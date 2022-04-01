@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, Sequelize) => {
-	const eventHistory = sequelize.define('eventHistory',
+	const eventHistory = sequelize.define(
+		'eventHistory',
 		{
 			id: {
 				allowNull: false,
@@ -42,9 +43,11 @@ module.exports = (sequelize, Sequelize) => {
 				type: Sequelize.DATE,
 				field: 'updated_at',
 			},
-		}, {
+		},
+		{
 			underscored: true,
 			tableName: 'event_histories',
-		});
+		}
+	);
 	return eventHistory;
 };

@@ -2,14 +2,7 @@ import React from 'react';
 import { Tooltip } from '@material-ui/core';
 
 const GCTooltip = (props) => {
-	const {
-		children,
-		title,
-		placement,
-		enterDelay = 1000,
-		leaveDelay = 10,
-		...remaining
-	} = props;
+	const { children, title, placement, enterDelay = 1000, leaveDelay = 10, ...remaining } = props;
 
 	return (
 		<Tooltip

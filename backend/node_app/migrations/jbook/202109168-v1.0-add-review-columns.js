@@ -21,7 +21,7 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'joint_capability_area', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'ai_role_description', Sequelize.TEXT),
 				queryInterface.addColumn(tablename, 'ai_type_description', Sequelize.TEXT),
-				queryInterface.removeColumn(tablename, 'doc_id', Sequelize.TEXT)
+				queryInterface.removeColumn(tablename, 'doc_id', Sequelize.TEXT),
 			]);
 		});
 	},
@@ -48,5 +48,5 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'doc_id', Sequelize.TEXT),
 			]);
 		});
-	}
+	},
 };

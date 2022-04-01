@@ -19,7 +19,7 @@ import IngestStats from './IngestStats';
 const GoalIcon = styled.div`
 	height: 20px;
 	width: 150px;
-	margin: auto
+	margin: auto;
 `;
 
 const TableRow = styled.div`
@@ -35,7 +35,7 @@ const CenterRow = styled.div`
 const SectionHeader = styled.div`
 	display: flex;
 	margin-bottom: 20px;
-	background-color: #F7F7F7;
+	background-color: #f7f7f7;
 	border-radius: 12px;
 	padding: 20px;
 `;
@@ -73,28 +73,26 @@ const StyledNeo4jTable = styled.div`
 `;
 
 const TableStyle = styled.div`
-	> .updates-table
-		.rt-td {
-			padding: 10px 5px;
-		}
+	> .updates-table .rt-td {
+		padding: 10px 5px;
+	}
 	> .ReactTable {
 		border-right: none;
 		font-family: 'Noto Sans';
 
 		> .rt-table {
-
-			> .rt-thead{
-				border-bottom: 1px solid #0000001F;
+			> .rt-thead {
+				border-bottom: 1px solid #0000001f;
 
 				> .rt-tr {
 					font-size: 14px;
-					text-align: center; 
+					text-align: center;
 					text-transform: uppercase;
 				}
 			}
 			.rt-th,
 			.rt-td {
-				border-right: 1px solid #0000001F !important;
+				border-right: 1px solid #0000001f !important;
 			}
 			.rt-th {
 				font-weight: bold;
@@ -107,8 +105,8 @@ const TableStyle = styled.div`
 				align-items: center;
 				justify-content: center;
 			}
-			.rt-tr-group:nth-of-type(even){
-				background: #F3F3F3;
+			.rt-tr-group:nth-of-type(even) {
+				background: #f3f3f3;
 			}
 		}
 	}
@@ -117,13 +115,13 @@ const TableStyle = styled.div`
 const styles = {
 	legendItem: {
 		margin: '0px 5px',
-		textAlign: 'center'
+		textAlign: 'center',
 	},
 	legendText: {
 		fontSize: '14px',
 		textTransform: 'uppercase',
-		fontWeight: 'bold'
-	}
+		fontWeight: 'bold',
+	},
 };
 
 const gameChangerAPI = new GameChangerAPI();
@@ -131,9 +129,7 @@ const gameChangerAPI = new GameChangerAPI();
 const PAGE_SIZE = 15;
 
 const nextFriday = new Date();
-nextFriday.setDate(
-	nextFriday.getDate() + ((5 + (7 - nextFriday.getDay())) % 7)
-);
+nextFriday.setDate(nextFriday.getDate() + ((5 + (7 - nextFriday.getDay())) % 7));
 nextFriday.setUTCHours(11, 0, 0);
 
 const preventDefault = (event) => event.preventDefault();
@@ -208,7 +204,7 @@ const getData = async ({
 			}
 		} else if (tabIndex === 'crawlerInfo') {
 			const data = await gameChangerAPI.gcCrawlerSealData();
-			if (data && data.data){
+			if (data && data.data) {
 				return data.data;
 			} else {
 				return [];
@@ -251,8 +247,7 @@ const GCDataStatusTracker = (props) => {
 		edges: [],
 	});
 	const [loading, setLoading] = useState(true);
-	const [loadingNeo4jPropertiesData, setLoadingNeo4jPropertiesData] =
-		useState(true);
+	const [loadingNeo4jPropertiesData, setLoadingNeo4jPropertiesData] = useState(true);
 	const [loadingNeo4jGraphData, setLoadingNeo4jGraphData] = useState(true);
 	const [loadingNeo4jCounts, setLoadingNeo4jCounts] = useState(true);
 	const [numPages, setNumPages] = useState(0);
@@ -260,12 +255,11 @@ const GCDataStatusTracker = (props) => {
 	const [ingestData, setIngestData] = useState({});
 
 	useEffect(() => {
-		gameChangerAPI.getDocIngestionStats().then(res => {
+		gameChangerAPI.getDocIngestionStats().then((res) => {
 			setIngestData(res.data);
 		});
 	}, []);
-	
-	
+
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
@@ -386,11 +380,7 @@ const GCDataStatusTracker = (props) => {
 	};
 
 	const handleTabClicked = async (tabIndex) => {
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'DataStatusTracker',
-			tabIndex
-		);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', tabIndex);
 		setTabIndex(tabIndex);
 		if (tabIndex === 'neo4j') {
 			await handleGetNeo4jData();
@@ -423,24 +413,19 @@ const GCDataStatusTracker = (props) => {
 		const diffTime = Math.abs(Date.now() - date);
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
-	
+
 	const getCrawlerName = (crawler) => {
-		if(crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
+		if (crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
 		return crawler.crawler_name;
 	};
 
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'DataStatusTracker',
-				'PDFOpen'
-			);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', 'PDFOpen');
 			window.open(
-				`/#/pdfviewer/gamechanger?filename=${filename.replace(
-					/'/g,
-					''
-				)}&cloneIndex=${state.cloneData.clone_name}`
+				`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${
+					state.cloneData.clone_name
+				}`
 			);
 		};
 
@@ -505,33 +490,21 @@ const GCDataStatusTracker = (props) => {
 				accessor: 'publication_date',
 				filterable: false,
 				width: 150,
-				Cell: (row) => (
-					<TableRow>
-						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-					</TableRow>
-				),
+				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
 			},
 			{
 				Header: 'Ingestion Date',
 				accessor: 'upload_date',
 				filterable: false,
 				width: 150,
-				Cell: (row) => (
-					<TableRow>
-						{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-					</TableRow>
-				),
+				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
 			},
 			{
 				Header: 'Next update',
 				width: 150,
 				filterable: false,
 				sortable: false,
-				Cell: (row) => (
-					<TableRow>
-						{moment(Date.parse(nextFriday.toISOString())).format('YYYY-MM-DD')}
-					</TableRow>
-				),
+				Cell: (row) => <TableRow>{moment(Date.parse(nextFriday.toISOString())).format('YYYY-MM-DD')}</TableRow>,
 			},
 		];
 
@@ -539,20 +512,22 @@ const GCDataStatusTracker = (props) => {
 			<>
 				<SectionHeader>
 					<div>
-						<Typography variant="h3" style={{fontSize: '18px'}}>Document Overview</Typography>
+						<Typography variant="h3" style={{ fontSize: '18px' }}>
+							Document Overview
+						</Typography>
 						<Typography variant="body2">
-						The following table lists all documents within the GAMECHANGER corpus. Use the 
-						filtering capabilities for the TYPE, NUMBER, and TITLE columns to locate specific 
-						documents of interest.
+							The following table lists all documents within the GAMECHANGER corpus. Use the filtering
+							capabilities for the TYPE, NUMBER, and TITLE columns to locate specific documents of
+							interest.
 						</Typography>
 					</div>
 				</SectionHeader>
-				<div style={{display: 'flex'}}>
-					<TableStyle style={{width: '75%'}}>
+				<div style={{ display: 'flex' }}>
+					<TableStyle style={{ width: '75%' }}>
 						<ReactTable
 							data={dataTableData}
 							columns={dataColumns}
-							style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+							style={{ whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 							pageSize={PAGE_SIZE}
 							showPageSizeOptions={false}
 							filterable={true}
@@ -568,7 +543,7 @@ const GCDataStatusTracker = (props) => {
 							]}
 						/>
 					</TableStyle>
-					<IngestStats style={{width: '25%'}} ingestData={ingestData}/>
+					<IngestStats style={{ width: '25%' }} ingestData={ingestData} />
 				</div>
 			</>
 		);
@@ -576,7 +551,7 @@ const GCDataStatusTracker = (props) => {
 
 	const renderIngestprogress = (status) => {
 		let percent;
-		switch(status){
+		switch (status) {
 			case 'Crawl and Download Complete':
 				percent = '33%';
 				break;
@@ -590,14 +565,31 @@ const GCDataStatusTracker = (props) => {
 				percent = '0%';
 		}
 
-		return (<>
-			<div style={{fontSize: '12px'}}>
-				{percent}
-			</div>
-			<div style={{maxWidth: 150, width: '80%', height: 8, background: '#D8D8D8', borderRadius: '24px', position: 'relative'}}>
-				<div style={{width: percent, height: 8, background: '#969696', borderRadius: '24px', position: 'absolute'}}/>
-			</div>
-		</>);
+		return (
+			<>
+				<div style={{ fontSize: '12px' }}>{percent}</div>
+				<div
+					style={{
+						maxWidth: 150,
+						width: '80%',
+						height: 8,
+						background: '#D8D8D8',
+						borderRadius: '24px',
+						position: 'relative',
+					}}
+				>
+					<div
+						style={{
+							width: percent,
+							height: 8,
+							background: '#969696',
+							borderRadius: '24px',
+							position: 'absolute',
+						}}
+					/>
+				</div>
+			</>
+		);
 	};
 
 	const renderCrawlerData = () => {
@@ -605,30 +597,34 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'crawler_name',
-				Cell: (row) =>{
-					return row.original.url_origin ?
+				Cell: (row) => {
+					return row.original.url_origin ? (
 						<TableRow>
-							<a 
-								href={row.original.url_origin} 
-								target='_blank' 
-								rel="noreferrer">
+							<a href={row.original.url_origin} target="_blank" rel="noreferrer">
 								{getCrawlerName(row.original)}
 							</a>
 						</TableRow>
-						:
-						<TableRow>
-							{getCrawlerName(row.original)}
-						</TableRow>;
+					) : (
+						<TableRow>{getCrawlerName(row.original)}</TableRow>
+					);
 				},
-				style: { 'whiteSpace': 'unset' },
+				style: { whiteSpace: 'unset' },
 			},
 			{
 				Header: '% Ingested',
 				accessor: 'status',
-				Cell: (row) => 
-					<TableRow style={{display: 'flex', flexDirection: 'column', paddingBottom: '5px', justifyContent: 'center'}}>
+				Cell: (row) => (
+					<TableRow
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							paddingBottom: '5px',
+							justifyContent: 'center',
+						}}
+					>
 						{renderIngestprogress(row.value)}
-					</TableRow>,
+					</TableRow>
+				),
 			},
 			{
 				Header: 'Crawl and Download Complete',
@@ -636,13 +632,9 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
-							<GoalIcon
-								style={{ backgroundColor: green[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon
-								style={{ backgroundColor: red[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: red[500] }} />
 						)}
 					</CenterRow>
 				),
@@ -653,13 +645,9 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
-							<GoalIcon
-								style={{ backgroundColor: green[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon
-								style={{ backgroundColor: red[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: red[500] }} />
 						)}
 					</CenterRow>
 				),
@@ -670,13 +658,9 @@ const GCDataStatusTracker = (props) => {
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
-							<GoalIcon
-								style={{ backgroundColor: green[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon
-								style={{ backgroundColor: red[500] }}
-							/>
+							<GoalIcon style={{ backgroundColor: red[500] }} />
 						)}
 					</CenterRow>
 				),
@@ -685,11 +669,7 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Last Action',
 				accessor: 'datetime',
 				Cell: (row) => {
-					return (
-						<TableRow>
-							{moment(Date.parse(row.value)).format('YYYY-MM-DD')}
-						</TableRow>
-					);
+					return <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>;
 				},
 			},
 			{
@@ -705,41 +685,38 @@ const GCDataStatusTracker = (props) => {
 			<>
 				<SectionHeader>
 					<div>
-						<Typography variant="h3" style={{fontSize: '18px'}}>Progress Overview</Typography>
+						<Typography variant="h3" style={{ fontSize: '18px' }}>
+							Progress Overview
+						</Typography>
 						<Typography variant="body2">
-							The following table and chart provide a real-time status update of each data 
-							source within the GAMECHANGER corpus. Data pipelines update automatically, 
-							typically every 7 days. Any issues or delays will be indicated directly in 
-							the table.
+							The following table and chart provide a real-time status update of each data source within
+							the GAMECHANGER corpus. Data pipelines update automatically, typically every 7 days. Any
+							issues or delays will be indicated directly in the table.
 						</Typography>
 					</div>
 					<div
 						style={{
 							display: 'flex',
 							alignItems: 'center',
-							marginLeft: '10px'
+							marginLeft: '10px',
 						}}
-					>	
+					>
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>Complete </span>
-							<GoalIcon
-								style={{ backgroundColor: green[500], width: 100 }}
-							/>
+							<GoalIcon style={{ backgroundColor: green[500], width: 100 }} />
 						</div>
 						<div style={styles.legendItem}>
 							<span style={styles.legendText}>Incomplete </span>
-							<GoalIcon
-								style={{ backgroundColor: red[500], width: 100 }}
-							/>
+							<GoalIcon style={{ backgroundColor: red[500], width: 100 }} />
 						</div>
 					</div>
 				</SectionHeader>
-				<div style={{display: 'flex'}}>
-					<TableStyle style={{width: '75%'}}>
+				<div style={{ display: 'flex' }}>
+					<TableStyle style={{ width: '75%' }}>
 						<ReactTable
 							data={crawlerTableData}
 							columns={crawlerColumns}
-							style={{whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
+							style={{ whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 							pageSize={PAGE_SIZE}
 							showPageSizeOptions={false}
 							filterable={false}
@@ -749,7 +726,7 @@ const GCDataStatusTracker = (props) => {
 							onFetchData={handleFetchCrawlerData}
 						/>
 					</TableStyle>
-					<IngestStats style={{width: '25%'}} ingestData={ingestData}/>
+					<IngestStats style={{ width: '25%' }} ingestData={ingestData} />
 				</div>
 			</>
 		);
@@ -763,14 +740,15 @@ const GCDataStatusTracker = (props) => {
 			<StyledNeo4jTable>
 				<SectionHeader>
 					<div>
-						<Typography variant="h3" style={{fontSize: '18px'}}>Knowledge Overview</Typography>
+						<Typography variant="h3" style={{ fontSize: '18px' }}>
+							Knowledge Overview
+						</Typography>
 						<Typography variant="body2">
-							The following tables and chart describe the schema in the Knowledge
-							Graph. The table on the left lists the Nodes and Relationships by
-							"Label" along with the property names and the types of those
-							properties. The table in the bottom right lists the different Nodes and
-							Relationships and the counts. The chart graphically describes the
-							schema of the Knowledge Graph.
+							The following tables and chart describe the schema in the Knowledge Graph. The table on the
+							left lists the Nodes and Relationships by "Label" along with the property names and the
+							types of those properties. The table in the bottom right lists the different Nodes and
+							Relationships and the counts. The chart graphically describes the schema of the Knowledge
+							Graph.
 						</Typography>
 					</div>
 				</SectionHeader>
@@ -881,7 +859,7 @@ const GCDataStatusTracker = (props) => {
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>{renderCrawlerData()}</TabPanel>
 					<TabPanel>{renderDataTable()}</TabPanel>
-					<TabPanel style={{marginBottom: 100}}>{renderNeo4jTable()}</TabPanel>
+					<TabPanel style={{ marginBottom: 100 }}>{renderNeo4jTable()}</TabPanel>
 				</div>
 			</Tabs>
 		</div>

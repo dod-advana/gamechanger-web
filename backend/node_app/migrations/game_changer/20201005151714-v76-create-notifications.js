@@ -8,23 +8,23 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			project_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			level: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			message: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			active: {
-				type: Sequelize.BOOLEAN
-			}
+				type: Sequelize.BOOLEAN,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

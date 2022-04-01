@@ -8,44 +8,35 @@ const styles = {
 	formField: {
 		minWidth: 500,
 		display: 'block',
-		margin: '10px 0'
-	}
+		margin: '10px 0',
+	},
 };
 
 const useStyles = makeStyles({
 	root: {
-		width: '500px'
-	}
+		width: '500px',
+	},
 });
 
-export default function GCResponsibilitySearch({ 
-	setPreSearch, 
-	setReloadResponsibilities, 
-	setFilters, 
-	docTitle, 
+export default function GCResponsibilitySearch({
+	setPreSearch,
+	setReloadResponsibilities,
+	setFilters,
+	docTitle,
 	setDocTitle,
-	organziation, 
+	organziation,
 	setOrganization,
-	responsibilityText, 
-	setResponsibilityText
+	responsibilityText,
+	setResponsibilityText,
 }) {
-
 	const classes = useStyles();
 
-	const handleDocChange = event => {
-		setDocTitle(
-			event.target.type === 'checkbox'
-            	? event.target.checked
-            	: event.target.value
-		);
+	const handleDocChange = (event) => {
+		setDocTitle(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
 	};
 
-	const handleOrgChange = event => {
-		setOrganization(
-			event.target.type === 'checkbox'
-            	? event.target.checked
-            	: event.target.value
-		);
+	const handleOrgChange = (event) => {
+		setOrganization(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
 	};
 	const top100Films = [
 		{ title: 'DoDD 1000.20', year: 1994 },
@@ -135,38 +126,40 @@ export default function GCResponsibilitySearch({
 				<TextField
 					classes={{ root: classes.root }}
 					variant="outlined"
-					placeholder='Responsibility Text'
+					placeholder="Responsibility Text"
 					value={responsibilityText?.value || ''}
-					onChange={(e) => setResponsibilityText({id: 'responsibilityText', value: e.target.value})}
+					onChange={(e) => setResponsibilityText({ id: 'responsibilityText', value: e.target.value })}
 				/>
 			</div>
-			<div style={{
-				width: 500,
-				display: 'flex',
-				justifyContent: 'right'
-			}}>
-				<GCButton 
+			<div
+				style={{
+					width: 500,
+					display: 'flex',
+					justifyContent: 'right',
+				}}
+			>
+				<GCButton
 					onClick={() => {
 						setResponsibilityText({});
 						setOrganization([]);
 						setDocTitle([]);
 					}}
-					style={{margin: 0}}
+					style={{ margin: 0 }}
 					isSecondaryBtn
 				>
 					Clear Filters
 				</GCButton>
-				<GCButton 
+				<GCButton
 					onClick={() => {
 						const filters = [];
-						if(Object.keys(responsibilityText).length) filters.push(responsibilityText);
-						if(organziation.length) filters.push(organziation);
-						if(docTitle.docTitle) filters.push(docTitle);
+						if (Object.keys(responsibilityText).length) filters.push(responsibilityText);
+						if (organziation.length) filters.push(organziation);
+						if (docTitle.docTitle) filters.push(docTitle);
 						setFilters(filters);
 						setReloadResponsibilities(true);
 						setPreSearch(false);
 					}}
-					style={{marginLeft: 10}}
+					style={{ marginLeft: 10 }}
 				>
 					Search
 				</GCButton>
@@ -178,4 +171,3 @@ export default function GCResponsibilitySearch({
 // Doc Title – User should select 0+ from a prepopulated list of options (typing should filter the list for easier selection, see “Study Section” or “Organization” fields of https://reporter.nih.gov/advanced-search)
 // Org/Personnel – User should enter 0+ options view a free text field that enters separate entries when “Enter” is pressed on the keyboard.  Similar to “Organization” section of https://reporter.nih.gov/advanced-search but without the autocomplete.
 // Resp text – User should be able to enter a free text search that will do exact keyword match.
-

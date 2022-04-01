@@ -6,32 +6,32 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			first_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			middle_initial: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			last_name: {
-				type: Sequelize.TEXT
+				type: Sequelize.TEXT,
 			},
 			is_primary_reviewer: {
-				type: Sequelize.BOOLEAN
+				type: Sequelize.BOOLEAN,
 			},
 			is_service_reviewer: {
-				type: Sequelize.BOOLEAN
+				type: Sequelize.BOOLEAN,
 			},
 			is_poc_reviewer: {
-				type: Sequelize.BOOLEAN
+				type: Sequelize.BOOLEAN,
 			},
 			is_admin: {
-				type: Sequelize.BOOLEAN
+				type: Sequelize.BOOLEAN,
 			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('users');
-	}
+	},
 };

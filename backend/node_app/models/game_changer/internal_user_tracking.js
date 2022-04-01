@@ -2,7 +2,8 @@
 
 const tableName = 'internal_user_tracking';
 module.exports = (sequelize, DataTypes) => {
-	const internal_user_tracking = sequelize.define(tableName,
+	const internal_user_tracking = sequelize.define(
+		tableName,
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -11,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			username: {
 				type: DataTypes.TEXT,
-				unique: true
-			}
-		}, 
+				unique: true,
+			},
+		},
 		{
 			freezeTableName: true,
 			tableName,
-			timestamps: false
+			timestamps: false,
 		}
 	);
 	return internal_user_tracking;

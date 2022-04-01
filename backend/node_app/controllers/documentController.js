@@ -9,7 +9,7 @@ const axios = require('axios');
 const https = require('https');
 const url = require('url');
 const { Op } = require('sequelize');
-const {getUserIdFromSAMLUserId} = require("../utils/userUtility");
+const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
@@ -20,7 +20,7 @@ class DocumentController {
 			organizationURLs = ORGANIZATION_URLS,
 			logger = LOGGER,
 			dataApi = new DataLibrary(opts),
-			sparkMD5 = sparkMD5Lib
+			sparkMD5 = sparkMD5Lib,
 		} = opts;
 
 		this.constants = constants;
@@ -54,26 +54,26 @@ class DocumentController {
 
 			const esQuery = {
 				_source: {
-					includes: ['filename', 'id', 'doc_type', 'doc_num', 'p_text', 'type', 'p_page', 'paragraphs']
+					includes: ['filename', 'id', 'doc_type', 'doc_num', 'p_text', 'type', 'p_page', 'paragraphs'],
 				},
 				query: {
 					bool: {
 						must: [
 							{
 								exists: {
-									field: 'filename'
-								}
-							}
-						]
-					}
-				}
+									field: 'filename',
+								},
+							},
+						],
+					},
+				},
 			};
 
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
 			switch (cloneData.clone_name) {
 				case 'eda':
-					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 						esClientName = 'eda';
 						esIndex = 'eda';
 					} else {
@@ -97,7 +97,6 @@ class DocumentController {
 			const returnObj = this.cleanDocumentForCrowdAssist(randomDoc, userId);
 
 			res.send(returnObj);
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'ixmxFNYyAL', userId);
@@ -110,7 +109,7 @@ class DocumentController {
 		try {
 			let results = {
 				totalCount: raw.body.hits.total.value,
-				docs: []
+				docs: [],
 			};
 			raw.body.hits.hits.forEach((r) => {
 				let result = r._source;
@@ -127,13 +126,12 @@ class DocumentController {
 			let returnObj;
 
 			if (document) {
-
 				returnObj = {
 					doc_id: document.id,
 					doc_num: document.doc_num,
 					doc_type: document.doc_type,
 					type: document.type,
-					paragraphs: document.paragraphs.filter(child => {
+					paragraphs: document.paragraphs.filter((child) => {
 						if (child.type === 'paragraph') return child;
 					}),
 					tagsList: ['PERSON', 'NORP', 'ORG', 'GPE', 'LOC', 'LAW'],
@@ -143,8 +141,8 @@ class DocumentController {
 						ORG: ' Companies, Agencies, Institutions, Etc.',
 						GPE: 'Countries, Cities, States',
 						LOC: 'Non-GPE locations, Mountain ranges, Bodies of water',
-						LAW: 'Named Documents made into Laws'
-					}
+						LAW: 'Named Documents made into Laws',
+					},
 				};
 			} else {
 				returnObj = {
@@ -160,8 +158,8 @@ class DocumentController {
 						ORG: ' Companies, Agencies, Institutions, Etc.',
 						GPE: 'Countries, Cities, States',
 						LOC: 'Non-GPE locations, Mountain ranges, Bodies of water',
-						LAW: 'Named Documents made into Laws'
-					}
+						LAW: 'Named Documents made into Laws',
+					},
 				};
 			}
 
@@ -182,8 +180,8 @@ class DocumentController {
 					ORG: ' Companies, Agencies, Institutions, Etc.',
 					GPE: 'Countries, Cities, States',
 					LOC: 'Non-GPE locations, Mountain ranges, Bodies of water',
-					LAW: 'Named Documents made into Laws'
-				}
+					LAW: 'Named Documents made into Laws',
+				},
 			};
 		}
 	}
@@ -194,14 +192,13 @@ class DocumentController {
 		try {
 			const { annotationData } = req.body;
 
-			annotationData.forEach(answer => {
+			annotationData.forEach((answer) => {
 				if (answer.incorrect_reason === '') answer.incorrect_reason = 0;
 				answer.user_id = getUserIdFromSAMLUserId(req);
 				this.gcCrowdAssist.create(answer);
 			});
 
 			res.status(200).send();
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'OI5RZVI', userId);
@@ -214,12 +211,12 @@ class DocumentController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { path, dest, filekey, samplingType, samplingLines } = req.query;
-	
+
 			if (!(dest && filekey && path)) {
 				throw new Error('Both destination and filekey are required query parameters');
 			}
 
-			this.dataApi.getFilePDF(res, {path, dest, filekey, samplingType, samplingLines}, userId);
+			this.dataApi.getFilePDF(res, { path, dest, filekey, samplingType, samplingLines }, userId);
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'imeN2WMyAL', userId);
@@ -227,49 +224,54 @@ class DocumentController {
 			res.status(500).send(message);
 		}
 	}
-	
+
 	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
 		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
-	};
-	
+	}
+
 	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
 		return {
 			params: {
 				Xrfkey: 1234567890123456,
-				...params
+				...params,
 			},
-			headers: { 'content-type': 'application/json', 'X-Qlik-xrfkey': '1234567890123456', 'X-Qlik-user': this.getUserHeader(userid) },
+			headers: {
+				'content-type': 'application/json',
+				'X-Qlik-xrfkey': '1234567890123456',
+				'X-Qlik-user': this.getUserHeader(userid),
+			},
 			httpsAgent: new https.Agent({
 				rejectUnauthorized: false,
 				ca: CA,
 				key: KEY,
-				cert: CERT
-			})
+				cert: CERT,
+			}),
 		};
-	};
-	
+	}
+
 	async getThumbnail(req, res) {
 		try {
-			
-			const {location} = url.parse(req.url,true).query;
+			const { location } = url.parse(req.url, true).query;
 			console.log(location);
-			let response = await axios.get(`${QLIK_URL}${location}`, { ...this.getRequestConfigs(), responseType: 'stream' });
-	
+			let response = await axios.get(`${QLIK_URL}${location}`, {
+				...this.getRequestConfigs(),
+				responseType: 'stream',
+			});
+
 			res.writeHead(200, {
 				'content-type': response.headers['content-type'],
 				'cache-control': response.headers['cache-control'],
-				'etag': response.headers['etag'],
-				'expires': response.headers['expires'],
+				etag: response.headers['etag'],
+				expires: response.headers['expires'],
 				'last-modified': response.headers['last-modified'],
 			});
-	
+
 			response.data.pipe(res);
-	
 		} catch (err) {
 			this.logger.error(err, '7GILAOJ');
 			res.end();
 		}
-	};
+	}
 
 	async getHomepageThumbnail(req, res) {
 		let userId = 'webapp_unknown';
@@ -277,17 +279,17 @@ class DocumentController {
 			const { filenames, folder, dest, clone_name } = req.body;
 			const promises = [];
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			filenames.forEach(({img_filename}) => {
+			filenames.forEach(({ img_filename }) => {
 				const filename = img_filename;
 				if (!(dest && filename)) {
 					throw new Error('Both destination and filekey are required query parameters');
 				}
-				let promise = this.dataApi.getFileThumbnail({dest, filename, folder, clone_name}, userId);
+				let promise = this.dataApi.getFileThumbnail({ dest, filename, folder, clone_name }, userId);
 				promises.push(promise);
 			});
-			
+
 			let allPromises = await Promise.allSettled(promises);
-			res.status(200).send(allPromises);			
+			res.status(200).send(allPromises);
 		} catch (err) {
 			this.logger.error(err, 'TJJUFQC', userId);
 			res.status(500).send(err);
@@ -297,11 +299,45 @@ class DocumentController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {clone = false, cloneData = {}} = req.body;
+			const { clone = false, cloneData = {} } = req.body;
 
 			const index = clone ? cloneData.clone_data.project_name : this.constants.GAME_CHANGER_OPTS.index;
 
-			res.status(200).send([{ name: 'abbreviations_n', searchField: false }, { name: 'author', searchField: false }, { name: 'category_1', searchField: false }, { name: 'category_2', searchField: false }, { name: 'change_date', searchField: false }, { name: 'classification', searchField: false }, { name: 'display_doc_type_s', searchField: false }, { name: 'display_org_s', searchField: false }, { name: 'display_title_s', searchField: false }, { name: 'doc_num', searchField: false }, { name: 'doc_type', searchField: true }, { name: 'entities', searchField: false }, { name: 'filename', searchField: true }, { name: 'group_s', searchField: false }, { name: 'id', searchField: false }, { name: 'init_date', searchField: false }, { name: 'keyw_5', searchField: false }, { name: 'kw_doc_score', searchField: false }, { name: 'orgs', searchField: false }, { name: 'orgs_rs', searchField: false }, { name: 'page_count', searchField: false }, { name: 'pagerank', searchField: false }, { name: 'pagerank_r', searchField: false }, { name: 'par_count_i', searchField: false }, { name: 'paragraphs', searchField: false }, { name: 'ref_list', searchField: false }, { name: 'signature', searchField: false }, { name: 'subject', searchField: false }, { name: 'summary_30', searchField: false }, { name: 'text_length_r', searchField: false }, { name: 'title', searchField: true }, { name: 'type', searchField: false }, { name: 'word_count', searchField: false }]);
+			res.status(200).send([
+				{ name: 'abbreviations_n', searchField: false },
+				{ name: 'author', searchField: false },
+				{ name: 'category_1', searchField: false },
+				{ name: 'category_2', searchField: false },
+				{ name: 'change_date', searchField: false },
+				{ name: 'classification', searchField: false },
+				{ name: 'display_doc_type_s', searchField: false },
+				{ name: 'display_org_s', searchField: false },
+				{ name: 'display_title_s', searchField: false },
+				{ name: 'doc_num', searchField: false },
+				{ name: 'doc_type', searchField: true },
+				{ name: 'entities', searchField: false },
+				{ name: 'filename', searchField: true },
+				{ name: 'group_s', searchField: false },
+				{ name: 'id', searchField: false },
+				{ name: 'init_date', searchField: false },
+				{ name: 'keyw_5', searchField: false },
+				{ name: 'kw_doc_score', searchField: false },
+				{ name: 'orgs', searchField: false },
+				{ name: 'orgs_rs', searchField: false },
+				{ name: 'page_count', searchField: false },
+				{ name: 'pagerank', searchField: false },
+				{ name: 'pagerank_r', searchField: false },
+				{ name: 'par_count_i', searchField: false },
+				{ name: 'paragraphs', searchField: false },
+				{ name: 'ref_list', searchField: false },
+				{ name: 'signature', searchField: false },
+				{ name: 'subject', searchField: false },
+				{ name: 'summary_30', searchField: false },
+				{ name: 'text_length_r', searchField: false },
+				{ name: 'title', searchField: true },
+				{ name: 'type', searchField: false },
+				{ name: 'word_count', searchField: false },
+			]);
 
 			// const rawResults = await this.dataApi.getElasticSearchFields(index, userId);
 			//
@@ -323,7 +359,6 @@ class DocumentController {
 			// }
 			//
 			// res.status(200).send([]);
-
 		} catch (err) {
 			this.logger.error(err, '8AV00WC', userId);
 			res.status(500).send(`Error getting document properties: ${err.message}`);
@@ -337,18 +372,22 @@ class DocumentController {
 
 			const orgNames = req.query.names;
 			const orgDataCleaned = {};
-			const orgData = await this.organizationURLs.findAll(orgNames ? {
-				where: {
-					org_name: {
-						[Op.or]: orgNames
-					}
-				}
-			} : {});
+			const orgData = await this.organizationURLs.findAll(
+				orgNames
+					? {
+							where: {
+								org_name: {
+									[Op.or]: orgNames,
+								},
+							},
+					  }
+					: {}
+			);
 
 			orgData.forEach((item) => {
 				orgDataCleaned[item.org_name] = item.image_url;
 			});
-			
+
 			res.status(200).send(orgDataCleaned);
 		} catch (err) {
 			this.logger.error(err, 'TJJU7QC', userId);
@@ -365,8 +404,8 @@ class DocumentController {
 
 			const existingOrg = await this.organizationURLs.findOne({
 				where: {
-					org_name: name
-				}
+					org_name: name,
+				},
 			});
 
 			if (existingOrg) {
@@ -374,7 +413,7 @@ class DocumentController {
 			} else {
 				await this.organizationURLs.create({
 					org_name: name,
-					image_url: imageURL
+					image_url: imageURL,
 				});
 			}
 

@@ -3,12 +3,7 @@ import GCTooltip from '../common/GCToolTip';
 import { HelpOutline } from '@material-ui/icons';
 
 export default ({ color }) => (
-	<GCTooltip
-		title={'Open gamechanger tutorial documentation'}
-		placement="top-start"
-		style={{ color: 'white' }}
-		arrow
-	>
+	<GCTooltip title={'Open gamechanger tutorial documentation'} placement="top-start" style={{ color: 'white' }} arrow>
 		<a
 			href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+User+Guide"
 			target="_blank"

@@ -5,12 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { setState } from '../../utils/sharedFunctions';
 import _ from 'lodash';
 import SearchMatrixFactory from '../factories/searchMatrixFactory';
-import {
-	FormControl,
-	FormGroup,
-	FormControlLabel,
-	Checkbox,
-} from '@material-ui/core';
+import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { commaThousands } from '../../utils/gamechangerUtils';
 
@@ -264,7 +259,6 @@ export default function SearchMatrix(props) {
 	const [matrixHandler, setMatrixHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
-
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
@@ -281,9 +275,7 @@ export default function SearchMatrix(props) {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificCategoriesSelected = false;
 		newSearchSettings.allCategoriesSelected = true;
-		Object.keys(newSelectedCategories).forEach(
-			(category) => (newSelectedCategories[category] = true)
-		);
+		Object.keys(newSelectedCategories).forEach((category) => (newSelectedCategories[category] = true));
 		setState(dispatch, {
 			selectedCategories: newSelectedCategories,
 			searchSettings: newSearchSettings,
@@ -304,18 +296,14 @@ export default function SearchMatrix(props) {
 	const formatMetaData = (meta = {}, tab) => {
 		if (_.isEmpty(meta)) return null;
 
-		if (!_.isNil(meta?.[tab]?.total))
-			return ` (${commaThousands(meta[tab]?.total)})`;
+		if (!_.isNil(meta?.[tab]?.total)) return ` (${commaThousands(meta[tab]?.total)})`;
 
 		return null;
 	};
 
 	const handleCategoriesFilterChange = (event, state, dispatch) => {
 		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
-		let categoryName = event.target.name.substring(
-			0,
-			event.target.name.lastIndexOf('(') - 1
-		);
+		let categoryName = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
 		newSelectedCategories[categoryName] = event.target.checked;
 		setState(dispatch, {
 			selectedCategories: newSelectedCategories,
@@ -325,9 +313,7 @@ export default function SearchMatrix(props) {
 
 	const renderCategories = () => {
 		return (
-			<FormControl
-				style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
-			>
+			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '10px' }}>
 					<FormControlLabel
 						name="All categories"
@@ -337,13 +323,9 @@ export default function SearchMatrix(props) {
 							<Checkbox
 								classes={{ root: classes.filterBox }}
 								onClick={() => handleSelectAllCategories(state, dispatch)}
-								icon={
-									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
-								}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.searchSettings.allCategoriesSelected}
-								checkedIcon={
-									<i style={{ color: '#E9691D' }} className="fa fa-check" />
-								}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="All categories"
 								style={styles.filterBox}
 							/>
@@ -362,13 +344,9 @@ export default function SearchMatrix(props) {
 							<Checkbox
 								classes={{ root: classes.filterBox }}
 								onClick={() => handleSelectSpecificCategories(state, dispatch)}
-								icon={
-									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
-								}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.searchSettings.specificCategoriesSelected}
-								checkedIcon={
-									<i style={{ color: '#E9691D' }} className="fa fa-check" />
-								}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="Specific category(s)"
 								style={styles.filterBox}
 							/>
@@ -384,14 +362,8 @@ export default function SearchMatrix(props) {
 							if (!state.categoryMetadata?.[category]?.total) return <></>;
 							return (
 								<FormControlLabel
-									key={`${category} (${formatMetaData(
-										state.categoryMetadata,
-										category
-									)})`}
-									value={`${category} (${formatMetaData(
-										state.categoryMetadata,
-										category
-									)})`}
+									key={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
+									value={`${category} (${formatMetaData(state.categoryMetadata, category)})`}
 									classes={{ label: classes.checkboxPill }}
 									control={
 										<Checkbox
@@ -399,20 +371,12 @@ export default function SearchMatrix(props) {
 												root: classes.rootButton,
 												checked: classes.checkedButton,
 											}}
-											name={`${category} (${formatMetaData(
-												state.categoryMetadataa,
-												category
-											)})`}
+											name={`${category} (${formatMetaData(state.categoryMetadataa, category)})`}
 											checked={state.selectedCategories[category]}
-											onClick={(event) =>
-												handleCategoriesFilterChange(event, state, dispatch)
-											}
+											onClick={(event) => handleCategoriesFilterChange(event, state, dispatch)}
 										/>
 									}
-									label={`${category} ${formatMetaData(
-										state.categoryMetadata,
-										category
-									)}`}
+									label={`${category} ${formatMetaData(state.categoryMetadata, category)}`}
 									labelPlacement="end"
 								/>
 							);
@@ -423,10 +387,7 @@ export default function SearchMatrix(props) {
 	};
 
 	return (
-		<div
-			className={''}
-			style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}
-		>
+		<div className={''} style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}>
 			<div className={''}>
 				<div style={styles.innerContainer}>
 					<div

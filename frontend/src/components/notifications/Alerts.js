@@ -14,9 +14,7 @@ const Alerts = (props) => {
 					top={140}
 					type={'warning'}
 					message={alerts.noResultsMessage}
-					onHide={() =>
-						dispatch({ type: 'SET_ALERT', payload: { noResultsMessage: null } })
-					}
+					onHide={() => dispatch({ type: 'SET_ALERT', payload: { noResultsMessage: null } })}
 					containerStyles={styles.alertStyle}
 				/>
 			)}
@@ -41,9 +39,7 @@ const Alerts = (props) => {
 					type={'warning'}
 					top={140}
 					message={alerts.transformFailed}
-					onHide={() =>
-						dispatch({ type: 'SET_ALERT', payload: { transformFailed: false } })
-					}
+					onHide={() => dispatch({ type: 'SET_ALERT', payload: { transformFailed: false } })}
 					containerStyles={styles.alertStyle}
 				/>
 			)}

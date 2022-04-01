@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactTable from 'react-table';
-import { IconButton  } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 
 import ProgressBar from './util/ProgressBar';
 import { TableRow, BorderDiv } from './util/styledDivs';
-import { Stop  } from '@material-ui/icons';
+import { Stop } from '@material-ui/icons';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 import 'react-table/react-table.css';
@@ -27,10 +27,10 @@ const Process = (props) => {
 	 * Pass a file from s3 to download into the ml-api
 	 * @method downloadS3File
 	 */
-	 const  killProcess = async (row) => {
+	const killProcess = async (row) => {
 		await gameChangerAPI.stopProcess({
-			'thread_id':row.original.thread_id,
-			'process': `${row.original.category}: ${row.original.process}`
+			thread_id: row.original.thread_id,
+			process: `${row.original.category}: ${row.original.process}`,
 		});
 	};
 
@@ -50,9 +50,7 @@ const Process = (props) => {
 			id: 'progress',
 			Cell: (row) => (
 				<TableRow>
-					<ProgressBar
-						 progress={(100 * row.original.progress) / row.original.total}
-					 />
+					<ProgressBar progress={(100 * row.original.progress) / row.original.total} />
 				</TableRow>
 			),
 		},
@@ -69,29 +67,37 @@ const Process = (props) => {
 		{
 			Header: '',
 			accessor: 'message',
-			Cell: (row) => <TableRow>
-				{('message' in row.original) ? row.value : 
-					<IconButton onClick={() => {
-						killProcess(row);
-					}} style={{ color: 'white' }}><Stop fontSize="large"/></IconButton>}
-			</TableRow>,
+			Cell: (row) => (
+				<TableRow>
+					{'message' in row.original ? (
+						row.value
+					) : (
+						<IconButton
+							onClick={() => {
+								killProcess(row);
+							}}
+							style={{ color: 'white' }}
+						>
+							<Stop fontSize="large" />
+						</IconButton>
+					)}
+				</TableRow>
+			),
 		},
 	];
-	
+
 	return (
 		<div className="info">
-			<BorderDiv >
+			<BorderDiv>
 				<div
 					style={{
 						width: '100%',
 						display: 'inline-block',
 						paddingBottom: '5px',
-						marginTop: '10px'
+						marginTop: '10px',
 					}}
 				>
-					<div style={{ display: 'inline-block', fontWeight: 'bold' }}>
-						Processes:
-					</div>
+					<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Processes:</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
 							<ReactTable

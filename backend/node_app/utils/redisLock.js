@@ -44,7 +44,8 @@ class RedisLock {
 			return 1
 		end`;
 		const res = await this.redisClient.eval(deleteScript, 1, this.key, this.value);
-		if (res !== 1) { // can this actually happen?
+		if (res !== 1) {
+			// can this actually happen?
 			throw new RedisLockError('unable to unlock');
 		}
 	}
@@ -69,13 +70,12 @@ class RedisLock {
 
 class RedisLockManager {
 	constructor(opts = {}) {
-		({
-			uuid: this.uuid = randomHex,
-			redisClient: this.redisClient,
-		} = opts);
+		({ uuid: this.uuid = randomHex, redisClient: this.redisClient } = opts);
 
 		if (!this.redisClient) {
-			this.redisClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost', { db: redisAsyncClientDB });
+			this.redisClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost', {
+				db: redisAsyncClientDB,
+			});
 		}
 	}
 

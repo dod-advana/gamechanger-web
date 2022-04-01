@@ -1,22 +1,15 @@
-import React, {
-	useState,
-	useEffect,
-	useRef,
-	useCallback,
-	createRef,
-	useMemo
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback, createRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import anchorme from 'anchorme';
 import sanitizeHtml from 'sanitize-html';
 import TabStyles from '../common/TabStyles';
-import {Grid, Typography} from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import GCAccordion from '../common/GCAccordion';
 //import GameChangerAPI from '../api/gameChanger-service-api';
 import JAICLogo from '../../images/logos/JAIC_logo.png';
-import {StyledSummaryFAQContainer} from '../modules/jbook/jbookMainViewStyles';
-import {GC_COLORS} from '../modules/jbook/jbookMainViewHandler2';
+import { StyledSummaryFAQContainer } from '../modules/jbook/jbookMainViewStyles';
+import { GC_COLORS } from '../modules/jbook/jbookMainViewHandler2';
 
 //const gameChangerAPI = new GameChangerAPI();
 
@@ -32,8 +25,7 @@ const StyledCategories = styled.ul`
 `;
 
 const StyledListItem = styled.li`
-	border-left: ${({ selected, id }) =>
-		selected === id ? '6px solid #E9691E' : ''}
+	border-left: ${({ selected, id }) => (selected === id ? '6px solid #E9691E' : '')}
 	background: ${({ selected, id }) => (selected === id ? '#E9691E59' : '')}
 	color: ${({ selected, id }) => (selected === id ? '#1C2D65' : '#000000DE')}
 	padding-left: ${({ selected, id }) => (selected === id ? '34px' : '40px')}
@@ -66,10 +58,8 @@ const JBookAboutUs = (props) => {
 	const categoryRefs = useRef([]);
 
 	const categoryOrder = useMemo(() => {
-		return [
-			'General',
-		];
-	},[]);
+		return ['General'];
+	}, []);
 
 	const arrLength = categoryOrder.length;
 	let ignoreNextScrollEvent = false;
@@ -85,12 +75,9 @@ const JBookAboutUs = (props) => {
 			if (categoryRefs.current[1] && categoryRefs.current[1].current !== null && !ignoreNextScrollEvent) {
 				const currentScroll = e.target.documentElement.scrollTop;
 				let index = 0;
-				let closestNegative = categoryOrder
-					.map((cat) => cat.toLowerCase())
-					.indexOf(selectedCategory);
+				let closestNegative = categoryOrder.map((cat) => cat.toLowerCase()).indexOf(selectedCategory);
 				while (index < categoryOrder.length) {
-					const diff =
-						categoryRefs.current[index].current.offsetTop - 30 - currentScroll; // 30 for the height of each dummy div
+					const diff = categoryRefs.current[index].current.offsetTop - 30 - currentScroll; // 30 for the height of each dummy div
 					if (diff < 50) {
 						closestNegative = index;
 					}
@@ -117,27 +104,28 @@ const JBookAboutUs = (props) => {
 		// 		}
 		// 	});
 
-		const categorized = {general: [
-			{
-				answer: anchorme(`The Joint Artificial Intelligence Center (JAIC) is the Department of Defense’s (DoD) Artificial Intelligence (AI) Center of Excellence that provides a critical mass of expertise and capability to help the Department and the Military Services harness the game-changing power of AI. To help operationally prepare the Department for AI, the JAIC integrates technology development, with the requisite policies, knowledge, processes and relationships to ensure long term success and scalability.
+		const categorized = {
+			general: [
+				{
+					answer: anchorme(`The Joint Artificial Intelligence Center (JAIC) is the Department of Defense’s (DoD) Artificial Intelligence (AI) Center of Excellence that provides a critical mass of expertise and capability to help the Department and the Military Services harness the game-changing power of AI. To help operationally prepare the Department for AI, the JAIC integrates technology development, with the requisite policies, knowledge, processes and relationships to ensure long term success and scalability.
 					<br />
 					<br />The mission of the JAIC is to transform the DoD by accelerating the delivery and adoption of AI to achieve mission impact at scale.
 					<br />
 					<br />Learn more about the JAIC at <a href="https://www.ai.mil/index.html">https://www.ai.mil/index.html</a> 
 				`),
-				question: `What is the JAIC?`
-			},
-			{
-				answer: anchorme(`The JAIC assists military services and DoD components with a broad set of service offerings, including AI consulting & advisory, AI test & evaluation, AI acquisition support, AI-related training & education programs, and AI/ML development solutions.
+					question: `What is the JAIC?`,
+				},
+				{
+					answer: anchorme(`The JAIC assists military services and DoD components with a broad set of service offerings, including AI consulting & advisory, AI test & evaluation, AI acquisition support, AI-related training & education programs, and AI/ML development solutions.
 					<br />
 					<br />For DoD Data Scientists and AI/ML developers (and approved industry/academic partners), the JAIC provides free access to the Joint Common Foundation, a cloud-enabled NIPR/SIPR AI development platform. The JCF hosts a comprehensive set of enterprise capabilities for the development of AI, including leading open-source and commercial tools for Data Ingest & Exploration, Data Processing and Preparation, AI Model Development & Training, and AI Application Development.  It is available for use with unclassified, CUI, and SECRET data.  
 					<br />
 					<br />If you have a Common Access Card (CAC) and are on NIPRNet, please proceed to  <a href="https://portal.jcf.jaic.mil/">https://portal.jcf.jaic.mil/</a> to receive a free JCF shared services account or to request a dedicated AI/ML development enclave on the JCF. 
 				`),
-				question: 'What Services Does the JAIC Offer?'
-			},
-			{
-				answer: anchorme(`As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the DoD Joint AI Center to provide the congressional defense committees an inventory of all DoD artificial intelligence activities, to include each: 
+					question: 'What Services Does the JAIC Offer?',
+				},
+				{
+					answer: anchorme(`As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the DoD Joint AI Center to provide the congressional defense committees an inventory of all DoD artificial intelligence activities, to include each: 
 				<br />
 				<ul>
 					<li>program’s appropriation, project, and (budget) line number </li>
@@ -160,18 +148,22 @@ const JBookAboutUs = (props) => {
 				<br /> Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.  
 				<br /> After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
 				`),
-				question: 'What is the JAIC Phase II AI Inventory?'
-			},
-			{
-				answer: anchorme('As part of its commitment to providing information and enabling services to DoD AI leaders, the JAIC has partnered with the OUSD(C) Advana Team and the Military Services to develop and provide the DoD AI Inventory via the Advana Gamechanger Platform – JBOOK application. This tool will unify budget, contracting, requirements, and program data into a secure and searchable database to provide the most comprehensive, accurate, organized, and useful picture of the DoD AI Portfolio ever. Upon completion, it will provide valuable information and insights to DoD and Military Service Leadership.'),
-				question: 'What is the DoD JBOOK Search for the AI Inventory Portfolio?'
-			},
-			{
-				answer: anchorme('DoD and Military Service Leadership, DoD Portfolio Managers, DoD Analysts and any other member of the DoD AI community interested in understanding how the DoD is investing resources for its Artificial Intelligence Portfolio.'),
-				question: 'Who Should Use the DoD JBOOK Search for the AI Inventory Portfolio?'
-			},
-			{
-				answer: anchorme(`Organizations intended to complete the Service Level review are the designated representatives of OUSD(R&E), the Military Services, and Special Operations Command. 
+					question: 'What is the JAIC Phase II AI Inventory?',
+				},
+				{
+					answer: anchorme(
+						'As part of its commitment to providing information and enabling services to DoD AI leaders, the JAIC has partnered with the OUSD(C) Advana Team and the Military Services to develop and provide the DoD AI Inventory via the Advana Gamechanger Platform – JBOOK application. This tool will unify budget, contracting, requirements, and program data into a secure and searchable database to provide the most comprehensive, accurate, organized, and useful picture of the DoD AI Portfolio ever. Upon completion, it will provide valuable information and insights to DoD and Military Service Leadership.'
+					),
+					question: 'What is the DoD JBOOK Search for the AI Inventory Portfolio?',
+				},
+				{
+					answer: anchorme(
+						'DoD and Military Service Leadership, DoD Portfolio Managers, DoD Analysts and any other member of the DoD AI community interested in understanding how the DoD is investing resources for its Artificial Intelligence Portfolio.'
+					),
+					question: 'Who Should Use the DoD JBOOK Search for the AI Inventory Portfolio?',
+				},
+				{
+					answer: anchorme(`Organizations intended to complete the Service Level review are the designated representatives of OUSD(R&E), the Military Services, and Special Operations Command. 
 					<br />
 					<br />Upon logging in, click on the Reviewer Checklist Tab. On this tab, you will find the projects you are supposed to review. Double click on an individual Project line, and you will be taken to the Project Profile page. Read the Project Description (and any AI related key words in highlighted text), the General Ledger, Accomplishments and Contracts information as well as the Primary Reviewer section. Then scroll down to the Service Reviewer section. In this section you can review and accept or reject the accuracy of the JAIC’s findings about the project in question.   
 					<br />
@@ -179,10 +171,10 @@ const JBookAboutUs = (props) => {
 					<br />
 					<br />Finally, add the project POC, POC Organization, POC title and POC email in the text boxes provided. A suitable type of PoC would be the Program Element Monitor. Add any other relevant information to the Reviewer Notes Text Box. Once all these tasks are complete click on the submit button at the bottom of the Service Reviewer section. If you need to revise a submitted set of information on a project, click on the reset button at the bottom of the Service Reviewer section. Close this page when complete and go back to the Reviewer Checklist page to select the next project for review.
 				`),
-				question: 'How Does the Tool Work for Service Level Reviewers?'
-			},
-			{
-				answer: anchorme(`Upon logging in, click on the Reviewer Checklist Tab. On this tab, you will find the projects you are supposed to review. Double click on an individual Project line, and you will be taken to the Project Profile page. Read the Project Description (and any AI related key words in highlighted text), the General Ledger, and Contracts information as well as the Primary and Service Reviewer sections. Then scroll down to the POC Reviewer section.  
+					question: 'How Does the Tool Work for Service Level Reviewers?',
+				},
+				{
+					answer: anchorme(`Upon logging in, click on the Reviewer Checklist Tab. On this tab, you will find the projects you are supposed to review. Double click on an individual Project line, and you will be taken to the Project Profile page. Read the Project Description (and any AI related key words in highlighted text), the General Ledger, and Contracts information as well as the Primary and Service Reviewer sections. Then scroll down to the POC Reviewer section.  
 					<br />
 					<br />If you are not the appropriate POC for this Program/Project, please enter an alternate AI Point of Contact for this Program/Project in the POC section of the Service Reviewer Section. We ask that you enter the Alternate POC Title, Name, Email address, Organization and Phone number in this section.    
 					<br />
@@ -190,12 +182,12 @@ const JBookAboutUs = (props) => {
 					<br />
 					<br />Once all these tasks are complete click on the submit button at the bottom of the Service Reviewer section. If you need to revise a submitted set of information on a project, click on the reset button at the bottom of the POCReviewer section. Close this page when complete and go back to the Reviewer Checklist page to select the next project for review.
 				`),
-				question: 'How Does the Tool Work For Project/POC Level Reviewers?'
-			}
-		]};
+					question: 'How Does the Tool Work For Project/POC Level Reviewers?',
+				},
+			],
+		};
 		categorized['general'].push();
 		setFAQdata(categorized);
-
 	}, []);
 
 	useEffect(() => {
@@ -208,16 +200,30 @@ const JBookAboutUs = (props) => {
 			<StyledSummaryFAQContainer>
 				<Grid container className={'summarySection'}>
 					<Grid item xs={12} className={'summaryTextSectionContainer'}>
-						<Typography className={'summarySectionHeader'}>Congressionally-Mandated Inventory of DoD AI Programs | Summary and FAQ</Typography>
+						<Typography className={'summarySectionHeader'}>
+							Congressionally-Mandated Inventory of DoD AI Programs | Summary and FAQ
+						</Typography>
 					</Grid>
 				</Grid>
 				<Grid container>
 					<Grid item xs={12}>
 						<Grid container className={'summaryTextSection'}>
 							<Grid item xs={8}>
-								<Typography className={'summarySectionSubHeader'}>Welcome to the Phase II DoD AI Inventory!</Typography>
-								<Typography className={'summarySectionText'}>Click <a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources">here</a> to view our User Guide.</Typography>
-								<Typography className={'summarySectionText'}>As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the DoD Joint AI Center to provide the congressional defense committees an inventory of all DoD artificial intelligence activities, to include each:</Typography>
+								<Typography className={'summarySectionSubHeader'}>
+									Welcome to the Phase II DoD AI Inventory!
+								</Typography>
+								<Typography className={'summarySectionText'}>
+									Click{' '}
+									<a href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources">
+										here
+									</a>{' '}
+									to view our User Guide.
+								</Typography>
+								<Typography className={'summarySectionText'}>
+									As part of the FY21 Defense Appropriations Bill, Congress tasked the Director of the
+									DoD Joint AI Center to provide the congressional defense committees an inventory of
+									all DoD artificial intelligence activities, to include each:
+								</Typography>
 								<ul className={'summarySectionList'}>
 									<li>program’s appropriation, project, and (budget) line number</li>
 									<li>the current and future years defense program funding (FY21-FY25)</li>
@@ -225,57 +231,79 @@ const JBookAboutUs = (props) => {
 									<li>any planned transition partners, if applicable</li>
 								</ul>
 								<Typography className={'summarySectionText'}>
-										Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services, and other DoD Component representatives of the DoD AI Working Group in scoping and executing this task. We delivered the Phase I Inventory of DoD AI Programs in April 2021.
+									Over the past year, JAIC has worked closely with OUSD(R&E), OUSD(C), the Services,
+									and other DoD Component representatives of the DoD AI Working Group in scoping and
+									executing this task. We delivered the Phase I Inventory of DoD AI Programs in April
+									2021.
 								</Typography>
 								<Typography className={'summarySectionText'}>
-										In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the Advana Platform, which the Deputy Secretary of Defense has officially designated “as the single enterprise authoritative data management and analytics platform.”
+									In partnership with OUSD(C), the JAIC is executing the Phase II AI Inventory via the
+									Advana Platform, which the Deputy Secretary of Defense has officially designated “as
+									the single enterprise authoritative data management and analytics platform.”
 								</Typography>
 							</Grid>
 							<Grid item xs={4} className={'summaryLogoSectionContainer'}>
 								<div className={'summaryLogoSection'}>
-									<img
-										src={JAICLogo}
-										alt="jaic-title"
-										id={'titleButton'}
-										className={'jaic-image'}
-									/>
+									<img src={JAICLogo} alt="jaic-title" id={'titleButton'} className={'jaic-image'} />
 								</div>
 							</Grid>
-
 						</Grid>
 						<div className={'summaryTextSection'}>
 							<Typography className={'summarySectionText'}>
-									Using the Advana Gamechanger platform, you will be able to easily review key budget and contracting data about AI-related programs and projects and input additional information needed to complete this congressionally mandated tasking.
+								Using the Advana Gamechanger platform, you will be able to easily review key budget and
+								contracting data about AI-related programs and projects and input additional information
+								needed to complete this congressionally mandated tasking.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in a tool that addresses limitations of Phase I deliverable and includes an inventory of classified programs. The Phase II inventory will be conducted via a three-part data coordination and review process: at the JAIC-level, Service-level, and program POC-level.
+								Phase II of the AI Inventory (to be submitted to Congress in early 2022) will result in
+								a tool that addresses limitations of Phase I deliverable and includes an inventory of
+								classified programs. The Phase II inventory will be conducted via a three-part data
+								coordination and review process: at the JAIC-level, Service-level, and program
+								POC-level.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review the inventory data to initially classify projects and programs as either AI-core, AI-enabled, or AI-enabling.
+								JAIC-Level Review: The JAIC will publish and refine the SIPR and NIPR tools, and review
+								the inventory data to initially classify projects and programs as either AI-core,
+								AI-enabled, or AI-enabling.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Service-Level Review: After initial classification and tool refinement, the Services will confirm classification of the projects and programs, which will be followed by detailed analysis of each project or program at the POC-level.
+								Service-Level Review: After initial classification and tool refinement, the Services
+								will confirm classification of the projects and programs, which will be followed by
+								detailed analysis of each project or program at the POC-level.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									Program PoC-Level Review: The POCs will provide more detailed information on each program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
+								Program PoC-Level Review: The POCs will provide more detailed information on each
+								program and project, to include: Joint Capability Area, Type of AI, AI domain & task.
 							</Typography>
 							<Typography className={'summarySectionText'}>
-									After all phases of coordination and review, the final PAT and Phase II of the inventory will be submitted to Congress in early 2022. After that time, this dataset will be made available to the entire DoD AI community for use in their analysis and planning.
+								After all phases of coordination and review, the final PAT and Phase II of the inventory
+								will be submitted to Congress in early 2022. After that time, this dataset will be made
+								available to the entire DoD AI community for use in their analysis and planning.
 							</Typography>
 						</div>
 					</Grid>
 				</Grid>
-			</StyledSummaryFAQContainer>
+			</StyledSummaryFAQContainer>,
 		];
 	};
 
 	const renderFAQ = () => {
 		return [
-			<div style={{width: 900}}>
-				<Typography style={{fontFamily: 'Montserrat', fontSize: 38, fontWeight: 'bold', marginBottom: 20}}>Your Questions Answered</Typography>
-				<Typography style={{fontFamily: 'Noto Sans', fontSize: 20, marginBottom: 20}}>Browse our answers to some of your most frequently asked questions (FAQs) JBook Search and JAIC AI Inventory. We’ve organized our responses around our guiding principles.</Typography>
-				<Typography style={{fontFamily: 'Noto Sans', fontSize: 20, marginBottom: 20}}>We want to make sure we’re answering all your questions, so if you can’t find what you’re looking for, let us know. Submit a new question or concern, and we’ll do our best to address it.</Typography>
-				<Typography style={{fontFamily: 'Noto Sans', fontSize: 20}}>We’ll continuously update this page with new insights and information. So check back often.</Typography>
+			<div style={{ width: 900 }}>
+				<Typography style={{ fontFamily: 'Montserrat', fontSize: 38, fontWeight: 'bold', marginBottom: 20 }}>
+					Your Questions Answered
+				</Typography>
+				<Typography style={{ fontFamily: 'Noto Sans', fontSize: 20, marginBottom: 20 }}>
+					Browse our answers to some of your most frequently asked questions (FAQs) JBook Search and JAIC AI
+					Inventory. We’ve organized our responses around our guiding principles.
+				</Typography>
+				<Typography style={{ fontFamily: 'Noto Sans', fontSize: 20, marginBottom: 20 }}>
+					We want to make sure we’re answering all your questions, so if you can’t find what you’re looking
+					for, let us know. Submit a new question or concern, and we’ll do our best to address it.
+				</Typography>
+				<Typography style={{ fontFamily: 'Noto Sans', fontSize: 20 }}>
+					We’ll continuously update this page with new insights and information. So check back often.
+				</Typography>
 			</div>,
 			<div style={{ display: 'flex' }}>
 				<StyledCategories>
@@ -301,21 +329,13 @@ const JBookAboutUs = (props) => {
 						const category = cat.toLowerCase();
 						return (
 							<div style={{ marginBottom: 30 }}>
-								<div
-									id="spacer"
-									ref={categoryRefs.current[i]}
-									style={{ height: 30 }}
-								/>
+								<div id="spacer" ref={categoryRefs.current[i]} style={{ height: 30 }} />
 								<Typography variant="h5" style={{ marginBottom: 15 }}>
 									{cat}
 								</Typography>
 								{FAQdata[category] ? (
 									FAQdata[category].map((obj) => (
-										<GCAccordion
-											expanded={false}
-											header={obj.question}
-											contentAlign="left"
-										>
+										<GCAccordion expanded={false} header={obj.question} contentAlign="left">
 											<div
 												dangerouslySetInnerHTML={{
 													__html: sanitizeHtml(obj.answer),
@@ -324,9 +344,7 @@ const JBookAboutUs = (props) => {
 										</GCAccordion>
 									))
 								) : (
-									<Typography variant="body">
-										None for now, please check back later.
-									</Typography>
+									<Typography variant="body">None for now, please check back later.</Typography>
 								)}
 							</div>
 						);
@@ -340,11 +358,13 @@ const JBookAboutUs = (props) => {
 		<div style={TabStyles.tabContainer}>
 			<Tabs>
 				<div style={{ ...TabStyles.tabButtonContainer, paddingLeft: 0 }}>
-					<TabList style={{...TabStyles.tabsList, borderBottom: `2px solid ${GC_COLORS.primary}`,}}>
+					<TabList style={{ ...TabStyles.tabsList, borderBottom: `2px solid ${GC_COLORS.primary}` }}>
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'about' ? {...TabStyles.tabSelectedStyle, backgroundColor: GC_COLORS.primary} : {}),
+								...(tabIndex === 'about'
+									? { ...TabStyles.tabSelectedStyle, backgroundColor: GC_COLORS.primary }
+									: {}),
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userHistory"
@@ -357,7 +377,9 @@ const JBookAboutUs = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'faq' ? {...TabStyles.tabSelectedStyle, backgroundColor: GC_COLORS.primary} : {}),
+								...(tabIndex === 'faq'
+									? { ...TabStyles.tabSelectedStyle, backgroundColor: GC_COLORS.primary }
+									: {}),
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userHistory"
@@ -374,9 +396,7 @@ const JBookAboutUs = (props) => {
 					<TabPanel>{renderAboutGC()}</TabPanel>
 					<TabPanel>
 						<StyledSummaryFAQContainer>
-							<div className={'faqSection'}>
-								{renderFAQ()}
-							</div>
+							<div className={'faqSection'}>{renderFAQ()}</div>
 						</StyledSummaryFAQContainer>
 					</TabPanel>
 				</div>

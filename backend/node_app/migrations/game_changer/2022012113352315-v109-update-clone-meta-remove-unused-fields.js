@@ -18,5 +18,5 @@ module.exports = {
 				queryInterface.addColumn(tablename, 'source_agency_name', Sequelize.TEXT),
 			]);
 		});
-	}
+	},
 };

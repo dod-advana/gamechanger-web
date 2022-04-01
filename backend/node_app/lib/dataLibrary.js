@@ -6,7 +6,7 @@ const AWS = require('aws-sdk');
 const neo4jLib = require('neo4j-driver');
 const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
@@ -14,7 +14,6 @@ const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_on
 const SAMPLING_BYTES = 4096;
 
 class DataLibrary {
-
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
@@ -27,7 +26,7 @@ class DataLibrary {
 			redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 			edaDatabase = edaDatabaseFile,
 			lineItemDetails = LINE_ITEM_DETAILS,
-			allOutgoingCounts = ALL_OUTGOING_COUNTS
+			allOutgoingCounts = ALL_OUTGOING_COUNTS,
 		} = opts;
 
 		this.redisClientDB = redisClientDB;
@@ -61,7 +60,7 @@ class DataLibrary {
 			s3Opt.region = this.constants.S3_REGION;
 		}
 
-		if(process.env.S3_IS_MINIO === 'true') {
+		if (process.env.S3_IS_MINIO === 'true') {
 			s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
 			s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
 			s3Opt.endpoint = process.env.S3_ENDPOINT;
@@ -107,9 +106,8 @@ class DataLibrary {
 	// 		throw msg;
 	// 	}
 	// }
-	
 
-	async queryLineItemPostgres(columns, tables, filenames){
+	async queryLineItemPostgres(columns, tables, filenames) {
 		try {
 			// original raw query
 			// const results = await this.edaDatabase.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
@@ -119,21 +117,34 @@ class DataLibrary {
 			//  {replacements:{files: filenames}, type: Sequelize.QueryTypes.SELECT, raw: true, logging: console.log})
 
 			let results = await this.lineItemDetails.findAll({
-				include: [{
-					model: this.allOutgoingCounts,
-					attributes: ['pdf_filename', 'pds_filename'],
-					where: {
-						pdf_filename: { 
-							[Op.in]: filenames
+				include: [
+					{
+						model: this.allOutgoingCounts,
+						attributes: ['pdf_filename', 'pds_filename'],
+						where: {
+							pdf_filename: {
+								[Op.in]: filenames,
+							},
 						},
 					},
-				}],
-				attributes: ['filename', 'prod_or_svc', 'prod_or_svc_desc', 'li_base', 'li_type', 'obligated_amount', 'obligated_amount_cin', 'row_id'],
+				],
+				attributes: [
+					'filename',
+					'prod_or_svc',
+					'prod_or_svc_desc',
+					'li_base',
+					'li_type',
+					'obligated_amount',
+					'obligated_amount_cin',
+					'row_id',
+				],
 			});
 
-			results = results.map(result => {
+			results = results.map((result) => {
 				result = result.dataValues;
-				let data = result.all_outgoing_counts_pdf_pds_xwalk_only ? result.all_outgoing_counts_pdf_pds_xwalk_only.dataValues : {}; 
+				let data = result.all_outgoing_counts_pdf_pds_xwalk_only
+					? result.all_outgoing_counts_pdf_pds_xwalk_only.dataValues
+					: {};
 				result.pdf_filename = data.pdf_filename;
 				result.pds_filename = data.pds_filename;
 				return result;
@@ -144,38 +155,35 @@ class DataLibrary {
 			this.logger.error(err, 'MJ2D6XT');
 			return { results: [], totalCount: 0, count: 0 };
 		}
-	};
+	}
 
 	async queryElasticSearch(clientName, index, queryBody, user) {
 		try {
 			return await this.esSearchLib.queryElasticsearch(clientName, index, queryBody, user);
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, '9ZJ4HRN', user);
 			throw err;
 		}
-
 	}
 
 	async mulitqueryElasticSearch(clientName, index, queryBodiesArray, user) {
 		try {
 			return await this.esSearchLib.multiqueryElasticsearch(clientName, index, queryBodiesArray, user);
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'P8JKHRN', user);
 			throw err;
 		}
-
 	}
 	async putDocument(clientName, index, searchLog) {
 		try {
 			return await this.esSearchLib.addDocument(clientName, index, searchLog);
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'P8JKARM');
 			throw err;
 		}
-
 	}
 	async getElasticSearchFields(esIndex, userId) {
 		try {
@@ -184,15 +192,14 @@ class DataLibrary {
 			const esUrl = `${opts.protocol}://${opts.host}:${opts.port}/${esIndex}/_mapping`;
 
 			return await this.axios.get(esUrl, this.esRequestConfig);
-
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'SNX3AII', userId);
 			throw msg;
 		}
 	}
 
-	getESRequestConfig({user, password, port, ca, index}) {
+	getESRequestConfig({ user, password, port, ca, index }) {
 		let reqConfig = {};
 		if (port === '443' && user) {
 			reqConfig.httpsAgent = new https.Agent({
@@ -202,7 +209,7 @@ class DataLibrary {
 			});
 			reqConfig.auth = {
 				username: user,
-				password
+				password,
 			};
 		} else if (port === '443') {
 			reqConfig.httpsAgent = new https.Agent({
@@ -214,9 +221,9 @@ class DataLibrary {
 		return reqConfig;
 	}
 
-	getESClientConfig ({ user, password, ca, protocol, host, port, index, requestTimeout }) {
+	getESClientConfig({ user, password, ca, protocol, host, port, index, requestTimeout }) {
 		let config = {
-			node: {}
+			node: {},
 		};
 		if (port === '443') {
 			config.node.agent = () => {
@@ -228,15 +235,15 @@ class DataLibrary {
 			};
 			config.auth = {
 				username: user,
-				password
+				password,
 			};
 		}
 		if (user) {
 			config.auth = {
 				username: user,
-				password
+				password,
 			};
-		};
+		}
 		config.node.url = new URL(`${protocol}://${host}:${port}`);
 		config.requestTimeout = requestTimeout;
 
@@ -244,7 +251,7 @@ class DataLibrary {
 	}
 
 	getElasticsearchSearchUrl(user, index, isClone = false, cloneData = {}, multiSearch = false) {
-		const {clone_data = {}} = cloneData;
+		const { clone_data = {} } = cloneData;
 		try {
 			let opts = Object.assign({}, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
 
@@ -281,47 +288,49 @@ class DataLibrary {
 			this.logger.error(err, '155M3L7', user);
 			throw err;
 		}
-
 	}
 
 	getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
 		const { req } = res;
-		const { _parsedOriginalUrl: { query = undefined } } = req;
+		const {
+			_parsedOriginalUrl: { query = undefined },
+		} = req;
 		const queryString = query ? `?${query}` : '';
 		// console.log("getFilePDFn",req)
-		
-		try {
-			
-			if((req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) && req.query.isClone && req.query.clone_name === 'eda'){
 
-				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL+ req.baseUrl + req.path + queryString;
+		try {
+			if (
+				(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
+				req.query.isClone &&
+				req.query.clone_name === 'eda'
+			) {
+				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL + req.baseUrl + req.path + queryString;
 
 				this.axios({
 					method: 'get',
 					url: edaUrl,
-					responseType:'stream'
+					responseType: 'stream',
 				})
-					.then(response => {
+					.then((response) => {
 						response.data.pipe(res);
 					})
-					.catch(err=>{
+					.catch((err) => {
 						this.logger.error(err, 'N4BAC3N', userId);
 						throw err;
 					});
-			}
-			else{
+			} else {
 				const params = {
 					Bucket: dest,
-					Key: decodeURIComponent(filekey)
+					Key: decodeURIComponent(filekey),
 				};
-	
+
 				if (samplingType === 'head') {
 					params.Range = 'bytes=0-' + SAMPLING_BYTES;
 				} else if (samplingType === 'tail') {
 					params.Range = 'bytes=-' + SAMPLING_BYTES;
 				}
-	
+
 				try {
 					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
 					this.awsS3Client.getObject(params).createReadStream().pipe(res);
@@ -330,32 +339,31 @@ class DataLibrary {
 					throw err;
 				}
 			}
-	
 		} catch (err) {
-			const msg = (err && err.message) ? `${err.message}` : `${err}`;
+			const msg = err && err.message ? `${err.message}` : `${err}`;
 			this.logger.error(msg, 'PFXO7XD', userId);
 			throw msg;
 		}
 	}
 
-	async getFileThumbnail(data, userId){
+	async getFileThumbnail(data, userId) {
 		let { dest, folder, filename, clone_name } = data;
 		const key = `${clone_name}/${folder}/${filename}`;
 		let filetype = filename.split('.').pop();
-		if (filetype === '.png'){
+		if (filetype === '.png') {
 			filetype = 'image/png';
-		} else if(filetype === 'svg'){
+		} else if (filetype === 'svg') {
 			filetype = 'image/svg+xml';
 		}
 
 		const params = {
 			Bucket: dest,
 			Key: key,
-			ResponseContentType: 'image/png'
+			ResponseContentType: 'image/png',
 		};
 
-		return new Promise(async (resolve,reject) => {
-			if(filename === 'none'){
+		return new Promise(async (resolve, reject) => {
+			if (filename === 'none') {
 				reject(filename);
 			}
 			await this.redisDB.select(this.redisClientDB);
@@ -364,7 +372,7 @@ class DataLibrary {
 				resolve(cachedResults);
 			} else {
 				this.awsS3Client.getObject(params, async (err, data) => {
-					if(err) {
+					if (err) {
 						reject(err, err.stack);
 					} else {
 						try {
@@ -377,7 +385,6 @@ class DataLibrary {
 					}
 				});
 			}
-
 		});
 	}
 
@@ -390,7 +397,6 @@ class DataLibrary {
 			const result = await session.run(query, parameters);
 			await this.close(driver, session);
 			return { result };
-
 		} catch (err) {
 			this.logger.error(err, 'LKRS7EO', userId);
 			throw err;

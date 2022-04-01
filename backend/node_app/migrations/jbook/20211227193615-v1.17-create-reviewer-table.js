@@ -7,28 +7,27 @@ module.exports = {
 				autoIncrement: true,
 				primaryKey: true,
 			},
-      name : {
-        type: Sequelize.TEXT,
-      },
-      type : {
-        type: Sequelize.TEXT,
-      },
-      title : {
-        type: Sequelize.TEXT,
-      },
-      organization : {
-        type: Sequelize.TEXT,
-      },
-      email: {
-        type: Sequelize.TEXT,
-      },
-      phone_number : {
-        type: Sequelize.TEXT,
-      },
+			name: {
+				type: Sequelize.TEXT,
+			},
+			type: {
+				type: Sequelize.TEXT,
+			},
+			title: {
+				type: Sequelize.TEXT,
+			},
+			organization: {
+				type: Sequelize.TEXT,
+			},
+			email: {
+				type: Sequelize.TEXT,
+			},
+			phone_number: {
+				type: Sequelize.TEXT,
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('reviewer');
-	}
+	},
 };
-

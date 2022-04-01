@@ -1,16 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-	List,
-	ListItem,
-	Drawer,
-	ListSubheader,
-	Table,
-	TableBody,
-	TableRow,
-	TableCell,
-} from '@material-ui/core';
+import { List, ListItem, Drawer, ListSubheader, Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import { backgroundGreyDark } from '../../components/common/gc-colors';
 import GCButton from '../common/GCButton';
 import ExportIcon from '../../images/icon/Export.svg';
@@ -26,15 +17,14 @@ const DrawerTitle = styled(ListItem)`
 `;
 
 const DrawerTable = styled(Table)`
-    border: 1px solid ${backgroundGreyDark};
-    margin: 0 16px;
-    width: 93% !important;
-    table-layout:fixed;
+	border: 1px solid ${backgroundGreyDark};
+	margin: 0 16px;
+	width: 93% !important;
+	table-layout: fixed;
 `;
 
 const DrawerTableRow = styled(TableRow)`
-	background-color: ${({ index }) =>
-		index % 2 === 0 ? 'white' : 'transparent'};
+	background-color: ${({ index }) => (index % 2 === 0 ? 'white' : 'transparent')};
 `;
 
 const ButtonRow = styled.div`
@@ -44,9 +34,9 @@ const ButtonRow = styled.div`
 `;
 
 const DrawerTableCell = styled(TableCell)`
-    display: flex !important;
-    justify-content: space-between !important;
-    max-width: 100% !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	max-width: 100% !important;
 `;
 
 export const SelectedDocsDrawer = (props) => {
@@ -90,18 +80,19 @@ export const SelectedDocsDrawer = (props) => {
 					style={{ backgroundColor: index % 2 === 0 ? 'white' : 'transparent' }}
 				>
 					<DrawerTableCell>
-						<div 
+						<div
 							style={{
 								display: 'flex',
 								alignItems: 'center',
 								width: '100%',
-								justifyContent: 'space-between'
-							}}>
+								justifyContent: 'space-between',
+							}}
+						>
 							<span style={{ fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
-							<i 
-								className="fa fa-times-circle fa-fw" 
-								style={{ cursor: 'pointer', height: 17 }} 
-								onClick={()=>handleRemoveSelection(key)} 
+							<i
+								className="fa fa-times-circle fa-fw"
+								style={{ cursor: 'pointer', height: 17 }}
+								onClick={() => handleRemoveSelection(key)}
 							/>
 						</div>
 					</DrawerTableCell>
@@ -145,9 +136,7 @@ export const SelectedDocsDrawer = (props) => {
 					margin: '16px 0px 0px 10px',
 					height: 50,
 				}}
-				disabled={
-					!rawSearchResults || rawSearchResults.length <= 0 ? true : false
-				}
+				disabled={!rawSearchResults || rawSearchResults.length <= 0 ? true : false}
 			>
 				<GCToolTip title="Export" placement="bottom" arrow>
 					<img
@@ -155,8 +144,7 @@ export const SelectedDocsDrawer = (props) => {
 						style={{
 							margin: '0 0 3px 3px',
 							width: 15,
-							opacity:
-								!rawSearchResults || rawSearchResults.length <= 0 ? 0.6 : 1,
+							opacity: !rawSearchResults || rawSearchResults.length <= 0 ? 0.6 : 1,
 						}}
 						alt="export"
 					/>
