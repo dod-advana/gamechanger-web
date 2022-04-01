@@ -6,7 +6,15 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 
 const jbookSearchBarHandler = {
-	async debouncedFetchSearchSuggestions(value, cloneData, setAutocorrect, setPresearchTitle, setPresearchTopic, setPresearchOrg, setPredictions) {
+	async debouncedFetchSearchSuggestions(
+		value,
+		cloneData,
+		setAutocorrect,
+		setPresearchTitle,
+		setPresearchTopic,
+		setPresearchOrg,
+		setPredictions
+	) {
 		try {
 			// do nothing
 		} catch (e) {
@@ -35,14 +43,21 @@ const jbookSearchBarHandler = {
 			setFavoriteName,
 			setFavoriteSummary,
 			favoriteSummary,
-			handleSaveSearch
+			handleSaveSearch,
 		} = props;
 
 		return (
-			<div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 0 25px', position: 'relative' }} ref={ref}>
+			<div
+				style={{ display: 'flex', justifyContent: 'center', margin: '0 0 0 25px', position: 'relative' }}
+				ref={ref}
+			>
 				<SearchBarForm
 					id="GamechangerSearchBarForm"
-					className={state.componentStepNumbers ? `tutorial-step-${state.componentStepNumbers['Search Input']}` : null}
+					className={
+						state.componentStepNumbers
+							? `tutorial-step-${state.componentStepNumbers['Search Input']}`
+							: null
+					}
 					onSubmit={handleSubmit}
 					autoComplete="off"
 					onKeyDown={handleKeyDown}
@@ -52,18 +67,26 @@ const jbookSearchBarHandler = {
 						value={searchText}
 						onChange={handleOnType}
 						onBlur={handleOnBlur}
-						onFocus={() => { setDropdownOpen(true) }}
+						onFocus={() => {
+							setDropdownOpen(true);
+						}}
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>
-					{dropdownOpen && !advancedSearchOpen && <SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />}
+					{dropdownOpen && !advancedSearchOpen && (
+						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
+					)}
 				</SearchBarForm>
 				<SearchButton backgroundColor={'#9E9E9E'} id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
 
-				<Popover onClose={() => { handleFavoriteSearchClicked(null) }}
-					open={searchFavoritePopperOpen} anchorEl={searchFavoritePopperAnchorEl}
+				<Popover
+					onClose={() => {
+						handleFavoriteSearchClicked(null);
+					}}
+					open={searchFavoritePopperOpen}
+					anchorEl={searchFavoritePopperAnchorEl}
 					anchorOrigin={{
 						vertical: 'bottom',
 						horizontal: 'right',
@@ -78,34 +101,52 @@ const jbookSearchBarHandler = {
 							<TextField
 								label={'Favorite Name'}
 								value={favoriteName}
-								onChange={(event) => { setFavoriteName(event.target.value) }}
+								onChange={(event) => {
+									setFavoriteName(event.target.value);
+								}}
 								className={classes.textField}
-								margin='none'
-								size='small'
-								variant='outlined'
+								margin="none"
+								size="small"
+								variant="outlined"
 							/>
 							<TextField
 								label={'Favorite Summary'}
 								value={favoriteSummary}
-								onChange={(event) => { setFavoriteSummary(event.target.value) }}
+								onChange={(event) => {
+									setFavoriteSummary(event.target.value);
+								}}
 								className={classes.textArea}
-								margin='none'
-								size='small'
-								variant='outlined'
+								margin="none"
+								size="small"
+								variant="outlined"
 								multiline={true}
 								rows={4}
 							/>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 								<GCButton
 									onClick={() => handleFavoriteSearchClicked(null)}
-									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
 									isSecondaryBtn={true}
-								>Cancel
+								>
+									Cancel
 								</GCButton>
 								<GCButton
 									onClick={() => handleSaveSearch(true)}
-									style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-								>Save
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+								>
+									Save
 								</GCButton>
 							</div>
 						</div>

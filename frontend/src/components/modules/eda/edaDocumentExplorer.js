@@ -13,17 +13,11 @@ import {
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
 } from '../../../utils/gamechangerUtils';
-import {
-	getEDAMetadataForPropertyTable,
-	getDisplayTitle,
-} from '../../modules/eda/edaUtils';
+import { getEDAMetadataForPropertyTable, getDisplayTitle } from '../../modules/eda/edaUtils';
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
-import {
-	EDA_FIELDS,
-	EDA_FIELD_JSON_MAP,
-} from '../../modules/eda/edaCardHandler';
+import { EDA_FIELDS, EDA_FIELD_JSON_MAP } from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -57,25 +51,11 @@ function numberWithCommas(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-const getIframePreviewLinkInferred = (
-	filename,
-	prevSearchText,
-	pageNumber,
-	isClone = false,
-	cloneData = {}
-) => {
+const getIframePreviewLinkInferred = (filename, prevSearchText, pageNumber, isClone = false, cloneData = {}) => {
 	return new Promise((resolve, reject) => {
-		gameChangerAPI
-			.dataStorageDownloadGET(
-				filename,
-				prevSearchText,
-				pageNumber,
-				isClone,
-				cloneData
-			)
-			.then((url) => {
-				resolve(url);
-			});
+		gameChangerAPI.dataStorageDownloadGET(filename, prevSearchText, pageNumber, isClone, cloneData).then((url) => {
+			resolve(url);
+		});
 	});
 };
 
@@ -117,35 +97,20 @@ export default function EDADocumentExplorer({
 					const filename = rec.file_location_eda_ext;
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
-					if (
-						filename &&
-						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
-					) {
+					if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
 						setIframeLoading(true);
-						getIframePreviewLinkInferred(
-							filename,
-							prevSearchText,
-							pageNumber,
-							isClone,
-							cloneData
-						).then((url) => {
-							node.src = url;
-							setIframeLoading(false);
-							setPrevIframPreviewLink(iframePreviewLink);
-						});
+						getIframePreviewLinkInferred(filename, prevSearchText, pageNumber, isClone, cloneData).then(
+							(url) => {
+								node.src = url;
+								setIframeLoading(false);
+								setPrevIframPreviewLink(iframePreviewLink);
+							}
+						);
 					}
 				}
 			}
 		},
-		[
-			iframePreviewLink,
-			prevSearchText,
-			prevIframPreviewLink,
-			isClone,
-			cloneData,
-			data,
-		]
+		[iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data]
 	);
 
 	useEffect(() => {
@@ -196,11 +161,7 @@ export default function EDADocumentExplorer({
 			const fileName = rec.id;
 			const pageObj = rec.pageHits[pageKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'PDFOpen'
-			);
+			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'PDFOpen');
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'DocumentExplorerInteraction',
@@ -229,12 +190,7 @@ export default function EDADocumentExplorer({
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad(
-						'docPdfViewer',
-						'viewerContainer',
-						fileName,
-						'PDF Viewer'
-					);
+					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
 					setPdfLoaded(true);
 				}
 			} catch (err) {
@@ -244,33 +200,19 @@ export default function EDADocumentExplorer({
 		}
 	}
 	const currentDocData = data[iframePreviewLink.dataIdx];
-	const previewPathname =
-		data.length > 0 && currentDocData && currentDocData.filepath;
+	const previewPathname = data.length > 0 && currentDocData && currentDocData.filepath;
 	const previewData =
 		(data.length > 0 &&
 			currentDocData &&
-			getEDAMetadataForPropertyTable(
-				EDA_FIELD_JSON_MAP,
-				EDA_FIELDS,
-				currentDocData
-			)) ||
+			getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData)) ||
 		[];
 	const previewDataReflist =
-		(data.length > 0 &&
-			currentDocData &&
-			getReferenceListMetadataPropertyTable(currentDocData.ref_list)) ||
-		[];
+		(data.length > 0 && currentDocData && getReferenceListMetadataPropertyTable(currentDocData.ref_list)) || [];
 	const iframePanelSize =
-		12 -
-		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
-		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	// This checks if there are any documents loaded and assigns the default collapse keys to the cards default to open.
-	if (
-		collapseKeys &&
-		Object.keys(collapseKeys).length === 0 &&
-		data.length > 0
-	) {
+	if (collapseKeys && Object.keys(collapseKeys).length === 0 && data.length > 0) {
 		let collapseDictionary = {};
 		for (let i = 0; i < data.length; i++) {
 			collapseDictionary[i.toString()] = false;
@@ -280,17 +222,10 @@ export default function EDADocumentExplorer({
 
 	// set the tooltip for the right panel
 	let tooltipText = 'No metadata available';
-	if (
-		currentDocData &&
-		currentDocData.metadata_type_eda_ext &&
-		currentDocData.award_id_eda_ext
-	) {
+	if (currentDocData && currentDocData.metadata_type_eda_ext && currentDocData.award_id_eda_ext) {
 		if (currentDocData.metadata_type_eda_ext === 'pds') {
 			tooltipText = 'Pulled from PDS data';
-		} else if (
-			currentDocData.metadata_type_eda_ext === 'syn' &&
-			currentDocData.award_id_eda_ext
-		) {
+		} else if (currentDocData.metadata_type_eda_ext === 'syn' && currentDocData.award_id_eda_ext) {
 			tooltipText = 'Pulled from Synopsis data';
 		}
 	}
@@ -304,10 +239,8 @@ export default function EDADocumentExplorer({
 	};
 	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
-	if (!leftPanelOpen)
-		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
-	if (!rightPanelOpen)
-		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
+	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
+	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
 		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
@@ -321,9 +254,7 @@ export default function EDADocumentExplorer({
 					overflow: 'scroll',
 				}}
 			>
-				<div
-					style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}
-				>
+				<div style={{ paddingLeft: '10px', color: grey800, fontWeight: 'bold' }}>
 					{totalCount ? (
 						<div>
 							{numberWithCommas(totalCount)} results found.
@@ -336,10 +267,7 @@ export default function EDADocumentExplorer({
 					)}
 				</div>
 
-				<div
-					style={styles.docExplorerPag}
-					className="gcPagination docExplorerPag"
-				>
+				<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
 					<Pagination
 						activePage={resultsPage}
 						itemsCountPerPage={resultsPerPage}
@@ -365,9 +293,7 @@ export default function EDADocumentExplorer({
 				)}
 				{!loading &&
 					_.map(data, (item, key) => {
-						const collapsed = collapseKeys
-							? collapseKeys[key.toString()]
-							: true;
+						const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
 						const displayTitle = getDisplayTitle(item);
 
 						if (item.type === 'document') {
@@ -388,13 +314,8 @@ export default function EDADocumentExplorer({
 											}}
 											className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
 										/>
-										<span className="gc-document-explorer-result-header-text">
-											{displayTitle}
-										</span>
-										<span
-											style={{ width: 30, marginLeft: 'auto' }}
-											className="badge"
-										>
+										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
 											{item.pageHitCount}
 										</span>
 									</div>
@@ -420,13 +341,9 @@ export default function EDADocumentExplorer({
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 
 													if (isHighlighted)
-														blockquoteClass +=
-															' searchdemo-blockquote-sm-active';
+														blockquoteClass += ' searchdemo-blockquote-sm-active';
 													return (
-														<div
-															key={key + pageKey}
-															style={{ position: 'relative' }}
-														>
+														<div key={key + pageKey} style={{ position: 'relative' }}>
 															<a
 																href="#noref"
 																className="searchdemo-quote-link"
@@ -464,10 +381,7 @@ export default function EDADocumentExplorer({
 						}
 					})}
 			</div>
-			<div
-				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}
-			>
+			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
 				<div
 					style={{
 						display: 'flex',
@@ -482,9 +396,7 @@ export default function EDADocumentExplorer({
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -495,9 +407,7 @@ export default function EDADocumentExplorer({
 						/>
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -544,9 +454,7 @@ export default function EDADocumentExplorer({
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -557,9 +465,7 @@ export default function EDADocumentExplorer({
 						/>
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',

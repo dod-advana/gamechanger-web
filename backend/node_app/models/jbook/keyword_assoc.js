@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const KEYWORD = sequelize.define('keyword_assoc',
+	const KEYWORD = sequelize.define(
+		'keyword_assoc',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -22,11 +23,12 @@ module.exports = (sequelize, DataTypes) => {
 			accomp_id: {
 				type: DataTypes.INTEGER,
 			},
-		}, {
-		freezeTableName: true,
-		timestamps: false,
-		tableName: 'keyword_assoc'
-	}
+		},
+		{
+			freezeTableName: true,
+			timestamps: false,
+			tableName: 'keyword_assoc',
+		}
 	);
 	return KEYWORD;
 };

@@ -57,12 +57,7 @@ const EdaSearchHandler = {
 			edaSearchSettings,
 		} = state;
 
-		if (
-			isDecoupled &&
-			userData &&
-			userData.search_history &&
-			userData.search_history.length > 9
-		) {
+		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
 			if (checkUserInfo(state, dispatch)) {
 				return;
 			}
@@ -94,18 +89,13 @@ const EdaSearchHandler = {
 		if (_.isEmpty(trimmed)) return;
 
 		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches =
-			localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
 		if (!recentSearchesParsed.includes(searchText)) {
 			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT)
-				recentSearchesParsed.pop();
-			localStorage.setItem(
-				`recent${cloneData.clone_name}Searches`,
-				JSON.stringify(recentSearchesParsed)
-			);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
 		}
 
 		const t0 = new Date().getTime();
@@ -169,8 +159,7 @@ const EdaSearchHandler = {
 					let getUserDataFlag = true;
 
 					if (_.isObject(resp.data)) {
-						let { docs, totalCount, expansionDict, isCached, timeSinceCache } =
-							resp.data;
+						let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
 
 						if (docs && Array.isArray(docs)) {
 							// intelligent search failed, show keyword results with warning alert
@@ -323,10 +312,7 @@ const EdaSearchHandler = {
 								issuingOrgs[org] += 1;
 							}
 
-							if (
-								doc.obligated_amounts_eda_ext &&
-								!isNaN(doc.obligated_amounts_eda_ext)
-							) {
+							if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
 								totalObligatedAmount += doc.obligated_amounts_eda_ext;
 							}
 						}
@@ -381,8 +367,7 @@ const EdaSearchHandler = {
 		const endDateURL = getQueryVariable('endDate', url);
 		const issueAgencyURL = getQueryVariable('issueAgency', url);
 
-		const isNullish = (param) =>
-			!param || param === 'null' || param === 'undefined';
+		const isNullish = (param) => !param || param === 'null' || param === 'undefined';
 
 		if (searchText) {
 			parsed.searchText = searchText;
@@ -476,10 +461,7 @@ const EdaSearchHandler = {
 			newSearchSettings.issueAgency = issueAgencyURL;
 		}
 
-		parsed.edaSearchSettings = _.defaults(
-			newSearchSettings,
-			_.cloneDeep(defaultState.edaSearchSettings)
-		);
+		parsed.edaSearchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.edaSearchSettings));
 
 		return parsed;
 	},
@@ -507,36 +489,22 @@ const EdaSearchHandler = {
 		let orgFilterText = undefined;
 		const majcomFilter =
 			organizations && majcoms
-				? _.pickBy(
-					majcoms,
-					(value, key) =>
-						value && value.length > 0 && organizations.indexOf(key) !== -1
-				  )
+				? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1)
 				: undefined;
-		if (
-			!allOrgsSelected &&
-			majcomFilter &&
-			Object.keys(majcomFilter).length > 0
-		) {
+		if (!allOrgsSelected && majcomFilter && Object.keys(majcomFilter).length > 0) {
 			orgFilterText = '';
 			for (const org of organizations) {
 				let separator = Object.keys(majcomFilter).indexOf(org) !== 0 ? '|' : '';
-				orgFilterText += `${separator}${org}${
-					majcomFilter[org] ? ':' + majcomFilter[org].join('_') : ''
-				}`;
+				orgFilterText += `${separator}${org}${majcomFilter[org] ? ':' + majcomFilter[org].join('_') : ''}`;
 			}
 		} else {
 			orgFilterText =
-				!allOrgsSelected && organizations && organizations.length > 0
-					? organizations.join('_')
-					: undefined;
+				!allOrgsSelected && organizations && organizations.length > 0 ? organizations.join('_') : undefined;
 		}
 		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
 		const issueOfficeNameText = issueOfficeName ?? undefined;
 		const fiscalYearsText =
-			!allYearsSelected && fiscalYears && fiscalYears.length > 0
-				? fiscalYears.join('_')
-				: undefined;
+			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
 		const contractDataText =
 			!allDataSelected && contractData
 				? Object.keys(_.pickBy(contractData, (value, key) => value)).join('_')
@@ -558,10 +526,8 @@ const EdaSearchHandler = {
 		if (issueOfficeNameText) params.append('officeName', issueOfficeNameText);
 		if (fiscalYearsText) params.append('fiscalYears', fiscalYearsText);
 		if (contractDataText) params.append('contractData', contractDataText);
-		if (minObligatedAmountText)
-			params.append('minAmount', minObligatedAmountText);
-		if (maxObligatedAmountText)
-			params.append('maxAmount', maxObligatedAmountText);
+		if (minObligatedAmountText) params.append('minAmount', minObligatedAmountText);
+		if (maxObligatedAmountText) params.append('maxAmount', maxObligatedAmountText);
 		if (modTypeText) params.append('modType', modTypeText);
 		if (startDateText) params.append('startDate', startDateText);
 		if (endDateText) params.append('endDate', endDateText);

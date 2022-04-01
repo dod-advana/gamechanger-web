@@ -2,12 +2,12 @@ import React from 'react';
 // import GeneralAdminButtons from '../../admin/GeneralAdminButtons';
 import NotificationsManagement from '../../notifications/NotificationsManagement';
 import UserList from '../../admin/UserList';
-import {Tooltip, Typography} from '@material-ui/core';
-import {HoverNavItem} from '../../navigation/NavItems';
-import {toolTheme} from '../../admin/util/GCAdminStyles';
+import { Tooltip, Typography } from '@material-ui/core';
+import { HoverNavItem } from '../../navigation/NavItems';
+import { toolTheme } from '../../admin/util/GCAdminStyles';
 import AdminIcon from '../../../images/icon/AdminIcon.png';
 import NewAdminIcon from '../../../images/icon/NewAdminIcon.png';
-import {AddAlert, SupervisedUserCircle} from '@material-ui/icons';
+import { AddAlert, SupervisedUserCircle } from '@material-ui/icons';
 import { ConstrainedIcon, PageLink } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import GamechangerNGALogo from '../../../images/logos/NGA-Sidemenu.png';
@@ -17,7 +17,7 @@ import GamechangerSFLogo from '../../../images/logos/SF-Sidemenu.png';
 import GamechangerCDOLogo from '../../../images/logos/CDO-Sidemenu.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
 import JAICLogo from '../../../images/logos/JBooks_wht.svg';
-import {getCloneTitleForFactory} from '../../../utils/gamechangerUtils';
+import { getCloneTitleForFactory } from '../../../utils/gamechangerUtils';
 import GCTooltip from '../../common/GCToolTip';
 
 const PAGES = {
@@ -34,14 +34,14 @@ const styles = {
 };
 
 const renderGeneralAdminButtons = () => {
-	return (<></>);
+	return <></>;
 };
 
 const DefaultAdminMainViewHandler = {
 	getPages: () => {
 		return PAGES;
 	},
-	
+
 	renderSwitch: (page, cloneName) => {
 		switch (page) {
 			case PAGES.general:
@@ -54,12 +54,10 @@ const DefaultAdminMainViewHandler = {
 				return renderGeneralAdminButtons();
 		}
 	},
-	
+
 	closedAdminMenu: (setPageToView, pages, cloneName) => {
 		return (
-			<div
-				style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-			>
+			<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Admin Page" placement="right" arrow>
 						<HoverNavItem
@@ -77,23 +75,15 @@ const DefaultAdminMainViewHandler = {
 
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Service Notifications" placement="right" arrow>
-						<HoverNavItem
-							centered
-							onClick={() => setPageToView(PAGES.notifications)}
-							toolTheme={toolTheme}
-						>
+						<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 							<AddAlert style={{ fontSize: 30 }} />
 						</HoverNavItem>
 					</Tooltip>
 				)}
-	
+
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Manage Users" placement="right" arrow>
-						<HoverNavItem
-							centered
-							onClick={() => setPageToView(PAGES.userList)}
-							toolTheme={toolTheme}
-						>
+						<HoverNavItem centered onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 							<SupervisedUserCircle style={{ fontSize: 30 }} />
 						</HoverNavItem>
 					</Tooltip>
@@ -101,22 +91,17 @@ const DefaultAdminMainViewHandler = {
 
 				{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href={`#/gamechanger-admin`}
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href={`#/gamechanger-admin`} centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={NewAdminIcon} />
 							</HoverNavItem>
 						</PageLink>
 					</GCTooltip>
 				)}
-
 			</div>
 		);
 	},
-	
+
 	openedAdminMenu: (setPageToView, pages, cloneName) => {
 		return (
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -137,10 +122,7 @@ const DefaultAdminMainViewHandler = {
 
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Show Notifications" placement="right" arrow>
-						<HoverNavItem
-							onClick={() => setPageToView(PAGES.notifications)}
-							toolTheme={toolTheme}
-						>
+						<HoverNavItem onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 							<AddAlert style={{ fontSize: 30 }} />
 							<span style={{ marginLeft: '5px' }}>Show Notifications</span>
 						</HoverNavItem>
@@ -149,10 +131,7 @@ const DefaultAdminMainViewHandler = {
 
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Manage Users" placement="right" arrow>
-						<HoverNavItem
-							onClick={() => setPageToView(PAGES.userList)}
-							toolTheme={toolTheme}
-						>
+						<HoverNavItem onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 							<SupervisedUserCircle style={{ fontSize: 30 }} />
 							<span style={{ marginLeft: '5px' }}>Manage Users</span>
 						</HoverNavItem>
@@ -172,7 +151,7 @@ const DefaultAdminMainViewHandler = {
 			</div>
 		);
 	},
-	
+
 	getToolTheme: (cloneData) => {
 		const toolTheme = {
 			menuBackgroundColor: '#171A23',
@@ -255,16 +234,13 @@ const DefaultAdminMainViewHandler = {
 				),
 				toolIconHref: `#/${cloneData?.url || ''}`,
 			};
-		}else {
+		} else {
 			return {
 				...toolTheme,
 				toolLogo: (
 					<PageLink href={`#/${cloneData.url}`}>
 						<div>
-							<Typography
-								variant="h1"
-								style={{ ...styles.wording, margin: '0 15px 0 0' }}
-							>
+							<Typography variant="h1" style={{ ...styles.wording, margin: '0 15px 0 0' }}>
 								{getCloneTitleForFactory(cloneData, false)}
 							</Typography>
 							<Typography
@@ -283,7 +259,7 @@ const DefaultAdminMainViewHandler = {
 				toolIconHref: `#/${cloneData?.url || ''}`,
 			};
 		}
-	}
+	},
 };
 
 export default DefaultAdminMainViewHandler;

@@ -3,21 +3,26 @@ import SimpleTable from '../../common/SimpleTable';
 import { StyledTableContainer } from './profilePage/profilePageStyles';
 import { JBookContext } from './jbookContext';
 import {
-	SecondaryReviewerKey, SecondaryReviewerValue,
-	LabelingValidationKey, LabelingValidationValue,
-	TransitionPartnersKey, TransitionPartnersValue,
-	MissionPartnersKey, MissionPartnersValue,
-	AIPOCKey, AIPOCValue,
-	ReviewerNotesKey, ReviewerNotesValue,
+	SecondaryReviewerKey,
+	SecondaryReviewerValue,
+	LabelingValidationKey,
+	LabelingValidationValue,
+	TransitionPartnersKey,
+	TransitionPartnersValue,
+	MissionPartnersKey,
+	MissionPartnersValue,
+	AIPOCKey,
+	AIPOCValue,
+	ReviewerNotesKey,
+	ReviewerNotesValue,
 	ServiceDescriptionText,
-	boldKeys, firstColWidth,
+	boldKeys,
+	firstColWidth,
 	ReviewStatus,
-	ButtonFooter
+	ButtonFooter,
 } from './jbookServiceHelper';
 
-
 const JBookServiceReviewForm = React.memo((props) => {
-
 	const {
 		setReviewData,
 		dropdownData,
@@ -26,29 +31,28 @@ const JBookServiceReviewForm = React.memo((props) => {
 		finished,
 		renderReenableModal,
 		roleDisabled,
-		vendorData
+		vendorData,
 	} = props;
-
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { serviceValidated, serviceValidation, reviewData, primaryReviewLoading } = state;
 
-
 	const serviceReviewData = [
 		{
 			Key: <SecondaryReviewerKey />,
-			Value:
+			Value: (
 				<SecondaryReviewerValue
 					dropdownData={dropdownData}
 					serviceSecondaryReviewer={reviewData.serviceSecondaryReviewer}
 					setReviewData={setReviewData}
 					finished={finished}
-				/>,
+				/>
+			),
 		},
 		{
 			Key: <LabelingValidationKey />,
-			Value:
+			Value: (
 				<LabelingValidationValue
 					serviceAgreeLabel={reviewData.serviceAgreeLabel}
 					setReviewData={setReviewData}
@@ -59,10 +63,11 @@ const JBookServiceReviewForm = React.memo((props) => {
 					serviceValidated={serviceValidated}
 					serviceValidation={serviceValidation}
 				/>
+			),
 		},
 		{
 			Key: <TransitionPartnersKey />,
-			Value:
+			Value: (
 				<TransitionPartnersValue
 					finished={finished}
 					setReviewData={setReviewData}
@@ -73,11 +78,11 @@ const JBookServiceReviewForm = React.memo((props) => {
 					serviceValidated={serviceValidated}
 					serviceValidation={serviceValidation}
 				/>
-
+			),
 		},
 		{
 			Key: <MissionPartnersKey />,
-			Value:
+			Value: (
 				<MissionPartnersValue
 					setReviewData={setReviewData}
 					vendorData={vendorData}
@@ -85,10 +90,11 @@ const JBookServiceReviewForm = React.memo((props) => {
 					serviceMissionPartners={reviewData.serviceMissionPartnersList}
 					serviceMissionPartnersChecklist={reviewData.serviceMissionPartnersChecklist}
 				/>
+			),
 		},
 		{
 			Key: <AIPOCKey />,
-			Value:
+			Value: (
 				<AIPOCValue
 					setReviewData={setReviewData}
 					finished={finished}
@@ -100,32 +106,32 @@ const JBookServiceReviewForm = React.memo((props) => {
 					servicePOCOrg={reviewData.servicePOCOrg}
 					servicePOCPhoneNumber={reviewData.servicePOCPhoneNumber}
 				/>
+			),
 		},
 		{
 			Key: <ReviewerNotesKey />,
-			Value:
+			Value: (
 				<ReviewerNotesValue
 					finished={finished}
 					serviceReviewerNotes={reviewData.serviceReviewerNotes}
 					setReviewData={setReviewData}
 				/>
+			),
 		},
 		{
 			Key: <></>,
-			Value: <ServiceDescriptionText />
-		}
+			Value: <ServiceDescriptionText />,
+		},
 	];
-
-
 
 	return (
 		<StyledTableContainer>
-
 			{renderReenableModal('Service')}
 
 			<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
 
-			<SimpleTable tableClass={'magellan-table'}
+			<SimpleTable
+				tableClass={'magellan-table'}
 				zoom={1}
 				rows={boldKeys(serviceReviewData)}
 				height={'auto'}
@@ -134,7 +140,7 @@ const JBookServiceReviewForm = React.memo((props) => {
 				title={''}
 				headerExtraStyle={{
 					backgroundColor: '#313541',
-					color: 'white'
+					color: 'white',
 				}}
 				hideHeader={true}
 				firstColWidth={firstColWidth}
@@ -152,6 +158,5 @@ const JBookServiceReviewForm = React.memo((props) => {
 		</StyledTableContainer>
 	);
 });
-
 
 export default JBookServiceReviewForm;

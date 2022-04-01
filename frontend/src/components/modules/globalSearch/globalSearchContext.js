@@ -219,11 +219,7 @@ const GlobalSearchContext = React.createContext(initState);
 const GlobalSearchProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
-	return (
-		<GlobalSearchContext.Provider value={{ state, dispatch }}>
-			{props.children}
-		</GlobalSearchContext.Provider>
-	);
+	return <GlobalSearchContext.Provider value={{ state, dispatch }}>{props.children}</GlobalSearchContext.Provider>;
 });
 
 export { GlobalSearchContext, GlobalSearchProvider };

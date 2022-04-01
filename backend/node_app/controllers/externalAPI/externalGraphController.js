@@ -5,10 +5,7 @@ const LOGGER = require('@dod-advana/advana-logger');
  */
 class ExternalGraphController {
 	constructor(opts = {}) {
-		const {
-			gcController,
-			logger = LOGGER,
-		} = opts;
+		const { gcController, logger = LOGGER } = opts;
 
 		this.gcController = gcController;
 		this.logger = logger;
@@ -17,7 +14,7 @@ class ExternalGraphController {
 	async queryGraph(req, res) {
 		const userId = 'API';
 		try {
-			res.status(200).send({msg: 'TODO'});
+			res.status(200).send({ msg: 'TODO' });
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'DWVK5IV', userId);

@@ -24,15 +24,12 @@ import {
 	DataTypeValue,
 	SliderKey,
 	SliderValue,
-	FooterValue
+	FooterValue,
 } from './jbookPOCHelper';
-
-
 
 const errorColor = '#F44336';
 
 const JBookPOCReviewForm = React.memo((props) => {
-
 	const {
 		submitReviewForm,
 		setReviewData,
@@ -41,7 +38,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 		dropdownData,
 		vendorData,
 		renderReenableModal,
-		totalBudget
+		totalBudget,
 	} = props;
 
 	const context = useContext(JBookContext);
@@ -52,54 +49,57 @@ const JBookPOCReviewForm = React.memo((props) => {
 		const pocReviewerData = [
 			{
 				Key: <AltAIPOCKey />,
-				Value:
-					<AltAIPOCValue setReviewData={setReviewData} />
+				Value: <AltAIPOCValue setReviewData={setReviewData} />,
 			},
 			{
 				Key: <LabelingValidationKey />,
-				Value: <LabelingValidationValue setReviewData={setReviewData} dropdownData={dropdownData} />
+				Value: <LabelingValidationValue setReviewData={setReviewData} dropdownData={dropdownData} />,
 			},
 			{
 				Key: <TransitionPartnerKey />,
-				Value: <TransitionPartnerValue setReviewData={setReviewData} dropdownData={dropdownData} />
+				Value: <TransitionPartnerValue setReviewData={setReviewData} dropdownData={dropdownData} />,
 			},
 			{
 				Key: <MissionPartnersKey />,
-				Value: <MissionPartnersValue setReviewData={setReviewData} vendorData={vendorData} />
+				Value: <MissionPartnersValue setReviewData={setReviewData} vendorData={vendorData} />,
 			},
 			{
 				Key: <JCAKey />,
-				Value: <JCAValue setReviewData={setReviewData} />
+				Value: <JCAValue setReviewData={setReviewData} />,
 			},
 			{
 				Key: <AIDomainKey />,
-				Value: <AIDomainValue setReviewData={setReviewData} domainTasks={domainTasks} />
+				Value: <AIDomainValue setReviewData={setReviewData} domainTasks={domainTasks} />,
 			},
 			{
 				Key: <DataTypeKey />,
-				Value: <DataTypeValue setReviewData={setReviewData} />
-			}
+				Value: <DataTypeValue setReviewData={setReviewData} />,
+			},
 		];
 
 		let showSlider = true;
 
 		if (reviewData.pocClassLabel && reviewData.pocClassLabel === 'Not AI') showSlider = false;
-		else if (!reviewData.pocClassLabel && reviewData.serviceClassLabel && reviewData.serviceClassLabel === 'Not AI') showSlider = false;
-		else if (!reviewData.pocClassLabel && !reviewData.serviceClassLabel && reviewData.primaryClassLabel === 'Not AI') showSlider = false;
+		else if (!reviewData.pocClassLabel && reviewData.serviceClassLabel && reviewData.serviceClassLabel === 'Not AI')
+			showSlider = false;
+		else if (
+			!reviewData.pocClassLabel &&
+			!reviewData.serviceClassLabel &&
+			reviewData.primaryClassLabel === 'Not AI'
+		)
+			showSlider = false;
 
 		if (showSlider) {
 			pocReviewerData.push({
 				Key: <SliderKey />,
-				Value: <SliderValue totalBudget={totalBudget} setReviewData={setReviewData} />
+				Value: <SliderValue totalBudget={totalBudget} setReviewData={setReviewData} />,
 			});
 		}
 
-		pocReviewerData.push(
-			{
-				Key: <></>,
-				Value: <FooterValue />
-			}
-		);
+		pocReviewerData.push({
+			Key: <></>,
+			Value: <FooterValue />,
+		});
 
 		return pocReviewerData;
 	};
@@ -107,7 +107,8 @@ const JBookPOCReviewForm = React.memo((props) => {
 	return (
 		<StyledTableContainer>
 			{renderReenableModal('POC')}
-			<SimpleTable tableClass={'magellan-table'}
+			<SimpleTable
+				tableClass={'magellan-table'}
 				zoom={1}
 				rows={boldKeys(pocReviewerData())}
 				height={'auto'}
@@ -116,21 +117,21 @@ const JBookPOCReviewForm = React.memo((props) => {
 				title={''}
 				headerExtraStyle={{
 					backgroundColor: '#313541',
-					color: 'white'
+					color: 'white',
 				}}
 				hideHeader={true}
 				firstColWidth={firstColWidth}
 			/>
 			<StyledFooterDiv>
 				{!pocValidated && <span style={{ color: errorColor }}>Please fill out the highlighted fields</span>}
-				{finished && !roleDisabled &&
+				{finished && !roleDisabled && (
 					<GCPrimaryButton
 						style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 						onClick={() => setState(dispatch, { POCModalOpen: true })}
 					>
 						Re-Enable (Partial Review)
 					</GCPrimaryButton>
-				}
+				)}
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 					onClick={() => {
@@ -138,38 +139,37 @@ const JBookPOCReviewForm = React.memo((props) => {
 					}}
 					disabled={finished || roleDisabled}
 				>
-					{!primaryReviewLoading ?
+					{!primaryReviewLoading ? (
 						'Reset Form'
-						:
+					) : (
 						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
-					}
+					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
 					onClick={() => submitReviewForm('primaryReviewLoading', false, 'poc')}
 					disabled={finished || roleDisabled}
 				>
-					{!primaryReviewLoading ?
+					{!primaryReviewLoading ? (
 						'Save (Partial Review)'
-						:
+					) : (
 						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
-					}
+					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
 					style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
 					onClick={() => submitReviewForm('primaryReviewLoading', true, 'poc')}
 					disabled={finished || roleDisabled}
 				>
-					{!primaryReviewLoading ?
+					{!primaryReviewLoading ? (
 						'Submit (Finished Review)'
-						:
+					) : (
 						<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
-					}
+					)}
 				</GCPrimaryButton>
 			</StyledFooterDiv>
 		</StyledTableContainer>
 	);
 });
-
 
 export default JBookPOCReviewForm;

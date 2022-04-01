@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const COMPARE_FEEDBACK = sequelize.define('compare_feedback',
+	const COMPARE_FEEDBACK = sequelize.define(
+		'compare_feedback',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,29 +10,29 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			searchedParagraph: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			matchedParagraphId: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			docId: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			positiveFeedback: {
 				type: DataTypes.BOOLEAN,
-				allowNull: true
+				allowNull: true,
 			},
 			userId: {
 				type: DataTypes.TEXT,
-				allowNull: false
-			}
+				allowNull: false,
+			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'compare_feedback',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return COMPARE_FEEDBACK;

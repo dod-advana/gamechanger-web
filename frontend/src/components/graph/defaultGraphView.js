@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-	getOrgToOrgQuery,
-	getTypeQuery,
-	numberWithCommas,
-	SEARCH_TYPES,
-} from '../../utils/gamechangerUtils';
+import { getOrgToOrgQuery, getTypeQuery, numberWithCommas, SEARCH_TYPES } from '../../utils/gamechangerUtils';
 import { getSearchObjectFromString, setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedPolicyGraphView } from './policyGraphView';
@@ -113,15 +108,11 @@ const DefaultGraphView = (props) => {
 	const [nodeLimit, setNodeLimit] = useState();
 	const [mockedFromES, setMockedFromES] = useState(false);
 
-	const [width, setWidth] = React.useState(
-		window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100)
-	);
+	const [width, setWidth] = React.useState(window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100));
 	const [height, setHeight] = React.useState(window.innerHeight * 0.75);
 
 	useEffect(() => {
-		setWidth(
-			window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100)
-		);
+		setWidth(window.innerWidth * (((state.showSideFilters ? 68.5 : 90.5) - 1) / 100));
 		setHeight(window.innerHeight * 0.75);
 	}, [state]);
 
@@ -147,10 +138,8 @@ const DefaultGraphView = (props) => {
 	const resultsText = runningSearch
 		? 'Running search...'
 		: noSearches
-			? 'Make a search to see the graph network'
-			: `${numberWithCommas(
-				documentsFound
-		  )} document nodes and ${numberWithCommas(
+		? 'Make a search to see the graph network'
+		: `${numberWithCommas(documentsFound)} document nodes and ${numberWithCommas(
 				numOfEdges
 		  )} edges returned in ${timeFound} seconds`;
 
@@ -173,7 +162,10 @@ const DefaultGraphView = (props) => {
 				searchText={state.searchText}
 				selectedDocuments={state.selectedDocumentsForGraph}
 				loadAll={() => {
-					setState(dispatch, { searchSettings: { ...state.searchSettings, loadAll: true }, runGraphSearch: true });
+					setState(dispatch, {
+						searchSettings: { ...state.searchSettings, loadAll: true },
+						runGraphSearch: true,
+					});
 					setGraphResultsFound(false);
 				}}
 				nodeLimit={nodeLimit}

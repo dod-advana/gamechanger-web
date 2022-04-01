@@ -18,14 +18,8 @@ const ProgressBar = (props) => {
 	const progress = Math.round(props.progress * 100) / 100 + '%';
 	return (
 		<div className={props?.className ? props.className + ' bar' : 'bar'}>
-			<div style={{ position: 'absolute', width: '100%', zIndex: '10' }}>
-				{' '}
-				{progress}
-			</div>
-			<div
-				style={{ width: progress }}
-				className={'progress-container ' + status[index]}
-			></div>
+			<div style={{ position: 'absolute', width: '100%', zIndex: '10' }}> {progress}</div>
+			<div style={{ width: progress }} className={'progress-container ' + status[index]}></div>
 		</div>
 	);
 };
