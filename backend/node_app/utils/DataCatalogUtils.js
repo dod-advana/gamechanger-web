@@ -7,9 +7,11 @@ const ASSET_TYPES = constants.DATA_CATALOG_OPTS.api_config.assetTypes;
 // config helper
 
 function getCollibraUrl() {
-	const url = constants.DATA_CATALOG_OPTS.host + (constants.DATA_CATALOG_OPTS.port ? `:${constants.DATA_CATALOG_OPTS.port}` : '');
+	const url =
+		constants.DATA_CATALOG_OPTS.host +
+		(constants.DATA_CATALOG_OPTS.port ? `:${constants.DATA_CATALOG_OPTS.port}` : '');
 	return `${constants.DATA_CATALOG_OPTS.protocol}://${url}${constants.DATA_CATALOG_OPTS.core_rest_path}`;
-};
+}
 
 function getAuthConfig() {
 	let authConfig = {};
@@ -17,20 +19,20 @@ function getAuthConfig() {
 		authConfig.httpsAgent = new https.Agent({
 			rejectUnauthorized: false,
 			keepAlive: true,
-			ca: constants.DATA_CATALOG_OPTS.ca
+			ca: constants.DATA_CATALOG_OPTS.ca,
 		});
-	};
+	}
 
 	authConfig.auth = {
 		username: constants.DATA_CATALOG_OPTS.username,
-		password: constants.DATA_CATALOG_OPTS.password
+		password: constants.DATA_CATALOG_OPTS.password,
 	};
 	return authConfig;
-};
+}
 
 function getAPIConfig() {
 	return constants.DATA_CATALOG_OPTS.api_config;
-};
+}
 
 // data format helpers
 
@@ -48,28 +50,21 @@ function getListOfField(srcData, srcField, newField) {
 	} else {
 		return [];
 	}
-};
+}
 
 const generateAcronymSearchInFields = (acronymAttributeId, datasourceAssetId) => {
 	return [
 		{
-			"resourceType": "Asset",
-			"fields": [
-				`StringAttribute:${acronymAttributeId}`,
-				`Asset:${datasourceAssetId}`
-			]
-		}
+			resourceType: 'Asset',
+			fields: [`StringAttribute:${acronymAttributeId}`, `Asset:${datasourceAssetId}`],
+		},
 	];
 };
 
-
 const cleanSearchText = (text) => {
-	if (text.includes(`"`))
-		return text;
-	else
-		return `${text}*`;
+	if (text.includes(`"`)) return text;
+	else return `${text}*`;
 };
-
 
 const getSearchTypeId = (searchType) => {
 	if (!searchType) {
@@ -81,7 +76,6 @@ const getSearchTypeId = (searchType) => {
 	}
 };
 
-
 const getQueryableStatuses = () => constants.DATA_CATALOG_OPTS.api_config.queryableStatuses;
 
 module.exports = {
@@ -92,5 +86,5 @@ module.exports = {
 	getListOfField,
 	generateAcronymSearchInFields,
 	cleanSearchText,
-	getSearchTypeId
+	getSearchTypeId,
 };

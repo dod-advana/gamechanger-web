@@ -1,20 +1,18 @@
 import React from 'react';
-import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
 import GCButton from '../../common/GCButton';
-import {styles, useStyles} from '../util/GCAdminStyles';
+import { styles, useStyles } from '../util/GCAdminStyles';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-
 /**
- * 
+ *
  * @class EditReviewStatusModal
  */
-export default ({showEditReviewStatusEmailModal, setShowEditReviewStatusEmailModal, setEmailAddress, sendEmail}) => {
-
+export default ({ showEditReviewStatusEmailModal, setShowEditReviewStatusEmailModal, setEmailAddress, sendEmail }) => {
 	const classes = useStyles();
 
-	return(
+	return (
 		<Dialog
 			open={showEditReviewStatusEmailModal}
 			scroll={'paper'}
@@ -22,23 +20,29 @@ export default ({showEditReviewStatusEmailModal, setShowEditReviewStatusEmailMod
 			disableEscapeKeyDown
 			disableBackdropClick
 			classes={{
-				paperWidthSm: classes.dialogSm
+				paperWidthSm: classes.dialogSm,
 			}}
 		>
-			<DialogTitle >
+			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
-					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{'Send Review Status Update Email'}</Typography>
+					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+						{'Send Review Status Update Email'}
+					</Typography>
 				</div>
-				<IconButton aria-label="close" style={{
-					position: 'absolute',
-					right: '0px',
-					top: '0px',
-					height: 60,
-					width: 60,
-					color: 'black',
-					backgroundColor: styles.backgroundGreyLight,
-					borderRadius: 0
-				}} onClick={() => setShowEditReviewStatusEmailModal(false)}>
+				<IconButton
+					aria-label="close"
+					style={{
+						position: 'absolute',
+						right: '0px',
+						top: '0px',
+						height: 60,
+						width: 60,
+						color: 'black',
+						backgroundColor: styles.backgroundGreyLight,
+						borderRadius: 0,
+					}}
+					onClick={() => setShowEditReviewStatusEmailModal(false)}
+				>
 					<CloseIcon style={{ fontSize: 30 }} />
 				</IconButton>
 			</DialogTitle>
@@ -49,7 +53,7 @@ export default ({showEditReviewStatusEmailModal, setShowEditReviewStatusEmailMod
 							<TextField
 								label="Email"
 								id="margin-dense"
-								onChange={event => setEmailAddress(event.target.value)}
+								onChange={(event) => setEmailAddress(event.target.value)}
 								className={classes.textField}
 								margin="dense"
 							/>
@@ -64,17 +68,16 @@ export default ({showEditReviewStatusEmailModal, setShowEditReviewStatusEmailMod
 					style={{ margin: '10px' }}
 					buttonColor={'#8091A5'}
 				>
-						Close
+					Close
 				</GCButton>
 				<GCButton
 					id={'editUserSubmit'}
 					onClick={() => sendEmail()}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
 				>
-						Submit
+					Submit
 				</GCButton>
 			</DialogActions>
-
 		</Dialog>
 	);
 };

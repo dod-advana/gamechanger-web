@@ -30,22 +30,15 @@ const getStyles = (props) => ({
 		},
 	},
 	switchBar: {
-		backgroundColor: `${
-			props.customColor ? props.customColor : primary
-		} !important`,
+		backgroundColor: `${props.customColor ? props.customColor : primary} !important`,
 		opacity: 0.5,
 	},
 });
 
 export default function (props) {
-	
 	const classes = makeStyles(getStyles(props))();
-	
-	const {
-		disabled,
-		onClickLeft,
-		onClick
-	} = props;
+
+	const { disabled, onClickLeft, onClick } = props;
 
 	return (
 		<>
@@ -60,7 +53,7 @@ export default function (props) {
 					fontSize: 15,
 					color: '#3c4144',
 					fontWeight: props.rightActive ? '500' : '700',
-					...(props.disabled ? {} : { cursor: 'pointer'}),
+					...(props.disabled ? {} : { cursor: 'pointer' }),
 					userSelect: 'none',
 					...props.leftLabelStyle,
 				}}
@@ -77,7 +70,7 @@ export default function (props) {
 						classes={{
 							switchBase: classes.switch,
 							track: classes.switchBar,
-							input: classes.input
+							input: classes.input,
 						}}
 						disabled={props.disabled}
 					/>
@@ -85,7 +78,7 @@ export default function (props) {
 				label={props.rightLabel}
 				classes={{
 					root: classes.formControlLabelRoot,
-					label: props.rightActive ? classes.labelAbsActive : classes.labelAbsInactive
+					label: props.rightActive ? classes.labelAbsActive : classes.labelAbsInactive,
 				}}
 			/>
 		</>

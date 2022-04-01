@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('obligations_expenditures',
+	return sequelize.define(
+		'obligations_expenditures',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -11,16 +12,16 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 			},
 			department_code: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			appn_num: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			ba_num: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			budgetyear: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			yearmonth: {
 				type: DataTypes.TEXT,
@@ -37,16 +38,17 @@ module.exports = (sequelize, DataTypes) => {
 			cumulative_obligations: {
 				type: DataTypes.TEXT,
 			},
-            cumulative_disbursements: {
+			cumulative_disbursements: {
 				type: DataTypes.TEXT,
 			},
-            doc_type: {
+			doc_type: {
 				type: DataTypes.TEXT,
 			},
-		}, {
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'obligations_expenditures'
+			tableName: 'obligations_expenditures',
 		}
 	);
 };

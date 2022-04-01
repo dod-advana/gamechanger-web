@@ -6,7 +6,7 @@ export const fullWidthCentered = {
 	display: 'flex',
 	flexDirection: 'column',
 	justifyContent: 'center',
-	alignItems: 'center'
+	alignItems: 'center',
 };
 
 export const styles = {
@@ -16,22 +16,22 @@ export const styles = {
 		marginLeft: 10,
 		padding: '0px 7px 0',
 		fontSize: 20,
-		height: 34
+		height: 34,
 	},
 	cachedResultIcon: {
 		display: 'flex',
 		justifyContent: 'center',
-		padding: '0 0 1% 0'
+		padding: '0 0 1% 0',
 	},
 	searchResults: fullWidthCentered,
 	paginationWrapper: fullWidthCentered,
 	leftContainerSummary: {
 		width: '15%',
-		marginTop: 10
+		marginTop: 10,
 	},
 	rightContainerSummary: {
 		marginLeft: '17.5%',
-		width: '79.7%'
+		width: '79.7%',
 	},
 	filterBox: {
 		backgroundColor: '#ffffff',
@@ -39,14 +39,14 @@ export const styles = {
 		padding: '2px',
 		border: '2px solid #bdccde',
 		pointerEvents: 'none',
-		margin: '2px 5px 0px'
+		margin: '2px 5px 0px',
 	},
 	titleText: {
 		fontSize: 22,
 		fontWeight: 500,
 		color: '#131E43',
 		margin: '20px 0',
-		fontFamily: 'Montserrat'
+		fontFamily: 'Montserrat',
 	},
 	tableColumn: {
 		textAlign: 'center',
@@ -58,7 +58,7 @@ export const styles = {
 		display: 'flex',
 		alignItems: 'center',
 		flex: 9,
-		marginRight: 15
+		marginRight: 15,
 	},
 	tabStyle: {
 		border: `1px solid ${'#DCDCDC'}`,
@@ -75,7 +75,7 @@ export const styles = {
 		height: 45,
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
 	},
 	tabSelectedStyle: {
 		border: `1px solid ${'#0000001F'}`,
@@ -89,12 +89,12 @@ export const styles = {
 	tabButtonContainer: {
 		backgroundColor: '#ffffff',
 		width: '100%',
-		paddingTop: 20
+		paddingTop: 20,
 	},
 	orangeText: {
 		fontWeight: 'bold',
-		color: '#E9691D'
-	}
+		color: '#E9691D',
+	},
 };
 
 export const StyledContainer = styled.div`
@@ -110,7 +110,6 @@ export const StyledMainContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	padding: 0 2em;
-
 `;
 
 export const StyledMainTopBar = styled.div`

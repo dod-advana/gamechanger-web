@@ -7,32 +7,32 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			user_id: {
 				type: Sequelize.STRING,
 				allowNull: false,
 			},
 			download_request_body: {
-				type: Sequelize.JSONB
+				type: Sequelize.JSONB,
 			},
 			search_response_metadata: {
-				type: Sequelize.JSONB
+				type: Sequelize.JSONB,
 			},
 			createdAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
+				defaultValue: Sequelize.fn('NOW'),
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('export_history');
-	}
+	},
 };

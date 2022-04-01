@@ -2,14 +2,14 @@ const nodemailer = require('nodemailer');
 const LOGGER = require('@dod-advana/advana-logger');
 
 class EmailUtility {
-	constructor({ transportOptions, fromName, fromEmail}){
+	constructor({ transportOptions, fromName, fromEmail }) {
 		this.transportOptions = transportOptions;
 		this.fromName = fromName;
 		this.fromEmail = fromEmail;
 		this.logger = LOGGER;
 	}
 
-	sendEmail(html, subject, recipientEmails, userEmail, attachments = null, userId){
+	sendEmail(html, subject, recipientEmails, userEmail, attachments = null, userId) {
 		try {
 			return new Promise((resolve, reject) => {
 				let transporter = nodemailer.createTransport(this.transportOptions);
@@ -31,10 +31,9 @@ class EmailUtility {
 						error.message = 'Sending contact message failed due to internal error.';
 						reject({ error });
 					} else {
-						resolve({ message: 'Message successfully sent', info});
+						resolve({ message: 'Message successfully sent', info });
 					}
 				});
-
 			});
 		} catch (err) {
 			this.logger.error(err, '2QO3162', userId);

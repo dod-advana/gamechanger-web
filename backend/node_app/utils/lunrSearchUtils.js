@@ -11,8 +11,7 @@ const parse = (input) => {
 const replaceExactSearch = (input) => {
 	let hasQuotedWordsRegex = new RegExp(/"[^"]*"/, 'gus');
 
-	if (!hasQuotedWordsRegex.test(input))
-		return input;
+	if (!hasQuotedWordsRegex.test(input)) return input;
 
 	let [match] = input.match(hasQuotedWordsRegex);
 	match = match.replace(/(\b\w+\b)/g, '+$&');
@@ -21,7 +20,6 @@ const replaceExactSearch = (input) => {
 	return input.replace(hasQuotedWordsRegex, match);
 };
 
-
 const replaceNots = (input) => {
 	return input.replace(/\!/g, '-');
 };
@@ -29,8 +27,7 @@ const replaceNots = (input) => {
 const addWildcardsToSingleWords = (input) => {
 	let hasOneWordRegex = new RegExp(/^\w+$/);
 
-	if (!hasOneWordRegex.test(input))
-		return input;
+	if (!hasOneWordRegex.test(input)) return input;
 
 	return '*' + input + '*';
 };
@@ -39,15 +36,11 @@ const addWilcardToLastWord = (input) => {
 	let endWithQuoteRegex = new RegExp(/(\"|\*)$/);
 	let lastWordHasSpecialCharRegex = new RegExp(/((\+|-|\!)\b\w+)$/);
 
-	if (endWithQuoteRegex.test(input) || lastWordHasSpecialCharRegex.test(input))
-		return input;
-
+	if (endWithQuoteRegex.test(input) || lastWordHasSpecialCharRegex.test(input)) return input;
 
 	return input + '*';
 };
 
-
-
 module.exports = {
-	parse
+	parse,
 };

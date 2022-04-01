@@ -10,7 +10,6 @@ const matomoController = new MatomoController();
 const tutorialOverlay = new TutorialOverlayController();
 const userController = new UserController();
 
-
 // matomo
 router.get('/matomo', matomoController.getAppMatomoStatus);
 router.post('/matomo', matomoController.setAppMatomoStatus);
