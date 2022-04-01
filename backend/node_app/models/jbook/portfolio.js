@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const PORTFOLIO = sequelize.define('portfolio',
+	const PORTFOLIO = sequelize.define(
+		'portfolio',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -14,15 +15,16 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 			},
 			user_ids: {
-				type: DataTypes.ARRAY(DataTypes.INTEGER)
+				type: DataTypes.ARRAY(DataTypes.INTEGER),
 			},
 			tags: {
-				type: DataTypes.ARRAY(DataTypes.TEXT)
-			}
-		}, {
+				type: DataTypes.ARRAY(DataTypes.TEXT),
+			},
+		},
+		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'portfolio'
+			tableName: 'portfolio',
 		}
 	);
 	return PORTFOLIO;
