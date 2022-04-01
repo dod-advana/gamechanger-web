@@ -260,13 +260,20 @@ const GCDataStatusTracker = (props) => {
 	const [numPages, setNumPages] = useState(0);
 	const [tabIndex, setTabIndex] = useState('crawler');
 	const [ingestData, setIngestData] = useState({});
+	const [crawlerInfoMap, setCrawlerInfoMap] = useState(null);
 
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then(res => {
 			setIngestData(res.data);
 		});
+		gameChangerAPI.gcCrawlerSealData().then(res => {
+			const map = {};
+			res.data.forEach(crawler => {
+				map[crawler.crawler] = crawler;
+			});
+			setCrawlerInfoMap(map);
+		});
 	}, []);
-	
 	
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
@@ -484,8 +491,9 @@ const GCDataStatusTracker = (props) => {
 				width: 200,
 				filterable: false,
 				sortable: false,
-				Cell: (props) => (
-					<TableRow>
+				Cell: (props) => {
+					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
+					return (<TableRow>
 						<Link
 							href={'#'}
 							onClick={(event) => {
@@ -495,11 +503,11 @@ const GCDataStatusTracker = (props) => {
 							style={{ color: '#386F94' }}
 						>
 							<div>
-								{props.original.json_metadata.crawler_used}
+								{crawler ? `${crawler.data_source_s} - ${crawler.source_title}` : props.original.json_metadata.crawler_used}
 							</div>
 						</Link>
-					</TableRow>
-				),
+					</TableRow>);
+				},
 			},
 			{
 				Header: 'Publication Date',
