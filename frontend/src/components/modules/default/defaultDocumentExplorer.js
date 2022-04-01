@@ -54,14 +54,7 @@ const getIframePreviewLinkInferred = (
 ) => {
 	return new Promise((resolve, reject) => {
 		gameChangerAPI
-			.dataStorageDownloadGET(
-				filename,
-				prevSearchText,
-				pageNumber,
-				isClone,
-				cloneData,
-				isDLA
-			)
+			.dataStorageDownloadGET(filename, prevSearchText, pageNumber, isClone, cloneData, isDLA)
 			.then((url) => {
 				resolve(url);
 			});
@@ -108,11 +101,7 @@ export default function DocumentExplorer({
 
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
-					if (
-						filename &&
-						JSON.stringify(prevIframPreviewLink) !==
-							JSON.stringify(iframePreviewLink)
-					) {
+					if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
 							filename,
@@ -130,15 +119,7 @@ export default function DocumentExplorer({
 				}
 			}
 		},
-		[
-			iframePreviewLink,
-			prevSearchText,
-			prevIframPreviewLink,
-			isClone,
-			cloneData,
-			data,
-			filename,
-		]
+		[iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]
 	);
 
 	useEffect(() => {
@@ -198,11 +179,7 @@ export default function DocumentExplorer({
 			const fileName = rec.id;
 			const pageObj = rec.pageHits[pageKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'PDFOpen'
-			);
+			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'PDFOpen');
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'DocumentExplorerInteraction',
@@ -231,12 +208,7 @@ export default function DocumentExplorer({
 			try {
 				if (rec && !pdfLoaded) {
 					const fileName = rec.id;
-					handlePdfOnLoad(
-						'docPdfViewer',
-						'viewerContainer',
-						fileName,
-						'PDF Viewer'
-					);
+					handlePdfOnLoad('docPdfViewer', 'viewerContainer', fileName, 'PDF Viewer');
 					setPdfLoaded(true);
 				}
 			} catch (err) {
@@ -247,9 +219,7 @@ export default function DocumentExplorer({
 	}
 
 	const previewPathname =
-		data.length > 0 &&
-		data[iframePreviewLink.dataIdx] &&
-		data[iframePreviewLink.dataIdx].filepath;
+		data.length > 0 && data[iframePreviewLink.dataIdx] && data[iframePreviewLink.dataIdx].filepath;
 	const previewData =
 		(data.length > 0 &&
 			data[iframePreviewLink.dataIdx] &&
@@ -258,21 +228,13 @@ export default function DocumentExplorer({
 	const previewDataReflist =
 		(data.length > 0 &&
 			data[iframePreviewLink.dataIdx] &&
-			getReferenceListMetadataPropertyTable(
-				data[iframePreviewLink.dataIdx].ref_list
-			)) ||
+			getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) ||
 		[];
 	const iframePanelSize =
-		12 -
-		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
-		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	// This checks if there are any documents loaded and assigns the default collapse keys to the cards default to open.
-	if (
-		collapseKeys &&
-		Object.keys(collapseKeys).length === 0 &&
-		data.length > 0
-	) {
+	if (collapseKeys && Object.keys(collapseKeys).length === 0 && data.length > 0) {
 		let collapseDictionary = {};
 		for (let i = 0; i < data.length; i++) {
 			collapseDictionary[i.toString()] = false;
@@ -289,16 +251,11 @@ export default function DocumentExplorer({
 	};
 	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
-	if (!leftPanelOpen)
-		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
-	if (!rightPanelOpen)
-		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
+	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
+	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div
-			className="row"
-			style={{ height: 'calc(100% - 70px)', marginTop: '10px' }}
-		>
+		<div className="row" style={{ height: 'calc(100% - 70px)', marginTop: '10px' }}>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
@@ -310,18 +267,15 @@ export default function DocumentExplorer({
 				}}
 			>
 				<div
-					className='doc-exp-nav'
-					style={{  
-						color: grey800, 
-						fontWeight: 'bold', 
+					className="doc-exp-nav"
+					style={{
+						color: grey800,
+						fontWeight: 'bold',
 						display: 'flex',
-						marginBottom: '10px'
+						marginBottom: '10px',
 					}}
 				>
-					<div
-						style={styles.docExplorerPag}
-						className="gcPagination docExplorerPag"
-					>
+					<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
 						<Pagination
 							activePage={resultsPage}
 							itemsCountPerPage={resultsPerPage}
@@ -340,8 +294,8 @@ export default function DocumentExplorer({
 					</div>
 					{totalCount ? (
 						<div>
-							<div 
-								style={{ 
+							<div
+								style={{
 									display: 'flex',
 									height: 45,
 									width: 45,
@@ -349,9 +303,9 @@ export default function DocumentExplorer({
 									justifyContent: 'center',
 									fontSize: 18,
 									borderRadius: 4,
-									marginRight: 2  
+									marginRight: 2,
 								}}
-								className="view-toggle" 
+								className="view-toggle"
 								onClick={() => handleViewToggle()}
 							>
 								{viewTogle ? '+' : '-'}
@@ -369,16 +323,14 @@ export default function DocumentExplorer({
 				)}
 				{!loading &&
 					_.map(data, (item, key) => {
-						const collapsed = collapseKeys
-							? collapseKeys[key.toString()]
-							: true;
+						const collapsed = collapseKeys ? collapseKeys[key.toString()] : true;
 						const displayTitle =
 							item.title === 'NA'
 								? `${item.doc_type} ${item.doc_num}`
 								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
 						if (item.type === 'document') {
-							const pageHits = item.pageHits.filter(hit => hit.pageNumber);
+							const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
 							return (
 								<div key={key}>
 									<div
@@ -396,13 +348,8 @@ export default function DocumentExplorer({
 											}}
 											className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
 										/>
-										<span className="gc-document-explorer-result-header-text">
-											{displayTitle}
-										</span>
-										<span
-											style={{ width: 30, marginLeft: 'auto' }}
-											className="badge"
-										>
+										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
 											{item.pageHitCount}
 										</span>
 									</div>
@@ -428,13 +375,9 @@ export default function DocumentExplorer({
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 
 													if (isHighlighted)
-														blockquoteClass +=
-															' searchdemo-blockquote-sm-active';
+														blockquoteClass += ' searchdemo-blockquote-sm-active';
 													return (
-														<div
-															key={key + pageKey}
-															style={{ position: 'relative' }}
-														>
+														<div key={key + pageKey} style={{ position: 'relative' }}>
 															<a
 																href="#noref"
 																className="searchdemo-quote-link"
@@ -474,7 +417,7 @@ export default function DocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
-				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position:'relative' }}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position: 'relative' }}
 			>
 				<div
 					style={{
@@ -490,9 +433,7 @@ export default function DocumentExplorer({
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -503,9 +444,7 @@ export default function DocumentExplorer({
 						/>
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${
-								leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-							} fa-angle-double-up`}
+							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -537,8 +476,7 @@ export default function DocumentExplorer({
 									onLoad={handlePdfOnLoadStart}
 									style={{
 										borderStyle: 'none',
-										display:
-											data.length > 0 && !iframeLoading ? 'initial' : 'none',
+										display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
 									}}
 									width="100%"
 									height="100%%"
@@ -568,9 +506,7 @@ export default function DocumentExplorer({
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -581,9 +517,7 @@ export default function DocumentExplorer({
 						/>
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 						<i
-							className={`fa ${
-								rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-							} fa-angle-double-up`}
+							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',

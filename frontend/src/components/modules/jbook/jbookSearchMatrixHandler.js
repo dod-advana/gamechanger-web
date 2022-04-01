@@ -3,12 +3,7 @@ import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 
 import _ from 'lodash';
-import {
-	FormControl,
-	FormGroup,
-	FormControlLabel,
-	Checkbox,
-} from '@material-ui/core';
+import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { setState } from '../../../utils/sharedFunctions';
 
@@ -28,7 +23,6 @@ const handleSelectSpecific = (state, dispatch, type) => {
 };
 
 const handleSelectAll = (state, dispatch, type) => {
-
 	const specific = `${type}SpecificSelected`;
 	const all = `${type}AllSelected`;
 
@@ -56,8 +50,7 @@ const handleFilterChange = (event, state, dispatch, type) => {
 
 	if (index !== -1) {
 		newSearchSettings[type].splice(index, 1);
-	}
-	else {
+	} else {
 		newSearchSettings[type].push(optionName);
 	}
 
@@ -78,21 +71,21 @@ const handleFilterChange = (event, state, dispatch, type) => {
 };
 
 const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => {
-
 	const endsInY = displayName[displayName.length - 1] === 'y';
 	const endsInS = displayName[displayName.length - 1] === 's';
 
-
 	const allSelected = `${type}AllSelected`;
-	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : (endsInS ? 'es' : 's')}`;
-	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${endsInY ? 'ies' : (endsInS ? 'es' : 's')}`;
+	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
+		endsInY ? 'ies' : endsInS ? 'es' : 's'
+	}`;
+	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
+		endsInY ? 'ies' : endsInS ? 'es' : 's'
+	}`;
 	const specificSelected = `${type}SpecificSelected`;
 	const options = state.defaultOptions[type];
 
 	return (
-		<FormControl
-			style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
-		>
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 			{
 				<>
 					<FormGroup row style={{ marginBottom: '10px' }}>
@@ -104,15 +97,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectAll(state, dispatch, type)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.jbookSearchSettings[allSelected]}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name={allText}
 									style={styles.filterBox}
 								/>
@@ -131,15 +118,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectSpecific(state, dispatch, type)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.jbookSearchSettings[specificSelected]}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name={specificText}
 									style={styles.filterBox}
 								/>
@@ -168,9 +149,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 												}}
 												name={`${option}`}
 												checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
-												onClick={(event) =>
-													handleFilterChange(event, state, dispatch, type)
-												}
+												onClick={(event) => handleFilterChange(event, state, dispatch, type)}
 											/>
 										}
 										label={`${option}`}
@@ -191,7 +170,7 @@ const handleFilterInputChange = (field, value, state, dispatch) => {
 	newSearchSettings[field] = value;
 
 	setState(dispatch, {
-		jbookSearchSettings: newSearchSettings
+		jbookSearchSettings: newSearchSettings,
 	});
 };
 
@@ -199,15 +178,17 @@ const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
-
 const renderStats = (contractTotals) => {
-	let data = Object.keys(contractTotals).map(key => {
+	let data = Object.keys(contractTotals).map((key) => {
 		return {
 			Key: key,
-			Value: contractTotals[key] > 1000 ? (contractTotals[key] / 1000).toFixed(2) + ' B' : (parseFloat(contractTotals[key])).toFixed(2) + ' M'
+			Value:
+				contractTotals[key] > 1000
+					? (contractTotals[key] / 1000).toFixed(2) + ' B'
+					: parseFloat(contractTotals[key]).toFixed(2) + ' M',
 		};
 	});
-	data = data.filter(row => row.Key !== '');
+	data = data.filter((row) => row.Key !== '');
 	data.sort((a, b) => {
 		if (a.Key === 'Total Obligated Amt.') {
 			return 1;
@@ -226,7 +207,7 @@ const renderStats = (contractTotals) => {
 			dontScroll={true}
 			colWidth={{
 				whiteSpace: 'nowrap',
-				maxWidth: '200px'
+				maxWidth: '200px',
 			}}
 			disableWrap={true}
 			hideHeader={true}
@@ -236,15 +217,9 @@ const renderStats = (contractTotals) => {
 
 const PolicySearchMatrixHandler = {
 	getSearchMatrixItems(props) {
-
-		const {
-			state,
-			dispatch,
-			classes,
-		} = props;
+		const { state, dispatch, classes } = props;
 
 		const { contractTotals } = state;
-
 
 		return (
 			<div style={{ marginLeft: 15 }}>
@@ -274,7 +249,9 @@ const PolicySearchMatrixHandler = {
 
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
-						expanded={state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''}
+						expanded={
+							state.jbookSearchSettings.programElement && state.jbookSearchSettings.programElement !== ''
+						}
 						header={<b>PROGRAM ELEMENT / BLI</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -296,10 +273,12 @@ const PolicySearchMatrixHandler = {
 					</GCAccordion>
 				</div>
 
-				{!state.useElasticSearch &&
+				{!state.useElasticSearch && (
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<GCAccordion
-							expanded={state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''}
+							expanded={
+								state.jbookSearchSettings.projectTitle && state.jbookSearchSettings.projectTitle !== ''
+							}
 							header={<b>PROJECT TITLE</b>}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
@@ -308,7 +287,7 @@ const PolicySearchMatrixHandler = {
 							<InputFilter setJBookSetting={handleFilterInputChange} field={'projectTitle'} />
 						</GCAccordion>
 					</div>
-				}
+				)}
 
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
@@ -354,7 +333,11 @@ const PolicySearchMatrixHandler = {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						<InputFilter setJBookSetting={handleFilterInputChange} field={'pocReviewer'} name={'POC Reviewer'} />
+						<InputFilter
+							setJBookSetting={handleFilterInputChange}
+							field={'pocReviewer'}
+							name={'POC Reviewer'}
+						/>
 					</GCAccordion>
 				</div>
 
@@ -417,7 +400,7 @@ const PolicySearchMatrixHandler = {
 						alignItems: 'center',
 						borderRadius: 5,
 						width: '100%',
-						marginBottom: 10
+						marginBottom: 10,
 					}}
 					onClick={() => {
 						resetAdvancedSettings(dispatch);
@@ -446,25 +429,17 @@ const PolicySearchMatrixHandler = {
 					headerTextColor={'white'}
 					headerTextWeight={'normal'}
 				>
-					{state.statsLoading && (
-						<div style={{ margin: '0 auto' }}>
-							loading
-						</div>
+					{state.statsLoading && <div style={{ margin: '0 auto' }}>loading</div>}
+					{!state.statsLoading && (
+						<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 					)}
-					{!state.statsLoading && <div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>}
 				</GCAccordion>
-
 			</div>
 		);
 	},
 
 	getAdvancedOptions(props) {
-
-		return (
-			<>
-
-			</>
-		);
+		return <></>;
 	},
 };
 

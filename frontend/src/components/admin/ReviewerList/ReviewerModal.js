@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
 import GCButton from '../../common/GCButton';
-import {styles, useStyles} from '../util/GCAdminStyles';
+import { styles, useStyles } from '../util/GCAdminStyles';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -10,35 +10,34 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
 /**
- * 
+ *
  * @class UserModal
  */
-export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, reviewerData, getReviewerData}) => {
+export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, reviewerData, getReviewerData }) => {
 	const [editReviewerData, setEditReviewerData] = useState({});
-    
 
 	const classes = useStyles();
 
-	useEffect(()=>{
+	useEffect(() => {
 		setEditReviewerData(reviewerData);
-	},[reviewerData]);
+	}, [reviewerData]);
 
 	const closeReviewerModal = () => {
 		setEditReviewerData({});
 		setShowCreateEditReviewerModal(false);
 	};
 	/**
-     * 
-     * @param {*} ReviewerToEdit
-     * @returns 
-     */
-    
+	 *
+	 * @param {*} ReviewerToEdit
+	 * @returns
+	 */
+
 	const storeReviewerData = (reviewerToEdit = null) => {
 		if (!reviewerToEdit) {
 			reviewerToEdit = editReviewerData;
 		}
 
-		gameChangerAPI.storeReviewerData(reviewerToEdit).then(data => {
+		gameChangerAPI.storeReviewerData(reviewerToEdit).then((data) => {
 			if (data.status === 200) {
 				closeReviewerModal();
 				getReviewerData();
@@ -52,7 +51,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 
 		console.log(key);
 
-		if (key === 'type'){
+		if (key === 'type') {
 			switch (value) {
 				case 'primary':
 					tmpData['title'] = 'Primary Reviewer';
@@ -70,7 +69,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 		setEditReviewerData(tmpData);
 	};
 
-	return(
+	return (
 		<Dialog
 			open={showCreateEditReviewerModal}
 			scroll={'paper'}
@@ -78,30 +77,41 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 			disableEscapeKeyDown
 			disableBackdropClick
 			classes={{
-				paperWidthSm: classes.dialogSm
+				paperWidthSm: classes.dialogSm,
 			}}
 		>
-			<DialogTitle >
+			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
-					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{`${editReviewerData.name ? 'Edit ' + editReviewerData.name + '\'s' : 'Insert'} Reviewer Data`}</Typography>
+					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>{`${
+						editReviewerData.name ? 'Edit ' + editReviewerData.name + "'s" : 'Insert'
+					} Reviewer Data`}</Typography>
 				</div>
-				<IconButton aria-label="close" style={{
-					position: 'absolute',
-					right: '0px',
-					top: '0px',
-					height: 60,
-					width: 60,
-					color: 'black',
-					backgroundColor: styles.backgroundGreyLight,
-					borderRadius: 0
-				}} onClick={() => closeReviewerModal()}>
+				<IconButton
+					aria-label="close"
+					style={{
+						position: 'absolute',
+						right: '0px',
+						top: '0px',
+						height: 60,
+						width: 60,
+						color: 'black',
+						backgroundColor: styles.backgroundGreyLight,
+						borderRadius: 0,
+					}}
+					onClick={() => closeReviewerModal()}
+				>
 					<CloseIcon style={{ fontSize: 30 }} />
 				</IconButton>
 			</DialogTitle>
 			<DialogContent style={{ height: 400 }}>
 				<div style={{ margin: '0 20px' }}>
-					<Grid container style={{ background: '#f2f2f2', borderRadius: 6, marginTop: 10, marginBottom: 10, padding: 10 }}>
-						<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Complete the fields below to add a new Primary, Service, or Secondary Reviewer</Typography>
+					<Grid
+						container
+						style={{ background: '#f2f2f2', borderRadius: 6, marginTop: 10, marginBottom: 10, padding: 10 }}
+					>
+						<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+							Complete the fields below to add a new Primary, Service, or Secondary Reviewer
+						</Typography>
 					</Grid>
 					<Grid container>
 						<Grid item xs={6}>
@@ -109,7 +119,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 								label="Name"
 								id="margin-dense"
 								defaultValue={editReviewerData ? editReviewerData.name : null}
-								onChange={event => handleTextChange(event.target.value, 'name')}
+								onChange={(event) => handleTextChange(event.target.value, 'name')}
 								className={classes.textField}
 								margin="dense"
 								helperText={'Last, First'}
@@ -118,7 +128,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 								label="Organization"
 								id="margin-dense"
 								defaultValue={editReviewerData ? editReviewerData.organization : null}
-								onChange={event => handleTextChange(event.target.value, 'organization')}
+								onChange={(event) => handleTextChange(event.target.value, 'organization')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
@@ -127,7 +137,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 								label="Phone Number"
 								id="margin-dense"
 								defaultValue={editReviewerData ? editReviewerData.phone_number : null}
-								onChange={event => handleTextChange(event.target.value, 'phone_number')}
+								onChange={(event) => handleTextChange(event.target.value, 'phone_number')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
@@ -159,7 +169,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 								label="Email"
 								id="margin-dense"
 								defaultValue={editReviewerData ? editReviewerData.email : null}
-								onChange={event => handleTextChange(event.target.value, 'email')}
+								onChange={(event) => handleTextChange(event.target.value, 'email')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
@@ -168,7 +178,7 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 								label="Title"
 								id="margin-dense"
 								value={editReviewerData ? editReviewerData.title : null}
-								onChange={event => handleTextChange(event.target.value, 'title')}
+								onChange={(event) => handleTextChange(event.target.value, 'title')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
@@ -184,17 +194,16 @@ export default ({showCreateEditReviewerModal, setShowCreateEditReviewerModal, re
 					style={{ margin: '10px' }}
 					buttonColor={'#8091A5'}
 				>
-						Close
+					Close
 				</GCButton>
 				<GCButton
 					id={'editReviewerSubmit'}
 					onClick={() => storeReviewerData()}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
 				>
-						Submit
+					Submit
 				</GCButton>
 			</DialogActions>
-			
 		</Dialog>
 	);
 };

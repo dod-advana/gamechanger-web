@@ -17,8 +17,7 @@ export const RECENT_SEARCH_LIMIT = 6;
 
 export const CARD_FONT_SIZE = 14;
 
-export const NO_RESULTS_MESSAGE =
-	'No results found! Please try refining your search.';
+export const NO_RESULTS_MESSAGE = 'No results found! Please try refining your search.';
 
 export const orgAlias = {
 	OSD: 'Office of the Secretary of Defense',
@@ -294,33 +293,22 @@ export const policyMetadata = (item) => {
 	let dateText = 'Unknown';
 	if (item.current_as_of !== undefined && item.current_as_of !== '') {
 		const currentDate = new Date(item.current_as_of);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-			currentDate
-		);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
 		const month = new Intl.DateTimeFormat('en', {
 			month: '2-digit',
 		}).format(currentDate);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-			currentDate
-		);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
 		dateText = `${month}-${day}-${year}`;
 	}
 
 	let publicationDate;
-	if (
-		item.publication_date_dt !== undefined &&
-		item.publication_date_dt !== ''
-	) {
+	if (item.publication_date_dt !== undefined && item.publication_date_dt !== '') {
 		const currentDate = new Date(item.publication_date_dt);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-			currentDate
-		);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
 		const month = new Intl.DateTimeFormat('en', {
 			month: '2-digit',
 		}).format(currentDate);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-			currentDate
-		);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
 		publicationDate = `${month}-${day}-${year}`;
 	} else {
 		publicationDate = `unknown`;
@@ -349,16 +337,9 @@ export const policyMetadata = (item) => {
 	}
 
 	let file_origin_item;
-	if (
-		item.source_page_url_s !== undefined &&
-		item.source_page_url_s !== ''
-	) {
+	if (item.source_page_url_s !== undefined && item.source_page_url_s !== '') {
 		file_origin_item = (
-			<a
-				href={item.source_page_url_s}
-				target="_blank"
-				rel="noopener noreferrer"
-			>
+			<a href={item.source_page_url_s} target="_blank" rel="noopener noreferrer">
 				{' '}
 				Go to Source{' '}
 			</a>
@@ -370,11 +351,7 @@ export const policyMetadata = (item) => {
 	let source_file_item;
 	if (item.download_url_s !== undefined && item.download_url_s !== '') {
 		source_file_item = (
-			<a
-				href={item.download_url_s}
-				target="_blank"
-				rel="noopener noreferrer"
-			>
+			<a href={item.download_url_s} target="_blank" rel="noopener noreferrer">
 				{' '}
 				Open from Source
 			</a>
@@ -415,8 +392,6 @@ export function numberWithCommas(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-
-
 const crawlerMapping = {
 	dod_issuances: ['WHS DoD Directives Division', 'Dept. of Defense'],
 	army_pubs: ['Army Publishing Directorate', 'Dept. of the Army', 'US Army'],
@@ -437,24 +412,32 @@ const crawlerMapping = {
 	Bupers_Crawler: ['Bureau of Naval Personnel Instructions', 'Mynavy Hr'],
 	milpersman_crawler: ['Navy Personnel Command Instructions'],
 	nato_stanag: ['NATO Publications', 'NATO Standardization Office'],
-	fmr_pubs: ['DoD Financial Management Regulation', 'Under Secretary Of Defense (comptroller)', 'Defense Publications'],
+	fmr_pubs: [
+		'DoD Financial Management Regulation',
+		'Under Secretary Of Defense (comptroller)',
+		'Defense Publications',
+	],
 	legislation_pubs: ['Congressional Legislation', 'U.S. Government Publishing Office'],
 	Army_Reserve: ['U.S. Army Reserve Publications'],
 	Memo: ['OSD Executive Secretary'],
 	dha_pubs: ['Military Health System'],
 	jumbo_FAR: ['Federal Acquisition Regulation', 'Acquisition Publications'],
 	jumbo_DFAR: ['Defense Federal Acquisition Regulation'],
-	National_Guard: ['National Guard Bureau Publications Library', 'National Guard Bureau Publications & Forms Library', 'National Guard Bureau Publications'],
+	National_Guard: [
+		'National Guard Bureau Publications Library',
+		'National Guard Bureau Publications & Forms Library',
+		'National Guard Bureau Publications',
+	],
 	Coast_Guard: ['US Coast Guard Directives', 'Coast Guard Deputy Commandant For Mission Support'],
 	dfar_subpart_regs: ['Defense Federal Acquisition Regulation'],
 	far_subpart_regs: ['Federal Acquisition Regulation'],
 	Chief_National_Guard_Bureau_Instructions: ['National Guard Bureau Instructions'],
-	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board']
+	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board'],
 };
 export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
 	for (let key in crawlerMapping) {
-		if (crawlerMapping[key].map(name => name.toLowerCase()).includes(item.toLowerCase())) {
+		if (crawlerMapping[key].map((name) => name.toLowerCase()).includes(item.toLowerCase())) {
 			crawler = key;
 			break;
 		}
@@ -659,13 +642,7 @@ export const convertHexToRgbA = (hexVal, alpha) => {
 	}
 };
 
-export const getNodeOutlineColors = (
-	node,
-	alpha,
-	selectedItemId,
-	isChild,
-	connectedLevel
-) => {
+export const getNodeOutlineColors = (node, alpha, selectedItemId, isChild, connectedLevel) => {
 	// if (selectedItemId === node.id){
 	// 	return convertHexToRgbA('#008000', alpha);
 	// }
@@ -674,12 +651,8 @@ export const getNodeOutlineColors = (
 		return convertHexToRgbA('#FFFF00', alpha);
 	}
 
-	const displayOrg = node['display_org_s']
-		? node['display_org_s']
-		: 'Uncategorized';
-	const displayType = node['display_doc_type_s']
-		? node['display_doc_type_s']
-		: 'Document';
+	const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
+	const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
 
 	switch (connectedLevel) {
 		case 0:
@@ -707,12 +680,8 @@ export const getNodeOutlineColors = (
 export const getNodeColors = (node, alpha) => {
 	let nodeColor = '#ffffff';
 
-	const displayOrg = node['display_org_s']
-		? node['display_org_s']
-		: 'Uncategorized';
-	const displayType = node['display_doc_type_s']
-		? node['display_doc_type_s']
-		: 'Document';
+	const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
+	const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
 
 	switch (node.label) {
 		case 'Entity':
@@ -729,10 +698,7 @@ export const getNodeColors = (node, alpha) => {
 
 	return {
 		nodeColor: nodeColor,
-		nodeTextColor: convertHexToRgbA(
-			getTextColorBasedOnBackground(nodeColor),
-			alpha
-		),
+		nodeTextColor: convertHexToRgbA(getTextColorBasedOnBackground(nodeColor), alpha),
 	};
 };
 
@@ -769,12 +735,9 @@ export const shadeColor = (col, amt) => {
 	if (B > 255) B = 255;
 	else if (B < 0) B = 0;
 
-	const RR =
-		R.toString(16).length === 1 ? '0' + R.toString(16) : R.toString(16);
-	const GG =
-		G.toString(16).length === 1 ? '0' + G.toString(16) : G.toString(16);
-	const BB =
-		B.toString(16).length === 1 ? '0' + B.toString(16) : B.toString(16);
+	const RR = R.toString(16).length === 1 ? '0' + R.toString(16) : R.toString(16);
+	const GG = G.toString(16).length === 1 ? '0' + G.toString(16) : G.toString(16);
+	const BB = B.toString(16).length === 1 ? '0' + B.toString(16) : B.toString(16);
 
 	return (usePound ? '#' : '') + RR + GG + BB;
 };
@@ -802,11 +765,7 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
 					end = element.scrollTop;
 					distance = end - start;
 
-					distance =
-						distance /
-						(element.getBoundingClientRect().height -
-							element.scrollHeight +
-							62);
+					distance = distance / (element.getBoundingClientRect().height - element.scrollHeight + 62);
 
 					handleOnScroll(distance, filename, category);
 
@@ -821,12 +780,7 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
 
 const handleOnScroll = (distance, filename, category) => {
 	if (filename) {
-		trackEvent(
-			category,
-			distance > 0 ? 'onScrollUp' : 'onScrollDown',
-			filename,
-			distance
-		);
+		trackEvent(category, distance > 0 ? 'onScrollUp' : 'onScrollDown', filename, distance);
 	}
 };
 
@@ -838,12 +792,8 @@ export const setFilterVariables = (object, url) => {
 };
 
 export const formatDate = (dateObj, separator) => {
-	const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-		dateObj
-	);
-	const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-		dateObj
-	);
+	const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(dateObj);
+	const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(dateObj);
 	const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(dateObj);
 
 	return `${month}${separator}${day}${separator}${year}`;
@@ -909,8 +859,7 @@ export const decodeTinyUrl = (url) => {
 	}
 
 	returnData.resultsPage = Math.floor(returnData.offset / RESULTS_PER_PAGE) + 1;
-	returnData.useSemanticSearch =
-		returnData.searchType === SEARCH_TYPES.semantic;
+	returnData.useSemanticSearch = returnData.searchType === SEARCH_TYPES.semantic;
 	returnData.pubDate = '';
 
 	if (!pubDateURL || pubDateURL.indexOf('_') === -1) {
@@ -921,10 +870,7 @@ export const decodeTinyUrl = (url) => {
 			const start = new Date(parseInt(dates[0]));
 			const end = new Date(parseInt(dates[1]));
 
-			returnData.pubDate = `${formatDate(start, '/')} - ${formatDate(
-				end,
-				'/'
-			)}`;
+			returnData.pubDate = `${formatDate(start, '/')} - ${formatDate(end, '/')}`;
 		} catch (err) {
 			console.log(err);
 		}
@@ -941,7 +887,7 @@ export const encode = (filename) => {
 		'#': '%23',
 		$: '%24',
 		'&': '%26',
-		'\'': '%27',
+		"'": '%27',
 		//'(': '%28',
 		//')': '%29',
 		'*': '%2A',
@@ -968,7 +914,7 @@ export const exactMatch = (phrase, word, split) => {
 	return exists;
 };
 
-export const displayBackendError = (resp, dispatch = () => { }) => {
+export const displayBackendError = (resp, dispatch = () => {}) => {
 	if (resp?.data?.error) {
 		const errorMessage = Permissions.permissionValidator('Gamechanger Super Admin', true)
 			? `An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}`

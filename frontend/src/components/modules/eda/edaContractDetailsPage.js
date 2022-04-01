@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MainContainer } from '../../../containers/GameChangerDetailsPage';
-import {Paper} from '@material-ui/core';
+import { Paper } from '@material-ui/core';
 import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 import GameChangerAPI from '../../api/gameChanger-service-api';
@@ -114,16 +114,10 @@ const EDAContractDetailsPage = (props) => {
 			if (contractModData) {
 				// for the contract modifications section
 				contractModData.docs.sort((first, second) => {
-					if (
-						first.modification_eda_ext &&
-						first.modification_eda_ext === 'Award'
-					) {
+					if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {
 						return -1;
 					}
-					if (
-						second.modification_eda_ext &&
-						second.modification_eda_ext === 'Award'
-					) {
+					if (second.modification_eda_ext && second.modification_eda_ext === 'Award') {
 						return 1;
 					}
 					if (!first.modification_eda_ext) {
@@ -151,9 +145,7 @@ const EDAContractDetailsPage = (props) => {
 
 					return modData;
 				});
-				barGraphData = barGraphData.filter(
-					(doc) => doc['Obligated Amount'] !== ''
-				);
+				barGraphData = barGraphData.filter((doc) => doc['Obligated Amount'] !== '');
 				setBarGraphData(barGraphData);
 
 				let currentAmount = 0;
@@ -174,19 +166,14 @@ const EDAContractDetailsPage = (props) => {
 
 					const modData = {
 						'Mod Number': doc.modification_eda_ext ?? '',
-						'Obligated Amount': amount
-							? Math.ceil(currentAmount * 100) / 100
-							: '',
+						'Obligated Amount': amount ? Math.ceil(currentAmount * 100) / 100 : '',
 						Date: date,
 					};
 					return modData;
 				});
 
 				timelineData = timelineData.filter(
-					(doc) =>
-						doc['Date'] !== '' &&
-						doc['Obligated Amount'] !== '' &&
-						doc['Mod Number'] !== ''
+					(doc) => doc['Date'] !== '' && doc['Obligated Amount'] !== '' && doc['Mod Number'] !== ''
 				);
 				setTimelineViewData(timelineData);
 			} else {
@@ -207,9 +194,7 @@ const EDAContractDetailsPage = (props) => {
 	const renderBarGraph = () => {
 		return (
 			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-				<p style={{ width: '100%' }}>
-					Contract Obligated Amount per Contract Mod
-				</p>
+				<p style={{ width: '100%' }}>Contract Obligated Amount per Contract Mod</p>
 				<div style={{ width: '100%', height: 500 }}>
 					<ResponsiveContainer width="100%" height="100%">
 						<BarChart
@@ -228,11 +213,7 @@ const EDAContractDetailsPage = (props) => {
 							<YAxis />
 							<Tooltip />
 							<Legend />
-							<Bar
-								dataKey="Obligated Amount"
-								fill="rgb(0, 131, 143)"
-								barSize={30}
-							/>
+							<Bar dataKey="Obligated Amount" fill="rgb(0, 131, 143)" barSize={30} />
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
@@ -321,10 +302,7 @@ const EDAContractDetailsPage = (props) => {
 
 	return (
 		<MainContainer>
-			<div
-				className={'details'}
-				style={{ borderTopLeftRadius: 5, borderTopRightRadius: 5 }}
-			>
+			<div className={'details'} style={{ borderTopLeftRadius: 5, borderTopRightRadius: 5 }}>
 				<Paper>
 					<div className={'details-header'} style={{ margin: '0' }}>
 						<span>{'BASE AWARD METADATA'}</span>
@@ -367,29 +345,21 @@ const EDAContractDetailsPage = (props) => {
 						{timelineViewData && timelineViewData.length > 0
 							? renderTimeline()
 							: modLoading
-								? 'Searching for data...'
-								: 'Data Not Available'}
+							? 'Searching for data...'
+							: 'Data Not Available'}
 					</GCAccordion>
 				</div>
 				<div className={'section'}>
-					<GCAccordion
-						expanded={true}
-						header={'CONTRACT MOD AMOUNTS'}
-						backgroundColor={'rgb(238, 241, 242)'}
-					>
+					<GCAccordion expanded={true} header={'CONTRACT MOD AMOUNTS'} backgroundColor={'rgb(238, 241, 242)'}>
 						{barGraphData && barGraphData.length > 0
 							? renderBarGraph()
 							: modLoading
-								? 'Searching for data...'
-								: 'Data Not Available'}
+							? 'Searching for data...'
+							: 'Data Not Available'}
 					</GCAccordion>
 				</div>
 				<div className={'section'}>
-					<GCAccordion
-						expanded={false}
-						header={'SIMILAR DOCUMENTS'}
-						backgroundColor={'rgb(238, 241, 242)'}
-					>
+					<GCAccordion expanded={false} header={'SIMILAR DOCUMENTS'} backgroundColor={'rgb(238, 241, 242)'}>
 						<div style={{ width: '100%' }}>
 							<div className="row" style={{ margin: 'auto 0' }}>
 								<div style={styles.resultsCount}>
@@ -399,10 +369,10 @@ const EDAContractDetailsPage = (props) => {
 										  similarDocsData &&
 										  similarDocsData.docs &&
 										  similarDocsData.docs.length
-											? `${numberWithCommas(
+										? `${numberWithCommas(
 												similarDocsData.totalCount
 										  )} results found in ${timeFoundSimilar} seconds`
-											: ''}
+										: ''}
 								</div>
 								{similarDocsData &&
 								similarDocsData.docs &&
@@ -414,16 +384,16 @@ const EDAContractDetailsPage = (props) => {
 									(!similarDocsData ||
 										!similarDocsData.docs ||
 										similarDocsData.docs.length === 0) && (
-									<div
-										style={{
-											fontSize: 22,
-											fontWeight: 'bold',
-											color: '#131E43',
-										}}
-									>
+										<div
+											style={{
+												fontSize: 22,
+												fontWeight: 'bold',
+												color: '#131E43',
+											}}
+										>
 											No Documents Found
-									</div>
-								)}
+										</div>
+									)}
 							</div>
 						</div>
 					</GCAccordion>
@@ -432,11 +402,7 @@ const EDAContractDetailsPage = (props) => {
 					<GCAccordion
 						expanded={true}
 						header={'CONTRACT MODIFICATIONS'}
-						itemCount={
-							contractModData && contractModData.docs
-								? contractModData.docs.length
-								: 0
-						}
+						itemCount={contractModData && contractModData.docs ? contractModData.docs.length : 0}
 						backgroundColor={'rgb(238,241,242)'}
 					>
 						<div style={{ width: '100%' }}>
@@ -448,31 +414,28 @@ const EDAContractDetailsPage = (props) => {
 										  contractModData &&
 										  contractModData.docs &&
 										  contractModData.docs.length
-											? `${numberWithCommas(
+										? `${numberWithCommas(
 												contractModData.totalCount
 										  )} results found in ${timeFound} seconds`
-											: ''}
+										: ''}
 								</div>
-								{contractModData &&
-								contractModData.docs &&
-								contractModData.docs.length &&
-								!modLoading
+								{contractModData && contractModData.docs && contractModData.docs.length && !modLoading
 									? renderContractMods()
 									: ''}
 								{!modLoading &&
 									(!contractModData ||
 										!contractModData.docs ||
 										contractModData.docs.length === 0) && (
-									<div
-										style={{
-											fontSize: 22,
-											fontWeight: 'bold',
-											color: '#131E43',
-										}}
-									>
+										<div
+											style={{
+												fontSize: 22,
+												fontWeight: 'bold',
+												color: '#131E43',
+											}}
+										>
 											No Documents Found
-									</div>
-								)}
+										</div>
+									)}
 							</div>
 						</div>
 					</GCAccordion>

@@ -1,10 +1,9 @@
 const GraphHandler = require('../base/graphHandler');
 const redisAsyncClientDB = 8;
 
-
 class SimpleGraphHandler extends GraphHandler {
 	constructor(opts = {}) {
-		super({redisClientDB: redisAsyncClientDB, ...opts});
+		super({ redisClientDB: redisAsyncClientDB, ...opts });
 	}
 
 	async searchHelper(req, userId) {

@@ -14,7 +14,6 @@ import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
-
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
 	height: 250px;
@@ -22,8 +21,7 @@ const StyledFavoriteDocumentCard = styled.div`
 	border-radius: 6px;
 	margin: 10px;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
-	> .main-info {
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')} > .main-info {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -302,37 +300,37 @@ const FavoriteCard = (props) => {
 							onClick={
 								isDocument
 									? () => {
-										trackEvent(
-											getTrackingNameForFactory(cloneData.clone_name),
-											'UserDashboardFavoritesInteraction',
-											'PDFOpen',
-											documentObject.filename
-										);
-										window.open(
-											`/#/pdfviewer/gamechanger?filename=${encode(
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'UserDashboardFavoritesInteraction',
+												'PDFOpen',
 												documentObject.filename
-											)}&prevSearchText=${
-												documentObject.search_text
-											}&pageNumber=${1}&isClone=${true}&cloneIndex=${
-												cloneData.clone_name
-											}&sourceUrl=${documentObject.download_url_s}`
-										);
+											);
+											window.open(
+												`/#/pdfviewer/gamechanger?filename=${encode(
+													documentObject.filename
+												)}&prevSearchText=${
+													documentObject.search_text
+												}&pageNumber=${1}&isClone=${true}&cloneIndex=${
+													cloneData.clone_name
+												}&sourceUrl=${documentObject.download_url_s}`
+											);
 									  }
 									: isTopic
-										? () => {
+									? () => {
 											trackEvent('GAMECHANGER', 'TopicOpened', cardTitle);
 											window.open(
 												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`
 											);
 									  }
-										: isOrganization
-											? () => {
+									: isOrganization
+									? () => {
 											// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
-												window.open(
-													`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
-												);
+											window.open(
+												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
+											);
 									  }
-											: null
+									: null
 							}
 						>
 							{isDocument || isTopic || isOrganization ? (
@@ -402,8 +400,7 @@ const FavoriteCard = (props) => {
 								</div>
 								<div style={{ width: 350, margin: 5 }}>
 									<div style={{ margin: '65px 15px 0' }}>
-										Are you sure you want to delete this favorite? You will lose
-										any comments made.
+										Are you sure you want to delete this favorite? You will lose any comments made.
 									</div>
 									<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 										<GCButton

@@ -42,7 +42,7 @@ export default function UserFeedback(props) {
 					style={{
 						width: '100%',
 						fontSize: '25px',
-						marginBottom: 20
+						marginBottom: 20,
 					}}
 				>
 					Help us improve your experience with feedback!
@@ -53,7 +53,8 @@ export default function UserFeedback(props) {
 						width: '100%',
 					}}
 				>
-					Our feedback form is currently undergoing some improvements. If you'd like to get in touch with us, please send us an email @ osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil.
+					Our feedback form is currently undergoing some improvements. If you'd like to get in touch with us,
+					please send us an email @ osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil.
 				</Typography>
 			</>
 		);

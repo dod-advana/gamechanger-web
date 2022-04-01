@@ -23,8 +23,7 @@ export default () => {
 
 	// EsIndexModal and TrendingBlacklistModal state variables
 	const [showEditEsIndexModal, setShowEditEsIndexModal] = useState(false);
-	const [showTrendingBlacklistModal, setShowTrendingBlacklistModal] =
-		useState(false);
+	const [showTrendingBlacklistModal, setShowTrendingBlacklistModal] = useState(false);
 
 	// Alert state variables
 	const [alertActive, setAlertActive] = useState(false);
@@ -50,11 +49,7 @@ export default () => {
 		try {
 			await gameChangerAPI.setCombinedSearchMode(!combinedSearch);
 			setCombinedSearch(!combinedSearch);
-			createAlert(
-				'Search Mode',
-				'info',
-				!combinedSearch ? 'Combined' : 'Keyword only'
-			);
+			createAlert('Search Mode', 'info', !combinedSearch ? 'Combined' : 'Keyword only');
 		} catch (e) {
 			console.error('Error setting combined search mode', e);
 		}
@@ -64,11 +59,7 @@ export default () => {
 		try {
 			await gameChangerAPI.setIntelligentAnswersMode(!intelligentAnswers);
 			setIntelligentAnswers(!intelligentAnswers);
-			createAlert(
-				'Intelligent Answers',
-				'info',
-				!intelligentAnswers ? 'On' : 'Off'
-			);
+			createAlert('Intelligent Answers', 'info', !intelligentAnswers ? 'On' : 'Off');
 		} catch (e) {
 			console.error('Error setting Intelligent Answers', e);
 		}
@@ -184,11 +175,7 @@ export default () => {
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(
-				'Reloading Handler Map',
-				'error',
-				'Failed updating handler map'
-			);
+			createAlert('Reloading Handler Map', 'error', 'Failed updating handler map');
 		}
 	};
 
@@ -197,20 +184,12 @@ export default () => {
 		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.toggleJiraFeedbackMode().then((res) => {
-				createAlert(
-					'Toggling Jira feedback value',
-					'success',
-					'updated Jira feedback mode'
-				);
+				createAlert('Toggling Jira feedback value', 'success', 'updated Jira feedback mode');
 				getJiraFeedback();
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(
-				'Toggling Jira feedback value',
-				'error',
-				'failed updating Jira feedback mode'
-			);
+			createAlert('Toggling Jira feedback value', 'error', 'failed updating Jira feedback mode');
 		}
 	};
 
@@ -219,20 +198,12 @@ export default () => {
 		createAlert(title, 'info', 'Started');
 		try {
 			await gameChangerAPI.toggleLTR().then(() => {
-				createAlert(
-					'Toggling LTR',
-					'success',
-					'updated LTR'
-				);
+				createAlert('Toggling LTR', 'success', 'updated LTR');
 				getLTR();
 			});
 		} catch (e) {
 			console.log(e);
-			createAlert(
-				'Toggling LTR',
-				'error',
-				'failed toggling LTR'
-			);
+			createAlert('Toggling LTR', 'error', 'failed toggling LTR');
 		}
 	};
 
@@ -324,46 +295,30 @@ export default () => {
 								to="#"
 								onClick={() => {
 									openEsIndexModal();
-									trackEvent(
-										'GAMECHANGER_Admin',
-										'AdminPageChangeEsIndex',
-										'onClick'
-									);
+									trackEvent('GAMECHANGER_Admin', 'AdminPageChangeEsIndex', 'onClick');
 								}}
 								style={{ textDecoration: 'none' }}
 							>
 								<i style={styles.image} className="fa fa fa-plug fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Change ElasticSearch Index
-									</span>
+									<span style={styles.featureNameLink}>Change ElasticSearch Index</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={createSearchCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={createSearchCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-search fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Create Search Cache
-									</span>
+									<span style={styles.featureNameLink}>Create Search Cache</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={clearSearchCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={clearSearchCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-trash fa-2x" />
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>Clear Search Cache</span>
@@ -373,43 +328,27 @@ export default () => {
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={createAbbreviationsCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={createAbbreviationsCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-search fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Create Abbreviations Cache
-									</span>
+									<span style={styles.featureNameLink}>Create Abbreviations Cache</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={clearAbbreviationsCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={clearAbbreviationsCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-trash fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Clear Abbreviations Cache
-									</span>
+									<span style={styles.featureNameLink}>Clear Abbreviations Cache</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={createGraphDataCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={createGraphDataCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-code-fork fa-2x" />
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>Create Graph Cache</span>
@@ -419,11 +358,7 @@ export default () => {
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={clearGraphDataCache}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={clearGraphDataCache} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-trash fa-2x" />
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>Clear Graph Cache</span>
@@ -433,27 +368,17 @@ export default () => {
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={openTrendingBlacklistModal}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={openTrendingBlacklistModal} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-line-chart fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Edit Trending Blacklist
-									</span>
+									<span style={styles.featureNameLink}>Edit Trending Blacklist</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={reloadHandlerMap}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={reloadHandlerMap} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-map fa-2x" />
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>Reload Handler Map</span>
@@ -464,22 +389,14 @@ export default () => {
 					<div style={styles.feature}>
 						<Paper
 							style={
-								combinedSearch
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
+								combinedSearch ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
 							}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={setCombinedSearchMode}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={setCombinedSearchMode} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-btc fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle Combined Search
-									</span>
+									<span style={styles.featureNameLink}>Toggle Combined Search</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -493,124 +410,72 @@ export default () => {
 							}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={setIntelligentAnswersMode}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={setIntelligentAnswersMode} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-question fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle Intelligent Answers
-									</span>
+									<span style={styles.featureNameLink}>Toggle Intelligent Answers</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper
-							style={
-								entitySearch
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
-							}
+							style={entitySearch ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={setEntitySearchMode}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={setEntitySearchMode} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle Entity Search
-									</span>
+									<span style={styles.featureNameLink}>Toggle Entity Search</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper
-							style={
-								topicSearch
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
-							}
+							style={topicSearch ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={setTopicSearchMode}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={setTopicSearchMode} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle Topic Search
-									</span>
+									<span style={styles.featureNameLink}>Toggle Topic Search</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper
-							style={
-								jiraFeedback
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
-							}
+							style={jiraFeedback ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={toggleJiraFeedback}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={toggleJiraFeedback} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle Jira User Feedback
-									</span>
+									<span style={styles.featureNameLink}>Toggle Jira User Feedback</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper
-							style={
-								ltr
-									? styles.paper
-									: { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }
-							}
+							style={ltr ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }}
 							zDepth={2}
 						>
-							<Link
-								to="#"
-								onClick={toggleLTR}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={toggleLTR} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Toggle LTR
-									</span>
+									<span style={styles.featureNameLink}>Toggle LTR</span>
 								</h2>
 							</Link>
 						</Paper>
 					</div>
 					<div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2}>
-							<Link
-								to="#"
-								onClick={syncOldUserTableToNew}
-								style={{ textDecoration: 'none' }}
-							>
+							<Link to="#" onClick={syncOldUserTableToNew} style={{ textDecoration: 'none' }}>
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>
-										Sync User Table
-									</span>
+									<span style={styles.featureNameLink}>Sync User Table</span>
 								</h2>
 							</Link>
 						</Paper>
@@ -618,12 +483,9 @@ export default () => {
 				</div>
 
 				{/* <p style={styles.sectionFooter}>Currently {useMatomo ? 'sending': 'not sending'} data to Matomo</p> */}
+				<p style={styles.sectionFooter}>Currently not using cache for searches</p>
 				<p style={styles.sectionFooter}>
-					Currently not using cache for searches
-				</p>
-				<p style={styles.sectionFooter}>
-					Currently using{' '}
-					{combinedSearch ? 'combined search mode' : 'keyword searching only'}
+					Currently using {combinedSearch ? 'combined search mode' : 'keyword searching only'}
 				</p>
 				<p style={styles.sectionFooter}>
 					Currently {!intelligentAnswers ? 'not' : ''} using intelligent answers

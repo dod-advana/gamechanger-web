@@ -2,37 +2,36 @@
 
 module.exports = {
 	up: async (queryInterface, Sequelize) => {
-		return queryInterface.createTable('favorite_groups',
-		{
+		return queryInterface.createTable('favorite_groups', {
 			id: {
 				type: Sequelize.INTEGER,
 				autoIncrement: true,
 				primaryKey: true,
-                allowNull: false
+				allowNull: false,
 			},
 			user_id: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			group_type: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			group_name: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			group_description: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: Sequelize.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			createdAt: Sequelize.DATE,
 			updatedAt: Sequelize.DATE,
@@ -41,5 +40,5 @@ module.exports = {
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('favorite_groups');
-	}
+	},
 };

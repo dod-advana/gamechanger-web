@@ -1,23 +1,22 @@
 'use strict';
-const tablename='rdoc_accomp';
+const tablename = 'rdoc_accomp';
 module.exports = {
-    up: (queryInterface, Sequelize) => {
-        return queryInterface.describeTable(tablename).then(tableDefinition => {
-            const queries = [];
-            
-             if (tableDefinition['Project_Number'])  queries.push(queryInterface.renameColumn(tablename, 'Project_Number', 'Proj_Number'));
+	up: (queryInterface, Sequelize) => {
+		return queryInterface.describeTable(tablename).then((tableDefinition) => {
+			const queries = [];
 
-            return queryInterface.sequelize.transaction(function () {
-                Promise.all(queries);
-            });
-        });
-    },
+			if (tableDefinition['Project_Number'])
+				queries.push(queryInterface.renameColumn(tablename, 'Project_Number', 'Proj_Number'));
 
-  down: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.transaction(function () {
-			Promise.all([
-                queryInterface.renameColumn(tablename, 'Proj_Number', 'Project_Number')
-      ]);
-    });
-  }
+			return queryInterface.sequelize.transaction(function () {
+				Promise.all(queries);
+			});
+		});
+	},
+
+	down: (queryInterface, Sequelize) => {
+		return queryInterface.sequelize.transaction(function () {
+			Promise.all([queryInterface.renameColumn(tablename, 'Proj_Number', 'Project_Number')]);
+		});
+	},
 };

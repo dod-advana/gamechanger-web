@@ -20,9 +20,7 @@ import { toolTheme } from './util/GCAdminStyles';
  * Both of theses components are the admin page menu on the left and have a list of buttons with icons.
  * When you click on a button from the menu it renders that page in the main open area.
  */
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 /**
  * @class ClosedAdminMenu
  * @param {method} props.setPageToView - Renders the selected component in the open space
@@ -30,9 +28,7 @@ const isDecoupled =
  */
 const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
-		<div
-			style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-		>
+		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
@@ -77,22 +73,14 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			<Tooltip title="Service Notifications" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
+				<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 					<AddAlert style={{ fontSize: 30 }} />
 				</HoverNavItem>
 			</Tooltip>
 
 			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage Users" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => setPageToView(PAGES.userList)}
-						toolTheme={toolTheme}
-					>
+					<HoverNavItem centered onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
 					</HoverNavItem>
 				</Tooltip>
@@ -230,10 +218,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			<Tooltip title="Show Notifications" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
+				<HoverNavItem onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 					<AddAlert style={{ fontSize: 30 }} />
 					<span style={{ marginLeft: '5px' }}>Show Notifications</span>
 				</HoverNavItem>
@@ -241,10 +226,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 
 			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage Users" placement="right" arrow>
-					<HoverNavItem
-						onClick={() => setPageToView(PAGES.userList)}
-						toolTheme={toolTheme}
-					>
+					<HoverNavItem onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
 						<span style={{ marginLeft: '5px' }}>Manage Users</span>
 					</HoverNavItem>
