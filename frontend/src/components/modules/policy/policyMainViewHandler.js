@@ -326,6 +326,7 @@ const PolicyMainViewHandler = {
 
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({ favorite_documents, export_history });
+			console.log(data);
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import axios from 'axios';
 
 import {
 	getOrgToOrgQuery,
@@ -25,6 +26,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
 const gameChangerAPI = new GameChangerAPI();
+let cancelToken = axios.CancelToken.source();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	gameChangerAPI
@@ -59,6 +61,7 @@ const PolicySearchHandler = {
 			searchSettings,
 			currentViewName,
 			cloneData,
+			runningSearch,
 		} = state;
 
 		const {
@@ -74,6 +77,12 @@ const PolicySearchHandler = {
 			publicationDateAllTime,
 			searchFields,
 		} = searchSettings;
+
+		if (runningSearch) {
+			console.log('cancel initial search');
+			cancelToken.cancel('cancelled axios with consecutive call');
+			cancelToken = axios.CancelToken.source();
+		}
 
 		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9 && !showTutorial) {
 			if (checkUserInfo(state, dispatch)) {
@@ -176,23 +185,26 @@ const PolicySearchHandler = {
 			}
 
 			gameChangerAPI
-				.getDataForSearch({
-					options: {
-						orgFilterString,
-						orgFilter: modifiedOrgFilter,
-						typeFilterString,
-						typeFilter: modifiedTypeFilter,
-						cloneData,
-						useGCCache,
-						searchFields,
-						accessDateFilter,
-						publicationDateFilter,
-						publicationDateAllTime,
-						searchText,
-						includeRevoked,
+				.getDataForSearch(
+					{
+						options: {
+							orgFilterString,
+							orgFilter: modifiedOrgFilter,
+							typeFilterString,
+							typeFilter: modifiedTypeFilter,
+							cloneData,
+							useGCCache,
+							searchFields,
+							accessDateFilter,
+							publicationDateFilter,
+							publicationDateAllTime,
+							searchText,
+							includeRevoked,
+						},
+						cloneName: cloneData.clone_name,
 					},
-					cloneName: cloneData.clone_name,
-				})
+					cancelToken
+				)
 				.then((resp) => {
 					setState(dispatch, {
 						entitiesForSearch: resp.data.entities,
@@ -211,35 +223,38 @@ const PolicySearchHandler = {
 					});
 				});
 
-			let combinedSearch = await gameChangerAPI.getCombinedSearchMode();
+			let combinedSearch = await gameChangerAPI.getCombinedSearchMode(cancelToken);
 			combinedSearch = combinedSearch.data.value === 'true';
 
 			let ltr = await gameChangerAPI.getLTRMode();
 			ltr = ltr.data.value === 'true';
 
-			const resp = await gameChangerAPI.modularSearch({
-				cloneName: cloneData.clone_name,
-				searchText: searchObject.search,
-				offset,
-				options: {
-					searchType,
-					orgFilterString,
-					transformResults,
-					charsPadding,
-					typeFilterString,
-					showTutorial,
-					useGCCache,
-					tiny_url,
-					searchFields,
-					accessDateFilter,
-					publicationDateFilter,
-					publicationDateAllTime,
-					includeRevoked,
-					archivedCongressSelected,
-					ltr,
+			const resp = await gameChangerAPI.modularSearch(
+				{
+					cloneName: cloneData.clone_name,
+					searchText: searchObject.search,
+					offset,
+					options: {
+						searchType,
+						orgFilterString,
+						transformResults,
+						charsPadding,
+						typeFilterString,
+						showTutorial,
+						useGCCache,
+						tiny_url,
+						searchFields,
+						accessDateFilter,
+						publicationDateFilter,
+						publicationDateAllTime,
+						includeRevoked,
+						archivedCongressSelected,
+						ltr,
+					},
+					limit: 18,
 				},
-				limit: 18,
-			});
+				cancelToken
+			);
 
 			const t1 = new Date().getTime();
 
