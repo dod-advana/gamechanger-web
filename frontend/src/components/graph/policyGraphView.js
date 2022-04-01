@@ -1005,13 +1005,13 @@ export default function PolicyGraphView(props) {
 	 */
 
 	const showEntitiesForNode = () => {
-		const node = graph.nodes.find(node => node.id === selectedID);
-		
+		const node = graph.nodes.find((node) => node.id === selectedID);
+
 		if (node.showingEntities) {
 			const tempGraph = _.cloneDeep(graph);
 			const nodesToRemove = [];
 			const edgesToRemove = [];
-			const targetNodes = graph.edges.map(edge => getSourceOrTargetID(edge.target));
+			const targetNodes = graph.edges.map((edge) => getSourceOrTargetID(edge.target));
 
 			graph.edges.forEach((edge) => {
 				const source = getSourceOrTargetID(edge.source);
@@ -1023,7 +1023,7 @@ export default function PolicyGraphView(props) {
 						if (
 							node.notInOriginalSearch &&
 							node.id === target &&
-							targetNodes.filter(target => target === node.id).length <= 1 // only remove this node if this edge is the only one connected to it
+							targetNodes.filter((target) => target === node.id).length <= 1 // only remove this node if this edge is the only one connected to it
 						) {
 							nodesToRemove.push(node.id);
 						}
@@ -1031,14 +1031,14 @@ export default function PolicyGraphView(props) {
 				}
 			});
 
-			tempGraph.edges = graph.edges.filter(edge => !edgesToRemove.includes(edge.id));
-			tempGraph.nodes = graph.nodes.filter(node => !nodesToRemove.includes(node.id));
+			tempGraph.edges = graph.edges.filter((edge) => !edgesToRemove.includes(edge.id));
+			tempGraph.nodes = graph.nodes.filter((node) => !nodesToRemove.includes(node.id));
 
-			const selectedNode = tempGraph.nodes.find(node => node.id === selectedID);
+			const selectedNode = tempGraph.nodes.find((node) => node.id === selectedID);
 			selectedNode.showingEntities = false;
-			const tempNodes = [...tempGraph.nodes.filter(node => node.id !== selectedNode.id), selectedNode];
-			
-			setGraph({...tempGraph, nodes: tempNodes});
+			const tempNodes = [...tempGraph.nodes.filter((node) => node.id !== selectedNode.id), selectedNode];
+
+			setGraph({ ...tempGraph, nodes: tempNodes });
 			lockNodeInPlace(node, false);
 			reloadAndRunSimulation();
 			return;
@@ -1077,11 +1077,11 @@ export default function PolicyGraphView(props) {
 					}
 				});
 
-				const selectedNode = tempGraph.nodes.find(node => node.id === selectedID);
+				const selectedNode = tempGraph.nodes.find((node) => node.id === selectedID);
 				selectedNode.showingEntities = true;
-				const tempNodes = [...tempGraph.nodes.filter(node => node.id !== selectedNode.id), selectedNode];
-				
-				setGraph({...tempGraph, nodes: tempNodes});
+				const tempNodes = [...tempGraph.nodes.filter((node) => node.id !== selectedNode.id), selectedNode];
+
+				setGraph({ ...tempGraph, nodes: tempNodes });
 				lockNodeInPlace(node, true);
 				reloadAndRunSimulation();
 			});
