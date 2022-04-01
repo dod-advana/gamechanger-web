@@ -217,9 +217,15 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 	}
 };
 const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) => {
+	let cleanedDocs = [];
 	let filteredPubs = [];
+
+	for (let doc of last_opened_docs){
+		cleanedDocs.push(doc.document.split(' - ')[1].split(".pdf")[0]);
+		cleanedDocs = [...new Set(cleanedDocs)];
+	}
 	try {
-		filteredPubs = last_opened_docs.map((name) => ({
+		filteredPubs = cleanedDocs.map((name) => ({
 			name,
 			doc_filename: name,
 			img_filename: name + '.png',
@@ -367,14 +373,10 @@ const PolicyMainViewHandler = {
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
-		let last_opened_docs = [];
 
 		const user = await gcUserManagementAPI.getUserData();
 		const { favorite_documents = [], export_history = [], pdf_opened = []} = user.data;
-		for (let doc of pdf_opened){
-			last_opened_docs.push(doc.document.split(' - ')[1]);
-		}
-		console.log(last_opened_docs);
+
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history, pdf_opened});
 			data.forEach((obj) => {
@@ -398,12 +400,11 @@ const PolicyMainViewHandler = {
 				? { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true }
 				: { adminTopics: topics }
 		);
-		console.log(last_opened_docs);
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch, props.cancelToken);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 		handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
-		handleLastOpened(last_opened_docs, state, dispatch, props.cancelToken);
+		handleLastOpened(pdf_opened, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {
@@ -636,22 +637,13 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
-					<GameChangerThumbnailRow
-						links={lastOpened}
-						title="Recently Viewed"
-						width="215px"
-					>
+					<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
 						{lastOpened.length > 0 &&
 							lastOpened[0].imgSrc &&
 							lastOpened.map((pub) => (
 								<div className="topPublication">
 									{pub.imgSrc !== 'error' ? (
-										<img
-											className="image"
-											src={pub.imgSrc}
-											alt="thumbnail"
-											title={pub.name}
-										/>
+										<img className="image" src={pub.imgSrc} alt="thumbnail" title={pub.name} />
 									) : (
 										<div className="image">{pub.name}</div>
 									)}
@@ -664,15 +656,18 @@ const PolicyMainViewHandler = {
 												'PublicationOpened',
 												pub.name
 											);
-											pub.imgSrc !== DefaultPub ? (
-												window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`)) : (setState(dispatch, { searchText: pub.name, runSearch: true }));
+											pub.imgSrc !== DefaultPub
+												? window.open(
+														`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
+												  )
+												: setState(dispatch, { searchText: pub.name, runSearch: true });
 										}}
 									>
 										<div className="hover-text">{formatString(pub.name)}</div>
 									</div>
 								</div>
 							))}
-						{loadingLastOpened&& lastOpened.length === 0 && (
+						{loadingLastOpened && lastOpened.length === 0 && (
 							<div className="col-xs-12">
 								<LoadingIndicator
 									customColor={gcOrange}
@@ -688,11 +683,13 @@ const PolicyMainViewHandler = {
 						)}
 						{!loadingLastOpened && lastOpened.length === 0 && (
 							<div className="col-xs-12" style={{ height: '140px' }}>
-								<Typography style={styles.containerText}>Try favoriting more documents to see your personalized recommendations.</Typography>
-
+								<Typography style={styles.containerText}>
+									No recent documents to show.
+								</Typography>
 							</div>
 						)}
 					</GameChangerThumbnailRow>
+
 					<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 						{crawlerSources.length > 0 &&
 							crawlerSources[0].imgSrc &&
