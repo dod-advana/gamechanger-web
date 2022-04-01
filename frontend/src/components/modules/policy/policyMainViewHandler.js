@@ -39,6 +39,7 @@ import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCAboutUs from '../../aboutUs/GCAboutUs';
+//import { last } from 'underscore';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -223,7 +224,6 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 };
 const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) => {
 	let filteredPubs = [];
-	console.log(last_opened_docs);
 	try {
 		filteredPubs = last_opened_docs.map((name) => ({
 			name,
@@ -234,7 +234,6 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) 
 			imgSrc: DefaultPub,
 		}));
 
-		console.log(filteredPubs);
 		setState(dispatch, { lastOpened: filteredPubs });
 		setState(dispatch, { loadingLastOpened: false });
 
@@ -387,8 +386,13 @@ const PolicyMainViewHandler = {
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
 		let last_opened_docs = [];
+
 		const user = await gcUserManagementAPI.getUserData();
 		const { favorite_documents = [], export_history = [], pdf_opened = []} = user.data;
+		for (let doc of pdf_opened){
+			last_opened_docs.push(doc.document.split(' - ')[1]);
+		}
+		console.log(last_opened_docs);
 		try {
 			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history, pdf_opened});
 			data.forEach((obj) => {
@@ -415,7 +419,7 @@ const PolicyMainViewHandler = {
 				{ adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true } :
 				{ adminTopics: topics }
 		);
-		last_opened_docs = pdf_opened;
+		console.log(last_opened_docs);
 		// handlePubs(pubs, state, dispatch);
 		handleSources(state, dispatch, props.cancelToken);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
@@ -438,8 +442,6 @@ const PolicyMainViewHandler = {
 			searchMajorPubs,
 			recDocs,
 			loadingrecDocs,
-			lastOpened,
-			loadingLastOpened,
 			cloneData,
 			crawlerSources,
 			prevSearchText,
@@ -448,7 +450,9 @@ const PolicyMainViewHandler = {
 			loading,
 			userData,
 			recentSearches,
-			trending
+			trending,
+			lastOpened=[],
+			loadingLastOpened=true,
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
@@ -465,7 +469,8 @@ const PolicyMainViewHandler = {
 		}
 
 		const { favorite_topics = [], favorite_searches = [] } = userData;
-
+		console.log(loadingLastOpened);
+		console.log(lastOpened);
 
 		// const agencyPublications = ['Department of the United States Army', 'Department of the United States Navy', 'Department of the United States Marine Corp', 'Department of United States Air Force']
 
@@ -672,7 +677,63 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow
+						links={lastOpened}
+						title="Recently Viewed"
+						width="215px"
+					>
+						{lastOpened.length > 0 &&
+							lastOpened[0].imgSrc &&
+							lastOpened.map((pub) => (
+								<div className="topPublication">
+									{pub.imgSrc !== 'error' ? (
+										<img
+											className="image"
+											src={pub.imgSrc}
+											alt="thumbnail"
+											title={pub.name}
+										/>
+									) : (
+										<div className="image">{pub.name}</div>
+									)}
 
+									<div
+										className="hover-overlay"
+										onClick={() => {
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'PublicationOpened',
+												pub.name
+											);
+											pub.imgSrc !== DefaultPub ? (
+												window.open(`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`)) : (setState(dispatch, { searchText: pub.name, runSearch: true }));
+										}}
+									>
+										<div className="hover-text">{formatString(pub.name)}</div>
+									</div>
+								</div>
+							))}
+						{loadingLastOpened&& lastOpened.length === 0 && (
+							<div className="col-xs-12">
+								<LoadingIndicator
+									customColor={gcOrange}
+									inline={true}
+									containerStyle={{
+										height: '300px',
+										textAlign: 'center',
+										paddingTop: '75px',
+										paddingBottom: '75px',
+									}}
+								/>
+							</div>
+						)}
+						{!loadingLastOpened && lastOpened.length === 0 && (
+							<div className="col-xs-12" style={{ height: '140px' }}>
+								<Typography style={styles.containerText}>Try favoriting more documents to see your personalized recommendations.</Typography>
+
+							</div>
+						)}
+					</GameChangerThumbnailRow>
 					<GameChangerThumbnailRow
 						links={crawlerSources}
 						title="Sources"
@@ -917,7 +978,7 @@ const PolicyMainViewHandler = {
 		const cacheTip = `Cached result from ${timeSinceCache > 0
 			? timeSinceCache + ' hour(s) ago'
 			: 'less than an hour ago'
-			}`;
+		}`;
 
 		return (
 			<div key={'cardView'}>
