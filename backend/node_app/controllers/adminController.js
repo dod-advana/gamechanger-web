@@ -87,7 +87,7 @@ class AdminController {
 	}
 	async getHomepageUserData(req, esIndex, userId) {
 		let results = [];
-		const { favorite_documents = [], export_history = [], pdf_opened=[] } = req.body;
+		const { favorite_documents = [], export_history = [], pdf_opened = [] } = req.body;
 		let favDocList = [];
 		let exportDocList = [];
 		let last_opened = [];
@@ -102,9 +102,9 @@ class AdminController {
 				exportDocList.push(doc.split('.pdf')[0]);
 			}
 		}
-		for (let obj of pdf_opened){
+		for (let obj of pdf_opened) {
 			const doc = obj.document;
-			last_opened.push(doc.split(".pdf")[0]);
+			last_opened.push(doc.split('.pdf')[0]);
 		}
 
 		// combine list
