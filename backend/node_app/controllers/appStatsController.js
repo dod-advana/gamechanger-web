@@ -878,6 +878,7 @@ class AppStatsController {
 					docs_opened:0,
 					searches_made:0,
 					name:user.first_name + ' ' + user.last_name,
+					email:user.email,
 					user_id: user.user_id,
 					org: user.organization,
 					last_search:null
@@ -887,36 +888,36 @@ class AppStatsController {
 				vistitIDMap[visit.idvisitor] = visit.user_id;
 			}
 
-			const searches = await this.getUserAggregationsQuery(opts.startDate,opts.endDate, connection);
-			const documents = await this.getUserDocuments(opts.startDate,opts.endDate, connection);
-			const opened = await this.queryPdfOpend(opts.startDate,opts.endDate, connection);
-			const cards = await this.getCardAggregationQuery(opts.startDate,opts.endDate, connection);
+		const searches = await this.getUserAggregationsQuery(opts.startDate,opts.endDate, connection);
+		const documents = await this.getUserDocuments(opts.startDate,opts.endDate, connection);
+		const opened = await this.queryPdfOpend(opts.startDate,opts.endDate, connection);
+		const cards = await this.getCardAggregationQuery(opts.startDate,opts.endDate, connection);
 
-			for(let search of searches){
-				if (vistitIDMap[search.idvisitor]){					
-					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] = documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened
-					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] = documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made
-					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search){
-						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search
-					}
+		for(let search of searches){
+			if (vistitIDMap[search.idvisitor]){					
+				documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] = documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened
+				documentMap[vistitIDMap[search.idvisitor]]['searches_made'] = documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made
+				if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search){
+					documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search
 				}
 			}
-			for (let doc of documents){
-				if (vistitIDMap[doc.idvisitor]){
-					if (!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) && documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5 ){
-						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
-					}
+		}
+		for (let doc of documents){
+			if (vistitIDMap[doc.idvisitor]){
+				if (!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) && documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5 ){
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
 				}
 			}
-			for (let open of opened){
-				if (vistitIDMap[open.idvisitor]){
-					if (!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) && documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5 ){
-						documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
-					}
+		}
+		for (let open of opened){
+			if (vistitIDMap[open.idvisitor]){
+				if (!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) && documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5 ){
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
 				}
 			}
-				
-			res.status(200).send({users:Object.values(documentMap),cards:cards[0]});
+		}
+			
+		res.status(200).send({users:Object.values(documentMap),cards:cards[0]});
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
 			res.status(500).send(err);
@@ -931,25 +932,25 @@ class AppStatsController {
 	 */
 	async getUserLastOpened(userdID) {
 
-		let connection;
-		try {
-			connection = this.mysql.createConnection({
-				host: this.constants.MATOMO_DB_CONFIG.host,
-				user: this.constants.MATOMO_DB_CONFIG.user,
-				password: this.constants.MATOMO_DB_CONFIG.password,
-				database: this.constants.MATOMO_DB_CONFIG.database
-			});
-			connection.connect();
-			const visitorID = await this.getUserVisitorID([userdID],connection);
-			const opened = await this.queryPDFOpenedByUserId(visitorID.map(x => x.idvisitor), connection);
-			return opened;
-		}catch (err) {
-			this.logger.error(err, '1CZPASK', userdID);
-			return [];
-		} finally {
-			connection.end();
+			let connection;
+			try {
+				connection = this.mysql.createConnection({
+					host: this.constants.MATOMO_DB_CONFIG.host,
+					user: this.constants.MATOMO_DB_CONFIG.user,
+					password: this.constants.MATOMO_DB_CONFIG.password,
+					database: this.constants.MATOMO_DB_CONFIG.database
+				});
+				connection.connect();
+				const visitorID = await this.getUserVisitorID([userdID],connection);
+				const opened = await this.queryPDFOpenedByUserId(visitorID.map(x => x.idvisitor), connection);
+				return opened;
+			}catch (err) {
+				this.logger.error(err, '1CZPASK', userdID);
+				return [];
+			} finally {
+				connection.end();
+			}
 		}
 	}
-}
 
 module.exports.AppStatsController = AppStatsController;
