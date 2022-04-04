@@ -250,6 +250,7 @@ class AppStatsController {
 					this.logger.error(error, 'BAP9ZIP');
 					throw error;
 				}
+				resolve(results);
 			});
 		});
 	}
@@ -360,6 +361,9 @@ class AppStatsController {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
 					resolve([]);
+				}
+				else{
+					resolve(results);
 				}
 			});
 		});

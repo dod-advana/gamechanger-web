@@ -144,8 +144,6 @@ const userAggColumns = [
 		accessor: 'docs_opened',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
-<<<<<<< HEAD
-=======
 	{
 		Header: 'Searches Made',
 		accessor: 'searches_made',
@@ -157,7 +155,6 @@ const userAggColumns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	}
 	
->>>>>>> dc5ce654... added frontend to work
 ];
 
 const feedbackColumns = [
