@@ -134,7 +134,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-		console.log('tracking event',action,name);
+		console.log('tracking event', action, name);
 		// Track Event
 		matomo.push(['trackEvent', category, action, name, value]);
 	} catch (error) {
