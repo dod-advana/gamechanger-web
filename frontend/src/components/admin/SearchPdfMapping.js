@@ -153,8 +153,7 @@ const userAggColumns = [
 		Header: 'Last Searche Made',
 		accessor: 'last_search',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	}
-	
+	},
 ];
 
 const feedbackColumns = [
