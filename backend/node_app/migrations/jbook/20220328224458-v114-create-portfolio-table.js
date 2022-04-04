@@ -8,13 +8,13 @@ module.exports = {
 				autoIncrement: true,
 				primaryKey: true,
 			},
-			name : {
+			name: {
 				type: Sequelize.TEXT,
 			},
-			description : {
+			description: {
 				type: Sequelize.TEXT,
 			},
-			user_ids : {
+			user_ids: {
 				type: Sequelize.ARRAY(Sequelize.INTEGER),
 			},
 			tags: {
@@ -24,5 +24,5 @@ module.exports = {
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('portfolio');
-	}
+	},
 };
