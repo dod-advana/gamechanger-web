@@ -92,13 +92,9 @@ const TableStyle = styled.div`
 			}
 			.rt-th,
 			.rt-td {
-<<<<<<< HEAD
-				border-right: 1px solid #0000001F !important;
+				border-right: 1px solid #0000001f !important;
 				white-space: normal;
 				text-align: center;
-=======
-				border-right: 1px solid #0000001f !important;
->>>>>>> dev
 			}
 			.rt-th {
 				font-weight: bold;
