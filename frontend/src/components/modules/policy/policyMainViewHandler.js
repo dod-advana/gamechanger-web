@@ -220,8 +220,8 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) 
 	let cleanedDocs = [];
 	let filteredPubs = [];
 
-	for (let doc of last_opened_docs){
-		cleanedDocs.push(doc.document.split(' - ')[1].split(".pdf")[0]);
+	for (let doc of last_opened_docs) {
+		cleanedDocs.push(doc.document.split(' - ')[1].split('.pdf')[0]);
 		cleanedDocs = [...new Set(cleanedDocs)];
 	}
 	try {
@@ -239,12 +239,7 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) 
 
 		for (let i = 0; i < filteredPubs.length; i++) {
 			gameChangerAPI
-				.thumbnailStorageDownloadPOST(
-					[filteredPubs[i]],
-					'thumbnails',
-					state.cloneData,
-					cancelToken
-				)
+				.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', state.cloneData, cancelToken)
 				.then((pngs) => {
 					const buffers = pngs.data;
 					buffers.forEach((buf, idx) => {
@@ -255,18 +250,18 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) 
 						}
 					});
 					setState(dispatch, { lastOpened: filteredPubs });
-				}).catch(e => {
+				})
+				.catch((e) => {
 					//Do nothing
 				});
 		}
-
 	} catch (e) {
 		//Do nothing
 		console.log(e);
 		setState(dispatch, { lastOpened: filteredPubs });
 	}
 };
-const handleRecDocs = async (rec_docs,state, dispatch, cancelToken) => {
+const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
 		filteredPubs = rec_docs.map((name) => ({
@@ -375,10 +370,14 @@ const PolicyMainViewHandler = {
 		let rec_docs = [];
 
 		const user = await gcUserManagementAPI.getUserData();
-		const { favorite_documents = [], export_history = [], pdf_opened = []} = user.data;
+		const { favorite_documents = [], export_history = [], pdf_opened = [] } = user.data;
 
 		try {
-			const { data } = await gameChangerAPI.getHomepageEditorData({favorite_documents, export_history, pdf_opened});
+			const { data } = await gameChangerAPI.getHomepageEditorData({
+				favorite_documents,
+				export_history,
+				pdf_opened,
+			});
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
@@ -431,8 +430,8 @@ const PolicyMainViewHandler = {
 			userData,
 			recentSearches,
 			trending,
-			lastOpened=[],
-			loadingLastOpened=true,
+			lastOpened = [],
+			loadingLastOpened = true,
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
@@ -683,9 +682,7 @@ const PolicyMainViewHandler = {
 						)}
 						{!loadingLastOpened && lastOpened.length === 0 && (
 							<div className="col-xs-12" style={{ height: '140px' }}>
-								<Typography style={styles.containerText}>
-									No recent documents to show.
-								</Typography>
+								<Typography style={styles.containerText}>No recent documents to show.</Typography>
 							</div>
 						)}
 					</GameChangerThumbnailRow>
