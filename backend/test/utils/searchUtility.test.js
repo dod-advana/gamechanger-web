@@ -981,7 +981,7 @@ describe('SearchUtility', function () {
 			};
 			const target = new SearchUtility(opts);
 			const actual = target.getElasticsearchDocDataFromId({docIds: 'test_ID'}, 'test');
-			const expected = {'_source': {'includes': ['pagerank_r', 'kw_doc_score_r', 'pagerank']}, 'query': {'bool': {'must': {'terms': {'id': 'test_ID'}}}}, 'size': 100, 'stored_fields': ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'ref_list', 'id', 'summary_30', 'keyw_5', 'type', 'pagerank_r', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s', 'topics_s', 'top_entities_t'], 'track_total_hits': true};
+			const expected = {'_source': {'includes': ['pagerank_r', 'kw_doc_score_r', 'pagerank']}, 'query': {'bool': {'must': {'terms': {'id': 'test_ID'}}}}, 'size': 100, 'stored_fields': ['filename', 'title', 'page_count', 'doc_type', 'doc_num', 'ref_list', 'id', 'summary_30', 'keyw_5', 'type', 'pagerank_r', 'display_title_s', 'display_org_s', 'display_doc_type_s', 'access_timestamp_dt', 'publication_date_dt', 'crawler_used_s', 'topics_s', 'top_entities_t','download_url_s','source_page_url_s','source_fqdn_s'], 'track_total_hits': true};
 			assert.deepStrictEqual(actual, expected);
 		});
 	});
