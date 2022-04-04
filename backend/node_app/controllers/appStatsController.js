@@ -261,7 +261,7 @@ class AppStatsController {
 	 *
 	 *
 	 */
-	 async queryPDFOpenedByUserId(userId, connection) {
+	async queryPDFOpenedByUserId(userId, connection) {
 		return new Promise((resolve, reject) => {
 			const self = this;
 			connection.query(
