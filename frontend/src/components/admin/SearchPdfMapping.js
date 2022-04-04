@@ -125,13 +125,18 @@ const columns = [
 
 const userAggColumns = [
 	{
-		Header: 'User ID',
-		accessor: 'idvisitor',
+		Header: 'Name',
+		accessor: 'name',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Searches Made',
-		accessor: 'searches_made',
+		Header: 'Email',
+		accessor: 'email',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Organization',
+		accessor: 'org',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
@@ -139,6 +144,20 @@ const userAggColumns = [
 		accessor: 'docs_opened',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
+<<<<<<< HEAD
+=======
+	{
+		Header: 'Searches Made',
+		accessor: 'searches_made',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Last Searche Made',
+		accessor: 'last_search',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	}
+	
+>>>>>>> dc5ce654... added frontend to work
 ];
 
 const feedbackColumns = [
@@ -387,7 +406,7 @@ export default () => {
 					<Grid item xs={3}>
 						<p>Exported:</p>
 						<ol>
-							{row.original.export.map((e) => (
+							{row.original.ExportDocument.map((e) => (
 								<li>
 									<a
 										target={'_blank'}
@@ -404,7 +423,7 @@ export default () => {
 					<Grid item xs={4}>
 						<p>Favorited:</p>
 						<ol>
-							{row.original.favorite.map((f) => (
+							{row.original.Favorite.map((f) => (
 								<li>
 									<a
 										target={'_blank'}
