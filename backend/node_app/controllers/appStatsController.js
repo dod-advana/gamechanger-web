@@ -250,7 +250,7 @@ class AppStatsController {
 						this.logger.error(error, 'BAP9ZIP');
 						throw error;
 					}
-					resolve(results);
+					resolve(self.cleanFilePath(results));
 				}
 			);
 		});
