@@ -161,6 +161,11 @@ class DataTrackerController {
 				level_value = await this.crawlerStatus
 					.findAll({
 						attributes,
+						where: {
+							crawler_name: {
+								[Op.ne]: 'dfars_subpart_regs',
+							},
+						},
 					})
 					.then((data) => {
 						data.map((item) => {

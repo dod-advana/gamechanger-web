@@ -39,6 +39,7 @@ import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCAboutUs from '../../aboutUs/GCAboutUs';
+//import { last } from 'underscore';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -215,7 +216,51 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 	}
 };
+const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) => {
+	let cleanedDocs = [];
+	let filteredPubs = [];
 
+	for (let doc of last_opened_docs) {
+		cleanedDocs.push(doc.document.split(' - ')[1].split('.pdf')[0]);
+		cleanedDocs = [...new Set(cleanedDocs)];
+	}
+	try {
+		filteredPubs = cleanedDocs.map((name) => ({
+			name,
+			doc_filename: name,
+			img_filename: name + '.png',
+			id: name + '.pdf_0',
+
+			imgSrc: DefaultPub,
+		}));
+
+		setState(dispatch, { lastOpened: filteredPubs });
+		setState(dispatch, { loadingLastOpened: false });
+
+		for (let i = 0; i < filteredPubs.length; i++) {
+			gameChangerAPI
+				.thumbnailStorageDownloadPOST([filteredPubs[i]], 'thumbnails', state.cloneData, cancelToken)
+				.then((pngs) => {
+					const buffers = pngs.data;
+					buffers.forEach((buf, idx) => {
+						if (buf.status === 'fulfilled') {
+							filteredPubs[i].imgSrc = 'data:image/png;base64,' + buf.value;
+						} else {
+							filteredPubs[i].imgSrc = DefaultPub;
+						}
+					});
+					setState(dispatch, { lastOpened: filteredPubs });
+				})
+				.catch((e) => {
+					//Do nothing
+				});
+		}
+	} catch (e) {
+		//Do nothing
+		console.log(e);
+		setState(dispatch, { lastOpened: filteredPubs });
+	}
+};
 const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
 	let filteredPubs = [];
 	try {
@@ -317,15 +362,22 @@ const PolicyMainViewHandler = {
 		const { state, dispatch } = props;
 		await defaultMainViewHandler.handlePageLoad(props);
 		setState(dispatch, { loadingrecDocs: true });
+		setState(dispatch, { loadingLastOpened: true });
+
 		let topics = [];
 		let pop_pubs = [];
 		let pop_pubs_inactive = [];
 		let rec_docs = [];
+
 		const user = await gcUserManagementAPI.getUserData();
-		const { favorite_documents = [], export_history = [] } = user.data;
+		const { favorite_documents = [], export_history = [], pdf_opened = [] } = user.data;
 
 		try {
-			const { data } = await gameChangerAPI.getHomepageEditorData({ favorite_documents, export_history });
+			const { data } = await gameChangerAPI.getHomepageEditorData({
+				favorite_documents,
+				export_history,
+				pdf_opened,
+			});
 			data.forEach((obj) => {
 				if (obj.key === 'homepage_topics') {
 					topics = JSON.parse(obj.value);
@@ -351,6 +403,7 @@ const PolicyMainViewHandler = {
 		handleSources(state, dispatch, props.cancelToken);
 		handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 		handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
+		handleLastOpened(pdf_opened, state, dispatch, props.cancelToken);
 	},
 
 	getMainView(props) {
@@ -377,6 +430,8 @@ const PolicyMainViewHandler = {
 			userData,
 			recentSearches,
 			trending,
+			lastOpened = [],
+			loadingLastOpened = true,
 		} = state;
 
 		const showDidYouMean = didYouMean && !loading;
@@ -581,6 +636,57 @@ const PolicyMainViewHandler = {
 							</div>
 						)}
 					</GameChangerThumbnailRow>
+					<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
+						{lastOpened.length > 0 &&
+							lastOpened[0].imgSrc &&
+							lastOpened.map((pub) => (
+								<div className="topPublication">
+									{pub.imgSrc !== 'error' ? (
+										<img className="image" src={pub.imgSrc} alt="thumbnail" title={pub.name} />
+									) : (
+										<div className="image">{pub.name}</div>
+									)}
+
+									<div
+										className="hover-overlay"
+										onClick={() => {
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'PublicationOpened',
+												pub.name
+											);
+											pub.imgSrc !== DefaultPub
+												? window.open(
+														`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${pub.id}`
+												  )
+												: setState(dispatch, { searchText: pub.name, runSearch: true });
+										}}
+									>
+										<div className="hover-text">{formatString(pub.name)}</div>
+									</div>
+								</div>
+							))}
+						{loadingLastOpened && lastOpened.length === 0 && (
+							<div className="col-xs-12">
+								<LoadingIndicator
+									customColor={gcOrange}
+									inline={true}
+									containerStyle={{
+										height: '300px',
+										textAlign: 'center',
+										paddingTop: '75px',
+										paddingBottom: '75px',
+									}}
+								/>
+							</div>
+						)}
+						{!loadingLastOpened && lastOpened.length === 0 && (
+							<div className="col-xs-12" style={{ height: '140px' }}>
+								<Typography style={styles.containerText}>No recent documents to show.</Typography>
+							</div>
+						)}
+					</GameChangerThumbnailRow>
+
 					<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 						{crawlerSources.length > 0 &&
 							crawlerSources[0].imgSrc &&
