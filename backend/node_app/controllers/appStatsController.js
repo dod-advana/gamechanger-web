@@ -892,7 +892,7 @@ class AppStatsController {
 					user_id: this.sparkMD5.hash(user.user_id),
 					org: user.organization,
 					last_search: null,
-					last_search_formatted:''
+					last_search_formatted: '',
 				};
 			}
 			for (let visit of visitorIDs) {
@@ -912,7 +912,8 @@ class AppStatsController {
 						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
 					}
 				}
 			}
