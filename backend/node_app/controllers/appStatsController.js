@@ -884,9 +884,9 @@ class AppStatsController {
 					Favorite: [],
 					docs_opened: 0,
 					searches_made: 0,
-					name: user.first_name + ' ' + user.last_name,
-					email: user.email,
-					user_id: user.user_id,
+					// name: user.first_name + ' ' + user.last_name,
+					// email: user.email,
+					user_id: this.sparkMD5.hash(user.user_id),
 					org: user.organization,
 					last_search: null,
 				};
