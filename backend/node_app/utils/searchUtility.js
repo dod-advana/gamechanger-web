@@ -446,7 +446,7 @@ class SearchUtility {
 		const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchTextLower.replace(/\//g, '');
+		let cleanSearch = searchTextLower.replace(/\/|{|}/g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -649,6 +649,8 @@ class SearchUtility {
 				.split(' ')
 				.slice(0, mainMaxkeywords)
 				.join('* OR *');
+
+			console.log(mainKeywords);
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
@@ -762,7 +764,7 @@ class SearchUtility {
 							{
 								query_string: {
 									fields: ['display_title_s.search'],
-									query: `${mainKeywords}*`,
+									query: `${mainKeywords}`,
 									type: 'best_fields',
 									boost: 6,
 									analyzer,
@@ -893,7 +895,6 @@ class SearchUtility {
 			if (Object.keys(docIds).length !== 0) {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
-
 			if (ltr) {
 				query.rescore = [
 					{
