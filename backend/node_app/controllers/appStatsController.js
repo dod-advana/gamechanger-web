@@ -232,7 +232,8 @@ class AppStatsController {
 					hex(a.idvisitor) as idvisitor,
 					idaction_name, 
 					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime,
+					DATE_FORMAT(CONVERT_TZ(a.server_time,'UTC','EST'),'%Y-%m-%d %H:%i') as documenttime_formatted
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
@@ -270,7 +271,7 @@ class AppStatsController {
 				`
 				select 
 					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime,
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
@@ -311,6 +312,7 @@ class AppStatsController {
 				a.search_cat,
 				b.name as value,
 				CONVERT_TZ(a.server_time,'UTC','EST') as searchtime,
+				DATE_FORMAT(CONVERT_TZ(a.server_time,'UTC','EST'),'%Y-%m-%d %H:%i') as searchtime_formatted,
 				hex(a.idvisitor) as idvisitor,
 				'Search' as action
 			from
@@ -758,7 +760,8 @@ class AppStatsController {
 					hex(a.idvisitor) as idvisitor,
 					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
 					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made,
-					max(server_time) as last_search
+					max(server_time) as last_search,
+					date_format(max(server_time),'%Y-%m-%d %H:%i') as last_search_formatted
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
@@ -889,6 +892,7 @@ class AppStatsController {
 					user_id: this.sparkMD5.hash(user.user_id),
 					org: user.organization,
 					last_search: null,
+					last_search_formatted:''
 				};
 			}
 			for (let visit of visitorIDs) {
@@ -908,6 +912,7 @@ class AppStatsController {
 						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted
 					}
 				}
 			}

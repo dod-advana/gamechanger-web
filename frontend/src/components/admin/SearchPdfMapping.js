@@ -51,7 +51,7 @@ const columns = [
 	},
 	{
 		Header: 'Search Time',
-		accessor: 'searchtime',
+		accessor: 'searchtime_formatted',
 		width: 200,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
@@ -157,7 +157,7 @@ const userAggColumns = [
 	},
 	{
 		Header: 'Last Search Made',
-		accessor: 'last_search',
+		accessor: 'last_search_formatted',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
