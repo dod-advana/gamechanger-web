@@ -650,7 +650,6 @@ class SearchUtility {
 				.slice(0, mainMaxkeywords)
 				.join('* OR *');
 
-			console.log(mainKeywords);
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
@@ -2677,7 +2676,6 @@ class SearchUtility {
 			);
 			if (resp.result.records.length == 0) {
 				// if no results, try group algo
-				console.log('no similar docs');
 				comm_resp = await this.dataLibrary.queryGraph(
 					`
 				MATCH (d:Document {filename: $filename})
