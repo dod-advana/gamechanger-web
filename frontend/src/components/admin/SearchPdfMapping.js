@@ -145,12 +145,12 @@ const userAggColumns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Searches Made',
+		Header: 'Total Searches',
 		accessor: 'searches_made',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Last Searche Made',
+		Header: 'Last Search Made',
 		accessor: 'last_search',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
