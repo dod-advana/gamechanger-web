@@ -386,7 +386,10 @@ const DocumentExplorer = ({
 						}
 					})}
 			</div>
-			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
+			<div
+				className={`col-xs-${iframePanelSize}`}
+				style={{ height: '99%', paddingLeft: 0, paddingRight: 0, position: 'relative' }}
+			>
 				<div
 					style={{
 						display: 'flex',
