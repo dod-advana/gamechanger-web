@@ -763,7 +763,7 @@ class SearchUtility {
 							{
 								query_string: {
 									fields: ['display_title_s.search'],
-									query: `${mainKeywords}`,
+									query: `${mainKeywords}*`,
 									type: 'best_fields',
 									boost: 6,
 									analyzer,
