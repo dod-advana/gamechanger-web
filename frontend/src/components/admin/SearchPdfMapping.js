@@ -124,14 +124,20 @@ const columns = [
 ];
 
 const userAggColumns = [
+	// {
+	// 	Header: 'Name',
+	// 	accessor: 'name',
+	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
+	// },
+	// {
+	// 	Header: 'Email',
+	// 	accessor: 'email',
+	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
+	// },
+
 	{
-		Header: 'Name',
-		accessor: 'name',
-		Cell: (row) => <TableRow>{row.value}</TableRow>,
-	},
-	{
-		Header: 'Email',
-		accessor: 'email',
+		Header: 'User ID',
+		accessor: 'user_id',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
