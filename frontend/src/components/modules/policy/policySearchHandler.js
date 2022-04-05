@@ -62,6 +62,8 @@ const PolicySearchHandler = {
 			currentViewName,
 			cloneData,
 			runningSearch,
+			currentSort,
+			currentOrder,
 		} = state;
 
 		const {
@@ -160,7 +162,6 @@ const PolicySearchHandler = {
 			timeFound: 0.0,
 			iframePreviewLink: null,
 			graph: { nodes: [], edges: [] },
-			runningSearch: true,
 			showFullGraph: false,
 			docTypeData: {},
 			runningEntitySearch: true,
@@ -250,6 +251,8 @@ const PolicySearchHandler = {
 						includeRevoked,
 						archivedCongressSelected,
 						ltr,
+						sort: currentSort,
+						order: currentOrder,
 					},
 					limit: 18,
 				},
@@ -502,6 +505,7 @@ const PolicySearchHandler = {
 						hideTabs: false,
 						resetSettingsSwitch: false,
 						query,
+						runningSearch: false,
 					});
 				} else {
 					if (!offset) {
