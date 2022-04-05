@@ -225,7 +225,7 @@ const useStyles = makeStyles({
 		},
 	},
 	checkboxPill: {
-		width: '145px',
+		width: '160px',
 		padding: '5px',
 		textAlign: 'center',
 		borderRadius: '10px',
