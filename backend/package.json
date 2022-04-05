@@ -65,7 +65,7 @@
     "strip-ansi": "6.0.0",
     "swagger-jsdoc": "6.1.0",
     "swagger-ui-express": "4.1.6",
-    "underscore": "1.9.1",
+    "underscore": "1.13.2",
     "winston": "3.3.3"
   },
   "devDependencies": {

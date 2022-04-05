@@ -81,7 +81,6 @@ const PolicySearchHandler = {
 		} = searchSettings;
 
 		if (runningSearch) {
-			console.log('cancel initial search');
 			cancelToken.cancel('cancelled axios with consecutive call');
 			cancelToken = axios.CancelToken.source();
 		}
