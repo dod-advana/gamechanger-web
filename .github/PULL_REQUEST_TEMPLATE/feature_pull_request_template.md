@@ -2,10 +2,6 @@
 
 <!--- Describe your changes in detail, must use a list if more than 2-3 distinct items -->
 
-## !vibez
-
-<!--- How are you feeling after completing this PR? -->
-
 ## Issues/Tickets Contained in this Feature
 
 <!--- Please link to the issues/tickets here: -->
