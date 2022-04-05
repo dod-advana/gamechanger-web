@@ -12,8 +12,10 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler';
 import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
+import PortfolioBuilder from './jbookPortfolioBuilder';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import FolderIcon from '@mui/icons-material/Folder';
 import GeneralAdminButtons from './jbookGeneralButtons';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCButton from '../../common/GCButton';
@@ -26,6 +28,7 @@ const PAGES = {
 	userList: 'UserList',
 	reviewerList: 'ReviewerList',
 	notifications: 'Notifications',
+	portfolio: 'Portfolio',
 };
 
 const userListTableAdditions = [
@@ -166,6 +169,8 @@ const JBookAdminMainViewHandler = {
 				);
 			case PAGES.reviewerList:
 				return <ReviewerList cloneName={cloneName} />;
+			case PAGES.portfolio:
+				return <PortfolioBuilder cloneName={cloneName} />;
 			default:
 				return <GeneralAdminButtons />;
 		}
@@ -209,6 +214,14 @@ const JBookAdminMainViewHandler = {
 					<Tooltip title="Add/Edit Reviewers" placement="right" arrow>
 						<HoverNavItem centered onClick={() => setPageToView(PAGES.reviewerList)} toolTheme={toolTheme}>
 							<RateReviewIcon style={{ fontSize: 30 }} />
+						</HoverNavItem>
+					</Tooltip>
+				)}
+
+				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
+					<Tooltip title="Portfolio Builder" placement="right" arrow>
+						<HoverNavItem centered onClick={() => setPageToView(PAGES.portfolio)} toolTheme={toolTheme}>
+							<FolderIcon style={{ fontSize: 30 }} />
 						</HoverNavItem>
 					</Tooltip>
 				)}
@@ -267,6 +280,15 @@ const JBookAdminMainViewHandler = {
 						<HoverNavItem onClick={() => setPageToView(PAGES.reviewerList)} toolTheme={toolTheme}>
 							<RateReviewIcon style={{ fontSize: 30 }} />
 							<span style={{ marginLeft: '5px' }}>Add/Edit Reviewers</span>
+						</HoverNavItem>
+					</Tooltip>
+				)}
+
+				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
+					<Tooltip title="Portfolio Builder" placement="right" arrow>
+						<HoverNavItem onClick={() => setPageToView(PAGES.portfolio)} toolTheme={toolTheme}>
+							<FolderIcon style={{ fontSize: 30 }} />
+							<span style={{ marginLeft: '5px' }}>Portfolio Builder</span>
 						</HoverNavItem>
 					</Tooltip>
 				)}
