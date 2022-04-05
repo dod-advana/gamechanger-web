@@ -283,13 +283,13 @@ class AppStatsController {
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error('No userids found', 'B07IQHT');
+						resolve([]);
 					}
-					resolve([]);
+					resolve(results);
 				}
 			);
 		});
 	}
-
 	/**
 	 * This method gets an array of searches made with a timestamp and idvisit
 	 * depending on how many days back

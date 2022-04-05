@@ -703,7 +703,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText) => {
+export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText) => {
 	const { favorite_topics = null } = userData ?? {};
 	let favorites = [];
 

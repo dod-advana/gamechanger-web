@@ -93,6 +93,8 @@ const TableStyle = styled.div`
 			.rt-th,
 			.rt-td {
 				border-right: 1px solid #0000001f !important;
+				white-space: normal;
+				text-align: center;
 			}
 			.rt-th {
 				font-weight: bold;
@@ -253,13 +255,20 @@ const GCDataStatusTracker = (props) => {
 	const [numPages, setNumPages] = useState(0);
 	const [tabIndex, setTabIndex] = useState('crawler');
 	const [ingestData, setIngestData] = useState({});
+	const [crawlerInfoMap, setCrawlerInfoMap] = useState(null);
 
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then((res) => {
 			setIngestData(res.data);
 		});
+		gameChangerAPI.gcCrawlerSealData().then((res) => {
+			const map = {};
+			res.data.forEach((crawler) => {
+				map[crawler.crawler] = crawler;
+			});
+			setCrawlerInfoMap(map);
+		});
 	}, []);
-
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
@@ -433,13 +442,12 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Type',
 				accessor: 'pub_type',
-				width: 100,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Number',
 				accessor: 'pub_number',
-				width: 110,
+				width: 90,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -455,9 +463,7 @@ const GCDataStatusTracker = (props) => {
 							}}
 							style={{ color: '#386F94' }}
 						>
-							<div>
-								<p>{props.original.pub_title}</p>
-							</div>
+							<div>{props.original.pub_title}</div>
 						</Link>
 					</TableRow>
 				),
@@ -465,43 +471,52 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'json_metadata',
-				width: 350,
+				width: 200,
 				filterable: false,
 				sortable: false,
-				Cell: (props) => (
-					<TableRow>
-						<Link
-							href={'#'}
-							onClick={(event) => {
-								preventDefault(event);
-								window.open(props.original.json_metadata.source_page_url);
-							}}
-							style={{ color: '#386F94' }}
-						>
-							<div>
-								<p>{props.original.json_metadata.crawler_used}</p>
-							</div>
-						</Link>
-					</TableRow>
-				),
+				Cell: (props) => {
+					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
+					return (
+						<TableRow>
+							<Link
+								href={'#'}
+								onClick={(event) => {
+									preventDefault(event);
+									window.open(props.original.json_metadata.source_page_url);
+								}}
+								style={{ color: '#386F94' }}
+							>
+								<div>
+									{crawler
+										? `${crawler.data_source_s} - ${crawler.source_title}`
+										: props.original.json_metadata.crawler_used}
+								</div>
+							</Link>
+						</TableRow>
+					);
+				},
 			},
 			{
 				Header: 'Publication Date',
 				accessor: 'publication_date',
 				filterable: false,
-				width: 150,
-				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
+				width: 115,
+				Cell: (row) => (
+					<TableRow>
+						{moment(row.value).isValid() ? moment(Date.parse(row.value)).format('YYYY-MM-DD') : 'N/A'}
+					</TableRow>
+				),
 			},
 			{
 				Header: 'Ingestion Date',
 				accessor: 'upload_date',
 				filterable: false,
-				width: 150,
+				width: 115,
 				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
 			},
 			{
 				Header: 'Next update',
-				width: 150,
+				width: 115,
 				filterable: false,
 				sortable: false,
 				Cell: (row) => <TableRow>{moment(Date.parse(nextFriday.toISOString())).format('YYYY-MM-DD')}</TableRow>,
