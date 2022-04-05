@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styles } from '../../../components/admin/util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
 import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import styled from 'styled-components';
 
-// import GameChangerAPI from '../../api/gameChanger-service-api';
+import GameChangerAPI from '../../api/gameChanger-service-api';
 
-// const gameChangerAPI = new GameChangerAPI();
+const gameChangerAPI = new GameChangerAPI();
 
 const portfolioStyles = {
 	portfolio: {
@@ -49,18 +49,38 @@ const Pill = styled.button`
  */
 const PortfolioBuilder = (props) => {
 	// State variables for the buttons
-	const { cloneName } = props;
+	let [portfolios, setPortfolios] = useState([]);
+	let [init, setInit] = useState(false);
+
+	useEffect(() => {
+		if (!init) {
+			gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {},
+				})
+				.then((data) => {
+					console.log(data);
+					let pData = data.data !== undefined ? data.data : [];
+					setPortfolios(pData);
+				});
+			setInit(true);
+		}
+	}, [init, setInit, portfolios, setPortfolios]);
 
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
 			return (
 				<div style={portfolioStyles.portfolio}>
-					<div style={portfolioStyles.portfolioHeader}>{portfolio.title}</div>
+					<div style={portfolioStyles.portfolioHeader}>{portfolio.name}</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>People With Access</div>
 					<div style={portfolioStyles.pillbox}>
-						{portfolio.users.map((user, index) => {
+						{portfolio.user_ids.length === 0 &&
+							(portfolio.name === 'jaic' ? '(all jbook users)' : '(none)')}
+						{portfolio.user_ids.map((user, index) => {
 							return (
 								<Pill>
 									<div style={{ marginRight: '5px', marginLeft: '5px' }}>{user}</div>
@@ -71,6 +91,7 @@ const PortfolioBuilder = (props) => {
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>Associated Tags</div>
 					<div style={portfolioStyles.pillbox}>
+						{portfolio.tags.length === 0 && '(none)'}
 						{portfolio.tags.map((tag, index) => {
 							return (
 								<Pill>
@@ -124,53 +145,7 @@ const PortfolioBuilder = (props) => {
 					</div>
 				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios([
-						{
-							title: 'Portfolio 1',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-						laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-						voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-							users: [
-								'User 1',
-								'User 2 long ',
-								'User 3 longer',
-								'User 1 longest',
-								'User 2',
-								'User 3 long',
-								'User 1',
-								'User 2 longer',
-								'User 3',
-								'User 1 longest',
-								'User 2',
-								'User 3 even longer name',
-							],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							title: 'Portfolio 2',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-						laboris nisi ut aliquip ex ea commodo consequat.`,
-							users: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							title: 'Portfolio 3',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in
-						voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-							users: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							title: 'Portfolio 4',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. `,
-							users: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-					])}
+					{listPortfolios(portfolios)}
 				</div>
 			</div>
 		</>
