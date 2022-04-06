@@ -657,6 +657,7 @@ describe('JBookDataHandler', function () {
 	describe('#getPortfolios', () => {
 		it('should get all portfolios', async (done) => {
 			const opts = {
+				...constructorOptionsMock,
 				portfolio: {
 					findAll: () => {
 						return Promise.resolve({
