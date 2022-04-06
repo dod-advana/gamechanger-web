@@ -658,6 +658,19 @@ describe('JBookDataHandler', function () {
 		it('should get all portfolios', async (done) => {
 			const opts = {
 				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				dataLibrary: {
+					queryElasticSearch(name, index, query, userId) {
+						return Promise.resolve(esReturn);
+					},
+					getESRequestConfig() {
+						return Promise.resolve({});
+					},
+				},
 				portfolio: {
 					findAll: () => {
 						return Promise.resolve({
