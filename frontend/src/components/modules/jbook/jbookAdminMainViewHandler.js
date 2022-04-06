@@ -218,7 +218,8 @@ const JBookAdminMainViewHandler = {
 					</Tooltip>
 				)}
 
-				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
+				{(Permissions.permissionValidator(`${cloneName} Admin`, true) ||
+					Permissions.permissionValidator(`Gamechanger Super Admin`, true)) && (
 					<Tooltip title="Portfolio Builder" placement="right" arrow>
 						<HoverNavItem centered onClick={() => setPageToView(PAGES.portfolio)} toolTheme={toolTheme}>
 							<FolderIcon style={{ fontSize: 30 }} />
