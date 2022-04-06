@@ -303,14 +303,19 @@ class PolicySearchHandler extends SearchHandler {
 
 			let searchResults;
 			const operator = 'and';
+			let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+			let entityLimit = 10;
+			const alias = await this.searchUtility.findAliases(req.body.searchText, entityLimit, clientObj.esClientName, entitiesIndex, userId);
 			searchResults = await this.searchUtility.documentSearch(
 				req,
 				{ ...req.body, expansionDict, operator },
+				alias,
 				clientObj,
 				userId
 			);
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
+			searchResults.alias = alias
 			return searchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
@@ -321,6 +326,7 @@ class PolicySearchHandler extends SearchHandler {
 		const { searchText, offset } = req.body;
 		try {
 			let sentenceResults = {};
+			//console.log("REQUEST BODY", req.body.searchText) // was used for intel search
 
 			let enrichedResults = searchResults;
 			//set empty values
@@ -341,7 +347,7 @@ class PolicySearchHandler extends SearchHandler {
 				intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if (intelligentSearchOn) {
 				// get sentence search from ML API
-				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId);
+				sentenceResults = await this.searchUtility.getSentResults(searchResults.searchTerms.join(' '), userId);
 				enrichedResults.sentenceResults = sentenceResults;
 			}
 
@@ -361,7 +367,7 @@ class PolicySearchHandler extends SearchHandler {
 			intelligentAnswersOn =
 				intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if (intelligentAnswersOn && intelligentSearchOn) {
-				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
+				const QA = await this.qaEnrichment(req, searchResults.searchTerms, searchResults.alias, sentenceResults, qaParams, userId);
 				enrichedResults.qaResults = QA;
 			}
 
@@ -472,7 +478,7 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, sentenceResults, qaParams, userId) {
+	async qaEnrichment(req, searchTerms, alias, sentenceResults, qaParams, userId) {
 		const { searchText } = req.body;
 
 		let QA = { question: '', answers: [], params: qaParams, qaContext: [] };
@@ -491,19 +497,12 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities = { QAResults: {}, allResults: {} };
-				let qaQueries = await this.searchUtility.formatQAquery(
-					searchText,
-					qaParams.entityLimit,
-					esClientName,
-					entitiesIndex,
-					userId
-				);
-				QA.question = qaQueries.display;
-				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				QA.question = searchText;
+				let bigramQueries = this.searchUtility.makeBigramQueries(searchTerms, alias);
 				try {
 					entities = await this.searchUtility.getQAEntities(
 						entities,
-						qaQueries,
+						alias,
 						bigramQueries,
 						qaParams,
 						esClientName,
@@ -537,7 +536,7 @@ class PolicySearchHandler extends SearchHandler {
 					// if context results, query QA model
 					QA.qaContext = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(
-						qaQueries.text,
+						QA.question.toLowerCase().replace('?', ''),
 						context.map((item) => item.text),
 						userId
 					);
