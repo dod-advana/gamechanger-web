@@ -644,7 +644,7 @@ class SearchUtility {
 				: 'paragraphs.par_raw_text_t.gc_english';
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
-			let mainKeywords = plainQuery
+			let mainKeywords = this.remove_stopwords(plainQuery)
 				.replace(/"|'/gi, '')
 				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
@@ -761,15 +761,6 @@ class SearchUtility {
 									},
 								},
 							},
-							{
-								query_string: {
-									fields: ['display_title_s.search'],
-									query: `*${mainKeywords}*`,
-									type: 'best_fields',
-									boost: 6,
-									analyzer,
-								},
-							},
 						],
 						minimum_should_match: 1,
 
@@ -820,7 +811,18 @@ class SearchUtility {
 				default:
 					break;
 			}
-
+			if (!this.isVerbatim(searchText)) {
+				const titleMainSearch = {
+					query_string: {
+						fields: ['display_title_s.search'],
+						query: `*${mainKeywords}*`,
+						type: 'best_fields',
+						boost: 6,
+						analyzer,
+					},
+				};
+				query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
+			}
 			if (extSearchFields.length > 0) {
 				const extQuery = {
 					multi_match: {
