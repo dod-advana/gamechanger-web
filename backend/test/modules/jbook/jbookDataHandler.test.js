@@ -659,7 +659,7 @@ describe('JBookDataHandler', function () {
 			const opts = {
 				portfolio: {
 					findAll: () => {
-						return {
+						return Promise.resolve({
 							data: [
 								{
 									name: 'testPortfolio',
@@ -668,7 +668,7 @@ describe('JBookDataHandler', function () {
 									user_ids: [],
 								},
 							],
-						};
+						});
 					},
 				},
 			};
