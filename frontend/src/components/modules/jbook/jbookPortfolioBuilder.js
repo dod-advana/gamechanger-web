@@ -14,7 +14,7 @@ const portfolioStyles = {
 		padding: '10px',
 		borderRadius: '10px',
 		margin: '10px 20px',
-		maxWidth: '400px',
+		width: '400px',
 	},
 	portfolioHeader: {
 		fontSize: '1.3em',
@@ -146,6 +146,53 @@ const PortfolioBuilder = (props) => {
 				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
 					{listPortfolios(portfolios)}
+					{listPortfolios([
+						{
+							name: 'Portfolio 1',
+							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+              labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+              voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
+							user_ids: [
+								'User 1',
+								'User 2 long ',
+								'User 3 longer',
+								'User 1 longest',
+								'User 2',
+								'User 3 long',
+								'User 1',
+								'User 2 longer',
+								'User 3',
+								'User 1 longest',
+								'User 2',
+								'User 3 even longer name',
+							],
+							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+						},
+						{
+							name: 'Portfolio 2',
+							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+              labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+              laboris nisi ut aliquip ex ea commodo consequat.`,
+							user_ids: ['User 1', 'User 2', 'User 3'],
+							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+						},
+						{
+							name: 'Portfolio 3',
+							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+              labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in
+              voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
+							user_ids: ['User 1', 'User 2', 'User 3'],
+							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+						},
+						{
+							name: 'Portfolio 4',
+							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+              labore et dolore magna aliqua. `,
+							user_ids: ['User 1', 'User 2', 'User 3'],
+							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
+						},
+					])}
 				</div>
 			</div>
 		</>
