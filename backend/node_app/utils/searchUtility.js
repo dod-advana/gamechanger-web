@@ -794,7 +794,6 @@ class SearchUtility {
 					  }
 					: {},
 			};
-			console.log(query.query.bool.should);
 			switch (sort) {
 				case 'Relevance':
 					query.sort = [{ _score: { order: order } }];
