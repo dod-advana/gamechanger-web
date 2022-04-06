@@ -645,7 +645,8 @@ class SearchUtility {
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 			let mainKeywords = plainQuery
-				.replace(/"|'| OR | AND /gi, ' ')
+				.replace(/"|'/gi, '')
+				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
 				.slice(0, mainMaxkeywords)
 				.join('* OR *');
@@ -763,7 +764,7 @@ class SearchUtility {
 							{
 								query_string: {
 									fields: ['display_title_s.search'],
-									query: `${mainKeywords}*`,
+									query: `*${mainKeywords}*`,
 									type: 'best_fields',
 									boost: 6,
 									analyzer,
@@ -793,7 +794,7 @@ class SearchUtility {
 					  }
 					: {},
 			};
-
+			console.log(query.query.bool.should);
 			switch (sort) {
 				case 'Relevance':
 					query.sort = [{ _score: { order: order } }];
