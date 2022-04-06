@@ -1285,9 +1285,10 @@ class SearchUtility {
 		}
 	}
 
-	async findAliases(searchTextList, entityLimit, esClientName, entitiesIndex, user) {
+	async findAliases(searchText, entityLimit, esClientName, entitiesIndex, user) {
 		let matchingAlias = {};
 		try {
+			let searchTextList = searchText.split(/\s+/);
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
@@ -1381,26 +1382,10 @@ class SearchUtility {
 		return paragraph;
 	}
 
-	async formatQAquery(searchText, entityLimit, esClientName, entitiesIndex, userId) {
+	async getQAEntities(entities, alias, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
 		try {
-			let text = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
-			let display = text + '?';
-			let list = text.split(/\s+/); // get list of query terms
-			let alias = await this.findAliases(list, entityLimit, esClientName, entitiesIndex, userId);
 			if (alias._source) {
-				text = text.replace(alias.match.toLowerCase(), alias._source.name);
-			}
-			let qaQueries = { text: text, display: display, list: list, alias: alias };
-			return qaQueries;
-		} catch (e) {
-			LOGGER.error(e.message, 'SRUVBNX', '');
-		}
-	}
-
-	async getQAEntities(entities, qaQueries, bigramQueries, qaParams, esClientName, entitiesIndex, userId) {
-		try {
-			if (qaQueries.alias._source) {
-				entities.QAResults = qaQueries.alias;
+				entities.QAResults = alias;
 			} else {
 				let queryType = 'entities';
 				let qaEntityQuery = this.phraseQAQuery(
@@ -2443,12 +2428,17 @@ class SearchUtility {
 		}
 	}
 
-	async documentSearch(req, body, clientObj, userId) {
+	async documentSearch(req, body, alias, clientObj, userId) {
 		try {
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, searchType } = body;
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
+			if (alias._source) {
+				searchTerms.push(alias._source.name)
+				body.parsedQuery = parsedQuery.concat(' ', alias._source.name);
+			} else {
+				body.parsedQuery = parsedQuery;
+			}
 			body.searchTerms = searchTerms;
-			body.parsedQuery = parsedQuery;
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
 			if (esQuery === '') {
@@ -2458,7 +2448,7 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-			const titleResults = await this.getTitle(body.searchText, clientObj, userId);
+			const titleResults = await this.getTitle(body.parsedQuery, clientObj, userId);
 
 			let results;
 
