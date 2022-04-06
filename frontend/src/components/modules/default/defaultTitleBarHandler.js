@@ -7,8 +7,8 @@ import NGA from '../../../images/logos/NGALogo.png';
 import SpaceForce from '../../../images/logos/SpaceForceLogo.png';
 import Covid19 from '../../../images/logos/Covid19Logo.png';
 import CDO from '../../../images/logos/CDOLogo.png';
-import {Typography} from '@material-ui/core';
-
+import { Typography } from '@material-ui/core';
+import JAICLogo from '../../../images/logos/JBooks Logo_wht.svg';
 
 const DefaultTitleBarHandler = {
 	getTitleBar: (props) => {
@@ -109,8 +109,24 @@ const DefaultTitleBarHandler = {
 					/>
 				</div>
 			);
+		} else if (cloneData.clone_name === 'jbook') {
+			return (
+				<div
+					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					onClick={onTitleClick}
+				>
+					<img
+						src={JAICLogo}
+						style={styles.title}
+						onClick={onTitleClick}
+						alt="gamechanger jbook"
+						id={'titleButton'}
+						className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+					/>
+				</div>
+			);
 		} else {
-			 return (
+			return (
 				<div
 					className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
 					onClick={onTitleClick}
@@ -141,9 +157,7 @@ const DefaultTitleBarHandler = {
 
 		return (
 			<>
-				{rawSearchResults?.length !== 0 &&
-					!loading &&
-					pageDisplayed === 'main' && (
+				{rawSearchResults?.length !== 0 && !loading && pageDisplayed === 'main' && (
 					<SearchContext.Provider
 						value={{
 							searchTypes: selectedCategories,
@@ -164,13 +178,11 @@ const DefaultTitleBarHandler = {
 	},
 
 	getTitleBarStyle(props) {
-		const { rawSearchResults, pageDisplayed } = props;
+		const { rawSearchResults, pageDisplayed, backgroundColor } = props;
 		return {
 			...styles.titleBar,
-			borderBottom:
-				rawSearchResults.length > 0 && pageDisplayed === 'main'
-					? '2px solid rgb(176, 186, 197)'
-					: '',
+			borderBottom: rawSearchResults.length > 0 && pageDisplayed === 'main' ? '2px solid rgb(176, 186, 197)' : '',
+			backgroundColor: `${backgroundColor || null}`,
 		};
 	},
 };
@@ -192,7 +204,7 @@ const styles = {
 		width: '100%',
 	},
 	title: {
-		margin: '0 40px 0 30px',
+		margin: '0 25px 0 15px',
 		cursor: 'pointer',
 		height: '50px',
 	},

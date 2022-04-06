@@ -1,17 +1,8 @@
-import {
-	DefaultContext,
-	DefaultProvider,
-} from '../modules/default/defaultContext';
+import { DefaultContext, DefaultProvider } from '../modules/default/defaultContext';
 import { PolicyContext, PolicyProvider } from '../modules/policy/policyContext';
-import {
-	GlobalSearchContext,
-	GlobalSearchProvider,
-} from '../modules/globalSearch/globalSearchContext';
+import { GlobalSearchContext, GlobalSearchProvider } from '../modules/globalSearch/globalSearchContext';
 import { EDAContext, EDAProvider } from '../modules/eda/edaContext';
-import {
-	BudgetSearchContext,
-	BudgetSearchProvider,
-} from '../modules/budgetSearch/budgetSearchContext';
+import { JBookContext, JBookProvider } from '../modules/jbook/jbookContext';
 
 const getContext = (cloneName) => {
 	switch (cloneName) {
@@ -22,8 +13,8 @@ const getContext = (cloneName) => {
 			return GlobalSearchContext;
 		case 'eda':
 			return EDAContext;
-		case 'budgetSearch':
-			return BudgetSearchContext;
+		case 'jbook':
+			return JBookContext;
 		default:
 			return DefaultContext;
 	}
@@ -38,8 +29,8 @@ const getProvider = (cloneName) => {
 			return GlobalSearchProvider;
 		case 'eda':
 			return EDAProvider;
-		case 'budgetSearch':
-			return BudgetSearchProvider;
+		case 'jbook':
+			return JBookProvider;
 		default:
 			return DefaultProvider;
 	}

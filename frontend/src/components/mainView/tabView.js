@@ -1,29 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { TabList, Tabs, Tab } from 'react-tabs';
 import { trackEvent } from '../telemetry/Matomo';
-import {
-	getTrackingNameForFactory,
-	PAGE_BORDER_RADIUS,
-	useMountEffect,
-} from '../../utils/gamechangerUtils';
-import {
-	backgroundGreyDark,
-	backgroundWhite,
-} from '../../components/common/gc-colors';
+import { getTrackingNameForFactory, PAGE_BORDER_RADIUS, useMountEffect } from '../../utils/gamechangerUtils';
+import { backgroundGreyDark, backgroundWhite } from '../../components/common/gc-colors';
 import { gcOrange } from '../../components/common/gc-colors';
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 import GCButton from '../common/GCButton';
-import {
-	checkUserInfo,
-	createCopyTinyUrl,
-	setState,
-} from '../../utils/sharedFunctions';
+import { checkUserInfo, createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
 import { SelectedDocsDrawer } from '../searchBar/GCSelectedDocsDrawer';
 
 const StyledTabsList = styled(TabList)`
-	border-bottom: 2px solid
-		${({ primary_color }) => (primary_color ? primary_color : gcOrange)};
+	border-bottom: 2px solid ${({ primary_color }) => (primary_color ? primary_color : gcOrange)};
 	padding: 0px !important;
 	display: flex;
 	align-items: center;
@@ -36,8 +24,7 @@ const StyledTab = styled(Tab)`
 	height: 45px !important;
 	color: ${({ active }) => (active === 'true' ? 'white' : null)};
 	border: 1px solid ${({ active }) => (active === 'true' ? 'transparent' : '')} !important;
-	border-color: ${({ active }) =>
-		active === 'true' ? 'none' : backgroundGreyDark} !important;
+	border-color: ${({ active }) => (active === 'true' ? 'none' : backgroundGreyDark)} !important;
 	border-bottom: none !important;
 	border-radius: ${({ first }) => (first === 'true' ? PAGE_BORDER_RADIUS : 0)}px
 		${({ last }) => (last === 'true' ? PAGE_BORDER_RADIUS : 0)}px 0px 0px;
@@ -86,11 +73,7 @@ const TabView = (props) => {
 	const handleTabClicked = (tabIndex, lastIndex, tabName) => {
 		const { searchText } = state;
 
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'TabSelected',
-			tabName
-		);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'TabSelected', tabName);
 
 		setState(dispatch, { tabName: tabName });
 		setCurrentTabIndex(tabIndex);
@@ -102,10 +85,7 @@ const TabView = (props) => {
 
 	const renderTabs = () => {
 		return (
-			<StyledTabsList
-				style={styles.tabsList}
-				primary_color={toolStyle.primaryColor}
-			>
+			<StyledTabsList style={styles.tabsList} primary_color={toolStyle.primaryColor}>
 				{tabNames.map((tmpTabName, idx) => {
 					return (
 						<StyledTab
@@ -142,9 +122,7 @@ const TabView = (props) => {
 	return (
 		<Tabs
 			selectedIndex={currentTabIndex}
-			onSelect={(tabIndex, lastIndex, event) =>
-				handleTabClicked(tabIndex, lastIndex, event.target.title)
-			}
+			onSelect={(tabIndex, lastIndex, event) => handleTabClicked(tabIndex, lastIndex, event.target.title)}
 		>
 			<div style={styles.tabButtonContainer}>
 				{!state.hideTabs && renderTabs()}
@@ -155,9 +133,7 @@ const TabView = (props) => {
 						rel="noopener noreferrer"
 						href="https://qlik.advana.data.mil/sense/app/604403a7-bf08-4d56-8807-7b5491a3db22/sheet/96329f3e-18a3-40e8-8b02-99d82feb1a6b/state/analysis"
 					>
-						<GCButton
-							style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}
-						>
+						<GCButton style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}>
 							Validation Metrics
 						</GCButton>
 					</a>
@@ -169,9 +145,7 @@ const TabView = (props) => {
 						id={'gcShareSearch'}
 						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
 						style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}
-						disabled={
-							!state.rawSearchResults || state.rawSearchResults.length <= 0
-						}
+						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>
 						Share <i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCButton>
@@ -182,17 +156,13 @@ const TabView = (props) => {
 						selectedDocuments={state.selectedDocuments}
 						docsDrawerOpen={state.docsDrawerOpen}
 						setDrawer={setDrawer}
-						clearSelections={() =>
-							setState(dispatch, { selectedDocuments: new Map() })
-						}
+						clearSelections={() => setState(dispatch, { selectedDocuments: new Map() })}
 						openExport={() => setState(dispatch, { exportDialogVisible: true })}
 						removeSelection={(doc) => this.removeSelectedDocument(doc)}
 						componentStepNumbers={state.componentStepNumbers}
 						isDrawerReady={state.isDrawerReady}
 						setDrawerReady={setDrawerReady}
-						setShowTutorial={(showTutorial) =>
-							setState(dispatch, { showTutorial: showTutorial })
-						}
+						setShowTutorial={(showTutorial) => setState(dispatch, { showTutorial: showTutorial })}
 						setStepIndex={setStepIndex}
 						showTutorial={state.showTutorial}
 						rawSearchResults={state.rawSearchResults}

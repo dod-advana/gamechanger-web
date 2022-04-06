@@ -1,4 +1,4 @@
-const LOGGER = require('../../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const ApiKey = require('../../models').api_key;
 const ApiKeyRequests = require('../../models').api_key_request;
 const ApiKeyRequestClones = require('../../models').api_key_request_clone;
@@ -7,13 +7,15 @@ const CloneMeta = require('../../models').clone_meta;
 const EmailUtility = require('../../utils/emailUtility');
 const constantsFile = require('../../config/constants');
 const hat = require('hat');
+const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 
 module.exports.SwaggerDefinition = {
 	swaggerDefinition: {
 		openapi: '3.0.1',
 		info: {
 			title: 'Gamechanger External Routes',
-			description: 'This is the swagger interface for all of the external routes. Click on the apis below to test them and examine results.'
+			description:
+				'This is the swagger interface for all of the external routes. Click on the apis below to test them and examine results.',
 		},
 		basePath: '/api/external',
 		produces: ['application/json'],
@@ -23,13 +25,13 @@ module.exports.SwaggerDefinition = {
 				apiKey: {
 					type: 'apiKey',
 					in: 'header',
-					name: 'X-API-KEY'
-				}
+					name: 'X-API-KEY',
+				},
 			},
 			responses: {
 				UnauthorizedError: {
-					description: 'API key is missing or invalid'
-				}
+					description: 'API key is missing or invalid',
+				},
 			},
 			requestBodies: {
 				Search: {
@@ -43,34 +45,34 @@ module.exports.SwaggerDefinition = {
 									cloneName: {
 										type: 'string',
 										required: true,
-										default: 'gamechanger'
+										default: 'gamechanger',
 									},
 									searchText: {
 										type: 'string',
-										required: true
+										required: true,
 									},
 									offset: {
 										type: 'integer',
 										required: false,
-										default: 0
+										default: 0,
 									},
 									limit: {
 										type: 'integer',
 										required: false,
-										default: 20
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+										default: 20,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		security: [
 			{
-				apiKey: []
-			}
-		]
+				apiKey: [],
+			},
+		],
 	},
 	apis: ['./node_app/routes/externalSearchRouter.js', './node_app/routes/externalGraphRouter.js'],
 };
@@ -78,7 +80,7 @@ module.exports.SwaggerDefinition = {
 module.exports.SwaggerOptions = {
 	customSiteTitle: 'GAMECHANGER DOCS',
 	customCss: '.topbar { display: none }',
-	customFavIcon: './node_app/routes/favicon.ico'
+	customFavIcon: './node_app/routes/favicon.ico',
 };
 
 class ExternalAPIController {
@@ -94,8 +96,8 @@ class ExternalAPIController {
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS
-			})
+				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS,
+			}),
 		} = opts;
 
 		this.constants = constants;
@@ -121,32 +123,37 @@ class ExternalAPIController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
-			const requests = await this.apiKeyRequests.findAll({ 
+			const requests = await this.apiKeyRequests.findAll({
 				raw: false,
-				include: [{
-					model: this.cloneMeta,
-					attributes: ['id', 'clone_name'],
-					through: {attributes: []}
-				}],
+				include: [
+					{
+						model: this.cloneMeta,
+						attributes: ['id', 'clone_name'],
+						through: { attributes: [] },
+					},
+				],
 			});
 
-			const pending = []; const approved = [];
+			const pending = [];
+			const approved = [];
 
 			for (const request of requests) {
 				if (request.approved) {
-					const key = await this.apiKeys.findOne({ 
-						raw: false, 
-						where: { 
+					const key = await this.apiKeys.findOne({
+						raw: false,
+						where: {
 							username: request.username,
-							active: true
-						 },
-						include: [{
-							model: this.cloneMeta,
-							attributes: ['id', 'clone_name'],
-							through: {attributes: []}
-						}],
+							active: true,
+						},
+						include: [
+							{
+								model: this.cloneMeta,
+								attributes: ['id', 'clone_name'],
+								through: { attributes: [] },
+							},
+						],
 					});
-					if(key){
+					if (key) {
 						request.dataValues.key = key.apiKey;
 						request.dataValues.keyClones = key.clone_meta;
 						request.dataValues.description = key.description;
@@ -157,11 +164,10 @@ class ExternalAPIController {
 				}
 			}
 
-			res.status(200).send({pending, approved});
-
+			res.status(200).send({ pending, approved });
 		} catch (err) {
 			this.logger.error(err, '8K7PYSG', userId);
-			res.status(500).send({pending: [], approved: []});
+			res.status(500).send({ pending: [], approved: [] });
 		}
 	}
 
@@ -169,17 +175,19 @@ class ExternalAPIController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {id, approve = false} = req.body;
+			const { id, approve = false } = req.body;
 
 			if (id >= 0) {
-				const request = await this.apiKeyRequests.findOne({ 
-					where: { id }, 
+				const request = await this.apiKeyRequests.findOne({
+					where: { id },
 					raw: false,
-					include: [{
-						model: this.cloneMeta,
-						attributes: ['id'],
-						through: {attributes: []}
-					}],
+					include: [
+						{
+							model: this.cloneMeta,
+							attributes: ['id'],
+							through: { attributes: [] },
+						},
+					],
 				});
 
 				if (request) {
@@ -190,19 +198,19 @@ class ExternalAPIController {
 							username: request.dataValues.username,
 							apiKey,
 							active: true,
-							description: request.reason
+							description: request.reason,
 						});
-						const joinObjects = request.dataValues.clone_meta.map(clone => {
+						const joinObjects = request.dataValues.clone_meta.map((clone) => {
 							return {
 								apiKeyId: key.dataValues.id,
-								cloneId: clone.id
+								cloneId: clone.id,
 							};
 						});
-						
+
 						const joins = await this.apiKeyClones.bulkCreate(joinObjects, {
 							returning: true,
-							ignoreDuplicates: true
-						});	
+							ignoreDuplicates: true,
+						});
 
 						if (joins) {
 							await this.apiKeyRequests.update({ approved: true, rejected: false }, { where: { id } });
@@ -214,7 +222,7 @@ class ExternalAPIController {
 					} else {
 						// Reject the request
 						await this.apiKeyRequests.update({ rejected: true, approved: false }, { where: { id } });
-						res.status(200).send({status: 'rejected'});
+						res.status(200).send({ status: 'rejected' });
 					}
 				} else {
 					// request not found
@@ -223,7 +231,6 @@ class ExternalAPIController {
 			} else {
 				res.sendStatus(400);
 			}
-
 		} catch (err) {
 			this.logger.error(err, 'DUHQD90', userId);
 			res.status(500).send(err);
@@ -234,22 +241,20 @@ class ExternalAPIController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {id} = req.body;
+			const { id } = req.body;
 
 			if (id >= 0) {
 				const request = await this.apiKeyRequests.findOne({ where: { id }, raw: true });
 
 				// Find the API keys associated and make them not active
-				await this.apiKeys.update({active: false}, { where: { username: request.username } });
+				await this.apiKeys.update({ active: false }, { where: { username: request.username } });
 
 				// Reject request
 				await this.apiKeyRequests.update({ rejected: true, approved: false }, { where: { id } });
 				res.sendStatus(200);
-
 			} else {
 				res.sendStatus(400);
 			}
-
 		} catch (err) {
 			this.logger.error(err, 'OHLSKSC', userId);
 			res.status(500).send(err);
@@ -260,38 +265,37 @@ class ExternalAPIController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {name, email, reason, clones} = req.body;
+			const { name, email, reason, clones } = req.body;
 
 			if (name && email && reason) {
 				try {
 					const request = await this.apiKeyRequests.create({
-						username: userId,
+						username: getUserIdFromSAMLUserId(req),
 						name,
 						email,
-						reason
+						reason,
 					});
 
-					const joinObjects = clones.map(cloneId => {
+					const joinObjects = clones.map((cloneId) => {
 						return {
 							apiKeyRequestId: request.dataValues.id,
-							cloneId
+							cloneId,
 						};
 					});
-					
+
 					const joins = await this.apiKeyRequestClones.bulkCreate(joinObjects, {
 						returning: true,
-						ignoreDuplicates: true
+						ignoreDuplicates: true,
 					});
 
 					if (joins) res.sendStatus(200);
 					else res.sendStatus(400);
 				} catch (err) {
-					res.status(400).send({status: 'request already exists'});
+					res.status(400).send({ status: 'request already exists' });
 				}
 			} else {
 				res.sendStatus(400);
 			}
-
 		} catch (err) {
 			this.logger.error(err, 'GUJ8UVG', userId);
 			res.status(500).send(err);
@@ -300,15 +304,17 @@ class ExternalAPIController {
 
 	async updateAPIKeyDescription(req, res) {
 		let userId = 'webapp_unknown';
-		try{
+		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { description, key } = req.body;
 			const update = await this.apiKeys.update({ description }, { where: { apiKey: key } });
 			if (update) {
-				res.status(200).send({status: update});
-			} else { res.status(400) }
-		} catch(err) {
-			this.logger.error(err, "MJID22P", userId);
+				res.status(200).send({ status: update });
+			} else {
+				res.status(400);
+			}
+		} catch (err) {
+			this.logger.error(err, 'MJID22P', userId);
 		}
 	}
 
@@ -317,8 +323,8 @@ class ExternalAPIController {
 			const active = await this.apiKeys.findOne({
 				where: {
 					username: userId,
-					active: true
-				}
+					active: true,
+				},
 			});
 			if (active && 'apiKey' in active) {
 				return active.apiKey;
@@ -365,15 +371,22 @@ class ExternalAPIController {
 				{
 					filename: 'GC-api-access.png',
 					path: __dirname + '/../../images/email/GC-api-access.png',
-					cid: 'gc-api-access'
+					cid: 'gc-api-access',
 				},
 				{
 					filename: 'GC-footer.png',
 					path: __dirname + '/../../images/email/GC-footer.png',
-					cid: 'gc-footer'
-				}
+					cid: 'gc-footer',
+				},
 			];
-			await this.emailUtility.sendEmail(emailBody,"GAMECHANGER API Key",request.email, this.constants.GAME_CHANGER_OPTS.emailAddress, attachment, userId);
+			await this.emailUtility.sendEmail(
+				emailBody,
+				'GAMECHANGER API Key',
+				request.email,
+				this.constants.GAME_CHANGER_OPTS.emailAddress,
+				attachment,
+				userId
+			);
 		} catch (err) {
 			this.logger.error(JSON.stringify(err), 'S6ED9GF', userId);
 		}

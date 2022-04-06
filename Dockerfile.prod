@@ -4,6 +4,7 @@ FROM $BASE_IMAGE
 # to support RHEL-based and DEBIAN-based version of node
 # e.g. RHEL-based node images in ironbank, DEBIAN-based ones in docker hub
 USER root
+
 RUN yum install -y \
         git \
         make

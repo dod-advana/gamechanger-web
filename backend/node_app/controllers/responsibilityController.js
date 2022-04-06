@@ -1,6 +1,6 @@
 const RESPONSIBILITIES = require('../models').responsibilities;
 const RESPONSIBILITY_REPORTS = require('../models').responsibility_report;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const EmailUtility = require('../utils/emailUtility');
 const constantsFile = require('../config/constants');
@@ -8,9 +8,7 @@ const { DataLibrary } = require('../lib/dataLibrary');
 const Sequelize = require('sequelize');
 const { Op } = Sequelize;
 
-
 class ResponsibilityController {
-
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
@@ -21,8 +19,8 @@ class ResponsibilityController {
 			emailUtility = new EmailUtility({
 				fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 				fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS
-			})
+				transportOptions: constants.ADVANA_EMAIL_TRANSPORT_OPTIONS,
+			}),
 		} = opts;
 
 		this.logger = logger;
@@ -49,118 +47,105 @@ class ResponsibilityController {
 		this.updateResponsibility = this.updateResponsibility.bind(this);
 		this.updateResponsibilityReport = this.updateResponsibilityReport.bind(this);
 	}
-	
+
 	async getOtherEntResponsibilityFilterList(req, res) {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const results = await this.responsibilities.findAll({
 				raw: true,
-				attributes: [
-					'otherOrganizationPersonnel'
-				]
+				attributes: ['otherOrganizationPersonnel'],
 			});
-			
+
 			const filterReturns = [];
-			
-			results.forEach(result => {
+
+			results.forEach((result) => {
 				if (result.otherOrganizationPersonnel === null) {
 					if (!filterReturns.includes('null')) {
 						filterReturns.push('null');
 					}
-				}
-				else {
+				} else {
 					const otherOrgsArray = result.otherOrganizationPersonnel.split('|');
-					otherOrgsArray.forEach(org => {
+					otherOrgsArray.forEach((org) => {
 						if (!filterReturns.includes(org)) {
 							filterReturns.push(org);
 						}
 					});
 				}
 			});
-			
-			res.status(200).send(filterReturns.sort());
 
+			res.status(200).send(filterReturns.sort());
 		} catch (err) {
 			this.logger.error(err, 'DPDA9Y3', userId);
 			res.status(500).send([]);
 		}
 	}
 
-
-	paraNumQuery(filename, text){
+	paraNumQuery(filename, text) {
 		const query = {
-			'_source': {
-				'includes': [
-					'pagerank_r',
-					'kw_doc_score_r',
-					'orgs_rs',
-					'topics_rs',
-					'download_url_s',
-				]
+			_source: {
+				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_rs', 'download_url_s'],
 			},
-			'stored_fields': [
-				'filename',
-			],
-			'from': 0,
-			'size': 1,
-			'track_total_hits': true,
-			'query': {
-				'bool': {
-					'must': [],
-					'should': [
+			stored_fields: ['filename'],
+			from: 0,
+			size: 1,
+			track_total_hits: true,
+			query: {
+				bool: {
+					must: [],
+					should: [
 						{
-							'nested': {
-								'path': 'paragraphs',
-								'inner_hits': {
-									'_source': false,
-									'stored_fields': [
+							nested: {
+								path: 'paragraphs',
+								inner_hits: {
+									_source: false,
+									stored_fields: [
 										'paragraphs.par_inc_count',
 										'paragraphs.filename',
 										'paragraphs.page_num_i',
-										'paragraphs.par_raw_text_t'
+										'paragraphs.par_raw_text_t',
 									],
 								},
-								'query': {
-									'bool': {
-										'should': [
+								query: {
+									bool: {
+										should: [
 											{
-												'query_string': {
-													'query': text,
-													'default_field': 'paragraphs.par_raw_text_t',
-													'default_operator': 'or',
-													'fuzzy_max_expansions': 100,
-													'fuzziness': 'AUTO'
-												}
+												query_string: {
+													query: text,
+													default_field: 'paragraphs.par_raw_text_t',
+													default_operator: 'or',
+													fuzzy_max_expansions: 100,
+													fuzziness: 'AUTO',
+												},
 											},
 										],
-										'must': [
+										must: [
 											{
-												'query_string': {
-													'query': filename,
-													'default_field': 'paragraphs.filename',
-													'default_operator': 'and',
-													'fuzzy_max_expansions': 100,
-													'fuzziness': 'AUTO'
-												}
-											}
+												query_string: {
+													query: filename,
+													default_field: 'paragraphs.filename',
+													default_operator: 'and',
+													fuzzy_max_expansions: 100,
+													fuzziness: 'AUTO',
+												},
+											},
 										],
 										//"minimum_should_match": 1
-									}
-								}
-							}
-						}
+									},
+								},
+							},
+						},
 					],
-					'minimum_should_match': 1,
-				}
+					minimum_should_match: 1,
+				},
 			},
-			'sort': [
+			sort: [
 				{
-					'_score': {
-						'order': 'desc'
-					}
-				}
-			]
+					_score: {
+						order: 'desc',
+					},
+				},
+			],
 		};
 		return query;
 	}
@@ -172,12 +157,11 @@ class ResponsibilityController {
 				size: 1,
 				query: {
 					bool: {
-						should:
-						{
-							match: { 'filename': filename }
-						}	
-					}
-				}
+						should: {
+							match: { filename: filename },
+						},
+					},
+				},
 			};
 		} catch (err) {
 			this.logger.error(err, 'DOIFCN', userId);
@@ -188,7 +172,7 @@ class ResponsibilityController {
 		// using a filename and a string, get back a list of paragraphs for the document AND
 		// the paragraph number for the string.
 		let userId = 'webapp_unknown';
-		try{
+		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
@@ -198,7 +182,7 @@ class ResponsibilityController {
 			let esIndex = 'gamechanger';
 			switch (cloneData.clone_name) {
 				case 'eda':
-					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 						esClientName = 'eda';
 						esIndex = 'eda';
 					} else {
@@ -224,14 +208,13 @@ class ResponsibilityController {
 		} catch (err) {
 			this.logger.error(err, 'QEDSN75', userId);
 		}
-
 	}
 
-	cleanEsQueryText(text){
+	cleanEsQueryText(text) {
 		let cleanText = text;
 
 		const colonIndex = text.match(/:+$/)?.index;
-		if(colonIndex) cleanText = cleanText.slice(0, colonIndex);
+		if (colonIndex) cleanText = cleanText.slice(0, colonIndex);
 
 		return cleanText;
 	}
@@ -240,12 +223,12 @@ class ResponsibilityController {
 		// using a filename and a string, get back a list of paragraphs for the document AND
 		// the paragraph number for the string.
 		let userId = 'webapp_unknown';
-		try{
+		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneData = {}, filename = '', text = '' } = req.body;
-			
+
 			const cleanedText = this.cleanEsQueryText(text);
 
 			let esQuery = this.paraNumQuery(filename, cleanedText);
@@ -253,7 +236,7 @@ class ResponsibilityController {
 			let esIndex = 'gamechanger';
 			switch (cloneData.clone_name) {
 				case 'eda':
-					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')){
+					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
 						esClientName = 'eda';
 						esIndex = 'eda';
 					} else {
@@ -265,26 +248,25 @@ class ResponsibilityController {
 					esIndex = this.constants.GAME_CHANGER_OPTS.index;
 			}
 			const rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			const pageNumber = rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields['paragraphs.page_num_i'][0];
+			const pageNumber =
+				rawResults.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields['paragraphs.page_num_i'][0];
 			const fileLink = rawResults.body.hits.hits[0]._source.download_url_s;
 
-			res.status(200).send({fileLink, pageNumber});
+			res.status(200).send({ fileLink, pageNumber });
 		} catch (err) {
 			res.status(500).send();
 			this.logger.error(err, 'QRDSM32', userId);
 		}
-
 	}
 
 	async getParagraphNum(raw, user) {
 		try {
-			if (raw.body.hits.hits.length === 0 ){
+			if (raw.body.hits.hits.length === 0) {
 				return -1;
 			} else {
 				let fields = raw.body.hits.hits[0].inner_hits.paragraphs.hits.hits[0].fields;
 				return fields['paragraphs.par_inc_count'][0];
 			}
-			
 		} catch (err) {
 			this.logger.error(err.message, 'FSDEW78', user);
 		}
@@ -292,10 +274,9 @@ class ResponsibilityController {
 
 	async cleanUpEsResults(raw, user) {
 		try {
-			
 			let results = {
 				totalCount: raw.body.hits.total.value,
-				docs: []
+				docs: [],
 			};
 
 			raw.body.hits.hits.forEach((r) => {
@@ -313,12 +294,11 @@ class ResponsibilityController {
 			let returnObj;
 
 			if (document) {
-
 				returnObj = {
 					doc_id: document.id,
 					doc_num: document.doc_num,
 					par_num: paragraphNum,
-					paragraphs: document.paragraphs.filter(child => {
+					paragraphs: document.paragraphs.filter((child) => {
 						if (child.type === 'paragraph') return child;
 					}),
 				};
@@ -329,7 +309,7 @@ class ResponsibilityController {
 					paragraphs: [],
 				};
 			}
-			
+
 			return returnObj;
 		} catch (err) {
 			const { message } = err;
@@ -350,42 +330,39 @@ class ResponsibilityController {
 			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.body;
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
-			where.forEach(({id, value}) => {
+			where.forEach(({ id, value }) => {
 				if (id === 'id') {
 					tmpWhere[id] = {
-						[Op.eq]: value
+						[Op.eq]: value,
 					};
 				} else {
 					if (id === 'otherOrganizationPersonnel') {
 						if (value.includes(null)) {
 							tmpWhere[id] = {
-								[Op.or]: [
-									{ [Op.like]: { [Op.any]: value } },
-									{ [Op.eq]: null },
-								]
+								[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
 							};
 						} else {
 							tmpWhere[id] = {
-								[Op.like]: { [Op.any]: value }
+								[Op.like]: { [Op.any]: value },
 							};
 						}
-					} else if (docView && id === 'documentTitle'){
-						if(!tmpWhere[Op.or]) tmpWhere[Op.or] = [];
+					} else if (docView && id === 'documentTitle') {
+						if (!tmpWhere[Op.or]) tmpWhere[Op.or] = [];
 						tmpWhere[Op.or].push({
-							[id]: value
+							[id]: value,
 						});
 					} else {
-						if(!tmpWhere[id]) tmpWhere[id] = {[Op.or]: []};
+						if (!tmpWhere[id]) tmpWhere[id] = { [Op.or]: [] };
 						tmpWhere[id][Op.or].push({
-							[Op.iLike]: `%${value}%`
+							[Op.iLike]: `%${value}%`,
 						});
 					}
 				}
 			});
-			tmpWhere['status'] = {[Op.not]: 'rejected'};
+			tmpWhere['status'] = { [Op.not]: 'rejected' };
 			const newOffsets = [];
 			let newLimit = 0;
-			if(docView){
+			if (docView) {
 				const docOffsets = await this.responsibilities.findAndCountAll({
 					where: tmpWhere,
 					group: 'documentTitle',
@@ -393,11 +370,11 @@ class ResponsibilityController {
 					attributes: [
 						[Sequelize.fn('COUNT', Sequelize.col('documentTitle')), 'documentCount'],
 						'documentTitle',
-					]
+					],
 				});
-				docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.documentCount)));
-				for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
-					if(!newOffsets[i]) break;
+				docOffsets.rows.forEach((data) => newOffsets.push(Number(data.dataValues.documentCount)));
+				for (let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++) {
+					if (!newOffsets[i]) break;
 					newLimit += newOffsets[i];
 				}
 			}
@@ -413,11 +390,10 @@ class ResponsibilityController {
 					'organizationPersonnel',
 					'responsibilityText',
 					'otherOrganizationPersonnel',
-					'documentsReferenced'
-				]
+					'documentsReferenced',
+				],
 			});
-			res.status(200).send({offsets: newOffsets, totalCount: results.count, results: results.rows});
-
+			res.status(200).send({ offsets: newOffsets, totalCount: results.count, results: results.rows });
 		} catch (err) {
 			this.logger.error(err, 'ASDED20', userId);
 			res.status(500).send(err);
@@ -430,17 +406,14 @@ class ResponsibilityController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 
 			const where = {};
-			where['status'] = {[Op.not]: 'rejected'};
+			where['status'] = { [Op.not]: 'rejected' };
 
 			const results = await this.responsibilities.findAll({
 				group: ['documentTitle'],
 				where,
-				attributes: [
-					'documentTitle',
-				]
+				attributes: ['documentTitle'],
 			});
-			res.status(200).send({results});
-
+			res.status(200).send({ results });
 		} catch (err) {
 			this.logger.error(err, 'BTEFE31', userId);
 			res.status(500).send(err);
@@ -453,14 +426,14 @@ class ResponsibilityController {
 		try {
 			const { id } = req.body;
 
-			const result = await this.responsibilities.update({status: 'rejected'},
+			const result = await this.responsibilities.update(
+				{ status: 'rejected' },
 				{
 					where: { id: id },
-					subQuery: false
+					subQuery: false,
 				}
 			);
 			res.status(200).send();
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'UYDC4856', userId);
@@ -501,82 +474,91 @@ class ResponsibilityController {
 		try {
 			const { update, responsibility, status } = req.body;
 			const { id: updateId, updatedText, updatedColumn } = update;
-			const { id: responsibilityId, responsibilityText, organizationPersonnel} = responsibility;
+			const { id: responsibilityId, responsibilityText, organizationPersonnel } = responsibility;
 			let responsibilityStatus;
-			if(updatedColumn === 'Reject' && status === 'accepted'){
-				await this.responsibilities.update({
-					status: 'rejected'
-				}, 
-				{
-					where: {
-						id: responsibilityId
+			if (updatedColumn === 'Reject' && status === 'accepted') {
+				await this.responsibilities.update(
+					{
+						status: 'rejected',
+					},
+					{
+						where: {
+							id: responsibilityId,
+						},
 					}
-				});
-				await this.responsibility_reports.update({
-					issue_description: status
-				}, 
-				{
-					where: {
-						id: updateId
+				);
+				await this.responsibility_reports.update(
+					{
+						issue_description: status,
+					},
+					{
+						where: {
+							id: updateId,
+						},
 					}
-				});
+				);
 
 				return res.status(200).send();
 			}
 			const foundResp = await this.responsibilities.findOne({
-				where: {id: responsibilityId},
+				where: { id: responsibilityId },
 				include: {
 					model: RESPONSIBILITY_REPORTS,
-					where: {issue_description: 'review'}
-				}
+					where: { issue_description: 'review' },
+				},
 			});
-			if(status === 'accepted'){ 
-				if(foundResp?.dataValues.responsibility_reports.length <= 1) {
+			if (status === 'accepted') {
+				if (foundResp?.dataValues.responsibility_reports.length <= 1) {
 					responsibilityStatus = 'updated';
-				}else{
+				} else {
 					responsibilityStatus = 'updated, review';
 				}
-				await this.responsibilities.update({
-					[updatedColumn]: updatedText,
-					status: responsibilityStatus
-				}, 
-				{
-					where: {
-						id: responsibilityId
-					}
-				});
-				let responsibilityUpdate;
-				if(updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
-				if(updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
-				await this.responsibility_reports.update({
-					updatedText: responsibilityUpdate,
-					issue_description: status
-				}, 
-				{
-					where: {
-						id: updateId
-					}
-				});
-			}
-			if(status === 'rejected'){
-				await this.responsibility_reports.destroy({
-					where: {
-						id: updateId
-					}
-				});
-				if(foundResp?.dataValues.responsibility_reports.length <= 1){
-					await this.responsibilities.update({
-						status: 'active'
+				await this.responsibilities.update(
+					{
+						[updatedColumn]: updatedText,
+						status: responsibilityStatus,
 					},
 					{
 						where: {
-							id: responsibilityId
+							id: responsibilityId,
+						},
+					}
+				);
+				let responsibilityUpdate;
+				if (updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
+				if (updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
+				await this.responsibility_reports.update(
+					{
+						updatedText: responsibilityUpdate,
+						issue_description: status,
+					},
+					{
+						where: {
+							id: updateId,
+						},
+					}
+				);
+			}
+			if (status === 'rejected') {
+				await this.responsibility_reports.destroy({
+					where: {
+						id: updateId,
+					},
+				});
+				if (foundResp?.dataValues.responsibility_reports.length <= 1) {
+					await this.responsibilities.update(
+						{
+							status: 'active',
+						},
+						{
+							where: {
+								id: responsibilityId,
+							},
 						}
-					});
+					);
 				}
 			}
 			res.status(200).send();
-
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'IORFMS75', userId);
@@ -587,21 +569,23 @@ class ResponsibilityController {
 
 	async updateResponsibilityReport(req, res) {
 		let userId = 'unknown_webapp';
-		try{
+		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { id, updatedText, textPosition } = req.body;
 
-			const result = await this.responsibility_reports.update({
-				updatedText,
-				textPosition
-			}, 
-			{
-				where: {
-					id
+			const result = await this.responsibility_reports.update(
+				{
+					updatedText,
+					textPosition,
+				},
+				{
+					where: {
+						id,
+					},
 				}
-			});
+			);
 			res.status(200).send(result);
-		}catch (err) {
+		} catch (err) {
 			this.logger.error(err, '1PU0TKR', userId);
 			res.status(500).send(err);
 		}
@@ -611,8 +595,8 @@ class ResponsibilityController {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const {id, issue_description, updatedColumn, updatedText, textPosition} = req.body;
-			if(id == null || !issue_description) return res.status(400).send();
+			const { id, issue_description, updatedColumn, updatedText, textPosition } = req.body;
+			if (id == null || !issue_description) return res.status(400).send();
 
 			const hashed_user = sparkMD5Lib.hash(userId);
 			const report = await this.responsibility_reports.create({
@@ -621,17 +605,18 @@ class ResponsibilityController {
 				issue_description,
 				updatedColumn,
 				updatedText,
-				textPosition
+				textPosition,
 			});
-			await this.responsibilities.update({
-				status: 'review'
-			},
-			{
-				where: { id: id },
-				subQuery: false
-			}
+			await this.responsibilities.update(
+				{
+					status: 'review',
+				},
+				{
+					where: { id: id },
+					subQuery: false,
+				}
 			);
-				
+
 			res.status(200).send(report);
 		} catch (err) {
 			this.logger.error(err, '5PO0TJR', userId);
@@ -650,7 +635,7 @@ class ResponsibilityController {
 	// 			include: RESPONSIBILITIES,
 	// 			where
 	// 		})
-				
+
 	// 		res.status(200).send(updates);
 	// 	} catch (err) {
 	// 		console.log(err)
@@ -667,21 +652,18 @@ class ResponsibilityController {
 			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
 			order.push(['filename', 'ASC']);
 			const where = {};
-			where['status'] = {[Op.like]: '%review%'};
+			where['status'] = { [Op.like]: '%review%' };
 			const newOffsets = [];
 			let limit = 0;
 			const docOffsets = await this.responsibilities.findAndCountAll({
 				where,
 				group: 'filename',
 				order: order,
-				attributes: [
-					[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'],
-					'filename',
-				]
+				attributes: [[Sequelize.fn('COUNT', Sequelize.col('filename')), 'filenameCount'], 'filename'],
 			});
-			docOffsets.rows.forEach(data => newOffsets.push(Number(data.dataValues.filenameCount)));
-			for(let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++){
-				if(!newOffsets[i]) break;
+			docOffsets.rows.forEach((data) => newOffsets.push(Number(data.dataValues.filenameCount)));
+			for (let i = (page - 1) * DOCS_PER_PAGE; i < page * DOCS_PER_PAGE; i++) {
+				if (!newOffsets[i]) break;
 				limit += newOffsets[i];
 			}
 			const results = await this.responsibilities.findAndCountAll({
@@ -691,11 +673,10 @@ class ResponsibilityController {
 				where,
 				include: {
 					model: RESPONSIBILITY_REPORTS,
-					where: { issue_description: 'review'}
-				}
+					where: { issue_description: 'review' },
+				},
 			});
-			res.status(200).send({offsets: newOffsets, totalCount: results.count, results: results.rows});
-
+			res.status(200).send({ offsets: newOffsets, totalCount: results.count, results: results.rows });
 		} catch (err) {
 			this.logger.error(err, 'BSRE320', userId);
 			res.status(500).send(err);

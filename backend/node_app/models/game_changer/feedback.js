@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const FEEDBACK = sequelize.define('feedback',
+	const FEEDBACK = sequelize.define(
+		'feedback',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			event_name: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			user_id: {
 				type: DataTypes.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			createdAt: {
 				allowNull: false,
-				type: DataTypes.DATE
+				type: DataTypes.DATE,
 			},
 			value_1: {
 				type: DataTypes.STRING,

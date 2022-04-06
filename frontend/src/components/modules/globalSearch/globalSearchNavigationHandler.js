@@ -2,12 +2,8 @@ import React from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { HoverNavItem, NavItem } from '../../navigation/NavItems';
 import { trackEvent } from '../../telemetry/Matomo';
-import {getTrackingNameForFactory, PAGE_DISPLAYED} from '../../../utils/gamechangerUtils';
-import {
-	ConstrainedIcon,
-	PageLink,
-	StyledBadgeSmall,
-} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
+import { ConstrainedIcon, PageLink, StyledBadgeSmall } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
@@ -18,9 +14,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 import UserIcon from '../../../images/icon/UserIcon.png';
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const getToolTheme = (cloneData) => {
 	return {
@@ -32,14 +26,7 @@ const getToolTheme = (cloneData) => {
 		sectionSeparatorColor: '#323E4A',
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
-		toolLogo: (
-			<img
-				src={AdvanaDarkTheme}
-				style={{ width: '196px' }}
-				alt="search"
-				id={'titleLogo'}
-			/>
-		),
+		toolLogo: <img src={AdvanaDarkTheme} style={{ width: '196px' }} alt="search" id={'titleLogo'} />,
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 	};
 };
@@ -86,13 +73,8 @@ const GlobalSearchNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							centered
 							onClick={() => {
@@ -138,7 +120,11 @@ const GlobalSearchNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -154,11 +140,7 @@ const GlobalSearchNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href="#/gamechanger-admin"
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>
@@ -213,7 +195,11 @@ const GlobalSearchNavigationHandler = {
 				<GCTooltip title="User Dashboard" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -230,7 +216,7 @@ const GlobalSearchNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin">
+						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 								<span style={{ marginLeft: '10px' }}>Admin Page</span>

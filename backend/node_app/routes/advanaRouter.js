@@ -4,11 +4,11 @@ const router = express.Router();
 
 const MatomoController = require('../controllers/matomoController');
 const { TutorialOverlayController } = require('../controllers/tutorialOverlaysController');
+const { UserController } = require('../controllers/userController');
 
 const matomoController = new MatomoController();
 const tutorialOverlay = new TutorialOverlayController();
-const userController = require('../controllers/userManagement');
-
+const userController = new UserController();
 
 // matomo
 router.get('/matomo', matomoController.getAppMatomoStatus);

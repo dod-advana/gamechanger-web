@@ -1,12 +1,9 @@
 const TUTORIAL_OVERLAYS = require('../models').tutorial_overlays;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 class TutorialOverlayController {
 	constructor(opts = {}) {
-		const {
-			tutorialOverlays = TUTORIAL_OVERLAYS,
-			logger = LOGGER,
-		} = opts;
+		const { tutorialOverlays = TUTORIAL_OVERLAYS, logger = LOGGER } = opts;
 
 		this.tutorialOverlays = tutorialOverlays;
 		this.logger = logger;
@@ -36,11 +33,12 @@ class TutorialOverlayController {
 		const userId = req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
-			return this.tutorialOverlays.update(componentsList, {
-				where: {
-					app_name: appName
-				}
-			})
+			return this.tutorialOverlays
+				.update(componentsList, {
+					where: {
+						app_name: appName,
+					},
+				})
 				.then((result) => {
 					if (result[0] === 1) {
 						res.status(200).send('Successfully updated tutorial');
@@ -50,7 +48,8 @@ class TutorialOverlayController {
 					} else {
 						res.status(400).send('Failed to update tutorial');
 					}
-				}).catch((err) => {
+				})
+				.catch((err) => {
 					console.log(err);
 					return res.status(400).send(err);
 				});
@@ -58,7 +57,7 @@ class TutorialOverlayController {
 			console.log(err);
 			this.logger.error(err, 'JE2CXPV', userId);
 			return res.status(500).send(err);
-		};
+		}
 	}
 }
 

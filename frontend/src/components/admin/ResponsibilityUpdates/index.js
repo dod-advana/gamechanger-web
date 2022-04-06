@@ -34,23 +34,22 @@ const styles = {
 	docExplorerPag: {
 		display: 'flex',
 		width: '100%',
-	}
+	},
 };
 const UpdateMetaText = styled.div`
-        color: #1E88E5;
-		&:hover {
-			cursor: pointer;
-			text-decoration: underline;
-		}
-    `;
+	color: #1e88e5;
+	&:hover {
+		cursor: pointer;
+		text-decoration: underline;
+	}
+`;
 const defaultIframPreviewLink = {
 	dataIdx: 0,
 	entityIdx: 0,
-	responsibilityIdx: 0
+	responsibilityIdx: 0,
 };
 
 export default function ResponsibilityUpdates() {
-
 	const DOCS_PER_PAGE = 3;
 
 	// Set out state variables and access functions
@@ -72,13 +71,13 @@ export default function ResponsibilityUpdates() {
 	const [refreshDocument, setRefreshDocument] = useState(false);
 
 	useEffect(() => {
-		if(Object.keys(responsibilityData).length){
+		if (Object.keys(responsibilityData).length) {
 			const { dataIdx, entityIdx, responsibilityIdx } = iframePreviewLink;
 			const doc = Object.keys(responsibilityData)[dataIdx];
 			let entity;
-			if(responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[entityIdx];
+			if (responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[entityIdx];
 			let resp;
-			if(responsibilityData?.[doc]?.[entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
+			if (responsibilityData?.[doc]?.[entity]) resp = responsibilityData[doc][entity][responsibilityIdx];
 			if (resp) {
 				setSelectedResponsibility(resp);
 			}
@@ -86,10 +85,10 @@ export default function ResponsibilityUpdates() {
 	}, [responsibilityData, iframePreviewLink]);
 
 	useEffect(() => {
-		if(selectedResponsibility?.responsibility_reports){
+		if (selectedResponsibility?.responsibility_reports) {
 			const newHighlights = [];
-			selectedResponsibility.responsibility_reports.forEach(report => {
-				if(report.textPosition) newHighlights.push({position: report.textPosition, id: report.id});
+			selectedResponsibility.responsibility_reports.forEach((report) => {
+				if (report.textPosition) newHighlights.push({ position: report.textPosition, id: report.id });
 			});
 			setHighlights(newHighlights);
 			setSelectedUpdate(selectedResponsibility.responsibility_reports[0]);
@@ -98,33 +97,33 @@ export default function ResponsibilityUpdates() {
 	}, [selectedResponsibility]);
 
 	useEffect(() => {
-		if(refreshDocument){
+		if (refreshDocument) {
 			setDocumentLink(refreshDocument);
 			setRefreshDocument(false);
 		}
 	}, [refreshDocument]);
 
 	useEffect(() => {
-		if(editing){
+		if (editing) {
 			setEditing(false);
 			const newHighlights = [];
-			selectedResponsibility.responsibility_reports.forEach(report => {
-				newHighlights.push({position: report.textPosition, id: report.id});
+			selectedResponsibility.responsibility_reports.forEach((report) => {
+				newHighlights.push({ position: report.textPosition, id: report.id });
 			});
 			setHighlights(newHighlights);
 		}
 		setScrollId(`${selectedUpdate.id}`);
 		setRefreshDocument(documentLink);
 		setDocumentLink('');
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedUpdate]);
 
 	useEffect(() => {
 		if (!Object.keys(collapseKeys).length && Object.keys(responsibilityData).length) {
 			let initialCollapseKeys = {};
-			Object.keys(responsibilityData).forEach(doc => {
+			Object.keys(responsibilityData).forEach((doc) => {
 				initialCollapseKeys[doc] = false;
-				Object.keys(responsibilityData[doc]).forEach(entity => {
+				Object.keys(responsibilityData[doc]).forEach((entity) => {
 					initialCollapseKeys[doc + entity] = false;
 				});
 			});
@@ -137,14 +136,14 @@ export default function ResponsibilityUpdates() {
 			handleFetchData({ page: resultsPage, sorted: [], filtered: [] });
 			setReloadResponsibilities(false);
 		}
-	 }, [reloadResponsibilities, resultsPage]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [reloadResponsibilities, resultsPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	 useEffect(() => {
+	useEffect(() => {
 		const getFileName = async () => {
 			const payload = {
-				filename: selectedResponsibility.filename
+				filename: selectedResponsibility.filename,
 			};
-			if(payload.filename){
+			if (payload.filename) {
 				const { data } = await gameChangerAPI.getResponsibilityDocLink(payload);
 				setDocumentLink(data.fileLink);
 			}
@@ -158,17 +157,17 @@ export default function ResponsibilityUpdates() {
 			const tmpFiltered = [...filtered];
 			let offset = 0;
 			let limit = 0;
-			for(let i = 1; i <= page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++){
-				if(!offsets[i]) break;
+			for (let i = 1; i <= page * DOCS_PER_PAGE - DOCS_PER_PAGE; i++) {
+				if (!offsets[i]) break;
 				offset += offsets[i];
 			}
-			for(let i = 1 + (page - 1) * DOCS_PER_PAGE; i <= page * DOCS_PER_PAGE; i++){
-				if(!offsets[i]) break;
+			for (let i = 1 + (page - 1) * DOCS_PER_PAGE; i <= page * DOCS_PER_PAGE; i++) {
+				if (!offsets[i]) break;
 				limit += offsets[i];
 			}
 			const { results = [] } = await getData({
 				limit,
-				page: resultsPage, 
+				page: resultsPage,
 				offset,
 				sorted,
 				filtered: tmpFiltered,
@@ -182,16 +181,10 @@ export default function ResponsibilityUpdates() {
 		}
 	};
 
-	const getData = async ({
-		limit,
-		page = 1,
-		offset = 0,
-		sorted = [],
-		filtered = [],
-	}) => {
+	const getData = async ({ limit, page = 1, offset = 0, sorted = [], filtered = [] }) => {
 		const order = sorted.map(({ id, desc }) => [id, desc ? 'DESC' : 'ASC']);
 		const where = filtered;
-                                                    
+
 		try {
 			const { data } = await gameChangerAPI.getResponsibilityUpdates({
 				docView: true,
@@ -201,13 +194,13 @@ export default function ResponsibilityUpdates() {
 				order,
 				where,
 			});
-			if(data.offsets){
+			if (data.offsets) {
 				const newOffsets = {};
 				data.offsets.forEach((resp, i) => {
-					if(!newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()]) {
-						newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] = 0;
+					if (!newOffsets[(Math.floor(i / DOCS_PER_PAGE) + 1).toString()]) {
+						newOffsets[(Math.floor(i / DOCS_PER_PAGE) + 1).toString()] = 0;
 					}
-					newOffsets[(Math.floor(i/DOCS_PER_PAGE) + 1).toString()] += resp;
+					newOffsets[(Math.floor(i / DOCS_PER_PAGE) + 1).toString()] += resp;
 				});
 				setOffsets(newOffsets);
 			}
@@ -223,21 +216,21 @@ export default function ResponsibilityUpdates() {
 		data.forEach((responsibility) => {
 			const doc = responsibility.documentTitle;
 			let entity = responsibility.organizationPersonnel;
-			if(!entity) entity = 'NO ENTITY';
-			if(!groupedData[doc]) groupedData[doc] = {};
-			if(!groupedData[doc][entity]) groupedData[doc][entity]= [];
+			if (!entity) entity = 'NO ENTITY';
+			if (!groupedData[doc]) groupedData[doc] = {};
+			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];
 			groupedData[doc][entity].push(responsibility);
 		});
 		setResponsibilityData(groupedData);
 	};
 
-	const onPaginationClick= (page) => {
+	const onPaginationClick = (page) => {
 		setResultsPage(page);
 		setReloadResponsibilities(true);
 	};
 
 	const handleMoveSelectedResp = () => {
-		if(selectedResponsibility.responsibility_reports?.length > 1) {
+		if (selectedResponsibility.responsibility_reports?.length > 1) {
 			return;
 		}
 		setIframePreviewLink(defaultIframPreviewLink);
@@ -245,9 +238,9 @@ export default function ResponsibilityUpdates() {
 
 	const acceptUpdate = async (update) => {
 		const data = {
-			update, 
-			responsibility: selectedResponsibility, 
-			status: 'accepted'
+			update,
+			responsibility: selectedResponsibility,
+			status: 'accepted',
 		};
 		await gameChangerAPI.updateResponsibility(data);
 		handleMoveSelectedResp();
@@ -256,9 +249,9 @@ export default function ResponsibilityUpdates() {
 
 	const rejectUpdate = async (update) => {
 		const data = {
-			update, 
-			responsibility: selectedResponsibility, 
-			status: 'rejected'
+			update,
+			responsibility: selectedResponsibility,
+			status: 'rejected',
 		};
 		await gameChangerAPI.updateResponsibility(data);
 		handleMoveSelectedResp();
@@ -267,9 +260,9 @@ export default function ResponsibilityUpdates() {
 
 	const editUpdate = async (updatedResp, textPosition) => {
 		const data = {
-			id: selectedUpdate.id, 
+			id: selectedUpdate.id,
 			updatedText: updatedResp,
-			textPosition: textPosition
+			textPosition: textPosition,
 		};
 		await gameChangerAPI.updateResponsibilityReport(data);
 		setReloadResponsibilities(true);
@@ -296,12 +289,13 @@ export default function ResponsibilityUpdates() {
 	}
 
 	const getResponsibilityMetaData = () => {
-		if(!Object.keys(responsibilityData).length) return [];
+		if (!Object.keys(responsibilityData).length) return [];
 		const doc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
 		let entity;
-		if(responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
+		if (responsibilityData[doc]) entity = Object.keys(responsibilityData[doc])[iframePreviewLink.entityIdx];
 		let responsibility;
-		if(responsibilityData[doc]?.[entity]) responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
+		if (responsibilityData[doc]?.[entity])
+			responsibility = responsibilityData[doc][entity][iframePreviewLink.responsibilityIdx];
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
@@ -309,12 +303,12 @@ export default function ResponsibilityUpdates() {
 			responsibilityText: 'Responsibility Text',
 		};
 		const metaData = [];
-		if(responsibility){
-			Object.keys(responsibility).forEach(key => {
-				if(keyMap[key]){
+		if (responsibility) {
+			Object.keys(responsibility).forEach((key) => {
+				if (keyMap[key]) {
 					metaData.push({
 						Key: keyMap[key],
-						Value: responsibility[key]
+						Value: responsibility[key],
 					});
 				}
 			});
@@ -323,41 +317,45 @@ export default function ResponsibilityUpdates() {
 	};
 
 	const getUpdateMetaData = () => {
-		if(!Object.keys(selectedResponsibility).length) return [];
+		if (!Object.keys(selectedResponsibility).length) return [];
 		const metaData = [];
-		selectedResponsibility.responsibility_reports.forEach(update => {
+		selectedResponsibility.responsibility_reports.forEach((update) => {
 			metaData.push({
 				Key: 'Update Type',
-				Value: update.updatedColumn
+				Value: update.updatedColumn,
 			});
-			if(update.updatedColumn !== 'Reject') metaData.push({
-				Key: 'Updated Text',
-				Value: <UpdateMetaText 
-					onClick={() => {
-						if(update.id === selectedUpdate.id) {
-							setRefreshDocument(documentLink);
-							return setDocumentLink('');
-						}
-						setSelectedUpdate(update);
-					}}
-				>
-					{update.updatedText}
-				</UpdateMetaText>
-			});
+			if (update.updatedColumn !== 'Reject')
+				metaData.push({
+					Key: 'Updated Text',
+					Value: (
+						<UpdateMetaText
+							onClick={() => {
+								if (update.id === selectedUpdate.id) {
+									setRefreshDocument(documentLink);
+									return setDocumentLink('');
+								}
+								setSelectedUpdate(update);
+							}}
+						>
+							{update.updatedText}
+						</UpdateMetaText>
+					),
+				});
 			metaData.push({
 				Key: 'Actions',
-				Value: <div className='row' style={{justifyContent: 'right'}}>
-					{update.updatedColumn !== 'Reject' &&
+				Value: (
+					<div className="row" style={{ justifyContent: 'right' }}>
+						{update.updatedColumn !== 'Reject' && (
 							<GCButton
 								onClick={() => {
-									if(editing) {
+									if (editing) {
 										const newHighlights = [];
-										selectedResponsibility.responsibility_reports.forEach(report => {
-											newHighlights.push({position: report.textPosition, id: report.id});
+										selectedResponsibility.responsibility_reports.forEach((report) => {
+											newHighlights.push({ position: report.textPosition, id: report.id });
 										});
 										setHighlights(newHighlights);
 										return setEditing(false);
-									};
+									}
 									setSelectedUpdate(update);
 									setEditing(`${update.id}`);
 									setHighlights([]);
@@ -368,57 +366,56 @@ export default function ResponsibilityUpdates() {
 									padding: '2px 8px 0px',
 									fontSize: 14,
 									margin: '16px 0px 0px 10px',
-									width: 'auto'
+									width: 'auto',
 								}}
 								disabled={editing && editing !== `${update.id}`}
 								isSecondaryBtn
 							>
 								{editing === `${update.id}` ? 'Cancel' : 'Edit'}
 							</GCButton>
-					}
-					<GCButton
-						onClick={() => {
-							rejectUpdate(update);
-						}}
-						style={{
-							height: 40,
-							minWidth: 40,
-							padding: '2px 8px 0px',
-							fontSize: 14,
-							margin: '16px 0px 0px 10px',
-							width: 'auto'
-						}}
-						disabled={editing}
-						isSecondaryBtn
-					>
-						Reject
-					</GCButton>
-					<GCButton
-						onClick={() => {
-							acceptUpdate(update);
-						}}
-						style={{
-							height: 40,
-							minWidth: 40,
-							padding: '2px 8px 0px',
-							fontSize: 14,
-							margin: '16px 0px 0px 10px',
-							width: 'auto'
-						}}
-						disabled={editing}
-					>
-						Accept
-					</GCButton>
-				</div>
+						)}
+						<GCButton
+							onClick={() => {
+								rejectUpdate(update);
+							}}
+							style={{
+								height: 40,
+								minWidth: 40,
+								padding: '2px 8px 0px',
+								fontSize: 14,
+								margin: '16px 0px 0px 10px',
+								width: 'auto',
+							}}
+							disabled={editing}
+							isSecondaryBtn
+						>
+							Reject
+						</GCButton>
+						<GCButton
+							onClick={() => {
+								acceptUpdate(update);
+							}}
+							style={{
+								height: 40,
+								minWidth: 40,
+								padding: '2px 8px 0px',
+								fontSize: 14,
+								margin: '16px 0px 0px 10px',
+								width: 'auto',
+							}}
+							disabled={editing}
+						>
+							Accept
+						</GCButton>
+					</div>
+				),
 			});
 		});
 		return metaData;
 	};
 
 	const iframePanelSize =
-		12 -
-		(leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
-		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
@@ -428,13 +425,11 @@ export default function ResponsibilityUpdates() {
 		maxWidth: '75%',
 	};
 
-	if (!leftPanelOpen)
-		leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
-	if (!rightPanelOpen)
-		rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
+	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
+	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div className='contatiner' style={{marginLeft: 20}}>
+		<div className="contatiner" style={{ marginLeft: 20 }}>
 			<div
 				className="row"
 				style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
@@ -453,18 +448,15 @@ export default function ResponsibilityUpdates() {
 					}}
 				>
 					<div
-						className='doc-exp-nav'
-						style={{  
-							color: grey800, 
-							fontWeight: 'bold', 
+						className="doc-exp-nav"
+						style={{
+							color: grey800,
+							fontWeight: 'bold',
 							display: 'flex',
-							marginBottom: '10px'
+							marginBottom: '10px',
 						}}
 					>
-						<div
-							style={styles.docExplorerPag}
-							className="gcPagination docExplorerPag"
-						>
+						<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
 							<Pagination
 								activePage={resultsPage}
 								itemsCountPerPage={DOCS_PER_PAGE}
@@ -474,7 +466,7 @@ export default function ResponsibilityUpdates() {
 									setIframePreviewLink({
 										dataIdx: 0,
 										entityIdx: 0,
-										responsibilityIdx: 0
+										responsibilityIdx: 0,
 									});
 									setCollapseKeys({});
 									onPaginationClick(page);
@@ -488,116 +480,152 @@ export default function ResponsibilityUpdates() {
 						</div>
 					)}
 					{!loading &&
-					_.map(Object.keys(responsibilityData), (doc, key) => {
-						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
-						const displayTitle = doc;
-						return (
-							<div key={key}>
-								<div
-									className="searchdemo-modal-result-header"
-									onClick={(e) => {
-										e.preventDefault();
-										setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
-									}}
-								>
-									<i
-										style={{
-											marginRight: docOpen ? 10 : 14,
-											fontSize: 20,
-											cursor: 'pointer',
+						_.map(Object.keys(responsibilityData), (doc, key) => {
+							const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
+							const displayTitle = doc;
+							return (
+								<div key={key}>
+									<div
+										className="searchdemo-modal-result-header"
+										onClick={(e) => {
+											e.preventDefault();
+											setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
 										}}
-										className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
-									/>
-									<span className="gc-document-explorer-result-header-text">
-										{displayTitle}
-									</span>
+									>
+										<i
+											style={{
+												marginRight: docOpen ? 10 : 14,
+												fontSize: 20,
+												cursor: 'pointer',
+											}}
+											className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+										/>
+										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+									</div>
+									<Collapse isOpened={docOpen}>
+										{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
+											const entOpen = collapseKeys[doc + entity]
+												? collapseKeys[doc + entity]
+												: false;
+											return (
+												<>
+													<div
+														className="searchdemo-modal-result-header"
+														onClick={(e) => {
+															e.preventDefault();
+															setCollapseKeys({
+																...collapseKeys,
+																[doc + entity]: !entOpen,
+															});
+														}}
+														style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
+													>
+														<i
+															style={{
+																marginRight: entOpen ? 10 : 14,
+																fontSize: 20,
+																cursor: 'pointer',
+															}}
+															className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
+														/>
+														<span className="gc-document-explorer-result-header-text">
+															{entity}
+														</span>
+													</div>
+													<Collapse isOpened={entOpen && docOpen}>
+														<div>
+															{responsibilityData[doc][entity].map(
+																(responsibility, respKey) => {
+																	let isHighlighted = false;
+																	const dataObj = responsibilityData[doc];
+																	if (dataObj) {
+																		const pageObj =
+																			responsibilityData[doc][entity][
+																				iframePreviewLink.entityIdx
+																			];
+																		if (pageObj) {
+																			const selectedDoc =
+																				Object.keys(responsibilityData)[
+																					iframePreviewLink.dataIdx
+																				];
+																			let selectedEntity;
+																			if (responsibilityData[selectedDoc])
+																				selectedEntity =
+																					Object.keys(
+																						responsibilityData[selectedDoc]
+																					)[iframePreviewLink.entityIdx] ===
+																					'NO ENTITY'
+																						? null
+																						: Object.keys(
+																								responsibilityData[
+																									selectedDoc
+																								]
+																						  )[
+																								iframePreviewLink
+																									.entityIdx
+																						  ];
+																			isHighlighted =
+																				selectedDoc ===
+																					responsibility.documentTitle &&
+																				selectedEntity ===
+																					responsibility.organizationPersonnel &&
+																				respKey ===
+																					iframePreviewLink.responsibilityIdx;
+																		}
+																	}
+
+																	let blockquoteClass = 'searchdemo-blockquote-sm';
+
+																	if (isHighlighted)
+																		blockquoteClass +=
+																			' searchdemo-blockquote-sm-active';
+																	return (
+																		<div
+																			key={key + respKey}
+																			style={{ position: 'relative' }}
+																		>
+																			<div
+																				className="searchdemo-quote-link"
+																				onClick={(e) => {
+																					handleQuoteLinkClick(
+																						e,
+																						respKey,
+																						entKey,
+																						key
+																					);
+																				}}
+																			>
+																				<div
+																					className={blockquoteClass}
+																					style={{ marginLeft: 40 }}
+																				>
+																					<span>
+																						{
+																							responsibility.responsibilityText
+																						}
+																					</span>
+																				</div>
+																			</div>
+																			{isHighlighted && (
+																				<span className="searchdemo-arrow-right-sm"></span>
+																			)}
+																		</div>
+																	);
+																}
+															)}
+														</div>
+													</Collapse>
+												</>
+											);
+										})}
+									</Collapse>
 								</div>
-								<Collapse isOpened={docOpen}>
-									{Object.keys(responsibilityData[doc]).map((entity, entKey) =>{
-										const entOpen = collapseKeys[(doc + entity)] ? collapseKeys[(doc + entity)] : false;
-										return <>
-											<div
-												className="searchdemo-modal-result-header"
-												onClick={(e) => {
-													e.preventDefault();
-													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
-												}}
-												style={{marginLeft: 20, backgroundColor: '#eceff1'}}
-											>
-												<i
-													style={{
-														marginRight: entOpen ? 10 : 14,
-														fontSize: 20,
-														cursor: 'pointer',
-													}}
-													className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
-												/>
-												<span className="gc-document-explorer-result-header-text">
-													{entity}
-												</span>
-											</div>
-											<Collapse isOpened={entOpen && docOpen}>
-												<div>
-													{responsibilityData[doc][entity].map((responsibility, respKey) => {
-														let isHighlighted = false;
-														const dataObj = responsibilityData[doc];
-														if (dataObj) {
-															const pageObj =
-																responsibilityData[doc][entity][
-																	iframePreviewLink.entityIdx
-																];
-															if (pageObj) {
-																const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
-																let selectedEntity;
-																if(responsibilityData[selectedDoc]) selectedEntity = Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] === 'NO ENTITY' ? null : Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
-																isHighlighted =
-																	selectedDoc === responsibility.documentTitle &&
-																	selectedEntity === responsibility.organizationPersonnel &&
-																	respKey === iframePreviewLink.responsibilityIdx;
-															}
-														}
-
-														let blockquoteClass = 'searchdemo-blockquote-sm';
-
-														if (isHighlighted)
-															blockquoteClass +=
-																' searchdemo-blockquote-sm-active';
-														return (
-															<div
-																key={key + respKey}
-																style={{ position: 'relative' }}
-															>
-																<div
-																	className="searchdemo-quote-link"
-																	onClick={(e) => {
-																		handleQuoteLinkClick(e, respKey, entKey, key);
-																	}}
-																>
-																	<div className={blockquoteClass} style={{marginLeft: 40}}>
-																		<span>
-																			{responsibility.responsibilityText}
-																		</span>
-																	</div>
-																</div>
-																{isHighlighted && (
-																	<span className="searchdemo-arrow-right-sm"></span>
-																)}
-															</div>
-														);
-													})
-													}
-												</div>
-											</Collapse>
-										</>;
-									})}
-								</Collapse>
-							</div>
-						);
-					})}
+							);
+						})}
 				</div>
 				<div
 					className={`col-xs-${iframePanelSize}`}
-					style={{ paddingLeft: 0, paddingRight: 0, height: 800}}
+					style={{ paddingLeft: 0, paddingRight: 0, height: 800, position: 'relative' }}
 				>
 					<div
 						style={{
@@ -613,9 +641,7 @@ export default function ResponsibilityUpdates() {
 							onClick={() => handleLeftPanelToggle()}
 						>
 							<i
-								className={`fa ${
-									leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-								} fa-angle-double-up`}
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 								style={{
 									color: 'white',
 									verticalAlign: 'sub',
@@ -626,9 +652,7 @@ export default function ResponsibilityUpdates() {
 							/>
 							<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 							<i
-								className={`fa ${
-									leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
-								} fa-angle-double-up`}
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 								style={{
 									color: 'white',
 									verticalAlign: 'sub',
@@ -645,18 +669,20 @@ export default function ResponsibilityUpdates() {
 								height: '100%',
 							}}
 						>
-							{!loading && !Object.keys(responsibilityData).length ?
-								<p style={{
-									fontSize: 16,
-									fontWeight: 600,
-									fontFamily: 'Noto Sans',
-									textAlign: 'center',
-								}}>
+							{!loading && !Object.keys(responsibilityData).length ? (
+								<p
+									style={{
+										fontSize: 16,
+										fontWeight: 600,
+										fontFamily: 'Noto Sans',
+										textAlign: 'center',
+									}}
+								>
 									No updates left to review
 								</p>
-								:
+							) : (
 								<div style={{ height: '100%' }}>
-									<PDFHighlighter 
+									<PDFHighlighter
 										handleSave={editUpdate}
 										highlights={highlights}
 										scrollId={scrollId}
@@ -664,7 +690,7 @@ export default function ResponsibilityUpdates() {
 										documentLink={documentLink}
 									/>
 								</div>
-							}
+							)}
 						</div>
 						<div
 							className="searchdemo-vertical-bar-toggle"
@@ -672,9 +698,7 @@ export default function ResponsibilityUpdates() {
 							onClick={() => handleRightPanelToggle()}
 						>
 							<i
-								className={`fa ${
-									rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-								} fa-angle-double-up`}
+								className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 								style={{
 									color: 'white',
 									verticalAlign: 'sub',
@@ -685,9 +709,7 @@ export default function ResponsibilityUpdates() {
 							/>
 							<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
 							<i
-								className={`fa ${
-									rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'
-								} fa-angle-double-up`}
+								className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 								style={{
 									color: 'white',
 									verticalAlign: 'sub',
@@ -707,11 +729,10 @@ export default function ResponsibilityUpdates() {
 						borderLeft: '1px solid lightgrey',
 						height: '800px',
 						overflow: 'scroll',
-						zIndex: 100
+						zIndex: 100,
 					}}
 				>
-					{!loading 
-						?
+					{!loading ? (
 						<>
 							<SimpleTable
 								tableClass={'magellan-table'}
@@ -724,7 +745,7 @@ export default function ResponsibilityUpdates() {
 								disableWrap={true}
 								title={'Metadata'}
 							/>
-							{Object.keys(selectedResponsibility).length &&
+							{Object.keys(selectedResponsibility).length && (
 								<SimpleTable
 									tableClass={'magellan-table'}
 									zoom={0.8}
@@ -736,11 +757,11 @@ export default function ResponsibilityUpdates() {
 									disableWrap={true}
 									title={'Updates'}
 								/>
-							}
+							)}
 						</>
-						:
+					) : (
 						<></>
-					}
+					)}
 				</div>
 			</div>
 		</div>

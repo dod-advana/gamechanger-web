@@ -1,8 +1,6 @@
-export const getEDAMetadataForPropertyTable = (
-	edaFieldJSONMap,
-	edaFields,
-	item
-) => {
+import { numberWithCommas } from '../../../utils/gamechangerUtils';
+
+export const getEDAMetadataForPropertyTable = (edaFieldJSONMap, edaFields, item, edaFPDSMap) => {
 	const rows = [];
 
 	if (edaFields) {
@@ -12,10 +10,17 @@ export const getEDAMetadataForPropertyTable = (
 			const row = {};
 			row['Key'] = displayName;
 
-			if (item[fieldName]) {
-				row['Value'] = item[fieldName];
+			let fpdsFieldName = edaFPDSMap[fieldName];
+			if (fpdsFieldName && item[fpdsFieldName]) {
+				row['Value'] =
+					fieldName.indexOf('amount') === -1 ? item[fpdsFieldName] : numberWithCommas(item[fpdsFieldName]);
 			} else {
-				row['Value'] = 'Data Not Available';
+				if (item[fieldName]) {
+					row['Value'] =
+						fieldName.indexOf('amount') === -1 ? item[fieldName] : numberWithCommas(item[fieldName]);
+				} else {
+					row['Value'] = 'Data Not Available';
+				}
 			}
 
 			rows.push(row);
@@ -41,10 +46,7 @@ export const getDisplayTitle = (item) => {
 
 			return `${first}${second}${mod}${mod2}`;
 		} catch (e) {
-			return `${
-				item?.filename?.substr(item.filename.lastIndexOf('/') + 1) ??
-				'Not Available'
-			}`;
+			return `${item?.filename?.substr(item.filename.lastIndexOf('/') + 1) ?? 'Not Available'}`;
 		}
 	}
 };

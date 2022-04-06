@@ -24,6 +24,8 @@ const { AppSettingsController } = require('../controllers/appSettingsController'
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
 const { AnalystToolsController } = require('../controllers/analystToolsController');
+const { ReviewController } = require('../controllers/reviewController');
+const { ReviewerController } = require('../controllers/reviewerController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -46,12 +48,16 @@ const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
 const analyticsTools = new AnalystToolsController();
+const reviewController = new ReviewController();
+const reviewer = new ReviewerController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
 router.get('/getElasticSearchIndex', search.getElasticSearchIndex);
 router.post('/admin/setElasticSearchIndex', search.setElasticSearchIndex);
 router.post('/admin/queryEs', search.queryEs);
+
+router.post('/expandTerms', search.expandTerms);
 
 router.post('/dataTracker/getTrackedData', dataTracker.getTrackedData);
 router.post('/dataTracker/getBrowsingLibrary', dataTracker.getBrowsingLibrary);
@@ -68,6 +74,8 @@ router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 
 router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
+
+router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
@@ -107,7 +115,7 @@ router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/stopProcess', transformer.stopProcess);
 
-router.get('/getNotifications', notification.getNotifications);
+router.post('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
 router.post('/admin/deleteNotification', notification.deleteNotification);
 router.post('/admin/editNotificationActive', notification.editNotificationActive);
@@ -144,19 +152,28 @@ router.post('/admin/trending/setTrendingBlacklist', trending.setTrendingBlacklis
 router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBlacklist);
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
+router.post('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/admin/syncUserTable', user.syncUserTable);
+router.post('/admin/createUpdateUser', user.updateOrCreateUser);
+router.post('/admin/deleteUserData', user.deleteUserData);
+router.post('/user/updateClonesVisited', user.updateClonesVisited);
+router.post('/user/setupUserProfile', user.setupUserProfile);
 router.get('/user/getUserData', user.getUserData);
+router.get('/user/getUserProfileData', user.getUserProfileData);
+router.post('/user/updateUserProfileData', user.updateUserProfileData);
 router.get('/getUserSettings', user.getUserSettings);
-router.post('/setUserBetaStatus', user.setUserBetaStatus);
 router.post('/user/submitUserInfo', user.submitUserInfo);
 router.get('/getInternalUsers', user.getInternalUsers);
-router.post('/admin/addInternalUser', user.addInternalUser);
 router.post('/admin/deleteInternalUser', user.deleteInternalUser);
 router.post('/sendFeedback', user.sendFeedback);
 router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
-router.get('/admin/populateNewUserId', user.populateNewUserId);
 router.post('/getRecentSearches', user.getRecentSearches);
+
+router.get('/admin/getReviewerData', reviewer.getReviewerData);
+router.post('/admin/createUpdateReviewer', reviewer.updateOrCreateReviewer);
+router.post('/admin/deleteReviewerData', reviewer.deleteReviewerData);
 
 router.post('/textSuggestion', textSuggest.getTextSuggestion);
 // router.post('/presearchSuggestion', presearchSuggest.getpresearchSuggestion);
@@ -168,13 +185,11 @@ router.post('/admin/revokeAPIKeyRequest', apiController.revokeAPIKeyRequest);
 router.post('/createAPIKeyRequest', apiController.createAPIKeyRequest);
 
 if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
-
-  router.post('/getAppStats', appStatsController.getAppStats);
-  router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
-  router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
-  router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
-  router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
-
+	router.post('/getAppStats', appStatsController.getAppStats);
+	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
+	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
+	router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 }
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
@@ -183,8 +198,6 @@ router.get('/appSettings/intelligentAnswers', appSettings.getIntelligentAnswersM
 router.post('/appSettings/intelligentAnswers', appSettings.setIntelligentAnswersMode);
 router.get('/appSettings/entitySearch', appSettings.getEntitySearchMode);
 router.post('/appSettings/entitySearch', appSettings.setEntitySearchMode);
-router.get('/appSettings/userFeedback', appSettings.getUserFeedbackMode);
-router.post('/appSettings/userFeedback', appSettings.toggleUserFeedbackMode);
 router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
 router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
@@ -197,6 +210,7 @@ router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFee
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
 router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
+router.post('/sendFeedback/requestDoc', feedback.requestDocIngest);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 

@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const GC_HISTORY = sequelize.define('haistack_history',
+	const GC_HISTORY = sequelize.define(
+		'haistack_history',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -8,30 +9,31 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 			},
 			user_id: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			search: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			num_results: {
-				type: DataTypes.INTEGER
+				type: DataTypes.INTEGER,
 			},
 			had_error: {
-				type: DataTypes.BOOLEAN
+				type: DataTypes.BOOLEAN,
 			},
 			run_at: {
-				type: DataTypes.DATE
+				type: DataTypes.DATE,
 			},
 			completion_time: {
-				type: DataTypes.DATE
+				type: DataTypes.DATE,
 			},
 			is_semantic_search: {
-				type: DataTypes.BOOLEAN
-			}
-		},{
+				type: DataTypes.BOOLEAN,
+			},
+		},
+		{
 			freezeTableName: true,
 			tableName: 'haistack_history',
-			timestamps: false
+			timestamps: false,
 		}
 	);
 	return GC_HISTORY;

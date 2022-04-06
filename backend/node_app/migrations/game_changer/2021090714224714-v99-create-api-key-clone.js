@@ -6,21 +6,21 @@ module.exports = {
 				allowNull: false,
 				type: Sequelize.INTEGER,
 				autoIncrement: true,
-				primaryKey: true
+				primaryKey: true,
 			},
 			apiKeyId: {
 				allowNull: false,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			cloneId: {
 				allowNull: false,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			createdAt: Sequelize.DATE,
-			updatedAt: Sequelize.DATE
+			updatedAt: Sequelize.DATE,
 		});
 	},
 	down: async (queryInterface, Sequelize) => {
 		await queryInterface.dropTable('api_key_clones');
-	}
+	},
 };

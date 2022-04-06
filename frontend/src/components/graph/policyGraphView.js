@@ -1,8 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-	MemoizedNodeCluster2D,
-	StyledLegendClickable,
-} from './GraphNodeCluster2D';
+import { MemoizedNodeCluster2D, StyledLegendClickable } from './GraphNodeCluster2D';
 import {
 	generateRandomColors,
 	getLines,
@@ -35,8 +32,7 @@ const HIDDEN_NODE_ALPHA = 0.08;
 const NODE_ALPHA = 1;
 const LINK_ALPHA = 0.5;
 const NO_RESULTS_MESSAGE = 'No results found! Please try refining your search.';
-const DETAILS_NO_RESULTS_MESSAGE =
-	'There are no nodes for this topic. Please check back later.';
+const DETAILS_NO_RESULTS_MESSAGE = 'There are no nodes for this topic. Please check back later.';
 
 const StyledCircularMenu = styled.nav`
 	width: 250px;
@@ -121,8 +117,8 @@ export const NotificationWrapper = styled.div`
 	border-radius: 4px;
 	box-sizing: border-box;
 
-	border-color: #F5A622;
-	background-color: #FFE8AF;
+	border-color: #f5a622;
+	background-color: #ffe8af;
 `;
 
 const IconWrapper = styled.div`
@@ -133,11 +129,11 @@ const IconWrapper = styled.div`
 	align-items: center;
 	color: #ffffff;
 
-	background-color: #F5A622;
+	background-color: #f5a622;
 `;
 
 const LoadAllButton = styled.button`
-	background-color: #E9691D;
+	background-color: #e9691d;
 	color: #fff;
 	height: 100%;
 	width: 150px;
@@ -176,12 +172,8 @@ const makeGraphCollections = (graph) => {
 	const collections = {};
 
 	nodes.forEach((node) => {
-		const displayOrg = node['display_org_s']
-			? node['display_org_s']
-			: 'Uncategorized';
-		const displayType = node['display_doc_type_s']
-			? node['display_doc_type_s']
-			: 'Document';
+		const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
+		const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
 
 		switch (node.label) {
 			case 'Entity':
@@ -271,7 +263,7 @@ const makeFilteredGraph = (is2D, graph, collections) => {
 };
 
 const filterGraphData = (nodes, edges) => {
-	const visibleEdges = edges.filter(edge => !edge.source.hidden && !edge.target.hidden);
+	const visibleEdges = edges.filter((edge) => !edge.source.hidden && !edge.target.hidden);
 
 	const filteredGraph = { nodes: [], edges: [], relationships: [] };
 
@@ -289,9 +281,7 @@ const filterGraphData = (nodes, edges) => {
 			idToNodeMap[node.id] = node;
 			edgeToNodeCountMap[node.id] = 0;
 
-			const displayOrg = node['display_org_s']
-				? node['display_org_s']
-				: 'Uncategorized';
+			const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
 
 			switch (node.label) {
 				case 'Entity':
@@ -332,20 +322,14 @@ const filterGraphData = (nodes, edges) => {
 				filteredGraph.edges.push(edge);
 				edgeIds.push(edge.id);
 
-				const source = edge.source.hasOwnProperty('id')
-					? edge.source.id
-					: edge.source;
-				const target = edge.target.hasOwnProperty('id')
-					? edge.target.id
-					: edge.target;
+				const source = edge.source.hasOwnProperty('id') ? edge.source.id : edge.source;
+				const target = edge.target.hasOwnProperty('id') ? edge.target.id : edge.target;
 
 				edgeToNodeCountMap[source] += 1;
 				edgeToNodeCountMap[target] += 1;
 
-				idToNodeMap[source].edgePercent =
-					edgeToNodeCountMap[source] / edgeCount;
-				idToNodeMap[target].edgePercent =
-					edgeToNodeCountMap[target] / edgeCount;
+				idToNodeMap[source].edgePercent = edgeToNodeCountMap[source] / edgeCount;
+				idToNodeMap[target].edgePercent = edgeToNodeCountMap[target] / edgeCount;
 
 				if (!filteredGraph.relationships.includes(edge.label)) {
 					filteredGraph.relationships.push(edge.label);
@@ -356,15 +340,15 @@ const filterGraphData = (nodes, edges) => {
 		}
 	});
 
-	filteredGraph.nodes.forEach(node => {
+	filteredGraph.nodes.forEach((node) => {
 		const edgePercent = node.edgePercent ? node.edgePercent : 0;
 		node.normalizedSize = node.pageRank * edgePercent;
 	});
 
-	const preNormalizedSizes = filteredGraph.nodes.map(node => node.normalizedSize);
+	const preNormalizedSizes = filteredGraph.nodes.map((node) => node.normalizedSize);
 	const min = Math.min(...preNormalizedSizes);
 	const delta = Math.max(...preNormalizedSizes) - min;
-	filteredGraph.nodes.forEach(node => {
+	filteredGraph.nodes.forEach((node) => {
 		node.normalizedSize = (node.normalizedSize - min) / delta;
 	});
 
@@ -482,12 +466,8 @@ export default function PolicyGraphView(props) {
 			});
 		} else {
 			graph.nodes.forEach((node) => {
-				const displayOrg = node['display_org_s']
-					? node['display_org_s']
-					: 'Uncategorized';
-				const displayType = node['display_doc_type_s']
-					? node['display_doc_type_s']
-					: 'Document';
+				const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
+				const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
 				switch (node.label) {
 					case 'Entity':
 						if (!tmpLegendData['Entity']) {
@@ -518,8 +498,7 @@ export default function PolicyGraphView(props) {
 						break;
 					default:
 						const docData = getDocTypeStyles(displayType, displayOrg);
-						node.color =
-							docData.docOrgColor !== '' ? docData.docOrgColor : '#964B00';
+						node.color = docData.docOrgColor !== '' ? docData.docOrgColor : '#964B00';
 						if (!tmpLegendData[docData.docOrg]) {
 							tmpLegendData[docData.docOrg] = {
 								color: docData.docOrgColor,
@@ -536,22 +515,17 @@ export default function PolicyGraphView(props) {
 		const { collections } = makeGraphCollections(graph);
 		setCollections(collections);
 
-		const { filteredGraph, documentsFound, docOrgNumbersTmp, timeFound } =
-			makeFilteredGraph(show2DView, graph, collections);
+		const { filteredGraph, documentsFound, docOrgNumbersTmp, timeFound } = makeFilteredGraph(
+			show2DView,
+			graph,
+			collections
+		);
 		setFilteredGraph(filteredGraph);
 		setDocumentsFound(documentsFound);
 		setDocOrgNumbers(docOrgNumbersTmp);
 		setTimeFound(timeFound);
 		setNumOfEdges(filteredGraph.edges.length);
-	}, [
-		graph,
-		show2DView,
-		reloadGraph,
-		communityView,
-		setDocumentsFound,
-		setTimeFound,
-		setNumOfEdges,
-	]);
+	}, [graph, show2DView, reloadGraph, communityView, setDocumentsFound, setTimeFound, setNumOfEdges]);
 
 	/**
 	 * Node Interactions
@@ -581,20 +555,14 @@ export default function PolicyGraphView(props) {
 			_.forEach(newNodes, (tmpNode) => {
 				_.forEach(filteredEdges, (edge) => {
 					if (edge.source === tmpNode) {
-						if (
-							!_.includes(alreadyVisitedNodes, edge.target) &&
-							!_.includes(tmpNewNodes, edge.target)
-						) {
+						if (!_.includes(alreadyVisitedNodes, edge.target) && !_.includes(tmpNewNodes, edge.target)) {
 							tmpNewNodes.push(edge.target);
 							alreadyVisitedNodes.push(edge.target);
 							highlightNodes.add(edge.target);
 							degreeConnected[i].push(edge.target);
 						}
 					} else if (edge.target === tmpNode) {
-						if (
-							!_.includes(alreadyVisitedNodes, edge.source) &&
-							!_.includes(tmpNewNodes, edge.source)
-						) {
+						if (!_.includes(alreadyVisitedNodes, edge.source) && !_.includes(tmpNewNodes, edge.source)) {
 							tmpNewNodes.push(edge.source);
 							alreadyVisitedNodes.push(edge.source);
 							highlightNodes.add(edge.source);
@@ -608,11 +576,7 @@ export default function PolicyGraphView(props) {
 	};
 
 	const handleNodeClick = async (node, event) => {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'GraphNodeClicked',
-			node.name
-		);
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNodeClicked', node.name);
 		setShouldCenter(false);
 
 		// Sleep until node is in place
@@ -682,12 +646,7 @@ export default function PolicyGraphView(props) {
 		if (nodeLabel !== 'UKN_Document') {
 			menuItems.push({
 				className: 'fa fa-book fa-2x',
-				onClick: () =>
-					handleContextMenuButtonClicked(
-						() => handleShowGraphCard(),
-						false,
-						'showGraphCard'
-					),
+				onClick: () => handleContextMenuButtonClicked(() => handleShowGraphCard(), false, 'showGraphCard'),
 				tooltip: `Display the ${cardText} card`,
 			});
 		}
@@ -695,35 +654,20 @@ export default function PolicyGraphView(props) {
 		if (nodeLabel === 'Publication' && !notInOriginal) {
 			menuItems.push({
 				className: 'fa fa-sitemap  fa-2x',
-				onClick: () =>
-					handleContextMenuButtonClicked(
-						() => showChildDocuments(),
-						true,
-						'showChildDocuments'
-					),
+				onClick: () => handleContextMenuButtonClicked(() => showChildDocuments(), true, 'showChildDocuments'),
 				tooltip: 'Display child documents',
 			});
 		}
 		if (nodeLabel === 'Document' && !notInOriginal) {
 			menuItems.push({
 				className: 'fa fa-address-card fa-2x',
-				onClick: () =>
-					handleContextMenuButtonClicked(
-						() => showEntitiesForNode(),
-						true,
-						'showEntities'
-					),
+				onClick: () => handleContextMenuButtonClicked(() => showEntitiesForNode(), true, 'showEntities'),
 				tooltip: 'Display entity nodes for this document',
 			});
 			if (Config.GAMECHANGER.SHOW_TOPICS) {
 				menuItems.push({
 					className: 'fa fa-lightbulb-o fa-2x',
-					onClick: () =>
-						handleContextMenuButtonClicked(
-							() => showTopicsForNode(),
-							true,
-							'showTopics'
-						),
+					onClick: () => handleContextMenuButtonClicked(() => showTopicsForNode(), true, 'showTopics'),
 					tooltip: 'Display topic nodes for this document',
 				});
 			}
@@ -733,11 +677,7 @@ export default function PolicyGraphView(props) {
 			menuItems.push({
 				className: 'fa fa-code-fork fa-2x',
 				onClick: () =>
-					handleContextMenuButtonClicked(
-						() => showReferencesForNode(false),
-						true,
-						'showReference'
-					),
+					handleContextMenuButtonClicked(() => showReferencesForNode(false), true, 'showReference'),
 				tooltip: 'Display reference nodes for this document',
 			});
 		}
@@ -745,30 +685,19 @@ export default function PolicyGraphView(props) {
 		if (!notInOriginal && nodeLabel === 'UKN_Document') {
 			menuItems.push({
 				className: 'fa fa-code-fork fa-2x',
-				onClick: () =>
-					handleContextMenuButtonClicked(
-						() => showReferencesForNode(true),
-						true,
-						'showReference'
-					),
+				onClick: () => handleContextMenuButtonClicked(() => showReferencesForNode(true), true, 'showReference'),
 				tooltip: 'Display reference nodes for this document',
 			});
 		}
 
 		menuItems.push({
 			className: 'fa fa-unlock fa-2x',
-			onClick: () =>
-				handleContextMenuButtonClicked(
-					() => lockNodeInPlace(null, false),
-					true,
-					'lockUnlockNode'
-				),
+			onClick: () => handleContextMenuButtonClicked(() => lockNodeInPlace(null, false), true, 'lockUnlockNode'),
 			tooltip: 'Unlock the node',
 		});
 		menuItems.push({
 			className: 'fa fa-eye-slash fa-2x',
-			onClick: () =>
-				handleContextMenuButtonClicked(() => hideNode(), true, 'hideNode'),
+			onClick: () => handleContextMenuButtonClicked(() => hideNode(), true, 'hideNode'),
 			tooltip: 'Dismiss the node from the graph',
 		});
 
@@ -780,28 +709,15 @@ export default function PolicyGraphView(props) {
 							const leftBack =
 								(
 									50 -
-									31 *
-										Math.cos(
-											-0.5 * Math.PI -
-												2 * (1 / menuItems.length) * idx * Math.PI
-										)
+									31 * Math.cos(-0.5 * Math.PI - 2 * (1 / menuItems.length) * idx * Math.PI)
 								).toFixed(4) + '%';
 							const topBack =
 								(
 									50 +
-									31 *
-										Math.sin(
-											-0.5 * Math.PI -
-												2 * (1 / menuItems.length) * idx * Math.PI
-										)
+									31 * Math.sin(-0.5 * Math.PI - 2 * (1 / menuItems.length) * idx * Math.PI)
 								).toFixed(4) + '%';
 							return (
-								<GCTooltip
-									title={item.tooltip}
-									arrow
-									enterDelay={30}
-									key={`tooltip-${idx}`}
-								>
+								<GCTooltip title={item.tooltip} arrow enterDelay={30} key={`tooltip-${idx}`}>
 									<div
 										className={'graph-contextItem'}
 										onClick={item.onClick}
@@ -810,9 +726,7 @@ export default function PolicyGraphView(props) {
 										<div
 											className={'graph-contextBackground'}
 											style={{
-												transform: `rotate(${
-													idx * (360 / menuItems.length)
-												}deg)`,
+												transform: `rotate(${idx * (360 / menuItems.length)}deg)`,
 											}}
 										></div>
 										<div>
@@ -828,16 +742,8 @@ export default function PolicyGraphView(props) {
 		);
 	};
 
-	const handleContextMenuButtonClicked = (
-		funcToRun,
-		removeSelectedID,
-		name
-	) => {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'GraphContextMenuClicked',
-			name
-		);
+	const handleContextMenuButtonClicked = (funcToRun, removeSelectedID, name) => {
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphContextMenuClicked', name);
 		funcToRun();
 		setContextOpen(false);
 		if (removeSelectedID) {
@@ -929,10 +835,7 @@ export default function PolicyGraphView(props) {
 					...node,
 					...cardItem,
 					id: node.doc_id,
-					title:
-						node.label === 'Publication'
-							? `${node.name}`
-							: `${node.display_title_s}`,
+					title: node.label === 'Publication' ? `${node.name}` : `${node.display_title_s}`,
 					type: cardType,
 					doc_ids: [],
 					label: node.label,
@@ -1059,20 +962,17 @@ export default function PolicyGraphView(props) {
 	};
 
 	const getEntityCardData = () => {
-		gameChangerAPI
-			.getDescriptionFromWikipedia(selectedItem.name)
-			.then((resp) => {
-				const desc =
-					resp.query?.pages[Object.keys(resp.query.pages)[0]]?.extract;
-				if (selectedItem) {
-					selectedItem.description = desc;
-					selectedItem.done = true;
-				}
-				setGraphCardData({
-					description: desc,
-					done: true,
-				});
+		gameChangerAPI.getDescriptionFromWikipedia(selectedItem.name).then((resp) => {
+			const desc = resp.query?.pages[Object.keys(resp.query.pages)[0]]?.extract;
+			if (selectedItem) {
+				selectedItem.description = desc;
+				selectedItem.done = true;
+			}
+			setGraphCardData({
+				description: desc,
+				done: true,
 			});
+		});
 	};
 
 	const getTopicCardData = async () => {
@@ -1216,8 +1116,8 @@ export default function PolicyGraphView(props) {
 		if (mockedFromES) {
 			// when results are mocked from ES, node ids are changed which causes a mismatch with the neo4j query above
 			// this matches based on doc_id and sets the mocked node's id to the id from neo4j
-			graph.nodes.forEach(mockedNode => {
-				graphData.nodes.forEach(node => {
+			graph.nodes.forEach((mockedNode) => {
+				graphData.nodes.forEach((node) => {
 					if (mockedNode.doc_id === node.doc_id) {
 						mockedNode.id = node.id;
 					}
@@ -1375,9 +1275,7 @@ export default function PolicyGraphView(props) {
 
 		_.forEach(graph.edges, (edge) => {
 			const sourceHasNode = edge.source.hasOwnProperty('id');
-			if (
-				_.includes(nodeIsToRemove, sourceHasNode ? edge.source.id : edge.source)
-			) {
+			if (_.includes(nodeIsToRemove, sourceHasNode ? edge.source.id : edge.source)) {
 				_.remove(filteredEdges, (n) => {
 					return n.id === edge.id;
 				});
@@ -1430,82 +1328,76 @@ export default function PolicyGraphView(props) {
 
 	const handleLegendAllDocsClick = (_, legendKey) => {
 		if (orgTypesSelected.includes(legendKey)) {
-			const allNonDocOrgTypes = orgTypesSelected.filter(type => type === 'Topic' || type === 'Entity');
+			const allNonDocOrgTypes = orgTypesSelected.filter((type) => type === 'Topic' || type === 'Entity');
 			setOrgTypesSelected(allNonDocOrgTypes);
 			setNodeGroupMenuLabel(allNonDocOrgTypes.length > 0 ? allNonDocOrgTypes[0] : '');
 		} else {
 			setOrgTypesSelected([
 				legendKey,
 				...orgTypesSelected,
-				...Object.keys(legendData).filter(type =>
-					type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
-				)
+				...Object.keys(legendData).filter(
+					(type) => type !== 'Topic' && type !== 'Entity' && !orgTypesSelected.includes(type)
+				),
 			]);
 			setNodeGroupMenuLabel('All Documents');
-		}		
+		}
 	};
 
 	const renderNodeLegendItems = () => {
-		return (!runningSearch &&
-			<>
-				{(Object.keys(legendData).includes('Topic') || Object.keys(legendData).includes('Entity')) && // Don't display All Documents filter if filters are only documents
-					<StyledLegendClickable
-						key={'All Documents'}
-						onClick={(event) =>
-							handleLegendAllDocsClick(event.target, 'All Documents')
-						}
-						typesSelected={orgTypesSelected}
-						type={'All Documents'}
-					>
-						<div
-							style={{
-								backgroundColor: '#6eb8cc',
-								width: '1em',
-								height: '1em',
-								borderRadius: '50%',
-								marginTop: '4px',
-							}}
-						></div>
-						<div style={{ marginLeft: '2em', width: '80%' }}>
-							All Documents
-						</div>
-					</StyledLegendClickable>
-				}
-				{Object.keys(legendData).sort((x, y) => x === 'All Documents' ? -1 : y === 'All Documents' ? 1 : 0).map((key) => {
-					return (
-						<GCTooltip
-							key={key}
-							title={`${docOrgNumbers[key]} node${
-								docOrgNumbers[key] > 1 ? 's' : ''
-							} associated`}
-							arrow
-							enterDelay={30}
+		return (
+			!runningSearch && (
+				<>
+					{(Object.keys(legendData).includes('Topic') || Object.keys(legendData).includes('Entity')) && ( // Don't display All Documents filter if filters are only documents
+						<StyledLegendClickable
+							key={'All Documents'}
+							onClick={(event) => handleLegendAllDocsClick(event.target, 'All Documents')}
+							typesSelected={orgTypesSelected}
+							type={'All Documents'}
 						>
-							<StyledLegendClickable
-								key={legendData[key].name}
-								onClick={(event) =>
-									handleLegendNodeClick(event.target, key)
-								}
-								typesSelected={orgTypesSelected}
-								type={key}
-							>
-								<div
-									style={{
-										backgroundColor: legendData[key].color,
-										width: '1em',
-										height: '1em',
-										borderRadius: '50%',
-										marginTop: '4px',
-									}}
-								></div>
-								<div style={{ marginLeft: '2em', width: '80%' }}>
-									{legendData[key].name}
-								</div>
-							</StyledLegendClickable>
-						</GCTooltip>
-					);
-				})}
-			</>
+							<div
+								style={{
+									backgroundColor: '#6eb8cc',
+									width: '1em',
+									height: '1em',
+									borderRadius: '50%',
+									marginTop: '4px',
+								}}
+							></div>
+							<div style={{ marginLeft: '2em', width: '80%' }}>All Documents</div>
+						</StyledLegendClickable>
+					)}
+					{Object.keys(legendData)
+						.sort((x, y) => (x === 'All Documents' ? -1 : y === 'All Documents' ? 1 : 0))
+						.map((key) => {
+							return (
+								<GCTooltip
+									key={key}
+									title={`${docOrgNumbers[key]} node${docOrgNumbers[key] > 1 ? 's' : ''} associated`}
+									arrow
+									enterDelay={30}
+								>
+									<StyledLegendClickable
+										key={legendData[key].name}
+										onClick={(event) => handleLegendNodeClick(event.target, key)}
+										typesSelected={orgTypesSelected}
+										type={key}
+									>
+										<div
+											style={{
+												backgroundColor: legendData[key].color,
+												width: '1em',
+												height: '1em',
+												borderRadius: '50%',
+												marginTop: '4px',
+											}}
+										></div>
+										<div style={{ marginLeft: '2em', width: '80%' }}>{legendData[key].name}</div>
+									</StyledLegendClickable>
+								</GCTooltip>
+							);
+						})}
+				</>
+			)
 		);
 	};
 
@@ -1517,22 +1409,25 @@ export default function PolicyGraphView(props) {
 			!orgTypesSelected.includes(legendKey)
 		);
 
-		const newOrgTypesSelected = orgTypesSelected.includes(legendKey) ?
-			orgTypesSelected.filter(type => type !== legendKey) :
-			[...orgTypesSelected, legendKey];
+		const newOrgTypesSelected = orgTypesSelected.includes(legendKey)
+			? orgTypesSelected.filter((type) => type !== legendKey)
+			: [...orgTypesSelected, legendKey];
 
-		const allOrgTypesExceptTopicAndEntity =
-			Object.keys(legendData).filter(type => type !== 'Topic' && type !== 'Entity');
-		const allCurrentOrgTypesExceptTopicAndEntity =
-			newOrgTypesSelected.filter(type => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents');
-
+		const allOrgTypesExceptTopicAndEntity = Object.keys(legendData).filter(
+			(type) => type !== 'Topic' && type !== 'Entity'
+		);
+		const allCurrentOrgTypesExceptTopicAndEntity = newOrgTypesSelected.filter(
+			(type) => type !== 'Topic' && type !== 'Entity' && type !== 'All Documents'
+		);
 
 		if (_.isEqual(allOrgTypesExceptTopicAndEntity.sort(), allCurrentOrgTypesExceptTopicAndEntity.sort())) {
-			setOrgTypesSelected(newOrgTypesSelected.includes('All Documents') ?
-				[...newOrgTypesSelected] :
-				['All Documents', ...newOrgTypesSelected]);
+			setOrgTypesSelected(
+				newOrgTypesSelected.includes('All Documents')
+					? [...newOrgTypesSelected]
+					: ['All Documents', ...newOrgTypesSelected]
+			);
 		} else {
-			setOrgTypesSelected(newOrgTypesSelected.filter(type => type !== 'All Documents'));
+			setOrgTypesSelected(newOrgTypesSelected.filter((type) => type !== 'All Documents'));
 		}
 
 		if (newOrgTypesSelected.includes(legendKey)) {
@@ -1557,7 +1452,7 @@ export default function PolicyGraphView(props) {
 		setSelectedID(-1);
 	};
 
-	const nodePaint = (node, color, ctx, globalScale) => {
+	const nodePaint = (node, color, ctx, globalScale, drawText) => {
 		let outlineThickness = 3;
 		let connectedLevel = -1;
 
@@ -1582,21 +1477,17 @@ export default function PolicyGraphView(props) {
 		const nodeType = communityView
 			? String(node.community)
 			: combinedTypes.includes(node.label)
-				? node.label
-				: node.orgType;
+			? node.label
+			: node.orgType;
 
-		const nodeColor = color ? color :
-			orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
-				? convertHexToRgbA(node.color, HIDDEN_NODE_ALPHA)
-				: convertHexToRgbA(node.color, NODE_ALPHA);
+		const nodeColor = color
+			? color
+			: orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
+			? convertHexToRgbA(node.color, HIDDEN_NODE_ALPHA)
+			: convertHexToRgbA(node.color, NODE_ALPHA);
 		const outlineColor =
 			orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
-				? getNodeOutlineColors(
-					node,
-					HIDDEN_NODE_ALPHA,
-					node.color,
-					connectedLevel
-				  )
+				? getNodeOutlineColors(node, HIDDEN_NODE_ALPHA, node.color, connectedLevel)
 				: getNodeOutlineColors(node, NODE_ALPHA, node.color, connectedLevel);
 
 		ctx.beginPath();
@@ -1607,7 +1498,7 @@ export default function PolicyGraphView(props) {
 				nodeRelSize +
 				(combinedTypes.includes(node.label)
 					? 1
-					: Math.max(node.normalizedSize * (scalingParam / zoom), 1));
+					: Math.max((node.normalizedSize || 0) * (scalingParam / zoom), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
@@ -1620,27 +1511,21 @@ export default function PolicyGraphView(props) {
 		ctx.stroke();
 
 		// Selected/Hovered Outline
-		if (
-			node.id === selectedID ||
-			node.id === nodeHoverID ||
-			selectedDocuments.includes(node.doc_id)
-		) {
+		if (node.id === selectedID || node.id === nodeHoverID || selectedDocuments.includes(node.doc_id)) {
 			ctx.strokeStyle = convertHexToRgbA(
 				'#6ac6ff',
-				orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType)
-					? HIDDEN_NODE_ALPHA
-					: NODE_ALPHA
+				orgTypesSelected.length !== 0 && !orgTypesSelected.includes(nodeType) ? HIDDEN_NODE_ALPHA : NODE_ALPHA
 			);
 			ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
 			ctx.arc(node.x, node.y, nodeSize + 0.2, 0, 2 * Math.PI, false);
 			ctx.stroke();
 		}
 
-		handleCreateNodeText(node, ctx, globalScale, null);
+		if (drawText) handleCreateNodeText(node, ctx, globalScale, null);
 	};
 
 	const create2dGraphNode = (node, ctx, globalScale) => {
-		nodePaint(node, undefined, ctx, globalScale);
+		nodePaint(node, undefined, ctx, globalScale, true);
 	};
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
@@ -1655,7 +1540,7 @@ export default function PolicyGraphView(props) {
 			const lines = getLines(ctx, label, node.value * nodeRelSize);
 			lines.lines.forEach(function (line, i) {
 				const fontSize = Math.min(
-					node.nodeSize / (nodeRelSize + 1) * maxFontBasis,
+					(node.nodeSize / (nodeRelSize + 1)) * maxFontBasis,
 					(node.value * nodeRelSize + 1.5) / lines.lines.length
 				);
 				ctx.font = `${fontSize}px Sans-Serif`;
@@ -1706,9 +1591,7 @@ export default function PolicyGraphView(props) {
 
 	const createNodeLabel = (node) => {
 		const useNameOnly = ['Entity', 'Topic', 'UKN_Document'];
-		return useNameOnly.includes(node.label)
-			? node.name
-			: `${node.doc_type} ${node.doc_num}`;
+		return useNameOnly.includes(node.label) ? node.name : `${node.doc_type} ${node.doc_num}`;
 	};
 
 	const createNodeTooltip = (node) => {
@@ -1722,10 +1605,8 @@ export default function PolicyGraphView(props) {
 
 		if (
 			orgTypesSelected.length !== 0 &&
-			(
-				!orgTypesSelected.includes(start.orgType || start.label) ||
-				!orgTypesSelected.includes(end.orgType || end.label)
-			)
+			(!orgTypesSelected.includes(start.orgType || start.label) ||
+				!orgTypesSelected.includes(end.orgType || end.label))
 		) {
 			return getLinkColor(link, HIDDEN_NODE_ALPHA);
 		} else {
@@ -1792,15 +1673,17 @@ export default function PolicyGraphView(props) {
 
 	return (
 		<div>
-			{(nodeLimit?.warningLimit || (graph.nodes.length >= nodeLimit?.maxLimit)) &&
+			{(nodeLimit?.warningLimit || graph.nodes.length >= nodeLimit?.maxLimit) && (
 				<NotificationWrapper>
 					<IconWrapper>
 						<Warning fontSize="large" />
 					</IconWrapper>
 
-					{nodeLimit.warningLimit &&
+					{nodeLimit.warningLimit && (
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
+							<div
+								style={styles.warningBox}
+							>{`For performance reasons, only the ${nodeLimit.warningLimit} most relevant results were loaded. Click "Load All" to load all of the results. WARNING: This may cause browser slowdown, long load times, and stuttering/freezing while interacting with the graph.`}</div>
 							<LoadAllButton
 								onClick={() => {
 									loadAll();
@@ -1810,15 +1693,17 @@ export default function PolicyGraphView(props) {
 								Load All
 							</LoadAllButton>
 						</>
-					}
-					{nodeLimit.maxLimit &&
+					)}
+					{nodeLimit.maxLimit && (
 						<>
-							<div style={{ padding: '0px 15px' }}>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
+							<div
+								style={styles.warningBox}
+							>{`For performance reasons, only the ${nodeLimit.maxLimit} most relevant results were loaded. Please use filters to further refine your search.`}</div>
 							<span></span>
 						</>
-					}
+					)}
 				</NotificationWrapper>
-			}
+			)}
 			{show2DView && (
 				<MemoizedNodeCluster2D
 					renderContextMenu={showNodeContextMenu}
@@ -1861,9 +1746,7 @@ export default function PolicyGraphView(props) {
 					nodePointerAreaPaint={nodePaint}
 				/>
 			)}
-			{showGraphCard && (
-				<div style={styles.graphCard}>{displayGraphCard()}</div>
-			)}
+			{showGraphCard && <div style={styles.graphCard}>{displayGraphCard()}</div>}
 			{graphData.nodes.length === 0 && !runningSearch && (
 				<div style={styles.centeredContent}>
 					<div style={styles.noResultsMessage}>
@@ -1896,6 +1779,15 @@ const styles = {
 		fontWeight: 'bold',
 		fontSize: '20px',
 		margin: 'auto',
+	},
+	warningBox: {
+		padding: '0px 15px',
+		maxHeight: '100%',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		display: '-webkit-box',
+		'-webkit-line-clamp': '2',
+		'-webkit-box-orient': 'vertical',
 	},
 };
 

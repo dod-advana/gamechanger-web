@@ -3,7 +3,8 @@
 const { Sequelize } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-	const FAVORITE_SEARCH = sequelize.define('favorite_searches',
+	const FAVORITE_SEARCH = sequelize.define(
+		'favorite_searches',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -12,30 +13,30 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			user_id: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			new_user_id: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			search_name: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			search_summary: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			search_text: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			tiny_url: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			document_count: {
 				type: DataTypes.INTEGER,
-				allowNull: false
+				allowNull: false,
 			},
 			updated_results: {
 				type: DataTypes.BOOLEAN,
@@ -52,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			freezeTableName: true,
 			tableName: 'favorite_searches',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return FAVORITE_SEARCH;

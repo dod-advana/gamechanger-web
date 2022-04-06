@@ -2,20 +2,12 @@ import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
 import _ from 'lodash';
-import {
-	FormControl,
-	FormGroup,
-	FormControlLabel,
-	Checkbox,
-} from '@material-ui/core';
+import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { setState } from '../../../utils/sharedFunctions';
 import themeDatePicker from '../../common/theme-datepicker';
-import {
-	MuiPickersUtilsProvider,
-	KeyboardDatePicker,
-} from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
@@ -57,10 +49,7 @@ const handleSelectAllOrgs = (state, dispatch) => {
 
 const handleOrganizationFilterChange = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let orgName = event.target.name.substring(
-		0,
-		event.target.name.lastIndexOf('(') - 1
-	);
+	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked,
@@ -108,9 +97,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 	}
 
 	return (
-		<FormControl
-			style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
-		>
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 			{searchbar ? (
 				<>
 					<FormGroup row style={{ marginBottom: '10px' }}>
@@ -122,15 +109,9 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectAllOrgs(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allOrgsSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="All sources"
 									style={styles.filterBox}
 								/>
@@ -147,15 +128,9 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.specificOrgsSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Specific source(s)"
 									style={styles.filterBox}
 								/>
@@ -186,11 +161,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 													name={`${org}`}
 													checked={state.searchSettings.orgFilter[org]}
 													onClick={(event) =>
-														handleOrganizationFilterChangeAdv(
-															event,
-															state,
-															dispatch
-														)
+														handleOrganizationFilterChangeAdv(event, state, dispatch)
 													}
 												/>
 											}
@@ -228,15 +199,9 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectAllOrgs(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allOrgsSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="All sources"
 									style={styles.filterBox}
 								/>
@@ -255,15 +220,9 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.specificOrgsSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Specific source(s)"
 									style={styles.filterBox}
 								/>
@@ -278,10 +237,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							Object.keys(betterOrgData).map((org) => {
 								return (
 									<FormControlLabel
-										disabled={
-											!betterOrgData[org] &&
-											!state.searchSettings.orgFilter[org]
-										}
+										disabled={!betterOrgData[org] && !state.searchSettings.orgFilter[org]}
 										key={`${org} (${betterOrgData[org]})`}
 										value={`${org} (${betterOrgData[org]})`}
 										classes={{
@@ -402,9 +358,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 	}
 
 	return (
-		<FormControl
-			style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
-		>
+		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 			{searchbar ? (
 				<>
 					<FormGroup row style={{ marginBottom: '10px' }}>
@@ -416,15 +370,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectAllTypes(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allTypesSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="All types"
 									style={styles.filterBox}
 								/>
@@ -441,15 +389,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.archivedCongressSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Archived Congress"
 									style={styles.filterBox}
 								/>
@@ -466,15 +408,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectSpecificTypes(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.specificTypesSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Specific type(s)"
 									style={styles.filterBox}
 								/>
@@ -505,12 +441,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 													name={`${type}`}
 													checked={state.searchSettings.typeFilter[type]}
 													onClick={(event) =>
-														handleTypeFilterChangeLocal(
-															event,
-															state,
-															dispatch,
-															true
-														)
+														handleTypeFilterChangeLocal(event, state, dispatch, true)
 													}
 												/>
 											}
@@ -546,15 +477,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectAllTypes(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allTypesSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="All types"
 									style={styles.filterBox}
 								/>
@@ -573,15 +498,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.archivedCongressSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Archived Congress"
 									style={styles.filterBox}
 								/>
@@ -600,15 +519,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								<Checkbox
 									classes={{ root: classes.filterBox }}
 									onClick={() => handleSelectSpecificTypes(state, dispatch)}
-									icon={
-										<CheckBoxOutlineBlankIcon
-											style={{ visibility: 'hidden' }}
-										/>
-									}
+									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.specificTypesSelected}
-									checkedIcon={
-										<i style={{ color: '#E9691D' }} className="fa fa-check" />
-									}
+									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Specific type(s)"
 									style={styles.filterBox}
 								/>
@@ -623,10 +536,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 							Object.keys(betterTypeData).map((type) => {
 								return (
 									<FormControlLabel
-										disabled={
-											!betterTypeData[type] &&
-											!state.searchSettings.typeFilter[type]
-										}
+										disabled={!betterTypeData[type] && !state.searchSettings.typeFilter[type]}
 										key={`${type} (${betterTypeData[type]})`}
 										value={`${type} (${betterTypeData[type]})`}
 										classes={{
@@ -641,9 +551,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 												}}
 												name={`${type} (${betterTypeData[type]})`}
 												checked={state.searchSettings.typeFilter[type]}
-												onClick={(event) =>
-													handleTypeFilterChangeLocal(event, state, dispatch)
-												}
+												onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)}
 											/>
 										}
 										label={`${type} (${betterTypeData[type]})`}
@@ -681,13 +589,7 @@ const handleSelectPublicationDateSpecificDates = (state, dispatch) => {
 	});
 };
 
-const handleDateRangeChange = (
-	date,
-	isStartDate,
-	filterType,
-	state,
-	dispatch
-) => {
+const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	const { publicationDateFilter, accessDateFilter } = newSearchSettings;
 
@@ -738,18 +640,9 @@ const handleDateRangeChange = (
 	});
 };
 
-const renderDates = (
-	state,
-	dispatch,
-	classes,
-	setDatePickerOpen,
-	setDatePickerClosed,
-	searchbar = false
-) => {
+const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
 	const pubAllTime =
-		state.searchSettings.publicationDateAllTime === undefined
-			? true
-			: state.searchSettings.publicationDateAllTime;
+		state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
 
 	return (
 		<MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -767,20 +660,11 @@ const renderDates = (
 											control={
 												<Checkbox
 													classes={{ root: classes.filterBox }}
-													onClick={() =>
-														handleSelectPublicationDateAllTime(state, dispatch)
-													}
-													icon={
-														<CheckBoxOutlineBlankIcon
-															style={{ visibility: 'hidden' }}
-														/>
-													}
+													onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
+													icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 													checked={pubAllTime}
 													checkedIcon={
-														<i
-															style={{ color: '#E9691D' }}
-															className="fa fa-check"
-														/>
+														<i style={{ color: '#E9691D' }} className="fa fa-check" />
 													}
 													name="All time"
 													style={styles.filterBox}
@@ -798,22 +682,12 @@ const renderDates = (
 												<Checkbox
 													classes={{ root: classes.filterBox }}
 													onClick={() =>
-														handleSelectPublicationDateSpecificDates(
-															state,
-															dispatch
-														)
+														handleSelectPublicationDateSpecificDates(state, dispatch)
 													}
-													icon={
-														<CheckBoxOutlineBlankIcon
-															style={{ visibility: 'hidden' }}
-														/>
-													}
+													icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 													checked={!pubAllTime}
 													checkedIcon={
-														<i
-															style={{ color: '#E9691D' }}
-															className="fa fa-check"
-														/>
+														<i style={{ color: '#E9691D' }} className="fa fa-check" />
 													}
 													name="Specific dates"
 													style={styles.filterBox}
@@ -835,10 +709,7 @@ const renderDates = (
 													<Checkbox
 														classes={{ root: classes.filterBox }}
 														onClick={() =>
-															handleSelectPublicationDateAllTime(
-																state,
-																dispatch
-															)
+															handleSelectPublicationDateAllTime(state, dispatch)
 														}
 														icon={
 															<CheckBoxOutlineBlankIcon
@@ -847,10 +718,7 @@ const renderDates = (
 														}
 														checked={pubAllTime}
 														checkedIcon={
-															<i
-																style={{ color: '#E9691D' }}
-																className="fa fa-check"
-															/>
+															<i style={{ color: '#E9691D' }} className="fa fa-check" />
 														}
 														name="All time"
 														style={styles.filterBox}
@@ -870,10 +738,7 @@ const renderDates = (
 													<Checkbox
 														classes={{ root: classes.filterBox }}
 														onClick={() =>
-															handleSelectPublicationDateSpecificDates(
-																state,
-																dispatch
-															)
+															handleSelectPublicationDateSpecificDates(state, dispatch)
 														}
 														icon={
 															<CheckBoxOutlineBlankIcon
@@ -882,10 +747,7 @@ const renderDates = (
 														}
 														checked={!pubAllTime}
 														checkedIcon={
-															<i
-																style={{ color: '#E9691D' }}
-																className="fa fa-check"
-															/>
+															<i style={{ color: '#E9691D' }} className="fa fa-check" />
 														}
 														name="Specific dates"
 														style={styles.filterBox}
@@ -916,13 +778,7 @@ const renderDates = (
 									}}
 									value={state.searchSettings.publicationDateFilter[0]}
 									onChange={(date) =>
-										handleDateRangeChange(
-											date,
-											true,
-											'publication',
-											state,
-											dispatch
-										)
+										handleDateRangeChange(date, true, 'publication', state, dispatch)
 									}
 									onOpen={setDatePickerOpen}
 									onClose={setDatePickerClosed}
@@ -940,13 +796,7 @@ const renderDates = (
 									}}
 									value={state.searchSettings.publicationDateFilter[1]}
 									onChange={(date) =>
-										handleDateRangeChange(
-											date,
-											false,
-											'publication',
-											state,
-											dispatch
-										)
+										handleDateRangeChange(date, false, 'publication', state, dispatch)
 									}
 									onOpen={setDatePickerOpen}
 									onClose={setDatePickerClosed}
@@ -975,9 +825,7 @@ const handleRevokedChange = (event, state, dispatch) => {
 const renderStatus = (state, dispatch, classes) => {
 	return (
 		<div>
-			<FormControl
-				style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}
-			>
+			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '0px' }}>
 					<FormControlLabel
 						name="Revoked Docs"
@@ -987,13 +835,9 @@ const renderStatus = (state, dispatch, classes) => {
 							<Checkbox
 								classes={{ root: classes.filterBox }}
 								onClick={(event) => handleRevokedChange(event, state, dispatch)}
-								icon={
-									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />
-								}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.searchSettings.includeRevoked}
-								checkedIcon={
-									<i style={{ color: '#E9691D' }} className="fa fa-check" />
-								}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="Revoked Docs"
 							/>
 						}
@@ -1006,20 +850,13 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 };
 
-
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
 const PolicySearchMatrixHandler = {
 	getSearchMatrixItems(props) {
-		
-		const {
-			state,
-			dispatch,
-			classes,
-		} = props;
-
+		const { state, dispatch, classes } = props;
 
 		return (
 			<>
@@ -1105,14 +942,7 @@ const PolicySearchMatrixHandler = {
 	},
 
 	getAdvancedOptions(props) {
-		const {
-			state,
-			dispatch,
-			classes,
-			handleSubmit,
-			setDatePickerOpen,
-			setDatePickerClosed,
-		} = props;
+		const { state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed } = props;
 
 		return (
 			<>
@@ -1131,14 +961,7 @@ const PolicySearchMatrixHandler = {
 				<div style={styles.filterDiv}>
 					<strong style={styles.boldText}>PUBLICATION DATE</strong>
 					<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-					{renderDates(
-						state,
-						dispatch,
-						classes,
-						setDatePickerOpen,
-						setDatePickerClosed,
-						true
-					)}
+					{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
 				</div>
 
 				<div style={styles.filterDiv}>
@@ -1162,10 +985,7 @@ const PolicySearchMatrixHandler = {
 						</GCButton>
 					</div>
 					<div style={{ width: '120px', height: '40px' }}>
-						<GCButton
-							style={{ width: '100%', height: '100%' }}
-							onClick={handleSubmit}
-						>
+						<GCButton style={{ width: '100%', height: '100%' }} onClick={handleSubmit}>
 							Search
 						</GCButton>
 					</div>

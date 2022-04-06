@@ -7,7 +7,7 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			apiKey: {
 				type: Sequelize.TEXT,
@@ -16,20 +16,20 @@ module.exports = {
 				type: Sequelize.TEXT,
 			},
 			active: {
-				type: Sequelize.BOOLEAN
+				type: Sequelize.BOOLEAN,
 			},
 			createdAt: {
 				allowNull: false,
-				type: Sequelize.DATE
+				type: Sequelize.DATE,
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 	down: (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

@@ -81,15 +81,10 @@ export default () => {
 
 	return (
 		<PageWrapper>
-			<Typography
-				variant="h2"
-				style={{ width: '100%', marginLeft: '20px', fontSize: '25px' }}
-			>
+			<Typography variant="h2" style={{ width: '100%', marginLeft: '20px', fontSize: '25px' }}>
 				{'Edit Trending Blacklist'}
 			</Typography>
-			<div
-				style={{ display: 'flex', flexDirection: 'row', marginBottom: '10px' }}
-			>
+			<div style={{ display: 'flex', flexDirection: 'row', marginBottom: '10px' }}>
 				<TextField
 					label="Blacklist Query"
 					id="margin-dense"
@@ -122,10 +117,7 @@ export default () => {
 						<ListItem key={search_text}>
 							<div style={{ width: '50%' }}>{search_text}</div>
 							<div style={{ width: '40%' }}>{added_by}</div>
-							<DeleteButton
-								style={{ width: '10%' }}
-								onClick={() => handleDelete(search_text)}
-							>
+							<DeleteButton style={{ width: '10%' }} onClick={() => handleDelete(search_text)}>
 								Delete
 							</DeleteButton>
 						</ListItem>

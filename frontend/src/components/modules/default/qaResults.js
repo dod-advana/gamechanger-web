@@ -36,7 +36,7 @@ const CloseButton = styled.div`
 
 const styles = {
 	intelligentContainer: {
-		margin: '10px',
+		margin: '10px 0',
 		padding: '20px',
 		backgroundColor: 'rgb(241, 245, 249)',
 		fontSize: '1.2em',
@@ -105,10 +105,7 @@ const GetQAResults = (props) => {
 	const sentenceResults = state.sentenceResults;
 	const { intelligentSearchResult } = state;
 	const isFavorite =
-		_.findIndex(
-			state.userData.favorite_documents,
-			(item) => item.id === intelligentSearchResult.id
-		) !== -1;
+		_.findIndex(state.userData.favorite_documents, (item) => item.id === intelligentSearchResult.id) !== -1;
 	const classes = useStyles();
 	let publicationDate;
 	if (
@@ -116,15 +113,9 @@ const GetQAResults = (props) => {
 		intelligentSearchResult.publication_date_dt !== ''
 	) {
 		const currentDate = new Date(intelligentSearchResult.publication_date_dt);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(
-			currentDate
-		);
-		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(
-			currentDate
-		);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(
-			currentDate
-		);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
 		publicationDate = `${month}-${day}-${year}`;
 	} else {
 		publicationDate = `unknown`;
@@ -137,9 +128,7 @@ const GetQAResults = (props) => {
 	const [favoriteSummary, setFavoriteSummary] = useState('');
 	const [open, setOpen] = useState(true);
 
-	const selected =
-		intelligentSearchResult.filename &&
-		state.selectedDocuments.has(intelligentSearchResult.filename);
+	const selected = intelligentSearchResult.filename && state.selectedDocuments.has(intelligentSearchResult.filename);
 
 	const preventDefault = (event) => event.preventDefault();
 
@@ -178,20 +167,10 @@ const GetQAResults = (props) => {
 
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'CardCheckboxUnchecked',
-				key,
-				0
-			);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
 		} else {
 			selectedDocuments.set(key, value);
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'CardCheckboxChecked',
-				key,
-				1
-			);
+			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
@@ -208,15 +187,13 @@ const GetQAResults = (props) => {
 							<div style={{ textAlign: 'center' }}>
 								{type === 'QA' ? (
 									<span>
-										This answer was retrieved based on beta artificial
-										intelligent answering. <br />
-										User discretion is encouraged while we continue maturing
-										this capability.
+										This answer was retrieved based on beta artificial intelligent answering. <br />
+										User discretion is encouraged while we continue maturing this capability.
 									</span>
 								) : (
 									<span>
-										This card was retrieved based on a new machine learning
-										algorithm. {feedback === '' && 'Was this result relevant?'}
+										This card was retrieved based on a new machine learning algorithm.{' '}
+										{feedback === '' && 'Was this result relevant?'}
 									</span>
 								)}
 							</div>
@@ -224,10 +201,7 @@ const GetQAResults = (props) => {
 						placement="right"
 						arrow
 					>
-						<i
-							className={classes.infoCircle + ' fa fa-info-circle'}
-							aria-hidden="true"
-						/>
+						<i className={classes.infoCircle + ' fa fa-info-circle'} aria-hidden="true" />
 					</GCTooltip>
 				</div>
 				<div>
@@ -321,11 +295,7 @@ const GetQAResults = (props) => {
 
 	const favoriteComponent = () => {
 		return (
-			<GCTooltip
-				title={'Favorite a document to track in the User Dashboard'}
-				placement="top"
-				arrow
-			>
+			<GCTooltip title={'Favorite a document to track in the User Dashboard'} placement="top" arrow>
 				<i
 					onClick={(event) => {
 						if (favorite) {
@@ -361,9 +331,7 @@ const GetQAResults = (props) => {
 							fontSize="large"
 						/>
 					}
-					checkedIcon={
-						<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />
-					}
+					checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
 					checked={selected}
 					className={`tutorial-step-${state.componentStepNumbers['Search Result Checkbox']}`}
 					id={'gcSearchResultCheckbox'}
@@ -385,9 +353,7 @@ const GetQAResults = (props) => {
 				>
 					<CloseIcon fontSize="large" />
 				</CloseButton>
-				<p style={{ marginTop: '10px', marginBottom: '0' }}>
-					{_.truncate(answers[0].answer, { length: 300 })}
-				</p>
+				<p style={{ marginTop: '10px', marginBottom: '0' }}>{_.truncate(answers[0].answer, { length: 300 })}</p>
 				<Link
 					href={'#'}
 					onClick={(event) => {
@@ -401,10 +367,7 @@ const GetQAResults = (props) => {
 						<b style={{ fontSize: 14 }}>{answers[0].displaySource}</b>
 					</strong>
 				</Link>
-				{feedbackComponent(
-					{ answer: answers[0], qaContext: qaContext, params: params },
-					'QA'
-				)}
+				{feedbackComponent({ answer: answers[0], qaContext: qaContext, params: params }, 'QA')}
 			</div>
 		);
 	} else if (open && Object.keys(intelligentSearchResult).length !== 0) {
@@ -451,12 +414,10 @@ const GetQAResults = (props) => {
 									</div>
 									<div style={{ width: 350, margin: 5 }}>
 										<div style={{ margin: '65px 15px 0' }}>
-											Are you sure you want to delete this favorite? You will
-											lose any comments made.
+											Are you sure you want to delete this favorite? You will lose any comments
+											made.
 										</div>
-										<div
-											style={{ display: 'flex', justifyContent: 'flex-end' }}
-										>
+										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
 												onClick={() => handleCancelFavorite()}
 												style={{
@@ -511,9 +472,7 @@ const GetQAResults = (props) => {
 											multiline={true}
 											rows={8}
 										/>
-										<div
-											style={{ display: 'flex', justifyContent: 'flex-end' }}
-										>
+										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
 												onClick={() => handleCancelFavorite()}
 												style={{
@@ -571,7 +530,6 @@ const GetQAResults = (props) => {
 					{_.truncate(intelligentSearchResult.pageHits[0].snippet, {
 						length: 500,
 					})}
-
 				</p>
 				<Link
 					href={'#'}

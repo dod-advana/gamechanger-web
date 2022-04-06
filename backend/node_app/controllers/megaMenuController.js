@@ -1,14 +1,11 @@
 const MODEL = require('../models').megamenu_links;
-const LOGGER = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const _ = require('underscore');
 
 class MegaMenuController {
 	constructor(opts = {}) {
-		const {
-			model = MODEL,
-			logger = LOGGER
-		} = opts;
+		const { model = MODEL, logger = LOGGER } = opts;
 
 		this.model = model;
 		this.logger = logger;
@@ -24,7 +21,7 @@ class MegaMenuController {
 
 	async getLinks(req, res) {
 		const links = await this.getMegamenuConfigFromDb();
-		res.status(200).send({links});
+		res.status(200).send({ links });
 	}
 
 	async getMegamenuConfigFromDb() {
@@ -32,7 +29,7 @@ class MegaMenuController {
 			raw: true,
 			order: [
 				['row_number', 'asc'],
-				['section', 'asc']
+				['section', 'asc'],
 			],
 		};
 
@@ -59,7 +56,7 @@ class MegaMenuController {
 			newTab: row['new_tab'],
 			permission: row['permission'] || null,
 			link_identifier: row['link_identifier'] || null,
-			notAvailable: _.isEmpty(row['href'])
+			notAvailable: _.isEmpty(row['href']),
 		};
 		if (row['hide_without_permission']) {
 			link.hideWithoutPermission = true;
@@ -71,89 +68,98 @@ class MegaMenuController {
 		return _.map(data, (row) => this.generateLink(row));
 	}
 
-    getOverviewLink(sectionData, section) {
+	getOverviewLink(sectionData, section) {
 		let link = { link: '#', description: '' };
 		const overviewLabel = `${section} Overview`;
-		const lookup = _.find(sectionData, x => x['subsection1_label'] === overviewLabel || x['link_label'] === overviewLabel);
+		const lookup = _.find(
+			sectionData,
+			(x) => x['subsection1_label'] === overviewLabel || x['link_label'] === overviewLabel
+		);
 		if (lookup && lookup['href']) link = { link: lookup['href'], description: lookup.description };
 		return link;
 	}
 
 	generateTwoLevelConfig(data) {
 		const sections = _.chain(data).uniq('subsection1_label').pluck('subsection1_label').value();
-		return _.map(sections, label => {
-			const filteredSectionData = _.filter(data, row => row['subsection1_label'] === label);
-			if (filteredSectionData.length === 1) return this.generateLink(filteredSectionData[0], filteredSectionData[0]['subsection1_label']);
+		return _.map(sections, (label) => {
+			const filteredSectionData = _.filter(data, (row) => row['subsection1_label'] === label);
+			if (filteredSectionData.length === 1)
+				return this.generateLink(filteredSectionData[0], filteredSectionData[0]['subsection1_label']);
 			return {
 				label,
 				links: this.generateLinkLabels(filteredSectionData),
 			};
 		});
 	}
-	
+
 	generateThreeLevelConfig(data) {
 		const sections = _.chain(data).uniq('subsection1_label').pluck('subsection1_label').value();
-		return _.map(sections, sectionLabel => {
+		return _.map(sections, (sectionLabel) => {
 			const subsections = _.chain(data)
-				.filter(row => row['subsection1_label'] === sectionLabel)
+				.filter((row) => row['subsection1_label'] === sectionLabel)
 				.uniq('subsection2_label')
 				.pluck('subsection2_label')
 				.value();
-	
-			const links = _.map(subsections, label => {
-				const filteredSectionData = _.filter(data, row => row['subsection2_label'] === label && row['subsection1_label'] === sectionLabel);
+
+			const links = _.map(subsections, (label) => {
+				const filteredSectionData = _.filter(
+					data,
+					(row) => row['subsection2_label'] === label && row['subsection1_label'] === sectionLabel
+				);
 				if (filteredSectionData.length === 1) {
-					return this.generateLink(filteredSectionData[0], filteredSectionData[0]['subsection2_label'] || filteredSectionData[0]['subsection1_label']);
+					return this.generateLink(
+						filteredSectionData[0],
+						filteredSectionData[0]['subsection2_label'] || filteredSectionData[0]['subsection1_label']
+					);
 				}
 				const thirdLevelLinks = this.generateTwoLevelConfig(filteredSectionData);
 				return {
 					label,
 					links: thirdLevelLinks[0].links,
-					permission: null
+					permission: null,
 				};
 			});
 			if (links.length === 1) return links[0];
 			return {
 				label: sectionLabel,
-				links
+				links,
 			};
-	
 		});
 	}
 
 	convertDbRowsToJSON(data, config) {
 		const { oneLevelSections, twoLevelSections, threeLevelSections } = config;
-	
-		const data1 = _.map(oneLevelSections, section => {
+
+		const data1 = _.map(oneLevelSections, (section) => {
 			const sectionData = data[section];
-			const {link, description} = this.getOverviewLink(sectionData, section);
+			const { link, description } = this.getOverviewLink(sectionData, section);
 			return {
 				title: section,
 				description,
 				link,
-				links: this.generateLinkLabels(sectionData)
+				links: this.generateLinkLabels(sectionData),
 			};
 		});
-	
-		const data2 = _.map(twoLevelSections, section => {
+
+		const data2 = _.map(twoLevelSections, (section) => {
 			const sectionData = data[section];
-			const {link, description} = this.getOverviewLink(sectionData, section);
+			const { link, description } = this.getOverviewLink(sectionData, section);
 			return {
 				title: section,
 				description,
 				link,
-				links: this.generateTwoLevelConfig(sectionData)
+				links: this.generateTwoLevelConfig(sectionData),
 			};
 		});
-	
-		const data3 = _.map(threeLevelSections, section => {
+
+		const data3 = _.map(threeLevelSections, (section) => {
 			const sectionData = data[section];
-			const {link, description} = this.getOverviewLink(sectionData, section);
+			const { link, description } = this.getOverviewLink(sectionData, section);
 			return {
 				title: section,
 				description,
 				link,
-				links: this.generateThreeLevelConfig(sectionData)
+				links: this.generateThreeLevelConfig(sectionData),
 			};
 		});
 		return _.indexBy([...data1, ...data2, ...data3], 'title');

@@ -1,12 +1,9 @@
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 const CryptoJS = require('crypto-js');
-const Base64 = require('crypto-js/enc-base64');
 
 export const getSignature = (options, url) => {
 	const token = Auth.getTokenPayload();
-	const signature = Base64.stringify(
-		CryptoJS.HmacSHA256(url, token['csrf-token'] || 'NoToken')
-	);
+	const signature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(url, token ? token['csrf-token'] : 'NoToken'));
 	options.headers = { 'X-UA-SIGNATURE': signature };
 };
 

@@ -13,10 +13,7 @@ export const NavItem = styled.div`
 export const HoverNavItem = styled(NavItem)`
 	cursor: pointer;
 	justify-content: ${(props) => (props.centered ? 'center' : 'auto')};
-	background-color: ${(props) =>
-		props.active
-			? props.toolTheme.hoverColor
-			: props.toolTheme.menuBackgroundColor};
+	background-color: ${(props) => (props.active ? props.toolTheme.hoverColor : props.toolTheme.menuBackgroundColor)};
 
 	&:hover {
 		background-color: ${(props) => props.toolTheme.hoverColor};
