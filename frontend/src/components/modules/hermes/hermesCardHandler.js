@@ -106,8 +106,7 @@ const StyledFrontCardHeader = styled.div`
 	display: inline-block;
 	color: black;
 	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 	font-weight: bold;
 	font-family: Montserrat;
 	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
@@ -127,10 +126,13 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
 			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({listView}) => listView ? '': 'anywhere'};
+			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
+				-webkit-line-clamp: 2;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
 			}
 
 			.list-view-arrow {
@@ -154,8 +156,7 @@ const StyledFrontCardHeader = styled.div`
 		color: black;
 		margin-bottom: 0px;
 		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) =>
-		intelligentSearch ? '#9BB1C8' : 'white'};
+		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
 		font-family: Montserrat;
 		height: 24px;
 		justify-content: space-between;
@@ -167,10 +168,8 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
-		color: ${({ typeTextColor }) =>
-		typeTextColor ? typeTextColor : '#ffffff'};
-		background-color: ${({ docTypeColor }) =>
-		docTypeColor ? docTypeColor : '#000000'};
+		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
+		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
 		padding: 8px;
 		display: flex;
@@ -186,8 +185,7 @@ const StyledFrontCardSubHeader = styled.div`
 		width: 50%;
 		color: white;
 		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) =>
-		docOrgColor ? docOrgColor : '#000000'};
+		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
 	}
 `;
 
@@ -207,12 +205,7 @@ const Row = ({ label, value, minWidth = 'inherit' }) => {
 	);
 };
 
-const makeRows = (
-	fieldsArr = [],
-	itemWithValues = {},
-	displayNameMap,
-	forTable = false
-) => {
+const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
 	const rows = [];
 	for (const fieldName of fieldsArr) {
 		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
@@ -236,14 +229,7 @@ const makeRows = (
 				row['Value'] = value;
 				rows.push(row);
 			} else {
-				rows.push(
-					<Row
-						key={cleanFieldName}
-						label={displayName}
-						value={value}
-						minWidth={40}
-					/>
-				);
+				rows.push(<Row key={cleanFieldName} label={displayName} value={value} minWidth={40} />);
 			}
 		}
 	}
@@ -251,12 +237,7 @@ const makeRows = (
 	return rows;
 };
 
-const renderHighlights = (
-	highlights,
-	capitalizeFirst,
-	hoveredHit,
-	setHoveredHit
-) => {
+const renderHighlights = (highlights, capitalizeFirst, hoveredHit, setHoveredHit) => {
 	const fontSize = 12;
 	const highlightList = [];
 
@@ -300,10 +281,7 @@ const renderHighlights = (
 						}}
 					>
 						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label}`}</span>
-						<i
-							className="fa fa-chevron-right"
-							style={{ marginLeft: 10, fontSize, color: 'white' }}
-						/>
+						<i className="fa fa-chevron-right" style={{ marginLeft: 10, fontSize, color: 'white' }} />
 					</div>
 				</>
 			);
@@ -332,32 +310,21 @@ const HermesCardHandler = {
 			const title = getDisplayTitle(item);
 			// $ to indicate use text as is
 			let type = item[auxDisplayLeftSubtitleText];
-			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${
-				item[auxDisplayRightSubtitleField]
-			}`;
+			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${item[auxDisplayRightSubtitleField]}`;
 
 			type = `$${capitalizeFirst(auxDisplayLeftSubtitleText)}: ${type}`;
 
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader
-					listView={state.listView}
-					docListView={docListView}
-					intelligentSearch={false}
-				>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={title} placement="top" arrow>
-							<div
-								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.body) : () => {}}
-							>
+							<div className={'title-text'} onClick={docListView ? () => clickFn(item.body) : () => {}}>
 								<div className={'text'}>{title}</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
-										<KeyboardArrowRight
-											style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }}
-										/>
+										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 									</div>
 								)}
 							</div>
@@ -380,9 +347,7 @@ const HermesCardHandler = {
 
 			// $ to indicate use text as is
 			let type = item[auxDisplayLeftSubtitleText];
-			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${
-				item[auxDisplayRightSubtitleField]
-			}`;
+			let org = `$${capitalizeFirst(auxDisplayRightSubtitleField)}: ${item[auxDisplayRightSubtitleField]}`;
 			let typeColor = 'black';
 
 			if (type === 'Z') {
@@ -419,7 +384,7 @@ const HermesCardHandler = {
 			const { item, hoveredHit, setHoveredHit } = props;
 
 			let hoveredSnippet = '';
-			if(hoveredHit){
+			if (hoveredHit) {
 				const sliceIndex = hoveredHit.match(/\d+$/).index;
 				const type = hoveredHit.slice(0, sliceIndex).trim();
 				const index = hoveredHit.slice(sliceIndex) - 1;
@@ -436,20 +401,13 @@ const HermesCardHandler = {
 				}
 			}
 
-			const frontItems = makeRows(
-				auxDisplayFrontFields,
-				item,
-				displayNameMap,
-				false
-			);
+			const frontItems = makeRows(auxDisplayFrontFields, item, displayNameMap, false);
 
 			return (
 				<div style={styles.bodyContainer}>
 					{frontItems}
 					{item && item.highlight && (
-						<div
-							style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}
-						>
+						<div style={{ display: 'flex', height: '100%', margin: '5px 0 0 0' }}>
 							<div
 								style={{
 									minWidth: 100,
@@ -459,12 +417,7 @@ const HermesCardHandler = {
 									overflow: 'scroll',
 								}}
 							>
-								{renderHighlights(
-									item.highlight,
-									capitalizeFirst,
-									hoveredHit,
-									setHoveredHit,
-								)}
+								{renderHighlights(item.highlight, capitalizeFirst, hoveredHit, setHoveredHit)}
 							</div>
 							<div
 								style={{
@@ -499,12 +452,7 @@ const HermesCardHandler = {
 				}
 			}
 
-			const backItemsTable = makeRows(
-				auxDisplayBackFields,
-				item,
-				displayNameMap,
-				true
-			);
+			const backItemsTable = makeRows(auxDisplayBackFields, item, displayNameMap, true);
 
 			return (
 				<SimpleTable
@@ -551,11 +499,7 @@ const HermesCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i
-							style={styles.viewMoreChevron}
-							className="fa fa-chevron-right"
-							aria-hidden="true"
-						/>
+						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
 					</div>
 				</>
 			);

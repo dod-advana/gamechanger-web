@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
-    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles",
+    "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
     "prestart": "npm install",
     "start": "node index.js",
@@ -16,23 +16,24 @@
     "gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
     "orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
     "orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo",
-    "eslint": "eslint --fix --debug -c package.json ./node_app/"
+    "eslint": "eslint --fix --debug -c .eslintrc.json ./node_app/"
   },
   "author": "",
   "license": "ISC",
   "resolutions": {
-    "node-forge": "1.2.1"
+    "node-forge": "1.2.1",
+    "types/node": "12.20.13"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.30",
-    "@dod-advana/advana-logger": "0.0.3",
+    "@dod-advana/advana-api-auth": "0.0.37",
+    "@dod-advana/advana-logger": "0.0.4",
     "@elastic/elasticsearch": "7.13.0",
     "async": "2.6.3",
     "async-redis": "2.0.0",
-    "aws-sdk": "2.948.0",
+    "aws-sdk": "2.976.0",
     "axios": "0.24.0",
     "body-parser": "1.19.0",
-    "chai": "4.3.4",
+    "chai": "4.3.0",
     "cors": "2.8.5",
     "crypto-js": "3.2.0",
     "csv-stringify": "5.6.2",
@@ -45,17 +46,17 @@
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
     "lunr": "2.3.9",
-    "moment": "2.27.0",
+    "moment": "2.20.1",
     "mysql": "2.18.1",
     "neo4j-driver": "4.3.1",
     "node-cron": "2.0.3",
     "node-forge": "1.2.1",
-    "nodemailer": "6.6.5",
+    "nodemailer": "6.6.3",
     "npm-force-resolutions": "0.0.10",
     "pagerank.js": "1.0.2",
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
-    "pdfmake": "0.1.72",
+    "pdfmake": "0.2.4",
     "redis": "3.1.2",
     "secure-random": "1.1.1",
     "sequelize": "6.6.5",
@@ -64,12 +65,15 @@
     "strip-ansi": "6.0.0",
     "swagger-jsdoc": "6.1.0",
     "swagger-ui-express": "4.1.6",
-    "underscore": "1.13.1",
+    "underscore": "1.13.2",
     "winston": "3.3.3"
   },
   "devDependencies": {
     "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "jest": "^25.1.0",
+    "prettier": "^2.6.1",
     "sonarqube-scanner": "^2.5.0"
   },
   "jest": {
@@ -80,49 +84,5 @@
       "lcov"
     ],
     "testTimeout": 10000
-  },
-  "eslintConfig": {
-    "rules": {
-      "semi": [
-        "error",
-        "always",
-        {
-          "omitLastInOneLineBlock": true
-        }
-      ],
-      "max-len": 0,
-      "indent": [
-        "warn",
-        "tab",
-        {
-          "SwitchCase": 1
-        }
-      ],
-      "space-before-function-paren": 0,
-      "radix": 0,
-      "comma-dangle": 0,
-      "strict": 0,
-      "no-throw-literal": 0,
-      "quotes": [
-        "warn",
-        "single",
-        {
-          "allowTemplateLiterals": true
-        }
-      ],
-      "no-eval": 0,
-      "no-irregular-whitespace": [
-        "error",
-        {
-          "skipComments": true
-        }
-      ]
-    },
-    "env": {
-      "es6": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2020
-    }
   }
 }

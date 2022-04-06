@@ -4,190 +4,13 @@ const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
 describe('UserController', function () {
 
-	describe('#addInternalUser', () => {
-		const opts = {
-			...constructorOptionsMock,
-			dataApi: {}
-		};
-
-		it('should fail if neither username or trackByRequest options are passed in the body', async () => {
-
-			let usedUsername;
-			const internalUserTracking = {
-				findAll({where: { username }}) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				},
-				findOne({where: { username }}) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				}
-			};
-			
-			const newOpts = {
-				...opts,
-				internalUserTracking
-			};
-			
-			const target = new UserController(newOpts);
-
-			const req = {
-				...reqMock,
-				body: {}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code){
-					resCode = code;
-					return this;
-				},
-				send(msg){
-					resMsg = msg;
-				}
-			};
-
-			const expectedCode = 500;
-			const expectedMsg = 'This user is already being tracked. Table ID # 1 - hash: d41d8cd98f00b204e9800998ecf8427e';
-
-			await target.addInternalUser(req, res);
-
-			assert.equal(resCode, expectedCode);
-			assert.equal(resMsg, expectedMsg);
-
-		});
-
-		it('should use the request header if trackByRequest is true in the request body', async () => {
-
-			let usedUsername;
-			const internalUserTracking = {
-				findAll({where: { username }}) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				},
-				findOne({where: { username }}) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				}
-			};
-
-			const newOpts = {
-				...opts,
-				internalUserTracking
-			};
-
-			const target = new UserController(newOpts);
-
-			const req = {
-				...reqMock,
-				body: {
-					trackByRequest: true,
-					username: 'wrongIfUsedWithTrackByRequest'
-				}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-				}
-			};
-
-			const expectedUsername = '27d1ca9e10b731476b7641eae2710ac0';
-			try {
-				await target.addInternalUser(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			assert.equal(usedUsername, expectedUsername);
-
-		});
-
-		it('should use the username if trackByRequest not in the request body', async () => {
-
-			let usedUsername;
-			const internalUserTracking = {
-				findAll({ where: { username } }) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				},
-				findOne({where: { username }}) {
-					usedUsername = username;
-					return {
-						id: 1,
-						username
-					};
-				}
-			};
-
-			const newOpts = {
-				...opts,
-				internalUserTracking
-			};
-
-			const target = new UserController(newOpts);
-
-			const req = {
-				...reqMock,
-				body: {
-					username: 'hashMe'
-				}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-				}
-			};
-
-			const expectedUsername = 'ae2b850d2b6b3db1a9eb1ff0afe7289c';
-			try {
-				await target.addInternalUser(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			assert.equal(usedUsername, expectedUsername);
-
-		});
-	});
-
 	describe('#getInternalUsers', () => {
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {}
 		};
 
-		it('return all internal users', async () => {
+		it('return all internal users', async (done) => {
 			const internalUsers = [{id: 1, username: 'Test'}];
 			const internalUserTracking = {
 				findAll() {
@@ -225,11 +48,12 @@ describe('UserController', function () {
 			const expected = [{id: 1, username: 'Test'}];
 			try {
 				await target.getInternalUsers(req, res);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			assert.deepStrictEqual(resMsg, expected);
-
 		});
 	});
 
@@ -297,7 +121,7 @@ describe('UserController', function () {
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
-			gcUser: {
+			user: {
 				findOrCreate(data) {
 					let user;
 
@@ -318,12 +142,27 @@ describe('UserController', function () {
 
 						return Promise.resolve([user, true]);
 					}
+				},
+				findOne(data) {
+					let user;
+
+					users.forEach(tmpUser => {
+						if (tmpUser.user_id === data.where.user_id) {
+							user = tmpUser;
+						}
+					});
+
+					if (user) {
+						return Promise.resolve(user);
+					} else {
+						return Promise.resolve(undefined);
+					}
 				}
 			},
 			constants: { GAME_CHANGER_OPTS: {index: 'gamechanger'}}
 		};
 
-		it('should return fake user data for a new user', async () => {
+		it('should return fake user data for a new user', async (done) => {
 			users = [];
 			const target = new UserController(opts);
 
@@ -350,19 +189,21 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserData(req, res);
+				const expected = {'api_key': '', 'export_history': [],'pdf_opened': [], 'favorite_documents': [], 'favorite_searches': [], 'notifications': {}, 'search_history': [], 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'api_key': '', 'export_history': [], 'favorite_documents': [], 'favorite_searches': [], 'notifications': {}, 'search_history': [], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
-			assert.deepStrictEqual(resMsg, expected);
 		});
 
-		it('should return fake user data for a user', async () => {
-			users.push({ user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
+		it('should return fake user data for a user', async (done) => {
+			users.push({ user_id: 'testsuite', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
 
 			const favorite_documents = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				filename: 'Test',
 				favorite_name: 'Test',
 				favorite_summary: 'Test',
@@ -373,7 +214,7 @@ describe('UserController', function () {
 
 			const favorite_searches = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				search_name: 'Test',
 				search_summary: 'Test',
 				search_text: 'Test',
@@ -385,7 +226,7 @@ describe('UserController', function () {
 
 			const favorite_topics = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				topic_name: 'Test',
 				topic_summary: 'Test',
 				is_clone: false,
@@ -394,7 +235,7 @@ describe('UserController', function () {
 
 			const favorite_organizations = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				organization_name: 'Test',
 				organization_summary: 'Test',
 				is_clone: false,
@@ -403,23 +244,23 @@ describe('UserController', function () {
 
 			const favorite_groups = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				group_type: 'document',
 				group_name: 'Test',
 				group_description: 'Test',
 				is_clone: true,
 				clone_index: 'Test',
-			}]
+			}];
 
 			const favorite_documents_groups = [{
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				favorite_group_id: 1,
 				favorite_document_id: 1,
-			}]
+			}];
 
 			const search_hisotry = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				clone_name: 'Test',
 				search: 'Test',
 				num_results: 20,
@@ -436,7 +277,7 @@ describe('UserController', function () {
 
 			const export_history = [{
 				id: 1,
-				user_id: '27d1ca9e10b731476b7641eae2710ac0',
+				user_id: 'testsuite',
 				download_request_body: {},
 				search_response_metadata: {}
 			}];
@@ -454,6 +295,22 @@ describe('UserController', function () {
 				externalAPI : {
 					getAPIKey(user) {
 						return api_key;
+					}
+				},
+				appStats: {
+					getUserLastOpened(user){
+						return [
+							{
+								"document": "test1.pdf",
+								"documenttime": "2022-03-17T13:54:58.000Z",
+								"clone_name": "gamechanger"
+							},
+							{
+								"document": "test2.pdf",
+								"documenttime": "2022-03-17T13:54:57.000Z",
+								"clone_name": "gamechanger"
+							}
+						]
 					}
 				},
 				dataApi: {
@@ -575,7 +432,7 @@ describe('UserController', function () {
 							});
 							return Promise.resolve([{favorited_count: count}]);
 						} else {
-							returnFavoriteOrganizations = [];
+							const returnFavoriteOrganizations = [];
 							favorite_organizations.forEach(org => {
 								if (data.where.user_id === org.user_id) {
 									returnFavoriteOrganizations.push(org);
@@ -591,7 +448,7 @@ describe('UserController', function () {
 						col(data) {}
 					},
 					findAll(data) {
-						returnFavoriteGroups = [];
+						const returnFavoriteGroups = [];
 						favorite_groups.forEach(group => {
 							if (data.where.user_id === group.user_id) {
 								returnFavoriteGroups.push(group);
@@ -606,7 +463,7 @@ describe('UserController', function () {
 						col(data) {}
 					},
 					findAll(data) {
-						returnFavoriteDocumentsGroup = [];
+						const returnFavoriteDocumentsGroup = [];
 						favorite_documents_groups.forEach(docGroup => {
 							if (data.where.favorite_group_id === docGroup.favorite_group_id) {
 								returnFavoriteDocumentsGroup.push(docGroup);
@@ -663,17 +520,19 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserData(req, res);
+				const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': 'testsuite'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'download_url_s': 'Test', 'favorite_id': 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': 'testsuite'}],'favorite_groups': [{'clone_index': 'Test', 'favorites': [1], 'group_description': 'Test', 'group_name': 'Test', 'group_type': 'document', 'id': 1, 'is_clone': true, 'user_id': 'testsuite'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': 'testsuite'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': 'testsuite'}], 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': 'testsuite'}],'pdf_opened':[{"document": "test1.pdf","documenttime": "2022-03-17T13:54:58.000Z","clone_name": "gamechanger"},{"document": "test2.pdf","documenttime": "2022-03-17T13:54:57.000Z","clone_name": "gamechanger"}], 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'api_key': 'testAPIKey', 'export_history': [{'download_request_body': {}, 'id': 1, 'search_response_metadata': {}, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_documents': [{'clone_index': 'Test', 'doc_num': 'Test', 'doc_type': 'Test', 'download_url_s': 'Test', 'favorite_id': 1, 'favorite_name': 'Test', 'favorite_summary': 'Test', 'favorited': 1, 'filename': 'Test', 'id': 'Test', 'is_clone': false, 'search_text': 'Test', 'summary': 'Test', 'title': 'Test Test Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}],'favorite_groups': [{'clone_index': 'Test', 'favorites': [1], 'group_description': 'Test', 'group_name': 'Test', 'group_type': 'document', 'id': 1, 'is_clone': true, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_searches': [], 'favorite_topics': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'topic_name': 'Test', 'topic_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'favorite_organizations': [{'clone_index': 'Test', 'favorited': 1, 'id': 1, 'is_clone': false, 'organization_name': 'Test', 'organization_summary': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_history': [{'cached_result': false, 'clone_name': 'Test', 'completion_time': 'Test', 'favorite': false, 'had_error': false, 'id': 1, 'is_tutorial_search': false, 'num_results': 20, 'request_body': {}, 'run_at': 'Test', 'search': 'Test', 'search_type': 'Test', 'search_version': 1, 'tiny_url': 'gamechanger?tiny=24', 'url': 'Test', 'user_id': '27d1ca9e10b731476b7641eae2710ac0'}], 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
-			assert.deepStrictEqual(resMsg, expected);
 
 		});
 	});
 
 	describe('#getUserSettings', () => {
-		let users = [];
+		let users = [{'is_beta': false, 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_settings': {}, 'submitted_info': true, 'user_id': 'testsuite'}];
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
@@ -700,11 +559,25 @@ describe('UserController', function () {
 
 						return Promise.resolve([user, true]);
 					}
+				}, findOne(data) {
+					let user;
+
+					users.forEach(tmpUser => {
+						if (tmpUser.user_id === data.where.user_id) {
+							user = tmpUser;
+						}
+					});
+
+					if (user) {
+						return Promise.resolve(user);
+					} else {
+						return Promise.resolve(undefined);
+					}
 				}
 			}
 		};
 
-		it('creates or returns a user settings', async () => {
+		it('creates or returns a user settings', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -730,77 +603,20 @@ describe('UserController', function () {
 
 			try {
 				await target.getUserSettings(req, res);
+				const expected = {'is_beta': false, 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_settings': {}, 'submitted_info': true, 'user_id': 'testsuite'};
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			const expected = {'is_beta': false, 'notifications': { 'gamechanger': {'favorites': 0, 'history': 0, 'total': 0} }, 'search_settings': {}, 'submitted_info': true, 'user_id': '27d1ca9e10b731476b7641eae2710ac0'};
-			assert.deepStrictEqual(resMsg, expected);
-		});
-	});
-
-	describe('#setUserBetaStatus', () => {
-		let users = [{user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 } }, is_beta: false}];
-		const opts = {
-			...constructorOptionsMock,
-			dataApi: {},
-			gcUser: {
-				update(data, where) {
-					let user;
-
-					users.forEach(tmpUser => {
-						if (tmpUser.user_id === where.where.user_id) {
-							user = tmpUser;
-						}
-					});
-
-					if (user) {
-						user.is_beta = data.is_beta;
-						return Promise.resolve(data.is_beta);
-					} else {
-						return Promise.resolve('Fail');
-					}
-				}
-			}
-		};
-
-		it('updates a users beta settings', async () => {
-			const target = new UserController(opts);
-
-			const req = {
-				...reqMock,
-				body: {
-					status: true
-				}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			try {
-				await target.setUserBetaStatus(req, res);
-			} catch (e) {
-				assert.fail(e);
-			}
-			const expected = {is_beta: true, notifications: { gamechanger: {favorites: 0, history: 0, total: 0} }, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
-			assert.deepStrictEqual(users[0], expected);
 		});
 	});
 
 	describe('#clearDashboardNotification', () => {
 		let users = [
-			{ user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { gamechanger: { total: 0, favorites: 5, history: 0 } }, search_settings: {} },
-			{ user_id: '0bd353b670d1d110d89797153f99edf3', notifications: {}, search_settings: {} },
+			{ user_id: 'testsuite', notifications: { gamechanger: { total: 0, favorites: 5, history: 0 } }, search_settings: {} },
+			{ user_id: 'testsuite2', notifications: {}, search_settings: {} },
 		];
 		const sequelize = {
 			transaction: jest.fn(async function(fn) {
@@ -838,7 +654,7 @@ describe('UserController', function () {
 			}
 		};
 
-		it('clear dashboard notifications', async () => {
+		it('clear dashboard notifications', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -850,11 +666,12 @@ describe('UserController', function () {
 			};
 
 			await target.clearDashboardNotification(req, res);
-			const expected = { notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } }, search_settings: {}, user_id: '27d1ca9e10b731476b7641eae2710ac0' };
+			const expected = { notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } }, search_settings: {}, user_id: 'testsuite' };
 			assert.deepStrictEqual(users[0], expected);
+			done();
 		});
 
-		it('clear dashboard notifications is a no-op on empty notifications', async () => {
+		it('clear dashboard notifications is a no-op on empty notifications', async (done) => {
 			const logger = {
 				...constructorOptionsMock.logger,
 				error: jest.fn(),
@@ -873,19 +690,20 @@ describe('UserController', function () {
 			};
 
 			await target.clearDashboardNotification(req, res);
-			const expected = { notifications: {}, search_settings: {}, user_id: '0bd353b670d1d110d89797153f99edf3' };
+			const expected = { notifications: {}, search_settings: {}, user_id: 'testsuite2' };
 			assert.deepStrictEqual(users[1], expected);
 			expect(logger.error).not.toHaveBeenCalled();
+			done();
 		});
 	});
 
 	describe('#updateUserAPIRequestLimit', () => {
-		let users = []
+		let users = [];
 		const opts = {
 			...constructorOptionsMock,
 			sequelize: {
 				literal(exp) {
-					return
+					return;
 				}
 			},
 			gcUser: {
@@ -906,10 +724,10 @@ describe('UserController', function () {
 					}
 				}
 			}
-		}
+		};
 		
-		it('should decrement the users API request limit by one', async () => {
-			users.push({user_id: '27d1ca9e10b731476b7641eae2710ac0', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
+		it('should decrement the users API request limit by one', async (done) => {
+			users.push({user_id: 'testsuite', notifications: { gamechanger: { total: 0, favorites: 0, history: 0 }}});
 			const target = new UserController(opts);
 
 			let resCode;
@@ -920,7 +738,7 @@ describe('UserController', function () {
 				body: {
 					username: 'hashMe'
 				}
-			}
+			};
 
 			const res = {
 				status(code) {
@@ -935,15 +753,18 @@ describe('UserController', function () {
 
 			try {
 				await target.updateUserAPIRequestLimit(req, res);
+				assert.equal(resCode, 200);
+				done();
 			} catch (e) {
 				assert.fail(e);
+				done(e);
 			}
-			assert.equal(resCode, 200);
-		})
-	})
+
+		});
+	});
 
 	describe('#submitUserInfo', () => {
-		let users = [{user_id: '27d1ca9e10b731476b7641eae2710ac0', user_info: null, submitted_info: null}];
+		let users = [{user_id: 'testsuite', user_info: null, submitted_info: null}];
 		const opts = {
 			...constructorOptionsMock,
 			dataApi: {},
@@ -968,7 +789,7 @@ describe('UserController', function () {
 			}
 		};
 
-		it('saves a users response to user info form', async () => {
+		it('saves a users response to user info form', async (done) => {
 			const target = new UserController(opts);
 
 			const req = {
@@ -1000,16 +821,17 @@ describe('UserController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {user_info:{ email: 'test@example.com', org: 'org', q1: 'a1', q2: 'a2'}, submitted_info: true, user_id: '27d1ca9e10b731476b7641eae2710ac0'};
+			const expected = {user_info:{ email: 'test@example.com', org: 'org', q1: 'a1', q2: 'a2'}, submitted_info: true, user_id: 'testsuite'};
 			assert.deepStrictEqual(users[0], expected);
 			assert.equal(resCode, 200);
+			done();
 		});
 	});
 
 	describe('#resetAPIRequestLimit', () => {
-		it('should reset all API request limits to 3', async () => {
+		it('should reset all API request limits to 3', async (done) => {
 			const id = {
-				getDataValue() { return 1; }
+				getDataValue() { return 1 }
 			};
 
 			const gcUser = {
@@ -1029,85 +851,18 @@ describe('UserController', function () {
 				...constructorOptionsMock,
 				gcUser
 			};
-			
+
 			const target = new UserController(opts);
 			const actual = await target.resetAPIRequestLimit();
 			const expected = 1;
 
 			assert.equal(actual, expected);
-		});
-	});
-
-	describe('#populateNewUserId', () => {
-		it('should update user ids in the tables', async () => {
-			const user = {
-				dataValues: {
-					user_id: 1,
-					new_user_id: 2
-				}
-			};
-
-			const gcHistoryTable = {
-				findAll() {
-					return [user];
-				},
-				update(data, where) {
-					if (data.new_user_id === 2 && where.where.user_id === 1) {
-						return Promise.resolve();
-					} else {
-						return Promise.resolve('Fail');
-					}
-				}
-			};
-
-			const table = {
-				findAll() {
-					return [];
-				}
-			};
-
-			const opts = {
-				...constructorOptionsMock,
-				gcHistory: gcHistoryTable,
-				exportHistory: table,
-				favoriteDocument: table,
-				favoriteSearch: table,
-				favoriteTopic: table
-			};
-			
-			const target = new UserController(opts);
-
-			const req = {
-				...reqMock,
-				body: {}
-			};
-
-			let resCode;
-			let resMsg;
-		
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			try {
-				await target.populateNewUserId(req, res);
-			} catch (e) {
-				assert.fail();
-			}
-
-			assert.equal(resCode, 200);
+			done();
 		});
 	});
 
 	describe('#getRecentSearches', () => {
-		it('should get recent searches', async () => {
+		it('should get recent searches', async (done) => {
 			const ids = [{ id: 1 }];
 
 			const searches = [{
@@ -1129,7 +884,7 @@ describe('UserController', function () {
 				...constructorOptionsMock,
 				gcHistory
 			};
-			
+
 			const target = new UserController(opts);
 
 			const req = {
@@ -1141,7 +896,7 @@ describe('UserController', function () {
 
 			let resCode;
 			let resMsg;
-		
+
 			const res = {
 				status(code) {
 					resCode = code;
@@ -1155,17 +910,20 @@ describe('UserController', function () {
 
 			try {
 				await target.getRecentSearches(req, res);
+				const expected = [{
+					run_at: 1,
+					test: 'test'
+				}];
+
+				assert.equal(resCode, 200);
+				assert.deepStrictEqual(resMsg, expected);
+				done();
 			} catch (e) {
 				assert.fail();
+				done(e);
 			}
 
-			const expected = [{
-				run_at: 1,
-				test: 'test'
-			}];
 
-			assert.equal(resCode, 200);
-			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
 });

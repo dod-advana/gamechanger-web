@@ -9,8 +9,7 @@ const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 export const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 // Sets the state using context
 export const setState = (dispatch, newState) => {
@@ -27,7 +26,12 @@ export const clearDashboardNotification = (cloneName, type, state, dispatch) => 
 	let userData = state.userData;
 
 	// only update if the notification exists and is non-zero
-	if (userData.notifications && userData.notifications[cloneName] && userData.notifications[cloneName][type]) {
+	if (
+		userData &&
+		userData.notifications &&
+		userData.notifications[cloneName] &&
+		userData.notifications[cloneName][type]
+	) {
 		/* await */ gameChangerAPI.clearDashboardNotification(cloneName, type);
 		userData = _.cloneDeep(userData);
 		userData.notifications[cloneName][type] = 0;
@@ -35,23 +39,14 @@ export const clearDashboardNotification = (cloneName, type, state, dispatch) => 
 	}
 };
 
-export const handleSearchTypeUpdate = (
-	{ value = SEARCH_TYPES.keyword },
-	dispatch,
-	state
-) => {
+export const handleSearchTypeUpdate = ({ value = SEARCH_TYPES.keyword }, dispatch, state) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.searchType = value;
 	setState(dispatch, {
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
 	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'SearchTypeChanged',
-		'value',
-		value
-	);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', 'value', value);
 };
 
 export const createCopyTinyUrl = (toolUrl, dispatch) => {
@@ -78,13 +73,7 @@ export const createCopyTinyUrl = (toolUrl, dispatch) => {
 	});
 };
 
-export const handleSaveFavoriteSearch = async (
-	favoriteName,
-	favoriteSummary,
-	favorite,
-	dispatch,
-	state
-) => {
+export const handleSaveFavoriteSearch = async (favoriteName, favoriteSummary, favorite, dispatch, state) => {
 	const { searchText, count, cloneData } = state;
 	const tinyUrl = await createTinyUrl(cloneData);
 	const searchData = {
@@ -103,7 +92,7 @@ export const handleSaveFavoriteSearch = async (
 export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	const { rawSearchResults, cloneData } = state;
 
-	if(!document.search_text) document.search_text = state.searchText;
+	if (!document.search_text) document.search_text = state.searchText;
 	document.is_clone = true;
 	document.clone_index = cloneData?.clone_data?.project_name;
 
@@ -123,12 +112,7 @@ export const handleSaveFavoriteDocument = async (document, state, dispatch) => {
 	setState(dispatch, { rawSearchResults: resultData });
 };
 
-export const handleSaveFavoriteTopic = async (
-	topic,
-	topicSummary,
-	favorited,
-	dispatch
-) => {
+export const handleSaveFavoriteTopic = async (topic, topicSummary, favorited, dispatch) => {
 	await gameChangerAPI.favoriteTopic({
 		topic,
 		topicSummary,
@@ -137,22 +121,62 @@ export const handleSaveFavoriteTopic = async (
 	await getUserData(dispatch);
 };
 
-export const handleGenerateGroup = async ( group, state, dispatch ) => {
+export const handleDeleteFavoriteSearch = async (search, dispatch) => {
+	await gameChangerAPI.favoriteSearch(search);
+	await getUserData(dispatch);
+};
+
+export const handleClearFavoriteSearchNotification = async (search, dispatch) => {
+	await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
+	await getUserData(dispatch);
+};
+
+export const handleSaveFavoriteSearchHistory = async (
+	favoriteName,
+	favoriteSummary,
+	favorite,
+	tinyUrl,
+	searchText,
+	count,
+	dispatch
+) => {
+	const searchData = {
+		search_name: favoriteName,
+		search_summary: favoriteSummary,
+		search_text: searchText,
+		tiny_url: tinyUrl,
+		document_count: count,
+		is_favorite: favorite,
+	};
+
+	await gameChangerAPI.favoriteSearch(searchData);
+	await getUserData(dispatch);
+};
+
+export const handleGenerateGroup = async (group, state, dispatch) => {
 	const { cloneData } = state;
 	const clone_index = cloneData?.clone_data?.project_name;
-	const {group_type, group_name, group_description, create, group_ids} = group;
+	const { group_type, group_name, group_description, create, group_ids } = group;
 
-	await gameChangerAPI.favoriteGroup({group_type, group_name, group_description, create, clone_index, group_ids, is_clone: true});
+	await gameChangerAPI.favoriteGroup({
+		group_type,
+		group_name,
+		group_description,
+		create,
+		clone_index,
+		group_ids,
+		is_clone: true,
+	});
 	await getUserData(dispatch);
 };
 
 export const handleSaveFavoriteOrganization = async (organization, organizationSummary, favorited, dispatch) => {
-	await gameChangerAPI.favoriteOrganization({organization, organizationSummary, is_favorite: favorited});
+	await gameChangerAPI.favoriteOrganization({ organization, organizationSummary, is_favorite: favorited });
 	await getUserData(dispatch);
 };
 
 export const handleRemoveFavoriteFromGroup = async (groupId, documentId, dispatch) => {
-	await gameChangerAPI.deleteFavoriteFromGroupPOST({groupId, documentId});
+	await gameChangerAPI.deleteFavoriteFromGroupPOST({ groupId, documentId });
 	await getUserData(dispatch);
 };
 
@@ -219,13 +243,7 @@ export const checkUserInfo = (state, dispatch) => {
 		didPass = infoPassed.passed;
 	}
 	try {
-		if (
-			isDecoupled &&
-			!userData?.submitted_info &&
-			userMatomoStatus &&
-			!didPass &&
-			userFeedbackMode
-		) {
+		if (isDecoupled && !userData?.submitted_info && userMatomoStatus && !didPass && userFeedbackMode) {
 			// show pop up
 			setState(dispatch, { userInfoModalOpen: true });
 			console.log('Decoupled user needs to fill out form');
@@ -246,7 +264,7 @@ export const setCurrentTime = (dispatch) => {
 
 	// currentTime = `${months[currentTime.getMonth() - 1]} ${currentTime.getDate()}, ${currentTime.getHours()}:${currentTime.getMinutes()}`;
 	currentTime = `${currentTime.getFullYear()}-${currentMonth}-${currentDay}-${currentTime.getHours()}-${currentTime.getSeconds()}-${currentTime.getMilliseconds()}`;
-	
+
 	setState(dispatch, { currentTime: currentTime });
 
 	return currentTime;

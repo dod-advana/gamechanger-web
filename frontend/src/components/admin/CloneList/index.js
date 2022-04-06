@@ -30,11 +30,7 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	const jsonFields = [];
 
 	tableMetaData.data[0].forEach((meta) => {
-		if (
-			meta.column_name !== 'createdAt' &&
-			meta.column_name !== 'updatedAt' &&
-			meta.column_name !== 'id'
-		) {
+		if (meta.column_name !== 'createdAt' && meta.column_name !== 'updatedAt' && meta.column_name !== 'id') {
 			let i,
 				frags = meta.column_name.split('_');
 
@@ -42,7 +38,7 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 				frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1);
 			}
 			const display_name = frags.join(' ');
-			
+
 			switch (meta.data_type) {
 				case 'integer':
 					stringFields.push({ key: meta.column_name, display_name });
@@ -55,7 +51,7 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 					break;
 				case 'character varying':
 				default:
-					stringFields.push({ key: meta.column_name, display_name });
+					if (meta.column_name !== 'permissions') stringFields.push({ key: meta.column_name, display_name });
 					break;
 			}
 		}
@@ -76,8 +72,7 @@ export default () => {
 		booleanFields: [],
 		jsonFields: [],
 	});
-	const [showCreateEditCloneModal, setShowCreateEditCloneModal] =
-		useState(false);
+	const [showCreateEditCloneModal, setShowCreateEditCloneModal] = useState(false);
 	const [cloneToEdit, setCloneToEdit] = useState(null);
 	const [editCloneDataErrors, setEditCloneDataErrors] = useState({});
 
@@ -87,8 +82,8 @@ export default () => {
 			const filteredClones = _.filter(gcCloneTableData, (clone) => {
 				return clone.id === num;
 			});
-			const cloneEdit = { ...filteredClones[0] };
-			setCloneToEdit(cloneEdit);
+			const tmpCloneToEdit = { ...filteredClones[0] };
+			setCloneToEdit(tmpCloneToEdit);
 		} else {
 			setCloneToEdit(null);
 		}
@@ -107,8 +102,8 @@ export default () => {
 		delete cloneDataToStore.createdAt;
 		delete cloneDataToStore.updatedAt;
 
-		if(cloneDataToStore.available_at !== undefined){
-			const dataArray = cloneDataToStore.available_at.split(',').map(item => item.trim());
+		if (cloneDataToStore.available_at !== undefined) {
+			const dataArray = cloneDataToStore.available_at.split(',').map((item) => item.trim());
 			cloneDataToStore.available_at = dataArray;
 		}
 
@@ -208,12 +203,7 @@ export default () => {
 					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent(
-									'GAMECHANGER_Admin',
-									'EditClone',
-									'onClick',
-									row.value
-								);
+								trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
 								openCloneModal(row.value);
 							}}
 							style={{ minWidth: 'unset' }}
@@ -233,12 +223,7 @@ export default () => {
 					{row.row._original.can_edit && (
 						<GCButton
 							onClick={() => {
-								trackEvent(
-									'GAMECHANGER_Admin',
-									'DeleteClone',
-									'onClick',
-									row.value
-								);
+								trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
 								deleteCloneData(row.value).then(() => {
 									getCloneData(setGCCloneTableData, setCloneTableMetaData);
 								});
@@ -267,9 +252,7 @@ export default () => {
 						margin: '10px 80px',
 					}}
 				>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-						Gamechanger Clones
-					</p>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Gamechanger Clones</p>
 					<GCButton
 						onClick={() => {
 							trackEvent('GAMECHANGER_Admin', 'CreateClone', 'onClick');

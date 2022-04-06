@@ -8,33 +8,33 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			responsibility_id: {
 				type: Sequelize.INTEGER,
-				allowNull: false
+				allowNull: false,
 			},
 			reporter_hashed_username: {
 				type: Sequelize.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			issue_description: {
 				type: Sequelize.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			createdAt: {
 				allowNull: false,
-				type: Sequelize.DATE
+				type: Sequelize.DATE,
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable(tablename);
-	}
+	},
 };

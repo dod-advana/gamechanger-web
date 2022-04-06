@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const ORGANIZATION_URLS = sequelize.define('organization_urls',
+	const ORGANIZATION_URLS = sequelize.define(
+		'organization_urls',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -11,16 +12,18 @@ module.exports = (sequelize, DataTypes) => {
 			org_name: {
 				type: DataTypes.STRING,
 				primaryKey: true,
-				allowNull: false
+				allowNull: false,
 			},
 			image_url: {
 				type: DataTypes.STRING,
-				allowNull: false
-			}
-		}, {
+				allowNull: false,
+			},
+		},
+		{
 			freezeTableName: true,
 			tableName: 'organization_urls',
-			timestamps: false
-		});
+			timestamps: false,
+		}
+	);
 	return ORGANIZATION_URLS;
 };

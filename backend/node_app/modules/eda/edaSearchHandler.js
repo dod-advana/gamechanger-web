@@ -6,13 +6,14 @@ const CONSTANTS = require('../../config/constants');
 // const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
-const { DataLibrary} = require('../../lib/dataLibrary');
+const { DataLibrary } = require('../../lib/dataLibrary');
 // const {Thesaurus} = require('../../lib/thesaurus');
 
 // const redisAsyncClientDB = 4;
 // const abbreviationRedisAsyncClientDB = 9;
 
 const SearchHandler = require('../base/searchHandler');
+const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 
 class EdaSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -26,7 +27,7 @@ class EdaSearchHandler extends SearchHandler {
 			// sep_async_redis = separatedRedisAsyncClient,
 			// async_redis = redisAsyncClient
 		} = opts;
-		super({ ...opts}); //redisClientDB: redisAsyncClientDB,
+		super({ ...opts }); //redisClientDB: redisAsyncClientDB,
 		this.dataLibrary = dataLibrary;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
@@ -39,7 +40,7 @@ class EdaSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -59,7 +60,7 @@ class EdaSearchHandler extends SearchHandler {
 			offset,
 			showTutorial = false,
 			tiny_url,
-			forCacheReload = false
+			forCacheReload = false,
 		} = req.body;
 
 		try {
@@ -72,14 +73,20 @@ class EdaSearchHandler extends SearchHandler {
 			historyRec.showTutorial = showTutorial;
 
 			const operator = 'and';
-			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
 			// log query to ES
 			if (storeHistory) {
-				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				await this.storeEsRecord(clientObj.esClientName, offset, cloneName, historyRec.user_id, searchText);
 			}
 
 			let searchResults;
-			searchResults = await this.documentSearch(req, {...req.body, expansionDict: {}, operator}, clientObj, userId);
+			searchResults = await this.documentSearch(
+				req,
+				{ ...req.body, expansionDict: {}, operator },
+				clientObj,
+				userId
+			);
+
 			// try storing results record
 			if (storeHistory && !forCacheReload) {
 				try {
@@ -93,9 +100,8 @@ class EdaSearchHandler extends SearchHandler {
 			}
 
 			return searchResults;
-
 		} catch (err) {
-			if (storeHistory && !forCacheReload){
+			if (storeHistory && !forCacheReload) {
 				const { message } = err;
 				this.logger.error(message, '3VOOUHO', userId);
 				historyRec.endTime = new Date().toISOString();
@@ -106,20 +112,19 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
-	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
+	async storeEsRecord(esClient, offset, clone_name, userId, searchText) {
 		try {
 			// log search query to elasticsearch
-			if (offset === 0){
+			if (offset === 0) {
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
-					clone_name: clone_log
-	
+					clone_name: clone_log,
 				};
 				let search_history_index = this.constants.GAME_CHANGER_OPTS.historyIndex;
-	
+
 				await this.dataLibrary.putDocument(esClient, search_history_index, searchLog);
 			}
 		} catch (e) {
@@ -130,46 +135,52 @@ class EdaSearchHandler extends SearchHandler {
 	async documentSearch(req, body, clientObj, userId) {
 		try {
 			const permissions = req.permissions ? req.permissions : [];
-			const {
-				getIdList,
-				selectedDocuments,
-				expansionDict = {},
-				forGraphCache = false,
-				forStats = false
-			} = body;
+			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, forStats = false } = body;
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
-	
+
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				const {extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+				const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
 				if (forStats) {
 					esQuery = this.edaSearchUtility.getElasticsearchStatsQuery(body, userId);
-				}
-				else {
+				} else {
 					esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 				}
-	
 			} else {
 				throw 'Unauthorized';
 			}
-	
+
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-	
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				if (getIdList) {
 					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
-	
-				if (forGraphCache){
+
+				if (forGraphCache) {
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return this.edaSearchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+					return this.edaSearchUtility.cleanUpEsResults(
+						results,
+						searchTerms,
+						userId,
+						selectedDocuments,
+						expansionDict,
+						esIndex,
+						esQuery
+					);
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
@@ -185,14 +196,14 @@ class EdaSearchHandler extends SearchHandler {
 
 	async queryContractMods(req, userId) {
 		try {
-			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
 			const { awardID, isSearch } = req.body;
-			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
+			const { id, idv } = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
 			} else {
 				throw 'Unauthorized';
@@ -200,7 +211,14 @@ class EdaSearchHandler extends SearchHandler {
 
 			// use the award ID to get the related mod numbers
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				const hits = results.body.hits.hits;
 
 				if (isSearch) {
@@ -209,15 +227,13 @@ class EdaSearchHandler extends SearchHandler {
 					const contractMods = [];
 					// grab the contract modification number
 					for (let hit of hits) {
-						contractMods.push(
-							{
-								modNumber: hit._source.extracted_data_eda_n.modification_number_eda_ext ?? null,
-								signatureDate: hit._source.extracted_data_eda_n.signature_date_eda_ext_dt ?? null,
-								effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null
-							}
-						);
+						contractMods.push({
+							modNumber: hit._source.extracted_data_eda_n.modification_number_eda_ext ?? null,
+							signatureDate: hit._source.extracted_data_eda_n.signature_date_eda_ext_dt ?? null,
+							effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null,
+						});
 					}
-					contractMods.sort((a, b) => { 
+					contractMods.sort((a, b) => {
 						if (!a.modNumber) {
 							return 1;
 						}
@@ -227,20 +243,18 @@ class EdaSearchHandler extends SearchHandler {
 
 						if (a.modNumber < b.modNumber) {
 							return -1;
-						}
-						else {
+						} else {
 							return 1;
 						}
 					});
 
 					return contractMods;
 				}
-
 			} else {
 				this.logger.error('Error with contract mods Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
 			}
-		} catch(err) {
+		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'S00CLT7', userId);
 			throw err;
@@ -249,15 +263,15 @@ class EdaSearchHandler extends SearchHandler {
 
 	async queryBaseAwardContract(req, userId) {
 		try {
-			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
 			const { awardID } = req.body;
 
-			const {id, idv} = this.edaSearchUtility.splitAwardID(awardID);
+			const { id, idv } = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
 			} else {
 				throw 'Unauthorized';
@@ -265,75 +279,89 @@ class EdaSearchHandler extends SearchHandler {
 
 			// use the award ID to get the base award data only
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					const data = hits[0];
-					const metadata = data._source && data._source.extracted_data_eda_n ? this.edaSearchUtility.getExtractedFields(data._source, data) : {};
+					const metadata =
+						data._source && data._source.extracted_data_eda_n
+							? this.edaSearchUtility.getExtractedFields(data._source, data)
+							: {};
 					return { ...data._source, ...data.fields, ...metadata };
-				}
-				else { 
+				} else {
 					return {};
 				}
 			} else {
 				this.logger.error('Error with contract base award Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
 			}
-		} catch(err) {
+		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'MKNUZQR', userId);
 			throw err;
 		}
-
 	}
 
 	async querySimilarDocs(req, userId) {
 		try {
-			const clientObj = {esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index};
+			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
 			const permissions = req.permissions ? req.permissions : [];
 			const { esClientName, esIndex } = clientObj;
 			const { body } = req;
 			const { issueOfficeDoDAAC, issueOfficeName } = body;
 
-
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery({...body, limit: 5, edaSearchSettings: { issueOfficeDoDAAC, issueOfficeName }}, userId);
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(
+					{ ...body, limit: 5, edaSearchSettings: { issueOfficeDoDAAC, issueOfficeName } },
+					userId
+				);
 			} else {
 				throw 'Unauthorized';
 			}
 
-
 			// use the award ID to get the base award data only
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					let data = this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
 					return data;
-				}
-				else { 
+				} else {
 					return {};
 				}
 			} else {
 				this.logger.error('Error with similar docs Elasticsearch results', 'P1TFZKQ', userId);
 				return [];
 			}
-		} catch(err) {
+		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'T5VRV7K', userId);
 			throw err;
 		}
-
 	}
 
 	async callFunctionHelper(req, userId) {
-		const {functionName} = req.body;
+		const { functionName } = req.body;
 
 		try {
 			const permissions = req.permissions ? req.permissions : [];
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
 				switch (functionName) {
 					case 'queryContractMods':
 						return await this.queryContractMods(req, userId);
@@ -356,10 +384,7 @@ class EdaSearchHandler extends SearchHandler {
 			this.logger.error(message, 'V2L9KW5', userId);
 			throw err;
 		}
-		
-
 	}
-
 }
 
 module.exports = EdaSearchHandler;

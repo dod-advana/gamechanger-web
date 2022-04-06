@@ -44,12 +44,9 @@ export const calcLinkControlPoints = (edge) => {
 
 	const start = edge.source;
 	const end = edge.target;
-	if (!start || !end || !start.hasOwnProperty('x') || !end.hasOwnProperty('x'))
-		return; // skip invalid link
+	if (!start || !end || !start.hasOwnProperty('x') || !end.hasOwnProperty('x')) return; // skip invalid link
 
-	const l = Math.sqrt(
-		Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
-	); // line length
+	const l = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)); // line length
 
 	if (l > 0) {
 		const a = Math.atan2(end.y - start.y, end.x - start.x); // line angle
@@ -107,37 +104,25 @@ export const draw2DArrows = (
 	const arrowHalfWidth = arrowLength / ARROW_WH_RATIO / 2;
 
 	// Construct bezier for curved lines
-	const bzLine =
-		link.__controlPoints &&
-		new Bezier(start.x, start.y, ...link.__controlPoints, end.x, end.y);
+	const bzLine = link.__controlPoints && new Bezier(start.x, start.y, ...link.__controlPoints, end.x, end.y);
 
 	const getCoordsAlongLine = bzLine
 		? (t) => bzLine.get(t) // get position along bezier line
 		: (t) => ({
-			// straight line: interpolate linearly
-			x: start.x + (end.x - start.x) * t || 0,
-			y: start.y + (end.y - start.y) * t || 0,
+				// straight line: interpolate linearly
+				x: start.x + (end.x - start.x) * t || 0,
+				y: start.y + (end.y - start.y) * t || 0,
 		  });
 
-	const lineLen = bzLine
-		? bzLine.length()
-		: Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+	const lineLen = bzLine ? bzLine.length() : Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
 
-	const posAlongLine =
-		startR +
-		arrowLength +
-		(lineLen - startR - endR - arrowLength) * arrowRelPos -
-		nodeSize / 2;
+	const posAlongLine = startR + arrowLength + (lineLen - startR - endR - arrowLength) * arrowRelPos - nodeSize / 2;
 
 	const arrowHead = getCoordsAlongLine(posAlongLine / lineLen);
 	const arrowTail = getCoordsAlongLine((posAlongLine - arrowLength) / lineLen);
-	const arrowTailVertex = getCoordsAlongLine(
-		(posAlongLine - arrowLength * (1 - ARROW_VLEN_RATIO)) / lineLen
-	);
+	const arrowTailVertex = getCoordsAlongLine((posAlongLine - arrowLength * (1 - ARROW_VLEN_RATIO)) / lineLen);
 
-	const arrowTailAngle =
-		Math.atan2(arrowHead.y - arrowTail.y, arrowHead.x - arrowTail.x) -
-		Math.PI / 2;
+	const arrowTailAngle = Math.atan2(arrowHead.y - arrowTail.y, arrowHead.x - arrowTail.x) - Math.PI / 2;
 
 	if (test) {
 		return {
@@ -167,10 +152,7 @@ export const draw2DArrows = (
 };
 
 export const getNodeColors = (node, alpha, nodeLabelColors = {}) => {
-	if (
-		nodeLabelColors[node?.label] &&
-		nodeLabelColors[node?.label].color === ''
-	) {
+	if (nodeLabelColors[node?.label] && nodeLabelColors[node?.label].color === '') {
 		shuffleArray(NODE_COLORS);
 
 		Object.keys(nodeLabelColors).forEach((label, idx) => {
@@ -180,10 +162,7 @@ export const getNodeColors = (node, alpha, nodeLabelColors = {}) => {
 			};
 		});
 	} else {
-		if (
-			!nodeLabelColors[node?.label] ||
-			nodeLabelColors[node?.label].color === ''
-		) {
+		if (!nodeLabelColors[node?.label] || nodeLabelColors[node?.label].color === '') {
 			return {
 				nodeColor: convertHexToRgbA('#000000', alpha),
 				nodeTextColor: convertHexToRgbA('#ffffff', alpha),
@@ -196,10 +175,7 @@ export const getNodeColors = (node, alpha, nodeLabelColors = {}) => {
 
 	return {
 		nodeColor: convertHexToRgbA(nodeColor, alpha),
-		nodeTextColor: convertHexToRgbA(
-			getTextColorBasedOnBackground(nodeColor),
-			alpha
-		),
+		nodeTextColor: convertHexToRgbA(getTextColorBasedOnBackground(nodeColor), alpha),
 		nodeHexColor: nodeColor,
 	};
 };
@@ -208,12 +184,7 @@ export const getLinkColor = (link, alpha) => {
 	return convertHexToRgbA('#000000', alpha);
 };
 
-export const getNodeOutlineColors = (
-	node,
-	alpha,
-	nodeColor,
-	connectedLevel
-) => {
+export const getNodeOutlineColors = (node, alpha, nodeColor, connectedLevel) => {
 	switch (connectedLevel) {
 		case 0:
 			return convertHexToRgbA('#ffe89c', alpha);
@@ -268,14 +239,8 @@ export function generateRandomColors(number) {
 	) {
 		for (i = 0; i < arguments[1].length; i++) {
 			//for all the passed colors
-			const vals = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(
-				arguments[1][i]
-			); //get RGB values
-			arguments[1][i] = [
-				parseInt(vals[1], 16),
-				parseInt(vals[2], 16),
-				parseInt(vals[3], 16),
-			]; //and convert them to base 10
+			const vals = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(arguments[1][i]); //get RGB values
+			arguments[1][i] = [parseInt(vals[1], 16), parseInt(vals[2], 16), parseInt(vals[3], 16)]; //and convert them to base 10
 		}
 	}
 	let loadedColors = typeof arguments[1] == 'undefined' ? [] : arguments[1]; //predefine colors in the set
@@ -321,9 +286,7 @@ export function generateRandomColors(number) {
 			//if so, get the biggest value in differences that we have and its corresponding value
 			const ret =
 				differenceRecursions.values[
-					differenceRecursions.differences.indexOf(
-						Math.max.apply(null, differenceRecursions.differences)
-					)
+					differenceRecursions.differences.indexOf(Math.max.apply(null, differenceRecursions.differences))
 				];
 			differenceRecursions = { differences: [], values: [] }; //then reset the recursions array, because we're done now
 			return ret; //and then return up the recursion chain
@@ -345,24 +308,15 @@ export function generateRandomColors(number) {
 			const sumDifference = difference.reduce(sumFunction); //add up the difference array
 			const loadedColorLuminosity = loadedColors[i].reduce(sumFunction); //get the total luminosity of the already generated color
 			const currentColorLuminosity = colorMap.reduce(sumFunction); //get the total luminosity of the current color
-			const lumDifference = Math.abs(
-				loadedColorLuminosity - currentColorLuminosity
-			); //get the difference in luminosity between the two
+			const lumDifference = Math.abs(loadedColorLuminosity - currentColorLuminosity); //get the difference in luminosity between the two
 			//how close are these two colors to being the same luminosity and saturation?
-			const differenceRange =
-				Math.max.apply(null, difference) - Math.min.apply(null, difference);
+			const differenceRange = Math.max.apply(null, difference) - Math.min.apply(null, difference);
 			const luminosityFactor = 50; //how much difference in luminosity the human eye should be able to detect easily
 			const rangeFactor = 75; //how much difference in luminosity and saturation the human eye should be able to dect easily
-			if (
-				((luminosityFactor / (lumDifference + 1)) * rangeFactor) /
-					(differenceRange + 1) >
-				1
-			) {
+			if (((luminosityFactor / (lumDifference + 1)) * rangeFactor) / (differenceRange + 1) > 1) {
 				//if there's a problem with range or luminosity
 				//set the biggest difference for these colors to be whatever is most significant
-				differences.push(
-					Math.min(differenceRange + lumDifference, sumDifference)
-				);
+				differences.push(Math.min(differenceRange + lumDifference, sumDifference));
 			}
 			differences.push(sumDifference); //otherwise output the raw difference in RGB values
 		}
@@ -374,10 +328,7 @@ export function generateRandomColors(number) {
 			breakVal = (loadedColors.length / tmpNum) * (tmpNum - breakdownAt), //break down progressively (if it's the second color, you can still make it a unique hue)
 			totalDifference = Math.min.apply(null, differences); //get the color closest to the current color
 
-		if (
-			totalDifference >
-			acceptableDifference - (breakVal < 0 ? 0 : breakVal) * breakdownFactor
-		) {
+		if (totalDifference > acceptableDifference - (breakVal < 0 ? 0 : breakVal) * breakdownFactor) {
 			//if the current color is acceptable
 			differenceRecursions = { differences: [], values: [] }; //reset the recursions object, because we're done
 			return colorMap; //and return that color
@@ -415,8 +366,7 @@ export function generateRandomColors(number) {
 			This shouldn't always happen, but it should happen more often then not.
 			Using a factor of 2.3, we'll only get the same range of spectrum 15% of the time.
 			*/
-			valueToReduce =
-				Math.floor(lastLoadedReduction + 1 + Math.random() * 2.3) % 3, //which value to reduce
+			valueToReduce = Math.floor(lastLoadedReduction + 1 + Math.random() * 2.3) % 3, //which value to reduce
 			/*
 			Because 300 and 510 are fairly close in reference to zero,
 			increase one of the remaining values by some arbitrary percent betweeen 0% and 100%,
@@ -427,9 +377,7 @@ export function generateRandomColors(number) {
 
 		lastLoadedReduction = valueToReduce; //next time we make a color, try not to reduce the same one
 		thisColor[valueToReduce] = Math.floor(thisColor[valueToReduce] / 16); //reduce one of the values
-		thisColor[valueToIncrease] = Math.ceil(
-			thisColor[valueToIncrease] * increaseBy
-		); //increase one of the values
+		thisColor[valueToIncrease] = Math.ceil(thisColor[valueToIncrease] * increaseBy); //increase one of the values
 		rescale = (x) => {
 			//now, rescale the random numbers so that our output color has the luminosity we want
 			return (

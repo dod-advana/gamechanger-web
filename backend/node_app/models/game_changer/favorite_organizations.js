@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const FAVORITE_ORGANIZATIONS = sequelize.define('favorite_organizations',
+	const FAVORITE_ORGANIZATIONS = sequelize.define(
+		'favorite_organizations',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -9,32 +10,32 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			user_id: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			new_user_id: {
-				type: DataTypes.TEXT
+				type: DataTypes.TEXT,
 			},
 			organization_name: {
 				type: DataTypes.TEXT,
-				allowNull: false
+				allowNull: false,
 			},
 			organization_summary: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: DataTypes.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: DataTypes.TEXT,
-				allowNull: true
+				allowNull: true,
 			},
 		},
 		{
 			freezeTableName: true,
 			tableName: 'favorite_organizations',
-			timestamps: true
+			timestamps: true,
 		}
 	);
 	return FAVORITE_ORGANIZATIONS;

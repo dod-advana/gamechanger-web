@@ -7,7 +7,7 @@ module.exports = {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
-				type: Sequelize.INTEGER
+				type: Sequelize.INTEGER,
 			},
 			user_id: {
 				type: Sequelize.STRING,
@@ -15,42 +15,42 @@ module.exports = {
 			},
 			filename: {
 				type: Sequelize.STRING,
-				allowNull: false
+				allowNull: false,
 			},
 			favorite_name: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			favorite_summary: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			search_text: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			is_clone: {
 				type: Sequelize.BOOLEAN,
-				allowNull: false
+				allowNull: false,
 			},
 			clone_index: {
 				type: Sequelize.STRING,
-				allowNull: true
+				allowNull: true,
 			},
 			createdAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
+				defaultValue: Sequelize.fn('NOW'),
 			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
-				defaultValue: Sequelize.fn('NOW')
-			}
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		});
 	},
 
 	down: async (queryInterface, Sequelize) => {
 		return queryInterface.dropTable('favorite_documents');
-	}
+	},
 };

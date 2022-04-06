@@ -15,10 +15,13 @@ import Pagination from 'react-js-pagination';
 import {
 	getTrackingNameForFactory,
 	numberWithCommas,
+	policyMetadata,
+	getMetadataForPropertyTable,
 } from '../../utils/gamechangerUtils';
 import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
+import { addFavoriteTopicToMetadata } from '../modules/policy/policyCardHandler';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -27,17 +30,12 @@ const colWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	overflowWrap: 'anywhere',
 };
 
 const RESULTS_PER_PAGE = 10;
 
-const getGraphDataFull = (
-	cloneName,
-	document,
-	setGraphData,
-	setRunningQuery,
-	setBackendError
-) => {
+const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
 	gameChangerAPI
 		.callGraphFunction({
 			functionName: 'getDocumentDetailsPageDataFull',
@@ -60,6 +58,7 @@ const DocumentDetailsPage = (props) => {
 
 	const [runningQuery, setRunningQuery] = useState(false);
 	const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
+	const [metadata, setMetadata] = useState(document?.detail);
 
 	const [similarDocs, setSimilarDocs] = useState({
 		docCount: 0,
@@ -74,8 +73,7 @@ const DocumentDetailsPage = (props) => {
 		timeFound: '0.0',
 		docs: [],
 	});
-	const [runningDocsReferencedQuery, setRunningDocsReferencedQuery] =
-		useState(true);
+	const [runningDocsReferencedQuery, setRunningDocsReferencedQuery] = useState(true);
 	const [docsReferencedPage, setDocsReferencedPage] = useState(1);
 
 	const [referencedByDocs, setReferencedByDocs] = useState({
@@ -83,11 +81,42 @@ const DocumentDetailsPage = (props) => {
 		timeFound: '0.0',
 		docs: [],
 	});
-	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] =
-		useState(true);
+	const [runningReferencedByDocsQuery, setRunningReferencedByDocsQuery] = useState(true);
 	const [referencedByDocsPage, setReferencedByDocsPage] = useState(1);
 
 	const [backendError, setBackendError] = useState({});
+
+	const [notInCorpusDocs, setNotInCorpusDocs] = useState(0);
+	const [refList, setRefList] = useState([]);
+
+	useEffect(() => {
+		if (document?.refList) {
+			const newList = [];
+			document.ref_list.forEach((ref) => {
+				newList.push({ References: ref });
+			});
+			setRefList(newList);
+		}
+
+		if (document) {
+			const data = getMetadataForPropertyTable(document);
+			let favoritableData = policyMetadata(document);
+			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
+			setMetadata(favoritableData);
+		}
+	}, [document]);
+
+	useEffect(() => {
+		if (document) {
+			const docs = document?.ref_list.filter((doc) => {
+				return (
+					!docsReferenced.docs.find((ref) => ref.display_title_s.includes(doc)) &&
+					!document.display_title_s.includes(doc)
+				);
+			});
+			setNotInCorpusDocs(docs);
+		}
+	}, [docsReferenced.docs, document]);
 
 	useEffect(() => {
 		setRunningQuery(true);
@@ -95,13 +124,7 @@ const DocumentDetailsPage = (props) => {
 
 	useEffect(() => {
 		if (!document || !cloneData) return;
-		getGraphDataFull(
-			cloneData.clone_name,
-			document,
-			setGraphData,
-			setRunningQuery,
-			setBackendError
-		);
+		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery, setBackendError);
 	}, [document, cloneData]);
 
 	useEffect(() => {
@@ -120,12 +143,8 @@ const DocumentDetailsPage = (props) => {
 		}
 		graphData.edges.forEach((edge) => {
 			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-				const target = nodeIdMap[edge.target]
-					? nodeIdMap[edge.target].doc_id
-					: '';
-				const source = nodeIdMap[edge.source]
-					? nodeIdMap[edge.source].doc_id
-					: '';
+				const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
+				const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
 				if (source === document.id && edge.label === 'SIMILAR_TO') {
 					if (!docsMap.similar_to.includes(target)) {
 						docsMap.similar_to.push(target);
@@ -226,25 +245,28 @@ const DocumentDetailsPage = (props) => {
 		}
 	};
 
-	const renderDocs = (
-		documentObj = {},
-		docPage = 0,
-		section,
-		runningQuery = true
-	) => {
+	const renderDocs = (documentObj = {}, docPage = 0, section, runningQuery = true) => {
 		let docsVisible = [];
 
 		switch (section) {
 			case 'similarDocs':
-				docsVisible = similarDocs.docs.slice(
-					(docPage - 1) * RESULTS_PER_PAGE,
-					docPage * RESULTS_PER_PAGE + 1
-				);
+				docsVisible = similarDocs.docs.slice((docPage - 1) * RESULTS_PER_PAGE, docPage * RESULTS_PER_PAGE + 1);
 				break;
 			case 'docsReferenced':
 				docsVisible = docsReferenced.docs.slice(
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
+				);
+				const notInCorpusDocs = document?.ref_list.filter((doc) => {
+					return (
+						!docsReferenced.docs.find((ref) => ref.display_title_s.includes(doc)) &&
+						!document.display_title_s.includes(doc)
+					);
+				});
+				const emptyDoc = { ...document };
+				Object.keys(emptyDoc).forEach((prop) => (emptyDoc[prop] = null));
+				notInCorpusDocs?.forEach((doc) =>
+					docsVisible.push({ ...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true })
 				);
 				break;
 			case 'referencedByDocs':
@@ -286,15 +308,12 @@ const DocumentDetailsPage = (props) => {
 						{runningQuery
 							? 'Searching for documents...'
 							: documentObj.docCount > 0
-								? `${numberWithCommas(documentObj.docCount)} results found in ${
+							? `${numberWithCommas(documentObj.docCount)} results found in ${
 									documentObj.timeFound
 							  } seconds`
-								: ''}
+							: ''}
 					</div>
-					<div
-						style={{ marginTop: '-14px', display: 'flex' }}
-						className={'gcPagination'}
-					>
+					<div style={{ display: 'flex' }} className={'gcPagination'}>
 						{!runningQuery && documentObj.docCount > 0 && (
 							<Pagination
 								activePage={docPage}
@@ -314,18 +333,15 @@ const DocumentDetailsPage = (props) => {
 						)}
 					</div>
 				</div>
-				<div
-					className="row"
-					style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}
-				>
+				<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
 					{runningQuery ? (
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={gcColors.buttonColor2} />
 						</div>
-					) : documentObj.docCount > 0 ? (
-						renderDocs()
-					) : (
+					) : documentObj.docCount < 1 && notInCorpusDocs.length < 1 ? (
 						<div style={styles.noResults}>No Documents Found</div>
+					) : (
+						renderDocs()
 					)}
 				</div>
 			</div>
@@ -335,16 +351,14 @@ const DocumentDetailsPage = (props) => {
 	return (
 		<div>
 			<p style={{ margin: '10px 4%', fontSize: 18 }}>
-				Welcome to our new Document Details page! As you look around, you may
-				note some technical issues below; please bear with us while we continue
-				making improvements here and check back often for a more stable version.
+				Welcome to our new Document Details page! As you look around, you may note some technical issues below;
+				please bear with us while we continue making improvements here and check back often for a more stable
+				version.
 			</p>
 			<MainContainer>
 				<div className={'details'}>
 					<Paper>
-						<div className={'name'}>
-							{document?.display_title_s || 'Loading...'}
-						</div>
+						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
 
 						<div>
 							<GCButton
@@ -357,7 +371,9 @@ const DocumentDetailsPage = (props) => {
 										'PDFOpen'
 									);
 									window.open(
-										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${cloneData?.clone_name}${isDLA ? '&sourceUrl=dla' : ''}`
+										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${
+											cloneData?.clone_name
+										}${isDLA ? '&sourceUrl=dla' : ''}`
 									);
 								}}
 								style={{
@@ -387,7 +403,7 @@ const DocumentDetailsPage = (props) => {
 												backgroundColor: '#313541',
 												color: 'white',
 											}}
-											rows={document?.details || []}
+											rows={metadata || []}
 											height={'auto'}
 											dontScroll={true}
 											colWidth={colWidth}
@@ -395,21 +411,19 @@ const DocumentDetailsPage = (props) => {
 											title={'Metadata'}
 											hideHeader={true}
 										/>
-										<div style={{ marginTop: -18 }}>
-											<SimpleTable
-												tableClass={'magellan-table'}
-												zoom={1}
-												headerExtraStyle={{
-													backgroundColor: '#313541',
-													color: 'white',
-												}}
-												rows={document?.refList || []}
-												height={'auto'}
-												dontScroll={true}
-												colWidth={{ minWidth: '25%', maxWidth: '25%' }}
-												disableWrap={true}
-											/>
-										</div>
+										<SimpleTable
+											tableClass={'magellan-table'}
+											zoom={1}
+											headerExtraStyle={{
+												backgroundColor: '#313541',
+												color: 'white',
+											}}
+											rows={refList}
+											height={'auto'}
+											dontScroll={true}
+											colWidth={{ minWidth: '25%', maxWidth: '25%' }}
+											disableWrap={true}
+										/>
 									</>
 								) : (
 									<div style={{ margin: '0 auto' }}>
@@ -422,11 +436,7 @@ const DocumentDetailsPage = (props) => {
 				</div>
 				<div className={'graph-top-docs'}>
 					<div className={'section'} ref={ref}>
-						<GCAccordion
-							expanded={true}
-							header={'GRAPH VIEW (BETA)'}
-							backgroundColor={'rgb(238,241,242)'}
-						>
+						<GCAccordion expanded={true} header={'GRAPH VIEW (BETA)'} backgroundColor={'rgb(238,241,242)'}>
 							<MemoizedPolicyGraphView
 								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
@@ -450,12 +460,7 @@ const DocumentDetailsPage = (props) => {
 							itemCount={similarDocs.docs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
-							{renderDocs(
-								similarDocs,
-								similarDocsPage,
-								'similarDocs',
-								runningSimilarDocsQuery
-							)}
+							{renderDocs(similarDocs, similarDocsPage, 'similarDocs', runningSimilarDocsQuery)}
 						</GCAccordion>
 					</div>
 
@@ -463,7 +468,7 @@ const DocumentDetailsPage = (props) => {
 						<GCAccordion
 							expanded={false}
 							header={'DOCUMENTS REFERENCED'}
-							itemCount={docsReferenced.docs.length || 0}
+							itemCount={docsReferenced.docs.length + notInCorpusDocs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
 						>
 							{renderDocs(
@@ -527,7 +532,7 @@ const styles = {
 		fontSize: 22,
 		fontWeight: 'bold',
 		color: '#131E43',
-		paddingTop: '10px',
+		paddingTop: '15px',
 	},
 	noResults: {
 		fontSize: 22,

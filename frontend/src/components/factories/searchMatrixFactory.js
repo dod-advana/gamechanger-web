@@ -2,6 +2,7 @@ const defaultSearchMatrixHandler = require(`../modules/default/defaultSearchMatr
 const policySearchMatrixHandler = require(`../modules/policy/policySearchMatrixHandler`);
 const globalSearchMatrixHandler = require(`../modules/globalSearch/globalSearchMatrixHandler`);
 const edaSearchMatrixHandler = require(`../modules/eda/edaSearchMatrixHandler`);
+const jbookSearchMatrixHandler = require(`../modules/jbook/jbookSearchMatrixHandler`);
 class SearchMatrixFactory {
 	constructor(module) {
 		try {
@@ -15,6 +16,9 @@ class SearchMatrixFactory {
 					break;
 				case 'eda/edaMainViewHandler':
 					this.handler = edaSearchMatrixHandler;
+					break;
+				case 'jbook/jbookMainViewHandler':
+					this.handler = jbookSearchMatrixHandler;
 					break;
 				default:
 					this.handler = defaultSearchMatrixHandler;

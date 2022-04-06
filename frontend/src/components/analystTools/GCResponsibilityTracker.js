@@ -15,21 +15,17 @@ import {
 	TextField,
 	Typography,
 } from '@material-ui/core';
-import {
-	backgroundGreyDark,
-	backgroundGreyLight,
-	backgroundWhite,
-} from '../common/gc-colors';
+import { backgroundGreyDark, backgroundGreyLight, backgroundWhite } from '../common/gc-colors';
 import { gcOrange } from '../common/gc-colors';
 import GCPrimaryButton from '../common/GCButton';
 import GameChangerAPI from '../api/gameChanger-service-api';
-import {trackEvent} from '../telemetry/Matomo';
+import { trackEvent } from '../telemetry/Matomo';
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CloseIcon from '@material-ui/icons/Close';
-import {makeStyles, withStyles} from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
@@ -38,13 +34,15 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const _ = require('lodash');
 
-const FilterInput = ({value, setValue}) => {
-	return(
-		<input 
-			type="text" 
-			value={value} 
-			style={{width: '100%'}}
-			onChange={(e) => {setValue(e.target.value)}}
+const FilterInput = ({ value, setValue }) => {
+	return (
+		<input
+			type="text"
+			value={value}
+			style={{ width: '100%' }}
+			onChange={(e) => {
+				setValue(e.target.value);
+			}}
 		/>
 	);
 };
@@ -117,12 +115,7 @@ const GCCheckbox = withStyles({
 const gameChangerAPI = new GameChangerAPI();
 const PAGE_SIZE = 10;
 
-const getData = async ({
-	limit = PAGE_SIZE,
-	offset = 0,
-	sorted = [],
-	filtered = [],
-}) => {
+const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = [] }) => {
 	const order = sorted.map(({ id, desc }) => [id, desc ? 'DESC' : 'ASC']);
 	const where = filtered;
 
@@ -143,7 +136,7 @@ const getData = async ({
 const preventDefault = (event) => event.preventDefault();
 
 const GCResponsibilityTracker = ({
-	state, 
+	state,
 	filters,
 	setFilters,
 	docTitle,
@@ -151,9 +144,8 @@ const GCResponsibilityTracker = ({
 	organization,
 	setOrganization,
 	responsibilityText,
-	setResponsibilityText
+	setResponsibilityText,
 }) => {
-
 	const classes = useStyles();
 	const [responsibilityTableData, setResponsibilityTableData] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -172,9 +164,7 @@ const GCResponsibilityTracker = ({
 	const [filterPopperAnchorEl, setFilterPopperAnchorEl] = useState(null);
 	const [otherEntRespFilters, setOtherEntRespFilters] = useState({});
 	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
-	const [visibleOtherEntRespFilters, setVisibleOtherEntRespFilters] = useState(
-		{}
-	);
+	const [visibleOtherEntRespFilters, setVisibleOtherEntRespFilters] = useState({});
 	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
 	const [reloadResponsibilityTable, setReloadResponsibilityTable] = useState(true);
 
@@ -222,27 +212,27 @@ const GCResponsibilityTracker = ({
 			handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
 			setReloadResponsibilityTable(false);
 		}
-	 // eslint-disable-next-line react-hooks/exhaustive-deps
-	 }, [pageIndex, sorts, filters]); 
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [pageIndex, sorts, filters]);
 
-	 useEffect(() => {
+	useEffect(() => {
 		const newFilters = [];
-		if(Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
-		if(organization.length) {
-			organization.forEach(org => {
-				newFilters.push({id: 'organizationPersonnel', value: org});
+		if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
+		if (organization.length) {
+			organization.forEach((org) => {
+				newFilters.push({ id: 'organizationPersonnel', value: org });
 			});
-		};
-		if(docTitle.length) {
-			docTitle.forEach(doc => {
-				newFilters.push({id: 'documentTitle', value: doc.documentTitle});
+		}
+		if (docTitle.length) {
+			docTitle.forEach((doc) => {
+				newFilters.push({ id: 'documentTitle', value: doc.documentTitle });
 			});
-		};
+		}
 		setFilters(newFilters);
 		setReloadResponsibilityTable(true);
-	 },[docTitle, organization, responsibilityText, setFilters]);
+	}, [docTitle, organization, responsibilityText, setFilters]);
 
-	 const handleFetchData = async ({ page, sorted, filtered }) => {
+	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
@@ -284,16 +274,12 @@ const GCResponsibilityTracker = ({
 				return selectedIds.includes(result.id);
 			});
 			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name), 
-				'ResponsibilityTracker', 
-				'ExportCSV', 
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'ResponsibilityTracker',
+				'ExportCSV',
 				selectedIds.length > 0 ? rtnResults.length : results.length
 			);
-			exportToCsv(
-				'ResponsibilityData.csv', 
-				selectedIds.length > 0 ? rtnResults : results, 
-				true
-			);
+			exportToCsv('ResponsibilityData.csv', selectedIds.length > 0 ? rtnResults : results, true);
 			deselectRows();
 		} catch (e) {
 			console.error(e);
@@ -326,7 +312,7 @@ const GCResponsibilityTracker = ({
 	// }
 
 	const deselectRows = async () => {
-		responsibilityTableData.forEach(result => {
+		responsibilityTableData.forEach((result) => {
 			result.selected = false;
 		});
 		setSelectRows(false);
@@ -340,24 +326,27 @@ const GCResponsibilityTracker = ({
 				accessor: 'documentTitle',
 				style: { whiteSpace: 'unset' },
 				width: 300,
-				Filter: 
-					<FilterInput 
-						value={docTitle.map(doc => doc.documentTitle).join(' AND ')} 
+				Filter: (
+					<FilterInput
+						value={docTitle.map((doc) => doc.documentTitle).join(' AND ')}
 						setValue={(filter) => {
 							const splitFilter = filter.split(' AND ');
-							const parsedFilter = splitFilter.map(filter => {
-								return {documentTitle: filter};
+							const parsedFilter = splitFilter.map((filter) => {
+								return { documentTitle: filter };
 							});
 							setDocTitle(parsedFilter);
 						}}
-					/>,
+					/>
+				),
 				Cell: (row) => (
 					<TableRow>
-						<Link href={'#'} onClick={(event)=> {
-							preventDefault(event);
-							fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
-						}}
-						style={{ color: '#386F94' }}
+						<Link
+							href={'#'}
+							onClick={(event) => {
+								preventDefault(event);
+								fileClicked(row.row._original.filename, row.row.responsibilityText, 1);
+							}}
+							style={{ color: '#386F94' }}
 						>
 							<div>
 								<p>{row.value}</p>
@@ -370,39 +359,44 @@ const GCResponsibilityTracker = ({
 				Header: 'Organization/Personnel',
 				accessor: 'organizationPersonnel',
 				style: { whiteSpace: 'unset' },
-				Filter: 
-					<FilterInput 
-						value={organization.join(' AND ')} 
+				Filter: (
+					<FilterInput
+						value={organization.join(' AND ')}
 						setValue={(filter) => {
 							const parsedFilter = filter.split(' AND ');
 							setOrganization(parsedFilter);
 						}}
-					/>,
+					/>
+				),
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Responsibility Text',
 				accessor: 'responsibilityText',
 				style: { whiteSpace: 'unset' },
-				Filter: 
-					<FilterInput 
-						value={responsibilityText?.value || ''} 
-						setValue={(filter) => setResponsibilityText({id: 'responsibilityText', value: filter})}
-					/>,
+				Filter: (
+					<FilterInput
+						value={responsibilityText?.value || ''}
+						setValue={(filter) => setResponsibilityText({ id: 'responsibilityText', value: filter })}
+					/>
+				),
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: () => (
 					<div style={{ cursor: 'default' }}>
 						<>Other Organization/Personnel</>
-						<i onClick={(event) => {
-							openFilterPopper(event.target, 'otherOrgsPers');
-						}} className={'fa fa-filter'} style={{
-							color: '#E9691D',
-							marginLeft: '50px',
-							cursor: 'pointer',
-							fontSize: 18
-						}}
+						<i
+							onClick={(event) => {
+								openFilterPopper(event.target, 'otherOrgsPers');
+							}}
+							className={'fa fa-filter'}
+							style={{
+								color: '#E9691D',
+								marginLeft: '50px',
+								cursor: 'pointer',
+								fontSize: 18,
+							}}
 						/>
 					</div>
 				),
@@ -418,11 +412,7 @@ const GCResponsibilityTracker = ({
 				style: { whiteSpace: 'unset' },
 				width: 200,
 				filterable: false,
-				Cell: row => (
-					<TableRow>
-						{row.value? row.value.join(', '): '' }
-					</TableRow>
-				),
+				Cell: (row) => <TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>,
 			},
 			{
 				Header: 'Select',
@@ -444,12 +434,8 @@ const GCResponsibilityTracker = ({
 									fontSize="large"
 								/>
 							}
-							checkedIcon={
-								<CheckBoxIcon
-									style={{ width: 25, height: 25, fill: gcOrange }}
-								/>
-							}
-							checked={row.row.selected}
+							checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: gcOrange }} />}
+							checked={selectedIds.includes(row.original.id)}
 						/>
 					</TableRow>
 				),
@@ -498,8 +484,7 @@ const GCResponsibilityTracker = ({
 				getTrProps={(state, rowInfo, column) => {
 					if (rowInfo && rowInfo.row) {
 						return {
-							onClick: (e, t) => {
-							 },
+							onClick: (e, t) => {},
 							onMouseEnter: (e) => {
 								setHoveredRow(rowInfo.index);
 							},
@@ -532,11 +517,7 @@ const GCResponsibilityTracker = ({
 	};
 
 	const fileClicked = (filename, searchText, pageNumber) => {
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
-			'PDFOpen'
-		);
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'PDFOpen');
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
 			'ResponsibilityTracker',
@@ -550,9 +531,9 @@ const GCResponsibilityTracker = ({
 			pageNumber
 		);
 		let tempSearchText;
-		if(searchText){
+		if (searchText) {
 			const searchTextArray = searchText.split(' ');
-			if(searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
+			if (searchTextArray[0].match(/(\(\w{1,2}\)|\w{1,2}\.)/)) searchTextArray[0] += ' ';
 			tempSearchText = searchTextArray.join(' ');
 		}
 		window.open(
@@ -563,32 +544,37 @@ const GCResponsibilityTracker = ({
 	};
 
 	const handleSelected = (id) => {
-		responsibilityTableData.forEach(row => {
-			if(row['id'] === id){
+		responsibilityTableData.forEach((row) => {
+			if (row['id'] === id) {
 				row.selected = !row.selected;
 				trackEvent(
-					getTrackingNameForFactory(state.cloneData.clone_name), 
-					'ResponsibilityTracker', 
-					`ID ${row.selected ? 'Selected' : 'Des-Selected'}`, 
-					id);
+					getTrackingNameForFactory(state.cloneData.clone_name),
+					'ResponsibilityTracker',
+					`ID ${row.selected ? 'Selected' : 'Des-Selected'}`,
+					id
+				);
 				if (row.selected) {
-					selectedIds.push(id);
+					const newSelectedIds = [...selectedIds];
+					newSelectedIds.push(id);
+					setSelectedIds(newSelectedIds);
 				} else {
-					selectedIds.splice(selectedIds.indexOf(id), 1);
+					const newSelectedIds = [...selectedIds];
+					newSelectedIds.splice(selectedIds.indexOf(id), 1);
+					setSelectedIds(newSelectedIds);
 				}
 			}
 		});
 	};
-	
+
 	const handleCancelSelect = () => {
 		deselectRows();
 		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name), 
-			'ResponsibilityTracker', 
+			getTrackingNameForFactory(state.cloneData.clone_name),
+			'ResponsibilityTracker',
 			'Cancel Select Rows'
 		);
 	};
-	
+
 	const hideShowReportModal = (show) => {
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
@@ -670,14 +656,11 @@ const GCResponsibilityTracker = ({
 						marginTop: '150px',
 						height: '75px',
 						width: '75px',
-						filter:
-							'invert(26%) sepia(49%) saturate(1486%) hue-rotate(146deg) brightness(72%) contrast(103%)',
+						filter: 'invert(26%) sepia(49%) saturate(1486%) hue-rotate(146deg) brightness(72%) contrast(103%)',
 					}}
 				/>
 
-				<h1 style={{ marginTop: '50px', alignSelf: 'center' }}>
-					Thank You! We appreciate the feedback.
-				</h1>
+				<h1 style={{ marginTop: '50px', alignSelf: 'center' }}>Thank You! We appreciate the feedback.</h1>
 			</div>
 		);
 	};
@@ -706,9 +689,7 @@ const GCResponsibilityTracker = ({
 			const tmpEntFilterNames = [];
 			Object.keys(tmpEntFilters).forEach((key) => {
 				if (tmpEntFilters[key].checked)
-					tmpEntFilterNames.push(
-						key === 'null' ? null : `%${tmpEntFilters[key].name}%`
-					);
+					tmpEntFilterNames.push(key === 'null' ? null : `%${tmpEntFilters[key].name}%`);
 			});
 			setOtherEntRespFiltersList(tmpEntFilterNames);
 		} else {
@@ -776,38 +757,35 @@ const GCResponsibilityTracker = ({
 			</Popover>
 
 			<div style={styles.disclaimerContainer}>
-				Data in the table below does not currently reflect all documents in
-				GAMECHANGER. As we continue to process data for this capability, please
-				check back later or reach us by email if your document/s of interest are
-				not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
+				Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to
+				process data for this capability, please check back later or reach us by email if your document/s of
+				interest are not yet included: osd.pentagon.ousd-c.mbx.advana-gamechanger@mail.mil
 			</div>
-			
-			<div style={{display: 'flex', justifyContent: 'flex-end'}}>
-				{ selectRows ?
+
+			<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+				{selectRows ? (
 					<div>
 						<GCPrimaryButton buttonColor={'#131E43'} onClick={handleCancelSelect}>
-							Cancel <Icon className="fa fa-times" style={styles.buttons}/>
+							Cancel <Icon className="fa fa-times" style={styles.buttons} />
 						</GCPrimaryButton>
 						<GCPrimaryButton onClick={exportCSV}>
-							Export <Icon className="fa fa-external-link" style={styles.buttons}/>
+							Export <Icon className="fa fa-external-link" style={styles.buttons} />
 						</GCPrimaryButton>
 						{/* <GCPrimaryButton buttonColor={'red'} onClick={reportButtonAction}>
 							Update <Icon className="fa fa-bug" style={styles.buttons}/>
 						</GCPrimaryButton> */}
-						<div style={styles.spacer}/>
+						<div style={styles.spacer} />
 					</div>
-					:
+				) : (
 					<div>
-						<GCPrimaryButton onClick={() => setSelectRows(true)}>
-							Select Rows
-						</GCPrimaryButton>
-						<div style={styles.spacer}/>
+						<GCPrimaryButton onClick={() => setSelectRows(true)}>Select Rows</GCPrimaryButton>
+						<div style={styles.spacer} />
 					</div>
-				}
+				)}
 			</div>
-	
-			{ renderDataTable() }
-			
+
+			{renderDataTable()}
+
 			<Dialog
 				open={showReportModal}
 				scroll={'paper'}
@@ -818,13 +796,9 @@ const GCResponsibilityTracker = ({
 					paperWidthLg: classes.dialogLg,
 				}}
 			>
-				<DialogTitle >
+				<DialogTitle>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography 
-							variant="h3" 
-							display="inline" 
-							style={{ fontWeight: 700 }}
-						>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
 							Report Issues with Data
 						</Typography>
 					</div>
@@ -933,7 +907,7 @@ const styles = {
 	},
 	disclaimerContainer: {
 		alignItems: 'center',
-		fontWeight: 'bold'
+		fontWeight: 'bold',
 	},
 };
 

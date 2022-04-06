@@ -19,9 +19,7 @@ const GlobalSearchTitleBarHandler = {
 				id={'titleButton'}
 				className={
 					componentStepNumbers
-						? `tutorial-step-${
-							componentStepNumbers[`${cloneData.display_name} Title`]
-						  }`
+						? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`
 						: null
 				}
 			/>

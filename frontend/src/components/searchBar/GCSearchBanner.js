@@ -4,14 +4,7 @@ import { Typography } from '@material-ui/core';
 import { primaryGreyLight } from '../common/gc-colors';
 import GamechangerLogo from '../../images/logos/GAMECHANGER-NoPentagon.png';
 import TitleBarFactory from '../factories/titleBarFactory';
-import AdvanaMegaMenuPill, {
-	PillButton,
-	TitleText,
-} from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
-
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 
 const styles = {
 	container: {
@@ -114,11 +107,7 @@ const SearchBanner = (props) => {
 	return (
 		<div
 			style={{ ...styles.container, ...style }}
-			className={
-				componentStepNumbers
-					? `tutorial-step-${componentStepNumbers['Search Bar']}`
-					: null
-			}
+			className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Search Bar']}` : null}
 		>
 			{loaded && (
 				<div
@@ -146,34 +135,13 @@ const SearchBanner = (props) => {
 										: null
 								}
 							/>
-							<Typography
-								variant="h2"
-								style={styles.adminWording}
-								display="inline"
-							>
+							<Typography variant="h2" style={styles.adminWording} display="inline">
 								Data Tracker
 							</Typography>
 						</div>
 					)}
 					<div style={styles.searchBar}>{children}</div>
-					{!jupiter && (
-						<>
-							{isDecoupled ? (
-								<PillButton
-									margin={'0 60px 0 5px'}
-									justifyContent="center"
-									onClick={() => window.location.href = 'https://advana.data.mil/'}
-								>
-									<TitleText>ADVANA</TitleText>
-								</PillButton>
-							) : (
-								<AdvanaMegaMenuPill
-									margin="0 0 0 5px"
-									defaultHeader="Applications"
-								/>
-							)}
-						</>
-					)}
+					{!jupiter && <AdvanaMegaMenuPill margin="0 -30px 0 20px" defaultHeader="Applications" />}
 				</div>
 			)}
 
@@ -188,8 +156,7 @@ const SearchBanner = (props) => {
 					cloneData,
 					dispatch,
 					loading,
-				})
-			}
+				})}
 		</div>
 	);
 };

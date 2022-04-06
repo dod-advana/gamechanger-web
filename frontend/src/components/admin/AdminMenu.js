@@ -20,9 +20,7 @@ import { toolTheme } from './util/GCAdminStyles';
  * Both of theses components are the admin page menu on the left and have a list of buttons with icons.
  * When you click on a button from the menu it renders that page in the main open area.
  */
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 /**
  * @class ClosedAdminMenu
  * @param {method} props.setPageToView - Renders the selected component in the open space
@@ -30,10 +28,8 @@ const isDecoupled =
  */
 const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
-		<div
-			style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-		>
-			{Permissions.isGameChangerAdmin() && (
+		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -48,7 +44,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && isDecoupled && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -77,22 +73,14 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			<Tooltip title="Service Notifications" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
+				<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 					<AddAlert style={{ fontSize: 30 }} />
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => setPageToView(PAGES.internalUsers)}
-						toolTheme={toolTheme}
-					>
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
+				<Tooltip title="Manage Users" placement="right" arrow>
+					<HoverNavItem centered onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
 					</HoverNavItem>
 				</Tooltip>
@@ -134,7 +122,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -148,7 +136,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -162,7 +150,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Responsibility Updates" placement="right" arrow>
 					<HoverNavItem
 						centered
@@ -186,7 +174,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Admin Page" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -201,7 +189,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && isDecoupled && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && isDecoupled && (
 				<Tooltip title="Manage Admins" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -230,23 +218,17 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			<Tooltip title="Show Notifications" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => setPageToView(PAGES.notifications)}
-					toolTheme={toolTheme}
-				>
+				<HoverNavItem onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 					<AddAlert style={{ fontSize: 30 }} />
 					<span style={{ marginLeft: '5px' }}>Show Notifications</span>
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
-				<Tooltip title="Manage Internal Users" placement="right" arrow>
-					<HoverNavItem
-						onClick={() => setPageToView(PAGES.internalUsers)}
-						toolTheme={toolTheme}
-					>
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
+				<Tooltip title="Manage Users" placement="right" arrow>
+					<HoverNavItem onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 						<SupervisedUserCircle style={{ fontSize: 30 }} />
-						<span style={{ marginLeft: '5px' }}>Manage Internal Users</span>
+						<span style={{ marginLeft: '5px' }}>Manage Users</span>
 					</HoverNavItem>
 				</Tooltip>
 			)}
@@ -288,7 +270,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</HoverNavItem>
 			</Tooltip>
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Manage API Keys" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -302,7 +284,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Homepage Editor" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
@@ -316,7 +298,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 				</Tooltip>
 			)}
 
-			{Permissions.isGameChangerAdmin() && (
+			{Permissions.permissionValidator('Gamechanger Super Admin', true) && (
 				<Tooltip title="Responsibility Updates" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {

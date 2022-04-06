@@ -1,58 +1,60 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
-import {setState} from '../../utils/sharedFunctions';
+import React, { useEffect, useRef, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { setState } from '../../utils/sharedFunctions';
 import AnalystToolsFactory from '../factories/analystToolsFactory';
 
 export default function GCAnalystToolsSideBar(props) {
-	
 	const classes = useStyles();
-	
-	const {
-		context
-	} = props;
-	
-	const {state, dispatch} = context;
-	
+
+	const { context, results } = props;
+
+	const { state, dispatch } = context;
+
 	const [analystToolsSideBarHandler, setAnalystToolsSideBarHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
-	const [sideFilterOverlayDimension, setSideFilterOverlayDimension] = useState({width: 0, height: 0});
-	
+	const [sideFilterOverlayDimension, setSideFilterOverlayDimension] = useState({ width: 0, height: 0 });
+
 	const sideBarFilterRef = useRef();
-	
+
 	useEffect(() => {
 		if (sideBarFilterRef.current) {
-			setSideFilterOverlayDimension({width: sideBarFilterRef.current.offsetWidth, height: sideBarFilterRef.current.offsetHeight});
+			setSideFilterOverlayDimension({
+				width: sideBarFilterRef.current.offsetWidth,
+				height: sideBarFilterRef.current.offsetHeight,
+			});
 		}
 	}, [sideBarFilterRef]);
-	
+
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
 			const factory = new AnalystToolsFactory(state.cloneData.main_view_module);
 			const handler = factory.createHandler();
-			
+
 			setAnalystToolsSideBarHandler(handler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
-	
+
 	const handleSubmit = (event) => {
 		if (event) {
 			event.preventDefault();
 		}
 		setState(dispatch, { runDocumentComparisonSearch: true });
 	};
-	
+
 	return (
-		<div style={styles.cardBody} class='analyst-tools-filters'>
+		<div style={styles.cardBody} className="analyst-tools-filters">
 			<div style={styles.innerContainer} ref={sideBarFilterRef}>
-				{loaded && analystToolsSideBarHandler.getSideBarItems({
-					state,
-					classes,
-					dispatch,
-					handleSubmit,
-					sideFilterOverlayDimension
-				})}
+				{loaded &&
+					analystToolsSideBarHandler.getSideBarItems({
+						state,
+						classes,
+						dispatch,
+						results,
+						handleSubmit,
+						sideFilterOverlayDimension,
+					})}
 			</div>
 		</div>
 	);
@@ -62,7 +64,7 @@ const styles = {
 	innerContainer: {
 		display: 'flex',
 		height: '100%',
-		flexDirection: 'column'
+		flexDirection: 'column',
 	},
 	cardBody: {
 		fontSize: '1.1em',
@@ -71,7 +73,7 @@ const styles = {
 	subHead: {
 		fontSize: '1.0em',
 		display: 'flex',
-		position: 'relative'
+		position: 'relative',
 	},
 	headerColumn: {
 		fontSize: '1.0em',
@@ -79,8 +81,8 @@ const styles = {
 		padding: '8px 8px',
 		backgroundColor: 'rgb(50,53,64)',
 		display: 'flex',
-		alignItems: 'center'
-	}
+		alignItems: 'center',
+	},
 };
 
 const useStyles = makeStyles({
@@ -99,37 +101,37 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 	},
 	titleText: {
-		fontSize: '14px'
+		fontSize: '14px',
 	},
 	tipText: {
 		maxWidth: '250px',
 		width: '250px',
 		margin: '0 auto',
 		fontSize: '12px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	optionText: {
 		margin: '20px 75px 0px',
 		fontSize: '14px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	dateOptionText: {
 		margin: '20px 0px 0px',
 		fontSize: '14px',
-		lineHeight: '20px'
+		lineHeight: '20px',
 	},
 	title: {
 		margin: '20px 75px 0px',
 		fontSize: '20px',
 		lineHeight: '20px',
-		fontWeight: 600
+		fontWeight: 600,
 	},
 	rootButton: {
 		visibility: 'hidden',
 		width: '0px',
 		padding: '0px',
 		border: '0px',
-		cursor: 'default'
+		cursor: 'default',
 	},
 	rootLabel: {
 		cursor: 'pointer',
@@ -137,7 +139,7 @@ const useStyles = makeStyles({
 		alignItems: 'center',
 		marginRight: '26px',
 		marginBottom: '15px',
-		verticalAlign: 'middle'
+		verticalAlign: 'middle',
 	},
 	filterBox: {
 		backgroundColor: '#ffffff',
@@ -146,7 +148,7 @@ const useStyles = makeStyles({
 		border: '2px solid #bdccde',
 		pointerEvents: 'none',
 		marginLeft: '5px',
-		marginRight: '5px'
+		marginRight: '5px',
 	},
 	checkBox: {
 		visibility: 'hidden',
@@ -162,11 +164,11 @@ const useStyles = makeStyles({
 			border: '2px solid #313541',
 			borderRadius: '10px',
 			'&, $tipText,$titleText': {
-				color: '#ffffff'
+				color: '#ffffff',
 			},
 			'&::after': {
 				fontFamily: 'FontAwesome',
-				content: '\'\\f00c\'',
+				content: "'\\f00c'",
 				width: '20px',
 				height: '20px',
 				lineHeight: '10px',
@@ -180,7 +182,7 @@ const useStyles = makeStyles({
 				top: '10px',
 				right: '10px',
 				paddingTop: '3px',
-			}
+			},
 		},
 		'& + $checkboxPill': {
 			backgroundColor: '#313541',
@@ -188,7 +190,7 @@ const useStyles = makeStyles({
 			border: '2px solid #313541',
 			borderRadius: '10px',
 			color: '#ffffff',
-		}
+		},
 	},
 	checkboxPill: {
 		width: '145px',
@@ -203,7 +205,7 @@ const useStyles = makeStyles({
 		minHeight: '35px',
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
 	},
 	disabledButton: {
 		'& + $checkboxPill': {
@@ -211,7 +213,6 @@ const useStyles = makeStyles({
 			border: '2px solid grey',
 			borderRadius: '10px',
 			color: '#ffffff',
-		}
-	}
+		},
+	},
 });
-

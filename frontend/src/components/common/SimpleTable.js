@@ -4,6 +4,7 @@ import parse from 'html-react-parser';
 
 import { primary } from './gc-colors';
 import CONFIG from '../../config/config';
+import sanitizeHtml from 'sanitize-html';
 
 const defaultColWidth = {
 	maxWidth: 250,
@@ -48,6 +49,7 @@ export default class SimpleTable extends React.Component {
 		stickyHeader: false,
 		useParser: false,
 		hideSubheader: false,
+		useInnerHtml: false,
 	};
 
 	state = {
@@ -55,14 +57,7 @@ export default class SimpleTable extends React.Component {
 	};
 
 	getHeader = (cols, colMap) => {
-		const {
-			hideHeader,
-			hideSubheader,
-			headerExtraStyle,
-			colWidth,
-			firstColWidth,
-			title,
-		} = this.props;
+		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
 
 		if (hideHeader) return <thead></thead>;
 		return (
@@ -147,16 +142,8 @@ export default class SimpleTable extends React.Component {
 		const rowItems = [];
 		let extraWrapStyle = {};
 		if (this.props.disableWrap) extraWrapStyle = noWrapStyle;
-		const selectedRow = this.state.selectedRow
-			? this.state.selectedRow
-			: this.props.defaultRow;
-		const {
-			highlightSelectedRow,
-			colWidth,
-			firstColWidth,
-			returnRowOnClick,
-			useParser,
-		} = this.props;
+		const selectedRow = this.state.selectedRow ? this.state.selectedRow : this.props.defaultRow;
+		const { highlightSelectedRow, colWidth, firstColWidth, returnRowOnClick, useParser, useInnerHtml } = this.props;
 		const tbodyStyle = {
 			cursor: onRowClick ? 'pointer' : 'default',
 			borderTop: '1px solid #ddd',
@@ -178,41 +165,49 @@ export default class SimpleTable extends React.Component {
 					let innerVal = c.format ? c.format(r[c.col]) : r[c.col];
 
 					rowCells.push(
-						<td
-							title={c.noTooltip ? '' : innerVal}
-							style={{ ...colWidth, ...extraWrapStyle }}
-							key={`${rIdx}_${cIdx}`}
-						>
+						<td style={{ ...colWidth, ...extraWrapStyle }} key={`${rIdx}_${cIdx}`}>
 							{innerVal}
 						</td>
 					);
 				});
 			} else {
-				_.each(cols, (c, cIdx) => {
-					let value = r[c];
-					const editIcon = this.props.showEditIcon && cIdx === 0 && (
-						<i
-							style={{ marginRight: 10, color: 'blue' }}
-							className="fa fa-pencil"
-						/>
-					);
-					
-					if (!value || _.isBoolean(value)) value = '';
-					if(r[c]?.constructor === Array) r[c] = r[c].join(', ');
-
-					rowCells.push(
-						<td
-							style={{
-								...(cIdx === 0 ? firstColWidth : colWidth),
-								...extraWrapStyle,
-							}}
-							key={`${rIdx}_${cIdx}`}
-						>
-							{editIcon}
-							{useParser ? parse(r[c]) : r[c]}
-						</td>
-					);
-				});
+				if (!r.Hidden) {
+					_.each(cols, (c, cIdx) => {
+						let value = r[c] ?? '';
+						if (useInnerHtml) {
+							if (!value || _.isBoolean(value)) value = '';
+							rowCells.push(
+								<td
+									style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
+									key={`${rIdx}_${cIdx}`}
+								>
+									<blockquote
+										style={{ borderLeft: 'none' }}
+										dangerouslySetInnerHTML={{
+											__html: sanitizeHtml(value, {
+												allowedAttributes: { span: ['style'], br: [] },
+											}),
+										}}
+									/>
+								</td>
+							);
+						} else {
+							const editIcon = this.props.showEditIcon && cIdx === 0 && (
+								<i style={{ marginRight: 10, color: 'blue' }} className="fa fa-pencil" />
+							);
+							if (!value || _.isBoolean(value)) value = '';
+							rowCells.push(
+								<td
+									style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
+									key={`${rIdx}_${cIdx}`}
+								>
+									{editIcon}
+									{useParser ? parse(r[c]) : Array.isArray(r[c]) ? r[c].join(', ') : r[c]}
+								</td>
+							);
+						}
+					});
+				}
 			}
 			const isSelectedRow = highlightSelectedRow && selectedRow === r.id;
 
@@ -242,18 +237,8 @@ export default class SimpleTable extends React.Component {
 	};
 
 	render() {
-		const {
-			rows,
-			colKeys,
-			columnMap,
-			onRowClick,
-			height,
-			zoom,
-			tableClass,
-			dontScroll,
-			inheritOverflow,
-			margin,
-		} = this.props;
+		const { rows, colKeys, columnMap, onRowClick, height, zoom, tableClass, dontScroll, inheritOverflow, margin } =
+			this.props;
 		if (rows.length === 0) return <i></i>;
 		const cols = colKeys || _.keys(rows[0]);
 		const head = this.getHeader(cols, columnMap);
@@ -265,6 +250,7 @@ export default class SimpleTable extends React.Component {
 				backgroundColor: 'white',
 				position: 'relative',
 				// borderCollapse: 'separate'
+				marginBottom: 0,
 			},
 			container: {
 				width: '100%',

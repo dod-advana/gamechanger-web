@@ -5,13 +5,7 @@ import styled from 'styled-components';
 import { PageLink } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
-import {
-	primary,
-	backgroundWhite,
-	backgroundGreyLight,
-	backgroundGreyDark,
-	gcOrange,
-} from '../../common/gc-colors';
+import { primary, backgroundWhite, backgroundGreyLight, backgroundGreyDark, gcOrange } from '../../common/gc-colors';
 
 const styles = {
 	sectionHeader: {
@@ -136,6 +130,7 @@ const styles = {
 	},
 	checkbox: {
 		padding: 9,
+		marginLeft: 8,
 	},
 	backgroundGreyLight: backgroundGreyLight,
 };
@@ -178,6 +173,10 @@ const useStyles = makeStyles((theme) => ({
 			fontSize: 12,
 		},
 	},
+	dialogSm: {
+		maxWidth: '800px',
+		minWidth: '800px',
+	},
 	dialogLg: {
 		maxWidth: '1200px',
 		minWidth: '1200px',
@@ -191,6 +190,18 @@ const useStyles = makeStyles((theme) => ({
 		color: 'black',
 		backgroundColor: styles.backgroundGreyLight,
 		borderRadius: 0,
+	},
+	inputBox: {
+		fontFamily: 'Montserrat',
+		fontSize: '20px',
+		color: '#000000DD !important',
+
+		'&&&:before': {
+			borderBottom: 'none',
+		},
+		'&&:after': {
+			borderBottom: 'none',
+		},
 	},
 }));
 

@@ -24,9 +24,7 @@ export default ({ open, handleClose, query }) => {
 			<div>
 				<p style={{ fontSize: '12px' }}>{JSON.stringify(query)}</p>
 			</div>
-			<div
-				style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
-			>
+			<div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
 				<GCButton onClick={handleClose} isSecondaryBtn={true}>
 					Close
 				</GCButton>

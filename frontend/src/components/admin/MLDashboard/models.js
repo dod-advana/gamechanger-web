@@ -52,12 +52,13 @@ export default (props) => {
 		sentence: {},
 		qexp: {},
 		topic_models: {},
-		jbook_qexp: {}
+		jbook_qexp: {},
+		qa_model: {},
 	});
-	const [deleteModal,setDeleteModal] = useState({
-		show:false,
-		model:'',
-		type:''
+	const [deleteModal, setDeleteModal] = useState({
+		show: false,
+		model: '',
+		type: '',
 	});
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([]);
@@ -77,6 +78,7 @@ export default (props) => {
 	const [selectedQEXP, setSelectedQEXP] = useState('');
 	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
 	const [selectedTopicModel, setSelectedTopicModel] = useState('');
+	const [selectedQAModel, setSelectedQAModel] = useState('');
 
 	const [modelName, setModelName] = useState(DEFAULT_MODEL_NAME);
 	const [evalModelName, setEvalModelName] = useState('');
@@ -94,7 +96,7 @@ export default (props) => {
 	const [epochs, setEpochs] = useState(10);
 	const [testingOnly, setTesting] = useState(false);
 	const [remakeTD, setRemakeTD] = useState(true);
-	
+
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
 	/**
@@ -121,66 +123,33 @@ export default (props) => {
 			//		? current.data.sentence_models
 			//		: initTransformer
 			//);
-			setCurrentEncoder(
-				current.data.encoder_model
-					? current.data.encoder_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentSim(
-				current.data.sim_model
-					? current.data.sim_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
+			setCurrentEncoder(current.data.encoder_model ? current.data.encoder_model.replace(/^.*[\\/]/, '') : '');
+			setCurrentSim(current.data.sim_model ? current.data.sim_model.replace(/^.*[\\/]/, '') : '');
 			setCurrentSentenceIndex(
-				current.data.sentence_index
-					? current.data.sentence_index.replace(/^.*[\\/]/, '')
-					: ''
+				current.data.sentence_index ? current.data.sentence_index.replace(/^.*[\\/]/, '') : ''
 			);
-			setCurrentQexp(
-				current.data.qexp_model
-					? current.data.qexp_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentQa(
-				current.data.qa_model
-					? current.data.qa_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentJbook(
-				current.data.jbook_model
-					? current.data.jbook_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentWordSim(
-				current.data.wordsim_model
-					? current.data.wordsim_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentTopicModel(
-				current.data.topic_model
-					? current.data.topic_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
+			setCurrentQexp(current.data.qexp_model ? current.data.qexp_model.replace(/^.*[\\/]/, '') : '');
+			setCurrentQa(current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : '');
+			setCurrentJbook(current.data.jbook_model ? current.data.jbook_model.replace(/^.*[\\/]/, '') : '');
+			setCurrentWordSim(current.data.wordsim_model ? current.data.wordsim_model.replace(/^.*[\\/]/, '') : '');
+			setCurrentTopicModel(current.data.topic_model ? current.data.topic_model.replace(/^.*[\\/]/, '') : '');
+
 			props.updateLogs('Successfully queried current loaded models.', 0);
 		} catch (e) {
-			props.updateLogs(
-				'Error querying current loaded models: ' + e.toString(),
-				2
-			);
+			props.updateLogs('Error querying current loaded models: ' + e.toString(), 2);
 			throw e;
 		}
 	};
 
-
-	const deleteLocalModels = async (model,type) =>{
+	const deleteLocalModels = async (model, type) => {
 		setDeleteModal({
-			show:false,
-			model:'',
-			type:''
+			show: false,
+			model: '',
+			type: '',
 		});
 		await gameChangerAPI.deleteLocalModel({
-			'model':model,
-			'type':type
+			model: model,
+			type: type,
 		});
 		props.getProcesses();
 		getModelsList();
@@ -195,11 +164,11 @@ export default (props) => {
 			for (const key in props.processes.process_status) {
 				if (key !== 'flags') {
 					const status = props.processes.process_status[key]['process'].split(': ');
-					if (['models', 'training'].includes(status[0])){
+					if (['models', 'training'].includes(status[0])) {
 						processList.push({
 							...props.processes.process_status[key],
 							thread_id: key,
-							date:'Currently Running'
+							date: 'Currently Running',
 						});
 					}
 				}
@@ -208,12 +177,12 @@ export default (props) => {
 		if (props.processes && props.processes.completed_process) {
 			for (const completed of props.processes.completed_process) {
 				const completed_process = completed.process.split(': ');
-				if (['models', 'training'].includes(completed_process[0])){
+				if (['models', 'training'].includes(completed_process[0])) {
 					processList.push({
 						...completed,
 						process: completed_process[1],
 						category: completed_process[0],
-						progress: completed.total
+						progress: completed.total,
 					});
 				}
 			}
@@ -222,7 +191,7 @@ export default (props) => {
 	};
 
 	const getLocalData = async () => {
-		const dataList =  await gameChangerAPI.getDataList();
+		const dataList = await gameChangerAPI.getDataList();
 		setDataTable(dataList.data.dirs);
 	};
 	/**
@@ -242,8 +211,8 @@ export default (props) => {
 						model,
 						config: JSON.stringify(list.data[type][model], null, 2),
 					});
-				};
-			};
+				}
+			}
 			setModelTable(modelList);
 			props.updateLogs('Successfully queried models list', 0);
 		} catch (e) {
@@ -277,7 +246,7 @@ export default (props) => {
 				version: version,
 				encoder_model: modelName,
 				gpu: gpu,
-				upload: upload
+				upload: upload,
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -289,7 +258,7 @@ export default (props) => {
 	/**
 	 * @method triggerFinetuneModel
 	 */
-	 const triggerFinetuneModel = async () => {
+	const triggerFinetuneModel = async () => {
 		try {
 			await gameChangerAPI.trainModel({
 				build_type: 'sent_finetune',
@@ -297,7 +266,7 @@ export default (props) => {
 				warmup_steps: warmupSteps,
 				model: baseModel,
 				remake_train_data: remakeTD,
-				testing_only: testingOnly
+				testing_only: testingOnly,
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -308,13 +277,13 @@ export default (props) => {
 	/**
 	 * @method triggerTrainQexp
 	 */
-	 const triggerTrainQexp = async () => {
+	const triggerTrainQexp = async () => {
 		try {
 			await gameChangerAPI.trainModel({
 				validate: false,
 				build_type: 'qexp',
 				version: qexpversion,
-				upload: qexpupload
+				upload: qexpupload,
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -331,7 +300,7 @@ export default (props) => {
 				build_type: 'topics',
 				sample_rate: topicsSampling,
 				upload: topicsUpload,
-				version: topicsVersion
+				version: topicsVersion,
 			});
 			props.updateLogs('Started training', 0);
 			props.getProcesses();
@@ -348,7 +317,7 @@ export default (props) => {
 				build_type: 'eval',
 				model_name: evalModelName,
 				validation_data: 'latest',
-				eval_type: 'domain'
+				eval_type: 'domain',
 			});
 			props.updateLogs('Started evaluating', 0);
 			props.getProcesses();
@@ -358,7 +327,7 @@ export default (props) => {
 			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
 		}
 	};
-	
+
 	/**
 	 * @method triggerReloadModels
 	 */
@@ -376,6 +345,9 @@ export default (props) => {
 			}
 			if (selectedJbookQEXP) {
 				params['jbook_qexp'] = selectedJbookQEXP;
+			}
+			if (selectedQAModel) {
+				params['qa_model'] = selectedQAModel;
 			}
 			await gameChangerAPI.reloadModels(params);
 			props.updateLogs('Reloaded Models', 0);
@@ -431,10 +403,7 @@ export default (props) => {
 	 */
 	const checkFlag = (flag) => {
 		let flagged = false;
-		if (
-			props.processes.process_status &&
-			props.processes.process_status.flags
-		) {
+		if (props.processes.process_status && props.processes.process_status.flags) {
 			const flags = props.processes.process_status.flags;
 			for (const key in flags) {
 				if (key.includes(flag) && flags[key]) {
@@ -455,28 +424,28 @@ export default (props) => {
 		<div>
 			<Modal
 				isOpen={deleteModal.show}
-				onRequestClose={() => setDeleteModal({
-					show:false,
-					model:'',
-					type:''
-				})}
+				onRequestClose={() =>
+					setDeleteModal({
+						show: false,
+						model: '',
+						type: '',
+					})
+				}
 				style={styles.esIndexModal}
 			>
 				<div>
-					<Typography>
-							Are you sure you want to delete {deleteModal.model}
-					</Typography>
+					<Typography>Are you sure you want to delete {deleteModal.model}</Typography>
 				</div>
 				<div
 					style={{
-						position:'absolute',
+						position: 'absolute',
 						bottom: 0,
 						justifyContent: 'flex-end',
 					}}
 				>
 					<GCButton
 						id={'modelDeleteConfirm'}
-						onClick={() => deleteLocalModels(deleteModal.model,deleteModal.type)}
+						onClick={() => deleteLocalModels(deleteModal.model, deleteModal.type)}
 						style={{ margin: '25px' }}
 						buttonColor={'#8091A5'}
 					>
@@ -484,17 +453,18 @@ export default (props) => {
 					</GCButton>
 					<GCButton
 						id={'modelModalClose'}
-						onClick={() => setDeleteModal({
-							show:false,
-							model:'',
-							type:''
-						})}
+						onClick={() =>
+							setDeleteModal({
+								show: false,
+								model: '',
+								type: '',
+							})
+						}
 						style={{ margin: '25px' }}
 						buttonColor={'#8091A5'}
 					>
 						No
 					</GCButton>
-		
 				</div>
 			</Modal>
 			<div
@@ -504,9 +474,7 @@ export default (props) => {
 					margin: '10px 80px',
 				}}
 			>
-				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-					Loaded Resources And Controls
-				</p>
+				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Loaded Resources And Controls</p>
 
 				<GCPrimaryButton
 					onClick={() => {
@@ -518,9 +486,7 @@ export default (props) => {
 				</GCPrimaryButton>
 			</div>
 			<div>
-				<Processes
-					processData={getAllProcessData()}
-				/>
+				<Processes processData={getAllProcessData()} />
 			</div>
 			<div className="info">
 				<BorderDiv className="half">
@@ -531,14 +497,14 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}> <b>Local State:</b></div>
+						<div style={{ display: 'inline-block' }}>
+							{' '}
+							<b>Local State:</b>
+						</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div
-								style={{ width: '35%', boxSizing: 'border-box' }}
-								className="half"
-							>
+							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
 								Corpus:
 								<br />
 								<div style={{ paddingLeft: '15px' }}>Files in corpus:</div>
@@ -551,7 +517,6 @@ export default (props) => {
 								<div style={{ paddingLeft: '15px' }}>Jbook QExp:</div>
 								<div style={{ paddingLeft: '15px' }}>Word Similarity:</div>
 								<div style={{ paddingLeft: '15px' }}>Topic Model:</div>
-
 								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
 								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
 								<div style={{ paddingLeft: '30px' }}>Sim:</div>
@@ -567,7 +532,6 @@ export default (props) => {
 								{currentJbook} <br />
 								{currentWordSim} <br />
 								{currentTopicModel} <br />
-
 								<br />
 								{currentEncoder.replace(/^.*[\\/]/, '')}
 								<br />
@@ -584,7 +548,9 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}><b>Local Models:</b></div>
+						<div style={{ display: 'inline-block' }}>
+							<b>Local Models:</b>
+						</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -602,11 +568,10 @@ export default (props) => {
 											<GCPrimaryButton
 												onClick={() => {
 													setDeleteModal({
-														show:true,
-														model:row.original.model,
-														type:row.original.type
+														show: true,
+														model: row.original.model,
+														type: row.original.type,
 													});
-													
 												}}
 												style={{ float: 'left', minWidth: 'unset' }}
 											>
@@ -627,7 +592,9 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}><b>API Controls:</b></div>
+						<div style={{ display: 'inline-block' }}>
+							<b>API Controls:</b>
+						</div>
 					</div>
 					<div
 						style={{
@@ -652,9 +619,7 @@ export default (props) => {
 						</GCPrimaryButton>
 						<div>
 							<div>
-								<div style={{ width: '120px', display: 'inline-block' }}>
-									SENTENCE EMBEDDINGS:
-								</div>
+								<div style={{ width: '120px', display: 'inline-block' }}>SENTENCE EMBEDDINGS:</div>
 								<Select
 									value={selectedSentence}
 									onChange={(e) => setSelectedSentence(e.target.value)}
@@ -676,9 +641,7 @@ export default (props) => {
 							</div>
 
 							<div>
-								<div style={{ width: '120px', display: 'inline-block' }}>
-									QEXP MODEL:
-								</div>
+								<div style={{ width: '120px', display: 'inline-block' }}>QEXP MODEL:</div>
 								<Select
 									value={selectedQEXP}
 									onChange={(e) => setSelectedQEXP(e.target.value)}
@@ -699,9 +662,7 @@ export default (props) => {
 								</Select>
 							</div>
 							<div>
-								<div style={{ width: '120px', display: 'inline-block' }}>
-									JBOOK QEXP MODEL:
-								</div>
+								<div style={{ width: '120px', display: 'inline-block' }}>JBOOK QEXP MODEL:</div>
 								<Select
 									value={selectedJbookQEXP}
 									onChange={(e) => setSelectedJbookQEXP(e.target.value)}
@@ -722,9 +683,7 @@ export default (props) => {
 								</Select>
 							</div>
 							<div>
-								<div style={{ width: '120px', display: 'inline-block' }}>
-									TOPIC MODEL:
-								</div>
+								<div style={{ width: '120px', display: 'inline-block' }}>TOPIC MODEL:</div>
 								<Select
 									value={selectedTopicModel}
 									onChange={(e) => setSelectedTopicModel(e.target.value)}
@@ -736,6 +695,27 @@ export default (props) => {
 									}}
 								>
 									{Object.keys(downloadedModelsList.topic_models).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>QA MODEL:</div>
+								<Select
+									value={selectedQAModel}
+									onChange={(e) => setSelectedQAModel(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
 											<MenuItem style={{ fontSize: 'small' }} value={name}>
 												{name}
@@ -770,9 +750,7 @@ export default (props) => {
 						</GCPrimaryButton>
 
 						<div>
-							<div style={{ width: '120px', display: 'inline-block' }}>
-								Encoder Model:
-							</div>
+							<div style={{ width: '120px', display: 'inline-block' }}>Encoder Model:</div>
 							<Input
 								value={modelName}
 								onChange={(e) => setModelName(e.target.value)}
@@ -784,18 +762,13 @@ export default (props) => {
 							<div
 								style={{
 									width: '60px',
-									display: 'inline-block'
+									display: 'inline-block',
 								}}
 							>
 								GPU:
 							</div>
-							<Checkbox
-								checked={gpu}
-								onChange={(e) => setgpu(e.target.checked)}
-							/>
-							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
-								Version:
-							</div>
+							<Checkbox checked={gpu} onChange={(e) => setgpu(e.target.checked)} />
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px' }}>Version:</div>
 							<Input
 								value={version}
 								onChange={(e) => setVersion(e.target.value)}
@@ -811,10 +784,7 @@ export default (props) => {
 							>
 								Upload:
 							</div>
-							<Checkbox
-								checked={upload}
-								onChange={(e) => setUpload(e.target.checked)}
-							/>
+							<Checkbox checked={upload} onChange={(e) => setUpload(e.target.checked)} />
 						</div>
 					</div>
 					<div
@@ -838,11 +808,9 @@ export default (props) => {
 						>
 							Train
 						</GCPrimaryButton>
-					
+
 						<div>
-							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
-							Version:
-							</div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px' }}>Version:</div>
 							<Input
 								value={qexpversion}
 								onChange={(e) => setQexpVersion(e.target.value)}
@@ -858,10 +826,7 @@ export default (props) => {
 							>
 								Upload:
 							</div>
-							<Checkbox
-								checked={qexpupload}
-								onChange={(e) => setQexpUpload(e.target.checked)}
-							/>
+							<Checkbox checked={qexpupload} onChange={(e) => setQexpUpload(e.target.checked)} />
 						</div>
 					</div>
 					<div
@@ -885,11 +850,9 @@ export default (props) => {
 						>
 							Train
 						</GCPrimaryButton>
-					
+
 						<div>
-							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px'}}>
-							Version:
-							</div>
+							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px' }}>Version:</div>
 							<Input
 								value={topicsVersion}
 								onChange={(e) => setTopicsVersion(e.target.value)}
@@ -903,7 +866,7 @@ export default (props) => {
 									marginLeft: '10px',
 								}}
 							>
-							Sampling:
+								Sampling:
 							</div>
 							<Input
 								value={topicsSampling}
@@ -920,12 +883,9 @@ export default (props) => {
 							>
 								Upload:
 							</div>
-							<Checkbox
-								checked={topicsUpload}
-								onChange={(e) => setTopicsUpload(e.target.checked)}
-							/>
+							<Checkbox checked={topicsUpload} onChange={(e) => setTopicsUpload(e.target.checked)} />
 						</div>
-					</div>							
+					</div>
 					<div
 						style={{
 							width: '100%',
@@ -947,11 +907,9 @@ export default (props) => {
 						>
 							Train
 						</GCPrimaryButton>
-					
+
 						<div>
-							<div style={{ width: '60px', display: 'inline-block' }}>
-								Base Model:
-							</div>
+							<div style={{ width: '60px', display: 'inline-block' }}>Base Model:</div>
 							<Input
 								value={baseModel}
 								onChange={(e) => setBaseModel(e.target.value)}
@@ -960,9 +918,7 @@ export default (props) => {
 							/>
 						</div>
 						<div>
-							<div style={{ width: '60px', display: 'inline-block' }}>
-								Warmup Steps:
-							</div>
+							<div style={{ width: '60px', display: 'inline-block' }}>Warmup Steps:</div>
 							<Input
 								value={warmupSteps}
 								onChange={(e) => setWarmupSteps(e.target.value)}
@@ -971,9 +927,7 @@ export default (props) => {
 							/>
 						</div>
 						<div>
-							<div style={{ width: '60px', display: 'inline-block' }}>
-								Epochs:
-							</div>
+							<div style={{ width: '60px', display: 'inline-block' }}>Epochs:</div>
 							<Input
 								value={epochs}
 								onChange={(e) => setEpochs(e.target.value)}
@@ -991,10 +945,7 @@ export default (props) => {
 							>
 								Remake Training Data:
 							</div>
-							<Checkbox
-								checked={remakeTD}
-								onChange={(e) => setRemakeTD(e.target.checked)}
-							/>
+							<Checkbox checked={remakeTD} onChange={(e) => setRemakeTD(e.target.checked)} />
 							<div
 								style={{
 									width: '60px',
@@ -1004,13 +955,10 @@ export default (props) => {
 							>
 								Testing Only:
 							</div>
-							<Checkbox
-								checked={testingOnly}
-								onChange={(e) => setTesting(e.target.checked)}
-							/>
+							<Checkbox checked={testingOnly} onChange={(e) => setTesting(e.target.checked)} />
 						</div>
 					</div>
-					
+
 					<div
 						style={{
 							width: '100%',
@@ -1033,9 +981,7 @@ export default (props) => {
 							Evaluate
 						</GCPrimaryButton>
 						<div>
-							<div style={{ width: '120px', display: 'inline-block' }}>
-								Model:
-							</div>
+							<div style={{ width: '120px', display: 'inline-block' }}>Model:</div>
 							<Input
 								value={evalModelName}
 								onChange={(e) => setEvalModelName(e.target.value)}
@@ -1062,23 +1008,22 @@ export default (props) => {
 							onClick={() => {
 								triggerInitializeLTR();
 							}}
-							style={{ margin: '0 10px 10px 0', minWidth: 'unset'}}
+							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
 						>
 							Initialize
 						</GCPrimaryButton>
-						{ltrInitializedStatus &&
+						{ltrInitializedStatus && (
 							<div
 								style={{
 									minWidth: '200px',
-									display: 'inline-block'
+									display: 'inline-block',
 								}}
 							>
-								{ltrInitializedStatus === 200 ?
-									'Initialize request successful' :
-									`Initialize reqeust returned code ${ltrInitializedStatus}`
-								}
+								{ltrInitializedStatus === 200
+									? 'Initialize request successful'
+									: `Initialize reqeust returned code ${ltrInitializedStatus}`}
 							</div>
-						}
+						)}
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
@@ -1088,19 +1033,18 @@ export default (props) => {
 						>
 							Create Model
 						</GCPrimaryButton>
-						{ltrModelCreatedStatus &&
+						{ltrModelCreatedStatus && (
 							<div
 								style={{
 									minWidth: '200px',
-									display: 'inline-block'
+									display: 'inline-block',
 								}}
 							>
-								{ltrModelCreatedStatus === 200 ?
-									'Create model request successful' :
-									`Create model reqeust returned code ${ltrModelCreatedStatus}`
-								}
+								{ltrModelCreatedStatus === 200
+									? 'Create model request successful'
+									: `Create model reqeust returned code ${ltrModelCreatedStatus}`}
 							</div>
-						}
+						)}
 					</div>
 				</BorderDiv>
 				<BorderDiv className="half" style={{ float: 'right' }}>
@@ -1111,7 +1055,9 @@ export default (props) => {
 							paddingBottom: '5px',
 						}}
 					>
-						<div style={{ display: 'inline-block' }}><b>Local Data:</b></div>
+						<div style={{ display: 'inline-block' }}>
+							<b>Local Data:</b>
+						</div>
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
@@ -1122,17 +1068,20 @@ export default (props) => {
 								defaultPageSize={10}
 								SubComponent={(row) => {
 									return (
-										<div className="code-container" style={{padding:'15px'}}>
+										<div className="code-container" style={{ padding: '15px' }}>
 											Files
 											<ul>
-												{row.original.files.map((d) => <li key={d}>{d}</li>)}
+												{row.original.files.map((d) => (
+													<li key={d}>{d}</li>
+												))}
 											</ul>
 											Directories
 											<ul>
-												{row.original.subdirectories.map((d) => <li key={d}>{d}</li>)}
+												{row.original.subdirectories.map((d) => (
+													<li key={d}>{d}</li>
+												))}
 											</ul>
 										</div>
-											
 									);
 								}}
 							/>

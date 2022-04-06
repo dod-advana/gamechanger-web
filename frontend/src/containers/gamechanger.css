@@ -6,6 +6,10 @@
     padding: 11px 19px;
 }
 
+.gcPagination > .pagination {
+    margin-top: 15px;
+}
+
 .gcPagination > .pagination > li > a {
     color: black !important;
     padding: 11px 19px;
@@ -97,7 +101,7 @@
 
 .main-container { 
     background-color: white;
-    min-height: calc(100vh - 30px);
+    min-height: calc(100vh - 120px);
 }
 
 #gc-user-dash .row > * { 
@@ -117,5 +121,13 @@
 }
 
 .analyst-tools-filters [class*="MuiAccordion-root"] [class*="MuiAccordionSummary-content"] {
+    margin: 0 !important;
+}
+
+#faq-section #accordion-header {
+    height: auto;
+}
+
+#faq-section [class*="MuiAccordionSummary-content"] {
     margin: 0 !important;
 }

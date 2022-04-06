@@ -5,26 +5,22 @@ import SearchBanner from '../components/searchBar/GCSearchBanner';
 import MLDashboard from '../components/admin/MLDashboard';
 import GeneralAdminButtons from '../components/admin/GeneralAdminButtons';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
-import InternalUsersManagement from '../components/user/InternalUserManagement';
+// import InternalUsersManagement from '../components/user/InternalUserManagement';
 import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
 import SearchPdfMapping from '../components/admin/SearchPdfMapping';
 import CloneList from '../components/admin/CloneList';
 import ResponsibilityUpdates from '../components/admin/ResponsibilityUpdates';
+import UserList from '../components/admin/UserList';
 import AdminList from '../components/admin/AdminList';
 import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
-import {
-	ClosedAdminMenu,
-	OpenedAdminMenu,
-} from '../components/admin/AdminMenu';
+import { ClosedAdminMenu, OpenedAdminMenu } from '../components/admin/AdminMenu';
 
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import { toolTheme } from '../components/admin/util/GCAdminStyles';
+import { GCCheckbox, styles, TableRow, toolTheme } from '../components/admin/util/GCAdminStyles';
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const PAGES = {
 	general: 'General',
@@ -33,12 +29,48 @@ const PAGES = {
 	adminList: 'AdminList',
 	mlDashboard: 'mlDashboard',
 	notifications: 'Notifications',
-	internalUsers: 'Internal Users',
+	userList: 'Users',
 	appStats: 'Application Stats',
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
-	responsibilityUpdates: 'Responsibility Updates'
+	responsibilityUpdates: 'Responsibility Updates',
 };
+
+const userListTableAdditions = [
+	{
+		Header: 'Admin',
+		accessor: 'is_admin',
+		width: 100,
+		Cell: (row) => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'admin'}
+					color="inherit"
+					style={{ ...styles.checkbox, color: '#1C2D64' }}
+				/>
+			</TableRow>
+		),
+	},
+	{
+		Header: 'Super Admin',
+		accessor: 'is_super_admin',
+		width: 100,
+		Cell: (row) => (
+			<TableRow>
+				<GCCheckbox
+					checked={row.value}
+					onChange={() => {}}
+					name={'super_admin'}
+					color="inherit"
+					style={{ ...styles.checkbox, color: '#1C2D64' }}
+				/>
+			</TableRow>
+		),
+	},
+];
+
 /**
  *
  * @class GamechangerAdminPage
@@ -50,12 +82,7 @@ const GamechangerAdminPage = (props) => {
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
 	const renderSwitch = (page) => {
-		trackEvent(
-			'GAMECHANGER_Admin',
-			'ChangeAdminPage',
-			'onChange',
-			page.toString()
-		);
+		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
 
 		switch (page) {
 			case PAGES.general:
@@ -70,8 +97,8 @@ const GamechangerAdminPage = (props) => {
 				return <AdminList />;
 			case PAGES.notifications:
 				return <NotificationsManagement />;
-			case PAGES.internalUsers:
-				return <InternalUsersManagement />;
+			case PAGES.userList:
+				return <UserList columns={userListTableAdditions} />;
 			case PAGES.appStats:
 				return <GamechangerAppStats />;
 			case PAGES.apiKeys:
@@ -104,12 +131,8 @@ const GamechangerAdminPage = (props) => {
 
 	return (
 		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
-			<SlideOutMenuContent type="closed">
-				{ClosedAdminMenu({ setPageToView, PAGES })}
-			</SlideOutMenuContent>
-			<SlideOutMenuContent type="open">
-				{OpenedAdminMenu({ setPageToView, PAGES })}
-			</SlideOutMenuContent>
+			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 
 			<SearchBanner
 				onTitleClick={() => {
@@ -119,7 +142,8 @@ const GamechangerAdminPage = (props) => {
 				titleBarModule={'admin/adminTitleBarHandler'}
 				jupiter={jupiter}
 				rawSearchResults={[]}
-			></SearchBanner>
+				cloneData={{ clone_name: 'gamechanger' }}
+			/>
 
 			{renderSwitch(pageToView)}
 		</div>

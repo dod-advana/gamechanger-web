@@ -8,7 +8,7 @@ module.exports = {
 		dataSource: {
 			path: 'assets',
 			domainId: '1c9c2d34-c0f9-4653-ab16-0a75befabe96', // Advana Data Source Overview
-			typeId: 'bd82b60c-7abc-4ece-a75b-c43f45857f24' // Data Source
+			typeId: 'bd82b60c-7abc-4ece-a75b-c43f45857f24', // Data Source
 		},
 		portfolio: {
 			path: 'assets',
@@ -19,7 +19,7 @@ module.exports = {
 			path: 'assets',
 			domainId: '59bb7f8c-7769-4094-bc04-b06756be27c3', // Advana Analytical Line Organizational Structure
 			typeId: '197937ce-0475-4d21-88a3-1ed44cd5ca2a', // Advana Analytical Product
-		}
+		},
 	},
 	//TODO: verify these guids match in prod. If not, this config should be moved to dynamic constants
 	//this should fetch the list of Asset Types:  http://<API_BASE_URL>/assetTypes?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false
@@ -28,7 +28,7 @@ module.exports = {
 		columns: '00000000-0000-0000-0000-000000031008',
 		tables: '00000000-0000-0000-0000-000000031007',
 		dataSources: 'bd82b60c-7abc-4ece-a75b-c43f45857f24',
-		applications: 'deb21586-7602-4519-abc9-3f9a644f5b0d'
+		applications: 'deb21586-7602-4519-abc9-3f9a644f5b0d',
 	},
 	relations: {
 		dataSourceByPortfolio: {
@@ -43,36 +43,37 @@ module.exports = {
 			// role: requires data from Data Source, coRole: provides data for Analytical Line
 			// sourceType: Advana Analytical Line (Portfolio), targetType: Data Source
 		},
-		dataSourceWithAuditDev: { // DEV
+		dataSourceWithAuditDev: {
+			// DEV
 			path: 'relations',
-			typeId: '1c6a9446-1f22-4e9a-92df-7bd575cbda77'
+			typeId: '1c6a9446-1f22-4e9a-92df-7bd575cbda77',
 		},
-		dataSourceWithAuditProd: { // PROD
+		dataSourceWithAuditProd: {
+			// PROD
 			path: 'relations',
-			typeId: 'bfef12a6-94f2-4e26-b954-8e5536dae8fc'
+			typeId: 'bfef12a6-94f2-4e26-b954-8e5536dae8fc',
 		},
 		dataSourceWithAuditAndTarget: {
 			path: 'relations',
 			typeId: '00000000-0000-0000-0000-000000007018', // relation type between policy and asset
-			targetId: 'd0f7e2c6-77fe-440b-ac40-03fd73a8fd52' // assetId for SSAE18 auditMapping
-		}
+			targetId: 'd0f7e2c6-77fe-440b-ac40-03fd73a8fd52', // assetId for SSAE18 auditMapping
+		},
 	},
 	complexRelations: {
 		auditDataByAssetId: {
 			path: 'complexRelations',
-			assetId: 'd0f7e2c6-77fe-440b-ac40-03fd73a8fd52', 
-		}
+			assetId: 'd0f7e2c6-77fe-440b-ac40-03fd73a8fd52',
+		},
 	},
 	attributes: {
 		dataSourceAcronym: {
 			path: 'attributes',
 			typeId: '3c5a16e5-d5e4-4b1a-9d8c-bc039124fe05',
-		}
+		},
 	},
 	queryableStatuses: [
 		'6d5d8a5e-b926-4332-90d2-9917895aabd9', //providing data to the platform
 		'f708efb7-2cbd-4475-bc73-a38d0a772c57', //available for query
 		'f93358a2-0c9d-4068-b167-55d058e119fe', //data acquisition pending
-	]
-
+	],
 };

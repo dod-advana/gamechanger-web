@@ -188,7 +188,7 @@ const initState = {
 		accessDateFilter: [null, null],
 		includeRevoked: false,
 	},
-	
+
 	analystToolsSearchSettings: {
 		isFilterUpdate: false,
 		orgUpdate: false,
@@ -197,10 +197,12 @@ const initState = {
 		originalOrgFilters: orgFilters,
 		originalTypeFilters: typeFilters,
 		orgFilter: orgFilters,
+		orgCount: {},
+		typeCount: {},
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
 		allOrgsSelected: true,
-		searchFields: {'initial': {field: null, input: ''}},
+		searchFields: { initial: { field: null, input: '' } },
 		specificCategoriesSelected: false,
 		specificOrgsSelected: false,
 		allTypesSelected: true,
@@ -208,9 +210,9 @@ const initState = {
 		publicationDateAllTime: true,
 		publicationDateFilter: [null, null],
 		accessDateFilter: [null, null],
-		includeRevoked: false
+		includeRevoked: false,
 	},
-	
+
 	compareModalOpen: false,
 	compareFilename: null,
 	ignoredDocs: [],
@@ -229,13 +231,7 @@ const initState = {
 	},
 
 	categorySorting: {
-		Documents: [
-			'Relevance',
-			'Publishing Date',
-			'Alphabetical',
-			'References',
-			'Popular',
-		],
+		Documents: ['Relevance', 'Publishing Date', 'Alphabetical', 'References', 'Popular'],
 	},
 	currentSort: 'Relevance',
 	currentOrder: 'desc',
@@ -290,7 +286,7 @@ function reducer(state, action) {
 		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
 			const newState = {
 				...state,
-				analystToolsSearchSettings: initState.analystToolsSearchSettings
+				analystToolsSearchSettings: initState.analystToolsSearchSettings,
 			};
 			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
 			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
@@ -315,11 +311,7 @@ const PolicyContext = React.createContext(initState);
 const PolicyProvider = React.memo((props) => {
 	const [state, dispatch] = useReducer(reducer, initState, init);
 
-	return (
-		<PolicyContext.Provider value={{ state, dispatch }}>
-			{props.children}
-		</PolicyContext.Provider>
-	);
+	return <PolicyContext.Provider value={{ state, dispatch }}>{props.children}</PolicyContext.Provider>;
 });
 
 export { PolicyContext, PolicyProvider };

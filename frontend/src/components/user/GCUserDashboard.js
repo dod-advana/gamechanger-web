@@ -20,7 +20,7 @@ import Popover from '@material-ui/core/Popover';
 import Popper from '@material-ui/core/Popper';
 import Link from '@material-ui/core/Link';
 import Badge from '@material-ui/core/Badge';
-import {decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
+import { decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
 import FavoriteCard from '../cards/GCFavoriteCard';
 import ReactTable from 'react-table';
 import TextField from '@material-ui/core/TextField';
@@ -33,7 +33,7 @@ import {
 	setCurrentTime,
 	getUserData,
 	setState,
-	clearDashboardNotification
+	clearDashboardNotification,
 } from '../../utils/sharedFunctions';
 import GCGroupCard from '../../components/cards/GCGroupCard';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -111,6 +111,31 @@ const FavoriteStyledI = styled.div`
 	}
 `;
 
+const TabContainer = styled.div`
+	align-items: center;
+	min-height: 613px;
+
+	.tab-button-container {
+		width: 100%;
+		display: flex;
+		align-items: center;
+	}
+
+	.tabs-list {
+		border-bottom: 2px solid ${gcOrange};
+		padding: 0;
+		display: flex;
+		align-items: center;
+		flex: 9;
+		margin: 10px !important;
+	}
+
+	.panel-container {
+		align-items: center;
+		margin: 10px;
+	}
+`;
+
 const useStyles = makeStyles((theme) => ({
 	root: {
 		padding: 0,
@@ -180,18 +205,18 @@ const useStyles = makeStyles((theme) => ({
 		width: '100%',
 		'& .MuiFormHelperText-root': {
 			fontSize: 14,
-			marginLeft: 'unset'
+			marginLeft: 'unset',
 		},
 		'& .MuiInputBase-root': {
 			'& .MuiInputBase-input': {
 				height: '24px',
-				fontSize: '14px'
-			}
+				fontSize: '14px',
+			},
 		},
 		'& .MuiOutlinedInput-root': {
 			'&.Mui-disabled fieldset': {
-				borderColor: props => props.error ? 'red' : 'inherit',
-			}
+				borderColor: (props) => (props.error ? 'red' : 'inherit'),
+			},
 		},
 	},
 	modalTextArea: {
@@ -201,17 +226,17 @@ const useStyles = makeStyles((theme) => ({
 		width: '100%',
 		'& .MuiFormHelperText-root': {
 			fontSize: 14,
-			marginLeft: 'unset'
+			marginLeft: 'unset',
 		},
 		'& .MuiInputBase-root': {
 			'& .MuiInputBase-input': {
-				fontSize: '14px'
-			}
+				fontSize: '14px',
+			},
 		},
 		'& .MuiOutlinedInput-root': {
 			'&.Mui-disabled fieldset': {
-				borderColor: props => props.error ? 'red' : 'inherit',
-			}
+				borderColor: (props) => (props.error ? 'red' : 'inherit'),
+			},
 		},
 	},
 	icon: {
@@ -219,11 +244,9 @@ const useStyles = makeStyles((theme) => ({
 		color: '#DFE6EE',
 		width: 20,
 		height: 20,
-		boxShadow:
-			'inset 0 0 0 1px rgba(16,22,26,.2), inset 0 -1px 0 rgba(16,22,26,.1)',
+		boxShadow: 'inset 0 0 0 1px rgba(16,22,26,.2), inset 0 -1px 0 rgba(16,22,26,.1)',
 		backgroundColor: '#ffffff',
-		backgroundImage:
-			'linear-gradient(180deg,hsla(0,0%,100%,.8),hsla(0,0%,100%,0))',
+		backgroundImage: 'linear-gradient(180deg,hsla(0,0%,100%,.8),hsla(0,0%,100%,0))',
 		'$root.Mui-focusVisible &': {
 			outline: '2px auto #DFE6EE',
 			outlineOffset: 2,
@@ -239,8 +262,7 @@ const useStyles = makeStyles((theme) => ({
 	checkedIcon: {
 		backgroundColor: '#ffffff',
 		color: '#E9691D',
-		backgroundImage:
-			'linear-gradient(180deg,hsla(0,0%,100%,.1),hsla(0,0%,100%,0))',
+		backgroundImage: 'linear-gradient(180deg,hsla(0,0%,100%,.1),hsla(0,0%,100%,0))',
 		'&:before': {
 			display: 'block',
 			width: 20,
@@ -262,10 +284,10 @@ const useStyles = makeStyles((theme) => ({
 		transform: 'translate(-50%, -50%)',
 		backgroundColor: 'white',
 		zIndex: 9999,
-		border: '1px solid #CCD8E5', 
-		boxShadow: '0px 12px 14px #00000080', 
+		border: '1px solid #CCD8E5',
+		boxShadow: '0px 12px 14px #00000080',
 		borderRadius: '6px',
-		padding: 15
+		padding: 15,
 	},
 	addToGroupModal: {
 		position: 'fixed',
@@ -274,28 +296,28 @@ const useStyles = makeStyles((theme) => ({
 		transform: 'translate(-50%, -50%)',
 		backgroundColor: 'white',
 		zIndex: 1000,
-		border: '1px solid #CCD8E5', 
-		boxShadow: '0px 12px 14px #00000080', 
+		border: '1px solid #CCD8E5',
+		boxShadow: '0px 12px 14px #00000080',
 		borderRadius: '6px',
 		padding: 15,
 	},
 	label: {
 		fontSize: 14,
-		maxWidth: 350
+		maxWidth: 350,
 	},
 	labelFont: {
 		backgroundColor: 'white',
-		padding: '0px 10px'
+		padding: '0px 10px',
 	},
 	groupSelect: {
-		fontSize: '16px', 
-		'&:focus': {backgroundColor: 'white'} 
-	}
+		fontSize: '16px',
+		'&:focus': { backgroundColor: 'white' },
+	},
 }));
 
 const RESULTS_PER_PAGE = 12;
 
-const GCUserDashboard = (props) => {
+const GCUserDashboard = React.memo((props) => {
 	const {
 		userData,
 		updateUserData,
@@ -308,7 +330,7 @@ const GCUserDashboard = (props) => {
 		checkUserInfo,
 		cloneData,
 		state,
-		dispatch
+		dispatch,
 	} = props;
 
 	const [tabIndex, setTabIndex] = useState(0);
@@ -317,20 +339,16 @@ const GCUserDashboard = (props) => {
 	// const [exportHistoryTotalCount, setExportHistoryTotalCount] = useState(0);
 	const [exportHistory, setExportHistory] = useState([]);
 	const [exportHistoryLoading, setExportHistoryLoading] = useState(true);
-	const [exportHistoryDownloading, setExportHistoryDownloading] = useState(
-		new Set()
-	);
+	const [exportHistoryDownloading, setExportHistoryDownloading] = useState(new Set());
 
 	// const [searchHistoryPage, setSearchHistoryPage] = useState(1);
 	// const [searchHistoryTotalCount, setSearchHistoryTotalCount] = useState(0);
 	const [searchHistory, setSearchHistory] = useState([]);
 	const [searchHistoryLoading, setSearchHistoryLoading] = useState(true);
 
-	const [favoriteDocumentsLoading, setFavoriteDocumentsLoading] =
-		useState(true);
+	const [favoriteDocumentsLoading, setFavoriteDocumentsLoading] = useState(true);
 	const [documentFavoritesPage, setDocumentFavoritesPage] = useState(1);
-	const [documentFavoritesTotalCount, setDocumentFavoritesTotalCount] =
-		useState(0);
+	const [documentFavoritesTotalCount, setDocumentFavoritesTotalCount] = useState(0);
 	const [favoriteDocuments, setFavoriteDocuments] = useState([]);
 	const [favoriteDocumentsSlice, setFavoriteDocumentsSlice] = useState([]);
 
@@ -346,18 +364,13 @@ const GCUserDashboard = (props) => {
 	const [favoriteTopics, setFavoriteTopics] = useState([]);
 	const [favoriteTopicsSlice, setFavoriteTopicsSlice] = useState([]);
 
-	const [favoriteOrganizationsLoading, setFavoriteOrganizationsLoading] =
-		useState(false);
+	const [favoriteOrganizationsLoading, setFavoriteOrganizationsLoading] = useState(false);
 	const [organizationFavoritesPage, setOrganizationFavoritesPage] = useState(1);
-	const [organizationFavoritesTotalCount, setOrganizationFavoritesTotalCount] =
-		useState(0);
+	const [organizationFavoritesTotalCount, setOrganizationFavoritesTotalCount] = useState(0);
 	const [favoriteOrganizations, setFavoriteOrganizations] = useState([]);
-	const [favoriteOrganizationsSlice, setFavoriteOrganizationsSlice] = useState(
-		[]
-	);
+	const [favoriteOrganizationsSlice, setFavoriteOrganizationsSlice] = useState([]);
 
-	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] =
-		useState(null);
+	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] = useState(null);
 	const [searchHistoryPopperOpen, setSearchHistoryPopperOpen] = useState(false);
 	const [unfavoritePopperOpen, setUnfavoritePopperOpen] = useState(false);
 	const [searchHistoryFavoriteData, setSearchHistoryFavoriteData] = useState({
@@ -375,8 +388,12 @@ const GCUserDashboard = (props) => {
 
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
-	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({searchType: '',
-		orgFilterText: '', exportType: '', isExport: false});
+	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
+		searchType: '',
+		orgFilterText: '',
+		exportType: '',
+		isExport: false,
+	});
 
 	const [documentGroups, setDocumentGroups] = useState([]);
 	const [showNewGroupModal, setShowNewGroupModal] = useState(false);
@@ -399,9 +416,9 @@ const GCUserDashboard = (props) => {
 
 	const handleChange = ({ target }) => {
 		setAddToGroupError('');
-		const groupId = documentGroups.find(group => group.group_name === target.value).id;
+		const groupId = documentGroups.find((group) => group.group_name === target.value).id;
 		setDocumentsToGroup([]);
-		setSelectedGroup({id: groupId, name: target.value});
+		setSelectedGroup({ id: groupId, name: target.value });
 	};
 
 	const searchHistoryColumns = [
@@ -414,10 +431,7 @@ const GCUserDashboard = (props) => {
 					href={'#'}
 					onClick={(event) => {
 						preventDefault(event);
-						window.open(
-							`${window.location.origin}/#/${row.original.tiny_url}`,
-							'_blank'
-						);
+						window.open(`${window.location.origin}/#/${row.original.tiny_url}`, '_blank');
 					}}
 					style={{ color: '#386F94' }}
 				>
@@ -445,9 +459,7 @@ const GCUserDashboard = (props) => {
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>
-						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
-					</p>
+					<p>{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}</p>
 				</div>
 			),
 		},
@@ -456,10 +468,7 @@ const GCUserDashboard = (props) => {
 			filterable: false,
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip
-					title={'Click to see setting for this search'}
-					placement="top"
-				>
+				<GCTooltip title={'Click to see setting for this search'} placement="top">
 					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
 						<i
 							className="fa fa-cogs"
@@ -482,10 +491,7 @@ const GCUserDashboard = (props) => {
 			accessor: 'favorite',
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip
-					title={'Favorite a search to track in the User Dashboard'}
-					placement="top"
-				>
+				<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top">
 					<FavoriteStyledI
 						style={{
 							...styles.tableCenterDiv,
@@ -549,9 +555,7 @@ const GCUserDashboard = (props) => {
 			width: 250,
 			Cell: (row) => (
 				<div style={styles.tableLeftDiv}>
-					<p>
-						{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}
-					</p>
+					<p>{moment(Date.parse(row.value)).utc().format('YYYY-MM-DD HH:mm UTC')}</p>
 				</div>
 			),
 		},
@@ -560,10 +564,7 @@ const GCUserDashboard = (props) => {
 			filterable: false,
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip
-					title={'Click to see setting for this export'}
-					placement="top"
-				>
+				<GCTooltip title={'Click to see setting for this export'} placement="top">
 					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
 						<i
 							className="fa fa-cogs"
@@ -596,9 +597,7 @@ const GCUserDashboard = (props) => {
 							alignItems: 'center',
 							padding: '0 15px',
 						}}
-						onClick={(event) =>
-							regenerate(row.original.download_request_body, row.value)
-						}
+						onClick={(event) => regenerate(row.original.download_request_body, row.value)}
 					>
 						<i className={'fa fa-download'} />
 					</StyledI>
@@ -611,28 +610,26 @@ const GCUserDashboard = (props) => {
 		if (userData === null) return;
 		// Decode url data
 		if (userData.favorite_searches) {
-			userData.favorite_searches = userData.favorite_searches.filter(search => {
+			userData.favorite_searches = userData.favorite_searches.filter((search) => {
 				const searchArr = search.url.split('?');
 				return searchArr[0] === cloneData.url;
 			});
-			userData.favorite_searches.forEach(search => {
+			userData.favorite_searches.forEach((search) => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
 			});
 
 			setFavoriteSearches(userData.favorite_searches);
-			setSearchFavoritesTotalCount(
-				userData.favorite_searches ? userData.favorite_searches.length : 0
-			);
-			setFavoriteSearchesSlice(
-				userData.favorite_searches.slice(0, RESULTS_PER_PAGE)
-			);
+			setSearchFavoritesTotalCount(userData.favorite_searches ? userData.favorite_searches.length : 0);
+			setFavoriteSearchesSlice(userData.favorite_searches.slice(0, RESULTS_PER_PAGE));
 			setFavoriteSearchesLoading(false);
 		}
 
 		if (userData.search_history) {
-			userData.search_history = userData.search_history.filter(search=>search.clone_name===cloneData.clone_name);
-			userData.search_history.forEach(search => {
+			userData.search_history = userData.search_history.filter(
+				(search) => search.clone_name === cloneData.clone_name
+			);
+			userData.search_history.forEach((search) => {
 				const data = decodeTinyUrl(search.url);
 				Object.assign(search, data);
 			});
@@ -643,20 +640,17 @@ const GCUserDashboard = (props) => {
 
 		if (userData.favorite_documents) {
 			setFavoriteDocuments(userData.favorite_documents);
-			setDocumentFavoritesTotalCount(
-				userData.favorite_documents ? userData.favorite_documents.length : 0
-			);
-			setFavoriteDocumentsSlice(
-				userData.favorite_documents.slice(0, RESULTS_PER_PAGE)
-			);
+			setDocumentFavoritesTotalCount(userData.favorite_documents ? userData.favorite_documents.length : 0);
+			setFavoriteDocumentsSlice(userData.favorite_documents.slice(0, RESULTS_PER_PAGE));
 			setFavoriteDocumentsLoading(false);
 		}
 
 		if (userData.export_history) {
 			try {
-				userData.export_history = userData.export_history.filter(search=>search.download_request_body.cloneData.clone_name===cloneData.clone_name);
-				userData.export_history.forEach(hist => {
-	
+				userData.export_history = userData.export_history.filter(
+					(search) => search.download_request_body.cloneData.clone_name === cloneData.clone_name
+				);
+				userData.export_history.forEach((hist) => {
 					let orgFilterText = '';
 					if (
 						hist.download_request_body &&
@@ -664,10 +658,7 @@ const GCUserDashboard = (props) => {
 						hist.download_request_body.orgFilterQuery === '*'
 					) {
 						orgFilterText = 'All sources';
-					} else if (
-						hist.download_request_body &&
-						hist.download_request_body.orgFilter
-					) {
+					} else if (hist.download_request_body && hist.download_request_body.orgFilter) {
 						Object.keys(hist.download_request_body.orgFilter).forEach((key) => {
 							if (hist.download_request_body.orgFilter[key]) {
 								orgFilterText += `${key}, `;
@@ -679,8 +670,7 @@ const GCUserDashboard = (props) => {
 				});
 			} catch (e) {
 				console.log('Export history error', e);
-			} 
-
+			}
 
 			setExportHistory(userData.export_history);
 			setExportHistoryLoading(false);
@@ -688,45 +678,31 @@ const GCUserDashboard = (props) => {
 
 		if (userData.favorite_topics) {
 			setFavoriteTopics(userData.favorite_topics);
-			setTopicFavoritesTotalCount(
-				userData.favorite_topics ? userData.favorite_topics.length : 0
-			);
-			setFavoriteTopicsSlice(
-				userData.favorite_topics.slice(0, RESULTS_PER_PAGE)
-			);
+			setTopicFavoritesTotalCount(userData.favorite_topics ? userData.favorite_topics.length : 0);
+			setFavoriteTopicsSlice(userData.favorite_topics.slice(0, RESULTS_PER_PAGE));
 			setFavoriteTopicsLoading(false);
 		}
 
-		if(userData.favorite_groups) {
+		if (userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			setSelectedGroup({id: null, name: ''});
+			setSelectedGroup({ id: null, name: '' });
 		}
 
 		if (userData.favorite_organizations) {
 			setFavoriteOrganizations(userData.favorite_organizations);
 			setOrganizationFavoritesTotalCount(
-				userData.favorite_organizations
-					? userData.favorite_organizations.length
-					: 0
+				userData.favorite_organizations ? userData.favorite_organizations.length : 0
 			);
-			setFavoriteOrganizationsSlice(
-				userData.favorite_organizations.slice(0, RESULTS_PER_PAGE)
-			);
+			setFavoriteOrganizationsSlice(userData.favorite_organizations.slice(0, RESULTS_PER_PAGE));
 			setFavoriteOrganizationsLoading(false);
 		}
-
 	}, [userData, cloneData.clone_name, cloneData.url]);
 
 	useEffect(() => {}, [reload]);
 
 	const handleTabClicked = (tabIndex, lastIndex, event) => {
 		const tabName = event.target.title;
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'UserDashboardTab',
-			'onClick',
-			tabName
-		);
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTab', 'onClick', tabName);
 		setTabIndex(tabIndex);
 	};
 
@@ -741,37 +717,23 @@ const GCUserDashboard = (props) => {
 			case 'searchFavorites':
 				setSearchFavoritesPage(page);
 				setFavoriteSearchesSlice(
-					favoriteSearches.slice(
-						(page - 1) * RESULTS_PER_PAGE,
-						page * RESULTS_PER_PAGE
-					)
+					favoriteSearches.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
 				);
 				break;
 			case 'documentsFavorites':
 				setDocumentFavoritesPage(page);
 				setFavoriteDocumentsSlice(
-					favoriteDocuments.slice(
-						(page - 1) * RESULTS_PER_PAGE,
-						page * RESULTS_PER_PAGE
-					)
+					favoriteDocuments.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
 				);
 				break;
 			case 'topicFavorites':
 				setTopicFavoritesPage(page);
-				setFavoriteTopicsSlice(
-					favoriteTopics.slice(
-						(page - 1) * RESULTS_PER_PAGE,
-						page * RESULTS_PER_PAGE
-					)
-				);
+				setFavoriteTopicsSlice(favoriteTopics.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
 				break;
 			case 'organizationFavorites':
 				setOrganizationFavoritesPage(page);
 				setFavoriteOrganizationsSlice(
-					favoriteOrganizations.slice(
-						(page - 1) * RESULTS_PER_PAGE,
-						page * RESULTS_PER_PAGE
-					)
+					favoriteOrganizations.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
 				);
 				break;
 			default:
@@ -781,27 +743,27 @@ const GCUserDashboard = (props) => {
 	const renderFavorites = () => {
 		return (
 			<div>
-				{Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' &&
+				{Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
 					<GCAccordion expanded={false} header={'FAVORITE TOPICS'} itemCount={topicFavoritesTotalCount}>
-						{ renderTopicFavorites() }
+						{renderTopicFavorites()}
 					</GCAccordion>
-				}
-				{ cloneData.clone_name === 'gamechanger' &&
-				<GCAccordion expanded={false} header={'FAVORITE ORGANIZATIONS'} itemCount={organizationFavoritesTotalCount}>
-					{ renderOrganizationFavorites() }
-				</GCAccordion>
-				}
-				{ cloneData.clone_name === 'gamechanger' && 
-				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
-					{ renderDocumentFavorites() }
-				</GCAccordion>
-				}
+				)}
+				{cloneData.clone_name === 'gamechanger' && (
+					<GCAccordion
+						expanded={false}
+						header={'FAVORITE ORGANIZATIONS'}
+						itemCount={organizationFavoritesTotalCount}
+					>
+						{renderOrganizationFavorites()}
+					</GCAccordion>
+				)}
+				{cloneData.clone_name === 'gamechanger' && (
+					<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
+						{renderDocumentFavorites()}
+					</GCAccordion>
+				)}
 
-				<GCAccordion
-					expanded={true}
-					header={'FAVORITE SEARCHES'}
-					itemCount={searchFavoritesTotalCount}
-				>
+				<GCAccordion expanded={true} header={'FAVORITE SEARCHES'} itemCount={searchFavoritesTotalCount}>
 					{renderSearchFavorites()}
 				</GCAccordion>
 			</div>
@@ -826,9 +788,7 @@ const GCUserDashboard = (props) => {
 						</div>
 					</div>
 				) : (
-					<StyledPlaceHolder>
-						Favorite a search to see it listed here
-					</StyledPlaceHolder>
+					<StyledPlaceHolder>Favorite a search to see it listed here</StyledPlaceHolder>
 				)}
 
 				{favoriteSearchesSlice.length > 0 && (
@@ -859,27 +819,20 @@ const GCUserDashboard = (props) => {
 			search.active = !search.active;
 		};
 
-		const createdDate = moment(Date.parse(search.createdAt))
-			.utc()
-			.format('YYYY-MM-DD HH:mm UTC');
+		const createdDate = moment(Date.parse(search.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const searchDetails = (
 			<>
 				<GCTooltip title={search.search_text} placement="top">
 					<div className={'search-text'}>
 						Search Text:{' '}
-						{search.search_text.length > 55
-							? search.search_text.slice(0, 40) + '...'
-							: search.search_text}
+						{search.search_text.length > 55 ? search.search_text.slice(0, 40) + '...' : search.search_text}
 					</div>
 				</GCTooltip>
 				<div className={'stats-details'}>
 					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
-						<GCTooltip
-							title={'Number of documents found in search'}
-							placement="top"
-						>
+						<GCTooltip title={'Number of documents found in search'} placement="top">
 							<div className={'stats-stat'}>
 								<span className={'stats-text'}>{search.document_count}</span>
 								<Icon className="fa fa-file-pdf-o" />
@@ -909,37 +862,33 @@ const GCUserDashboard = (props) => {
 
 		const searchOverlayText = <div>{search.search_summary}</div>;
 
-		const searchSettings = cloneData.clone_name === 'gamechanger' ? (
-			<>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Organization Filter:</span>{' '}
-					{search.orgFilterText}
-				</div>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Type Filter:</span>{' '}
-					{search.typeFilterText}
-				</div>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Publication Date:</span>{' '}
-					{search.pubDate}
-				</div>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
-					{search.isRevoked ? 'true' : 'false'}
-				</div>
-			</>
-		) : (
-			<>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Search Text:</span>{' '}
-					{search.search_text}
-				</div>
-				<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
-					<span style={{ fontWeight: 'bold' }}>Source:</span>{' '}
-					{search.orgFilterText}
-				</div>
-			</>
-		);
+		const searchSettings =
+			cloneData.clone_name === 'gamechanger' ? (
+				<>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Source Filter:</span> {search.orgFilterText}
+					</div>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Type Filter:</span> {search.typeFilterText}
+					</div>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Publication Date:</span> {search.pubDate}
+					</div>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Include Canceled:</span>{' '}
+						{search.isRevoked ? 'true' : 'false'}
+					</div>
+				</>
+			) : (
+				<>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Search Text:</span> {search.search_text}
+					</div>
+					<div style={{ textAlign: 'left', margin: '0 0 10px 0' }}>
+						<span style={{ fontWeight: 'bold' }}>Source:</span> {search.orgFilterText}
+					</div>
+				</>
+			);
 
 		return (
 			<FavoriteCard
@@ -977,7 +926,7 @@ const GCUserDashboard = (props) => {
 	const handleAddToGroupCheckbox = (value) => {
 		const newDocumentsToGroup = [...documentsToGroup];
 		const index = newDocumentsToGroup.indexOf(value);
-		if(index > -1){
+		if (index > -1) {
 			newDocumentsToGroup.splice(index, 1);
 		} else {
 			newDocumentsToGroup.push(value);
@@ -988,7 +937,7 @@ const GCUserDashboard = (props) => {
 	const handleDeleteGroupCheckbox = (value) => {
 		const newGroupsToDelete = [...groupsToDelete];
 		const index = newGroupsToDelete.indexOf(value);
-		if(index > -1){
+		if (index > -1) {
 			newGroupsToDelete.splice(index, 1);
 		} else {
 			newGroupsToDelete.push(value);
@@ -997,14 +946,14 @@ const GCUserDashboard = (props) => {
 	};
 
 	const handleAddToFavorites = async () => {
-		if(!selectedGroup.name) return setAddToGroupError('Please select a group');
-		const selectedGroupInfo = userData.favorite_groups.find(group => group.id === selectedGroup.id);
+		if (!selectedGroup.name) return setAddToGroupError('Please select a group');
+		const selectedGroupInfo = userData.favorite_groups.find((group) => group.id === selectedGroup.id);
 		let totalInGroup = documentsToGroup.length;
-		selectedGroupInfo.favorites.forEach(favId => {
-			if(!documentsToGroup.includes(favId)) totalInGroup++;
+		selectedGroupInfo.favorites.forEach((favId) => {
+			if (!documentsToGroup.includes(favId)) totalInGroup++;
 		});
-		if(totalInGroup > 5) return setAddToGroupError('Groups can only contain up to 5 items');
-		await gameChangerAPI.addTofavoriteGroupPOST({groupId: selectedGroup.id, documentIds: documentsToGroup});
+		if (totalInGroup > 5) return setAddToGroupError('Groups can only contain up to 5 items');
+		await gameChangerAPI.addTofavoriteGroupPOST({ groupId: selectedGroup.id, documentIds: documentsToGroup });
 		updateUserData();
 		handleCloseAddGroupModal();
 	};
@@ -1017,28 +966,48 @@ const GCUserDashboard = (props) => {
 
 	const renderDocumentsToAdd = () => {
 		let groupFavorites;
-		if(selectedGroup.name) groupFavorites = userData.favorite_groups.find(group => group.group_name === selectedGroup.name)?.favorites;
-		return <div style={{overflow: 'scroll', maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)'}}>
-			{_.map(favoriteDocuments, (doc) => {
-				if(selectedGroup.name){
-					if(groupFavorites?.includes(doc.favorite_id)) {
-						return <></>;
+		if (selectedGroup.name)
+			groupFavorites = userData.favorite_groups.find(
+				(group) => group.group_name === selectedGroup.name
+			)?.favorites;
+		return (
+			<div style={{ overflow: 'scroll', maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
+				{_.map(favoriteDocuments, (doc) => {
+					if (selectedGroup.name) {
+						if (groupFavorites?.includes(doc.favorite_id)) {
+							return <></>;
+						}
 					}
-				}
-				return <GCTooltip title={doc.title} placement="top" style={{zIndex:1001}}>
-					<FormControlLabel
-						control={<Checkbox
-							onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
-							color="primary"
-							icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
-							checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
-							key={doc.id}
-						/>}
-						label={<Typography variant="h6" noWrap className={classes.label}>{doc.title}</Typography>}
-					/>
-				</GCTooltip>;
-			})}
-		</div>;
+					return (
+						<GCTooltip title={doc.title} placement="top" style={{ zIndex: 1001 }}>
+							<FormControlLabel
+								control={
+									<Checkbox
+										onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
+										color="primary"
+										icon={
+											<CheckBoxOutlineBlankIcon
+												style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }}
+												fontSize="large"
+											/>
+										}
+										checkedIcon={
+											<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />
+										}
+										key={doc.id}
+									/>
+								}
+								label={
+									<Typography variant="h6" noWrap className={classes.label}>
+										{doc.title}
+									</Typography>
+								}
+							/>
+						</GCTooltip>
+					);
+				})}
+			</div>
+		);
 	};
 
 	const renderDocumentFavorites = () => {
@@ -1048,70 +1017,110 @@ const GCUserDashboard = (props) => {
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
-				) : (
-					favoriteDocumentsSlice.length > 0 ? (
-						<>
-							<div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft:'40px', paddingRight: 0,width:'95%' }}>
-								{userData.favorite_groups.length > 0 && <GCButton
-									onClick={() => {setShowAddToGroupModal(true)}}
-								>Add To Group
-								</GCButton>}
-							</div>
-							<Modal 
-								isOpen={showAddToGroupModal}
-								onRequestClose={() => handleCloseAddGroupModal()}
-								className={classes.addToGroupModal}
-								overlayClassName="new-group-modal-overlay"
-								id="new-group-modal"
-								closeTimeoutMS={300}
-								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
-								<div>
-									<CloseButton onClick={() => handleCloseAddGroupModal()}>
-										<CloseIcon fontSize="large" />
-									</CloseButton>
-									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Add Favorite Document to Group</Typography>
-									<div style={{ width: 815 }}>
-										{selectedGroup.name && renderDocumentsToAdd()}
-										<FormControl variant="outlined" style={{ width: '100%' }}>
-											<InputLabel className={classes.labelFont}>Select Group</InputLabel>
-											<Select classes={{root: classes.groupSelect}} value={selectedGroup.name} onChange={handleChange}>
-												{_.map(documentGroups, (group) => {
-													return <MenuItem style={styles.menuItem} value={group.group_name} key={group.id}>{group.group_name}</MenuItem>;
-												})}
-											</Select>
-										</FormControl>
-										<div style={{ display: 'flex' }}>
-											{addToGroupError && <div style={styles.modalError}>{addToGroupError}</div>}
-											<div style={{ marginLeft: 'auto' }}>
-												<GCButton
-													onClick={() => handleCloseAddGroupModal()}
-													style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-													isSecondaryBtn
-												>Close
-												</GCButton>
-												<GCButton
-													onClick={() => handleAddToFavorites()}
-													style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-												>Save
-												</GCButton>
-											</div>
+				) : favoriteDocumentsSlice.length > 0 ? (
+					<>
+						<div
+							style={{
+								display: 'flex',
+								justifyContent: 'flex-end',
+								marginLeft: '40px',
+								paddingRight: 0,
+								width: '95%',
+							}}
+						>
+							{userData.favorite_groups.length > 0 && (
+								<GCButton
+									onClick={() => {
+										setShowAddToGroupModal(true);
+									}}
+								>
+									Add To Group
+								</GCButton>
+							)}
+						</div>
+						<Modal
+							isOpen={showAddToGroupModal}
+							onRequestClose={() => handleCloseAddGroupModal()}
+							className={classes.addToGroupModal}
+							overlayClassName="new-group-modal-overlay"
+							id="new-group-modal"
+							closeTimeoutMS={300}
+							style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
+						>
+							<div>
+								<CloseButton onClick={() => handleCloseAddGroupModal()}>
+									<CloseIcon fontSize="large" />
+								</CloseButton>
+								<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
+									Add Favorite Document to Group
+								</Typography>
+								<div style={{ width: 815 }}>
+									{selectedGroup.name && renderDocumentsToAdd()}
+									<FormControl variant="outlined" style={{ width: '100%' }}>
+										<InputLabel className={classes.labelFont}>Select Group</InputLabel>
+										<Select
+											classes={{ root: classes.groupSelect }}
+											value={selectedGroup.name}
+											onChange={handleChange}
+										>
+											{_.map(documentGroups, (group) => {
+												return (
+													<MenuItem
+														style={styles.menuItem}
+														value={group.group_name}
+														key={group.id}
+													>
+														{group.group_name}
+													</MenuItem>
+												);
+											})}
+										</Select>
+									</FormControl>
+									<div style={{ display: 'flex' }}>
+										{addToGroupError && <div style={styles.modalError}>{addToGroupError}</div>}
+										<div style={{ marginLeft: 'auto' }}>
+											<GCButton
+												onClick={() => handleCloseAddGroupModal()}
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
+												isSecondaryBtn
+											>
+												Close
+											</GCButton>
+											<GCButton
+												onClick={() => handleAddToFavorites()}
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
+											>
+												Save
+											</GCButton>
 										</div>
 									</div>
 								</div>
-							</Modal> 
-							<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
-								<div className={'col-xs-12'} style={{ padding: 0 }}>
-									<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-										{_.map(favoriteDocumentsSlice, (document, idx) => {
-											return renderFavoriteDocumentCard(document, idx);
-										})}
-									</div>
+							</div>
+						</Modal>
+						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
+							<div className={'col-xs-12'} style={{ padding: 0 }}>
+								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+									{_.map(favoriteDocumentsSlice, (document, idx) => {
+										return renderFavoriteDocumentCard(document, idx);
+									})}
 								</div>
 							</div>
-						</>
-					) : (
-						<StyledPlaceHolder>Favorite a document to see it listed here</StyledPlaceHolder>
-					)
+						</div>
+					</>
+				) : (
+					<StyledPlaceHolder>Favorite a document to see it listed here</StyledPlaceHolder>
 				)}
 
 				{favoriteDocumentsSlice.length > 0 && (
@@ -1142,9 +1151,7 @@ const GCUserDashboard = (props) => {
 			document.active = !document.active;
 		};
 
-		const createdDate = moment(Date.parse(document.createdAt))
-			.utc()
-			.format('YYYY-MM-DD HH:mm UTC');
+		const createdDate = moment(Date.parse(document.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const documentDetails = (
 			<>
@@ -1190,9 +1197,7 @@ const GCUserDashboard = (props) => {
 					<div className={'favorited-date'}>{createdDate}</div>
 					<div className={'stats-details-stat-div'}>
 						<GCTooltip
-							title={
-								'The number of times this document has been favorited by others'
-							}
+							title={'The number of times this document has been favorited by others'}
 							placement="top"
 						>
 							<div className={'stats-stat'}>
@@ -1254,9 +1259,7 @@ const GCUserDashboard = (props) => {
 						</div>
 					</div>
 				) : (
-					<StyledPlaceHolder>
-						Favorite a topic to see it listed here
-					</StyledPlaceHolder>
+					<StyledPlaceHolder>Favorite a topic to see it listed here</StyledPlaceHolder>
 				)}
 
 				{favoriteTopicsSlice.length > 0 && (
@@ -1287,20 +1290,13 @@ const GCUserDashboard = (props) => {
 			topic.active = !topic.active;
 		};
 
-		const createdDate = moment(Date.parse(topic.createdAt))
-			.utc()
-			.format('YYYY-MM-DD HH:mm UTC');
+		const createdDate = moment(Date.parse(topic.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const searchDetails = (
 			<div className={'stats-details'}>
 				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
-					<GCTooltip
-						title={
-							'The number of times this topic has been favorited by others'
-						}
-						placement="top"
-					>
+					<GCTooltip title={'The number of times this topic has been favorited by others'} placement="top">
 						<div className={'stats-stat'}>
 							<span className={'stats-text'}>{topic.favorited}</span>
 							<Icon className="fa fa-heart-o" />
@@ -1363,9 +1359,7 @@ const GCUserDashboard = (props) => {
 						</div>
 					</div>
 				) : (
-					<StyledPlaceHolder>
-						Favorite an organization to see it listed here
-					</StyledPlaceHolder>
+					<StyledPlaceHolder>Favorite an organization to see it listed here</StyledPlaceHolder>
 				)}
 
 				{favoriteOrganizationsSlice.length > 0 && (
@@ -1391,18 +1385,14 @@ const GCUserDashboard = (props) => {
 			organization.active = !organization.active;
 		};
 
-		const createdDate = moment(Date.parse(organization.createdAt))
-			.utc()
-			.format('YYYY-MM-DD HH:mm UTC');
+		const createdDate = moment(Date.parse(organization.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const searchDetails = (
 			<div className={'stats-details'}>
 				<div className={'favorited-date'}>{createdDate}</div>
 				<div className={'stats-details-stat-div'}>
 					<GCTooltip
-						title={
-							'The number of times this organization has been favorited by others'
-						}
+						title={'The number of times this organization has been favorited by others'}
 						placement="top"
 					>
 						<div className={'stats-stat'}>
@@ -1451,19 +1441,11 @@ const GCUserDashboard = (props) => {
 	const renderHistory = () => {
 		return (
 			<div>
-				<GCAccordion
-					expanded={false}
-					header={'EXPORT HISTORY'}
-					itemCount={exportHistory.length}
-				>
+				<GCAccordion expanded={false} header={'EXPORT HISTORY'} itemCount={exportHistory.length}>
 					{renderExportHistory()}
 				</GCAccordion>
 
-				<GCAccordion
-					expanded={true}
-					header={'SEARCH HISTORY'}
-					itemCount={searchHistory.length}
-				>
+				<GCAccordion expanded={true} header={'SEARCH HISTORY'} itemCount={searchHistory.length}>
 					{renderSearchHistory()}
 				</GCAccordion>
 			</div>
@@ -1553,9 +1535,7 @@ const GCUserDashboard = (props) => {
 							}}
 						/>
 					) : (
-						<StyledPlaceHolder>
-							Make a search to see the History
-						</StyledPlaceHolder>
+						<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
 					)}
 				</div>
 
@@ -1578,14 +1558,7 @@ const GCUserDashboard = (props) => {
 		);
 	};
 
-	const handleFavoriteSearchHistoryStarClicked = (
-		target,
-		favorite,
-		tinyUrl,
-		searchText,
-		count,
-		index
-	) => {
+	const handleFavoriteSearchHistoryStarClicked = (target, favorite, tinyUrl, searchText, count, index) => {
 		if (!favorite && !unfavoritePopperOpen) {
 			setSearchHistoryPopperAnchorEl(target);
 			setUnfavoritePopperOpen(true);
@@ -1671,9 +1644,7 @@ const GCUserDashboard = (props) => {
 							}}
 						/>
 					) : (
-						<StyledPlaceHolder>
-							Make a search to see the History
-						</StyledPlaceHolder>
+						<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
 					)}
 				</div>
 
@@ -1710,8 +1681,7 @@ const GCUserDashboard = (props) => {
 								label={'Favorite Summary'}
 								value={searchHistoryFavoriteData.favoriteSummary}
 								onChange={(event) => {
-									searchHistoryFavoriteData.favoriteSummary =
-										event.target.value;
+									searchHistoryFavoriteData.favoriteSummary = event.target.value;
 									setReload(!reload);
 								}}
 								className={classes.textArea}
@@ -1723,9 +1693,7 @@ const GCUserDashboard = (props) => {
 							/>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 								<GCButton
-									onClick={() =>
-										handleFavoriteSearchHistoryStarClicked(null, true)
-									}
+									onClick={() => handleFavoriteSearchHistoryStarClicked(null, true)}
 									style={{
 										height: 40,
 										minWidth: 40,
@@ -1784,8 +1752,7 @@ const GCUserDashboard = (props) => {
 						</div>
 						<div style={{ width: 350, margin: 5 }}>
 							<div style={{ margin: '65px 15px 0' }}>
-								Are you sure you want to delete this favorite? You will lose any
-								comments made.
+								Are you sure you want to delete this favorite? You will lose any comments made.
 							</div>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 								<GCButton
@@ -1853,9 +1820,7 @@ const GCUserDashboard = (props) => {
 						</div>
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
-								<span style={{ fontWeight: 'bold' }}>
-									Organization Filter:
-								</span>{' '}
+								<span style={{ fontWeight: 'bold' }}>Source Filter:</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>
 							{searchHistorySettingsData.isExport && (
@@ -1899,22 +1864,8 @@ const GCUserDashboard = (props) => {
 	};
 
 	const handleSaveSearch = () => {
-		const {
-			favoriteName,
-			favoriteSummary,
-			favorite,
-			tinyUrl,
-			searchText,
-			count,
-		} = searchHistoryFavoriteData;
-		saveFavoriteSearch(
-			favoriteName,
-			favoriteSummary,
-			favorite,
-			tinyUrl,
-			searchText,
-			count
-		);
+		const { favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count } = searchHistoryFavoriteData;
+		saveFavoriteSearch(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count);
 		setSearchHistoryFavoriteData({
 			favoriteName: '',
 			favoriteSummary: '',
@@ -1953,20 +1904,20 @@ const GCUserDashboard = (props) => {
 		return (
 			<div>
 				<GCAccordion expanded={true} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
-					{ renderDocumentGroups() }
+					{renderDocumentGroups()}
 				</GCAccordion>
 			</div>
 		);
-	}; 
+	};
 
 	const handleSaveGroup = (groupType) => {
 		const group = {
-			group_type: groupType, 
-			group_name: groupName, 
+			group_type: groupType,
+			group_name: groupName,
 			group_description: groupDescription,
-			create: true
+			create: true,
 		};
-		if(documentGroups.filter(group => group.group_name === groupName).length > 0){
+		if (documentGroups.filter((group) => group.group_name === groupName).length > 0) {
 			return setCreateGroupError('A group with that name already exists');
 		}
 		handleGenerateGroup(group, state, dispatch);
@@ -1976,7 +1927,7 @@ const GCUserDashboard = (props) => {
 	const handleDeleteGroup = () => {
 		const group = {
 			group_ids: groupsToDelete,
-			create: false
+			create: false,
 		};
 		handleGenerateGroup(group, state, dispatch);
 		handleCloseDeleteGroupModal();
@@ -1996,115 +1947,174 @@ const GCUserDashboard = (props) => {
 
 	const renderDocumentGroups = () => {
 		return (
-			<div style={{width: '100%', height: '100%'}}>
-				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10}}>
+			<div style={{ width: '100%', height: '100%' }}>
+				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
 					<div className={'col-xs-12'} style={{ padding: 0 }}>
-						<div className="row" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: 0, marginLeft: 40,width:'95%' }}>
-							<GCButton
-								onClick={() => setShowDeleteGroupModal(true)}
-								style={{}}
-								isSecondaryBtn={true}
-							>
+						<div
+							className="row"
+							style={{
+								display: 'flex',
+								justifyContent: 'flex-end',
+								paddingRight: 0,
+								marginLeft: 40,
+								width: '95%',
+							}}
+						>
+							<GCButton onClick={() => setShowDeleteGroupModal(true)} style={{}} isSecondaryBtn={true}>
 								Delete a Group
 							</GCButton>
-							<GCButton
-								onClick={() => setShowNewGroupModal(true)}
-								style={{}}
-							>
+							<GCButton onClick={() => setShowNewGroupModal(true)} style={{}}>
 								Create a New Group
 							</GCButton>
-							<Modal 
+							<Modal
 								isOpen={showNewGroupModal}
 								onRequestClose={() => handleCloseNewGroupModal()}
 								className={classes.newGroupModal}
 								overlayClassName="new-group-modal-overlay"
 								id="new-group-modal"
 								closeTimeoutMS={300}
-								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
+								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
+							>
 								<div>
 									<CloseButton onClick={() => handleCloseNewGroupModal()}>
 										<CloseIcon fontSize="large" />
 									</CloseButton>
-									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Create a New Group</Typography>
+									<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
+										Create a New Group
+									</Typography>
 									<div style={{ width: 490 }}>
 										<TextField
 											label={'Name of the Group'}
 											value={groupName}
-											onChange={(event) => { 
-												setGroupName(event.target.value); 
+											onChange={(event) => {
+												setGroupName(event.target.value);
 												setCreateGroupError('');
 											}}
 											error={createGroupError}
-											helperText = {createGroupError}
+											helperText={createGroupError}
 											className={classes.modalTextField}
-											margin='none'
-											size='small'
-											variant='outlined'
+											margin="none"
+											size="small"
+											variant="outlined"
 										/>
 										<TextField
 											label={'Description'}
 											value={groupDescription}
-											onChange={(event) => { setGroupDescription(event.target.value) }}
+											onChange={(event) => {
+												setGroupDescription(event.target.value);
+											}}
 											className={classes.modalTextArea}
-											margin='none'
-											size='small'
-											variant='outlined'
+											margin="none"
+											size="small"
+											variant="outlined"
 											multiline={true}
 											rows={4}
 										/>
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
 												onClick={() => handleCloseNewGroupModal()}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
 												isSecondaryBtn
-											>Close
+											>
+												Close
 											</GCButton>
 											<GCButton
 												onClick={() => handleSaveGroup('document')}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-											>Generate
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
+											>
+												Generate
 											</GCButton>
 										</div>
 									</div>
 								</div>
-							</Modal> 
-							<Modal 
+							</Modal>
+							<Modal
 								isOpen={showDeleteGroupModal}
 								onRequestClose={() => handleCloseDeleteGroupModal()}
 								className={classes.newGroupModal}
 								overlayClassName="new-group-modal-overlay"
 								id="new-group-modal"
 								closeTimeoutMS={300}
-								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}>
+								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
+							>
 								<div>
 									<CloseButton onClick={() => handleCloseDeleteGroupModal()}>
 										<CloseIcon fontSize="large" />
 									</CloseButton>
-									<Typography variant="h2" style={{ width: '100%', fontSize:'24px' }}>Delete Groups</Typography>
+									<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
+										Delete Groups
+									</Typography>
 									<div style={{ width: 490 }}>
 										{_.map(documentGroups, (group) => {
-											return <FormControlLabel
-												control={<Checkbox
-													onChange={() => handleDeleteGroupCheckbox(group.id)}
-													color="primary"
-													icon={<CheckBoxOutlineBlankIcon style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }} fontSize="large" />}
-													checkedIcon={<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />}
-													key={group.id}
-												/>}
-												label={<Typography variant="h6" noWrap className={classes.label}>{group.group_name}</Typography>}
-											/>;
+											return (
+												<FormControlLabel
+													control={
+														<Checkbox
+															onChange={() => handleDeleteGroupCheckbox(group.id)}
+															color="primary"
+															icon={
+																<CheckBoxOutlineBlankIcon
+																	style={{
+																		width: 25,
+																		height: 25,
+																		fill: 'rgb(224, 224, 224)',
+																	}}
+																	fontSize="large"
+																/>
+															}
+															checkedIcon={
+																<CheckBoxIcon
+																	style={{ width: 25, height: 25, fill: '#386F94' }}
+																/>
+															}
+															key={group.id}
+														/>
+													}
+													label={
+														<Typography variant="h6" noWrap className={classes.label}>
+															{group.group_name}
+														</Typography>
+													}
+												/>
+											);
 										})}
 										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 											<GCButton
 												onClick={() => handleCloseDeleteGroupModal()}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
 												isSecondaryBtn
-											>Cancel
+											>
+												Cancel
 											</GCButton>
 											<GCButton
 												onClick={() => handleDeleteGroup()}
-												style={{ height: 40, minWidth: 40, padding: '2px 8px 0px', fontSize: 14, margin: '16px 0px 0px 10px' }}
-											>Delete
+												style={{
+													height: 40,
+													minWidth: 40,
+													padding: '2px 8px 0px',
+													fontSize: 14,
+													margin: '16px 0px 0px 10px',
+												}}
+											>
+												Delete
 											</GCButton>
 										</div>
 									</div>
@@ -2112,18 +2122,32 @@ const GCUserDashboard = (props) => {
 							</Modal>
 							<ExportResultsDialog
 								open={state.exportDialogVisible}
-								handleClose={() => setState(dispatch, { exportDialogVisible: false, selectedDocuments: new Map(), prevSearchText: '' })}
-								searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : '')}
+								handleClose={() =>
+									setState(dispatch, {
+										exportDialogVisible: false,
+										selectedDocuments: new Map(),
+										prevSearchText: '',
+									})
+								}
+								searchObject={getSearchObjectFromString(
+									state.prevSearchText ? state.prevSearchText : ''
+								)}
 								setCurrentTime={setCurrentTime}
 								selectedDocuments={state.selectedDocuments}
 								isSelectedDocs={true}
-								orgFilterString={getOrgToOrgQuery(state.searchSettings.allOrgsSelected, state.searchSettings.orgFilter)}
-								typeFilterString={getTypeQuery(state.searchSettings.allTypesSelected, state.searchSettings.typeFilter)}
+								orgFilterString={getOrgToOrgQuery(
+									state.searchSettings.allOrgsSelected,
+									state.searchSettings.orgFilter
+								)}
+								typeFilterString={getTypeQuery(
+									state.searchSettings.allTypesSelected,
+									state.searchSettings.typeFilter
+								)}
 								orgFilter={state.searchSettings.orgFilter}
 								typeFilter={state.searchSettings.typeFilter}
 								getUserData={() => getUserData(dispatch)}
-								isClone = {true}
-								cloneData = {state.cloneData}
+								isClone={true}
+								cloneData={state.cloneData}
 								searchType={state.searchSettings.searchType}
 								edaSearchSettings={state.edaSearchSettings}
 								sort={state.currentSort}
@@ -2141,7 +2165,8 @@ const GCUserDashboard = (props) => {
 											dispatch={dispatch}
 											favorites={group.favorites}
 											key={group.id}
-										/>);
+										/>
+									);
 								})}
 							</div>
 						) : (
@@ -2172,42 +2197,47 @@ const GCUserDashboard = (props) => {
 	const favoritesTabMeta = {
 		title: 'userFavorites',
 		onClick: () => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch),
-		children: <StyledBadge
-			badgeContent={
-				userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
-			}
-		>
-			<Typography variant="h6" display="inline" title="cardView">
-				FAVORITES
-			</Typography>
-		</StyledBadge>,
-		panel: renderFavorites()
+		children: (
+			<StyledBadge
+				badgeContent={
+					userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
+				}
+			>
+				<Typography variant="h6" display="inline" title="cardView">
+					FAVORITES
+				</Typography>
+			</StyledBadge>
+		),
+		panel: renderFavorites(),
 	};
 	const historyTabMeta = {
 		title: 'userHistory',
 		onClick: () => {},
-		children: <Typography variant="h6" display="inline" title="cardView">HISTORY</Typography>,
-		panel: renderHistory()
+		children: (
+			<Typography variant="h6" display="inline" title="cardView">
+				HISTORY
+			</Typography>
+		),
+		panel: renderHistory(),
 	};
 	const groupTabMeta = {
 		title: 'userGroups',
 		onClick: () => {},
-		children: <Typography variant="h6" display="inline" title="cardView">GROUPS</Typography>,
-		panel: renderGroups()
+		children: (
+			<Typography variant="h6" display="inline" title="cardView">
+				GROUPS
+			</Typography>
+		),
+		panel: renderGroups(),
 	};
-	if(cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
+	if (cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
 	tabList.push(historyTabMeta);
-	
 
 	return (
-		<div style={styles.tabContainer} id='gc-user-dash'>
-			<Tabs
-				onSelect={(tabIndex, lastIndex, event) =>
-					handleTabClicked(tabIndex, lastIndex, event)
-				}
-			>
-				<div style={styles.tabButtonContainer}>
-					<TabList style={styles.tabsList}>
+		<TabContainer id="gc-user-dash">
+			<Tabs onSelect={(tabIndex, lastIndex, event) => handleTabClicked(tabIndex, lastIndex, event)}>
+				<div className={'tab-button-container'}>
+					<TabList className={'tabs-list'}>
 						{tabList.map((tab, index) => {
 							const tl = index === 0 ? '5px' : '0';
 							const tr = index === tabList.length - 1 ? '5px' : '0';
@@ -2304,25 +2334,19 @@ const GCUserDashboard = (props) => {
 					</Popper>
 				</div>
 
-				<div style={styles.panelContainer}>
-					{tabList.map(tab => <TabPanel> {tab.panel} </TabPanel>)}
+				<div className={'panel-container'}>
+					{tabList.map((tab) => (
+						<TabPanel> {tab.panel} </TabPanel>
+					))}
 				</div>
 			</Tabs>
-		</div>
+		</TabContainer>
 	);
-};
+});
 
 const styles = {
 	menuItem: {
-		fontSize: 16
-	},
-	tabsList: {
-		borderBottom: `2px solid ${gcOrange}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		margin: '10px 0 10px 50px',
+		fontSize: 16,
 	},
 	tabStyle: {
 		width: '140px',
@@ -2348,19 +2372,6 @@ const styles = {
 		backgroundColor: gcOrange,
 		borderColor: 'none',
 		color: 'white',
-	},
-	tabContainer: {
-		alignItems: 'center',
-		minHeight: '613px',
-	},
-	tabButtonContainer: {
-		backgroundColor: '#ffffff',
-		width: '100%',
-		display: 'flex',
-		paddingLeft: '2em',
-		paddingRight: '5em',
-		paddingBottom: '5px',
-		alignItems: 'center',
 	},
 	panelContainer: {
 		alignItems: 'center',
@@ -2414,12 +2425,12 @@ const styles = {
 			fontSize: '14px',
 		},
 		overlaySearchDetails: {
-			marginBottom: '10px'
-		}
+			marginBottom: '10px',
+		},
 	},
 	modalError: {
-		color: '#f44336'
-	}
+		color: '#f44336',
+	},
 };
 
 GCUserDashboard.propTypes = {

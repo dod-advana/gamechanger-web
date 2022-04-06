@@ -36,73 +36,60 @@ const SearchBarDropdown = ({ rowData = [], cursor, isEDA }) => {
 		<DropdownWrapper id="GamechangerSearchBarDropdown">
 			{
 				// unpacks each set of rows in order from rowData, so that they can be different i.e. deletable or other future options
-				rowData.reduce(
-					(
-						acc,
-						{
-							rows,
-							IconComponent,
-							handleRowPressed,
-							handleDeletePressed,
-							rowType,
-						},
-						i
-					) => {
-						const withDelete = handleDeletePressed instanceof Function;
-						rows.forEach(({ text, id }, ii) => {
-							if (!isEDA || (isEDA && rowType === 'autocorrect')) {
-								acc.push(
-									<Row
-										name={acc.length}
-										className={
-											'SearchBar-Dropdown-Row' +
-											(rowType === 'autocorrect' ? ' bold' : '') +
-											(cursor === acc.length ? ' cursor' : '')
-										}
-										key={i + text + ii}
-										onClick={() => {
+				rowData.reduce((acc, { rows, IconComponent, handleRowPressed, handleDeletePressed, rowType }, i) => {
+					const withDelete = handleDeletePressed instanceof Function;
+					rows.forEach(({ text, id }, ii) => {
+						if (!isEDA || (isEDA && rowType === 'autocorrect')) {
+							acc.push(
+								<Row
+									name={acc.length}
+									className={
+										'SearchBar-Dropdown-Row' +
+										(rowType === 'autocorrect' ? ' bold' : '') +
+										(cursor === acc.length ? ' cursor' : '')
+									}
+									key={i + text + ii}
+									onClick={() => {
+										handleRowPressed({ text, rowType });
+									}}
+									tabIndex={0}
+									role="option"
+									onKeyPress={(event) => {
+										// press enter
+										if (event.charCode === 13) {
 											handleRowPressed({ text, rowType });
-										}}
-										tabIndex={0}
-										role="option"
-										onKeyPress={(event) => {
-											// press enter
-											if (event.charCode === 13) {
-												handleRowPressed({ text, rowType });
-											}
-										}}
-									>
-										<IconTextWrapper>
-											<IconComponent style={{ fontSize: '22px' }} />
-											<div
-												style={{
-													display: 'flex',
-													flexDirection: 'column',
-													paddingLeft: '6px',
-												}}
-											>
-												<SuggestionText>{text.toLowerCase()}</SuggestionText>
-												{subtext(rowType)}
-											</div>
-										</IconTextWrapper>
+										}
+									}}
+								>
+									<IconTextWrapper>
+										<IconComponent style={{ fontSize: '22px' }} />
+										<div
+											style={{
+												display: 'flex',
+												flexDirection: 'column',
+												paddingLeft: '6px',
+											}}
+										>
+											<SuggestionText>{text.toLowerCase()}</SuggestionText>
+											{subtext(rowType)}
+										</div>
+									</IconTextWrapper>
 
-										{withDelete && id && (
-											<DeleteButton
-												style={{ fontSize: '26px' }}
-												onClick={(event) => {
-													event.stopPropagation();
-													handleDeletePressed(id);
-												}}
-											/>
-										)}
-									</Row>
-								);
-							}
-						});
-						return acc;
-					},
-					[]
-				)
+									{withDelete && id && (
+										<DeleteButton
+											style={{ fontSize: '26px' }}
+											onClick={(event) => {
+												event.stopPropagation();
+												handleDeletePressed(id);
+											}}
+										/>
+									)}
+								</Row>
+							);
+						}
+					});
+					return acc;
+				}, [])
 			}
 		</DropdownWrapper>
 	);

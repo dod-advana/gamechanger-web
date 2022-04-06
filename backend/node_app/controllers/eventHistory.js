@@ -1,5 +1,5 @@
 const eventHistory = require('../models').eventHistory;
-const logger = require('../lib/logger');
+const LOGGER = require('@dod-advana/advana-logger');
 
 const actions = {
 	create: 'create',
@@ -21,22 +21,25 @@ function getTableName(instance) {
 
 function create(data) {
 	return new Promise(function (resolve, reject) {
-		let { userCn, table, objectId, action, field, oldValue, newValue, } = data;
+		let { userCn, table, objectId, action, field, oldValue, newValue } = data;
 
-		eventHistory.create({
-			userCn,
-			table,
-			objectId,
-			action,
-			field,
-			oldValue,
-			newValue,
-		}).then(() => {
-			resolve();
-		}).catch(e => {
-			logger.error(e);
-			reject(e);
-		});
+		eventHistory
+			.create({
+				userCn,
+				table,
+				objectId,
+				action,
+				field,
+				oldValue,
+				newValue,
+			})
+			.then(() => {
+				resolve();
+			})
+			.catch((e) => {
+				LOGGER.error(e);
+				reject(e);
+			});
 	});
 }
 

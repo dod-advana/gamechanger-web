@@ -18,14 +18,10 @@ const SearchBar = (props) => {
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
-			const searchFactory = new SearchHandlerFactory(
-				state.cloneData.search_module
-			);
+			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const tmpSearchHandler = searchFactory.createHandler();
 			setSearchHandler(tmpSearchHandler);
-			const mainViewFactory = new MainViewFactory(
-				state.cloneData.main_view_module
-			);
+			const mainViewFactory = new MainViewFactory(state.cloneData.main_view_module);
 			const tmpMainViewHandler = mainViewFactory.createHandler();
 			setMainViewHandler(tmpMainViewHandler);
 			setLoaded(true);
@@ -94,7 +90,7 @@ SearchBar.propTypes = {
 			menuOpen: PropTypes.bool,
 			pageDisplayed: PropTypes.string,
 			searchText: PropTypes.string,
-			componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+			componentStepNumbers: PropTypes.arrayOf(PropTypes.number),
 			searchSettings: PropTypes.shape({
 				searchType: PropTypes.string,
 				publicationDateFilter: PropTypes.arrayOf(PropTypes.string),
@@ -103,9 +99,7 @@ SearchBar.propTypes = {
 			expansionDict: PropTypes.object,
 			selectedCategories: PropTypes.objectOf(PropTypes.bool),
 			activeCategoryTab: PropTypes.string,
-			categoryMetadata: PropTypes.objectOf(
-				PropTypes.objectOf(PropTypes.number)
-			),
+			categoryMetadata: PropTypes.objectOf(PropTypes.objectOf(PropTypes.number)),
 			isFavoriteSearch: PropTypes.bool,
 		}),
 		dispatch: PropTypes.func,

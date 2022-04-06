@@ -5,17 +5,14 @@ const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const sparkMD5 = require('spark-md5');
-const { DataLibrary} = require('../../lib/dataLibrary');
-const {Thesaurus} = require('../../lib/thesaurus');
+const { DataLibrary } = require('../../lib/dataLibrary');
+const { Thesaurus } = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
-const FAVORITE_SEARCH = require('../../models').favorite_searches;
-const LOGGER = require('../../lib/logger');
-
+const LOGGER = require('@dod-advana/advana-logger');
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
-
 const SearchHandler = require('../base/searchHandler');
+const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 
 class SimpleSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -26,7 +23,7 @@ class SimpleSearchHandler extends SearchHandler {
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
 		} = opts;
-		super({redisClientDB: redisAsyncClientDB, ...opts});
+		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
 		this.dataTracker = dataTracker;
 		this.logger = logger;
@@ -37,7 +34,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 	async searchHelper(req, userId, storeHistory) {
 		const historyRec = {
-			user_id: userId,
+			user_id: getUserIdFromSAMLUserId(req),
 			clone_name: undefined,
 			search: '',
 			startTime: new Date().toISOString(),
@@ -60,7 +57,7 @@ class SimpleSearchHandler extends SearchHandler {
 			showTutorial = false,
 			tiny_url,
 			forCacheReload = false,
-			esIndex
+			esIndex,
 		} = req.body;
 
 		try {
@@ -80,24 +77,24 @@ class SimpleSearchHandler extends SearchHandler {
 			const redisDB = redisAsyncClient;
 			redisDB.select(redisAsyncClientDB);
 
-			const clientObj = {esClientName: 'gamechanger', esIndex};
+			const clientObj = { esClientName: 'gamechanger', esIndex };
 
 			// log query to ES
 			if (storeHistory) {
-				this.storeEsRecord(clientObj.esClientName, offset, cloneName, userId, searchText);
+				this.storeEsRecord(clientObj.esClientName, offset, cloneName, historyRec.user_id, searchText);
 			}
 
 			// if (!forCacheReload && useGCCache && offset === 0) {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			// try to get search expansion
-			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({searchText});
+			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = {};
 			try {
 				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
 			} catch (e) {
-			// log error and move on, expansions are not required
-				if (forCacheReload){
+				// log error and move on, expansions are not required
+				if (forCacheReload) {
 					throw Error('Cannot get expanded search terms in cache reload');
 				}
 				this.logger.error('Cannot get expanded search terms, continuing with search', '5HAV6D2', userId);
@@ -139,7 +136,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 			// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 			let cleanedAbbreviations = [];
-			abbreviationExpansions.forEach(abb => {
+			abbreviationExpansions.forEach((abb) => {
 				let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
 				let found = false;
 				termsArray.forEach((term) => {
@@ -154,11 +151,22 @@ class SimpleSearchHandler extends SearchHandler {
 
 			// this.logger.info(cleanedAbbreviations);
 
-			expansionDict = searchUtility.combineExpansionTerms(expansionDict, synonyms, text, cleanedAbbreviations, userId);
+			expansionDict = searchUtility.combineExpansionTerms(
+				expansionDict,
+				synonyms,
+				text,
+				cleanedAbbreviations,
+				userId
+			);
 			// this.logger.info('exp: ' + expansionDict);
 			await redisAsyncClient.select(redisAsyncClientDB);
 
-			let searchResults = await this.documentSearch(req, {...req.body, expansionDict, operator}, clientObj, userId);
+			let searchResults = await this.documentSearch(
+				req,
+				{ ...req.body, expansionDict, operator },
+				clientObj,
+				userId
+			);
 
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
@@ -181,9 +189,8 @@ class SimpleSearchHandler extends SearchHandler {
 			}
 
 			return searchResults;
-
 		} catch (err) {
-			if (storeHistory && !forCacheReload){
+			if (storeHistory && !forCacheReload) {
 				const { message } = err;
 				this.logger.error(message, 'W28XNE0', userId);
 				historyRec.endTime = new Date().toISOString();
@@ -196,12 +203,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 	async documentSearch(req, body, clientObj, userId) {
 		try {
-			const {
-				getIdList,
-				selectedDocuments,
-				expansionDict = {},
-				forGraphCache = false
-			} = body;
+			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false } = body;
 			const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
@@ -218,16 +220,30 @@ class SimpleSearchHandler extends SearchHandler {
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (results && results.body && results.body.hits && results.body.hits.total && results.body.hits.total.value && results.body.hits.total.value > 0) {
-
+			if (
+				results &&
+				results.body &&
+				results.body.hits &&
+				results.body.hits.total &&
+				results.body.hits.total.value &&
+				results.body.hits.total.value > 0
+			) {
 				if (getIdList) {
 					return searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
 
-				if (forGraphCache){
+				if (forGraphCache) {
 					return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return searchUtility.cleanUpEsResults(results, searchTerms, userId, selectedDocuments, expansionDict, esIndex, esQuery);
+					return searchUtility.cleanUpEsResults(
+						results,
+						searchTerms,
+						userId,
+						selectedDocuments,
+						expansionDict,
+						esIndex,
+						esQuery
+					);
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', '0F31BB1', userId);
@@ -238,17 +254,16 @@ class SimpleSearchHandler extends SearchHandler {
 		}
 	}
 
-	async storeEsRecord(esClient, offset, clone_name, userId, searchText){
+	async storeEsRecord(esClient, offset, clone_name, userId, searchText) {
 		try {
-		// log search query to elasticsearch
-			if (offset === 0){
+			// log search query to elasticsearch
+			if (offset === 0) {
 				let clone_log = clone_name || 'policy';
 				const searchLog = {
-					user_id: sparkMD5.hash(userId),
+					user_id: userId,
 					search_query: searchText,
 					run_time: new Date().getTime(),
-					clone_name: clone_log
-
+					clone_name: clone_log,
 				};
 				let search_history_index = constants.GAME_CHANGER_OPTS.historyIndex;
 
@@ -258,9 +273,7 @@ class SimpleSearchHandler extends SearchHandler {
 			this.logger.error(e.message, 'WFHI0RW');
 		}
 	}
-
 }
-
 
 function getElasticsearchQuery(
 	{
@@ -298,9 +311,14 @@ function getElasticsearchQuery(
 			'is_revoked_b',
 			'access_timestamp_dt',
 			'publication_date_dt',
-			'crawler_used_s'
-		], extStoredFields = [], extSearchFields = [], includeRevoked = false }, user) {
-
+			'crawler_used_s',
+		],
+		extStoredFields = [],
+		extSearchFields = [],
+		includeRevoked = false,
+	},
+	user
+) {
 	try {
 		// add additional search fields to the query
 		const mustQueries = [];
@@ -318,7 +336,7 @@ function getElasticsearchQuery(
 
 		let query = {
 			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s']
+				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
 			},
 			stored_fields: storedFields,
 			from: offset,
@@ -327,9 +345,9 @@ function getElasticsearchQuery(
 				doc_type_aggs: {
 					terms: {
 						field: 'doc_type',
-						size: 10000
-					}
-				}
+						size: 10000,
+					},
+				},
 			},
 			track_total_hits: true,
 			query: {
@@ -343,22 +361,22 @@ function getElasticsearchQuery(
 									stored_fields: [
 										'paragraphs.page_num_i',
 										'paragraphs.filename',
-										'paragraphs.par_raw_text_t'
+										'paragraphs.par_raw_text_t',
 									],
 									from: 0,
 									size: 5,
 									highlight: {
 										fields: {
 											'paragraphs.filename.search': {
-												number_of_fragments: 0
+												number_of_fragments: 0,
 											},
 											'paragraphs.par_raw_text_t': {
 												fragment_size: 2 * charsPadding,
-												number_of_fragments: 1
-											}
+												number_of_fragments: 1,
+											},
 										},
-										fragmenter: 'span'
-									}
+										fragmenter: 'span',
+									},
 								},
 								query: {
 									bool: {
@@ -367,9 +385,9 @@ function getElasticsearchQuery(
 												wildcard: {
 													'paragraphs.filename.search': {
 														value: `${parsedQuery}*`,
-														boost: 15
-													}
-												}
+														boost: 15,
+													},
+												},
 											},
 											{
 												query_string: {
@@ -377,66 +395,66 @@ function getElasticsearchQuery(
 													default_field: 'paragraphs.par_raw_text_t',
 													default_operator: `${operator}`,
 													fuzzy_max_expansions: 100,
-													fuzziness: 'AUTO'
-												}
-											}
-										]
-									}
-								}
-							}
+													fuzziness: 'AUTO',
+												},
+											},
+										],
+									},
+								},
+							},
 						},
 					],
 					should: [
 						{
 							multi_match: {
 								query: `${parsedQuery}`,
-								fields: [
-									'keyw_5^2',
-									'id^2',
-									'summary_30',
-									'paragraphs.par_raw_text_t'
-								],
-								operator: 'or'
-							}
+								fields: ['keyw_5^2', 'id^2', 'summary_30', 'paragraphs.par_raw_text_t'],
+								operator: 'or',
+							},
 						},
 						{
 							rank_feature: {
 								field: 'pagerank_r',
-								boost: 0.5
-							}
+								boost: 0.5,
+							},
 						},
 						{
 							rank_feature: {
 								field: 'kw_doc_score_r',
-								boost: 0.1
-							}
-						}
-					]
-				}
-			}
+								boost: 0.1,
+							},
+						},
+					],
+				},
+			},
 		};
 
-		if (extSearchFields.length > 0){
+		if (extSearchFields.length > 0) {
 			const extQuery = {
 				multi_match: {
 					query: searchText,
 					fields: [],
-					operator: 'or'
-				}
+					operator: 'or',
+				},
 			};
 			extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
 			query.query.bool.should = query.query.bool.should.concat(extQuery);
 		}
 
-		if (constants.GAME_CHANGER_OPTS.allow_daterange && !publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]){
+		if (
+			constants.GAME_CHANGER_OPTS.allow_daterange &&
+			!publicationDateAllTime &&
+			publicationDateFilter[0] &&
+			publicationDateFilter[1]
+		) {
 			if (!publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]) {
 				query.query.bool.must.push({
 					range: {
 						publication_date_dt: {
 							gte: publicationDateFilter[0].split('.')[0],
-							lte: publicationDateFilter[1].split('.')[0]
-						}
-					}
+							lte: publicationDateFilter[1].split('.')[0],
+						},
+					},
 				});
 			}
 		}

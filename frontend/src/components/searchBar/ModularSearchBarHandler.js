@@ -5,11 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AccessTime, Search } from '@material-ui/icons';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import {
-	handleSaveFavoriteSearch,
-	setState,
-	checkUserInfo,
-} from '../../utils/sharedFunctions';
+import { handleSaveFavoriteSearch, setState, checkUserInfo } from '../../utils/sharedFunctions';
 import SearchBarFactory from '../factories/searchBarFactory';
 
 const useStyles = makeStyles((theme) => ({
@@ -104,10 +100,8 @@ const ModularSearchBarHandler = (props) => {
 	const [dataRows, setDataRows] = useState([]);
 	const [favoriteName, setFavoriteName] = useState('');
 	const [favoriteSummary, setFavoriteSummary] = useState('');
-	const [searchFavoritePopperOpen, setSearchFavoritePopperOpen] =
-		useState(false);
-	const [searchFavoritePopperAnchorEl, setSearchFavoritePopperAnchorEl] =
-		useState(null);
+	const [searchFavoritePopperOpen, setSearchFavoritePopperOpen] = useState(false);
+	const [searchFavoritePopperAnchorEl, setSearchFavoritePopperAnchorEl] = useState(null);
 	const [cursor, setCursor] = useState(null);
 	const [originalText, setOriginalText] = useState(null);
 
@@ -117,9 +111,7 @@ const ModularSearchBarHandler = (props) => {
 	const [searchBarHandler, setSearchBarHandler] = useState();
 
 	useEffect(() => {
-		const queryText = context.state.searchText
-			? context.state.searchText
-			: null;
+		const queryText = context.state.searchText ? context.state.searchText : null;
 		if (queryText) {
 			setSearchText(queryText);
 		}
@@ -129,8 +121,7 @@ const ModularSearchBarHandler = (props) => {
 		// initial loading of user search history
 		if (!loaded) {
 			const userSearchHistory = JSON.parse(
-				localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) ||
-					'[]'
+				localStorage.getItem(`recent${state.cloneData.clone_name}Searches`) || '[]'
 			);
 			const historyWithIds = userSearchHistory.map((item, index) => ({
 				id: String(index),
@@ -143,7 +134,7 @@ const ModularSearchBarHandler = (props) => {
 
 	useEffect(() => {
 		if (searchBarHandler) {
-			if(debouncedSearchTerm.length > 3){
+			if (debouncedSearchTerm.length > 3) {
 				searchBarHandler.debouncedFetchSearchSuggestions(
 					debouncedSearchTerm,
 					state.cloneData,
@@ -188,9 +179,7 @@ const ModularSearchBarHandler = (props) => {
 	}, []);
 
 	useEffect(() => {
-		const searchBarFactory = new SearchBarFactory(
-			state.cloneData.search_bar_module
-		);
+		const searchBarFactory = new SearchBarFactory(state.cloneData.search_bar_module);
 		const tmpSearchBarHandler = searchBarFactory.createHandler();
 		setSearchBarHandler(tmpSearchBarHandler);
 	}, [state.cloneData.search_bar_module]);
@@ -255,13 +244,7 @@ const ModularSearchBarHandler = (props) => {
 	};
 
 	const handleSaveSearch = (favorite) => {
-		handleSaveFavoriteSearch(
-			favoriteName,
-			favoriteSummary,
-			favorite,
-			dispatch,
-			state
-		);
+		handleSaveFavoriteSearch(favoriteName, favoriteSummary, favorite, dispatch, state);
 		setFavoriteName('');
 		setFavoriteSummary('');
 		setSearchFavoritePopperOpen(false);
@@ -320,9 +303,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && autocorrect.length > 0) {
 				const rows = [];
 				autocorrect.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -338,9 +319,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchTitle.length > 0) {
 				const rows = [];
 				presearchTitle.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -356,9 +335,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && predictions.length > 0) {
 				const rows = [];
 				predictions.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -374,9 +351,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchTopic.length > 0) {
 				const rows = [];
 				presearchTopic.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -392,9 +367,7 @@ const ModularSearchBarHandler = (props) => {
 			if (text.length > 0 && presearchOrg.length > 0) {
 				const rows = [];
 				presearchOrg.forEach((o) => {
-					if (
-						textArray.findIndex((item) => item === o.text.toLowerCase()) === -1
-					) {
+					if (textArray.findIndex((item) => item === o.text.toLowerCase()) === -1) {
 						// if current item is not in textArray
 						rows.push(o);
 						textArray.push(o.text.toLowerCase());
@@ -412,9 +385,7 @@ const ModularSearchBarHandler = (props) => {
 				// if scrolling using arrow keys, use original text
 				const textToUse = originalText === null ? text : originalText;
 				// filter rows to make sure it includes
-				filteredRows = _.filter(filteredRows, (o) =>
-					o.text.toLowerCase().includes(textToUse.toLowerCase())
-				);
+				filteredRows = _.filter(filteredRows, (o) => o.text.toLowerCase().includes(textToUse.toLowerCase()));
 				data.push({
 					IconComponent: AccessTime,
 					rows: text.length > 0 ? filteredRows : userSearchHistory, // if there's no text, give all the history
@@ -439,12 +410,7 @@ const ModularSearchBarHandler = (props) => {
 			setDropdownOpen(false);
 
 			if (rowType) {
-				trackEvent(
-					getTrackingNameForFactory(state.cloneData),
-					'SearchSuggestionSelected',
-					rowType,
-					text
-				);
+				trackEvent(getTrackingNameForFactory(state.cloneData), 'SearchSuggestionSelected', rowType, text);
 			}
 		};
 

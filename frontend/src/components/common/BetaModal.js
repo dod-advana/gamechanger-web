@@ -54,11 +54,7 @@ const DialogTitle = withStyles(muiStyles)((props) => {
 						onClose();
 					}}
 				>
-					<i
-						style={styles.modalCloseIcon}
-						className="fa fa-times"
-						aria-hidden="true"
-					></i>
+					<i style={styles.modalCloseIcon} className="fa fa-times" aria-hidden="true"></i>
 				</div>
 			)}
 		</MuiDialogTitle>
@@ -108,12 +104,7 @@ export default function BetaModal({
 					<Button variant="contained" onClick={onLegacyClick} color="secondary">
 						Use Legacy App
 					</Button>
-					<Button
-						variant="contained"
-						autoFocus
-						onClick={onBetaClick}
-						color="primary"
-					>
+					<Button variant="contained" autoFocus onClick={onBetaClick} color="primary">
 						Try New Beta Version
 					</Button>
 				</DialogActions>

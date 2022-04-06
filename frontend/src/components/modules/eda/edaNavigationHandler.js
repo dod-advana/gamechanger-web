@@ -2,16 +2,8 @@ import React from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { HoverNavItem, NavItem } from '../../navigation/NavItems';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	getCloneTitleForFactory,
-	getTrackingNameForFactory,
-	PAGE_DISPLAYED,
-} from '../../../utils/gamechangerUtils';
-import {
-	ConstrainedIcon,
-	PageLink,
-	StyledBadgeSmall,
-} from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+import { getCloneTitleForFactory, getTrackingNameForFactory, PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
+import { ConstrainedIcon, PageLink, StyledBadgeSmall } from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
@@ -27,9 +19,7 @@ import { Typography } from '@material-ui/core';
 import { getNotifications } from '../../notifications/Notifications';
 import GamechangerContractSearchIcon from '../../../images/logos/GAMECHANGER-Contract-White.png';
 
-const isDecoupled =
-	window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' ||
-	process.env.REACT_APP_GC_DECOUPLED === 'true';
+const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
 const styles = {
 	wording: {
@@ -50,15 +40,8 @@ const getToolTheme = (cloneData) => {
 		hoverColor: '#E9691D',
 		toolLogo: (
 			<div>
-				<Typography
-					variant="h1"
-					style={{ ...styles.wording, margin: '5px 0 0 0' }}
-				>
-					<img
-						src={GamechangerContractSearchIcon}
-						alt="tool logo"
-						style={{ width: 180, maxHeight: 55 }}
-					/>
+				<Typography variant="h1" style={{ ...styles.wording, margin: '5px 0 0 0' }}>
+					<img src={GamechangerContractSearchIcon} alt="tool logo" style={{ width: 180, maxHeight: 55 }} />
 				</Typography>
 				<Typography
 					variant="h6"
@@ -118,13 +101,8 @@ const EdaNavigationHandler = {
 						</HoverNavItem>
 					</GCTooltip>
 				)}
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							centered
 							onClick={() => {
@@ -253,7 +231,11 @@ const EdaNavigationHandler = {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -269,11 +251,7 @@ const EdaNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink
-							href="#/gamechanger-admin"
-							centered
-							style={{ width: '100%' }}
-						>
+						<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
 							<HoverNavItem centered toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 							</HoverNavItem>
@@ -310,13 +288,8 @@ const EdaNavigationHandler = {
 				<NavItem style={{ justifyContent: 'space-between' }}>
 					<span>{getCloneTitleForFactory(state.cloneData, true)} MENU</span>
 				</NavItem>
-				{state.cloneData?.show_tutorial &&
-					Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip
-						title="How-to, features, and tips"
-						placement="right"
-						arrow
-					>
+				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 						<HoverNavItem
 							onClick={() => {
 								setState(dispatch, {
@@ -439,7 +412,11 @@ const EdaNavigationHandler = {
 				<GCTooltip title="User Dashboard" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`);
+							window.history.pushState(
+								null,
+								document.title,
+								`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
+							);
 							setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
@@ -456,7 +433,7 @@ const EdaNavigationHandler = {
 				</GCTooltip>
 				{Permissions.isGameChangerAdmin() && (
 					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href="#/gamechanger-admin">
+						<PageLink href={`#/${state.cloneData.url}/admin`}>
 							<HoverNavItem toolTheme={toolTheme}>
 								<ConstrainedIcon src={AdminIcon} />
 								<span style={{ marginLeft: '10px' }}>Admin Page</span>

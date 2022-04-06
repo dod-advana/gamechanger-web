@@ -1,13 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Typography,
-} from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import GCButton from '../common/GCButton';
 import CloseIcon from '@material-ui/icons/Close';
 import '../../components/export/export-results-dialog.css';
@@ -41,17 +35,12 @@ const useStyles = makeStyles(() => ({
 	},
 }));
 
-const RequestAPIKeyDialog = ({
-	handleClose,
-	handleSave,
-	apiRequestLimit,
-	renderContent,
-}) => {
+const RequestAPIKeyDialog = ({ handleClose, handleSave, apiRequestLimit, renderContent, open }) => {
 	const classes = useStyles();
 
 	return (
 		<Dialog
-			open
+			open={open}
 			scroll={'paper'}
 			maxWidth="lg"
 			disableEscapeKeyDown
@@ -73,9 +62,7 @@ const RequestAPIKeyDialog = ({
 				</CloseButton>
 			</DialogTitle>
 
-			<DialogContent style={{ height: '100%' }}>
-				{renderContent()}
-			</DialogContent>
+			<DialogContent style={{ height: '100%' }}>{renderContent()}</DialogContent>
 
 			<DialogActions>
 				<div

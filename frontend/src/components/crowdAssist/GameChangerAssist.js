@@ -16,13 +16,7 @@ import {
 	backgroundGreyDark,
 	primaryRedDark,
 } from '../../components/common/gc-colors';
-import {
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Typography,
-} from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
 import LinearProgressWithLabel from '@material-ui/core/LinearProgress';
@@ -30,14 +24,7 @@ import { setState } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
-const highlightColors = [
-	primaryPurple,
-	primaryAlt,
-	primaryRedDark,
-	primaryDark,
-	tertiaryGreen,
-	tertiaryGoldDarkest,
-];
+const highlightColors = [primaryPurple, primaryAlt, primaryRedDark, primaryDark, tertiaryGreen, tertiaryGoldDarkest];
 
 const useStyles = (theme) => ({
 	dialogXl: {
@@ -119,10 +106,7 @@ class GameChangerAssist extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
-		if (
-			this.props.context.state.showAssistModal !==
-			prevProps.context.state.showAssistModal
-		) {
+		if (this.props.context.state.showAssistModal !== prevProps.context.state.showAssistModal) {
 			if (this.props.context.state.showAssistModal) {
 				this.getAnnotationData();
 			}
@@ -171,12 +155,7 @@ class GameChangerAssist extends Component {
 			let resp = await gameChangerAPI.getDocumentsToAnnotate({
 				cloneData: this.props.context.state.cloneData,
 			});
-			if (
-				resp &&
-				resp.data &&
-				resp.data.paragraphs &&
-				resp.data.paragraphs.length > 0
-			) {
+			if (resp && resp.data && resp.data.paragraphs && resp.data.paragraphs.length > 0) {
 				goodResponse = resp;
 			}
 			tryCount++;
@@ -209,11 +188,7 @@ class GameChangerAssist extends Component {
 			}
 		});
 
-		textIndicies.push(
-			textIndiciesWithRealParagraphs[
-				random(0, textIndiciesWithRealParagraphs.length - 1)
-			]
-		);
+		textIndicies.push(textIndiciesWithRealParagraphs[random(0, textIndiciesWithRealParagraphs.length - 1)]);
 		const textsList = textIndicies.map((i) => texts[i]);
 
 		const tagmap = data.tagsList.reduce((acc, tag, i) => {
@@ -232,10 +207,7 @@ class GameChangerAssist extends Component {
 			progressText: `${this.state.currentTextIndex + 1} / ${
 				textIndiciesWithRealParagraphs.length
 			} available in this document`,
-			progressValue:
-				((this.state.currentTextIndex + 1) /
-					textIndiciesWithRealParagraphs.length) *
-				100,
+			progressValue: ((this.state.currentTextIndex + 1) / textIndiciesWithRealParagraphs.length) * 100,
 			doc_id: data.doc_id,
 			doc_num: data.doc_num,
 			doc_type: data.doc_type,
@@ -245,9 +217,7 @@ class GameChangerAssist extends Component {
 
 	setupGeneralUserData = (data) => {
 		const paragraphsWithEntities = data.paragraphs.filter((paragraph) => {
-			return paragraph.entities
-				? this.countEntities(paragraph.entities) > 0
-				: false;
+			return paragraph.entities ? this.countEntities(paragraph.entities) > 0 : false;
 		});
 
 		if (paragraphsWithEntities.length <= 0) {
@@ -303,9 +273,7 @@ class GameChangerAssist extends Component {
 			paragraphEntityAnswers.push(tmpEntityAnswers);
 		});
 
-		const randomParagraphIndex = Math.floor(
-			Math.random() * Math.floor(paragraphsWithEntities.length)
-		);
+		const randomParagraphIndex = Math.floor(Math.random() * Math.floor(paragraphsWithEntities.length));
 
 		this.setState({
 			tagsList: data.tagsList,
@@ -319,10 +287,7 @@ class GameChangerAssist extends Component {
 			progressText: `${this.state.currentEntityIndex + 1} / ${
 				paragraphEntities[randomParagraphIndex].length
 			} entities left in this paragraph`,
-			progressValue:
-				((this.state.currentEntityIndex + 1) /
-					paragraphEntities[randomParagraphIndex].length) *
-				100,
+			progressValue: ((this.state.currentEntityIndex + 1) / paragraphEntities[randomParagraphIndex].length) * 100,
 			doc_id: data.doc_id,
 			doc_num: data.doc_num,
 			doc_type: data.doc_type,
@@ -365,58 +330,36 @@ class GameChangerAssist extends Component {
 	};
 
 	handleChangeEntity = (change) => {
-		const {
-			currentEntityIndex,
-			paragraphEntities,
-			currentParagraphIndex,
-			paragraphEntityAnswers,
-			canMoveForward,
-		} = this.state;
+		const { currentEntityIndex, paragraphEntities, currentParagraphIndex, paragraphEntityAnswers, canMoveForward } =
+			this.state;
 		let newEntityIndex = currentEntityIndex;
 
 		// Are we going forward or back
 		if (change > 0 && canMoveForward) {
 			// Are we moving to the next entity in this paragraph or onto a new paragraph?
-			if (
-				currentEntityIndex + change ===
-				paragraphEntities[currentParagraphIndex].length
-			) {
+			if (currentEntityIndex + change === paragraphEntities[currentParagraphIndex].length) {
 			} else {
-				newEntityIndex =
-					(currentEntityIndex + change) %
-					paragraphEntities[currentParagraphIndex].length;
+				newEntityIndex = (currentEntityIndex + change) % paragraphEntities[currentParagraphIndex].length;
 			}
 		} else {
-			newEntityIndex =
-				(currentEntityIndex + change) %
-				paragraphEntities[currentParagraphIndex].length;
+			newEntityIndex = (currentEntityIndex + change) % paragraphEntities[currentParagraphIndex].length;
 			newEntityIndex = newEntityIndex < 0 ? 0 : newEntityIndex;
 		}
 
-		const newCanMoveForward =
-			paragraphEntityAnswers[currentParagraphIndex][newEntityIndex].answered;
+		const newCanMoveForward = paragraphEntityAnswers[currentParagraphIndex][newEntityIndex].answered;
 
 		this.setState({
 			currentEntityIndex: newEntityIndex,
 			progressText: `${newEntityIndex + 1} / ${
 				paragraphEntities[currentParagraphIndex].length
 			} entities left in this paragraph`,
-			progressValue:
-				((newEntityIndex + 1) /
-					paragraphEntities[currentParagraphIndex].length) *
-				100,
+			progressValue: ((newEntityIndex + 1) / paragraphEntities[currentParagraphIndex].length) * 100,
 			canMoveForward: newCanMoveForward,
 		});
 	};
 
 	handleChangeParagraph = (change) => {
-		const {
-			currentTextIndex,
-			textsList,
-			textsListsFull,
-			textIndicies,
-			textIndiciesFull,
-		} = this.state;
+		const { currentTextIndex, textsList, textsListsFull, textIndicies, textIndiciesFull } = this.state;
 		let newTextIndex;
 		let newTextList = textsList;
 		let newTextIndicies = textIndicies;
@@ -454,9 +397,7 @@ class GameChangerAssist extends Component {
 			currentTextIndex: newTextIndex,
 			textIndicies: newTextIndicies,
 			textsList: newTextList,
-			progressText: `${newTextIndex + 1} / ${
-				textIndiciesFull.length
-			} available in this document`,
+			progressText: `${newTextIndex + 1} / ${textIndiciesFull.length} available in this document`,
 			progressValue: ((newTextIndex + 1) / textIndiciesFull.length) * 100,
 			endOfList: endOfList,
 			voluntary: voluntary,
@@ -472,11 +413,7 @@ class GameChangerAssist extends Component {
 	};
 
 	handleGeneralAnswers = (correct, incorrectReason, unknown = false) => {
-		const {
-			paragraphEntityAnswers,
-			currentEntityIndex,
-			currentParagraphIndex,
-		} = this.state;
+		const { paragraphEntityAnswers, currentEntityIndex, currentParagraphIndex } = this.state;
 		//gameChangerAPI.saveDocumentAnnotations(dataToSave);
 
 		paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex] = {
@@ -499,12 +436,7 @@ class GameChangerAssist extends Component {
 	};
 
 	handleGeneralSave = async () => {
-		const {
-			paragraphEntityAnswers,
-			currentParagraphIndex,
-			paragraphEntities,
-			paragraphs,
-		} = this.state;
+		const { paragraphEntityAnswers, currentParagraphIndex, paragraphEntities, paragraphs } = this.state;
 
 		const dataToSave = [];
 
@@ -534,15 +466,7 @@ class GameChangerAssist extends Component {
 	};
 
 	handlePowerSave = () => {
-		const {
-			doc_id,
-			doc_num,
-			doc_type,
-			voluntary,
-			annotatedTokens,
-			textsList,
-			isTutorial,
-		} = this.state;
+		const { doc_id, doc_num, doc_type, voluntary, annotatedTokens, textsList, isTutorial } = this.state;
 
 		if (isTutorial) return;
 
@@ -646,15 +570,12 @@ class GameChangerAssist extends Component {
 						}
 						entityAnswer={
 							paragraphEntityAnswers[currentParagraphIndex]
-								? paragraphEntityAnswers[currentParagraphIndex][
-									currentEntityIndex
-								  ]
+								? paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex]
 								: { correct: true, incorrectReason: '0' }
 						}
 						tag={
 							paragraphEntities[currentParagraphIndex]
-								? paragraphEntities[currentParagraphIndex][currentEntityIndex]
-									?.tag
+								? paragraphEntities[currentParagraphIndex][currentEntityIndex]?.tag
 								: 'PERSON'
 						}
 						tags={tagsList}
@@ -699,13 +620,8 @@ class GameChangerAssist extends Component {
 			>
 				<DialogTitle>
 					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography
-							variant="h3"
-							display="inline"
-							style={{ fontWeight: 700 }}
-						>
-							Your Assists this Week:{' '}
-							<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+							Your Assists this Week: <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
 						</Typography>
 					</div>
 					<CloseButton onClick={() => this.handleSave(true)}>
@@ -759,16 +675,14 @@ class GameChangerAssist extends Component {
 								id={'gcAssistNext'}
 								className={`tutorial-step-${componentStepNumbers['Next Button']}`}
 								onClick={() => {
-									currentEntityIndex + 1 ===
-									paragraphEntityAnswers[currentParagraphIndex]?.length
+									currentEntityIndex + 1 === paragraphEntityAnswers[currentParagraphIndex]?.length
 										? this.handleSave()
 										: this.handlePreviousNext(1);
 								}}
 								disabled={!canMoveForward}
 								textStyle={{ color: !canMoveForward ? 'grey' : 'white' }}
 							>
-								{currentEntityIndex + 1 ===
-								paragraphEntityAnswers[currentParagraphIndex]?.length
+								{currentEntityIndex + 1 === paragraphEntityAnswers[currentParagraphIndex]?.length
 									? 'Submit'
 									: 'Next'}
 							</GCButton>
