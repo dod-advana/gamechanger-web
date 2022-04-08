@@ -811,7 +811,7 @@ class SearchUtility {
 				default:
 					break;
 			}
-			if (!this.isVerbatim(searchText)) {
+			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
 				const titleMainSearch = {
 					query_string: {
 						fields: ['display_title_s.search'],
