@@ -894,7 +894,7 @@ class SearchUtility {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
 
-			if (ltr) {
+			if (ltr && sort === 'Relevance') {
 				query.rescore = [
 					{
 						window_size: 50,
