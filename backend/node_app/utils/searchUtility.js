@@ -2432,6 +2432,7 @@ class SearchUtility {
 		try {
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, searchType } = body;
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
+			console.log("PARSED QUERY", parsedQuery)
 			if (alias._source) {
 				searchTerms.push(alias._source.name)
 				body.parsedQuery = parsedQuery.concat(' ', alias._source.name);
@@ -2439,6 +2440,7 @@ class SearchUtility {
 				body.parsedQuery = parsedQuery;
 			}
 			body.searchTerms = searchTerms;
+			console.log("PARSED QUERY", body.parsedQuery)
 			let { esClientName, esIndex } = clientObj;
 			let esQuery = '';
 			if (esQuery === '') {
