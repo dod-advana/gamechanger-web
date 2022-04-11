@@ -112,7 +112,10 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 app.use(async function (req, res, next) {
 	let cn;
 	let user_id;
-	if (req.session.user) {
+	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
+		user_id = 'ml-api';
+	} 
+	else if (req.session.user) {
 		cn = req.session.user.cn;
 		user_id = getUserIdFromSAMLUserId(req);
 		req.headers['ssl_client_s_dn_cn'] = cn;
@@ -120,11 +123,6 @@ app.use(async function (req, res, next) {
 		req.permissions = req.session.user.perms;
 	}
 
-	if (!cn) {
-		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			user_id = 'ml-api';
-		}
-	}
 
 	await redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${user_id}-perms`);
