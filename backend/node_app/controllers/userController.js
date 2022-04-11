@@ -1176,18 +1176,36 @@ class UserController {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
 			const emailBody = `
-				<h2>${feedbackType}</h2>
+				<img src="cid:gc-user-feedback" width="100%"/><br/>
+				<h2>Feedback Recieved</h2>
+				<h4>Type: ${feedbackType}</h4>
 				<p>${feedbackText}</p>
-				<p>${screenShot ? screenShot : 'No Screenshot'}</p>
+				${screenShot && screenShot !== '' ? `<p>${screenShot}</p>` : null}
+				<p>Thank you for the valuable feedback. We will contact you if any further information is required.</p>
+				<p>v/r,</p>
+				<p>GAMECHANGER Team</p>
+				<img src="cid:gc-footer" width="100%"/><br/>
 			`;
+			const attachment = [
+				{
+					filename: 'GAMECHANGER User Feedback.png',
+					path: __dirname + '/../images/email/GAMECHANGER User Feedback.png',
+					cid: 'gc-user-feedback',
+				},
+				{
+					filename: 'GC-footer.png',
+					path: __dirname + '/../images/email/GC-footer.png',
+					cid: 'gc-footer',
+				},
+			];
 			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
 			this.emailUtility
 				.sendEmail(
 					emailBody,
-					`User Feedback from ${userEmail}`,
+					`GAMECHANGER: User Feedback`,
 					this.constants.GAME_CHANGER_OPTS.emailAddress,
 					userEmail,
-					null,
+					attachment,
 					userId
 				)
 				.then((success) => {
