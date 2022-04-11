@@ -7,3 +7,4 @@ matomo
 .vscode
 .npmrc
 mysql
+/.github/CODEOWNERS
