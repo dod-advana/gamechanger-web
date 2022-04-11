@@ -41,8 +41,12 @@ const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 're
 
 // var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
 const keyFileData = constants.TLS_KEY;
-const private_key = '-----BEGIN RSA PRIVATE KEY-----\n' + (RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')).match(/.{1,64}/g).join('\n') + '\n-----END RSA PRIVATE KEY-----';
-
+const private_key =
+	'-----BEGIN RSA PRIVATE KEY-----\n' +
+	RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')
+		.match(/.{1,64}/g)
+		.join('\n') +
+	'\n-----END RSA PRIVATE KEY-----';
 
 logger.boot(`
                 
@@ -71,16 +75,11 @@ try {
 		let result = {};
 
 		for (let envvar in process.env) {
-			if (envvar.startsWith('REACT_APP_'))
-				result[envvar] = process.env[envvar];
+			if (envvar.startsWith('REACT_APP_')) result[envvar] = process.env[envvar];
 		}
 
-		fs.writeFileSync(
-			path.join(__dirname, './build', 'config.js'),
-			`window.__env__ = ${JSON.stringify(result)}`
-		);
+		fs.writeFileSync(path.join(__dirname, './build', 'config.js'), `window.__env__ = ${JSON.stringify(result)}`);
 	}
-
 } catch (err) {
 	console.error(err);
 	console.error('No env variables created');
@@ -102,9 +101,8 @@ app.use(AAA.ensureAuthenticated);
 
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	app.use(async function (req, res, next) {
-		req.headers['x-env-ssl_client_certificate'] = (
-			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`
-		);
+		req.headers['x-env-ssl_client_certificate'] =
+			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`;
 		next();
 	});
 }
@@ -139,18 +137,24 @@ app.use(async function (req, res, next) {
 app.use(function (req, res, next) {
 	let approvedClients = constants.APPROVED_API_CALLERS;
 	const { headers, hostname } = req;
-	const { origin } = headers;
 	const userId = req.get('SSL_CLIENT_S_DN_CN');
-	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-	if (approvedClients.includes(hostname)) {
+	logger.http(
+		`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${
+			req.originalUrl
+		}`
+	);
+	if (process.env.REQUEST_ORIGIN_ALLOWED) {
+		res.setHeader('Access-Control-Allow-Origin', process.env.REQUEST_ORIGIN_ALLOWED);
+	} else if (approvedClients.includes(hostname)) {
 		res.setHeader('Access-Control-Allow-Origin', hostname);
-	} else if (origin) {
-		res.setHeader('Access-Control-Allow-Origin', origin);
+	} else {
+		res.setHeader('Access-Control-Allow-Origin', '*.advana.data.mil');
 	}
-	// res.header('Access-Control-Allow-Origin', '*');
 	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-	// res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, x-env-ssl_client_certificate');
-	res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions');
+	res.header(
+		'Access-Control-Allow-Headers',
+		'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions'
+	);
 	res.header('Access-Control-Allow-Credentials', true);
 	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
 	// intercepts OPTIONS method
@@ -176,14 +180,16 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 		const [key] = await ApiKey.findAll({
 			where: { apiKey: req.headers['x-api-key'] },
 			raw: false,
-			include: [{
-				model: CloneMeta,
-				attributes: ['clone_name'],
-				through: { attributes: [] }
-			}],
+			include: [
+				{
+					model: CloneMeta,
+					attributes: ['clone_name'],
+					through: { attributes: [] },
+				},
+			],
 		});
 		let cloneAccess;
-		if (key) cloneAccess = key.clone_meta.map(clone => clone.clone_name);
+		if (key) cloneAccess = key.clone_meta.map((clone) => clone.clone_name);
 		if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 			req.headers['ssl_client_s_dn_cn'] = key.username;
 			req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
@@ -194,7 +200,10 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 	}
 });
 
-app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
+app.use('/api/gamechanger/external', [
+	require('./node_app/routes/externalSearchRouter'),
+	require('./node_app/routes/externalGraphRouter'),
+]);
 
 app.post('/api/auth/token', async function (req, res) {
 	let cn = 'unknown user';
@@ -227,7 +236,7 @@ app.post('/api/auth/token', async function (req, res) {
 			// Other attributes in extra_fields other than clone specific
 			const fieldsToIgnore = ['clones_visited'];
 
-			Object.keys(user.extra_fields).forEach(extraKey => {
+			Object.keys(user.extra_fields).forEach((extraKey) => {
 				if (!fieldsToIgnore.includes(extraKey) && user.extra_fields[extraKey].hasOwnProperty('is_admin')) {
 					if (user.extra_fields[extraKey].is_admin) {
 						perms.push(`${extraKey} Admin`);
@@ -283,13 +292,12 @@ app.post('/api/auth/token', async function (req, res) {
 		jwtClaims['csrf-token'] = csrfHash;
 		let token = '';
 		token = jwt.sign(jwtClaims, private_key, {
-			algorithm: 'RS256'
+			algorithm: 'RS256',
 		});
 
 		res.json({
-			token: token
+			token: token,
 		});
-
 	} catch (e) {
 		logger.error(e.message, '9SuBdeus', cn);
 		res.sendStatus(500);
@@ -297,7 +305,11 @@ app.post('/api/auth/token', async function (req, res) {
 });
 
 app.use(async function (req, res, next) {
-	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta', '/api/tutorialOverlay', '/api/userAppVersion'];
+	const routesAllowedWithoutToken = [
+		'/api/gamechanger/modular/getAllCloneMeta',
+		'/api/tutorialOverlay',
+		'/api/userAppVersion',
+	];
 	// SIG BYTES ERROR is HERE TODO
 
 	if (routesAllowedWithoutToken.includes(req.path)) {
@@ -328,12 +340,11 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Super Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		const match = req.permissions.find(perm => {
+		const match = req.permissions.find((perm) => {
 			return perm.includes('Admin');
 		});
 
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-
 			const signatureFromApp = req.get('x-ua-signature');
 			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN));
 			if (signatureFromApp === userToken) {
@@ -386,7 +397,7 @@ const options = {
 	cert: constants.TLS_CERT,
 	ca: constants.TLS_CERT_CA,
 	requestCert: false,
-	rejectUnauthorized: false
+	rejectUnauthorized: false,
 };
 
 https.createServer(options, app).listen(securePort);
@@ -432,4 +443,6 @@ if (process.env.PRINT_ROUTES === 'true') {
 	});
 }
 
-setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick') }, 10000);
+setInterval(() => {
+	logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick');
+}, 10000);
