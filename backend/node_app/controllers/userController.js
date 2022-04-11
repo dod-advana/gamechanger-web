@@ -1177,13 +1177,14 @@ class UserController {
 			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
 			const emailBody = `
 				<img src="cid:gc-user-feedback" width="100%"/><br/>
-				<h2>Feedback Recieved</h2>
+				<h2>Feedback Received</h2>
 				<h4>Type: ${feedbackType}</h4>
 				<p>${feedbackText}</p>
 				${screenShot && screenShot !== '' ? `<p>${screenShot}</p>` : null}
-				<p>Thank you for the valuable feedback. We will contact you if any further information is required.</p>
+				<p>**********</p>
+				<p>Thank you for your feedback! A member of our team will contact you shortly to provide an update on your feedback or seek further information as needed.</p>
 				<p>v/r,</p>
-				<p>GAMECHANGER Team</p>
+				<p>The GAMECHANGER Team</p>
 				<img src="cid:gc-footer" width="100%"/><br/>
 			`;
 			const attachment = [
