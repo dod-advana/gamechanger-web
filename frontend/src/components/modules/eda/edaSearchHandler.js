@@ -291,7 +291,6 @@ const EdaSearchHandler = {
 				.then((resp) => {
 					if (_.isObject(resp.data)) {
 						const docs = resp.data.docs;
-						console.log(docs);
 						const issuingOrgs = {
 							'Air Force': 0,
 							Army: 0,
