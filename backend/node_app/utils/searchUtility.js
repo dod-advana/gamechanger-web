@@ -896,6 +896,7 @@ class SearchUtility {
 			if (Object.keys(docIds).length !== 0) {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
+
 			if (ltr) {
 				query.rescore = [
 					{
