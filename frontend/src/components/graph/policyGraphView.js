@@ -1498,7 +1498,7 @@ export default function PolicyGraphView(props) {
 				nodeRelSize +
 				(combinedTypes.includes(node.label)
 					? 1
-					: Math.max(node.normalizedSize || 0 * (scalingParam / zoom), 1));
+					: Math.max((node.normalizedSize || 0) * (scalingParam / zoom), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 
