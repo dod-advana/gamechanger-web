@@ -1169,7 +1169,12 @@ class JBookDataHandler extends DataHandler {
 				if (!update || !update[0] || update[0] !== 1) {
 					throw new Error('Failed to update portfolio');
 				} else {
-					return true;
+					return {
+						name,
+						description,
+						user_ids,
+						tags,
+					};
 				}
 			} else {
 				throw new Error('Missing id to update portfolio');
@@ -1191,12 +1196,12 @@ class JBookDataHandler extends DataHandler {
 				where = { name };
 			}
 
-			await this.portfolio.update({ deleted: true }, { where });
+			let update = await this.portfolio.update({ deleted: true }, { where });
 
 			if (!update || !update[0] || update[0] !== 1) {
 				throw new Error('Failed to update portfolio');
 			} else {
-				return true;
+				return { deleted: true };
 			}
 		} catch (e) {
 			const { message } = e;
@@ -1213,6 +1218,30 @@ class JBookDataHandler extends DataHandler {
 			const { message } = e;
 			this.logger.error(message, '6QJASKF', userId);
 			return false;
+		}
+	}
+
+	async restorePortfolio(req, userId) {
+		try {
+			const { id, name } = req.body;
+
+			let where = { id };
+
+			if (!id) {
+				where = { name };
+			}
+
+			let update = await this.portfolio.update({ deleted: false }, { where });
+
+			if (!update || !update[0] || update[0] !== 1) {
+				throw new Error('Failed to restore portfolio');
+			} else {
+				return { deleted: false };
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKG', userId);
+			return {};
 		}
 	}
 
