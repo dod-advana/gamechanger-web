@@ -11,6 +11,7 @@ const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK = require('../../models').feedback;
+const PORTFOLIO = require('../../models').portfolio;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -49,6 +50,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK,
+			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
 
@@ -74,6 +76,7 @@ class JBookDataHandler extends DataHandler {
 		this.feedback = feedback;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
+		this.portfolio = portfolio;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -1106,6 +1109,16 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getPortfolios(req, userId) {
+		try {
+			return await this.portfolio.findAll();
+		} catch (err) {
+			this.logger.error(err, 'ZSPE50G', userId);
+			console.log(err);
+			return false;
+		}
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -1127,6 +1140,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.getUserSpecificReviews(req, userId);
 				case 'getContractTotals':
 					return await this.getContractTotals(req, userId);
+				case 'getPortfolios':
+					return await this.getPortfolios(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,
