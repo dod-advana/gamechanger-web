@@ -55,6 +55,7 @@ class SearchUtility {
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
+		this.autocorrect = this.autocorrect.bind(this);
 		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
 	}
 
@@ -1701,6 +1702,7 @@ class SearchUtility {
 		suggest_mode = 'popular',
 	}) {
 		// multi search in ES
+		console.log(searchText);
 		const plainQuery = this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText;
 
 		let query = {
@@ -1905,6 +1907,45 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+	async autocorrect(text, userId) {
+		try {
+			const esQuery = this.getESSuggesterQuery({ searchText: text, index: ['gamechanger'] });
+			console.log(esQuery);
+			let esClientName = 'gamechanger';
+
+			const results = await this.dataLibrary.queryElasticSearch(
+				esClientName,
+				this.constants.GAME_CHANGER_OPTS.textSuggestIndex,
+				esQuery,
+				userId
+			);
+			console.log(JSON.stringify(results.body.suggest, 0, 4));
+			let suggesterArray = results.body.suggest.suggester;
+			const corrected = [];
+			let hasCorrection = false;
+			suggesterArray.forEach((suggestion) => {
+				if (
+					suggestion.options.length > 0 &&
+					suggestion.options[0].score >= 0.7 &&
+					suggestion.options[0].freq >= 100
+				) {
+					corrected.push(suggestion.options[0].text);
+					hasCorrection = true;
+				} else {
+					corrected.push(suggestion.text);
+				}
+			});
+
+			if (!hasCorrection) {
+				return '';
+			} else {
+				return corrected.join(' ');
+			}
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'PL2LLV', userId);
+		}
+	}
 	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
@@ -1954,22 +1995,27 @@ class SearchUtility {
 				},
 			};
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+
 			if (results.body.aggregations) {
 				let aggs = results.body.aggregations.related.buckets;
 				let maxCount = 0;
 				if (aggs.length > 0) {
-					aggs.forEach((term) => {
-						let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
-						if (word !== searchText && term.user.buckets.length > 1) {
-							word = word.replace(/\s{2,}/g, ' ');
-							if (!relatedSearches.includes(word) && maxCount < maxSearches) {
-								relatedSearches.push(word);
+					for (let term in aggs) {
+						let words = aggs[term].key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+						if (words !== searchText && aggs[term].user.buckets.length > 1) {
+							words = words.replace(/\s{2,}/g, ' ');
+							if (!relatedSearches.includes(words) && maxCount < maxSearches) {
+								let corrected = await this.autocorrect(words, userId);
+								console.log(corrected);
+								relatedSearches.push(words);
 								maxCount += 1;
 							}
 						}
-					});
+					}
 				}
 			}
+			let corrected = await this.autocorrect(relatedSearches[0], userId);
+			console.log(corrected);
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
 		}

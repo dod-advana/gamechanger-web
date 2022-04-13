@@ -113,6 +113,7 @@ class TextSuggestionController {
 				esQuery,
 				userId
 			);
+			//console.log(JSON.stringify(results.body.suggest, 0, 4));
 			return results.body;
 		} catch (err) {
 			const { message } = err;
@@ -161,7 +162,11 @@ class TextSuggestionController {
 		const corrected = [];
 		let hasCorrection = false;
 		suggesterArray.forEach((suggestion) => {
-			if (suggestion.options.length > 0 && suggestion.options[0].score >= 0.85) {
+			if (
+				suggestion.options.length > 0 &&
+				suggestion.options[0].score >= 0.7 &&
+				suggestion.options[0].freq >= 100
+			) {
 				corrected.push(suggestion.options[0].text);
 				hasCorrection = true;
 			} else {
