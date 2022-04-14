@@ -394,7 +394,7 @@ class AppStatsController {
 				JOIN matomo_log_action as la_names
 				WHERE llva.idaction_event_action = la.idaction
 				AND llva.idaction_name = la_names.idaction
-				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument')
+				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument' OR la.name LIKE 'Highlight')
 				AND server_time >= ?
 				AND server_time <= ?
 			`,
@@ -446,7 +446,9 @@ class AppStatsController {
 				}
 				event = { ...event, value: search };
 			}
-			searchMap[event.idvisit].push(event);
+			if (searchMap[event.idvisit]){
+				searchMap[event.idvisit].push(event);
+			}
 		}
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
