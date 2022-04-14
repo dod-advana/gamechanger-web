@@ -226,11 +226,11 @@ const EdaMainViewHandler = {
 									display: 'flex',
 									alignItems: 'center',
 									justifyContent: 'space-between',
-									padding: '0 0 0 50px',
+									padding: '0 0 0 10px',
 								}}
 							>
 								<Typography variant="h3" display="inline">{`${
-									searchResults ? searchResults.length : '0'
+									searchResults ? count : '0'
 								} results found in ${timeFound} seconds`}</Typography>
 
 								{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}

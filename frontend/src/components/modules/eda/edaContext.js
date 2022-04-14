@@ -27,6 +27,7 @@ const initState = {
 			defense: [],
 			navy: [],
 		},
+		excludeTerms: null,
 	},
 	contractAwards: {},
 	showDialog: false,
