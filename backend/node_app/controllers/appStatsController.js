@@ -446,7 +446,7 @@ class AppStatsController {
 				}
 				event = { ...event, value: search };
 			}
-			if (searchMap[event.idvisit]){
+			if (searchMap[event.idvisit]) {
 				searchMap[event.idvisit].push(event);
 			}
 		}
