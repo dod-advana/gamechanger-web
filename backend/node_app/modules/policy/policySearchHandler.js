@@ -300,7 +300,6 @@ class PolicySearchHandler extends SearchHandler {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
-			//const expandAcronyms = true;
 			let searchResults;
 			const operator = 'and';
 			let alias = {};
@@ -329,7 +328,6 @@ class PolicySearchHandler extends SearchHandler {
 		const { searchText, offset } = req.body;
 		try {
 			let sentenceResults = {};
-			//console.log("REQUEST BODY", req.body.searchText) // was used for intel search
 
 			let enrichedResults = searchResults;
 			//set empty values
@@ -435,7 +433,6 @@ class PolicySearchHandler extends SearchHandler {
 		let intelligentSearchResult = {};
 
 		// combined search: run if not clone + sort === 'relevance' + flag enabled
-		//console.log("INTELLIGENT SEARCH")
 		const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 		const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
 		const noSourceSpecified = _.isEqual([], orgFilterString);
