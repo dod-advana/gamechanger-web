@@ -296,7 +296,7 @@ class PolicySearchHandler extends SearchHandler {
 		return cleanedAbbreviations;
 	}
 
-	async doSearch(req, expansionDict, clientObj, userId) {
+	async doSearch(req, expansionDict, clientObj, userId, expandAcronyms = true) {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
@@ -304,11 +304,11 @@ class PolicySearchHandler extends SearchHandler {
 			let searchResults;
 			const operator = 'and';
 			let alias = {};
-			//if (expandAcronyms === true) { // if set to true, will look up entity aliases and add to search
-			let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-			let entityLimit = 10;
-			alias = await this.searchUtility.findAliases(req.body.searchText, entityLimit, clientObj.esClientName, entitiesIndex, userId);
-			//};
+			if (expandAcronyms === true) { // if set to true, will look up entity aliases and add to search
+				let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+				let entityLimit = 10;
+				alias = await this.searchUtility.findAliases(req.body.searchText, entityLimit, clientObj.esClientName, entitiesIndex, userId);
+			};
 			searchResults = await this.searchUtility.documentSearch(
 				req,
 				{ ...req.body, expansionDict, operator },
@@ -319,7 +319,6 @@ class PolicySearchHandler extends SearchHandler {
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			searchResults.alias = alias
-			console.log(searchResults.alias)
 			return searchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
@@ -436,6 +435,7 @@ class PolicySearchHandler extends SearchHandler {
 		let intelligentSearchResult = {};
 
 		// combined search: run if not clone + sort === 'relevance' + flag enabled
+		//console.log("INTELLIGENT SEARCH")
 		const verbatimSearch = searchText.startsWith('"') && searchText.endsWith('"');
 		const noFilters = _.isEqual(searchFields, { initial: { field: null, input: '' } });
 		const noSourceSpecified = _.isEqual([], orgFilterString);
