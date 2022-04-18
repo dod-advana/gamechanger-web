@@ -178,7 +178,7 @@ const PortfolioBuilder = (props) => {
 						non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
             `}
 					</div>
-					<div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse' }}>
+					<div>
 						<GCButton
 							onClick={() => {
 								setShowModal(true);
@@ -186,16 +186,6 @@ const PortfolioBuilder = (props) => {
 							style={{ minWidth: 'unset' }}
 						>
 							Create a New Portfolio
-						</GCButton>
-						<GCButton
-							onClick={async () => {}}
-							style={{
-								minWidth: 'unset',
-								backgroundColor: 'rgb(176, 186, 197)',
-								borderColor: 'rgb(176, 186, 197)',
-							}}
-						>
-							Delete a Portfolio
 						</GCButton>
 					</div>
 				</div>
