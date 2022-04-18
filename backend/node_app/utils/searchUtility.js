@@ -1918,7 +1918,6 @@ class SearchUtility {
 				userId
 			);
 			let suggesterArray = results.body.suggest.suggester;
-			console.log(suggesterArray);
 			const corrected = [];
 			let hasCorrection = false;
 			suggesterArray.forEach((suggestion) => {

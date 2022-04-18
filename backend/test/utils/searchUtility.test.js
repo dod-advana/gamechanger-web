@@ -6052,12 +6052,14 @@ describe('SearchUtility', function () {
 	});
 	describe('#autocorrect', () => {
 		it('it should give a correct spelled word', async () => {
+			let testWord = 'nav';
+
 			const elasticSearchData = {
 				body: {
 					suggest: {
 						suggester: [
 							{
-								text: 'navy',
+								text: testWord,
 								offset: 0,
 								length: 4,
 								options: [{ text: 'navy', score: 0.8888889, freq: 522 }],
@@ -6072,30 +6074,101 @@ describe('SearchUtility', function () {
 					GAME_CHANGER_OPTS: { downloadLimit: 1000 },
 					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test' },
 				},
-				dataLibrary: {
+				mlApi: {},
+				dataApi: {
 					queryElasticSearch(_esClientName, _textSuggestIndex, esQueryArray, _userId) {
-						if (esQueryArray.length > 0 && esQueryArray[0] === 'test') {
-							return Promise.resolve(elasticSearchData);
-						} else {
-							return Promise.resolve({ body: {} });
-						}
+						return Promise.resolve(elasticSearchData);
 					},
 				},
-				mlApi: {},
-				dataApi: {},
 			};
 			const target = new SearchUtility(opts);
-			const filenames = ['Title 10 - Armed Forces'];
-			const actual = await target.autocorrect('navy', 'gamechanger', 'test');
-			const expected = {
-				filenames: ['Title 10 - Armed Forces'],
-				method: 'Neo4j graph',
-				results: ['EO 13384', 'DoDD 5515.06', 'DoDI 1241.06', 'H.R. 2494 EH 117th'],
-			};
+			const actual = await target.autocorrect(testWord, 'gamechanger', 'test');
+			const expected = 'navy';
 
 			assert.deepStrictEqual(actual, expected);
 		});
+		it('it should choose the the highest score option', async () => {
+			let testWord = 'nav';
 
+			const elasticSearchData = {
+				body: {
+					suggest: {
+						suggester: [
+							{
+								text: testWord,
+								offset: 0,
+								length: 4,
+								options: [
+									{ text: 'navy', score: 0.85, freq: 522 },
+									{ text: 'naval', score: 0.5, freq: 522 },
+								],
+							},
+						],
+					},
+				},
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000 },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test' },
+				},
+				mlApi: {},
+				dataApi: {
+					queryElasticSearch(_esClientName, _textSuggestIndex, esQueryArray, _userId) {
+						return Promise.resolve(elasticSearchData);
+					},
+				},
+			};
+			const target = new SearchUtility(opts);
+			const actual = await target.autocorrect(testWord, 'gamechanger', 'test');
+			const expected = 'navy';
+
+			assert.deepStrictEqual(actual, expected);
+		});
+		it('it should return correctly spelled words for multiple words', async () => {
+			let testWord = 'nav';
+			let testWord2 = 'comamand';
+
+			const elasticSearchData = {
+				body: {
+					suggest: {
+						suggester: [
+							{
+								text: testWord,
+								offset: 0,
+								length: 4,
+								options: [{ text: 'navy', score: 0.85, freq: 522 }],
+							},
+							{
+								text: testWord2,
+								offset: 0,
+								length: 4,
+								options: [{ text: 'command', score: 0.8, freq: 522 }],
+							},
+						],
+					},
+				},
+			};
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000 },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test' },
+				},
+				mlApi: {},
+				dataApi: {
+					queryElasticSearch(_esClientName, _textSuggestIndex, esQueryArray, _userId) {
+						return Promise.resolve(elasticSearchData);
+					},
+				},
+			};
+			const target = new SearchUtility(opts);
+			const actual = await target.autocorrect(testWord + ' ' + testWord2, 'gamechanger', 'test');
+			const expected = 'navy command';
+
+			assert.deepStrictEqual(actual, expected);
+		});
 		// it('should return a suggestion for each word where the first option has a score over 0.8', () => {
 		// 	const data = [
 		// 		{
