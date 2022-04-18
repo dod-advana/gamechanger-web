@@ -1702,7 +1702,6 @@ class SearchUtility {
 		suggest_mode = 'popular',
 	}) {
 		// multi search in ES
-		console.log(searchText);
 		const plainQuery = this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText;
 
 		let query = {
@@ -1907,10 +1906,9 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
-	async autocorrect(text, userId) {
+	async autocorrect(text, index, userId) {
 		try {
-			const esQuery = this.getESSuggesterQuery({ searchText: text, index: ['gamechanger'] });
-			console.log(esQuery);
+			const esQuery = this.getESSuggesterQuery({ searchText: text, index: index });
 			let esClientName = 'gamechanger';
 
 			const results = await this.dataLibrary.queryElasticSearch(
@@ -1919,8 +1917,8 @@ class SearchUtility {
 				esQuery,
 				userId
 			);
-			console.log(JSON.stringify(results.body.suggest, 0, 4));
 			let suggesterArray = results.body.suggest.suggester;
+			console.log(suggesterArray);
 			const corrected = [];
 			let hasCorrection = false;
 			suggesterArray.forEach((suggestion) => {
@@ -1986,7 +1984,7 @@ class SearchUtility {
 					related: {
 						terms: {
 							field: 'search_query',
-							min_doc_count: 5,
+							min_doc_count: 10,
 						},
 						aggs: {
 							user: { terms: { field: 'user_id', size: 2 } },
@@ -2005,8 +2003,6 @@ class SearchUtility {
 						if (words !== searchText && aggs[term].user.buckets.length > 1) {
 							words = words.replace(/\s{2,}/g, ' ');
 							if (!relatedSearches.includes(words) && maxCount < maxSearches) {
-								let corrected = await this.autocorrect(words, userId);
-								console.log(corrected);
 								relatedSearches.push(words);
 								maxCount += 1;
 							}
@@ -2014,8 +2010,6 @@ class SearchUtility {
 					}
 				}
 			}
-			let corrected = await this.autocorrect(relatedSearches[0], userId);
-			console.log(corrected);
 		} catch (err) {
 			this.logger.error(err.message, 'ALS01AZ', userId);
 		}

@@ -19,7 +19,6 @@ class TextSuggestionController {
 
 		// need to bind to have <this> in context
 		this.getTextSuggestion = this.getTextSuggestion.bind(this);
-		this.textSuggestData = this.textSuggestData.bind(this);
 		this.getPresearchSuggestion = this.getPresearchSuggestion.bind(this);
 	}
 
@@ -41,9 +40,8 @@ class TextSuggestionController {
 			let presearchEntity = { presearchTopic: [], presearchOrg: [] };
 
 			if (req.body.searchText.length > 3) {
-				const data = await this.textSuggestData({ ...req.body, index }, userId);
 				try {
-					corrected = this.getSingleCorrected(data.suggest.suggester);
+					corrected = await this.searchUtility.autocorrect(req.body.searchText, index, userId);
 				} catch (err) {
 					const { message } = err;
 					this.logger.error(message, 'JBVZKTP', userId);
@@ -101,27 +99,6 @@ class TextSuggestionController {
 		}
 	}
 
-	async textSuggestData(body, userId) {
-		try {
-			const esQuery = this.searchUtility.getESSuggesterQuery(body);
-
-			let esClientName = 'gamechanger';
-
-			const results = await this.dataApi.queryElasticSearch(
-				esClientName,
-				this.constants.GAME_CHANGER_OPTS.textSuggestIndex,
-				esQuery,
-				userId
-			);
-			//console.log(JSON.stringify(results.body.suggest, 0, 4));
-			return results.body;
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'VLPOXOV', userId);
-			throw message;
-		}
-	}
-
 	async getPresearchSuggestion(body, index, userId) {
 		try {
 			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
@@ -157,28 +134,6 @@ class TextSuggestionController {
 		unique = unique.slice(0, 2);
 
 		return unique;
-	}
-	getSingleCorrected(suggesterArray) {
-		const corrected = [];
-		let hasCorrection = false;
-		suggesterArray.forEach((suggestion) => {
-			if (
-				suggestion.options.length > 0 &&
-				suggestion.options[0].score >= 0.7 &&
-				suggestion.options[0].freq >= 100
-			) {
-				corrected.push(suggestion.options[0].text);
-				hasCorrection = true;
-			} else {
-				corrected.push(suggestion.text);
-			}
-		});
-
-		if (!hasCorrection) {
-			return '';
-		} else {
-			return corrected.join(' ');
-		}
 	}
 
 	getPreTitleCorrected(suggesterArray) {
