@@ -425,8 +425,12 @@ const GCDataStatusTracker = (props) => {
 	};
 
 	const getCrawlerName = (crawler) => {
-		if (crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
-		return crawler.crawler_name;
+		const crawlerDisplay =
+			crawler.data_source_s && crawler.source_title
+				? `${crawler.data_source_s} - ${crawler.source_title}`
+				: crawler.crawler_name;
+
+		return <div style={{ textAlign: 'left', width: '100%' }}>{crawlerDisplay}</div>;
 	};
 
 	const renderDataTable = () => {
