@@ -303,11 +303,11 @@ class PolicySearchHandler extends SearchHandler {
 			let searchResults;
 			const operator = 'and';
 			let alias = {};
-			if (expandAcronyms === true) { // if set to true, will look up entity aliases and add to search
+			if (expandAcronyms === true) {
 				let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 				let entityLimit = 10;
 				alias = await this.searchUtility.findAliases(req.body.searchText, entityLimit, clientObj.esClientName, entitiesIndex, userId);
-			};
+			}
 			searchResults = await this.searchUtility.documentSearch(
 				req,
 				{ ...req.body, expansionDict, operator },
@@ -317,7 +317,7 @@ class PolicySearchHandler extends SearchHandler {
 			);
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-			searchResults.alias = alias
+			searchResults.alias = alias;
 			return searchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
