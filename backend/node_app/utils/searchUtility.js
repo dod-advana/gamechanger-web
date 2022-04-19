@@ -55,6 +55,7 @@ class SearchUtility {
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
+		this.autocorrect = this.autocorrect.bind(this);
 		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
 	}
 
@@ -446,7 +447,7 @@ class SearchUtility {
 		const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchTextLower.replace(/\//g, '');
+		let cleanSearch = searchTextLower.replace(/\/|{|}/g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -644,11 +645,13 @@ class SearchUtility {
 				: 'paragraphs.par_raw_text_t.gc_english';
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
-			let mainKeywords = plainQuery
-				.replace(/"|'| OR | AND /gi, ' ')
+			let mainKeywords = this.remove_stopwords(plainQuery)
+				.replace(/"|'/gi, '')
+				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
 				.slice(0, mainMaxkeywords)
 				.join('* OR *');
+
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
@@ -800,7 +803,6 @@ class SearchUtility {
 					  }
 					: {},
 			};
-
 			switch (sort) {
 				case 'Relevance':
 					query.sort = [{ _score: { order: order } }];
@@ -827,7 +829,18 @@ class SearchUtility {
 				default:
 					break;
 			}
-
+			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
+				const titleMainSearch = {
+					query_string: {
+						fields: ['display_title_s.search'],
+						query: `*${mainKeywords}*`,
+						type: 'best_fields',
+						boost: 6,
+						analyzer,
+					},
+				};
+				query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
+			}
 			if (extSearchFields.length > 0) {
 				const extQuery = {
 					multi_match: {
@@ -901,8 +914,7 @@ class SearchUtility {
 			if (Object.keys(docIds).length !== 0) {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
-
-			if (ltr) {
+			if (ltr && sort === 'Relevance') {
 				query.rescore = [
 					{
 						window_size: 50,
@@ -1911,6 +1923,43 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+	async autocorrect(text, index, userId) {
+		try {
+			const esQuery = this.getESSuggesterQuery({ searchText: text, index: index });
+			let esClientName = 'gamechanger';
+
+			const results = await this.dataLibrary.queryElasticSearch(
+				esClientName,
+				this.constants.GAME_CHANGER_OPTS.textSuggestIndex,
+				esQuery,
+				userId
+			);
+			let suggesterArray = results.body.suggest.suggester;
+			const corrected = [];
+			let hasCorrection = false;
+			suggesterArray.forEach((suggestion) => {
+				if (
+					suggestion.options.length > 0 &&
+					suggestion.options[0].score >= 0.7 &&
+					suggestion.options[0].freq >= 100
+				) {
+					corrected.push(suggestion.options[0].text);
+					hasCorrection = true;
+				} else {
+					corrected.push(suggestion.text);
+				}
+			});
+
+			if (!hasCorrection) {
+				return '';
+			} else {
+				return corrected.join(' ');
+			}
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'PL2LLV', userId);
+		}
+	}
 	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
@@ -1951,7 +2000,7 @@ class SearchUtility {
 					related: {
 						terms: {
 							field: 'search_query',
-							min_doc_count: 5,
+							min_doc_count: 10,
 						},
 						aggs: {
 							user: { terms: { field: 'user_id', size: 2 } },
@@ -1960,20 +2009,21 @@ class SearchUtility {
 				},
 			};
 			let results = await this.dataLibrary.queryElasticSearch(esClientName, searchHistoryIndex, query, userId);
+
 			if (results.body.aggregations) {
 				let aggs = results.body.aggregations.related.buckets;
 				let maxCount = 0;
 				if (aggs.length > 0) {
-					aggs.forEach((term) => {
-						let word = term.key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
-						if (word !== searchText && term.user.buckets.length > 1) {
-							word = word.replace(/\s{2,}/g, ' ');
-							if (!relatedSearches.includes(word) && maxCount < maxSearches) {
-								relatedSearches.push(word);
+					for (let term in aggs) {
+						let words = aggs[term].key.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+						if (words !== searchText && aggs[term].user.buckets.length > 1) {
+							words = words.replace(/\s{2,}/g, ' ');
+							if (!relatedSearches.includes(words) && maxCount < maxSearches) {
+								relatedSearches.push(words);
 								maxCount += 1;
 							}
 						}
-					});
+					}
 				}
 			}
 		} catch (err) {
@@ -2684,7 +2734,6 @@ class SearchUtility {
 			);
 			if (resp.result.records.length == 0) {
 				// if no results, try group algo
-				console.log('no similar docs');
 				comm_resp = await this.dataLibrary.queryGraph(
 					`
 				MATCH (d:Document {filename: $filename})
