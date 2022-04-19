@@ -14,14 +14,16 @@ import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
+/*eslint-disable */
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
 	height: 250px;
 	background-color: #f4f4f4;
 	border-radius: 6px;
-	margin: 10px;
+	margin: 10px !important;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')} > .main-info {
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
+	> .main-info {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -43,6 +45,10 @@ const StyledFavoriteDocumentCard = styled.div`
 				text-overflow: ellipsis;
 				cursor: pointer;
 				line-height: 1;
+				-webkit-line-clamp: 2;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				margin-right: 5px;
 
 				> .summary-title-link {
 					text-decoration: none;
@@ -171,6 +177,7 @@ const StyledFavoriteDocumentCard = styled.div`
 						width: 20px;
 						margin-bottom: -8px;
 						padding-left: 2px;
+						font-size: inherit
 					}
 				}
 			}
@@ -223,6 +230,7 @@ const StyledFavoriteDocumentCard = styled.div`
 		}
 	}
 `;
+/*eslint-disable */
 
 const CloseButton = styled.div`
 	padding: 6px;
