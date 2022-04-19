@@ -306,7 +306,13 @@ class PolicySearchHandler extends SearchHandler {
 			if (expandAcronyms === true) {
 				let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 				let entityLimit = 10;
-				alias = await this.searchUtility.findAliases(req.body.searchText, entityLimit, clientObj.esClientName, entitiesIndex, userId);
+				alias = await this.searchUtility.findAliases(
+					req.body.searchText, 
+					entityLimit, 
+					clientObj.esClientName, 
+					entitiesIndex, 
+					userId
+				);
 			}
 			searchResults = await this.searchUtility.documentSearch(
 				req,
@@ -368,7 +374,14 @@ class PolicySearchHandler extends SearchHandler {
 			intelligentAnswersOn =
 				intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if (intelligentAnswersOn && intelligentSearchOn) {
-				const QA = await this.qaEnrichment(req, searchResults.searchTerms, searchResults.alias, sentenceResults, qaParams, userId);
+				const QA = await this.qaEnrichment(
+					req, 
+					searchResults.searchTerms, 
+					searchResults.alias, 
+					sentenceResults, 
+					qaParams, 
+					userId
+				);
 				enrichedResults.qaResults = QA;
 			}
 
