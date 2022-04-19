@@ -466,7 +466,7 @@ describe('PolicySearchHandler', function () {
 			};
 			const target = new PolicySearchHandler(opts);
 			const actual = await target.qaEnrichment(req, {}, 'test');
-			const expected = {'answers': [], 'params': 'test', 'qaContext': [], 'question': ''};
+			const expected = {'answers': [], 'params': {}, 'qaContext': [], 'question': ''};
 			assert.deepStrictEqual(actual, expected);
 			done();
 		});
