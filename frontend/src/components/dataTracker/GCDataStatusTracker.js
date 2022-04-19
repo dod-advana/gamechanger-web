@@ -292,6 +292,7 @@ const GCDataStatusTracker = (props) => {
 	const handleFetchCrawlerData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
+			console.log('sorted: ', sorted);
 			const { totalCount, docs = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
@@ -628,6 +629,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: '% Ingested',
 				accessor: 'status',
+				sortable: false,
 				Cell: (row) => (
 					<TableRow
 						style={{
@@ -644,6 +646,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Crawl and Download Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
@@ -657,6 +660,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest In Progress',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
@@ -670,6 +674,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
@@ -683,6 +688,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Last Action',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>;
 				},
@@ -690,6 +696,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Days Since Last Ingest',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
 				},
@@ -739,6 +746,12 @@ const GCDataStatusTracker = (props) => {
 							manual={true}
 							pages={numPages}
 							onFetchData={handleFetchCrawlerData}
+							defaultSorted={[
+								{
+									id: 'crawler_name',
+									desc: false,
+								},
+							]}
 						/>
 					</TableStyle>
 					<IngestStats style={{ width: '25%' }} ingestData={ingestData} />
