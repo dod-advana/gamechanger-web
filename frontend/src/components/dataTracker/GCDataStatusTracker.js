@@ -9,6 +9,7 @@ import TabStyles from '../common/TabStyles';
 import moment from 'moment';
 import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
+import _ from 'lodash';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
@@ -267,15 +268,33 @@ const GCDataStatusTracker = (props) => {
 				map[crawler.crawler] = crawler;
 			});
 			setCrawlerInfoMap(map);
+			console.log('map');
+			console.table(map);
 		});
 	}, []);
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
+			// handle special case of filtering on the json_metadata field
+			let newFiltered = Object.assign([], filtered);
+			const jsonFilterIndex = _.findIndex(filtered, (e) => e.id === 'json_metadata', 0);
+			if (jsonFilterIndex > -1) {
+				// remove json_metadata from filters
+				newFiltered = Object.assign(
+					[],
+					filtered.filter((e) => e.id !== 'json_metadata')
+				);
+				// add json_metadata.crawler_used to filters
+				newFiltered.push({
+					id: 'json_metadata.crawler_used',
+					value: filtered[jsonFilterIndex].value,
+				});
+			}
+
 			setLoading(true);
 			const { totalCount, docs = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
-				filtered,
+				filtered: newFiltered,
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 			setNumPages(pageCount);
@@ -472,8 +491,8 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Source',
 				accessor: 'json_metadata',
 				width: 200,
-				filterable: false,
-				sortable: false,
+				// filterable: true,
+				sortable: true,
 				Cell: (props) => {
 					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
 					return (
@@ -495,6 +514,20 @@ const GCDataStatusTracker = (props) => {
 						</TableRow>
 					);
 				},
+				Filter: ({ filter, onChange }) => (
+					<select
+						onChange={(event) => onChange(event.target.value)}
+						style={{ width: '100%' }}
+						value={filter ? filter.value : 'all'}
+					>
+						<option value="">Show All</option>
+						{Object.keys(crawlerInfoMap).map((crawler) => (
+							<option value={crawler} key={crawler}>
+								{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
+							</option>
+						))}
+					</select>
+				),
 			},
 			{
 				Header: 'Publication Date',
