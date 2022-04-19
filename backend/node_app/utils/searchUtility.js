@@ -717,6 +717,7 @@ class SearchUtility {
 											],
 										},
 									},
+									score_mode: 'sum',
 								},
 							},
 							{
@@ -732,6 +733,7 @@ class SearchUtility {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
 										boost: 10,
+										case_insensitive: true,
 									},
 								},
 							},
@@ -740,6 +742,7 @@ class SearchUtility {
 									'filename.search': {
 										value: `*${plainQuery}*`,
 										boost: 5,
+										case_insensitive: true,
 									},
 								},
 							},
@@ -762,10 +765,15 @@ class SearchUtility {
 							{
 								query_string: {
 									fields: ['display_title_s.search'],
-									query: `${mainKeywords}*`,
+									query: `*${mainKeywords}*`,
 									type: 'best_fields',
-									boost: 6,
+									boost: 2,
 									analyzer,
+								},
+							},
+							{
+								match_phrase: {
+									'display_title_s.search': plainQuery,
 								},
 							},
 						],
