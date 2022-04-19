@@ -208,7 +208,7 @@ const DefaultNavigationHandler = {
 					</GCTooltip>
 				)}
 				{state.cloneData?.show_data_tracker && (
-					<GCTooltip title="Data Tracker" placement="right" arrow>
+					<GCTooltip title="Data Status Tracker" placement="right" arrow>
 						<HoverNavItem
 							centered
 							onClick={() => {
@@ -383,7 +383,7 @@ const DefaultNavigationHandler = {
 					</GCTooltip>
 				)}
 				{state.cloneData?.show_data_tracker && (
-					<GCTooltip title="Data Tracker" placement="right" arrow>
+					<GCTooltip title="Data Status Tracker" placement="right" arrow>
 						<HoverNavItem
 							onClick={() => {
 								setState(dispatch, {
@@ -399,7 +399,7 @@ const DefaultNavigationHandler = {
 							toolTheme={toolTheme}
 						>
 							<ConstrainedIcon src={DataStatusTrackerIcon} />
-							<span style={{ marginLeft: '10px' }}>Data Tracker</span>
+							<span style={{ marginLeft: '10px' }}>Data Status Tracker</span>
 						</HoverNavItem>
 					</GCTooltip>
 				)}
