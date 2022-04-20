@@ -186,6 +186,9 @@ export const StyledFrontCardHeader = styled.div`
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
+				-webkit-line-clamp: 2;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
 			}
 
 			.list-view-arrow {
