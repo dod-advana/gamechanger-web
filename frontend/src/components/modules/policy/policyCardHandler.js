@@ -157,6 +157,9 @@ const StyledFrontCardHeader = styled.div`
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
+				-webkit-line-clamp: 2;
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
 			}
 
 			.list-view-arrow {
@@ -703,7 +706,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText) => {
+export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText) => {
 	const { favorite_topics = null } = userData ?? {};
 	let favorites = [];
 
