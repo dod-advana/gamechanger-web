@@ -735,7 +735,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 10,
+										boost: 12,
 										case_insensitive: true,
 									},
 								},
