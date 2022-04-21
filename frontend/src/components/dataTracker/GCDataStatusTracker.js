@@ -7,6 +7,7 @@ import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import { Typography } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
+import { MenuItem, Select } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
 import _ from 'lodash';
@@ -515,18 +516,20 @@ const GCDataStatusTracker = (props) => {
 					);
 				},
 				Filter: ({ filter, onChange }) => (
-					<select
+					<Select
+						id="select"
 						onChange={(event) => onChange(event.target.value)}
 						style={{ width: '100%' }}
-						value={filter ? filter.value : 'all'}
+						className="font-size-rem"
+						value={filter ? filter.value : ''}
 					>
-						<option value="">Show All</option>
+						<MenuItem value="">Show All</MenuItem>
 						{Object.keys(crawlerInfoMap).map((crawler) => (
-							<option value={crawler} key={crawler}>
+							<MenuItem value={crawler} key={crawler}>
 								{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
-							</option>
+							</MenuItem>
 						))}
-					</select>
+					</Select>
 				),
 			},
 			{
