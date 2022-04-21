@@ -158,6 +158,17 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 		case 'maxObligatedAmount':
 		case 'minObligatedAmount':
 		case 'excludeTerms':
+		case 'vendorName':
+		case 'fundingOfficeCode':
+		case 'idvPIID':
+		case 'modNumber':
+		case 'pscDesc':
+		case 'piid':
+		case 'reqDesc':
+		case 'psc':
+		case 'fundingAgencyName':
+		case 'naicsCode':
+		case 'duns':
 			edaSettings[field] = value;
 			break;
 		case 'majcoms':
@@ -922,20 +933,6 @@ const EDASearchMatrixHandler = {
 				>
 					{renderExcludeTerms(state, dispatch)}
 				</GCAccordion>
-				<GCAccordion
-					contentPadding={0}
-					expanded={
-						!edaSearchSettings.allOrgsSelected &&
-						edaSearchSettings.organizations &&
-						edaSearchSettings.organizations.length > 0
-					}
-					header={'ISSUE ORGANIZATION'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderOrganizationFilters(state, dispatch)}
-				</GCAccordion>
 
 				<GCAccordion
 					contentPadding={15}
@@ -978,7 +975,7 @@ const EDASearchMatrixHandler = {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'MOD NUMBER', 'modNumber')}
+					{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
 				</GCAccordion>
 
 				<GCAccordion
@@ -989,7 +986,7 @@ const EDASearchMatrixHandler = {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'PSC DESCRIPTION', 'pscDesc')}
+					{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
 				</GCAccordion>
 
 				<GCAccordion
@@ -1011,7 +1008,7 @@ const EDASearchMatrixHandler = {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'DESCRIPTION OF REQUIREMENTS', 'reqDesc')}
+					{renderTextFieldFilter(state, dispatch, 'Description of Reqs', 'reqDesc')}
 				</GCAccordion>
 
 				<GCAccordion
@@ -1033,18 +1030,18 @@ const EDASearchMatrixHandler = {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'FUNDING AGENCY NAME', 'fundingAgencyName')}
+					{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}
 				</GCAccordion>
 
 				<GCAccordion
 					contentPadding={15}
-					expanded={edaSearchSettings.naics}
+					expanded={edaSearchSettings.naicsCode}
 					header={'NAICS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'NAICS', 'naics')}
+					{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}
 				</GCAccordion>
 
 				<GCAccordion
