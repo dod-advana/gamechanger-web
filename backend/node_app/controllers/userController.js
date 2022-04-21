@@ -587,16 +587,17 @@ class UserController {
 		}
 	}
 
-	async updateOrCreateUserHelper(userData, userId, fromApp = false) {
+	async updateOrCreateUserHelper(userData, fromApp = false) {
 		try {
 			let foundItem;
-
-			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id, false) : userId;
 
 			if (fromApp) {
 				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
 			} else {
-				foundItem = await this.user.findOne({ where: { user_id: user_id }, raw: true });
+				foundItem = await this.user.findOne({
+					where: { user_id: getUserIdFromSAMLUserId(userData.id) },
+					raw: true,
+				});
 			}
 
 			if (!foundItem) {
@@ -604,7 +605,10 @@ class UserController {
 					await this.user.create(userData);
 				} else {
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({ user_id, cn: userData.cn });
+					const oldGCUserInfo = await this.syncUserHelper({
+						user_id: getUserIdFromSAMLUserId(userData.id),
+						cn: userData.cn,
+					});
 
 					const tmpExtraFields = { gamechanger: oldGCUserInfo.policy || {} };
 
