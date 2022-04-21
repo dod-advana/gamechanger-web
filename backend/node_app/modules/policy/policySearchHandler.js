@@ -193,7 +193,8 @@ class PolicySearchHandler extends SearchHandler {
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
-			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
+			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray, userId);
+			
 			let relatedSearches = await this.searchUtility.getRelatedSearches(
 				searchText,
 				expansionDict,
@@ -256,28 +257,33 @@ class PolicySearchHandler extends SearchHandler {
 		return [synList, text];
 	}
 
-	async abbreviationCleaner(termsArray) {
+	async abbreviationCleaner(termsArray, userId) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
-			if (expandedTerm) {
-				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-				}
-			}
-			if (compressedTerm) {
-				if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-				}
+		const esClientName = 'gamechanger'
+		const entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let alias = await this.searchUtility.findAliases(termsArray, esClientName, entitiesIndex, userId);
+		let expandedTerm = alias._source.name
+		console.log(expandedTerm);
+		//let abbreviationExpansions = [];
+		//let i = 0;
+		//for (i = 0; i < termsArray.length; i++) {
+		//let term = termsArray[i];
+		//let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+		//let expandedTerm = await this.redisDB.get(upperTerm);
+		//let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+		//let compressedTerm = await this.redisDB.get(lowerTerm);
+		if (expandedTerm) {
+			if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
+				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
 		}
+		//if (compressedTerm) {
+		//	if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
+		//		abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
+		//	}
+		//}
+		//}
 
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 		let cleanedAbbreviations = [];
@@ -296,34 +302,21 @@ class PolicySearchHandler extends SearchHandler {
 		return cleanedAbbreviations;
 	}
 
-	async doSearch(req, expansionDict, clientObj, userId, expandAcronyms = true) {
+	async doSearch(req, expansionDict, clientObj, userId) {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
+
 			let searchResults;
 			const operator = 'and';
-			let alias = {};
-			if (expandAcronyms === true) {
-				let entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
-				let entityLimit = 10;
-				alias = await this.searchUtility.findAliases(
-					req.body.searchText, 
-					entityLimit, 
-					clientObj.esClientName, 
-					entitiesIndex, 
-					userId
-				);
-			}
 			searchResults = await this.searchUtility.documentSearch(
 				req,
 				{ ...req.body, expansionDict, operator },
-				alias,
 				clientObj,
 				userId
 			);
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-			searchResults.alias = alias;
 			return searchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
@@ -354,7 +347,7 @@ class PolicySearchHandler extends SearchHandler {
 				intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if (intelligentSearchOn) {
 				// get sentence search from ML API
-				sentenceResults = await this.searchUtility.getSentResults(searchResults.searchTerms.join(' '), userId);
+				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId);
 				enrichedResults.sentenceResults = sentenceResults;
 			}
 
@@ -374,14 +367,7 @@ class PolicySearchHandler extends SearchHandler {
 			intelligentAnswersOn =
 				intelligentAnswersOn.length > 0 ? intelligentAnswersOn[0].dataValues.value === 'true' : false;
 			if (intelligentAnswersOn && intelligentSearchOn) {
-				const QA = await this.qaEnrichment(
-					req, 
-					searchResults.searchTerms, 
-					searchResults.alias, 
-					sentenceResults, 
-					qaParams, 
-					userId
-				);
+				const QA = await this.qaEnrichment(req, sentenceResults, qaParams, userId);
 				enrichedResults.qaResults = QA;
 			}
 
@@ -492,7 +478,7 @@ class PolicySearchHandler extends SearchHandler {
 		return intelligentSearchResult;
 	}
 
-	async qaEnrichment(req, searchTerms, alias, sentenceResults, qaParams, userId) {
+	async qaEnrichment(req, sentenceResults, qaParams, userId) {
 		const { searchText } = req.body;
 
 		let QA = { question: '', answers: [], params: qaParams, qaContext: [] };
@@ -511,12 +497,18 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities = { QAResults: {}, allResults: {} };
-				QA.question = searchText;
-				let bigramQueries = this.searchUtility.makeBigramQueries(searchTerms, alias);
+				let qaQueries = await this.searchUtility.formatQAquery(
+					searchText,
+					esClientName,
+					entitiesIndex,
+					userId
+				);
+				QA.question = qaQueries.display;
+				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
 					entities = await this.searchUtility.getQAEntities(
 						entities,
-						alias,
+						qaQueries,
 						bigramQueries,
 						qaParams,
 						esClientName,
@@ -550,7 +542,7 @@ class PolicySearchHandler extends SearchHandler {
 					// if context results, query QA model
 					QA.qaContext = context;
 					let shortenedResults = await this.mlApi.getIntelAnswer(
-						QA.question.toLowerCase().replace('?', ''),
+						qaQueries.text,
 						context.map((item) => item.text),
 						userId
 					);
