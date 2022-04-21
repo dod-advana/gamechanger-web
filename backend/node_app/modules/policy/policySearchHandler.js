@@ -259,31 +259,15 @@ class PolicySearchHandler extends SearchHandler {
 
 	async abbreviationCleaner(termsArray, userId) {
 		// get expanded abbreviations
-		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		const esClientName = 'gamechanger'
 		const entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		let alias = await this.searchUtility.findAliases(termsArray, esClientName, entitiesIndex, userId);
 		let expandedTerm = alias._source.name
-		console.log(expandedTerm);
-		//let abbreviationExpansions = [];
-		//let i = 0;
-		//for (i = 0; i < termsArray.length; i++) {
-		//let term = termsArray[i];
-		//let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-		//let expandedTerm = await this.redisDB.get(upperTerm);
-		//let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-		//let compressedTerm = await this.redisDB.get(lowerTerm);
 		if (expandedTerm) {
 			if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
 		}
-		//if (compressedTerm) {
-		//	if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-		//		abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-		//	}
-		//}
-		//}
 
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 		let cleanedAbbreviations = [];
