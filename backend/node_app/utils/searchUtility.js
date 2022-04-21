@@ -578,7 +578,7 @@ class SearchUtility {
 			charsPadding = 90,
 			operator = 'and',
 			searchFields = {},
-			mainMaxkeywords = 2,
+			mainMaxkeywords = 3,
 			accessDateFilter = [],
 			publicationDateFilter = [],
 			publicationDateAllTime = true,
@@ -714,7 +714,7 @@ class SearchUtility {
 														fuzzy_max_expansions: 100,
 														fuzziness: 'AUTO',
 														analyzer,
-														boost: 0.7,
+														boost: 0.5,
 													},
 												},
 											],
@@ -727,7 +727,7 @@ class SearchUtility {
 								wildcard: {
 									keyw_5: {
 										value: `*${plainQuery}*`,
-										boost: 4,
+										boost: 5,
 									},
 								},
 							},
@@ -744,7 +744,7 @@ class SearchUtility {
 								wildcard: {
 									'filename.search': {
 										value: `*${plainQuery}*`,
-										boost: 5,
+										boost: 10,
 										case_insensitive: true,
 									},
 								},
@@ -761,7 +761,7 @@ class SearchUtility {
 								wildcard: {
 									'top_entities_t.search': {
 										value: `*${plainQuery}*`,
-										boost: 4,
+										boost: 5,
 									},
 								},
 							},
@@ -826,7 +826,7 @@ class SearchUtility {
 						fields: ['display_title_s.search'],
 						query: `*${mainKeywords}*`,
 						type: 'best_fields',
-						boost: 3,
+						boost: 10,
 						analyzer,
 					},
 				};
