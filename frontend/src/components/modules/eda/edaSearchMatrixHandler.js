@@ -129,12 +129,6 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 				edaSettings.organizations.push(value);
 			}
 			break;
-		case 'issueOfficeDoDAAC':
-			edaSettings.issueOfficeDoDAAC = value;
-			break;
-		case 'issueOfficeName':
-			edaSettings.issueOfficeName = value;
-			break;
 		case 'allYears':
 			edaSettings.allYearsSelected = true;
 			break;
@@ -158,14 +152,13 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 		case 'contractData':
 			edaSettings.contractData[value] = !edaSettings.contractData[value];
 			break;
-		case 'minObligatedAmount':
-			edaSettings.minObligatedAmount = value;
-			break;
-		case 'maxObligatedAmount':
-			edaSettings.maxObligatedAmount = value;
-			break;
+		case 'issueOfficeDoDAAC':
+		case 'issueOfficeName':
 		case 'contractsOrMods':
-			edaSettings.contractsOrMods = value;
+		case 'maxObligatedAmount':
+		case 'minObligatedAmount':
+		case 'excludeTerms':
+			edaSettings[field] = value;
 			break;
 		case 'majcoms':
 			const majIndex = edaSettings.majcoms[value.org].indexOf(value.subOrg);
@@ -786,6 +779,30 @@ const renderModificationFilter = (state, dispatch) => {
 	);
 };
 
+const renderExcludeTerms = (state, dispatch) => {
+	return (
+		<div>
+			<p style={{ fontSize: 12, color: 'gray' }}>
+				Enter exclude terms separated by a semicolon. Example: <i>12-34;Machine Learning</i>
+			</p>
+			<TextField
+				placeholder="Enter Text to Exclude"
+				variant="outlined"
+				defaultValue={state.edaSearchSettings.excludeTerms}
+				style={{ backgroundColor: 'white', width: '100%' }}
+				fullWidth={true}
+				onBlur={(event) => setEDASearchSetting('excludeTerms', event.target.value, state, dispatch)}
+				inputProps={{
+					style: {
+						height: 19,
+						width: '100%',
+					},
+				}}
+			/>
+		</div>
+	);
+};
+
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
@@ -890,6 +907,17 @@ const EDASearchMatrixHandler = {
 					headerTextWeight={'normal'}
 				>
 					{renderModificationFilter(state, dispatch)}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.excludeTerms !== null}
+					header={'EXCLUDED TERMS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderExcludeTerms(state, dispatch)}
 				</GCAccordion>
 
 				<GCButton
