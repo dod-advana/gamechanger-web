@@ -650,8 +650,7 @@ class SearchUtility {
 				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
 				.slice(0, mainMaxkeywords)
-				.join('* OR *');
-
+				.join('* AND *');
 			let query = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
@@ -715,6 +714,7 @@ class SearchUtility {
 														fuzzy_max_expansions: 100,
 														fuzziness: 'AUTO',
 														analyzer,
+														boost: 0.7,
 													},
 												},
 											],
@@ -735,7 +735,7 @@ class SearchUtility {
 								wildcard: {
 									'display_title_s.search': {
 										value: `*${plainQuery}*`,
-										boost: 12,
+										boost: 15,
 										case_insensitive: true,
 									},
 								},
@@ -763,15 +763,6 @@ class SearchUtility {
 										value: `*${plainQuery}*`,
 										boost: 4,
 									},
-								},
-							},
-							{
-								query_string: {
-									fields: ['display_title_s.search'],
-									query: `*${mainKeywords}*`,
-									type: 'best_fields',
-									boost: 2,
-									analyzer,
 								},
 							},
 							{
@@ -835,7 +826,7 @@ class SearchUtility {
 						fields: ['display_title_s.search'],
 						query: `*${mainKeywords}*`,
 						type: 'best_fields',
-						boost: 6,
+						boost: 3,
 						analyzer,
 					},
 				};

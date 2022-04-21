@@ -104,9 +104,9 @@ class AdminController {
 		}
 		for (let obj of pdf_opened) {
 			const doc = obj.document;
-			last_opened.push(doc.split('.pdf')[0]);
+			last_opened.push(doc.split(' - ')[1].split('.pdf')[0]);
+			last_opened = [...new Set(last_opened)];
 		}
-
 		// combine list
 		let combinedDocList = favDocList.concat(exportDocList).concat(last_opened);
 
@@ -126,7 +126,7 @@ class AdminController {
 				const rec_results = await this.searchUtility.getRecDocs(combinedDocList, userId);
 				recDocs.value = rec_results.results ? rec_results.results : [];
 				// only get top 20 recommendations
-				recDocs.value = recDocs.value.slice(0, 20);
+				recDocs.value = recDocs.value.slice(0, 10);
 			} else {
 				recDocs.value = [];
 			}
