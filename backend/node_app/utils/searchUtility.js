@@ -1290,7 +1290,7 @@ class SearchUtility {
 	async findAliases(searchTextList, esClientName, entitiesIndex, user) {
 		let matchingAlias = {};
 		try {
-			let entityLimit=5;
+			let entityLimit = 5;
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
