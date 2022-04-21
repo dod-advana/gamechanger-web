@@ -1293,8 +1293,6 @@ class SearchUtility {
 			let entityLimit=5;
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
-			console.log("ALL ALIAS RESULTS")
-			console.log(JSON.stringify(aliasResults))
 			if (aliasResults.body.hits.hits[0]) {
 				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map((item) => item.name);
 				for (var i = 0; i < aliases.length; i++) {
