@@ -690,6 +690,12 @@ const GCDataStatusTracker = (props) => {
 				),
 			},
 			{
+				Header: '# Documents',
+				accessor: 'docCount',
+				sortable: false,
+				Cell: (row) => <TableRow>{row.value}</TableRow>,
+			},
+			{
 				Header: 'Last Action',
 				accessor: 'datetime',
 				sortable: false,

@@ -7,6 +7,8 @@ const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
+const { DataLibrary } = require('../lib/dataLibrary');
+const SearchUtility = require('../utils/searchUtility');
 const moment = require('moment');
 
 class DataTrackerController {
@@ -19,6 +21,8 @@ class DataTrackerController {
 			organizationInfo = ORGANIZATION_INFO,
 			versioned_docs = VERSIONED_DOCS,
 			sequelizeGCOrchestration = new Sequelize(constantsFile.POSTGRES_CONFIG.databases['gc-orchestration']),
+			searchUtility = new SearchUtility(opts),
+			dataLibrary = new DataLibrary(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -28,6 +32,8 @@ class DataTrackerController {
 		this.organizationInfo = organizationInfo;
 		this.versioned_docs = versioned_docs;
 		this.sequelizeGCOrchestration = sequelizeGCOrchestration;
+		this.dataLibrary = dataLibrary;
+		this.searchUtility = searchUtility;
 
 		this.getTrackedData = this.getTrackedData.bind(this);
 		this.getBrowsingLibrary = this.getBrowsingLibrary.bind(this);
@@ -138,7 +144,7 @@ class DataTrackerController {
 
 	async getCrawlerMetadata(req, res) {
 		let userId = 'webapp_unknown';
-		const { limit = 10, offset = 0, order = [], where = {}, option = 'all' } = req.body;
+		const { limit = 10, offset = 0, order = [], where = {}, option = 'all', cloneName = 'gamechanger' } = req.body;
 		const attributes = ['crawler_name', 'status', 'datetime'];
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
@@ -153,11 +159,13 @@ class DataTrackerController {
 				});
 				res.status(200).send({ totalCount: crawlerData.count, docs: crawlerData.rows });
 			} else if (option === 'status') {
+				const permissions = req.permissions ? req.permissions : [];
 				let level_value;
 				let crawlerData = {};
 				const info = await this.crawlerInfo.findAll({
 					attributes: ['crawler', 'url_origin', 'data_source_s', 'source_title'],
 				});
+
 				level_value = await this.crawlerStatus
 					.findAll({
 						attributes,
@@ -179,6 +187,22 @@ class DataTrackerController {
 						});
 						return crawlerData;
 					});
+
+				const esQuery = {
+					size: 0,
+					aggs: {
+						pubs: {
+							terms: {
+								size: Object.keys(crawlerData).length + 10,
+								field: 'crawler_used_s',
+							},
+						},
+					},
+				};
+				const { esClientName, esIndex } = this.searchUtility.getESClient(cloneName, permissions);
+				const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+				const docCounts = esResults?.body?.aggregations?.pubs?.buckets;
+
 				let resp = [];
 
 				const sort = order?.[0]?.[0];
@@ -187,7 +211,12 @@ class DataTrackerController {
 				const crawlerList = Object.keys(level_value);
 
 				crawlerList.forEach((data) => {
-					const dataInfo = info.find((crawler) => crawler.dataValues.crawler === data);
+					const dataInfo = info.find(
+						(crawler) => crawler.dataValues.crawler.toLowerCase() === data.toLowerCase()
+					);
+					const docCount =
+						docCounts.find((crawler) => crawler.key.toLowerCase() === data.toLowerCase())?.doc_count ||
+						'No Documents Found';
 					resp.push({
 						crawler_name: data,
 						status: level_value[data].status,
@@ -195,6 +224,7 @@ class DataTrackerController {
 						url_origin: dataInfo?.dataValues?.url_origin,
 						data_source_s: dataInfo?.dataValues.data_source_s,
 						source_title: dataInfo?.dataValues.source_title,
+						docCount,
 					});
 				});
 
