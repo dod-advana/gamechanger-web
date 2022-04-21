@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { styles } from '../../../components/admin/util/GCAdminStyles';
+import { styles, useStyles } from '../../admin/util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
 import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
+
 import styled from 'styled-components';
+import IconButton from '@material-ui/core/IconButton';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+
+import JbookPortfolioModal from './jbookPortfolioModal';
 
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
@@ -17,8 +25,10 @@ const portfolioStyles = {
 		width: '400px',
 	},
 	portfolioHeader: {
-		fontSize: '1.3em',
+		fontSize: '1.5em',
 		paddingBottom: '20px',
+		display: 'flex',
+		justifyContent: 'space-between',
 	},
 	pillbox: {
 		maxHeight: '100px',
@@ -38,6 +48,7 @@ const Pill = styled.button`
 	margin-right: 6px;
 	margin-bottom: 3px;
 	border: 1px solid rgb(209, 215, 220);
+	cursor: default !important;
 	> i {
 		margin-left: 3px;
 		color: #e9691d;
@@ -49,8 +60,13 @@ const Pill = styled.button`
  */
 const PortfolioBuilder = (props) => {
 	// State variables for the buttons
-	let [portfolios, setPortfolios] = useState([]);
+	const [portfolios, setPortfolios] = useState([]);
+	const [showModal, setShowModal] = useState(false);
+	const [deleteModal, setDeleteModal] = useState(false);
+	const [modalData, setModalData] = useState({});
+
 	let [init, setInit] = useState(false);
+	const classes = useStyles();
 
 	useEffect(() => {
 		if (!init) {
@@ -73,13 +89,47 @@ const PortfolioBuilder = (props) => {
 		let portfolios = pList.map((portfolio) => {
 			return (
 				<div style={portfolioStyles.portfolio}>
-					<div style={portfolioStyles.portfolioHeader}>{portfolio.name}</div>
+					<div style={portfolioStyles.portfolioHeader}>
+						<div>{portfolio.name}</div>
+						<div>
+							<IconButton
+								aria-label="close"
+								style={{
+									height: 30,
+									width: 30,
+									color: 'grey',
+									borderRadius: 0,
+									marginRight: '10px',
+								}}
+								onClick={() => {
+									setModalData(portfolio);
+									setShowModal(true);
+								}}
+							>
+								<EditIcon style={{ fontSize: 30 }} />
+							</IconButton>
+							<IconButton
+								aria-label="close"
+								style={{
+									height: 10,
+									width: 10,
+									color: 'red',
+									borderRadius: 0,
+								}}
+								onClick={() => {
+									setDeleteModal(true);
+								}}
+							>
+								<CancelIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</div>
+					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>People With Access</div>
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.user_ids.length === 0 &&
-							(portfolio.name === 'jaic' ? '(all jbook users)' : '(none)')}
+							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
 						{portfolio.user_ids.map((user, index) => {
 							return (
 								<Pill>
@@ -128,19 +178,14 @@ const PortfolioBuilder = (props) => {
 						non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
             `}
 					</div>
-					<div style={{ flex: 1, display: 'flex', flexDirection: 'row-reverse' }}>
-						<GCButton onClick={async () => {}} style={{ minWidth: 'unset' }}>
-							Create a New Portfolio
-						</GCButton>
+					<div>
 						<GCButton
-							onClick={async () => {}}
-							style={{
-								minWidth: 'unset',
-								backgroundColor: 'rgb(176, 186, 197)',
-								borderColor: 'rgb(176, 186, 197)',
+							onClick={() => {
+								setShowModal(true);
 							}}
+							style={{ minWidth: 'unset' }}
 						>
-							Delete a Portfolio
+							Create a New Portfolio
 						</GCButton>
 					</div>
 				</div>
@@ -195,6 +240,73 @@ const PortfolioBuilder = (props) => {
 					])}
 				</div>
 			</div>
+			<JbookPortfolioModal
+				showModal={showModal}
+				setShowModal={setShowModal}
+				modalData={modalData}
+			></JbookPortfolioModal>
+			<Dialog
+				open={deleteModal}
+				scroll={'paper'}
+				maxWidth="sm"
+				disableEscapeKeyDown
+				disableBackdropClick
+				classes={{
+					paperWidthSm: classes.dialogSm,
+				}}
+			>
+				<DialogTitle>
+					<div style={{ display: 'flex', width: '100%' }}>
+						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+							Are you sure you want to delete this portfolio?
+						</Typography>
+					</div>
+					<IconButton
+						aria-label="close"
+						style={{
+							position: 'absolute',
+							right: '0px',
+							top: '0px',
+							height: 60,
+							width: 60,
+							color: 'black',
+							backgroundColor: styles.backgroundGreyLight,
+							borderRadius: 0,
+						}}
+						onClick={() => {
+							setDeleteModal(false);
+						}}
+					>
+						<CloseIcon style={{ fontSize: 30 }} />
+					</IconButton>
+				</DialogTitle>
+				<DialogContent>
+					<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+						This portolio will be immediately deleted. You cannot undo this action.
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<GCButton
+						id={'editReviewerClose'}
+						onClick={() => {
+							setDeleteModal(false);
+						}}
+						style={{ margin: '10px' }}
+						buttonColor={'#8091A5'}
+					>
+						Cancel
+					</GCButton>
+					<GCButton
+						id={'editReviewerSubmit'}
+						onClick={() => {
+							setDeleteModal(false);
+						}}
+						style={{ margin: '10px' }}
+					>
+						Delete
+					</GCButton>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 };
