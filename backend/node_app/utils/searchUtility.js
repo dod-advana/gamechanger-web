@@ -8,7 +8,6 @@ const fs = require('fs');
 const { include } = require('underscore');
 const { performance } = require('perf_hooks');
 const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
-const { Console } = require('console');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
