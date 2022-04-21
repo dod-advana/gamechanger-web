@@ -261,14 +261,18 @@ class PolicySearchHandler extends SearchHandler {
 		// get expanded abbreviations
 		const esClientName = 'gamechanger';
 		const entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
+		let abbreviationExpansions = [];
 		let alias = await this.searchUtility.findAliases(termsArray, esClientName, entitiesIndex, userId);
-		let expandedTerm = alias._source.name;
-		if (expandedTerm) {
-			if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-			}
+		if (alias._source) {
+			let expandedName = alias._source.name.replace('United States ', '');
+			abbreviationExpansions.push('"' + expandedName.toLowerCase() + '"');
+			let expandedAliases = alias._source.aliases;
+			expandedAliases.forEach((term) => {
+				if (term['name'] !== alias.match) {
+					abbreviationExpansions.push('"' + term['name'].toLowerCase() + '"');
+				}
+			});
 		}
-
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 		let cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
