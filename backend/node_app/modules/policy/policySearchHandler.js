@@ -194,7 +194,7 @@ class PolicySearchHandler extends SearchHandler {
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray, userId);
-			
+
 			let relatedSearches = await this.searchUtility.getRelatedSearches(
 				searchText,
 				expansionDict,
@@ -259,10 +259,10 @@ class PolicySearchHandler extends SearchHandler {
 
 	async abbreviationCleaner(termsArray, userId) {
 		// get expanded abbreviations
-		const esClientName = 'gamechanger'
+		const esClientName = 'gamechanger';
 		const entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		let alias = await this.searchUtility.findAliases(termsArray, esClientName, entitiesIndex, userId);
-		let expandedTerm = alias._source.name
+		let expandedTerm = alias._source.name;
 		if (expandedTerm) {
 			if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
@@ -481,12 +481,7 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities = { QAResults: {}, allResults: {} };
-				let qaQueries = await this.searchUtility.formatQAquery(
-					searchText,
-					esClientName,
-					entitiesIndex,
-					userId
-				);
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, esClientName, entitiesIndex, userId);
 				QA.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
