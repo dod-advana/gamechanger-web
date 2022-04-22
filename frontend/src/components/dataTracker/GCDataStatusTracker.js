@@ -424,15 +424,6 @@ const GCDataStatusTracker = (props) => {
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
 
-	const getCrawlerName = (crawler) => {
-		const crawlerDisplay =
-			crawler.data_source_s && crawler.source_title
-				? `${crawler.data_source_s} - ${crawler.source_title}`
-				: crawler.crawler_name;
-
-		return <div style={{ textAlign: 'left', width: '100%' }}>{crawlerDisplay}</div>;
-	};
-
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', 'PDFOpen');
@@ -616,16 +607,17 @@ const GCDataStatusTracker = (props) => {
 		const crawlerColumns = [
 			{
 				Header: 'Source',
-				accessor: 'crawler_name',
+				accessor: 'displayName',
+				filterable: true,
 				Cell: (row) => {
 					return row.original.url_origin ? (
 						<TableRow>
 							<a href={row.original.url_origin} target="_blank" rel="noreferrer">
-								{getCrawlerName(row.original)}
+								{row.value}
 							</a>
 						</TableRow>
 					) : (
-						<TableRow>{getCrawlerName(row.original)}</TableRow>
+						<TableRow>{row.value}</TableRow>
 					);
 				},
 				style: { whiteSpace: 'unset' },
@@ -758,7 +750,7 @@ const GCDataStatusTracker = (props) => {
 							onFetchData={handleFetchCrawlerData}
 							defaultSorted={[
 								{
-									id: 'crawler_name',
+									id: 'displayName',
 									desc: false,
 								},
 							]}
