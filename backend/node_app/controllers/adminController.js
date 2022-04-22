@@ -3,6 +3,8 @@ const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');
+const MLSearchUtility = require('../utils/MLsearchUtility');
+
 const constantsFile = require('../config/constants');
 class AdminController {
 	constructor(opts = {}) {
@@ -12,6 +14,8 @@ class AdminController {
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
+			MLsearchUtility = new MLSearchUtility(opts),
+
 			constants = constantsFile,
 		} = opts;
 
@@ -20,6 +24,8 @@ class AdminController {
 		this.sparkMD5 = sparkMD5;
 		this.appSettings = appSettings;
 		this.searchUtility = searchUtility;
+		this.MLsearchUtility = MLsearchUtility;
+
 		this.constants = constants;
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
@@ -123,7 +129,7 @@ class AdminController {
 		try {
 			if (combinedDocList.length > 0) {
 				// get recommendations
-				const rec_results = await this.searchUtility.getRecDocs(combinedDocList, userId);
+				const rec_results = await this.MLsearchUtility.getRecDocs(combinedDocList, userId);
 				recDocs.value = rec_results.results ? rec_results.results : [];
 				// only get top 20 recommendations
 				recDocs.value = recDocs.value.slice(0, 10);

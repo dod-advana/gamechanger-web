@@ -1,4 +1,5 @@
 const SearchUtility = require('../../utils/searchUtility');
+const MLSearchUtility = require('../../utils/MLsearchUtility');
 const CONSTANTS = require('../../config/constants');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const GraphHandler = require('../base/graphHandler');
@@ -9,13 +10,14 @@ class PolicyGraphHandler extends GraphHandler {
 	constructor(opts = {}) {
 		const {
 			searchUtility = new SearchUtility(opts),
+			MLsearchUtility = new MLSearchUtility(opts),
 			constants = CONSTANTS,
 			dataLibrary = new DataLibrary(opts),
 			dataTracker = new DataTrackerController(opts),
 		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
-		this.searchUtility = searchUtility;
+		this.MLsearchUtility = MLsearchUtility;
 		this.constants = constants;
 		this.dataLibrary = dataLibrary;
 		this.dataTracker = dataTracker;
@@ -46,7 +48,7 @@ class PolicyGraphHandler extends GraphHandler {
 			const { isTest = false, expandTerms = false, searchText } = req.body;
 
 			const gT0 = new Date().getTime();
-			req.body.questionFlag = this.searchUtility.isQuestion(searchText);
+			req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
 			req.body.parsedQuery = parsedQuery;
@@ -628,7 +630,7 @@ class PolicyGraphHandler extends GraphHandler {
 			};
 
 			// const gT0 = new Date().getTime();
-			searchBody.questionFlag = this.searchUtility.isQuestion(searchText);
+			searchBody.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
 			searchBody.parsedQuery = parsedQuery;
