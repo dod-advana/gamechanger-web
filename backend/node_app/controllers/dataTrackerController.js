@@ -286,7 +286,7 @@ class DataTrackerController {
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UXV7V8R', userId);
-			res.status(502).send({ error: e.message, message: 'Error retrieving crawler metadata' });
+			res.status(500).send({ error: e.message, message: 'Error retrieving crawler metadata' });
 		}
 	}
 
