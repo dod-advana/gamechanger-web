@@ -504,7 +504,7 @@ class PolicySearchHandler extends SearchHandler {
 					userId
 				);
 				QA.question = qaQueries.display;
-				let bigramQueries = this.MLsearchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				let bigramQueries = this.MLsearchUtility.getBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
 					entities = await this.MLsearchUtility.getQAEntities(
 						entities,
@@ -518,7 +518,7 @@ class PolicySearchHandler extends SearchHandler {
 				} catch (e) {
 					this.logger.error(e.message, 'FLPQX67M');
 				}
-				let qaDocQuery = this.MLsearchUtility.phraseQAQuery(
+				let qaDocQuery = this.MLsearchUtility.getPhraseQAQuery(
 					bigramQueries,
 					queryType,
 					qaParams.entityLimit,

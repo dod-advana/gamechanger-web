@@ -56,6 +56,8 @@ class SearchUtility {
 		return `${cloneName}_${hashed}`;
 	}
 
+	/********** RELATED SEARCH AND EXPANSION FUNCTIONS **********/
+
 	combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbreviationExpansions, userId) {
 		try {
 			let result = {};
@@ -189,6 +191,8 @@ class SearchUtility {
 		}
 		return cleanPhrase;
 	}
+
+	/********** RELATED SEARCH AND EXPANSION FUNCTIONS END **********/
 
 	getQueryVariable(name, url) {
 		name = name.replace(/[[\]]/g, '\\$&');
@@ -724,24 +728,25 @@ class SearchUtility {
 			this.logger.error(err, '2OQQD7D', user);
 		}
 	}
-	isVerbatim(searchText) {
+
+	isVerbatim(searchText, suggest = false) {
 		let verbatim = false;
-		if (
-			(searchText.startsWith('"') && searchText.endsWith('"')) ||
-			(searchText.startsWith(`'`) && searchText.endsWith(`'`))
-		) {
-			verbatim = true;
+		if (!suggest) {
+			if (
+				(searchText.startsWith('"') && searchText.endsWith('"')) ||
+				(searchText.startsWith(`'`) && searchText.endsWith(`'`))
+			) {
+				verbatim = true;
+			}
+		} else {
+			if (searchText.startsWith('"') || searchText.startsWith(`'`)) {
+				verbatim = true;
+			}
 		}
+
 		return verbatim;
 	}
 
-	isVerbatimSuggest(searchText) {
-		let verbatim = false;
-		if (searchText.startsWith('"') || searchText.startsWith(`'`)) {
-			verbatim = true;
-		}
-		return verbatim;
-	}
 	async getTitle(parsedQuery, clientObj, userId) {
 		// get contents of single document searching by doc display title
 		try {
@@ -936,7 +941,7 @@ class SearchUtility {
 		suggest_mode = 'popular',
 	}) {
 		// multi search in ES
-		const plainQuery = this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText;
+		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
 
 		let query = {
 			suggest: {
@@ -1036,7 +1041,7 @@ class SearchUtility {
 		aliases = 'aliases',
 		queryTypes = ['title', 'searchhistory', 'entities'],
 	}) {
-		const plainQuery = this.isVerbatimSuggest(searchText) ? searchText.replace(/["']/g, '') : searchText;
+		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
 		// multi search in ES if text is more than 3
 		if (searchText.length >= 3) {
 			let query = [];
