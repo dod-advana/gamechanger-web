@@ -76,7 +76,7 @@ class MatomoController {
 	}
 
 	async getUserMatomoStatus(req, res) {
-		const userID = req.get('SSL_CLIENT_S_DN_CN');
+		const userID = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const data = await this.matomoStatus.findOne({
 				where: {
@@ -99,7 +99,7 @@ class MatomoController {
 	}
 
 	async setUserMatomoStatus(req, res) {
-		const userID = req.get('SSL_CLIENT_S_DN_CN');
+		const userID = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const { tracking } = req.body;
