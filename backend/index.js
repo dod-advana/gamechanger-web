@@ -127,7 +127,7 @@ app.use(async function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-	const userId = req.get('SSL_CLIENT_S_DN_CN');
+	const userId = req.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 	logger.http(
 		`[${process.env.pm_id || 0}][${req.ip}] [${req.session?.user?.cn || userId}] Request for: ${
 			req.protocol
