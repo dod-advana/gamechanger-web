@@ -456,6 +456,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 	);
 };
 
+// render a textfield tied to the edaSearchSettings
 const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 	return (
 		<TextField

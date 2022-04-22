@@ -155,8 +155,6 @@ class EdaSearchHandler extends SearchHandler {
 				throw 'Unauthorized';
 			}
 
-			console.log(JSON.stringify(esQuery));
-
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
 			if (
