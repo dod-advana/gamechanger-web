@@ -626,7 +626,6 @@ const GameChangerDetailsPage = (props) => {
 			entity.details.forEach((detail, i) => {
 				if (detail.name === 'NodeVec') entity.details.splice(i, 1);
 			});
-			console.log(entity.details);
 		}
 
 		return (
