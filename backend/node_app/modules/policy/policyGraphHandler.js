@@ -471,7 +471,7 @@ class PolicyGraphHandler extends GraphHandler {
 			data.nodes = entData.nodes;
 
 			const [graphData] = await this.getGraphData(
-				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF]-(:Entity) ' +
+				'OPTIONAL MATCH pc=(c:Entity)-[:CHILD_OF*0..1]-(:Entity) ' +
 					'WHERE c.name = $name ' +
 					'RETURN distinct pc limit 1000;',
 				{ name: entityName },
