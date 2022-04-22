@@ -31,232 +31,14 @@ class MLSearchUtility {
 		this.searchUtility = searchUtility;
 
 		this.intelligentSearchHandler = this.intelligentSearchHandler.bind(this);
-		this.makeBigramQueries = this.makeBigramQueries.bind(this);
-		this.phraseQAQuery = this.phraseQAQuery.bind(this);
+		this.getBigramQueries = this.getBigramQueries.bind(this);
+		this.getPhraseQAQuery = this.getPhraseQAQuery.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
 	}
-
-	// makes phrases to add to ES queries for entities or gamechanger indices
-	makeBigramQueries(searchTextList, alias) {
-		try {
-			let bigrams = [];
-			let searchText = searchTextList.join(' ');
-			let length = searchTextList.length - 2;
-			for (let i = 0; i <= length; i++) {
-				bigrams.push(searchTextList.slice(i, i + 2).join(' '));
-			}
-
-			// if alias search came back with a result, this adds the full unabbreviated name
-			try {
-				if (alias._source) {
-					bigrams.push(alias._source.name);
-				}
-			} catch (e) {
-				this.logger.error(e, 'DYWPQMCSW', '');
-			}
-
-			// make one object for all queries
-			const bigramQueries = {
-				entityShouldQueries: [],
-				docMustQueries: [],
-				docShouldQueries: [
-					{
-						multi_match: {
-							query: searchText,
-							fields: ['keyw_5^2', 'id^2', 'summary_30', 'paragraphs.par_raw_text_t'],
-							operator: 'or',
-						},
-					},
-				],
-			};
-
-			// make phrase queries for each bigram
-			for (const element of bigrams) {
-				// documents
-				const wildcard = {
-					wildcard: {
-						'display_title_s.search': {
-							value: element,
-							boost: 6,
-						},
-					},
-				};
-				bigramQueries.docMustQueries.push(wildcard);
-
-				const qs = {
-					query_string: {
-						query: element,
-						default_field: 'paragraphs.par_raw_text_t',
-						default_operator: 'AND',
-						fuzzy_max_expansions: 100,
-						fuzziness: 'AUTO',
-					},
-				};
-				bigramQueries.docMustQueries.push(qs);
-
-				const mm = {
-					multi_match: {
-						query: element,
-						fields: ['summary_30', 'keyw_5'],
-						type: 'phrase',
-						boost: 3,
-					},
-				};
-				bigramQueries.docShouldQueries.push(mm);
-
-				// entities
-				const nameEntityQuery = {
-					match_phrase: {
-						name: {
-							query: element,
-							slop: 2,
-							boost: 0.5,
-						},
-					},
-				};
-				bigramQueries.entityShouldQueries.push(nameEntityQuery);
-
-				const multiEntityQuery = {
-					multi_match: {
-						fields: ['name', 'aliases.name'], // 'information'
-						query: element,
-						type: 'phrase_prefix',
-					},
-				};
-				bigramQueries.entityShouldQueries.push(multiEntityQuery);
-			}
-			return bigramQueries;
-		} catch (e) {
-			this.logger.error(e, 'LWPOT5F', '');
-		}
-	}
-
-	// make ES query for QA documents/entities/aliases
-	phraseQAQuery(bigramQueries, queryType, entityLimit, maxLength, user) {
-		let query;
-		try {
-			if (queryType === 'alias_only') {
-				query = {
-					from: 0,
-					size: entityLimit,
-					query: {
-						bool: {
-							should: bigramQueries.aliasQuery,
-						},
-					},
-				};
-			} else if (queryType === 'entities') {
-				query = {
-					from: 0,
-					size: entityLimit,
-					query: {
-						bool: {
-							should: bigramQueries.entityShouldQueries,
-						},
-					},
-				};
-			} else if (queryType === 'documents') {
-				query = {
-					query: {
-						bool: {
-							must: [
-								{
-									nested: {
-										path: 'paragraphs',
-										inner_hits: {
-											_source: false,
-											stored_fields: [
-												'paragraphs.page_num_i',
-												'paragraphs.filename',
-												'paragraphs.par_raw_text_t',
-											],
-											from: 0,
-											size: 100,
-											highlight: {
-												fields: {
-													'paragraphs.filename.search': {
-														number_of_fragments: 0,
-													},
-													'paragraphs.par_raw_text_t': {
-														fragment_size: maxLength,
-														number_of_fragments: 1,
-													},
-												},
-												fragmenter: 'span',
-											},
-										},
-										query: {
-											bool: {
-												should: bigramQueries.docMustQueries,
-											},
-										},
-									},
-								},
-							],
-							should: bigramQueries.docShouldQueries,
-						},
-					},
-				};
-			}
-			return query;
-		} catch (e) {
-			this.logger.error(e, 'TJDDKH5F', user);
-		}
-	}
-
-	filterEmptyDocs(docs, filterLength) {
-		// filters out results that have no text or very short amount of text in the paragraphs
-		try {
-			let filteredResults = [];
-			for (let i = 0; i < docs.length; i++) {
-				let paragraphs = docs[i]._source.paragraphs;
-				let parText = paragraphs.map((item) => item.par_raw_text_t).join(' ');
-				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
-					filteredResults.push(docs[i]);
-				} else {
-					// pass
-					//console.log("REMOVING DOC: ", docs[i])
-				}
-			}
-			return filteredResults;
-		} catch (e) {
-			this.logger.error(e, 'SPW29NTY', '');
-		}
-	}
-
-	expandParagraphs(singleResult, parIdx, minLength) {
-		// adds context around short paragraphs to make them longer
-		let qaResults = singleResult._source.paragraphs; // get just the paragraph text into list
-		let qaTextList = qaResults.map((item) => item.par_raw_text_t);
-		let start = parIdx;
-		let end = +start + +1;
-		let text = qaTextList[start];
-		let total_pars = qaTextList.length;
-		let context = [];
-		let arr = text.split(/\s+/);
-		try {
-			for (start, end; start >= 0, end <= total_pars; --start, ++end) {
-				if (start <= 1) {
-					start = 1;
-				}
-				if (end >= total_pars) {
-					end = total_pars;
-				}
-				context = qaTextList.slice(start, end);
-				text = context.join(' ');
-				arr = text.split(/\s+/);
-				if (arr.length > minLength) {
-					break;
-				}
-			}
-			return context;
-		} catch (e) {
-			LOGGER.error(e.message, 'BVD4546JN', '');
-		}
-	}
+	/********** QUESTION ANSWER FUNCTIONS **********/
 
 	async queryOneDocQA(docId, esClientName, esIndex, userId) {
 		// query entire docs to expand short paragraphs/get beginning of doc
@@ -267,19 +49,6 @@ class MLSearchUtility {
 		} catch (e) {
 			LOGGER.error(e.message, 'COP4546JN', userId);
 		}
-	}
-	// ML
-	cleanParagraph(paragraph) {
-		// remove extra punctuation/weird characters
-		try {
-			paragraph = paragraph.replace(/((\.)(\s)?(?=\.))/g, ''); // remove TOC periods
-			paragraph = paragraph.replace(/([xX](\s)?(?=[xX]))/g, ''); // remove TOC periods
-			paragraph = paragraph.replace(/[^a-zA-Z0-9 \(\)\/-:;,"?!\.]/g, ' '); // ascii
-			paragraph = paragraph.replace(/(\s\s+)/g, ' '); // replace multiple spaces with one space
-		} catch (e) {
-			LOGGER.error(e.message, 'NQODF78X', '');
-		}
-		return paragraph;
 	}
 
 	async formatQAquery(searchText, entityLimit, esClientName, entitiesIndex, userId) {
@@ -304,7 +73,7 @@ class MLSearchUtility {
 				entities.QAResults = qaQueries.alias;
 			} else {
 				let queryType = 'entities';
-				let qaEntityQuery = this.phraseQAQuery(
+				let qaEntityQuery = this.getPhraseQAQuery(
 					bigramQueries,
 					queryType,
 					qaParams.entityLimit,
@@ -324,91 +93,6 @@ class MLSearchUtility {
 			return entities;
 		} catch (e) {
 			this.logger.error(e.message, 'I9XPQL2W');
-		}
-	}
-
-	cleanQAResults(QA, shortenedResults, context) {
-		// formats QA results
-		try {
-			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
-				shortenedResults.answers = shortenedResults.answers.filter(function (i) {
-					return i['status'] == 'passed' && i['text'] !== '';
-				});
-			} else {
-				shortenedResults.answers = shortenedResults.answers.filter(function (i) {
-					return i['text'] !== '';
-				});
-			}
-			let matchedResults = [];
-			for (var i = 0; i < shortenedResults.answers.length; i++) {
-				let ix = shortenedResults.answers[i].context;
-				let matchedAnswer = {
-					answer: shortenedResults.answers[i].text,
-					null_score_diff: shortenedResults.answers[i].null_score_diff,
-					filename: context[ix].filename,
-					docId: context[ix].docId,
-					resultType: context[ix].resultType,
-					cac_only: context[ix].cac_only,
-					pub_date: context[ix].pubDate,
-					displaySource:
-						'Source: ' +
-						context[ix].filename.toUpperCase() +
-						' (' +
-						context[ix].resultType.toUpperCase() +
-						')',
-				};
-				matchedResults.push(matchedAnswer);
-			}
-			QA.answers = matchedResults;
-		} catch (e) {
-			LOGGER.error(e.message, 'AJEPRUTY', '');
-		}
-		return QA;
-	}
-	// ML
-	getInnerHitHighlight(paragraph) {
-		// gets just the highlight from an inner hit
-		try {
-			return paragraph.highlight['paragraphs.par_raw_text_t'][0];
-		} catch (e) {
-			LOGGER.error(e.message, 'NPLWDQCX', '');
-		}
-	}
-	// ML
-	getInnerHitParagraph(paragraph) {
-		// get the paragraph text from an inner hit
-		try {
-			return paragraph.fields['paragraphs.par_raw_text_t'][0];
-		} catch (e) {
-			LOGGER.error(e.message, 'NQCPQBX', '');
-		}
-	}
-
-	processQAEntity(entity, context, userId) {
-		try {
-			let docId = '';
-			let resultType = '';
-			if (entity._source.entity_type === 'topic') {
-				docId = entity._source.name.toLowerCase();
-				resultType = 'topic';
-			} else {
-				docId = entity._source.name;
-				resultType = 'entity';
-			}
-			let entityObj = {
-				filename: entity._source.name,
-				docId: docId,
-				docScore: entity._score,
-				retrievedDate: entity._source.information_retrieved,
-				type: entity._source.entity_type,
-				resultType: resultType,
-				source: 'entity search',
-				text: entity._source.information,
-			};
-			context.unshift(entityObj);
-			return context;
-		} catch (e) {
-			LOGGER.error(e.message, 'PQXUOSDF9', userId);
 		}
 	}
 
@@ -570,28 +254,171 @@ class MLSearchUtility {
 		}
 	}
 
-	addSearchReport(query, params, saveResults, userId) {
+	getPhraseQAQuery(bigramQueries, queryType, entityLimit, maxLength, user) {
+		// make ES query for QA documents/entities/aliases
+
+		let query;
 		try {
-			var today = new Date();
-			var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-			let dir = './scripts/search-testing/' + date + '/';
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, {
-					recursive: true,
-				});
+			if (queryType === 'alias_only') {
+				query = {
+					from: 0,
+					size: entityLimit,
+					query: {
+						bool: {
+							should: bigramQueries.aliasQuery,
+						},
+					},
+				};
+			} else if (queryType === 'entities') {
+				query = {
+					from: 0,
+					size: entityLimit,
+					query: {
+						bool: {
+							should: bigramQueries.entityShouldQueries,
+						},
+					},
+				};
+			} else if (queryType === 'documents') {
+				query = {
+					query: {
+						bool: {
+							must: [
+								{
+									nested: {
+										path: 'paragraphs',
+										inner_hits: {
+											_source: false,
+											stored_fields: [
+												'paragraphs.page_num_i',
+												'paragraphs.filename',
+												'paragraphs.par_raw_text_t',
+											],
+											from: 0,
+											size: 100,
+											highlight: {
+												fields: {
+													'paragraphs.filename.search': {
+														number_of_fragments: 0,
+													},
+													'paragraphs.par_raw_text_t': {
+														fragment_size: maxLength,
+														number_of_fragments: 1,
+													},
+												},
+												fragmenter: 'span',
+											},
+										},
+										query: {
+											bool: {
+												should: bigramQueries.docMustQueries,
+											},
+										},
+									},
+								},
+							],
+							should: bigramQueries.docShouldQueries,
+						},
+					},
+				};
 			}
-			let filedir =
-				dir + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, '_') + '_search_reports.txt';
-			let report = { query: query, userId: userId, date: today, params: params, saveResults: saveResults };
-			fs.writeFile(filedir, JSON.stringify(report), (err) => {
-				if (err) {
-					LOGGER.error(err, 'CPQ4KSLN', userId);
-				}
-			});
+			return query;
 		} catch (e) {
-			LOGGER.error(e.message, 'WWKLNQPN', userId);
+			this.logger.error(e, 'TJDDKH5F', user);
 		}
 	}
+
+	processQAEntity(entity, context, userId) {
+		try {
+			let docId = '';
+			let resultType = '';
+			if (entity._source.entity_type === 'topic') {
+				docId = entity._source.name.toLowerCase();
+				resultType = 'topic';
+			} else {
+				docId = entity._source.name;
+				resultType = 'entity';
+			}
+			let entityObj = {
+				filename: entity._source.name,
+				docId: docId,
+				docScore: entity._score,
+				retrievedDate: entity._source.information_retrieved,
+				type: entity._source.entity_type,
+				resultType: resultType,
+				source: 'entity search',
+				text: entity._source.information,
+			};
+			context.unshift(entityObj);
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'PQXUOSDF9', userId);
+		}
+	}
+
+	cleanQAResults(QA, shortenedResults, context) {
+		// formats QA results
+		try {
+			if (shortenedResults.answers.length > 0 && shortenedResults.answers[0].status) {
+				shortenedResults.answers = shortenedResults.answers.filter(function (i) {
+					return i['status'] == 'passed' && i['text'] !== '';
+				});
+			} else {
+				shortenedResults.answers = shortenedResults.answers.filter(function (i) {
+					return i['text'] !== '';
+				});
+			}
+			let matchedResults = [];
+			for (var i = 0; i < shortenedResults.answers.length; i++) {
+				let ix = shortenedResults.answers[i].context;
+				let matchedAnswer = {
+					answer: shortenedResults.answers[i].text,
+					null_score_diff: shortenedResults.answers[i].null_score_diff,
+					filename: context[ix].filename,
+					docId: context[ix].docId,
+					resultType: context[ix].resultType,
+					cac_only: context[ix].cac_only,
+					pub_date: context[ix].pubDate,
+					displaySource:
+						'Source: ' +
+						context[ix].filename.toUpperCase() +
+						' (' +
+						context[ix].resultType.toUpperCase() +
+						')',
+				};
+				matchedResults.push(matchedAnswer);
+			}
+			QA.answers = matchedResults;
+		} catch (e) {
+			LOGGER.error(e.message, 'AJEPRUTY', '');
+		}
+		return QA;
+	}
+
+	isQuestion(searchText) {
+		const questionWords = [
+			'who',
+			'what',
+			'where',
+			'when',
+			'how',
+			'why',
+			'can',
+			'may',
+			'will',
+			"won't",
+			'does',
+			"doesn't",
+		];
+		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
+		const question =
+			questionWords.find((item) => item === searchTextList[0]) !== undefined ||
+			searchTextList[searchTextList.length - 1] === '?';
+		return question;
+	}
+	/********** QUESTION ANSWER FUNCTIONS END **********/
+
+	/********** RELATED SEARCH FUNCTIONS **********/
 
 	async getRelatedSearches(searchText, expansionDict, esClientName, userId, maxSearches = 5) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
@@ -665,6 +492,9 @@ class MLSearchUtility {
 
 		return relatedSearches;
 	}
+	/********** RELATED SEARCH FUNCTIONS END **********/
+
+	/********** INTELLIGENT SEARCH FUNCTIONS **********/
 
 	async getSentResults(searchText, userId) {
 		let sentResults = [];
@@ -695,7 +525,9 @@ class MLSearchUtility {
 		}
 		return {};
 	}
+	/********** INTELLIGENT SEARCH FUNCTIONS END **********/
 
+	/********** RECOMMENDATIONS FUNCTIONS **********/
 	async getRecDocs(docs = [], userId = '') {
 		let recDocs = [];
 		let recommendations = {};
@@ -713,26 +545,6 @@ class MLSearchUtility {
 			this.logger.error(e, 'LLLZ12P', userId);
 		}
 		return recommendations;
-	}
-
-	filterRecommendations(docList) {
-		try {
-			const docCount = {};
-
-			for (const doc of docList) {
-				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
-			}
-			let docListSorted = Object.keys(docCount)
-				.sort(function (a, b) {
-					return docCount[a] - docCount[b];
-				})
-				.reverse();
-
-			return docListSorted;
-		} catch (e) {
-			this.logger.error(e, 'LLLZ12P', '');
-			return docList;
-		}
 	}
 
 	async getAllGraphRecs(docList, userId, max_results = 10) {
@@ -828,55 +640,229 @@ class MLSearchUtility {
 		return suggested;
 	}
 
-	getESClient(cloneName, permissions) {
-		let esClientName = 'gamechanger';
-		let esIndex = '';
+	filterRecommendations(docList) {
 		try {
-			esIndex = [
-				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
-				this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
-			];
-		} catch (err) {
-			this.logger.error(err, 'GE2ALRF', '');
-			esIndex = 'gamechanger';
-		}
+			const docCount = {};
 
-		switch (cloneName) {
-			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-					esClientName = 'eda';
-					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
-				} else {
-					throw 'Unauthorized';
-				}
-				break;
-			default:
-				esClientName = 'gamechanger';
-		}
+			for (const doc of docList) {
+				docCount[doc] = docCount[doc] ? docCount[doc] + 1 : 1;
+			}
+			let docListSorted = Object.keys(docCount)
+				.sort(function (a, b) {
+					return docCount[a] - docCount[b];
+				})
+				.reverse();
 
-		return { esClientName, esIndex };
+			return docListSorted;
+		} catch (e) {
+			this.logger.error(e, 'LLLZ12P', '');
+			return docList;
+		}
 	}
 
-	isQuestion(searchText) {
-		const questionWords = [
-			'who',
-			'what',
-			'where',
-			'when',
-			'how',
-			'why',
-			'can',
-			'may',
-			'will',
-			"won't",
-			'does',
-			"doesn't",
-		];
-		const searchTextList = searchText.toLowerCase().trim().split(/\s|\b/);
-		const question =
-			questionWords.find((item) => item === searchTextList[0]) !== undefined ||
-			searchTextList[searchTextList.length - 1] === '?';
-		return question;
+	/********** RECOMMENDATIONS FUNCTIONS END **********/
+
+	/********** MISC FUNCTIONS **********/
+
+	getBigramQueries(searchTextList, alias) {
+		// makes phrases to add to ES queries for entities or gamechanger indices
+
+		try {
+			let bigrams = [];
+			let searchText = searchTextList.join(' ');
+			let length = searchTextList.length - 2;
+			for (let i = 0; i <= length; i++) {
+				bigrams.push(searchTextList.slice(i, i + 2).join(' '));
+			}
+
+			// if alias search came back with a result, this adds the full unabbreviated name
+			try {
+				if (alias._source) {
+					bigrams.push(alias._source.name);
+				}
+			} catch (e) {
+				this.logger.error(e, 'DYWPQMCSW', '');
+			}
+
+			// make one object for all queries
+			const bigramQueries = {
+				entityShouldQueries: [],
+				docMustQueries: [],
+				docShouldQueries: [
+					{
+						multi_match: {
+							query: searchText,
+							fields: ['keyw_5^2', 'id^2', 'summary_30', 'paragraphs.par_raw_text_t'],
+							operator: 'or',
+						},
+					},
+				],
+			};
+
+			// make phrase queries for each bigram
+			for (const element of bigrams) {
+				// documents
+				const wildcard = {
+					wildcard: {
+						'display_title_s.search': {
+							value: element,
+							boost: 6,
+						},
+					},
+				};
+				bigramQueries.docMustQueries.push(wildcard);
+
+				const qs = {
+					query_string: {
+						query: element,
+						default_field: 'paragraphs.par_raw_text_t',
+						default_operator: 'AND',
+						fuzzy_max_expansions: 100,
+						fuzziness: 'AUTO',
+					},
+				};
+				bigramQueries.docMustQueries.push(qs);
+
+				const mm = {
+					multi_match: {
+						query: element,
+						fields: ['summary_30', 'keyw_5'],
+						type: 'phrase',
+						boost: 3,
+					},
+				};
+				bigramQueries.docShouldQueries.push(mm);
+
+				// entities
+				const nameEntityQuery = {
+					match_phrase: {
+						name: {
+							query: element,
+							slop: 2,
+							boost: 0.5,
+						},
+					},
+				};
+				bigramQueries.entityShouldQueries.push(nameEntityQuery);
+
+				const multiEntityQuery = {
+					multi_match: {
+						fields: ['name', 'aliases.name'], // 'information'
+						query: element,
+						type: 'phrase_prefix',
+					},
+				};
+				bigramQueries.entityShouldQueries.push(multiEntityQuery);
+			}
+			return bigramQueries;
+		} catch (e) {
+			this.logger.error(e, 'LWPOT5F', '');
+		}
+	}
+
+	filterEmptyDocs(docs, filterLength) {
+		// filters out results that have no text or very short amount of text in the paragraphs
+		try {
+			let filteredResults = [];
+			for (let i = 0; i < docs.length; i++) {
+				let paragraphs = docs[i]._source.paragraphs;
+				let parText = paragraphs.map((item) => item.par_raw_text_t).join(' ');
+				if (parText.trim() !== '' && parText.trim().split(/\s+/).length > filterLength) {
+					filteredResults.push(docs[i]);
+				} else {
+					// pass
+					//console.log("REMOVING DOC: ", docs[i])
+				}
+			}
+			return filteredResults;
+		} catch (e) {
+			this.logger.error(e, 'SPW29NTY', '');
+		}
+	}
+
+	expandParagraphs(singleResult, parIdx, minLength) {
+		// adds context around short paragraphs to make them longer
+		let qaResults = singleResult._source.paragraphs; // get just the paragraph text into list
+		let qaTextList = qaResults.map((item) => item.par_raw_text_t);
+		let start = parIdx;
+		let end = +start + +1;
+		let text = qaTextList[start];
+		let total_pars = qaTextList.length;
+		let context = [];
+		let arr = text.split(/\s+/);
+		try {
+			for (start, end; start >= 0, end <= total_pars; --start, ++end) {
+				if (start <= 1) {
+					start = 1;
+				}
+				if (end >= total_pars) {
+					end = total_pars;
+				}
+				context = qaTextList.slice(start, end);
+				text = context.join(' ');
+				arr = text.split(/\s+/);
+				if (arr.length > minLength) {
+					break;
+				}
+			}
+			return context;
+		} catch (e) {
+			LOGGER.error(e.message, 'BVD4546JN', '');
+		}
+	}
+
+	cleanParagraph(paragraph) {
+		// remove extra punctuation/weird characters
+		try {
+			paragraph = paragraph.replace(/((\.)(\s)?(?=\.))/g, ''); // remove TOC periods
+			paragraph = paragraph.replace(/([xX](\s)?(?=[xX]))/g, ''); // remove TOC periods
+			paragraph = paragraph.replace(/[^a-zA-Z0-9 \(\)\/-:;,"?!\.]/g, ' '); // ascii
+			paragraph = paragraph.replace(/(\s\s+)/g, ' '); // replace multiple spaces with one space
+		} catch (e) {
+			LOGGER.error(e.message, 'NQODF78X', '');
+		}
+		return paragraph;
+	}
+
+	getInnerHitHighlight(paragraph) {
+		// gets just the highlight from an inner hit
+		try {
+			return paragraph.highlight['paragraphs.par_raw_text_t'][0];
+		} catch (e) {
+			LOGGER.error(e.message, 'NPLWDQCX', '');
+		}
+	}
+
+	getInnerHitParagraph(paragraph) {
+		// get the paragraph text from an inner hit
+		try {
+			return paragraph.fields['paragraphs.par_raw_text_t'][0];
+		} catch (e) {
+			LOGGER.error(e.message, 'NQCPQBX', '');
+		}
+	}
+
+	addSearchReport(query, params, saveResults, userId) {
+		try {
+			var today = new Date();
+			var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+			let dir = './scripts/search-testing/' + date + '/';
+			if (!fs.existsSync(dir)) {
+				fs.mkdirSync(dir, {
+					recursive: true,
+				});
+			}
+			let filedir =
+				dir + date + '_' + query.replace(/[^ 0-9a-z]/gi, '').replace(/ /g, '_') + '_search_reports.txt';
+			let report = { query: query, userId: userId, date: today, params: params, saveResults: saveResults };
+			fs.writeFile(filedir, JSON.stringify(report), (err) => {
+				if (err) {
+					LOGGER.error(err, 'CPQ4KSLN', userId);
+				}
+			});
+		} catch (e) {
+			LOGGER.error(e.message, 'WWKLNQPN', userId);
+		}
 	}
 }
 
