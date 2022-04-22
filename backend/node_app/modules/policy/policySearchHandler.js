@@ -193,7 +193,8 @@ class PolicySearchHandler extends SearchHandler {
 			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
-			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
+			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray, userId);
+
 			let relatedSearches = await this.searchUtility.getRelatedSearches(
 				searchText,
 				expansionDict,
@@ -256,29 +257,22 @@ class PolicySearchHandler extends SearchHandler {
 		return [synList, text];
 	}
 
-	async abbreviationCleaner(termsArray) {
+	async abbreviationCleaner(termsArray, userId) {
 		// get expanded abbreviations
-		await this.redisDB.select(abbreviationRedisAsyncClientDB);
+		const esClientName = 'gamechanger';
+		const entitiesIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
-			if (expandedTerm) {
-				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
+		let alias = await this.searchUtility.findAliases(termsArray, esClientName, entitiesIndex, userId);
+		if (alias._source) {
+			let expandedName = alias._source.name.replace('United States ', '');
+			abbreviationExpansions.push('"' + expandedName.toLowerCase() + '"');
+			let expandedAliases = alias._source.aliases;
+			expandedAliases.forEach((term) => {
+				if (term['name'] !== alias.match) {
+					abbreviationExpansions.push('"' + term['name'].toLowerCase() + '"');
 				}
-			}
-			if (compressedTerm) {
-				if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-				}
-			}
+			});
 		}
-
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 		let cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
@@ -491,13 +485,7 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities = { QAResults: {}, allResults: {} };
-				let qaQueries = await this.searchUtility.formatQAquery(
-					searchText,
-					qaParams.entityLimit,
-					esClientName,
-					entitiesIndex,
-					userId
-				);
+				let qaQueries = await this.searchUtility.formatQAquery(searchText, esClientName, entitiesIndex, userId);
 				QA.question = qaQueries.display;
 				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
 				try {

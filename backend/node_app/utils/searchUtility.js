@@ -1287,9 +1287,10 @@ class SearchUtility {
 		}
 	}
 
-	async findAliases(searchTextList, entityLimit, esClientName, entitiesIndex, user) {
+	async findAliases(searchTextList, esClientName, entitiesIndex, user) {
 		let matchingAlias = {};
 		try {
+			let entityLimit = 5;
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
@@ -1383,12 +1384,12 @@ class SearchUtility {
 		return paragraph;
 	}
 
-	async formatQAquery(searchText, entityLimit, esClientName, entitiesIndex, userId) {
+	async formatQAquery(searchText, esClientName, entitiesIndex, userId) {
 		try {
 			let text = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 			let display = text + '?';
 			let list = text.split(/\s+/); // get list of query terms
-			let alias = await this.findAliases(list, entityLimit, esClientName, entitiesIndex, userId);
+			let alias = await this.findAliases(list, esClientName, entitiesIndex, userId);
 			if (alias._source) {
 				text = text.replace(alias.match.toLowerCase(), alias._source.name);
 			}
