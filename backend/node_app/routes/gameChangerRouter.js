@@ -114,6 +114,7 @@ router.post('/admin/reloadModels', transformer.reloadModels);
 router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/stopProcess', transformer.stopProcess);
+router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
 
 router.post('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
