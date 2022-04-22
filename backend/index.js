@@ -110,7 +110,7 @@ app.use(AAA.ensureAuthenticated);
 app.use(async function (req, res, next) {
 	let user_id;
 	if (req.session.user) {
-		user_id = req.session.user.id;
+		user_id = getUserIdFromSAMLUserId(req);
 		req.permissions = req.session.user.perms;
 	}
 
@@ -240,7 +240,7 @@ app.post('/api/auth/token', async function (req, res) {
 			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
 		}
 
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
 		jwtClaims['csrf-token'] = csrfHash;
@@ -276,6 +276,7 @@ app.use(async function (req, res, next) {
 		} else {
 			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		}
+		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
 			next();
