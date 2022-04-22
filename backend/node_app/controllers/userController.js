@@ -588,14 +588,14 @@ class UserController {
 	}
 
 	async updateOrCreateUserHelper(userData, fromApp = false) {
+		const user_id = getUserIdFromSAMLUserId(userData.id, false);
 		try {
 			let foundItem;
-
 			if (fromApp) {
 				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
 			} else {
 				foundItem = await this.user.findOne({
-					where: { user_id: getUserIdFromSAMLUserId(userData.id) },
+					where: { user_id },
 					raw: true,
 				});
 			}
@@ -605,10 +605,13 @@ class UserController {
 					await this.user.create(userData);
 				} else {
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({
-						user_id: getUserIdFromSAMLUserId(userData.id),
-						cn: userData.cn,
-					});
+					const oldGCUserInfo = await this.syncUserHelper(
+						{
+							user_id,
+							cn: userData.cn,
+						},
+						user_id
+					);
 
 					const tmpExtraFields = { gamechanger: oldGCUserInfo.policy || {} };
 
@@ -725,13 +728,13 @@ class UserController {
 					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn)
 						tempUser.cn = userData.cn;
 
-					await this.user.update(tempUser, { where: { user_id: user_id } });
+					await this.user.update(tempUser, { where: { user_id } });
 				}
 			}
 
 			return true;
 		} catch (err) {
-			this.logger.error(err, '2XY95Z7', userId);
+			this.logger.error(err, '2XY95Z7', user_id);
 			return false;
 		}
 	}
@@ -815,8 +818,6 @@ class UserController {
 				raw: true,
 			});
 
-			console.log(newUsers);
-
 			// Loop through new users
 			for (const user of newUsers) {
 				await this.syncUserHelper(user, userId);
@@ -865,9 +866,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const apiKeyRequest of foundRecords) {
-						apiKeyRequest.username = user.user_id;
-						await this.apiKeyRequests.update(apiKeyRequest, { where: { id: apiKeyRequest.id } });
+					try {
+						for (const apiKeyRequest of foundRecords) {
+							apiKeyRequest.username = user.user_id;
+							await this.apiKeyRequests.update(apiKeyRequest, { where: { id: apiKeyRequest.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL1', userId);
 					}
 
 					// API Keys
@@ -880,9 +885,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const apiKey of foundRecords) {
-						apiKey.username = user.user_id;
-						await this.apiKey.update(apiKey, { where: { id: apiKey.id } });
+					try {
+						for (const apiKey of foundRecords) {
+							apiKey.username = user.user_id;
+							await this.apiKey.update(apiKey, { where: { id: apiKey.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL2', userId);
 					}
 
 					// Export History
@@ -895,9 +904,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const history of foundRecords) {
-						history.user_id = user.user_id;
-						await this.exportHistory.update(history, { where: { id: history.id } });
+					try {
+						for (const history of foundRecords) {
+							history.user_id = user.user_id;
+							await this.exportHistory.update(history, { where: { id: history.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL3', userId);
 					}
 
 					// Favorite Documents
@@ -910,9 +923,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteDocument.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteDocument.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL4', userId);
 					}
 
 					// Favorite Documents Group
@@ -925,9 +942,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteDocumentsGroup.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteDocumentsGroup.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL5', userId);
 					}
 
 					// Favorite Groups
@@ -940,9 +961,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteGroup.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteGroup.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL6', userId);
 					}
 
 					// Favorite Organizations
@@ -955,9 +980,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteOrganization.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteOrganization.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL7', userId);
 					}
 
 					// Favorite Searches
@@ -970,9 +999,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteSearch.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteSearch.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL8', userId);
 					}
 
 					// Favorite Topics
@@ -985,9 +1018,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteTopic.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteTopic.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL9', userId);
 					}
 
 					// Feedback
@@ -1000,9 +1037,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const feedback of foundRecords) {
-						feedback.user_id = user.user_id;
-						await this.feedback.update(feedback, { where: { id: feedback.id } });
+					try {
+						for (const feedback of foundRecords) {
+							feedback.user_id = user.user_id;
+							await this.feedback.update(feedback, { where: { id: feedback.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL10', userId);
 					}
 
 					// GC Assists
@@ -1015,9 +1056,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const assist of foundRecords) {
-						assist.user_id = user.user_id;
-						await this.gcAssists.update(assist, { where: { id: assist.id } });
+					try {
+						for (const assist of foundRecords) {
+							assist.user_id = user.user_id;
+							await this.gcAssists.update(assist, { where: { id: assist.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL11', userId);
 					}
 
 					// GC History
@@ -1030,9 +1075,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const history of foundRecords) {
-						history.user_id = user.user_id;
-						await this.gcHistory.update(history, { where: { id: history.id } });
+					try {
+						for (const history of foundRecords) {
+							history.user_id = user.user_id;
+							await this.gcHistory.update(history, { where: { id: history.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL12', userId);
 					}
 
 					// Update old user id
