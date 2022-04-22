@@ -12,7 +12,7 @@ function getUserIdFromSAMLUserId(obj, fromReq = true) {
 	if (obj.session && obj.session.user && obj.session.user.id) {
 		return obj.session.user.id.split('@')[0];
 	} else if (obj.headers && obj.get('SSL_CLIENT_S_DN_CN')) {
-		return obj.get('SSL_CLIENT_S_DN_CN');
+		return obj.get('SSL_CLIENT_S_DN_CN').split('@')[0];
 	} else {
 		return 'Unknown User';
 	}
