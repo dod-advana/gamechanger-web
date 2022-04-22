@@ -160,6 +160,7 @@ class DataTrackerController {
 				res.status(200).send({ totalCount: crawlerData.count, docs: crawlerData.rows });
 			} else if (option === 'status') {
 				const permissions = req.permissions ? req.permissions : [];
+				const filter = where?.[0]?.displayName.$iLike.replace(/%/gi, '').toLowerCase();
 				let level_value;
 				let crawlerData = {};
 				const info = await this.crawlerInfo.findAll({
@@ -217,30 +218,36 @@ class DataTrackerController {
 					const docCount =
 						docCounts.find((crawler) => crawler.key.toLowerCase() === data.toLowerCase())?.doc_count ||
 						'No Documents Found';
-					resp.push({
+					const data_source_s = dataInfo?.dataValues.data_source_s;
+					const source_title = dataInfo?.dataValues.source_title;
+					const displayName = data_source_s && source_title ? `${data_source_s} - ${source_title}` : data;
+
+					const crawlerObject = {
+						displayName,
 						crawler_name: data,
 						status: level_value[data].status,
 						datetime: level_value[data].datetime,
 						url_origin: dataInfo?.dataValues?.url_origin,
-						data_source_s: dataInfo?.dataValues.data_source_s,
-						source_title: dataInfo?.dataValues.source_title,
+						data_source_s,
+						source_title,
 						docCount,
-					});
+					};
+					if (filter) {
+						if (displayName.toLowerCase().includes(filter)) resp.push(crawlerObject);
+					} else {
+						resp.push(crawlerObject);
+					}
 				});
-
-				if (sort === 'crawler_name') {
+				if (sort === 'displayName') {
 					resp.sort((a, b) => {
-						const aName = a.data_source_s || a.crawler_name;
-						const bName = b.data_source_s || b.crawler_name;
-
-						if (aName.toLocaleLowerCase() > bName.toLocaleLowerCase())
+						if (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase())
 							return sortDirection === 'ASC' ? 1 : -1;
 						return sortDirection === 'ASC' ? -1 : 1;
 					});
 				}
 
 				res.status(200).send({
-					totalCount: Object.keys(crawlerData).length,
+					totalCount: resp.length,
 					docs: resp.slice(offset, offset + limit),
 				});
 			} else if (option === 'last') {
