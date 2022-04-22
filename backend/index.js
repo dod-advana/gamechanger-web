@@ -108,10 +108,15 @@ AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);
 
 app.use(async function (req, res, next) {
+	// No perms in req.user or req.session.user
 	let user_id;
 	if (req.session.user) {
 		user_id = getUserIdFromSAMLUserId(req);
 		req.permissions = req.session.user.perms;
+	} else if (req.user) {
+		req.permissions = req.user.perms;
+	} else {
+		req.permissions = [];
 	}
 
 	if (!req.session.user.cn && req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') user_id = 'ml-api';
