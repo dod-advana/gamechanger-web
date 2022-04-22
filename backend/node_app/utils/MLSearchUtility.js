@@ -8,6 +8,7 @@ const fs = require('fs');
 const { include } = require('underscore');
 const { performance } = require('perf_hooks');
 const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
+const SearchUtility = require('../utils/searchUtility');
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
@@ -19,6 +20,7 @@ class MLSearchUtility {
 			constants = constantsFile,
 			mlApi = new MLApiClient(opts),
 			dataApi = new DataLibrary(opts),
+			searchUtility = new SearchUtility(opts),
 		} = opts;
 
 		this.logger = logger;
@@ -26,381 +28,15 @@ class MLSearchUtility {
 		this.constants = constants;
 		this.mlApi = mlApi;
 		this.dataLibrary = dataApi;
+		this.searchUtility = searchUtility;
 
 		this.intelligentSearchHandler = this.intelligentSearchHandler.bind(this);
-		this.documentSearchOneID = this.documentSearchOneID.bind(this);
-		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
-		this.findAliases = this.findAliases.bind(this);
 		this.makeBigramQueries = this.makeBigramQueries.bind(this);
 		this.phraseQAQuery = this.phraseQAQuery.bind(this);
-		this.expandParagraphs = this.expandParagraphs.bind(this);
-		this.queryOneDocQA = this.queryOneDocQA.bind(this);
 		this.getQAContext = this.getQAContext.bind(this);
-		this.filterEmptyDocs = this.filterEmptyDocs.bind(this);
 		this.cleanQAResults = this.cleanQAResults.bind(this);
 		this.getRelatedSearches = this.getRelatedSearches.bind(this);
-		this.getTitle = this.getTitle.bind(this);
 		this.getRecDocs = this.getRecDocs.bind(this);
-	}
-
-	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }) {
-		// order matters for json stringify, adjusting this order will make a different cache key
-		const options = JSON.stringify({ searchText, index, cloneSpecificObject });
-		const hashed = this.sparkMD5.hash(options);
-		return `${cloneName}_${hashed}`;
-	}
-
-	remove_stopwords(str) {
-		const stopwords = [
-			'a',
-			'about',
-			'above',
-			'after',
-			'again',
-			'against',
-			'ain',
-			'all',
-			'am',
-			'an',
-			'and',
-			'any',
-			'are',
-			'aren',
-			"aren't",
-			'as',
-			'at',
-			'be',
-			'because',
-			'been',
-			'before',
-			'being',
-			'below',
-			'between',
-			'both',
-			'but',
-			'by',
-			'can',
-			'couldn',
-			"couldn't",
-			'd',
-			'did',
-			'didn',
-			"didn't",
-			'do',
-			'does',
-			'doesn',
-			"doesn't",
-			'doing',
-			'don',
-			"don't",
-			'down',
-			'during',
-			'each',
-			'few',
-			'for',
-			'from',
-			'further',
-			'had',
-			'hadn',
-			"hadn't",
-			'has',
-			'hasn',
-			"hasn't",
-			'have',
-			'haven',
-			"haven't",
-			'having',
-			'he',
-			'her',
-			'here',
-			'hers',
-			'herself',
-			'him',
-			'himself',
-			'his',
-			'how',
-			'i',
-			'if',
-			'in',
-			'into',
-			'is',
-			'isn',
-			"isn't",
-			'it',
-			"it's",
-			'its',
-			'itself',
-			'just',
-			'll',
-			'm',
-			'ma',
-			'me',
-			'mightn',
-			"mightn't",
-			'more',
-			'most',
-			'mustn',
-			"mustn't",
-			'my',
-			'myself',
-			'needn',
-			"needn't",
-			'no',
-			'nor',
-			'not',
-			'now',
-			'o',
-			'of',
-			'off',
-			'on',
-			'once',
-			'only',
-			'or',
-			'other',
-			'our',
-			'ours',
-			'ourselves',
-			'out',
-			'over',
-			'own',
-			're',
-			's',
-			'same',
-			'shan',
-			"shan't",
-			'she',
-			"she's",
-			'should',
-			"should've",
-			'shouldn',
-			"shouldn't",
-			'so',
-			'some',
-			'such',
-			't',
-			'than',
-			'that',
-			"that'll",
-			'the',
-			'their',
-			'theirs',
-			'them',
-			'themselves',
-			'then',
-			'there',
-			'these',
-			'they',
-			'this',
-			'those',
-			'through',
-			'to',
-			'too',
-			'under',
-			'until',
-			'up',
-			've',
-			'very',
-			'was',
-			'wasn',
-			"wasn't",
-			'we',
-			'were',
-			'weren',
-			"weren't",
-			'what',
-			'when',
-			'where',
-			'which',
-			'while',
-			'who',
-			'whom',
-			'why',
-			'will',
-			'with',
-			'won',
-			"won't",
-			'wouldn',
-			"wouldn't",
-			'y',
-			'you',
-			"you'd",
-			"you'll",
-			"you're",
-			"you've",
-			'your',
-			'yours',
-			'yourself',
-			'yourselves',
-			'could',
-			"he'd",
-			"he'll",
-			"he's",
-			"here's",
-			"how's",
-			"i'd",
-			"i'll",
-			"i'm",
-			"i've",
-			"let's",
-			'ought',
-			"she'd",
-			"she'll",
-			"that's",
-			"there's",
-			"they'd",
-			"they'll",
-			"they're",
-			"they've",
-			"we'd",
-			"we'll",
-			"we're",
-			"we've",
-			"what's",
-			"when's",
-			"where's",
-			"who's",
-			"why's",
-			'would',
-		];
-		let res = [];
-		const words = str.toLowerCase().split(' ');
-		for (let i = 0; i < words.length; i++) {
-			const word_clean = words[i].split('.').join('');
-			if (!stopwords.includes(word_clean)) {
-				res.push(word_clean);
-			}
-		}
-		return res.join(' ');
-	}
-
-	async getTitle(parsedQuery, clientObj, userId) {
-		// get contents of single document searching by doc display title
-		try {
-			let results = {};
-			let { esClientName, esIndex } = clientObj;
-			let titleQuery = {
-				size: 1,
-				query: {
-					bool: {
-						must: [
-							{
-								match_phrase: {
-									display_title_s: `${parsedQuery}`,
-								},
-							},
-						],
-					},
-				},
-			};
-			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-			return results;
-		} catch (err) {
-			this.logger.error(err, 'TJKBNOF', userId);
-		}
-	}
-
-	getESQueryUsingOneID(id, user, limit = 100, maxLength = 200) {
-		try {
-			return {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'pagerank', 'topics_s'],
-				},
-				stored_fields: [
-					'filename',
-					'title',
-					'page_count',
-					'doc_type',
-					'doc_num',
-					'ref_list',
-					'id',
-					'summary_30',
-					'keyw_5',
-					'p_text',
-					'type',
-					'p_page',
-					'display_title_s',
-					'display_org_s',
-					'display_doc_type_s',
-					'is_revoked_b',
-					'access_timestamp_dt',
-					'publication_date_dt',
-					'crawler_used_s',
-					'topics_s',
-				],
-				track_total_hits: true,
-				size: limit,
-				query: {
-					bool: {
-						should: {
-							nested: {
-								path: 'paragraphs',
-								inner_hits: {
-									_source: false,
-									stored_fields: [
-										'paragraphs.page_num_i',
-										'paragraphs.filename',
-										'paragraphs.par_raw_text_t',
-									],
-									from: 0,
-									size: 5,
-									highlight: {
-										fields: {
-											'paragraphs.filename.search': {
-												number_of_fragments: 0,
-											},
-											'paragraphs.par_raw_text_t': {
-												fragment_size: maxLength,
-												number_of_fragments: 1,
-											},
-										},
-										fragmenter: 'span',
-									},
-								},
-								query: {
-									bool: {
-										must: [
-											{
-												terms: {
-													'paragraphs.id': [id],
-												},
-											},
-										],
-										should: [
-											{
-												wildcard: {
-													'paragraphs.filename.search': {
-														value: id + '*',
-														boost: 15,
-													},
-												},
-											},
-										],
-									},
-								},
-							},
-						},
-					},
-				},
-			};
-		} catch (err) {
-			this.logger.error(err, 'TA9GH5F', user);
-		}
-	}
-
-	getESQueryOneDoc(id, userId) {
-		// get contents of single document searching by doc id
-		try {
-			return {
-				size: 1,
-				query: {
-					match: {
-						id: id,
-					},
-				},
-			};
-		} catch (err) {
-			this.logger.error(err, 'TJKFH5F', userId);
-		}
 	}
 
 	// makes phrases to add to ES queries for entities or gamechanger indices
@@ -571,63 +207,6 @@ class MLSearchUtility {
 		}
 	}
 
-	makeAliasesQuery(searchTextList, entityLimit) {
-		try {
-			// make alias queries for each word
-			const mustQueries = [];
-
-			for (const word of searchTextList) {
-				const alias = {
-					match: { 'aliases.name': word },
-				};
-				mustQueries.push(alias);
-			}
-
-			const aliasQuery = {
-				nested: {
-					path: 'aliases',
-					query: {
-						bool: {
-							should: mustQueries,
-						},
-					},
-				},
-			};
-			return {
-				from: 0,
-				size: entityLimit,
-				query: {
-					bool: {
-						should: aliasQuery,
-					},
-				},
-			};
-		} catch (e) {
-			this.logger.error(e, 'LQPRYTUOF', '');
-		}
-	}
-
-	async findAliases(searchTextList, entityLimit, esClientName, entitiesIndex, user) {
-		let matchingAlias = {};
-		try {
-			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
-			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
-			if (aliasResults.body.hits.hits[0]) {
-				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map((item) => item.name);
-				for (var i = 0; i < aliases.length; i++) {
-					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
-						matchingAlias = aliasResults.body.hits.hits[0];
-						matchingAlias.match = aliases[i];
-						break;
-					}
-				}
-			}
-			return matchingAlias;
-		} catch (e) {
-			this.logger.error(e, 'MBWYH5F', user);
-		}
-	}
-
 	filterEmptyDocs(docs, filterLength) {
 		// filters out results that have no text or very short amount of text in the paragraphs
 		try {
@@ -682,7 +261,7 @@ class MLSearchUtility {
 	async queryOneDocQA(docId, esClientName, esIndex, userId) {
 		// query entire docs to expand short paragraphs/get beginning of doc
 		try {
-			let newQuery = this.getESQueryOneDoc(docId, userId); // query ES for single doc
+			let newQuery = this.searchUtility.getESQueryOneDoc(docId, userId); // query ES for single doc
 			let singleResult = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, newQuery, userId);
 			return singleResult.body.hits.hits[0];
 		} catch (e) {
@@ -708,7 +287,7 @@ class MLSearchUtility {
 			let text = searchText.toLowerCase().replace('?', ''); // lowercase/ remove ? from query
 			let display = text + '?';
 			let list = text.split(/\s+/); // get list of query terms
-			let alias = await this.findAliases(list, entityLimit, esClientName, entitiesIndex, userId);
+			let alias = await this.searchUtility.findAliases(list, entityLimit, esClientName, entitiesIndex, userId);
 			if (alias._source) {
 				text = text.replace(alias.match.toLowerCase(), alias._source.name);
 			}
@@ -1104,7 +683,7 @@ class MLSearchUtility {
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
 		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.7) {
 			filename = sentenceResults[0].id;
-			const sentenceSearchRes = await this.documentSearchOneID(
+			const sentenceSearchRes = await this.searchUtility.documentSearchOneID(
 				req,
 				{ ...req.body, id: filename },
 				clientObj,
@@ -1115,113 +694,6 @@ class MLSearchUtility {
 			return result;
 		}
 		return {};
-	}
-
-	async documentSearchOneID(req, body, clientObj, userId) {
-		try {
-			const { id = '', searchTerms = [], expansionDict = {}, limit = 20, maxLength = 200 } = body;
-
-			const esQuery = this.getESQueryUsingOneID(id, userId, limit, maxLength);
-			const { esClientName, esIndex } = clientObj;
-
-			const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-
-			if (this.checkValidResults(esResults)) {
-				return this.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, esIndex);
-			} else {
-				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
-				if (this.checkESResultsEmpty(esResults)) {
-					this.logger.warn('Search has no hits');
-				}
-				return { totalCount: 0, docs: [] };
-			}
-		} catch (err) {
-			const msg = err && err.message ? `${err.message}` : `${err}`;
-			this.logger.error(msg, 'U1EIAR2', userId);
-			throw msg;
-		}
-	}
-
-	checkValidResults(results) {
-		if (
-			results &&
-			results.body &&
-			results.body.hits &&
-			results.body.hits.total &&
-			results.body.hits.total.value &&
-			results.body.hits.total.value > 0
-		) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	reorderFirst(results, titleResults) {
-		// reorders a matching title result to the top of the results
-		let reorderedHits = [];
-		let firstResult = titleResults.body.hits.hits[0];
-		let firstTitle = firstResult._source.display_title_s;
-		let inResults = false;
-		try {
-			results.body.hits.hits.forEach((r) => {
-				if (r.fields.display_title_s[0] !== firstTitle) {
-					reorderedHits.push(r);
-				} else {
-					inResults = true;
-					reorderedHits.unshift(r);
-				}
-			});
-			if (inResults === true) {
-				results.body.hits.hits = reorderedHits;
-			}
-			return results;
-		} catch (e) {
-			this.logger.error(e, 'JKJDFPOF', '');
-		}
-	}
-
-	getEntityQuery(searchText, offset = 0, limit = 6) {
-		try {
-			let query = {
-				from: offset,
-				size: limit,
-				query: {
-					bool: {
-						should: [
-							{
-								match_phrase: {
-									name: {
-										query: searchText,
-										slop: 2,
-										boost: 0.5,
-									},
-								},
-							},
-							{
-								match_phrase: {
-									'aliases.name': {
-										query: searchText,
-										slop: 2,
-										boost: 0.5,
-									},
-								},
-							},
-							{
-								multi_match: {
-									fields: ['name', 'aliases.name'],
-									query: searchText,
-									type: 'phrase_prefix',
-								},
-							},
-						],
-						must_not: [{ term: { 'entity_type.keyword': 'topic' } }],
-					},
-				},
-			};
-			return query;
-		} catch (err) {
-			this.logger.error(err, 'JAEIWMF', '');
-		}
 	}
 
 	async getRecDocs(docs = [], userId = '') {
@@ -1383,17 +855,6 @@ class MLSearchUtility {
 		}
 
 		return { esClientName, esIndex };
-	}
-	checkESResultsEmpty(results) {
-		if (results && results.body && results.body.hits) {
-			if (results.body.hits.total.value == 0) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
 	}
 
 	isQuestion(searchText) {
