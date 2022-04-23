@@ -497,7 +497,7 @@ class EDASearchUtility {
 						path: 'fpds_ng_n',
 						query: {
 							range: {
-								'fpds_ng_n.date_signed_eda_ext': {},
+								'fpds_ng_n.date_signed_eda_ext_dt': {},
 							},
 						},
 					},
@@ -506,12 +506,12 @@ class EDASearchUtility {
 				let push = false;
 
 				if (settings.startDate) {
-					rangeQuery.nested.query.range['fpds_ng_n.date_signed_eda_ext'].gte = settings.startDate;
+					rangeQuery.nested.query.range['fpds_ng_n.date_signed_eda_ext_dt'].gte = settings.startDate;
 					push = true;
 				}
 
 				if (settings.endDate) {
-					rangeQuery.nested.query.range['fpds_ng_n.date_signed_eda_ext'].lte = settings.endDate;
+					rangeQuery.nested.query.range['fpds_ng_n.date_signed_eda_ext_dt'].lte = settings.endDate;
 					push = true;
 				}
 
@@ -551,7 +551,7 @@ class EDASearchUtility {
 					const ceil = parseInt(year) + 1;
 					nestedQuery.nested.query.bool.should.push({
 						range: {
-							'fpds_ng_n.date_signed_eda_ext': {
+							'fpds_ng_n.date_signed_eda_ext_dt': {
 								gte: year,
 								lte: ceil.toString(),
 								format: 'yyyy',
