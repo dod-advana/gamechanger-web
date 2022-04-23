@@ -169,7 +169,7 @@ describe('EDASearchUtility', function () {
 										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'fpds_ng_n.date_signed_eda_ext': { gte: '2017-06-11' },
+												'fpds_ng_n.date_signed_eda_ext_dt': { gte: '2017-06-11' },
 											},
 										},
 									},
@@ -339,7 +339,7 @@ describe('EDASearchUtility', function () {
 												should: [
 													{
 														range: {
-															'fpds_ng_n.date_signed_eda_ext': {
+															'fpds_ng_n.date_signed_eda_ext_dt': {
 																gte: '2017',
 																lte: '2018',
 																format: 'yyyy',
@@ -1933,7 +1933,7 @@ describe('EDASearchUtility', function () {
 										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'fpds_ng_n.date_signed_eda_ext': { gte: '2017-06-11' },
+												'fpds_ng_n.date_signed_eda_ext_dt': { gte: '2017-06-11' },
 											},
 										},
 									},
