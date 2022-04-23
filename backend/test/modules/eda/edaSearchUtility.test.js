@@ -547,7 +547,7 @@ describe('EDASearchUtility', function () {
 										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'fpds_ng_n.dollars_obligated_eda_ext': {
+												'fpds_ng_n.dollars_obligated_eda_ext_f': {
 													gte: '200000',
 												},
 											},

@@ -1004,12 +1004,12 @@ const EDASearchMatrixHandler = {
 				<GCAccordion
 					contentPadding={15}
 					expanded={edaSearchSettings.reqDesc}
-					header={'DESCRIPTION OF REQUIREMENTS'}
+					header={'DESCRIPTION OF REQS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'Description of Reqs', 'reqDesc')}
+					{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}
 				</GCAccordion>
 
 				<GCAccordion
