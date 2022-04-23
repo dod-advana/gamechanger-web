@@ -626,7 +626,7 @@ class EDASearchUtility {
 						path: 'fpds_ng_n',
 						query: {
 							range: {
-								'fpds_ng_n.dollars_obligated_eda_ext': {},
+								'fpds_ng_n.dollars_obligated_eda_ext_f': {},
 							},
 						},
 					},
@@ -635,13 +635,13 @@ class EDASearchUtility {
 				let push = false;
 
 				if (settings.minObligatedAmount && settings.minObligatedAmount.length > 0) {
-					rangeQuery.nested.query.range['fpds_ng_n.dollars_obligated_eda_ext'].gte =
+					rangeQuery.nested.query.range['fpds_ng_n.dollars_obligated_eda_ext_f'].gte =
 						settings.minObligatedAmount;
 					push = true;
 				}
 
 				if (settings.maxObligatedAmount && settings.maxObligatedAmount.length > 0) {
-					rangeQuery.nested.query.range['fpds_ng_n.dollars_obligated_eda_ext'].lte =
+					rangeQuery.nested.query.range['fpds_ng_n.dollars_obligated_eda_ext_f'].lte =
 						settings.maxObligatedAmount;
 					push = true;
 				}
