@@ -10,8 +10,8 @@ class EmailUtility {
 	}
 
 	sendEmail(html, subject, recipientEmails, userEmail, attachments = null, userId) {
-		try {
-			return new Promise((resolve, reject) => {
+		return new Promise((resolve, reject) => {
+			try {
 				let transporter = nodemailer.createTransport(this.transportOptions);
 
 				let mailOptions = {
@@ -28,16 +28,18 @@ class EmailUtility {
 
 				transporter.sendMail(mailOptions, (error, info) => {
 					if (error) {
+						this.logger.error(error, '2QO316278', userId);
 						error.message = 'Sending contact message failed due to internal error.';
 						reject({ error });
 					} else {
 						resolve({ message: 'Message successfully sent', info });
 					}
 				});
-			});
-		} catch (err) {
-			this.logger.error(err, '2QO3162', userId);
-		}
+			} catch (err) {
+				this.logger.error(err, '2QO3162', userId);
+				reject({ error: { message: `Code: 2QO3162, ${err}` } });
+			}
+		});
 	}
 }
 
