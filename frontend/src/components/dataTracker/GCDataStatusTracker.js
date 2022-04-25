@@ -292,7 +292,6 @@ const GCDataStatusTracker = (props) => {
 	const handleFetchCrawlerData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
-			console.log('sorted: ', sorted);
 			const { totalCount, docs = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
