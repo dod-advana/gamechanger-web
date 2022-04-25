@@ -108,7 +108,6 @@ AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);
 
 app.use(async function (req, res, next) {
-	// No perms in req.user or req.session.user
 	let user_id;
 	if (req.session.user) {
 		user_id = getUserIdFromSAMLUserId(req);
