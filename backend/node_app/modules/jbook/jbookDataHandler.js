@@ -77,7 +77,6 @@ class JBookDataHandler extends DataHandler {
 		this.portfolio = portfolio;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
-		this.portfolio = portfolio;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 

@@ -2,25 +2,53 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
 import GCButton from '../../common/GCButton';
 import { styles, useStyles } from '../../admin/util/GCAdminStyles';
+import styled from 'styled-components';
+
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import CancelIcon from '@mui/icons-material/Cancel';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+const gameChangerAPI = new GameChangerAPI();
 
+const Pill = styled.button`
+	border: none;
+	border-radius: 15px;
+	background-color: white;
+	color: black;
+	white-space: nowrap;
+	text-align: center;
+	display: inline-block;
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-bottom: 3px;
+	border: 1px solid rgb(209, 215, 220);
+	cursor: default !important;
+	> i {
+		margin-left: 3px;
+		color: #e9691d;
+	}
+`;
 /**
  *
  * @class UserModal
  */
-export default ({ showModal, setShowModal, modalData }) => {
+export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 	const classes = useStyles();
-	const [data, setData] = useState({
+	const [init, setInit] = useState(false);
+	const emptyData = {
 		name: '',
 		description: '',
 		user_ids: [],
 		tags: [],
-	});
+		deleted: false,
+	};
+	const [data, setData] = useState(emptyData);
 	const [create, setCreate] = useState(true);
+
 	const closeReviewerModal = () => {
 		setShowModal(false);
+		setData(emptyData);
 	};
 	const handleTextChange = (val, key) => {
 		const newData = { ...data };
@@ -109,17 +137,54 @@ export default ({ showModal, setShowModal, modalData }) => {
 								multiline
 								rows={4}
 							/>
+							{}
 							<Autocomplete
 								label="Users"
-								options={['user 1', 'user 2', 'user 3']}
-								value={data.user_ids ?? []}
+								options={userList}
+								getOptionLabel={(user) =>
+									(user.first_name ? user.first_name : '') +
+									' ' +
+									(user.last_name ? user.last_name : '')
+								}
+								value={[]}
 								style={{ backgroundColor: 'white', marginTop: '10px' }}
-								renderInput={(params) => <TextField {...params} label="Users" variant="outlined" />}
-								onChange={(event, value) => {
-									handleTextChange(value, 'user_ids');
+								renderInput={(params) => {
+									return <TextField {...params} label="Users" variant="outlined" />;
 								}}
-								multiple
+								onChange={(event, value) => {
+									const newList = [...data.user_ids, value.id];
+									console.log(newList);
+									handleTextChange(newList, 'user_ids');
+								}}
 							/>
+							<div style={{ marginTop: '10px' }}>
+								{data.user_ids.map((user, index) => {
+									return (
+										<Pill>
+											<div style={{ marginRight: '5px', marginLeft: '5px' }}>
+												{userMap[user].first_name + ' ' + userMap[user].last_name}
+											</div>
+											<IconButton
+												aria-label="close"
+												style={{
+													height: 10,
+													width: 10,
+													color: 'red',
+													borderRadius: 0,
+												}}
+												onClick={() => {
+													let newUsers = data.user_ids.filter((item) => item.id === user.id);
+													const newData = { ...data, user_ids: newUsers };
+													setData(newData);
+												}}
+											>
+												<CancelIcon style={{ fontSize: 30 }} />
+											</IconButton>
+										</Pill>
+									);
+								})}
+							</div>
+
 							<Autocomplete
 								label="Tags"
 								options={['Tag 1', 'Tag 2', 'Tag 3']}
@@ -127,6 +192,7 @@ export default ({ showModal, setShowModal, modalData }) => {
 								style={{ backgroundColor: 'white', marginTop: '10px' }}
 								renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
 								onChange={(event, value) => {
+									console.log(value);
 									handleTextChange(value, 'tags');
 								}}
 								multiple
@@ -146,9 +212,14 @@ export default ({ showModal, setShowModal, modalData }) => {
 				</GCButton>
 				<GCButton
 					id={'editReviewerSubmit'}
-					onClick={() => {
+					onClick={async () => {
 						console.log(data);
-						setShowModal(false);
+						const res = await gameChangerAPI.callDataFunction({
+							functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
+							cloneName: 'jbook',
+							options: { ...data },
+						});
+						closeReviewerModal();
 					}}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
 				>
