@@ -556,7 +556,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId([userId], clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId([userId], connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -712,7 +712,6 @@ class AppStatsController {
 				}
 				doc.document = doc.document.substring(12).split(' - ')[0];
 			}
-
 			// filename mapping to titles; pulled from ES
 			let filenames = docData.map((item) => item.document);
 			const esQuery = this.searchUtility.getDocMetadataQuery('filenames', filenames);
@@ -924,7 +923,7 @@ class AppStatsController {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];
 		} finally {
-			connection.end();
+			if (connection) connection.end();
 		}
 	}
 }
