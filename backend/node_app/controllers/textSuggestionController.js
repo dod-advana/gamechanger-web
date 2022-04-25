@@ -27,7 +27,7 @@ class TextSuggestionController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const index = req.body.index
 				? req.body.index
 				: [

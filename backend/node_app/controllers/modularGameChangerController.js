@@ -30,7 +30,7 @@ class ModularGameChangerController {
 	}
 
 	async getCloneTableStructure(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const resp = await this.clone_meta.sequelize.query(`
 				SELECT table_name, column_name, data_type
@@ -45,7 +45,7 @@ class ModularGameChangerController {
 	}
 
 	async getCloneMeta(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName } = req.body;
 		this.clone_meta
 			.findOne({ where: { clone_name: cloneName } })
@@ -59,7 +59,7 @@ class ModularGameChangerController {
 	}
 
 	async getAllCloneMeta(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		this.clone_meta
 			.findAll({ raw: true })
 			.then((c) => {
@@ -108,7 +108,7 @@ class ModularGameChangerController {
 	}
 
 	async storeCloneMeta(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { cloneData } = req.body;
 
@@ -134,7 +134,7 @@ class ModularGameChangerController {
 	}
 
 	async deleteCloneMeta(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { id } = req.body;
 
@@ -149,7 +149,7 @@ class ModularGameChangerController {
 	}
 
 	async reloadHandlerMap(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			this.handler_factory.reloadCloneMeta();
 			res.status(200).send({ updated: true });
@@ -160,7 +160,7 @@ class ModularGameChangerController {
 	}
 
 	async search(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, searchText, limit = 18, options, storeHistory = true } = req.body;
 		let { offset = 0 } = req.body;
 		try {
@@ -188,7 +188,7 @@ class ModularGameChangerController {
 	}
 
 	async callSearchFunction(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('search', cloneName);
@@ -209,7 +209,7 @@ class ModularGameChangerController {
 	}
 
 	async export(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, searchText, format, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
@@ -221,7 +221,7 @@ class ModularGameChangerController {
 	}
 
 	async exportReview(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
@@ -233,7 +233,7 @@ class ModularGameChangerController {
 	}
 
 	async exportUsers(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
@@ -245,7 +245,7 @@ class ModularGameChangerController {
 	}
 
 	async exportChecklist(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
@@ -257,7 +257,7 @@ class ModularGameChangerController {
 	}
 
 	async exportProfilePage(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('export', cloneName);
@@ -278,7 +278,7 @@ class ModularGameChangerController {
 	}
 
 	async graphSearch(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, searchText, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
@@ -291,7 +291,7 @@ class ModularGameChangerController {
 	}
 
 	async graphQuery(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, query, code, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
@@ -306,7 +306,7 @@ class ModularGameChangerController {
 	}
 
 	async callGraphFunction(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('graph', cloneName);
@@ -319,7 +319,7 @@ class ModularGameChangerController {
 	}
 
 	async callDataFunction(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { cloneName, functionName, options } = req.body;
 		try {
 			const handler = this.handler_factory.createHandler('data', cloneName);

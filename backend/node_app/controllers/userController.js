@@ -122,7 +122,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
 			const user = await this.user.findOne({
@@ -155,7 +155,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
@@ -190,7 +190,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
@@ -225,7 +225,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { cloneName } = req.body;
 
@@ -282,8 +282,8 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const user_id = getUserIdFromSAMLUserId(req);
+			userId = req.session.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(userId, false);
 			const { clone } = req.body;
 
 			const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
@@ -292,11 +292,11 @@ class UserController {
 				if (user.extra_fields.hasOwnProperty('clones_visited')) {
 					if (!user.extra_fields.clones_visited.includes(clone)) {
 						user.extra_fields.clones_visited.push(clone);
-						await this.updateOrCreateUserHelper(user, user_id, true);
+						await this.updateOrCreateUserHelper(user, true);
 					}
 				} else {
 					user.extra_fields['clones_visited'] = [clone];
-					await this.updateOrCreateUserHelper(user, user_id, true);
+					await this.updateOrCreateUserHelper(user, true);
 				}
 			}
 
@@ -310,7 +310,7 @@ class UserController {
 	async getUserData(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 			let user = await this.user.findOne({
@@ -578,9 +578,9 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { userData, fromApp } = req.body;
-			res.status(200).send(await this.updateOrCreateUserHelper(userData, userId, fromApp));
+			res.status(200).send(await this.updateOrCreateUserHelper(userData, fromApp));
 		} catch (err) {
 			this.logger.error(err, 'VFA1YU7', userId);
 			res.status(500).send(`Error adding or updating user: ${err.message}`);
@@ -588,12 +588,13 @@ class UserController {
 	}
 
 	async updateOrCreateUserHelper(userData, fromApp = false) {
-		const user_id = getUserIdFromSAMLUserId(userData.id, false);
+		let user_id = 'WebApp';
 		try {
 			let foundItem;
 			if (fromApp) {
 				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
 			} else {
+				user_id = getUserIdFromSAMLUserId(userData.id, false);
 				foundItem = await this.user.findOne({
 					where: { user_id },
 					raw: true,
@@ -743,7 +744,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { userRowId } = req.body;
 			const user = await this.user.findOne({ where: { id: userRowId } });
 			await user.destroy();
@@ -759,7 +760,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { email, permissions } = req.body;
 			const userRequest = await this.userRequest.findOne({ where: { email: email }, raw: true });
@@ -1028,14 +1029,18 @@ class UserController {
 					}
 
 					// Feedback
-					foundRecords = await this.feedback.findAll({
-						where: {
-							user_id: {
-								[Op.in]: allIds,
+					try {
+						foundRecords = await this.feedback.findAll({
+							where: {
+								user_id: {
+									[Op.in]: allIds,
+								},
 							},
-						},
-						raw: true,
-					});
+							raw: true,
+						});
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL10', userId);
+					}
 
 					try {
 						for (const feedback of foundRecords) {
@@ -1043,7 +1048,7 @@ class UserController {
 							await this.feedback.update(feedback, { where: { id: feedback.id } });
 						}
 					} catch (error) {
-						this.logger.error(error, 'Z70XSYL10', userId);
+						this.logger.error(error, 'Z70XSYL11', userId);
 					}
 
 					// GC Assists
@@ -1062,7 +1067,7 @@ class UserController {
 							await this.gcAssists.update(assist, { where: { id: assist.id } });
 						}
 					} catch (error) {
-						this.logger.error(error, 'Z70XSYL11', userId);
+						this.logger.error(error, 'Z70XSYL12', userId);
 					}
 
 					// GC History
@@ -1081,7 +1086,7 @@ class UserController {
 							await this.gcHistory.update(history, { where: { id: history.id } });
 						}
 					} catch (error) {
-						this.logger.error(error, 'Z70XSYL12', userId);
+						this.logger.error(error, 'Z70XSYL13', userId);
 					}
 
 					// Update old user id
@@ -1139,7 +1144,7 @@ class UserController {
 	async getUserSettings(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
@@ -1162,7 +1167,7 @@ class UserController {
 	async submitUserInfo(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.gcUser.update(
@@ -1186,7 +1191,7 @@ class UserController {
 	async getInternalUsers(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const internalUsers = await this.internalUserTracking.findAll();
 			res.status(200).send(internalUsers);
@@ -1199,7 +1204,7 @@ class UserController {
 	async deleteInternalUser(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const deleted = this.internalUserTracking.destroy({
 				where: {
 					id: req.body.id,
@@ -1216,7 +1221,7 @@ class UserController {
 	async sendFeedback(req, res) {
 		let userId = 'Unknown_Webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
 			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
 			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
@@ -1272,7 +1277,7 @@ class UserController {
 	async sendClassificationAlert(req, res) {
 		let userId = 'Unknown_Webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { alertData } = req.body;
 			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${
 				alertData.options.classificationMarking
@@ -1292,7 +1297,7 @@ class UserController {
 	}
 
 	async clearDashboardNotification(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const user_id = getUserIdFromSAMLUserId(req);
@@ -1339,7 +1344,7 @@ class UserController {
 	async updateUserAPIRequestLimit(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
@@ -1380,7 +1385,7 @@ class UserController {
 	async getRecentSearches(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
 
 			const user_id = getUserIdFromSAMLUserId(req);

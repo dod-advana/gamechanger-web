@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
 	const FEEDBACK = sequelize.define(
-		'feedback',
+		'feedback_jbook',
 		{
 			id: {
 				type: DataTypes.INTEGER,
