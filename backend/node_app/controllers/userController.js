@@ -51,11 +51,6 @@ class UserController {
 			sequelize = new Sequelize(constantsFile.POSTGRES_CONFIG.databases.game_changer),
 			externalAPI = new ExternalAPIController(opts),
 			appStats = new AppStatsController(opts),
-			emailUtility = new EmailUtility({
-				fromName: constantsFile.ADVANA_EMAIL_CONTACT_NAME,
-				fromEmail: constantsFile.ADVANA_NOREPLY_EMAIL_ADDRESS,
-				transportOptions: constantsFile.ADVANA_EMAIL_TRANSPORT_OPTIONS,
-			}),
 			dataApi = new DataLibrary(opts),
 			apiKeyRequests = ApiKeyRequests,
 			apiKey = ApiKey,
@@ -83,7 +78,6 @@ class UserController {
 		this.sequelize = sequelize;
 		this.externalAPI = externalAPI;
 		this.appStats = appStats;
-		this.emailUtility = emailUtility;
 		this.constants = constants;
 		this.dataApi = dataApi;
 		this.apiKeyRequests = apiKeyRequests;
@@ -93,6 +87,22 @@ class UserController {
 		this.user = user;
 		this.jbookUser = jbook_user;
 		this.user_app_versions = user_app_versions;
+
+		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
+
+		//apply TLS configs to smtp transport as appropriate from env vars
+		if (process.env.EMAIL_REQUIRE_TLS?.toUpperCase() === 'TRUE') {
+			transportOptions.requireTLS = process.env.EMAIL_REQUIRE_TLS;
+			transportOptions.tls = {
+				servername: process.env.EMAIL_TLS_SERVERNAME || '',
+			};
+		}
+
+		this.emailUtility = new EmailUtility({
+			transportOptions,
+			fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
+			fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
+		});
 
 		this.deleteInternalUser = this.deleteInternalUser.bind(this);
 		this.syncUserTable = this.syncUserTable.bind(this);
@@ -1165,50 +1175,46 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
-			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
+			const emailBody = `
+				<img src="cid:gc-user-feedback" width="100%"/><br/>
+				<h2>Feedback Received</h2>
+				<h4>Type: ${feedbackType}</h4>
+				<p>${feedbackText}</p>
+				${screenShot && screenShot !== '' ? `<p>${screenShot}</p>` : null}
+				<p>**********</p>
+				<p>Thank you for your feedback! A member of our team will contact you shortly to provide an update on your feedback or seek further information as needed.</p>
+				<p>v/r,</p>
+				<p>The GAMECHANGER Team</p>
+				<img src="cid:gc-footer" width="100%"/><br/>
+			`;
+			const attachment = [
+				{
+					filename: 'GAMECHANGER User Feedback.png',
+					path: __dirname + '/../images/email/GAMECHANGER User Feedback.png',
+					cid: 'gc-user-feedback',
+				},
+				{
+					filename: 'GC-footer.png',
+					path: __dirname + '/../images/email/GC-footer.png',
+					cid: 'gc-footer',
+				},
+			];
 			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
-			// this.emailUtility.sendEmail(emailBody, 'User Feedback', this.constants.GAME_CHANGER_OPTS.emailAddress, userEmail, null, userId).then(resp => {
-			res.status(200).send({ status: 'good' });
-			// }).catch(error => {
-			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-			// res.status(500).send(error);
-			// });
-
-			// const axios = require('axios');
-			// const axiosInstance = axios.create({
-			// 	httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-			// });
-			// const currentTime = new Date(Date.now());
-			// const version = this.constants.VERSION;
-			// const userInstance = await this.users.findOne({
-			// 	where: {
-			// 		username: userId
-			// 	}
-			// });
-			// const options = {
-			// 	serviceDeskId: this.constants.SERVICEDESK_ID,
-			// 	requestTypeId: this.constants.REQUEST_TYPE_ID,
-			// 	requestFieldValues: {
-			// 		customfield_10501: userInstance.email,
-			// 		customfield_11607: this.constants.SERVICE_ACCOUNT_OPTS.PHONE,
-			// 		customfield_10520: this.constants.SERVICE_ACCOUNT_OPTS.ORGANIZATION,
-			// 		summary: `${userId} is submitting feedback at ${currentTime} in version ${version} of Advana. \n`,
-			// 		customfield_10201: this.constants.SERVICE_ACCOUNT_OPTS.ENVIRONMENT,
-			// 		customfield_10207: feedbackType,
-			// 		customfield_10608: 'other',
-			// 		description: feedbackText,
-			// 		attachement: screenShot
-			// 	}
-			// };
-			// await axiosInstance({
-			// 	method: 'post',
-			// 	url: 'https://support.advana.data.mil/rest/servicedeskapi/request',
-			// 	data: options,
-			// 	auth: {
-			// 		username: this.constants.SERVICE_ACCOUNT_OPTS.USERNAME,
-			// 		password: this.constants.SERVICE_ACCOUNT_OPTS.PASSWORD
-			// 	}
-			// });
+			this.emailUtility
+				.sendEmail(
+					emailBody,
+					`GAMECHANGER: User Feedback`,
+					this.constants.GAME_CHANGER_OPTS.emailAddress,
+					userEmail,
+					attachment,
+					userId
+				)
+				.then((success) => {
+					res.status(200).send({ status: 'good' });
+				})
+				.catch((failure) => {
+					res.status(500).send({ status: 'bad' });
+				});
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'WH9IUG0', userId);
@@ -1221,19 +1227,30 @@ class UserController {
 		try {
 			userId = req.get('SSL_CLIENT_S_DN_CN');
 			const { alertData } = req.body;
-			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${
-				alertData.options.classificationMarking
-			}</p><p>${JSON.stringify(alertData)}</p>`;
+			const emailBody = `
+				<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p>
+				<p>The marking they used is: ${alertData.options.classificationMarking}</p>
+				<p>${JSON.stringify(alertData)}</p>
+			`;
 			this.logger.info(`Classification alert: ${emailBody}`);
-			// this.emailUtility.sendEmail(emailBody, 'Document Export Classification Alert', this.constants.GAME_CHANGER_OPTS.emailAddress, this.constants.GAME_CHANGER_OPTS.emailAddress, null, userId).then(resp => {
-			res.status(200).send({ status: 'good' });
-			// }).catch(error => {
-			// this.logger.error(JSON.stringify(error), '8D3C1VX', userId);
-			// res.status(500).send(error);
-			// });
+			this.emailUtility
+				.sendEmail(
+					emailBody,
+					'Document Export Classification Alert',
+					this.constants.GAME_CHANGER_OPTS.emailAddress,
+					this.constants.GAME_CHANGER_OPTS.emailAddress,
+					null,
+					userId
+				)
+				.then((success) => {
+					res.status(200).send({ status: 'good' });
+				})
+				.catch((failure) => {
+					res.status(500).send({ status: 'bad' });
+				});
 		} catch (err) {
 			const { message } = err;
-			this.logger.error(message, 'WH9IUG0', userId);
+			this.logger.error(message, 'WH9IUG99', userId);
 			res.status(500).send(message);
 		}
 	}
