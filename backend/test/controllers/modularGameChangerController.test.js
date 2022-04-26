@@ -3,29 +3,30 @@ const { ModularGameChangerController } = require('../../node_app/controllers/mod
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
 describe('ModularGameChangerController', function () {
-
 	describe('#getCloneMeta', () => {
 		it('it should return a specified clone', async () => {
-			const cloneList = [{
-				id: 1,
-				clone_name: 'gamechanger',
-				search_module: 'policy/policySearchHandler',
-				export_module: 'simple/simpleExportHandler',
-				title_bar_module: 'policy/policyTitleBarHandler',
-				navigation_module: 'policy/policyNavigationHandler',
-				card_module: 'policy/policyCardHandler',
-				display_name: 'GAMECHANGER',
-				is_live: true,
-				url: 'gamechanger',
-				permissions_required: false,
-				available_at: JSON.stringify([['localhost']]),
-				clone_to_sipr: false,
-				show_tutorial: true,
-				show_graph: true,
-				show_crowd_source: true,
-				show_feedback: true,
-				config: {esIndex: 'gamechanger'}
-			}];
+			const cloneList = [
+				{
+					id: 1,
+					clone_name: 'gamechanger',
+					search_module: 'policy/policySearchHandler',
+					export_module: 'simple/simpleExportHandler',
+					title_bar_module: 'policy/policyTitleBarHandler',
+					navigation_module: 'policy/policyNavigationHandler',
+					card_module: 'policy/policyCardHandler',
+					display_name: 'GAMECHANGER',
+					is_live: true,
+					url: 'gamechanger',
+					permissions_required: false,
+					available_at: JSON.stringify([['localhost']]),
+					clone_to_sipr: false,
+					show_tutorial: true,
+					show_graph: true,
+					show_crowd_source: true,
+					show_feedback: true,
+					config: { esIndex: 'gamechanger' },
+				},
+			];
 			const opts = {
 				...constructorOptionsMock,
 				clone_meta: {
@@ -34,17 +35,17 @@ describe('ModularGameChangerController', function () {
 					},
 					findOne(data) {
 						return Promise.resolve(cloneList[0]);
-					}
+					},
 				},
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new ModularGameChangerController(opts);
 
 			const req = {
 				...reqMock,
 				body: {
-					cloneName: 'gamechanger'
-				}
+					cloneName: 'gamechanger',
+				},
 			};
 
 			let resCode;
@@ -58,7 +59,7 @@ describe('ModularGameChangerController', function () {
 				send(msg) {
 					resMsg = msg;
 					return this;
-				}
+				},
 			};
 
 			try {
@@ -72,41 +73,42 @@ describe('ModularGameChangerController', function () {
 
 	describe('#getAllCloneMeta', () => {
 		it('it should return a list of clones', async () => {
-			const cloneList = [{
-				id: 1,
-				clone_name: 'gamechanger',
-				search_module: 'policy/policySearchHandler',
-				export_module: 'simple/simpleExportHandler',
-				title_bar_module: 'policy/policyTitleBarHandler',
-				navigation_module: 'policy/policyNavigationHandler',
-				card_module: 'policy/policyCardHandler',
-				display_name: 'GAMECHANGER',
-				is_live: true,
-				url: 'gamechanger',
-				permissions_required: false,
-				available_at: JSON.stringify([['localhost']]),
-				clone_to_sipr: false,
-				show_tutorial: true,
-				show_graph: true,
-				show_crowd_source: true,
-				show_feedback: true,
-				config: {esIndex: 'gamechanger'}
-			}];
+			const cloneList = [
+				{
+					id: 1,
+					clone_name: 'gamechanger',
+					search_module: 'policy/policySearchHandler',
+					export_module: 'simple/simpleExportHandler',
+					title_bar_module: 'policy/policyTitleBarHandler',
+					navigation_module: 'policy/policyNavigationHandler',
+					card_module: 'policy/policyCardHandler',
+					display_name: 'GAMECHANGER',
+					is_live: true,
+					url: 'gamechanger',
+					permissions_required: false,
+					available_at: JSON.stringify([['localhost']]),
+					clone_to_sipr: false,
+					show_tutorial: true,
+					show_graph: true,
+					show_crowd_source: true,
+					show_feedback: true,
+					config: { esIndex: 'gamechanger' },
+				},
+			];
 			const opts = {
 				...constructorOptionsMock,
 				clone_meta: {
 					findAll(data) {
 						return Promise.resolve(cloneList);
-					}
+					},
 				},
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new ModularGameChangerController(opts);
 
 			const req = {
 				...reqMock,
-				body: {
-				}
+				body: {},
 			};
 
 			let resCode;
@@ -120,7 +122,7 @@ describe('ModularGameChangerController', function () {
 				send(msg) {
 					resMsg = msg;
 					return this;
-				}
+				},
 			};
 
 			try {
@@ -134,27 +136,29 @@ describe('ModularGameChangerController', function () {
 
 	describe('#storeCloneMeta', () => {
 		it('should take in clonedata, and update the db', async () => {
-			const cloneList = [{
-				id: 1,
-				clone_name: 'gamechanger',
-				search_module: 'policy/policySearchHandler',
-				export_module: 'simple/simpleExportHandler',
-				title_bar_module: 'policy/policyTitleBarHandler',
-				navigation_module: 'policy/policyNavigationHandler',
-				card_module: 'policy/policyCardHandler',
-				display_name: 'GAMECHANGER',
-				is_live: true,
-				url: 'gamechanger',
-				permissions_required: false,
-				available_at: JSON.stringify([['localhost']]),
-				clone_to_sipr: false,
-				show_tutorial: true,
-				show_graph: true,
-				show_crowd_source: true,
-				show_feedback: true,
-				config: {esIndex: 'gamechanger'},
-				save: () => {}
-			}];
+			const cloneList = [
+				{
+					id: 1,
+					clone_name: 'gamechanger',
+					search_module: 'policy/policySearchHandler',
+					export_module: 'simple/simpleExportHandler',
+					title_bar_module: 'policy/policyTitleBarHandler',
+					navigation_module: 'policy/policyNavigationHandler',
+					card_module: 'policy/policyCardHandler',
+					display_name: 'GAMECHANGER',
+					is_live: true,
+					url: 'gamechanger',
+					permissions_required: false,
+					available_at: JSON.stringify([['localhost']]),
+					clone_to_sipr: false,
+					show_tutorial: true,
+					show_graph: true,
+					show_crowd_source: true,
+					show_feedback: true,
+					config: { esIndex: 'gamechanger' },
+					save: () => {},
+				},
+			];
 			const opts = {
 				...constructorOptionsMock,
 				clone_meta: {
@@ -163,16 +167,47 @@ describe('ModularGameChangerController', function () {
 					},
 				},
 				handler_factory: {
-					reloadCloneMeta: () => {}
-				}
+					reloadCloneMeta: () => {},
+				},
 			};
 			const target = new ModularGameChangerController(opts);
 
 			const req = {
 				...reqMock,
 				body: {
-					cloneData: {"cloneData":{"clone_name":"gamechanger","display_name":"GAMECHANGER","is_live":true,"url":"gamechanger","permissions_required":true,"clone_to_sipr":false,"show_tutorial":false,"show_graph":true,"show_crowd_source":true,"show_feedback":true,"search_module":"policy/policySearchHandler","export_module":"policy/policyExportHandler","title_bar_module":"policy/policyTitleBarHandler","navigation_module":"policy/policyNavigationHandler","card_module":"policy/policyCardHandler","main_view_module":"policy/policyMainViewHandler","graph_module":"policy/policyGraphHandler","search_bar_module":null,"s3_bucket":null,"data_source_name":null,"source_agency_name":null,"metadata_creation_group":null,"source_s3_bucket":null,"source_s3_prefix":null,"elasticsearch_index":null,"needs_ingest":false,"available_at":"[\"localhost\"]","can_edit":true}}
-				}
+					cloneData: {
+						cloneData: {
+							clone_name: 'gamechanger',
+							display_name: 'GAMECHANGER',
+							is_live: true,
+							url: 'gamechanger',
+							permissions_required: true,
+							clone_to_sipr: false,
+							show_tutorial: false,
+							show_graph: true,
+							show_crowd_source: true,
+							show_feedback: true,
+							search_module: 'policy/policySearchHandler',
+							export_module: 'policy/policyExportHandler',
+							title_bar_module: 'policy/policyTitleBarHandler',
+							navigation_module: 'policy/policyNavigationHandler',
+							card_module: 'policy/policyCardHandler',
+							main_view_module: 'policy/policyMainViewHandler',
+							graph_module: 'policy/policyGraphHandler',
+							search_bar_module: null,
+							s3_bucket: null,
+							data_source_name: null,
+							source_agency_name: null,
+							metadata_creation_group: null,
+							source_s3_bucket: null,
+							source_s3_prefix: null,
+							elasticsearch_index: null,
+							needs_ingest: false,
+							available_at: '["localhost"]',
+							can_edit: true,
+						},
+					},
+				},
 			};
 
 			let resCode;
@@ -186,7 +221,7 @@ describe('ModularGameChangerController', function () {
 				send(msg) {
 					resMsg = msg;
 					return this;
-				}
+				},
 			};
 
 			try {
@@ -194,8 +229,8 @@ describe('ModularGameChangerController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			assert.deepStrictEqual(resMsg, {created: false, updated: true});
-		})
+			assert.deepStrictEqual(resMsg, { created: false, updated: true });
+		});
 	});
 
 	describe('#search', () => {
@@ -206,15 +241,19 @@ describe('ModularGameChangerController', function () {
 					createHandler(handlerType, cloneName) {
 						return {
 							search: async () => {
-								return {msg: 'I am a dummy search. Check out the test for specific modules.', handlerType, cloneName};
+								return {
+									msg: 'I am a dummy search. Check out the test for specific modules.',
+									handlerType,
+									cloneName,
+								};
 							},
 							getError: () => {
 								return {};
-							}
+							},
 						};
-					}
+					},
 				},
-				clone_meta: {}
+				clone_meta: {},
 			};
 			const target = new ModularGameChangerController(opts);
 
@@ -224,8 +263,8 @@ describe('ModularGameChangerController', function () {
 					cloneName: 'gamechanger',
 					searchText: 'test',
 					offset: 0,
-					limit: 20
-				}
+					limit: 20,
+				},
 			};
 
 			let resCode;
@@ -239,12 +278,15 @@ describe('ModularGameChangerController', function () {
 				send(msg) {
 					resMsg = msg;
 					return this;
-				}
+				},
 			};
 
-
 			await target.search(req, res);
-			const expected = {msg: 'I am a dummy search. Check out the test for specific modules.', handlerType: 'search', cloneName: 'gamechanger'};
+			const expected = {
+				msg: 'I am a dummy search. Check out the test for specific modules.',
+				handlerType: 'search',
+				cloneName: 'gamechanger',
+			};
 			assert.deepStrictEqual(resMsg, expected);
 		});
 	});
@@ -257,12 +299,16 @@ describe('ModularGameChangerController', function () {
 					createHandler(handlerType, cloneName) {
 						return {
 							export(res) {
-								res.send({msg: 'I am a dummy export. Check out the test for specific modules.', handlerType, cloneName});
-							}
+								res.send({
+									msg: 'I am a dummy export. Check out the test for specific modules.',
+									handlerType,
+									cloneName,
+								});
+							},
 						};
-					}
+					},
 				},
-				clone_meta: {}
+				clone_meta: {},
 			};
 			const target = new ModularGameChangerController(opts);
 
@@ -272,8 +318,8 @@ describe('ModularGameChangerController', function () {
 					cloneName: 'gamechanger',
 					searchText: 'test',
 					offset: 0,
-					limit: 20
-				}
+					limit: 20,
+				},
 			};
 
 			let resCode;
@@ -287,7 +333,7 @@ describe('ModularGameChangerController', function () {
 				send(msg) {
 					resMsg = msg;
 					return this;
-				}
+				},
 			};
 
 			try {
@@ -295,7 +341,11 @@ describe('ModularGameChangerController', function () {
 			} catch (e) {
 				assert.fail(e);
 			}
-			const expected = {msg: 'I am a dummy export. Check out the test for specific modules.', handlerType: 'export', cloneName: 'gamechanger'};
+			const expected = {
+				msg: 'I am a dummy export. Check out the test for specific modules.',
+				handlerType: 'export',
+				cloneName: 'gamechanger',
+			};
 			assert.deepStrictEqual(resMsg, expected);
 		});
 	});

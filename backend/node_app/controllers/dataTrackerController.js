@@ -46,7 +46,7 @@ class DataTrackerController {
 	}
 
 	async getBrowsingLibrary(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { level = 1 } = req.body;
 		let level_value;
 		try {
@@ -66,7 +66,7 @@ class DataTrackerController {
 	}
 
 	async getTrackedData(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { limit = 10, offset = 0, order = [], where = {} } = req.body;
 		const new_where = {};
 		where.forEach((object, idx) => {
@@ -85,7 +85,7 @@ class DataTrackerController {
 	}
 
 	async getTrackedSource(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { limit = 10, offset = 0, order = [], where = {} } = req.body;
 		try {
 			const totalCount = await this.documentCorpus.count({ where, group: 'source_fqdn' });
@@ -147,7 +147,7 @@ class DataTrackerController {
 		const { limit = 10, offset = 0, order = [], where = {}, option = 'all', cloneName = 'gamechanger' } = req.body;
 		const attributes = ['crawler_name', 'status', 'datetime'];
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			if (option === 'all') {
 				const crawlerData = await this.crawlerStatus.findAndCountAll({
 					raw: true,
@@ -293,7 +293,7 @@ class DataTrackerController {
 	async getCrawlerInfoData(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const crawlerData = await this.crawlerInfo.findAndCountAll({});
 			const crawlerDataCleaned = crawlerData.rows.map((item) => {
 				return item.dataValues;
@@ -308,7 +308,7 @@ class DataTrackerController {
 	async getOrgSealData(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const orgData = await this.organizationInfo.findAll();
 			res.status(200).send(orgData);
 		} catch (e) {
@@ -320,7 +320,7 @@ class DataTrackerController {
 	async getDocIngestionStats(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const numberOfSources = await this.crawlerInfo.count({});
 			const numDocResp = await this.sequelizeGCOrchestration.query(

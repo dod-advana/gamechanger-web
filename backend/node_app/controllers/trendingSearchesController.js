@@ -31,7 +31,7 @@ class TrendingSearchesController {
 		let trending = [];
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { cloneData = {}, daysBack } = req.body;
 			const blacklist = [];
 			try {
@@ -60,7 +60,7 @@ class TrendingSearchesController {
 		let userId = 'Unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const blacklist = await this.gcTrendingBlacklist.findAll({
 				attributes: [sequelize.literal('search_text, added_by, "updatedAt"')],
@@ -79,7 +79,7 @@ class TrendingSearchesController {
 		let userId = 'Unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { createEntry = 'test' } = req.body;
 
 			const blacklist = await this.gcTrendingBlacklist.findOrCreate({
@@ -103,7 +103,7 @@ class TrendingSearchesController {
 	async deleteTrendingBlacklist(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { searchText = 'test' } = req.body;
 
@@ -125,7 +125,7 @@ class TrendingSearchesController {
 		const daysBack = 14;
 		let results = [];
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			results = await this.searchUtility.getSearchCount(daysBack, userId);
 			res.status(200).send(results);
 		} catch (err) {
