@@ -122,7 +122,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
 			const user = await this.user.findOne({
@@ -155,7 +155,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
@@ -190,7 +190,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { userData } = req.body;
 
@@ -225,7 +225,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { cloneName } = req.body;
 
@@ -282,8 +282,8 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
-			const user_id = getUserIdFromSAMLUserId(req);
+			userId = req.session.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			const user_id = getUserIdFromSAMLUserId(userId, false);
 			const { clone } = req.body;
 
 			const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
@@ -292,11 +292,11 @@ class UserController {
 				if (user.extra_fields.hasOwnProperty('clones_visited')) {
 					if (!user.extra_fields.clones_visited.includes(clone)) {
 						user.extra_fields.clones_visited.push(clone);
-						await this.updateOrCreateUserHelper(user, user_id, true);
+						await this.updateOrCreateUserHelper(user, true);
 					}
 				} else {
 					user.extra_fields['clones_visited'] = [clone];
-					await this.updateOrCreateUserHelper(user, user_id, true);
+					await this.updateOrCreateUserHelper(user, true);
 				}
 			}
 
@@ -310,7 +310,7 @@ class UserController {
 	async getUserData(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 			let user = await this.user.findOne({
@@ -578,25 +578,27 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { userData, fromApp } = req.body;
-			res.status(200).send(await this.updateOrCreateUserHelper(userData, userId, fromApp));
+			res.status(200).send(await this.updateOrCreateUserHelper(userData, fromApp));
 		} catch (err) {
 			this.logger.error(err, 'VFA1YU7', userId);
 			res.status(500).send(`Error adding or updating user: ${err.message}`);
 		}
 	}
 
-	async updateOrCreateUserHelper(userData, userId, fromApp = false) {
+	async updateOrCreateUserHelper(userData, fromApp = false) {
+		let user_id = 'WebApp';
 		try {
 			let foundItem;
-
-			const user_id = !fromApp ? getUserIdFromSAMLUserId(userData.id, false) : userId;
-
 			if (fromApp) {
 				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
 			} else {
-				foundItem = await this.user.findOne({ where: { user_id: user_id }, raw: true });
+				user_id = getUserIdFromSAMLUserId(userData.id, false);
+				foundItem = await this.user.findOne({
+					where: { user_id },
+					raw: true,
+				});
 			}
 
 			if (!foundItem) {
@@ -604,7 +606,13 @@ class UserController {
 					await this.user.create(userData);
 				} else {
 					// Migrate the users data from the old GC table
-					const oldGCUserInfo = await this.syncUserHelper({ user_id, cn: userData.cn });
+					const oldGCUserInfo = await this.syncUserHelper(
+						{
+							user_id,
+							cn: userData.cn,
+						},
+						user_id
+					);
 
 					const tmpExtraFields = { gamechanger: oldGCUserInfo.policy || {} };
 
@@ -721,13 +729,13 @@ class UserController {
 					if ((!tempUser.cn || tempUser.cn === null || tempUser.cn === '') && userData.cn)
 						tempUser.cn = userData.cn;
 
-					await this.user.update(tempUser, { where: { user_id: user_id } });
+					await this.user.update(tempUser, { where: { user_id } });
 				}
 			}
 
 			return true;
 		} catch (err) {
-			this.logger.error(err, '2XY95Z7', userId);
+			this.logger.error(err, '2XY95Z7', user_id);
 			return false;
 		}
 	}
@@ -736,7 +744,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { userRowId } = req.body;
 			const user = await this.user.findOne({ where: { id: userRowId } });
 			await user.destroy();
@@ -752,7 +760,7 @@ class UserController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 			const { email, permissions } = req.body;
 			const userRequest = await this.userRequest.findOne({ where: { email: email }, raw: true });
@@ -811,8 +819,6 @@ class UserController {
 				raw: true,
 			});
 
-			console.log(newUsers);
-
 			// Loop through new users
 			for (const user of newUsers) {
 				await this.syncUserHelper(user, userId);
@@ -861,9 +867,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const apiKeyRequest of foundRecords) {
-						apiKeyRequest.username = user.user_id;
-						await this.apiKeyRequests.update(apiKeyRequest, { where: { id: apiKeyRequest.id } });
+					try {
+						for (const apiKeyRequest of foundRecords) {
+							apiKeyRequest.username = user.user_id;
+							await this.apiKeyRequests.update(apiKeyRequest, { where: { id: apiKeyRequest.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL1', userId);
 					}
 
 					// API Keys
@@ -876,9 +886,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const apiKey of foundRecords) {
-						apiKey.username = user.user_id;
-						await this.apiKey.update(apiKey, { where: { id: apiKey.id } });
+					try {
+						for (const apiKey of foundRecords) {
+							apiKey.username = user.user_id;
+							await this.apiKey.update(apiKey, { where: { id: apiKey.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL2', userId);
 					}
 
 					// Export History
@@ -891,9 +905,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const history of foundRecords) {
-						history.user_id = user.user_id;
-						await this.exportHistory.update(history, { where: { id: history.id } });
+					try {
+						for (const history of foundRecords) {
+							history.user_id = user.user_id;
+							await this.exportHistory.update(history, { where: { id: history.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL3', userId);
 					}
 
 					// Favorite Documents
@@ -906,9 +924,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteDocument.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteDocument.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL4', userId);
 					}
 
 					// Favorite Documents Group
@@ -921,9 +943,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteDocumentsGroup.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteDocumentsGroup.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL5', userId);
 					}
 
 					// Favorite Groups
@@ -936,9 +962,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteGroup.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteGroup.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL6', userId);
 					}
 
 					// Favorite Organizations
@@ -951,9 +981,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteOrganization.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteOrganization.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL7', userId);
 					}
 
 					// Favorite Searches
@@ -966,9 +1000,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteSearch.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteSearch.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL8', userId);
 					}
 
 					// Favorite Topics
@@ -981,24 +1019,36 @@ class UserController {
 						raw: true,
 					});
 
-					for (const favorite of foundRecords) {
-						favorite.user_id = user.user_id;
-						await this.favoriteTopic.update(favorite, { where: { id: favorite.id } });
+					try {
+						for (const favorite of foundRecords) {
+							favorite.user_id = user.user_id;
+							await this.favoriteTopic.update(favorite, { where: { id: favorite.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL9', userId);
 					}
 
 					// Feedback
-					foundRecords = await this.feedback.findAll({
-						where: {
-							user_id: {
-								[Op.in]: allIds,
+					try {
+						foundRecords = await this.feedback.findAll({
+							where: {
+								user_id: {
+									[Op.in]: allIds,
+								},
 							},
-						},
-						raw: true,
-					});
+							raw: true,
+						});
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL10', userId);
+					}
 
-					for (const feedback of foundRecords) {
-						feedback.user_id = user.user_id;
-						await this.feedback.update(feedback, { where: { id: feedback.id } });
+					try {
+						for (const feedback of foundRecords) {
+							feedback.user_id = user.user_id;
+							await this.feedback.update(feedback, { where: { id: feedback.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL11', userId);
 					}
 
 					// GC Assists
@@ -1011,9 +1061,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const assist of foundRecords) {
-						assist.user_id = user.user_id;
-						await this.gcAssists.update(assist, { where: { id: assist.id } });
+					try {
+						for (const assist of foundRecords) {
+							assist.user_id = user.user_id;
+							await this.gcAssists.update(assist, { where: { id: assist.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL12', userId);
 					}
 
 					// GC History
@@ -1026,9 +1080,13 @@ class UserController {
 						raw: true,
 					});
 
-					for (const history of foundRecords) {
-						history.user_id = user.user_id;
-						await this.gcHistory.update(history, { where: { id: history.id } });
+					try {
+						for (const history of foundRecords) {
+							history.user_id = user.user_id;
+							await this.gcHistory.update(history, { where: { id: history.id } });
+						}
+					} catch (error) {
+						this.logger.error(error, 'Z70XSYL13', userId);
 					}
 
 					// Update old user id
@@ -1086,7 +1144,7 @@ class UserController {
 	async getUserSettings(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
@@ -1109,7 +1167,7 @@ class UserController {
 	async submitUserInfo(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
 
 			await this.gcUser.update(
@@ -1133,7 +1191,7 @@ class UserController {
 	async getInternalUsers(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const internalUsers = await this.internalUserTracking.findAll();
 			res.status(200).send(internalUsers);
@@ -1146,7 +1204,7 @@ class UserController {
 	async deleteInternalUser(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const deleted = this.internalUserTracking.destroy({
 				where: {
 					id: req.body.id,
@@ -1163,7 +1221,7 @@ class UserController {
 	async sendFeedback(req, res) {
 		let userId = 'Unknown_Webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { feedbackType, feedbackText, screenShot, userEmail } = req.body.feedbackData;
 			const emailBody = `<h2>${feedbackType}</h2><p>${feedbackText}</p><p>${screenShot}</p>`;
 			this.logger.info(`User Feedback from ${userEmail}: ${emailBody} `);
@@ -1219,7 +1277,7 @@ class UserController {
 	async sendClassificationAlert(req, res) {
 		let userId = 'Unknown_Webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { alertData } = req.body;
 			const emailBody = `<p>A user with ID ${userId} has exported their search results with a non-standard classification marking.</p><p>The marking they used is: ${
 				alertData.options.classificationMarking
@@ -1239,7 +1297,7 @@ class UserController {
 	}
 
 	async clearDashboardNotification(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const user_id = getUserIdFromSAMLUserId(req);
@@ -1286,7 +1344,7 @@ class UserController {
 	async updateUserAPIRequestLimit(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const user_id = getUserIdFromSAMLUserId(req);
 
@@ -1327,7 +1385,7 @@ class UserController {
 	async getRecentSearches(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { clone_name } = req.body;
 
 			const user_id = getUserIdFromSAMLUserId(req);
