@@ -926,6 +926,9 @@ class AppStatsController {
 						documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
 					) {
 						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					} else {
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
 					}
 				}
 			}
@@ -936,6 +939,9 @@ class AppStatsController {
 						documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
 					) {
 						documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					} else {
+						documentMap[vistitIDMap[open.idvisitor]][['opened']].push(open.document);
+						documentMap[vistitIDMap[open.idvisitor]][['opened']].shift();
 					}
 				}
 			}

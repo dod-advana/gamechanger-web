@@ -680,6 +680,16 @@ describe('AppStatsController', function () {
           database: 'fakeDatabase',
         },
       },
+      user: {
+        findAll(){
+          return [{user_id:1,organization:'test'}]
+        }
+      },
+      sparkMD5:{
+        hash(id){
+          return id
+        }
+      }
     };
 
     it('should get users aggregated searches', async (done) => {
@@ -735,7 +745,7 @@ describe('AppStatsController', function () {
       const expectedData = {
         users: [
          {
-          idvisitor:'007',
+          user_id:1,
           docs_opened:5,
           searches_made:10,
           opened: [
@@ -745,20 +755,23 @@ describe('AppStatsController', function () {
             'test6.pdf',
             'test7.pdf',
           ],
-          export: [
+          ExportDocument: [
             'test2.pdf',
             'test3.pdf',
             'test4.pdf',
             'test5.pdf',
             'test6.pdf',
           ],
-          favorite: [
+          Favorite: [
             'test2.pdf',
             'test3.pdf',
             'test4.pdf',
             'test5.pdf',
             'test6.pdf',
-          ]
+          ],
+          last_search: new Date(2022,4,26,0,0,0),
+          last_search_formatted: '2022-04-26 00:00',
+          org:'test'
          }
         ],
         cards:{
@@ -767,11 +780,16 @@ describe('AppStatsController', function () {
         }
       };
       const target = new AppStatsController(tmpOpts);
+      target.getUserVisitorID = ([],connection) => [
+        {idvisitor:'007',user_id:1}
+      ]
       target.getUserAggregationsQuery = (connection) =>  [
         {
           idvisitor:'007',
           docs_opened:5,
-          searches_made:10
+          searches_made:10,
+          last_search: new Date(2022,4,26,0,0,0),
+          last_search_formatted: '2022-04-26 00:00'
         },
       ];
       target.queryPdfOpend = (connection) => [
@@ -907,6 +925,7 @@ describe('AppStatsController', function () {
       ];
 
       await target.getUserAggregations(req, res);
+      console.log(sentData);
       assert.equal(passedCode, 200);
       assert.deepEqual(sentData, expectedData);
       done();
