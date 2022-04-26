@@ -14,7 +14,7 @@ class AboutGcController {
 	async getFAQ(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const questions = await this.faq.findAll();
 			res.status(200).send(questions);
 		} catch (e) {

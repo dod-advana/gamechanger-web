@@ -509,7 +509,7 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getSearchPdfMapping(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
@@ -647,7 +647,7 @@ class AppStatsController {
 	 */
 	async getDocumentUsageData(req, res) {
 		let connection;
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { daysBack, offset, filters, sorting, pageSize };
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
@@ -850,7 +850,7 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getUserAggregations(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
 		const documentMap = {};
