@@ -342,10 +342,6 @@ const PolicySearchHandler = {
 
 						doc_types.forEach((element) => {
 							var docTypeName = element.key;
-							if (docTypeName.slice(-1) !== 's') {
-								docTypeName = docTypeName + 's';
-							}
-
 							docTypeMap[docTypeName] = docTypeMap[docTypeName]
 								? docTypeMap[docTypeName] + element.doc_count
 								: element.doc_count;
@@ -722,9 +718,6 @@ const PolicySearchHandler = {
 			const typeFilters = {};
 			for (const key in resp.data.types) {
 				let name = resp.data.types[key];
-				if (name.slice(-1) !== 's') {
-					name = name + 's';
-				}
 				typeFilters[name] = false;
 			}
 			const newSearchSettings = _.cloneDeep(state.searchSettings);
