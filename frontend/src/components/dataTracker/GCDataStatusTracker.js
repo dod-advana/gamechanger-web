@@ -443,11 +443,6 @@ const GCDataStatusTracker = (props) => {
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
 
-	const getCrawlerName = (crawler) => {
-		if (crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
-		return crawler.crawler_name;
-	};
-
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', 'PDFOpen');
@@ -647,16 +642,17 @@ const GCDataStatusTracker = (props) => {
 		const crawlerColumns = [
 			{
 				Header: 'Source',
-				accessor: 'crawler_name',
+				accessor: 'displayName',
+				filterable: true,
 				Cell: (row) => {
 					return row.original.url_origin ? (
 						<TableRow>
 							<a href={row.original.url_origin} target="_blank" rel="noreferrer">
-								{getCrawlerName(row.original)}
+								{row.value}
 							</a>
 						</TableRow>
 					) : (
-						<TableRow>{getCrawlerName(row.original)}</TableRow>
+						<TableRow>{row.value}</TableRow>
 					);
 				},
 				style: { whiteSpace: 'unset' },
@@ -664,6 +660,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: '% Ingested',
 				accessor: 'status',
+				sortable: false,
 				Cell: (row) => (
 					<TableRow
 						style={{
@@ -680,6 +677,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Crawl and Download Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
@@ -693,6 +691,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest In Progress',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
@@ -706,6 +705,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
@@ -717,8 +717,15 @@ const GCDataStatusTracker = (props) => {
 				),
 			},
 			{
+				Header: '# Documents',
+				accessor: 'docCount',
+				sortable: false,
+				Cell: (row) => <TableRow>{row.value}</TableRow>,
+			},
+			{
 				Header: 'Last Action',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>;
 				},
@@ -726,6 +733,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Days Since Last Ingest',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
 				},
@@ -775,6 +783,12 @@ const GCDataStatusTracker = (props) => {
 							manual={true}
 							pages={numPages}
 							onFetchData={handleFetchCrawlerData}
+							defaultSorted={[
+								{
+									id: 'displayName',
+									desc: false,
+								},
+							]}
 						/>
 					</TableStyle>
 					<IngestStats style={{ width: '25%' }} ingestData={ingestData} />
