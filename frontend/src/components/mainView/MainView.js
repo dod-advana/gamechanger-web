@@ -6,7 +6,6 @@ import { Button } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { trackEvent } from '../telemetry/Matomo';
 import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
-import AnalystTools from '../analystTools';
 import { setState, getUserData } from '../../utils/sharedFunctions';
 import MainViewFactory from '../factories/mainViewFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
@@ -162,7 +161,7 @@ const MainView = (props) => {
 	};
 
 	const getAnalystTools = () => {
-		return <AnalystTools context={context} />;
+		return mainViewHandler.getAnalystToolsPage({ context });
 	};
 
 	const getDataTracker = () => {
