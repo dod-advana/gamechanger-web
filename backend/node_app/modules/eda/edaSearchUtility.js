@@ -143,6 +143,46 @@ class EDASearchUtility {
 				},
 			};
 
+			// exclude certain terms or phrases
+			if (edaSearchSettings.excludeTerms && edaSearchSettings.excludeTerms !== '') {
+				let phrases = edaSearchSettings.excludeTerms.split(';');
+				let should = [];
+
+				phrases.forEach((phrase) => {
+					should.push({
+						wildcard: {
+							'pages.filename.search': {
+								value: `*${phrase}*`,
+							},
+						},
+					});
+					should.push({
+						match_phrase: {
+							'pages.p_raw_text': phrase,
+						},
+					});
+				});
+
+				query.query.bool.must_not = [
+					{
+						bool: {
+							should: [
+								{
+									nested: {
+										path: 'pages',
+										query: {
+											bool: {
+												should,
+											},
+										},
+									},
+								},
+							],
+						},
+					},
+				];
+			}
+
 			if (extSearchFields.length > 0) {
 				const extQuery = {
 					multi_match: {
@@ -289,6 +329,46 @@ class EDASearchUtility {
 					},
 				},
 			};
+
+			// exclude certain terms or phrases
+			if (edaSearchSettings.excludeTerms && edaSearchSettings.excludeTerms !== '') {
+				let phrases = edaSearchSettings.excludeTerms.split(';');
+				let should = [];
+
+				phrases.forEach((phrase) => {
+					should.push({
+						wildcard: {
+							'pages.filename.search': {
+								value: `*${phrase}*`,
+							},
+						},
+					});
+					should.push({
+						match_phrase: {
+							'pages.p_raw_text': phrase,
+						},
+					});
+				});
+
+				query.query.bool.must_not = [
+					{
+						bool: {
+							should: [
+								{
+									nested: {
+										path: 'pages',
+										query: {
+											bool: {
+												should,
+											},
+										},
+									},
+								},
+							],
+						},
+					},
+				];
+			}
 
 			if (extSearchFields.length > 0) {
 				const extQuery = {
