@@ -518,7 +518,7 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getSearchPdfMapping(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
@@ -565,7 +565,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId([userId], clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId([userId], connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -656,7 +656,7 @@ class AppStatsController {
 	 */
 	async getDocumentUsageData(req, res) {
 		let connection;
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { daysBack, offset, filters, sorting, pageSize };
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
@@ -721,7 +721,6 @@ class AppStatsController {
 				}
 				doc.document = doc.document.substring(12).split(' - ')[0];
 			}
-
 			// filename mapping to titles; pulled from ES
 			let filenames = docData.map((item) => item.document);
 			const esQuery = this.searchUtility.getDocMetadataQuery('filenames', filenames);
@@ -862,7 +861,7 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getUserAggregations(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
 		const documentMap = {};
@@ -973,7 +972,7 @@ class AppStatsController {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];
 		} finally {
-			connection.end();
+			if (connection) connection.end();
 		}
 	}
 }

@@ -73,7 +73,7 @@ class CacheController {
 		// this will be cut in prod it limits to 10 mins top in network
 		req.setTimeout(72000000); // 20 hours
 
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.createSearchHistoryCacheHelper(userId);
@@ -208,7 +208,7 @@ class CacheController {
 	}
 
 	async clearSearchHistoryCache(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.clearSearchHistoryCacheHelper(userId);
@@ -246,7 +246,7 @@ class CacheController {
 		// this will be cut in prod it limits to 10 mins top in network
 		req.setTimeout(72000000); // 20 hours
 
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.createAbbreviationsCacheHelper(userId);
@@ -297,7 +297,7 @@ class CacheController {
 	}
 
 	async clearAbbreviationsCache(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.clearAbbreviationsCacheHelper(userId);
@@ -335,7 +335,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			let useGCCache = await this.redisAsyncClient.get(CACHE_ACTIVE_STATUS_KEY);
 			useGCCache = false;
@@ -355,7 +355,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const useGCCache = await this.redisAsyncClient.get(CACHE_ACTIVE_STATUS_KEY);
 			const toggle = useGCCache === 'false';
@@ -372,7 +372,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.clearGraphDataCacheHelper(userId);
 			res.status(200).send('Graph data cache cleared');
 		} catch (err) {
@@ -412,7 +412,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.createGraphDataCacheHelper(userId);
 			res.status(200).send('Graph data cache created');
 		} catch (err) {

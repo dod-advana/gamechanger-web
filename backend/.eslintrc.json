@@ -1,6 +1,12 @@
 {
   "extends": [ "prettier", "plugin:prettier/recommended"],
   "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
     "max-len": 0,
     "space-before-function-paren": 0,
     "radix": 0,
