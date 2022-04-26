@@ -14,7 +14,7 @@ class TutorialOverlayController {
 	}
 
 	async fetchTutorialOverlays(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const data = await this.tutorialOverlays.findAll();
 			res.send(data);
@@ -30,7 +30,7 @@ class TutorialOverlayController {
 
 	async saveTutorialOverlays(req, res) {
 		const { appName, componentsList } = req.body;
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			return this.tutorialOverlays

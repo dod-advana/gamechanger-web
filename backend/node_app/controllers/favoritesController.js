@@ -67,7 +67,7 @@ class FavoritesController {
 	async favoriteDocumentPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const {
 				filename,
@@ -119,7 +119,7 @@ class FavoritesController {
 	async favoriteSearchPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { search_name, search_summary, search_text, tiny_url, document_count, is_favorite } = req.body;
 
@@ -157,7 +157,7 @@ class FavoritesController {
 	async favoriteTopicPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { topic, topicSummary, is_favorite } = req.body;
 
@@ -192,7 +192,7 @@ class FavoritesController {
 	async favoriteOrganizationPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { organization, organizationSummary, is_favorite } = req.body;
 
@@ -227,7 +227,7 @@ class FavoritesController {
 	async favoriteGroupPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { group_type, group_name, group_description, is_clone, create, clone_index, group_ids } = req.body;
 
@@ -267,7 +267,7 @@ class FavoritesController {
 	async addToFavoriteGroupPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { groupId, documentIds } = req.body;
 			const docObjects = documentIds.map((docId) => {
@@ -308,7 +308,7 @@ class FavoritesController {
 	async deleteFavoriteFromGroupPOST(req, res) {
 		let userId = 'Unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { groupId, documentId } = req.body;
 
 			const removed = await this.favoriteDocumentsGroup.destroy({
@@ -435,7 +435,7 @@ class FavoritesController {
 	}
 
 	async clearFavoriteSearchUpdate(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const { tinyurl } = req.body;

@@ -48,7 +48,7 @@ class ExportHistoryController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const hist = await this.exportHistory.findAll({
 				raw: true,
@@ -74,7 +74,7 @@ class ExportHistoryController {
 				throw new Error('No id passed in route');
 			}
 
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const resp = await this.exportHistory.destroy({
 				where: {
 					id,
