@@ -87,6 +87,7 @@ const endpoints = {
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
+	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -771,6 +772,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, { params: body });
 	};
 
+	sendUserAggregations = async (body) => {
+		const url = endpoints.sendUserAggregations;
+		return axiosPOST(this.axios, url, { params: body });
+	};
+
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
 		return axiosPOST(this.axios, url, body);
@@ -796,8 +802,21 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { tinyurl });
 	};
 
-	getDataForSearch = async (body) => {
+	getDataForSearch = async (body, cancelToken) => {
 		const url = endpoints.callGraphFunctionPOST;
+		if (cancelToken) {
+			return axiosPOST(
+				this.axios,
+				url,
+				{
+					functionName: 'getDataForSearch',
+					...body,
+				},
+				{
+					cancelToken: cancelToken?.token ? cancelToken.token : {},
+				}
+			);
+		}
 		return axiosPOST(this.axios, url, {
 			functionName: 'getDataForSearch',
 			...body,
@@ -865,8 +884,13 @@ export default class GameChangerAPI {
 		const url = endpoints.updateUserAPIRequestLimit;
 		return axiosGET(this.axios, url);
 	};
-	getCombinedSearchMode = async () => {
+	getCombinedSearchMode = async (cancelToken) => {
 		const url = endpoints.combinedSearchMode;
+		if (cancelToken) {
+			return axiosGET(this.axios, url, {
+				cancelToken: cancelToken?.token ? cancelToken.token : {},
+			});
+		}
 		return axiosGET(this.axios, url);
 	};
 
@@ -918,8 +942,13 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getLTRMode = async () => {
+	getLTRMode = async (cancelToken) => {
 		const url = endpoints.ltr;
+		if (cancelToken) {
+			return axiosGET(this.axios, url, {
+				cancelToken: cancelToken?.token ? cancelToken.token : {},
+			});
+		}
 		return axiosGET(this.axios, url);
 	};
 
