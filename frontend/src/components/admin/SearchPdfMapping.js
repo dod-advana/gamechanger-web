@@ -283,7 +283,7 @@ const getDocumentData = async (daysBack, setDocumentData) => {
 };
 
 /**
- * This method queries postgres for feedback data.
+ * This method queries postgres for user aggregations.
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
