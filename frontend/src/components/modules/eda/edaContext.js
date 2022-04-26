@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { orgFilters, typeFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	edaSearchSettings: {
@@ -63,6 +64,29 @@ const initState = {
 		allCategoriesSelected: true,
 		specificCategoriesSelected: false,
 	},
+	analystToolsSearchSettings: {
+		isFilterUpdate: false,
+		orgUpdate: false,
+		typeUpdate: false,
+		expansionTermAdded: false,
+		originalOrgFilters: orgFilters,
+		originalTypeFilters: typeFilters,
+		orgFilter: orgFilters,
+		orgCount: {},
+		typeCount: {},
+		typeFilter: typeFilters,
+		allCategoriesSelected: true,
+		allOrgsSelected: true,
+		searchFields: { initial: { field: null, input: '' } },
+		specificCategoriesSelected: false,
+		specificOrgsSelected: false,
+		allTypesSelected: true,
+		specificTypesSelected: false,
+		publicationDateAllTime: true,
+		publicationDateFilter: [null, null],
+		accessDateFilter: [null, null],
+		includeRevoked: false,
+	},
 	rawSearchResults: [],
 	userData: {
 		favorite_searches: [],
@@ -93,6 +117,14 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
+		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
+			const newState = {
+				...state,
+				analystToolsSearchSettings: initState.analystToolsSearchSettings,
+			};
+			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
+			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
+			return newState;
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,

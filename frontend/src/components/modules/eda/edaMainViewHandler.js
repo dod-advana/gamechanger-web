@@ -17,6 +17,7 @@ import { setState } from '../../../utils/sharedFunctions';
 import { Card } from '../../cards/GCCard';
 import ViewHeader from '../../mainView/ViewHeader';
 import defaultMainViewHandler from '../default/defaultMainViewHandler';
+import AnalystTools from '../../analystTools';
 import { Typography } from '@material-ui/core';
 
 const _ = require('lodash');
@@ -287,6 +288,10 @@ const EdaMainViewHandler = {
 
 	getAboutUs(props) {
 		return defaultMainViewHandler.getAboutUs(props);
+	},
+
+	getAnalystToolsPage({ context }) {
+		return <AnalystTools context={context} showResponsibilityExplorer={false} />;
 	},
 };
 

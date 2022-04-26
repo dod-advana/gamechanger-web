@@ -39,6 +39,7 @@ import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCAboutUs from '../../aboutUs/GCAboutUs';
+import AnalystTools from '../../analystTools';
 //import { last } from 'underscore';
 const _ = require('lodash');
 
@@ -1130,6 +1131,10 @@ const PolicyMainViewHandler = {
 	getAboutUs(props) {
 		const { state } = props;
 		return <GCAboutUs state={state} />;
+	},
+
+	getAnalystToolsPage({ context }) {
+		return <AnalystTools context={context} />;
 	},
 };
 

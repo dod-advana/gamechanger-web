@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { backgroundGreyDark, backgroundWhite, gcOrange } from '../common/gc-colors';
 import { Typography } from '@material-ui/core';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
@@ -9,11 +9,26 @@ import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
 import { setState } from '../../utils/sharedFunctions';
 import GCResponsibilityExplorer from './GCResponsibilityExplorer';
 
-const AnalystTools = (props) => {
-	const { context } = props;
+const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocumentComparisonTool = true }) => {
 	const { state, dispatch } = context;
 
-	const [tabIndex, setTabIndex] = useState('responsibility_explorer');
+	const [tabIndex, setTabIndex] = useState('');
+
+	const TAB_INDEX = {
+		RESPONSIBILITY_EXPLORER: 'responsibility_explorer',
+		DOCUMENT_COMPARISON_TOOL: 'dct',
+	};
+
+	useEffect(() => {
+		if (showResponsibilityExplorer) {
+			setState(dispatch, { analystToolsPageDisplayed: 'Responsibility Explorer' });
+			setTabIndex(TAB_INDEX.RESPONSIBILITY_EXPLORER);
+		} else if (showDocumentComparisonTool) {
+			setState(dispatch, { analystToolsPageDisplayed: 'Document Comparison Tool' });
+			setTabIndex(TAB_INDEX.DOCUMENT_COMPARISON_TOOL);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const handleTabClicked = (tabIndex) => {
 		trackEvent(
@@ -23,10 +38,10 @@ const AnalystTools = (props) => {
 		);
 
 		switch (tabIndex) {
-			case 'responsibility_explorer':
+			case TAB_INDEX.RESPONSIBILITY_EXPLORER:
 				setState(dispatch, { analystToolsPageDisplayed: 'Responsibility Explorer' });
 				break;
-			case 'dct':
+			case TAB_INDEX.DOCUMENT_COMPARISON_TOOL:
 				setState(dispatch, { analystToolsPageDisplayed: 'Document Comparison Tool' });
 				break;
 			default:
@@ -42,41 +57,53 @@ const AnalystTools = (props) => {
 				<Tabs>
 					<div style={styles.tabButtonContainer}>
 						<TabList style={styles.tabsList}>
-							<Tab
-								style={{
-									...styles.tabStyle,
-									...(tabIndex === 'responsibility_explorer' ? styles.tabSelectedStyle : {}),
-									borderRadius: `5px 5px 0 0`,
-								}}
-								title="userHistory"
-								onClick={() => handleTabClicked('responsibility_explorer')}
-							>
-								<Typography variant="h6" display="inline" title="cardView">
-									RESPONSIBILITY EXPLORER
-								</Typography>
-							</Tab>
-							<Tab
-								style={{
-									...styles.tabStyle,
-									...(tabIndex === 'dct' ? styles.tabSelectedStyle : {}),
-									borderRadius: `5px 5px 0 0`,
-								}}
-								title="userHistory"
-								onClick={() => handleTabClicked('dct')}
-							>
-								<Typography variant="h6" display="inline" title="cardView">
-									DOCUMENT COMPARISON TOOL
-								</Typography>
-							</Tab>
+							{showResponsibilityExplorer && (
+								<Tab
+									style={{
+										...styles.tabStyle,
+										...(tabIndex === TAB_INDEX.RESPONSIBILITY_EXPLORER
+											? styles.tabSelectedStyle
+											: {}),
+										borderRadius: `5px 5px 0 0`,
+									}}
+									title="userHistory"
+									onClick={() => handleTabClicked(TAB_INDEX.RESPONSIBILITY_EXPLORER)}
+								>
+									<Typography variant="h6" display="inline" title="cardView">
+										RESPONSIBILITY EXPLORER
+									</Typography>
+								</Tab>
+							)}
+							{showDocumentComparisonTool && (
+								<Tab
+									style={{
+										...styles.tabStyle,
+										...(tabIndex === TAB_INDEX.DOCUMENT_COMPARISON_TOOL
+											? styles.tabSelectedStyle
+											: {}),
+										borderRadius: `5px 5px 0 0`,
+									}}
+									title="userHistory"
+									onClick={() => handleTabClicked(TAB_INDEX.DOCUMENT_COMPARISON_TOOL)}
+								>
+									<Typography variant="h6" display="inline" title="cardView">
+										DOCUMENT COMPARISON TOOL
+									</Typography>
+								</Tab>
+							)}
 						</TabList>
 
 						<div style={styles.panelContainer}>
-							<TabPanel>
-								<GCResponsibilityExplorer state={state} dispatch={dispatch} />
-							</TabPanel>
-							<TabPanel>
-								<GCDocumentsComparisonTool context={context} />
-							</TabPanel>
+							{showResponsibilityExplorer && (
+								<TabPanel>
+									<GCResponsibilityExplorer state={state} dispatch={dispatch} />
+								</TabPanel>
+							)}
+							{showDocumentComparisonTool && (
+								<TabPanel>
+									<GCDocumentsComparisonTool context={context} />
+								</TabPanel>
+							)}
 						</div>
 					</div>
 				</Tabs>

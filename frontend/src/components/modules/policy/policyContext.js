@@ -90,7 +90,7 @@ const initState = {
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
-	analystToolsPageDisplayed: 'Responsibility Explorer',
+	analystToolsPageDisplayed: '',
 	listView: false,
 
 	// Documents

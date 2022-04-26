@@ -617,6 +617,10 @@ const DefaultMainViewHandler = {
 	getAboutUs(props) {
 		return <></>;
 	},
+
+	getAnalystToolsPage() {
+		return <></>;
+	},
 };
 
 export default DefaultMainViewHandler;
