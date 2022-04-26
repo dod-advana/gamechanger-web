@@ -41,7 +41,7 @@ class ExternalSearchController {
 			if (!req.query || !req.query.search || req.query.search === '') {
 				return res.status(400).send('Missing search');
 			} else {
-				userId = req.get('SSL_CLIENT_S_DN_CN');
+				userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 				let orgFilterString = req.query.orgFilter || [];
 				let typeFilterString = req.query.typeFilter || [];
 				if (typeof orgFilterString === 'string') {
