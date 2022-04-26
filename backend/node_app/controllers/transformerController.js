@@ -67,7 +67,7 @@ class TransformerController {
 	async getData(key, req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const resp = await this.registry[key](userId);
 			res.send(resp);
 		} catch (err) {
@@ -88,7 +88,7 @@ class TransformerController {
 		let userId = 'webapp_unknown';
 		try {
 			const data = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const resp = await this.registry[key](userId, data);
 			res.send(resp);
 		} catch (err) {

@@ -797,8 +797,21 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { tinyurl });
 	};
 
-	getDataForSearch = async (body) => {
+	getDataForSearch = async (body, cancelToken) => {
 		const url = endpoints.callGraphFunctionPOST;
+		if (cancelToken) {
+			return axiosPOST(
+				this.axios,
+				url,
+				{
+					functionName: 'getDataForSearch',
+					...body,
+				},
+				{
+					cancelToken: cancelToken?.token ? cancelToken.token : {},
+				}
+			);
+		}
 		return axiosPOST(this.axios, url, {
 			functionName: 'getDataForSearch',
 			...body,
@@ -866,8 +879,13 @@ export default class GameChangerAPI {
 		const url = endpoints.updateUserAPIRequestLimit;
 		return axiosGET(this.axios, url);
 	};
-	getCombinedSearchMode = async () => {
+	getCombinedSearchMode = async (cancelToken) => {
 		const url = endpoints.combinedSearchMode;
+		if (cancelToken) {
+			return axiosGET(this.axios, url, {
+				cancelToken: cancelToken?.token ? cancelToken.token : {},
+			});
+		}
 		return axiosGET(this.axios, url);
 	};
 
@@ -919,8 +937,13 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	getLTRMode = async () => {
+	getLTRMode = async (cancelToken) => {
 		const url = endpoints.ltr;
+		if (cancelToken) {
+			return axiosGET(this.axios, url, {
+				cancelToken: cancelToken?.token ? cancelToken.token : {},
+			});
+		}
 		return axiosGET(this.axios, url);
 	};
 
