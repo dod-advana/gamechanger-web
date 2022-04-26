@@ -40,7 +40,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			// const { searchQuery, docTitle } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			this.gcAdmins.findAll({ raw: true }).then((results) => {
 				res.status(200).send({ admins: results, timeStamp: new Date().toISOString() });
@@ -55,7 +55,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			const { adminData } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const [admin, created] = await this.gcAdmins.findOrCreate({
 				where: { username: adminData.username },
@@ -80,7 +80,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			const { username } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const admin = await this.gcAdmins.findOne({ where: { username } });
 			await admin.destroy();
@@ -155,7 +155,7 @@ class AdminController {
 		}
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			let results = await this.appSettings.findAll({
 				where: {
 					key: ['homepage_topics', 'homepage_major_pubs', 'homepage_popular_docs_inactive'],
@@ -174,7 +174,7 @@ class AdminController {
 
 		try {
 			const { key, tableData } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.appSettings.update(
 				{
 					value: JSON.stringify(tableData),
