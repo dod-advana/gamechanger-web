@@ -66,7 +66,7 @@ class ReviewController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { emails = [] } = req.body;
 
 			// Gather all the reviews that have not been completed and that have primary reviewer
