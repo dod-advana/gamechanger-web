@@ -87,6 +87,7 @@ const endpoints = {
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
+	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
@@ -769,6 +770,11 @@ export default class GameChangerAPI {
 	getUserAggregations = async (body) => {
 		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, { params: body });
+	};
+
+	sendUserAggregations = async (body) => {
+		const url = endpoints.sendUserAggregations;
+		return axiosPOST(this.axios, url, { params: body });
 	};
 
 	addInternalUser = async (body) => {
