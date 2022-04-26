@@ -1,4 +1,6 @@
 const SearchUtility = require('../../utils/searchUtility');
+const MLSearchUtility = require('../../utils/MLsearchUtility');
+
 const constantsFile = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
@@ -20,6 +22,7 @@ class PolicySearchHandler extends SearchHandler {
 		const {
 			dataTracker = new DataTrackerController(opts),
 			searchUtility = new SearchUtility(opts),
+			MLsearchUtility = new MLSearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
 			app_settings = APP_SETTINGS,
@@ -30,6 +33,8 @@ class PolicySearchHandler extends SearchHandler {
 
 		this.dataTracker = dataTracker;
 		this.searchUtility = searchUtility;
+		this.MLsearchUtility = MLsearchUtility;
+
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
 		this.app_settings = app_settings;
@@ -58,7 +63,7 @@ class PolicySearchHandler extends SearchHandler {
 		if (doubleQuoteCount % 2 === 1) {
 			req.body.searchText = searchText.replace(/["]+/g, '');
 		}
-		req.body.questionFlag = this.searchUtility.isQuestion(searchText);
+		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 		var startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
@@ -93,7 +98,7 @@ class PolicySearchHandler extends SearchHandler {
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId, false, getUserIdFromSAMLUserId(req));
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-				req.body.questionFlag = this.searchUtility.isQuestion(searchText);
+				req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
 				return searchResults;
 			case 'entityPagination':
@@ -194,8 +199,7 @@ class PolicySearchHandler extends SearchHandler {
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
 			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray, userId);
-
-			let relatedSearches = await this.searchUtility.getRelatedSearches(
+			let relatedSearches = await this.MLsearchUtility.getRelatedSearches(
 				searchText,
 				expansionDict,
 				cloneName,
@@ -335,7 +339,7 @@ class PolicySearchHandler extends SearchHandler {
 				intelligentSearchOn.length > 0 ? intelligentSearchOn[0].dataValues.value === 'true' : false;
 			if (intelligentSearchOn) {
 				// get sentence search from ML API
-				sentenceResults = await this.searchUtility.getSentResults(req.body.searchText, userId);
+				sentenceResults = await this.MLsearchUtility.getSentResults(req.body.searchText, userId);
 				enrichedResults.sentenceResults = sentenceResults;
 			}
 
@@ -398,7 +402,7 @@ class PolicySearchHandler extends SearchHandler {
 				saveResults.entities = enrichedResults.entities;
 				saveResults.topics = enrichedResults.topics;
 				saveResults.qaResponses = enrichedResults.qaResults;
-				this.searchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
+				this.MLsearchUtility.addSearchReport(searchText, enrichedResults.qaResults.params, saveResults, userId);
 			}
 			return enrichedResults;
 		} catch (e) {
@@ -442,7 +446,7 @@ class PolicySearchHandler extends SearchHandler {
 		) {
 			try {
 				// get intelligent search result
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(
+				intelligentSearchResult = await this.MLsearchUtility.intelligentSearchHandler(
 					sentenceResults,
 					userId,
 					req,
@@ -485,11 +489,16 @@ class PolicySearchHandler extends SearchHandler {
 			try {
 				let queryType = 'documents';
 				let entities = { QAResults: {}, allResults: {} };
-				let qaQueries = await this.searchUtility.formatQAquery(searchText, esClientName, entitiesIndex, userId);
+				let qaQueries = await this.MLsearchUtility.formatQAquery(
+					searchText,
+					esClientName,
+					entitiesIndex,
+					userId
+				);
 				QA.question = qaQueries.display;
-				let bigramQueries = this.searchUtility.makeBigramQueries(qaQueries.list, qaQueries.alias);
+				let bigramQueries = this.MLsearchUtility.getBigramQueries(qaQueries.list, qaQueries.alias);
 				try {
-					entities = await this.searchUtility.getQAEntities(
+					entities = await this.MLsearchUtility.getQAEntities(
 						entities,
 						qaQueries,
 						bigramQueries,
@@ -501,7 +510,7 @@ class PolicySearchHandler extends SearchHandler {
 				} catch (e) {
 					this.logger.error(e.message, 'FLPQX67M');
 				}
-				let qaDocQuery = this.searchUtility.phraseQAQuery(
+				let qaDocQuery = this.MLsearchUtility.getPhraseQAQuery(
 					bigramQueries,
 					queryType,
 					qaParams.entityLimit,
@@ -509,7 +518,7 @@ class PolicySearchHandler extends SearchHandler {
 					userId
 				);
 				let docQAResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, qaDocQuery, userId);
-				let context = await this.searchUtility.getQAContext(
+				let context = await this.MLsearchUtility.getQAContext(
 					docQAResults,
 					entities.QAResults,
 					sentenceResults,
@@ -519,7 +528,7 @@ class PolicySearchHandler extends SearchHandler {
 					qaParams
 				);
 				if (testing === true) {
-					this.searchUtility.addSearchReport(qaSearchText, qaParams, { results: context }, userId);
+					this.MLsearchUtility.addSearchReport(qaSearchText, qaParams, { results: context }, userId);
 				}
 				if (context.length > 0) {
 					// if context results, query QA model
@@ -529,7 +538,7 @@ class PolicySearchHandler extends SearchHandler {
 						context.map((item) => item.text),
 						userId
 					);
-					QA = this.searchUtility.cleanQAResults(QA, shortenedResults, context);
+					QA = this.MLsearchUtility.cleanQAResults(QA, shortenedResults, context);
 				}
 			} catch (e) {
 				this.error.category = 'ML API';

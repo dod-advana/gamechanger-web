@@ -183,6 +183,8 @@ const ViewHeader = (props) => {
 	};
 
 	const handleChangeSort = (event) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
 		const {
 			target: { value },
 		} = event;
@@ -192,18 +194,22 @@ const ViewHeader = (props) => {
 			resultsPage: 1,
 			docSearchResults: [],
 			replaceResults: true,
-			docsPagination: true,
+			runSearch: true,
 			infiniteScrollPage: 1,
+			searchSettings: newSearchSettings,
 		});
 	};
 
 	const handleChangeOrder = (value) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
 		setState(dispatch, {
 			currentOrder: value,
 			resultsPage: 1,
 			docSearchResults: [],
 			replaceResults: true,
-			docsPagination: true,
+			runSearch: true,
+			searchSettings: newSearchSettings,
 		});
 	};
 
