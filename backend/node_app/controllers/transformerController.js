@@ -32,6 +32,7 @@ class TransformerController {
 			initializeLTR: this.mlApi.initializeLTR,
 			createModelLTR: this.mlApi.createModelLTR,
 			stopProcess: this.mlApi.stopProcess,
+			sendUserAggregations: this.mlApi.sendUserAggregations,
 		};
 
 		// Get methods
@@ -54,6 +55,7 @@ class TransformerController {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
+		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 	}
 	/**
 	 * A generic get method to query the ML API.
