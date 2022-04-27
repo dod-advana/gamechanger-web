@@ -5,9 +5,14 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ all ]
+    branches: [ dev ]
   pull_request:
-    types: [opened, reopened, edited]
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - dev
+      - 'feature/**'
+      - 'hotfix/**'
+      - 'bugfix/sprint-**'
 
 jobs:
   build:
