@@ -331,8 +331,8 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
-					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'expansion2', source: 'abbreviations' },
+					{ phrase: 'expansion1', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -351,8 +351,8 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
-					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'expansion2', source: 'abbreviations' },
+					{ phrase: 'expansion1', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -417,11 +417,11 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'exp3', source: 'abbreviations' },
+					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'exp1', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'exp3', source: 'abbreviations' },
 					{ phrase: 'thing2', source: 'ML-QE' },
 				],
 			};
@@ -441,11 +441,11 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'exp3', source: 'abbreviations' },
+					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'exp1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
-					{ phrase: 'exp3', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'thesaurus' },
 				],
 			};
@@ -490,11 +490,11 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'exp3', source: 'abbreviations' },
+					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'exp1', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'exp3', source: 'abbreviations' },
 					{ phrase: 'thing2', source: 'ML-QE' },
 				],
 			};
@@ -514,11 +514,11 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'exp3', source: 'abbreviations' },
+					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'exp1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'exp2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
-					{ phrase: 'exp3', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'thesaurus' },
 					{ phrase: 'thing42', source: 'thesaurus' },
 				],
@@ -564,13 +564,13 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				'something else': [
+					{ phrase: 'thing42', source: 'abbreviations' },
+					{ phrase: 'thing6', source: 'abbreviations' },
+					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'thing6', source: 'abbreviations' },
 					{ phrase: 'thing2', source: 'ML-QE' },
-					{ phrase: 'thing42', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -588,16 +588,16 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				'something else': [
+					{ phrase: 'thing42', source: 'abbreviations' },
+					{ phrase: 'thing6', source: 'abbreviations' },
+					{ phrase: 'thing5', source: 'abbreviations' },
+					{ phrase: 'thing4', source: 'abbreviations' },
 					{ phrase: 'related 1', source: 'related' },
 					{ phrase: 'related 2', source: 'related' },
 					{ phrase: 'related 3', source: 'related' },
-					{ phrase: 'thing4', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'thing6', source: 'abbreviations' },
 					{ phrase: 'thing2', source: 'ML-QE' },
-					{ phrase: 'thing42', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -615,13 +615,13 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				'something else': [
+					{ phrase: 'thing41', source: 'abbreviations' },
+					{ phrase: 'thing3', source: 'abbreviations' },
+					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
-					{ phrase: 'thing3', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'thesaurus' },
-					{ phrase: 'thing41', source: 'abbreviations' },
 					{ phrase: 'thing42', source: 'thesaurus' },
 				],
 			};
@@ -641,16 +641,16 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				'something else': [
+					{ phrase: 'thing41', source: 'abbreviations' },
+					{ phrase: 'thing3', source: 'abbreviations' },
+					{ phrase: 'thing2', source: 'abbreviations' },
+					{ phrase: 'thing1', source: 'abbreviations' },
 					{ phrase: 'related 1', source: 'related' },
 					{ phrase: 'related 2', source: 'related' },
 					{ phrase: 'related 3', source: 'related' },
-					{ phrase: 'thing1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
-					{ phrase: 'thing3', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'thesaurus' },
-					{ phrase: 'thing41', source: 'abbreviations' },
 					{ phrase: 'thing42', source: 'thesaurus' },
 				],
 			};
@@ -717,9 +717,9 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
 					{ phrase: 'thing2', source: 'ML-QE' },
 				],
@@ -740,13 +740,13 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'thing7', source: 'abbreviations' },
+					{ phrase: 'thing6', source: 'abbreviations' },
+					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'thing6', source: 'abbreviations' },
 					{ phrase: 'thing2', source: 'ML-QE' },
-					{ phrase: 'thing7', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -766,12 +766,12 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'thing41', source: 'abbreviations' },
+					{ phrase: 'thing3', source: 'abbreviations' },
+					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
-					{ phrase: 'thing3', source: 'abbreviations' },
-					{ phrase: 'thing41', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -790,9 +790,9 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
-					{ phrase: 'thing2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
 					{ phrase: 'thing6', source: 'thesaurus' },
 					{ phrase: 'thing7', source: 'thesaurus' },
@@ -916,12 +916,12 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
-					{ phrase: 'thing1', source: 'abbreviations' },
-					{ phrase: 'thing2', source: 'abbreviations' },
-					{ phrase: 'thing3', source: 'abbreviations' },
-					{ phrase: 'thing4', source: 'abbreviations' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'abbreviations' },
+					{ phrase: 'thing5', source: 'abbreviations' },
+					{ phrase: 'thing4', source: 'abbreviations' },
+					{ phrase: 'thing3', source: 'abbreviations' },
+					{ phrase: 'thing2', source: 'abbreviations' },
+					{ phrase: 'thing1', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -940,12 +940,12 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
-					{ phrase: 'thing1', source: 'abbreviations' },
-					{ phrase: 'thing2', source: 'abbreviations' },
-					{ phrase: 'thing3', source: 'abbreviations' },
-					{ phrase: 'thing4', source: 'abbreviations' },
-					{ phrase: 'thing5', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'abbreviations' },
+					{ phrase: 'thing5', source: 'abbreviations' },
+					{ phrase: 'thing4', source: 'abbreviations' },
+					{ phrase: 'thing3', source: 'abbreviations' },
+					{ phrase: 'thing2', source: 'abbreviations' },
+					{ phrase: 'thing1', source: 'abbreviations' },
 				],
 			};
 
@@ -965,13 +965,13 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'expansion3', source: 'abbreviations' },
+					{ phrase: 'expansion2', source: 'abbreviations' },
 					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'expansion2', source: 'abbreviations' },
 					{ phrase: 'thing5', source: 'thesaurus' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'expansion3', source: 'abbreviations' },
 					{ phrase: 'thing6', source: 'thesaurus' },
 					{ phrase: 'thing2', source: 'ML-QE' },
 					{ phrase: 'thing42', source: 'thesaurus' },
@@ -994,12 +994,12 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'expansion3', source: 'abbreviations' },
+					{ phrase: 'expansion2', source: 'abbreviations' },
 					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'expansion2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'expansion3', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -1017,14 +1017,14 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'expansion3', source: 'abbreviations' },
+					{ phrase: 'expansion2', source: 'abbreviations' },
+					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'related 1', source: 'related' },
 					{ phrase: 'related 2', source: 'related' },
-					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'thing4', source: 'thesaurus' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'expansion2', source: 'abbreviations' },
 					{ phrase: 'thing1', source: 'ML-QE' },
-					{ phrase: 'expansion3', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -1043,12 +1043,12 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'expansion3', source: 'abbreviations' },
+					{ phrase: 'expansion2', source: 'abbreviations' },
+					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'related 1', source: 'related' },
 					{ phrase: 'thing1', source: 'related' },
-					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'thing3', source: 'ML-QE' },
-					{ phrase: 'expansion2', source: 'abbreviations' },
-					{ phrase: 'expansion3', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
@@ -1066,11 +1066,11 @@ describe('SearchUtility', function () {
 			let result = target.combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbs);
 			let expected = {
 				something: [
+					{ phrase: 'expansion3', source: 'abbreviations' },
+					{ phrase: 'expansion2', source: 'abbreviations' },
+					{ phrase: 'expansion1', source: 'abbreviations' },
 					{ phrase: 'related 1', source: 'related' },
 					{ phrase: 'thing1', source: 'related' },
-					{ phrase: 'expansion1', source: 'abbreviations' },
-					{ phrase: 'expansion2', source: 'abbreviations' },
-					{ phrase: 'expansion3', source: 'abbreviations' },
 				],
 			};
 			assert.deepEqual(result, expected);
