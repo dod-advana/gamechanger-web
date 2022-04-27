@@ -366,7 +366,7 @@ export default class GameChangerAPI {
 				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${cloneData.clone_name}`,
 				{
 					responseType: 'blob',
-					withCredentials: true,
+					withCredentials: false,
 				}
 			)
 				.then((resp) => {
