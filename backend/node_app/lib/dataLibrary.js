@@ -1,5 +1,6 @@
 const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
+const CryptoJS = require('crypto-js');
 const axiosLib = require('axios');
 const https = require('https');
 const AWS = require('aws-sdk');
@@ -8,6 +9,7 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
+const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
 
@@ -290,7 +292,7 @@ class DataLibrary {
 		}
 	}
 
-	getFilePDF(res, data, userId) {
+	async getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
 		const { req } = res;
 		const {
@@ -298,18 +300,37 @@ class DataLibrary {
 		} = req;
 		const queryString = query ? `?${query}` : '';
 		// console.log("getFilePDFn",req)
-
+		// console.log("REQ!!!!!!!!!!!!!")
+		// console.log(req)
 		try {
 			if (
 				(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
 				req.query.isClone &&
 				req.query.clone_name === 'eda'
 			) {
-				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL + req.baseUrl + req.path + queryString;
-
+				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL + req.baseUrl + req.path + 
+				'?path='+req.query.filekey+'&dest='+req.query.dest+'&filekey=/'+req.query.filekey +
+				'&isClone=false&clone_name=edaReRoute';
+				console.log('EDAURL!!!!!!!!!!!!!!!!1')
+				console.log(edaUrl)
+				
+				const oldCn = getUserIdFromSAMLUserId(req)
+				const cn = req.session.user.id;
+				const token = await this.redisDB.get(`${getUserIdFromSAMLUserId(req)}-token`);
+				const signature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.baseUrl+req.path, token ? token : 'NoToken'));
+				console.log("SIGNATURE!")
+				console.log(cn)
+				console.log(oldCn)
+				console.log(token)
+				console.log(signature)
 				this.axios({
 					method: 'get',
 					url: edaUrl,
+					headers: {
+						'host': this.constants.GAMECHANGER_BACKEND_EDA_URL,
+						'X-UA-SIGNATURE': signature,
+						'SSL_CLIENT_S_DN_CN': cn,
+						'x-env-ssl_client_certificate': req.headers['x-env-ssl_client_certificate']},
 					responseType: 'stream',
 				})
 					.then((response) => {
