@@ -114,7 +114,7 @@ class SearchUtility {
 						}
 					});
 					if (!found) {
-						result[key].push({ phrase: abb, source: 'abbreviations' });
+						result[key].unshift({ phrase: abb, source: 'abbreviations' });
 					}
 					nextAbbIndex++;
 				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
@@ -913,9 +913,10 @@ class SearchUtility {
 		}
 	}
 
-	async findAliases(searchTextList, entityLimit, esClientName, entitiesIndex, user) {
+	async findAliases(searchTextList, esClientName, entitiesIndex, user) {
 		let matchingAlias = {};
 		try {
+			let entityLimit = 5;
 			let aliasQuery = this.makeAliasesQuery(searchTextList, entityLimit);
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
