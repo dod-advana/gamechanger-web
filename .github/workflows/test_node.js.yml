@@ -7,7 +7,7 @@ on:
   push:
     branches: [ all ]
   pull_request:
-    branches: [ all ]
+    types: [opened, reopened, edited]
 
 jobs:
   build:
