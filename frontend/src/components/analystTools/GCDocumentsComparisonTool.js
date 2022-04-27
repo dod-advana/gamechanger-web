@@ -287,7 +287,7 @@ const GCDocumentsComparisonTool = (props) => {
 			};
 
 			gameChangerAPI
-				.compareDocumentPOST({ cloneName: state.cloneData.cloneName, paragraphs: paragraphs, filters })
+				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
 				.then((resp) => {
 					if (resp.data.docs.length <= 0) {
 						setNoResults(true);
@@ -321,7 +321,7 @@ const GCDocumentsComparisonTool = (props) => {
 	}, [
 		state.runDocumentComparisonSearch,
 		paragraphText,
-		state.cloneData.cloneName,
+		state.cloneData.clone_name,
 		dispatch,
 		allOrgsSelected,
 		orgFilter,

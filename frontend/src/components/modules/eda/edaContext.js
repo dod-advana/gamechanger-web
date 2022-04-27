@@ -80,7 +80,7 @@ const initState = {
 		fiscalYears: [],
 		allYearsSelected: true,
 		contractsOrMods: 'both',
-		idvPIID: null,
+		idvPIID: '',
 		typeFilter: typeFilters,
 		allOrgsSelected: true,
 		specificOrgsSelected: false,

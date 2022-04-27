@@ -29,18 +29,6 @@ const setAnalystToolsSettings = (field, value, state, dispatch) => {
 			analystToolsSettings.specificOrgsSelected = true;
 			analystToolsSettings.allOrgsSelected = false;
 			break;
-		case 'aggregations':
-			analystToolsSettings.aggregations[value] = !analystToolsSettings.aggregations[value];
-			break;
-		case 'issueDateRangeStart':
-			analystToolsSettings.startDate = value;
-			break;
-		case 'issueDateRangeEnd':
-			analystToolsSettings.endDate = value;
-			break;
-		case 'contractIssueAgency':
-			analystToolsSettings.issueAgency = value;
-			break;
 		case 'organizations':
 			const orgIndex = analystToolsSettings.organizations.indexOf(value);
 			if (orgIndex !== -1) {
@@ -63,32 +51,8 @@ const setAnalystToolsSettings = (field, value, state, dispatch) => {
 				analystToolsSettings.fiscalYears.push(value);
 			}
 			break;
-		case 'allData':
-			analystToolsSettings.allDataSelected = true;
-			break;
-		case 'specData':
-			analystToolsSettings.allDataSelected = false;
-			break;
-		case 'contractData':
-			analystToolsSettings.contractData[value] = !analystToolsSettings.contractData[value];
-			break;
-		case 'issueOfficeDoDAAC':
-		case 'issueOfficeName':
 		case 'contractsOrMods':
-		case 'maxObligatedAmount':
-		case 'minObligatedAmount':
-		case 'excludeTerms':
-		case 'vendorName':
-		case 'fundingOfficeCode':
 		case 'idvPIID':
-		case 'modNumber':
-		case 'pscDesc':
-		case 'piid':
-		case 'reqDesc':
-		case 'psc':
-		case 'fundingAgencyName':
-		case 'naicsCode':
-		case 'duns':
 			analystToolsSettings[field] = value;
 			break;
 		case 'majcoms':
@@ -495,10 +459,10 @@ const renderIdvPiid = (state, dispatch) => {
 		<TextField
 			placeholder="IDV PIID"
 			variant="outlined"
-			defaultValue={state.analystToolsSearchSettings['idvPIID']}
+			value={state.analystToolsSearchSettings['idvPIID']}
 			style={{ backgroundColor: 'white', width: '100%' }}
 			fullWidth={true}
-			onBlur={(event) => setAnalystToolsSettings('idvPIID', event.target.value, state, dispatch)}
+			onChange={(event) => setAnalystToolsSettings('idvPIID', event.target.value, state, dispatch)}
 			inputProps={{
 				style: {
 					height: 19,
