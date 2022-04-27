@@ -114,7 +114,7 @@ class SearchUtility {
 						}
 					});
 					if (!found) {
-						result[key].push({ phrase: abb, source: 'abbreviations' });
+						result[key].unshift({ phrase: abb, source: 'abbreviations' });
 					}
 					nextAbbIndex++;
 				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
