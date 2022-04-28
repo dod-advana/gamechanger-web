@@ -15,7 +15,7 @@ const GlobalSearchTitleBarHandler = {
 				src={AdvanaLightTheme}
 				style={styles.title}
 				onClick={() => (window.location.href = 'https://advana.data.mil/')}
-				alt="globalsearch"
+				alt="search"
 				id={'titleButton'}
 				className={
 					componentStepNumbers
@@ -71,7 +71,7 @@ const styles = {
 		marginRight: 15,
 	},
 	titleBar: {
-		padding: '20px 1em',
+		padding: '0px 1em',
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
@@ -80,9 +80,9 @@ const styles = {
 		width: '100%',
 	},
 	title: {
-		margin: '-10px 50px -10px 55px',
+		margin: '0px 50px 0px 15px',
 		cursor: 'pointer',
 		width: '255px',
-		height: '65x',
+		height: '50x',
 	},
 };
