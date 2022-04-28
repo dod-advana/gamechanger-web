@@ -792,6 +792,16 @@ describe('AppStatsController', function () {
 						return mySqlConnection;
 					},
 				},
+        user: {
+          findAll(){
+            return [{user_id:1,organization:'test'}]
+          }
+        },
+        sparkMD5:{
+          hash(id){
+            return id
+          }
+        }
 			};
 
 			let connectCalled = false;
@@ -818,13 +828,21 @@ describe('AppStatsController', function () {
 				},
 			};
 			const expectedResponses = [
-				[
-					{
-						idvisitor: '007',
-						docs_opened: 5,
-						searches_made: 10,
-					},
-				],
+        [
+          {
+            idvisitor:'007',
+            user_id:1
+          }
+        ],
+        [
+          {
+            idvisitor:'007',
+            docs_opened:5,
+            searches_made:10,
+            last_search: new Date(2022,4,26,0,0,0),
+            last_search_formatted: '2022-04-26 00:00'
+          },
+        ],
 				[
 					{
 						idvisitor: '007',
@@ -904,49 +922,49 @@ describe('AppStatsController', function () {
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test1.pdf',
+						document: 'PDFViewer - test1.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test2.pdf',
+						document: 'PDFViewer - test2.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test3.pdf',
+						document: 'PDFViewer - test3.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test4.pdf',
+						document: 'PDFViewer - test4.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test5.pdf',
+						document: 'PDFViewer - test5.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test6.pdf',
+						document: 'PDFViewer - test6.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 					{
 						idvisit: 1,
 						idvisitor: '007',
 						idaction_name: 6,
-						document: 'test7.pdf',
+						document: 'PDFViewer - test7.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
 				],
@@ -961,12 +979,15 @@ describe('AppStatsController', function () {
 			const expectedData = {
 				users: [
 					{
-						idvisitor: '007',
+						user_id: 1,
+            org: "test",
 						docs_opened: 5,
 						searches_made: 10,
+            "last_search": new Date(2022,4,26,0,0,0),
+            "last_search_formatted": "2022-04-26 00:00",
 						opened: ['test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf', 'test7.pdf'],
-						export: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
-						favorite: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
+						ExportDocument: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
+						Favorite: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
 					},
 				],
 				cards: {

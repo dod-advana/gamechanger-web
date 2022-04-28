@@ -181,7 +181,7 @@ class PolicyExportHandler extends ExportHandler {
 		) {
 			try {
 				// get intelligent search result
-				intelligentSearchResult = await this.searchUtility.intelligentSearchHandler(
+				intelligentSearchResult = await this.MLsearchUtility.intelligentSearchHandler(
 					sentenceResults,
 					userId,
 					req,
