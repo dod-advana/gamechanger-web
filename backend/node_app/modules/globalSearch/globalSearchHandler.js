@@ -215,10 +215,10 @@ class GlobalSearchHandler extends SearchHandler {
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
 
-			return response.data || [];
+			return response.data || { total: 0, results: [] };
 		} catch (err) {
 			this.logger.error(err, 'FE656U9', userId);
-			return [];
+			return { total: 0, results: [] };
 		}
 	}
 

@@ -118,7 +118,7 @@ const getViewHeader = (state, dispatch) => {
 				</Typography>
 			)}
 			<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
-				<div style={styles.container}>
+				<div style={{ ...styles.container, margin: '0px 25px' }}>
 					<GCButton
 						onClick={() => setState(dispatch, { listView: false })}
 						style={{
@@ -204,7 +204,7 @@ const GlobalSearchMainViewHandler = {
 											/>
 										</div>
 									)}
-									{!hideSearchResults && pageLoaded && (
+									{!hideSearchResults && pageLoaded && searchResultsCount > 0 && (
 										<>
 											{!loading && getViewHeader(state, dispatch)}
 											<div style={{ margin: '0 -15px 0 -30px' }}>
