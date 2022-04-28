@@ -32,7 +32,7 @@ class AnalystToolsController {
 	async compareDocument(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { cloneName, paragraphs = [], filters } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
@@ -95,7 +95,7 @@ class AnalystToolsController {
 	async compareFeedback(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { searchedParagraph, matchedParagraphId, docId, positiveFeedback, undo = false } = req.body;
 
 			if (undo) {

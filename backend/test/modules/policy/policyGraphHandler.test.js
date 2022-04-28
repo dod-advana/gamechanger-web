@@ -3008,6 +3008,7 @@ describe('PolicyGraphHandler', function () {
 						return Promise.resolve(searchResults);
 					},
 				},
+				constants: { GAME_CHANGER_OPTS: { allow_daterange: false }, STOP_WORDS: ['word'] },
 			};
 
 			const req = {
@@ -3024,7 +3025,6 @@ describe('PolicyGraphHandler', function () {
 
 			try {
 				const actual = await target.callFunctionHelper(req, 'test');
-
 				const expected = {
 					query: {
 						_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'] },
@@ -3100,22 +3100,32 @@ describe('PolicyGraphHandler', function () {
 																fuzzy_max_expansions: 100,
 																fuzziness: 'AUTO',
 																analyzer: 'gc_english',
+																boost: 0.5,
 															},
 														},
 													],
 												},
 											},
+											score_mode: 'sum',
 										},
 									},
-									{ wildcard: { keyw_5: { value: '*artificial intelligence*', boost: 4 } } },
+									{ wildcard: { keyw_5: { value: '*artificial intelligence*', boost: 5 } } },
 									{
 										wildcard: {
-											'display_title_s.search': { value: '*artificial intelligence*', boost: 10 },
+											'display_title_s.search': {
+												value: '*artificial intelligence*',
+												boost: 15,
+												case_insensitive: true,
+											},
 										},
 									},
 									{
 										wildcard: {
-											'filename.search': { value: '*artificial intelligence*', boost: 5 },
+											'filename.search': {
+												value: '*artificial intelligence*',
+												boost: 10,
+												case_insensitive: true,
+											},
 										},
 									},
 									{
@@ -3125,15 +3135,16 @@ describe('PolicyGraphHandler', function () {
 									},
 									{
 										wildcard: {
-											'top_entities_t.search': { value: '*artificial intelligence*', boost: 4 },
+											'top_entities_t.search': { value: '*artificial intelligence*', boost: 5 },
 										},
 									},
+									{ match_phrase: { 'display_title_s.search': 'artificial intelligence' } },
 									{
 										query_string: {
 											fields: ['display_title_s.search'],
-											query: '*artificial* OR *intelligence*',
+											query: '*artificial* AND *intelligence*',
 											type: 'best_fields',
-											boost: 6,
+											boost: 10,
 											analyzer: 'gc_english',
 										},
 									},
@@ -3252,7 +3263,7 @@ describe('PolicyGraphHandler', function () {
 							publication_date_dt: '2015-01-07T00:00:00',
 							page_count: 27,
 							pageHits: [],
-							esIndex: ['Test', 'Test'],
+							esIndex: 'gamechanger',
 							current_as_of: 'TEST',
 						},
 					],
