@@ -16,26 +16,6 @@ import { Button } from '@mui/material';
 import EditUserProfile from './EditUserProfile';
 import { convertHexToRgbA } from '../../utils/gamechangerUtils';
 
-const StyledTopDescription = styled.div`
-	font-family: Montserrat;
-	background: ${'#FFFFFF'};
-	width: 100%;
-	border-radius: 6px;
-
-	& .description-header {
-		color: ${'#212121'};
-		font-size: 18px;
-		font-family: Montserrat-SemiBold;
-		padding: 10px 10px 0 10px;
-	}
-
-	& .description-text {
-		color: ${'#212121'};
-		font-size: 14px;
-		padding: 0 10px 10px 10px;
-	}
-`;
-
 const StyledUserProfileDataDiv = styled.div`
 	background: ${'#FFFFFF'};
 	border-radius: 6px;
@@ -278,59 +258,47 @@ const UserProfile = React.memo((props) => {
 
 	return (
 		<div style={style}>
-			<Grid container spacing={3}>
-				<Grid container item xs={12} style={{ paddingRight: 15 }}>
-					<StyledTopDescription>
-						<Typography className={'description-header'}>User Profile</Typography>
-						<Typography className={'description-text'}>
-							This is the user profile page, use this page to edit your information and view app specific
-							items or tasks.
-						</Typography>
-					</StyledTopDescription>
+			<Grid container xs={12} spacing={3}>
+				<Grid container item xs={3} justify="center" alignItems="center">
+					<StyledUserProfileDataDiv>
+						<Grid
+							direction={'column'}
+							container
+							justify="center"
+							alignItems="center"
+							className={'user-picture'}
+						>
+							<Avatar src={ProfileDefaultImg} alt="profile-pic" className={classes.bigAvatar} />
+							<Typography className={'user-name'}>
+								{userData.preferred_name || `${userData.first_name || ''} ${userData.last_name || ''}`}
+							</Typography>
+						</Grid>
+						<Grid direction={'column'} container className={'user-data'}>
+							{renderUserData()}
+						</Grid>
+						<div className={'user-tags'}></div>
+						<Grid
+							direction={'column'}
+							container
+							justify="center"
+							alignItems="center"
+							className={'user-edit-button'}
+						>
+							<UserEditButton
+								variant="outlined"
+								startIcon={<EditIcon />}
+								onClick={() => {
+									setShowEditUserModal(true);
+								}}
+								primaryColor={primaryColor}
+							>
+								Edit Profile
+							</UserEditButton>
+						</Grid>
+					</StyledUserProfileDataDiv>
 				</Grid>
-				<Grid container item xs={12} spacing={3}>
-					<Grid container item xs={3} justify="center" alignItems="center">
-						<StyledUserProfileDataDiv>
-							<Grid
-								direction={'column'}
-								container
-								justify="center"
-								alignItems="center"
-								className={'user-picture'}
-							>
-								<Avatar src={ProfileDefaultImg} alt="profile-pic" className={classes.bigAvatar} />
-								<Typography className={'user-name'}>
-									{userData.preferred_name ||
-										`${userData.first_name || ''} ${userData.last_name || ''}`}
-								</Typography>
-							</Grid>
-							<Grid direction={'column'} container className={'user-data'}>
-								{renderUserData()}
-							</Grid>
-							<div className={'user-tags'}></div>
-							<Grid
-								direction={'column'}
-								container
-								justify="center"
-								alignItems="center"
-								className={'user-edit-button'}
-							>
-								<UserEditButton
-									variant="outlined"
-									startIcon={<EditIcon />}
-									onClick={() => {
-										setShowEditUserModal(true);
-									}}
-									primaryColor={primaryColor}
-								>
-									Edit Profile
-								</UserEditButton>
-							</Grid>
-						</StyledUserProfileDataDiv>
-					</Grid>
-					<Grid container item xs={9} style={{ paddingRight: 0 }}>
-						<StyledCustomAppDataDiv>{displayCustomAppContent()}</StyledCustomAppDataDiv>
-					</Grid>
+				<Grid container item xs={9} style={{ paddingRight: 0 }}>
+					<StyledCustomAppDataDiv>{displayCustomAppContent()}</StyledCustomAppDataDiv>
 				</Grid>
 			</Grid>
 
