@@ -225,7 +225,8 @@ const useStyles = makeStyles({
 		},
 	},
 	checkboxPill: {
-		width: '200px',
+		width: '160px',
+		padding: '5px',
 		textAlign: 'center',
 		borderRadius: '10px',
 		lineHeight: 1.2,
@@ -485,7 +486,7 @@ export default function SideBar(props) {
 	const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		return (
 			<div style={{ margin: '10px 0 10px 0' }}>
-				<FormGroup row style={{ marginLeft: '20px', width: '100%' }}>
+				<FormGroup row style={{ margin: '0 15px', width: '100%' }}>
 					{expansionTerms.map(({ phrase, source, checked }, idx) => {
 						let term = phrase;
 						term = term.length > 25 ? term.substring(0, 25 - 3) + '...' : term;

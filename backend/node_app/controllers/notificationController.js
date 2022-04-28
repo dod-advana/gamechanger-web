@@ -17,7 +17,7 @@ class NotificationController {
 	async getNotifications(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { project_name } = req.body;
 			const notifications = await this.notifications.findAll({ where: { project_name } });
@@ -35,7 +35,7 @@ class NotificationController {
 			// allow project name to be set for clone specific problems
 			const { project_name = 'gamechanger' } = body;
 
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			// use body. syntax to throw error if field not provided in body
 			const created = await this.notifications.create({
 				project_name,
@@ -54,7 +54,7 @@ class NotificationController {
 	async deleteNotification(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id } = req.body;
 
 			const deleted = this.notifications.destroy({
@@ -73,7 +73,7 @@ class NotificationController {
 	async editNotificationActive(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id, active } = req.body;
 
 			const edited = this.notifications.update(

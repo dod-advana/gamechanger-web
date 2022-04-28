@@ -398,7 +398,7 @@ class SearchController {
 	}
 
 	async convertTinyURL(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { url } = req.body;
 
 		try {
@@ -434,7 +434,7 @@ class SearchController {
 		let userId = 'webapp_unknown';
 		try {
 			const { url } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const [tiny] = await this.gcSearchURLs.findOrCreate({
 				where: { url: url },
 				defaults: {
@@ -456,7 +456,7 @@ class SearchController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const index = await this.redisAsyncClient.get('esIndex');
 			res.status(200).send(index);
 		} catch (err) {
@@ -468,7 +468,7 @@ class SearchController {
 	async queryEs(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { query, esClient } = req.body;
 			let safeEsClient = esClient;
 			let index = this.constants.GAME_CHANGER_OPTS.index;
@@ -493,7 +493,7 @@ class SearchController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { index } = req.body;
 			await this.redisAsyncClient.del('esIndex');
 			await this.redisAsyncClient.set('esIndex', index);

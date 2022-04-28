@@ -2,9 +2,19 @@ const _ = require('underscore');
 const https = require('https');
 const fs = require('fs');
 const constants = require('../config/constants');
-const ASSET_TYPES = constants.DATA_CATALOG_OPTS.api_config.assetTypes;
+const asyncRedisLib = require('async-redis');
 
 // config helper
+const getDataCatalogSettings = async () => {
+	const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
+	await redisAsyncClient.select(13);
+	const dcSettings = await redisAsyncClient.get('dataCatalogSettings');
+	if (dcSettings) {
+		return JSON.parse(dcSettings);
+	} else {
+		return {};
+	}
+};
 
 function getCollibraUrl() {
 	const url =
@@ -66,17 +76,23 @@ const cleanSearchText = (text) => {
 	else return `${text}*`;
 };
 
-const getSearchTypeId = (searchType) => {
+const getSearchTypeId = async (searchType) => {
+	const dcSettings = await getDataCatalogSettings();
 	if (!searchType) {
 		return null;
-	} else if (ASSET_TYPES[searchType]) {
-		return [ASSET_TYPES[searchType]];
+	} else if (dcSettings.assetTypes && dcSettings.assetTypes[searchType]) {
+		return [dcSettings.assetTypes[searchType]];
+	} else if (dcSettings.assetTypes) {
+		return _.toArray(dcSettings.assetTypes.assetTypes);
 	} else {
-		return _.toArray(ASSET_TYPES);
+		return null;
 	}
 };
 
-const getQueryableStatuses = () => constants.DATA_CATALOG_OPTS.api_config.queryableStatuses;
+const getQueryableStatuses = async () => {
+	const dcSettings = await getDataCatalogSettings();
+	return dcSettings.queryableStatuses;
+};
 
 module.exports = {
 	getCollibraUrl,

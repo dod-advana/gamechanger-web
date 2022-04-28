@@ -7,8 +7,10 @@ import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import { Typography } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
+import { MenuItem, Select } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
+import _ from 'lodash';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
@@ -93,6 +95,8 @@ const TableStyle = styled.div`
 			.rt-th,
 			.rt-td {
 				border-right: 1px solid #0000001f !important;
+				white-space: normal;
+				text-align: center;
 			}
 			.rt-th {
 				font-weight: bold;
@@ -253,20 +257,45 @@ const GCDataStatusTracker = (props) => {
 	const [numPages, setNumPages] = useState(0);
 	const [tabIndex, setTabIndex] = useState('crawler');
 	const [ingestData, setIngestData] = useState({});
+	const [crawlerInfoMap, setCrawlerInfoMap] = useState(null);
 
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then((res) => {
 			setIngestData(res.data);
 		});
+		gameChangerAPI.gcCrawlerSealData().then((res) => {
+			const map = {};
+			res.data.forEach((crawler) => {
+				map[crawler.crawler] = crawler;
+			});
+			setCrawlerInfoMap(map);
+			console.log('map');
+			console.table(map);
+		});
 	}, []);
-
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
+			// handle special case of filtering on the json_metadata field
+			let newFiltered = Object.assign([], filtered);
+			const jsonFilterIndex = _.findIndex(filtered, (e) => e.id === 'json_metadata', 0);
+			if (jsonFilterIndex > -1) {
+				// remove json_metadata from filters
+				newFiltered = Object.assign(
+					[],
+					filtered.filter((e) => e.id !== 'json_metadata')
+				);
+				// add json_metadata.crawler_used to filters
+				newFiltered.push({
+					id: 'json_metadata.crawler_used',
+					value: filtered[jsonFilterIndex].value,
+				});
+			}
+
 			setLoading(true);
 			const { totalCount, docs = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
-				filtered,
+				filtered: newFiltered,
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 			setNumPages(pageCount);
@@ -414,11 +443,6 @@ const GCDataStatusTracker = (props) => {
 		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	};
 
-	const getCrawlerName = (crawler) => {
-		if (crawler.data_source_s && crawler.source_title) return `${crawler.data_source_s} - ${crawler.source_title}`;
-		return crawler.crawler_name;
-	};
-
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', 'PDFOpen');
@@ -433,13 +457,12 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Type',
 				accessor: 'pub_type',
-				width: 100,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
 				Header: 'Number',
 				accessor: 'pub_number',
-				width: 110,
+				width: 90,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -455,9 +478,7 @@ const GCDataStatusTracker = (props) => {
 							}}
 							style={{ color: '#386F94' }}
 						>
-							<div>
-								<p>{props.original.pub_title}</p>
-							</div>
+							<div>{props.original.pub_title}</div>
 						</Link>
 					</TableRow>
 				),
@@ -465,43 +486,68 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'json_metadata',
-				width: 350,
-				filterable: false,
-				sortable: false,
-				Cell: (props) => (
-					<TableRow>
-						<Link
-							href={'#'}
-							onClick={(event) => {
-								preventDefault(event);
-								window.open(props.original.json_metadata.source_page_url);
-							}}
-							style={{ color: '#386F94' }}
-						>
-							<div>
-								<p>{props.original.json_metadata.crawler_used}</p>
-							</div>
-						</Link>
-					</TableRow>
+				width: 200,
+				// filterable: true,
+				sortable: true,
+				Cell: (props) => {
+					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
+					return (
+						<TableRow>
+							<Link
+								href={'#'}
+								onClick={(event) => {
+									preventDefault(event);
+									window.open(props.original.json_metadata.source_page_url);
+								}}
+								style={{ color: '#386F94' }}
+							>
+								<div>
+									{crawler
+										? `${crawler.data_source_s} - ${crawler.source_title}`
+										: props.original.json_metadata.crawler_used}
+								</div>
+							</Link>
+						</TableRow>
+					);
+				},
+				Filter: ({ filter, onChange }) => (
+					<Select
+						id="select"
+						onChange={(event) => onChange(event.target.value)}
+						style={{ width: '100%' }}
+						className="font-size-rem"
+						value={filter ? filter.value : ''}
+					>
+						<MenuItem value="">Show All</MenuItem>
+						{Object.keys(crawlerInfoMap).map((crawler) => (
+							<MenuItem value={crawler} key={crawler}>
+								{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
+							</MenuItem>
+						))}
+					</Select>
 				),
 			},
 			{
 				Header: 'Publication Date',
 				accessor: 'publication_date',
 				filterable: false,
-				width: 150,
-				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
+				width: 115,
+				Cell: (row) => (
+					<TableRow>
+						{moment(row.value).isValid() ? moment(Date.parse(row.value)).format('YYYY-MM-DD') : 'N/A'}
+					</TableRow>
+				),
 			},
 			{
 				Header: 'Ingestion Date',
 				accessor: 'upload_date',
 				filterable: false,
-				width: 150,
+				width: 115,
 				Cell: (row) => <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>,
 			},
 			{
 				Header: 'Next update',
-				width: 150,
+				width: 115,
 				filterable: false,
 				sortable: false,
 				Cell: (row) => <TableRow>{moment(Date.parse(nextFriday.toISOString())).format('YYYY-MM-DD')}</TableRow>,
@@ -596,16 +642,17 @@ const GCDataStatusTracker = (props) => {
 		const crawlerColumns = [
 			{
 				Header: 'Source',
-				accessor: 'crawler_name',
+				accessor: 'displayName',
+				filterable: true,
 				Cell: (row) => {
 					return row.original.url_origin ? (
 						<TableRow>
 							<a href={row.original.url_origin} target="_blank" rel="noreferrer">
-								{getCrawlerName(row.original)}
+								{row.value}
 							</a>
 						</TableRow>
 					) : (
-						<TableRow>{getCrawlerName(row.original)}</TableRow>
+						<TableRow>{row.value}</TableRow>
 					);
 				},
 				style: { whiteSpace: 'unset' },
@@ -613,6 +660,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: '% Ingested',
 				accessor: 'status',
+				sortable: false,
 				Cell: (row) => (
 					<TableRow
 						style={{
@@ -629,6 +677,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Crawl and Download Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{crawl_download(props.original.status) ? (
@@ -642,6 +691,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest In Progress',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_progress(props.original.status) ? (
@@ -655,6 +705,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Ingest Complete',
 				accessor: 'status',
+				sortable: false,
 				Cell: (props) => (
 					<CenterRow>
 						{ingest_complete(props.original.status) ? (
@@ -666,8 +717,15 @@ const GCDataStatusTracker = (props) => {
 				),
 			},
 			{
+				Header: '# Documents',
+				accessor: 'docCount',
+				sortable: false,
+				Cell: (row) => <TableRow>{row.value}</TableRow>,
+			},
+			{
 				Header: 'Last Action',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{moment(Date.parse(row.value)).format('YYYY-MM-DD')}</TableRow>;
 				},
@@ -675,6 +733,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Days Since Last Ingest',
 				accessor: 'datetime',
+				sortable: false,
 				Cell: (row) => {
 					return <TableRow>{date_difference(Date.parse(row.value))}</TableRow>;
 				},
@@ -724,6 +783,12 @@ const GCDataStatusTracker = (props) => {
 							manual={true}
 							pages={numPages}
 							onFetchData={handleFetchCrawlerData}
+							defaultSorted={[
+								{
+									id: 'displayName',
+									desc: false,
+								},
+							]}
 						/>
 					</TableStyle>
 					<IngestStats style={{ width: '25%' }} ingestData={ingestData} />
