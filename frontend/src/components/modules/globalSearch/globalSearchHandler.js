@@ -223,6 +223,7 @@ const GlobalSearchHandler = {
 					isCachedResult: false,
 					loadingTinyUrl: false,
 					hasExpansionTerms: false,
+					categoryMetadata,
 				});
 			}
 
