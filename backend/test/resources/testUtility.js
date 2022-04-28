@@ -1,16 +1,8 @@
 const redisApi = {
-	del(name) {
-
-	},
-	set(name, value) {
-
-	},
-	select(value){
-
-	},
-	get(name){
-
-	}
+	del(name) {},
+	set(name, value) {},
+	select(value) {},
+	get(name) {},
 };
 
 class AsyncRedisMock {
@@ -38,15 +30,18 @@ class AsyncRedisMock {
 	}
 }
 
-
 const constructorOptionsMock = {
-	constants: {},
+	constants: {
+		remove_stopwords(str) {
+			return [str];
+		},
+	},
 	axios: {},
 	gc_history: {
-		create: () => {}
+		create: () => {},
 	},
 	app_settings: {
-		create: () => {}
+		create: () => {},
 	},
 	favorite_search: {},
 	logger: {
@@ -58,41 +53,39 @@ const constructorOptionsMock = {
 		},
 		metrics: (data) => {
 			// console.log('MOCKED LOGGER-[metrics]:', data);
-		}
+		},
 	},
 	fs: {},
 	redis: redisApi,
 	async_redis: {
-		createClient(){
+		createClient() {
 			return new AsyncRedisMock();
 		},
 		select() {},
-		get() {}
+		get() {},
 	},
 	sep_async_redis: {
-		createClient(){
+		createClient() {
 			return new AsyncRedisMock();
 		},
 		select() {},
-		get() {}
+		get() {},
 	},
 	emailUtility: {
-		sendEmail(){
-
-		}
+		sendEmail() {},
 	},
 	mlApi: {
-		getExpandedSearchTerms(){
+		getExpandedSearchTerms() {
 			return Promise.resolve({});
 		},
-		transformResults(data){
+		transformResults(data) {
 			return Promise.resolve(data);
-		}
+		},
 	},
 	dataApi: {},
 	redisDB: {
 		select() {},
-		get() {}
+		get() {},
 	},
 	dataTracker: {},
 	apiKeyRequests: {},
@@ -100,31 +93,27 @@ const constructorOptionsMock = {
 	feedback: {},
 	gcAssists: {},
 	favoriteDocument: {},
-
-
 };
 
 const reqMock = {
 	headers: {
-		SSL_CLIENT_S_DN_CN: 'testsuite'
+		SSL_CLIENT_S_DN_CN: 'testsuite',
 	},
 	session: {
 		user: {
-			id: 'testsuite'
-		}
+			id: 'testsuite',
+		},
 	},
 	get(key) {
 		return this.headers[key];
-	}
+	},
 };
 
 const resMock = {
-	status(msg){
+	status(msg) {
 		return this;
 	},
-	send(data){
-
-	}
+	send(data) {},
 };
 
 // flush the promise queue -- see: https://github.com/facebook/jest/issues/2157#issuecomment-279171856
