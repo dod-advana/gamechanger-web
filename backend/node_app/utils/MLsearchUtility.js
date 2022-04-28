@@ -452,6 +452,7 @@ class MLSearchUtility {
 				size: 1,
 				query: {
 					query_string: {
+						default_field: 'search_query',
 						query: `*${similarWordsQuery}*`,
 						fuzziness: 5,
 					},
