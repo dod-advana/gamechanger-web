@@ -60,6 +60,10 @@ const GameChangerPage = (props) => {
 				setState(dispatch, { userData: data.data, userDataSet: true });
 			});
 		}
+
+		if (state.cloneDataSet && state.cloneData?.display_name) {
+			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
+		}
 	}, [cloneData, state, dispatch, history]);
 
 	return (
