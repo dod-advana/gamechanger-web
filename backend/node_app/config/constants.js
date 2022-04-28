@@ -1,6 +1,7 @@
 var path = require('path');
-const dataCatalogConfig = require('./datacatalog');
 const fs = require('fs');
+const axios = require('axios');
+const https = require('https');
 
 /**
  * Get cert/key provided env vars
@@ -182,12 +183,12 @@ module.exports = Object.freeze({
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,
-		protocol: 'http',
+		protocol: process.env.DATA_CATALOG_PROTOCOL,
 		host: process.env.DATA_CATALOG_HOST,
 		core_rest_path: '/rest/2.0',
 		username: process.env.DATA_CATALOG_USER,
 		password: process.env.DATA_CATALOG_PASSWORD,
-		api_config: dataCatalogConfig,
+		// api_config: dataCatalogConfig,
 		ca: process.env.DATA_CATALOG_CA ? process.env.DATA_CATALOG_CA.replace(/\\n/g, '\n') : '',
 	},
 	TLS_KEY_PASSPHRASE: process.env.TLS_KEY_PASSPHRASE,
