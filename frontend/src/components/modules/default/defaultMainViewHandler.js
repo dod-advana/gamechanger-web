@@ -295,6 +295,7 @@ const DefaultMainViewHandler = {
 			exportDialogVisible,
 			searchSettings,
 			prevSearchText,
+			pageDisplayed,
 			selectedDocuments,
 			loading,
 			rawSearchResults,
@@ -307,8 +308,7 @@ const DefaultMainViewHandler = {
 		const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
 
 		const noResults = Boolean(rawSearchResults?.length === 0);
-		const hideSearchResults = noResults && !loading;
-
+		const hideSearchResults = noResults && !loading && !pageDisplayed.includes('q=');
 		const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 		return (
