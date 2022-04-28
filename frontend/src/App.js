@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Redirect, Route, HashRouter as Router, Switch } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
-import { MatomoProvider, createInstance } from '@datapunt/matomo-tracker-react';
+import { MatomoProvider, createInstance, useMatomo } from '@datapunt/matomo-tracker-react';
 import { getProvider } from './components/factories/contextFactory';
-import ConsentAgreement from '@dod-advana/advana-platform-ui/dist/ConsentAgreement';
-import GamechangerPage from './containers/GameChangerPage';
-import GamechangerAdminPage from './containers/GamechangerAdminPage';
-import GamechangerLiteAdminPage from './containers/GamechangerLiteAdminPage';
-import GamechangerEsPage from './containers/GamechangerEsPage';
-import GameChangerDetailsPage from './containers/GameChangerDetailsPage';
-import GamechangerPdfViewer from './components/documentViewer/PDFViewer';
-import GamechangerInternalUserTrackingPage from './components/user/InternalUserManagementAutotracker';
 import GameChangerAPI from './components/api/gameChanger-service-api';
 import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { useMatomo } from '@datapunt/matomo-tracker-react';
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from 'spark-md5';
@@ -22,8 +14,6 @@ import _ from 'lodash';
 import './styles.css';
 import 'font-awesome/css/font-awesome.css';
 import 'flexboxgrid/css/flexboxgrid.css';
-import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
-import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import Config from './config/config';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
@@ -34,13 +24,107 @@ import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoun
 import UnauthorizedPage from '@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage';
 import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
+import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
+import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import './index.css';
-import JBookProfilePage from './containers/JBookProfilePage';
-import GCFooter from './components/navigation/GCFooter';
+
 require('typeface-noto-sans');
 require('typeface-montserrat');
-
 require('./favicon.ico');
+
+const ConsentAgreement = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-platform-ui/dist/ConsentAgreement'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const JBookProfilePage = LoadableVisibility({
+	loader: () => import('./containers/JBookProfilePage'),
+	loading: LoadingIndicator,
+});
+
+const GamechangerPage = LoadableVisibility({
+	loader: () => import('./containers/GameChangerPage'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GamechangerAdminPage = LoadableVisibility({
+	loader: () => import('./containers/GamechangerLiteAdminPage'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GamechangerEsPage = LoadableVisibility({
+	loader: () => import('./containers/GamechangerEsPage'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GameChangerDetailsPage = LoadableVisibility({
+	loader: () => import('./containers/GameChangerDetailsPage'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GamechangerPdfViewer = LoadableVisibility({
+	loader: () => import('./components/documentViewer/PDFViewer'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GamechangerLiteAdminPage = LoadableVisibility({
+	loader: () => import('./containers/GamechangerLiteAdminPage'),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const GCFooter = LoadableVisibility({
+	loader: () => import('./components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
 
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
@@ -344,11 +428,6 @@ const App = () => {
 														render={() => (
 															<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
 														)}
-													/>
-													<Route
-														exact
-														path="/gamechanger/internalUsers/track/me"
-														component={GamechangerInternalUserTrackingPage}
 													/>
 													<Route
 														exact
