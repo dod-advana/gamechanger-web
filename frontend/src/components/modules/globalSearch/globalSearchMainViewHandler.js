@@ -49,6 +49,13 @@ const styles = {
 	},
 	searchResults: fullWidthCentered,
 	paginationWrapper: fullWidthCentered,
+	resultsCount: {
+		fontFamily: 'Noto Sans',
+		fontSize: 22,
+		fontWeight: 'bold',
+		color: '#131E43',
+		paddingTop: '10px',
+	},
 	tabContainer: {
 		alignItems: 'center',
 		marginBottom: '14px',
@@ -57,7 +64,7 @@ const styles = {
 	},
 	tabButtonContainer: {
 		width: '100%',
-		padding: '0em 1em',
+		padding: '0em 0em',
 		alignItems: 'center',
 	},
 	spacer: {
@@ -203,7 +210,7 @@ const GlobalSearchMainViewHandler = {
 									{!hideSearchResults && pageLoaded && (
 										<>
 											{!loading && getViewHeader(state, dispatch)}
-											<div style={{ margin: '0 -75px 0 -52px' }}>
+											<div style={{ margin: '0 -15px 0 -15px' }}>
 												<ResultView
 													context={{ state, dispatch }}
 													viewNames={viewNames}
