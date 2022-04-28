@@ -874,7 +874,7 @@ function GCCard(props) {
 GCCard.propTypes = {
 	idx: PropTypes.number.isRequired,
 	state: PropTypes.shape({
-		selectedDocuments: PropTypes.instanceOf(Map).isRequired,
+		selectedDocuments: PropTypes.instanceOf(Map),
 		listView: PropTypes.bool.isRequired,
 		componentStepNumbers: PropTypes.objectOf(PropTypes.number),
 		showSideFilters: PropTypes.bool.isRequired,
@@ -887,10 +887,10 @@ GCCard.propTypes = {
 	dispatch: PropTypes.func.isRequired,
 	item: PropTypes.shape({
 		type: PropTypes.string.isRequired,
-		title: PropTypes.string.isRequired,
-		filename: PropTypes.string.isRequired,
-		favorite: PropTypes.bool.isRequired,
-		is_revoked_b: PropTypes.bool.isRequired,
+		title: PropTypes.string,
+		filename: PropTypes.string,
+		favorite: PropTypes.bool,
+		is_revoked_b: PropTypes.bool,
 		search_mode: PropTypes.string,
 	}),
 	id: PropTypes.number,

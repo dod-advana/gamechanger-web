@@ -29,6 +29,7 @@ const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
 const moment = require('moment');
+const startupUtils = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -70,20 +71,8 @@ thes.waitForLoad().then(() => {
 	console.log(thes.lookUp('win'));
 });
 
-try {
-	if (process.env.DISABLE_FRONT_END_CONFIG !== 'true') {
-		let result = {};
-
-		for (let envvar in process.env) {
-			if (envvar.startsWith('REACT_APP_')) result[envvar] = process.env[envvar];
-		}
-
-		fs.writeFileSync(path.join(__dirname, './build', 'config.js'), `window.__env__ = ${JSON.stringify(result)}`);
-	}
-} catch (err) {
-	console.error(err);
-	console.error('No env variables created');
-}
+startupUtils.copyConfigToBuild();
+startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
