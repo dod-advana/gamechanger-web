@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { setState } from '../../utils/sharedFunctions';
 import ModularSearchBarHandler from './ModularSearchBarHandler';
-import SearchBanner from './GCSearchBanner';
+import TitleBar from './TitleBar';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import MainViewFactory from '../factories/mainViewFactory';
 
@@ -45,32 +45,34 @@ const SearchBar = (props) => {
 
 	return (
 		<>
-			<SearchBanner
-				titleBarModule={state.cloneData.title_bar_module}
-				onTitleClick={() => {
-					window.location.href = `#/${state.cloneData.url}`;
-					dispatch({ type: 'RESET_STATE' });
-				}}
-				componentStepNumbers={state.componentStepNumbers}
-				toggleMenu={toggleMenu}
-				borderRadius="10px"
-				menuOpen={state.menuOpen}
-				menuColor="#13A792"
-				cloneData={state.cloneData}
-				expansionDict={state.expansionDict}
-				searchText={state.searchText}
-				jupiter={props.jupiter}
-				rawSearchResults={rawSearchResults}
-				selectedCategories={state.selectedCategories}
-				activeCategoryTab={state.activeCategoryTab}
-				setActiveCategoryTab={(tabName) => handleCategoryTabChange(tabName)}
-				categoryMetadata={state.categoryMetadata}
-				pageDisplayed={state.pageDisplayed}
-				dispatch={dispatch}
-				loading={state.loading}
-			>
-				<ModularSearchBarHandler context={context} />
-			</SearchBanner>
+			{loaded && (
+				<TitleBar
+					titleBarModule={state.cloneData.title_bar_module}
+					onTitleClick={() => {
+						window.location.href = `#/${state.cloneData.url}`;
+						dispatch({ type: 'RESET_STATE' });
+					}}
+					componentStepNumbers={state.componentStepNumbers}
+					toggleMenu={toggleMenu}
+					borderRadius="10px"
+					menuOpen={state.menuOpen}
+					menuColor="#13A792"
+					cloneData={state.cloneData}
+					expansionDict={state.expansionDict}
+					searchText={state.searchText}
+					jupiter={props.jupiter}
+					rawSearchResults={rawSearchResults}
+					selectedCategories={state.selectedCategories}
+					activeCategoryTab={state.activeCategoryTab}
+					setActiveCategoryTab={handleCategoryTabChange}
+					categoryMetadata={state.categoryMetadata}
+					pageDisplayed={state.pageDisplayed}
+					dispatch={dispatch}
+					loading={state.loading}
+				>
+					<ModularSearchBarHandler context={context} />
+				</TitleBar>
+			)}
 		</>
 	);
 };
