@@ -3,7 +3,6 @@ import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
 	convertDCTScoreToText,
-	encode,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable,
@@ -698,16 +697,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
-const getCardHeaderHandler = ({
-	item,
-	state,
-	idx,
-	checkboxComponent,
-	favoriteComponent,
-	graphView,
-	intelligentSearch,
-	quickCompareToggleComponent,
-}) => {
+const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
