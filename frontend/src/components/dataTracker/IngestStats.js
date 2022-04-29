@@ -50,7 +50,7 @@ export default function IngestStats({ ingestData }) {
 				</div>
 			</div>
 			<div>
-				<div style={{ marginBottom: 10, font: 'normal normal 600 14px Noto Sans' }}>DOCUMENTS ANALYTICS</div>
+				<div style={{ marginBottom: 10, font: 'normal normal 600 14px Noto Sans' }}>SOURCE METRICS</div>
 				<StatPill
 					stat={ingestData.numberOfDocuments ? Number(ingestData.numberOfDocuments).toLocaleString() : 0}
 					descriptor={'NUMBER OF DOCUMENTS INGESTED'}
