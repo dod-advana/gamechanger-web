@@ -64,6 +64,7 @@ const PolicySearchHandler = {
 			runningSearch,
 			currentSort,
 			currentOrder,
+			activeCategoryTab,
 		} = state;
 
 		const {
@@ -475,9 +476,19 @@ const PolicySearchHandler = {
 						);
 					}
 
+					let newActiveCategory = activeCategoryTab;
+
+					if (entities.length === 0 && topics.length === 0) {
+						newActiveCategory = 'Documents';
+					} else if (entities.length === 0 && newActiveCategory === 'Organizations') {
+						newActiveCategory = 'Documents';
+					} else if (topics.length === 0 && newActiveCategory === 'Topics') {
+						newActiveCategory = 'Documents';
+					}
+
 					setState(dispatch, {
 						searchSettings: newSearchSettings,
-						activeCategoryTab: entities.length === 0 && topics.length === 0 ? 'Documents' : 'all',
+						activeCategoryTab: newActiveCategory,
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
 						loading: false,
