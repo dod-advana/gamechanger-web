@@ -9,7 +9,6 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 	getMetadataForPropertyTable,
-	encode,
 } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
