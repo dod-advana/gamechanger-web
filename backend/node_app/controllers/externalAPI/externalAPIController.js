@@ -370,7 +370,7 @@ class ExternalAPIController {
 			const attachment = [
 				{
 					filename: 'GC-api-access.png',
-					path: __dirname + '/../../images/email/GC-api-access.png',
+					path: __dirname + '/../../images/email/GAMECHANGER API Newsletter.png',
 					cid: 'gc-api-access',
 				},
 				{
