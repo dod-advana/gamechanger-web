@@ -54,7 +54,7 @@ const JBookSearchTitleBarHandler = LoadableVisibility({
 const SearchBanner = (props) => {
 	const { titleBarModule } = props;
 
-	const getTitleBarComponent = (props) => {
+	const getTitleBarComponent = () => {
 		switch (titleBarModule) {
 			case 'policy/policyTitleBarHandler':
 				return <PolicyTitleBarHandler {...props} />;
@@ -73,7 +73,7 @@ const SearchBanner = (props) => {
 		}
 	};
 
-	return <>{getTitleBarComponent(props)}</>;
+	return <>{getTitleBarComponent()}</>;
 };
 
 SearchBanner.propTypes = {
