@@ -29,6 +29,7 @@ const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
 const moment = require('moment');
+const startupUtils = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -70,20 +71,8 @@ thes.waitForLoad().then(() => {
 	console.log(thes.lookUp('win'));
 });
 
-try {
-	if (process.env.DISABLE_FRONT_END_CONFIG !== 'true') {
-		let result = {};
-
-		for (let envvar in process.env) {
-			if (envvar.startsWith('REACT_APP_')) result[envvar] = process.env[envvar];
-		}
-
-		fs.writeFileSync(path.join(__dirname, './build', 'config.js'), `window.__env__ = ${JSON.stringify(result)}`);
-	}
-} catch (err) {
-	console.error(err);
-	console.error('No env variables created');
-}
+startupUtils.copyConfigToBuild();
+startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
@@ -95,10 +84,6 @@ app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-app.use(AAA.redisSession());
-AAA.setupSaml(app);
-app.use(AAA.ensureAuthenticated);
-
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	app.use(async function (req, res, next) {
 		req.headers['x-env-ssl_client_certificate'] =
@@ -107,20 +92,22 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	});
 }
 
+app.use(AAA.redisSession());
+AAA.setupSaml(app);
+app.use(AAA.ensureAuthenticated);
+
 app.use(async function (req, res, next) {
-	let cn;
 	let user_id;
-	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-		user_id = 'ml-api';
-	} 
-	else if (req.session.user) {
-		cn = req.session.user.cn;
+	if (req.session.user) {
 		user_id = getUserIdFromSAMLUserId(req);
-		req.headers['ssl_client_s_dn_cn'] = cn;
-		req.headers['SSL_CLIENT_S_DN_CN'] = cn;
 		req.permissions = req.session.user.perms;
+	} else if (req.user) {
+		req.permissions = req.user.perms;
+	} else {
+		req.permissions = [];
 	}
 
+	if (!req.session.user.cn && req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') user_id = 'ml-api';
 
 	await redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${user_id}-perms`);
@@ -133,37 +120,13 @@ app.use(async function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-	let approvedClients = constants.APPROVED_API_CALLERS;
-	const { headers, hostname } = req;
-	const userId = req.get('SSL_CLIENT_S_DN_CN');
+	const userId = req.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 	logger.http(
-		`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${
-			req.originalUrl
-		}`
+		`[${process.env.pm_id || 0}][${req.ip}] [${req.session?.user?.cn || userId}] Request for: ${
+			req.protocol
+		}://${req.get('host')}${req.originalUrl}`
 	);
-	if (process.env.REQUEST_ORIGIN_ALLOWED) {
-		res.setHeader('Access-Control-Allow-Origin', process.env.REQUEST_ORIGIN_ALLOWED);
-	} else if (approvedClients.includes(hostname)) {
-		res.setHeader('Access-Control-Allow-Origin', hostname);
-	} else {
-		res.setHeader('Access-Control-Allow-Origin', '*.advana.data.mil');
-	}
-	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-	res.header(
-		'Access-Control-Allow-Headers',
-		'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions'
-	);
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
-	// intercepts OPTIONS method
-	if (req.method === 'OPTIONS') {
-		res.sendStatus(200);
-	} else {
-		if (!req.permissions) {
-			req.permissions = [];
-		}
-		next();
-	}
+	AAA.getAllowedOriginMiddleware(req, res, next);
 });
 
 // Setting up swagger
@@ -210,17 +173,17 @@ app.post('/api/auth/token', async function (req, res) {
 	await redisAsyncClient.select(12);
 
 	try {
-		cn = sessUser.cn;
+		cn = req.session.user.cn;
 
 		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 
 		if (!user || user === null) {
-			await userController.updateOrCreateUserHelper(sessUser, cn);
+			await userController.updateOrCreateUserHelper(sessUser);
 			user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 		}
 
 		// Remove once we feel like most admins have used the new system
-		const admin = await Admin.findOne({ where: { username: cn } });
+		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
 
 		if (admin) {
 			perms.push('Gamechanger Super Admin');
@@ -244,20 +207,6 @@ app.post('/api/auth/token', async function (req, res) {
 			});
 
 			if (isAdminLite) perms.push('Gamechanger Admin Lite');
-		}
-
-		sessUser.id = getUserIdFromSAMLUserId(req);
-
-		if (sessUser.disabled === undefined) {
-			sessUser.disabled = false;
-		}
-
-		if (sessUser.displayName === undefined) {
-			sessUser.displayName = `${sessUser.firstName} ${sessUser.lastName}`;
-		}
-
-		if (sessUser.sandboxId === undefined) {
-			sessUser.sandboxId = 1;
 		}
 
 		sessUser.perms = sessUser.perms.concat(perms);
@@ -284,7 +233,7 @@ app.post('/api/auth/token', async function (req, res) {
 			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
 		}
 
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
 		jwtClaims['csrf-token'] = csrfHash;
@@ -308,7 +257,6 @@ app.use(async function (req, res, next) {
 		'/api/tutorialOverlay',
 		'/api/userAppVersion',
 	];
-	// SIG BYTES ERROR is HERE TODO
 
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
@@ -317,10 +265,11 @@ app.use(async function (req, res, next) {
 		await redisAsyncClient.select(12);
 		let csrfHash = '';
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			csrfHash = process.env.ML_WEB_TOKEN;
+			csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
 		} else {
 			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		}
+		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
 			next();

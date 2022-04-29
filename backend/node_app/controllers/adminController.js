@@ -3,6 +3,8 @@ const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');
+const MLSearchUtility = require('../utils/MLsearchUtility');
+
 const constantsFile = require('../config/constants');
 class AdminController {
 	constructor(opts = {}) {
@@ -12,6 +14,8 @@ class AdminController {
 			sparkMD5 = sparkMD5Lib,
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
+			MLsearchUtility = new MLSearchUtility(opts),
+
 			constants = constantsFile,
 		} = opts;
 
@@ -20,6 +24,8 @@ class AdminController {
 		this.sparkMD5 = sparkMD5;
 		this.appSettings = appSettings;
 		this.searchUtility = searchUtility;
+		this.MLsearchUtility = MLsearchUtility;
+
 		this.constants = constants;
 
 		this.getGCAdminData = this.getGCAdminData.bind(this);
@@ -34,7 +40,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			// const { searchQuery, docTitle } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			this.gcAdmins.findAll({ raw: true }).then((results) => {
 				res.status(200).send({ admins: results, timeStamp: new Date().toISOString() });
@@ -49,7 +55,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			const { adminData } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const [admin, created] = await this.gcAdmins.findOrCreate({
 				where: { username: adminData.username },
@@ -74,7 +80,7 @@ class AdminController {
 		let userId = 'webapp_unknown';
 		try {
 			const { username } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const admin = await this.gcAdmins.findOne({ where: { username } });
 			await admin.destroy();
@@ -104,9 +110,9 @@ class AdminController {
 		}
 		for (let obj of pdf_opened) {
 			const doc = obj.document;
-			last_opened.push(doc.split('.pdf')[0]);
+			last_opened.push(doc.split(' - ')[1].split('.pdf')[0]);
+			last_opened = [...new Set(last_opened)];
 		}
-
 		// combine list
 		let combinedDocList = favDocList.concat(exportDocList).concat(last_opened);
 
@@ -123,10 +129,10 @@ class AdminController {
 		try {
 			if (combinedDocList.length > 0) {
 				// get recommendations
-				const rec_results = await this.searchUtility.getRecDocs(combinedDocList, userId);
+				const rec_results = await this.MLsearchUtility.getRecDocs(combinedDocList, userId);
 				recDocs.value = rec_results.results ? rec_results.results : [];
 				// only get top 20 recommendations
-				recDocs.value = recDocs.value.slice(0, 20);
+				recDocs.value = recDocs.value.slice(0, 10);
 			} else {
 				recDocs.value = [];
 			}
@@ -149,7 +155,7 @@ class AdminController {
 		}
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			let results = await this.appSettings.findAll({
 				where: {
 					key: ['homepage_topics', 'homepage_major_pubs', 'homepage_popular_docs_inactive'],
@@ -168,7 +174,7 @@ class AdminController {
 
 		try {
 			const { key, tableData } = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.appSettings.update(
 				{
 					value: JSON.stringify(tableData),

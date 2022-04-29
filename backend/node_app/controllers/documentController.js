@@ -47,7 +47,7 @@ class DocumentController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneData = {} } = req.body;
@@ -187,7 +187,7 @@ class DocumentController {
 	}
 
 	async saveDocumentAnnotations(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const { annotationData } = req.body;
@@ -208,7 +208,7 @@ class DocumentController {
 	}
 
 	getPDF(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { path, dest, filekey, samplingType, samplingLines } = req.query;
 
@@ -278,7 +278,7 @@ class DocumentController {
 		try {
 			const { filenames, folder, dest, clone_name } = req.body;
 			const promises = [];
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			filenames.forEach(({ img_filename }) => {
 				const filename = img_filename;
 				if (!(dest && filename)) {
@@ -298,7 +298,7 @@ class DocumentController {
 	async getDocumentProperties(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { clone = false, cloneData = {} } = req.body;
 
 			const index = clone ? cloneData.clone_data.project_name : this.constants.GAME_CHANGER_OPTS.index;
@@ -368,7 +368,7 @@ class DocumentController {
 	async getOrgImageOverrideURLs(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const orgNames = req.query.names;
 			const orgDataCleaned = {};
@@ -398,7 +398,7 @@ class DocumentController {
 	async saveOrgImageOverrideURL(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { name, imageURL } = req.body;
 

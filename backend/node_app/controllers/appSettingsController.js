@@ -56,7 +56,7 @@ class AppSettingsController {
 	 * @param {*} res
 	 */
 	async getMode(key, req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const mode = await this.appSettings.findOrCreate({
 				attributes: ['value'],
@@ -77,7 +77,7 @@ class AppSettingsController {
 	 * @param {*} res
 	 */
 	async setMode(key, req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { value } = req.body;
 		try {
 			let updateValues = { value };
@@ -100,7 +100,7 @@ class AppSettingsController {
 	 * @param {*} res
 	 */
 	async toggleMode(key, req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			let { dataValues } = await this.appSettings.findOne({ attributes: ['value'], where: { key: key } });
 			if (dataValues.value === 'true') {

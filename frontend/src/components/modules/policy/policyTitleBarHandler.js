@@ -69,7 +69,7 @@ const styles = {
 	title: {
 		margin: '0 50px 0 15px',
 		cursor: 'pointer',
-		width: '190px',
+		width: '255px',
 		height: '50x',
 	},
 	titleBar: {

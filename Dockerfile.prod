@@ -9,7 +9,19 @@ RUN yum install -y \
         git \
         make
 
-RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs cyrus-sasl-lib
+RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs cyrus-sasl-lib gzip
+
+COPY ./postgres/tmp/RPM-GPG-KEY-PGDG-11 \
+     ./postgres/tmp/postgresql11-server.rpm \
+     ./postgres/tmp/postgresql11.rpm \
+     ./postgres/tmp/postgresql11-libs.rpm \
+     ./postgres/tmp/postgresql11-contrib.rpm \
+     /tmp/
+
+RUN rpm --import /tmp/RPM-GPG-KEY-PGDG-11 && \
+    dnf install -y --nodocs glibc-langpack-en /tmp/postgresql11-server.rpm /tmp/postgresql11.rpm /tmp/postgresql11-libs.rpm /tmp/postgresql11-contrib.rpm && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
      
 # non-root app USER/GROUP
 ARG APP_UID=1000

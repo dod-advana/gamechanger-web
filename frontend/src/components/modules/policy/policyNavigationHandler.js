@@ -156,7 +156,7 @@ const PolicyNavigationHandler = {
 						<ConstrainedIcon src={CrowdSourcingAppIcon} />
 					</HoverNavItem>
 				</GCTooltip>
-				<GCTooltip title="Data Tracker" placement="right" arrow>
+				<GCTooltip title="Data Status Tracker" placement="right" arrow>
 					<HoverNavItem
 						centered
 						onClick={() => {
@@ -368,7 +368,7 @@ const PolicyNavigationHandler = {
 						<span style={{ marginLeft: '10px' }}>Crowd Sourcing</span>
 					</HoverNavItem>
 				</GCTooltip>
-				<GCTooltip title="Data Tracker" placement="right" arrow>
+				<GCTooltip title="Data Status Tracker" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
 							window.history.pushState(
@@ -387,7 +387,7 @@ const PolicyNavigationHandler = {
 						toolTheme={toolTheme}
 					>
 						<ConstrainedIcon src={DataStatusTrackerIcon} />
-						<span style={{ marginLeft: '10px' }}>Data Tracker</span>
+						<span style={{ marginLeft: '10px' }}>Data Status Tracker</span>
 					</HoverNavItem>
 				</GCTooltip>
 				<GCTooltip title="Analyst Tools" placement="right" arrow>
