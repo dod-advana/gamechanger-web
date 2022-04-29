@@ -28,7 +28,7 @@ const calculatSumTotal = (meta) => {
 };
 
 const SearchTabBar = (props) => {
-	const { searchTypes, activeTab, setActiveTab, resultMetaData, returnHome } = useContext(SearchContext);
+	const { searchTypes, activeTab, setActiveTab, resultMetaData = {}, returnHome } = useContext(SearchContext);
 
 	const { containerStyles = {} } = props;
 

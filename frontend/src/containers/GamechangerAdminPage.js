@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 
-import SearchBanner from '../components/searchBar/GCSearchBanner';
+import TitleBar from '../components/searchBar/TitleBar';
 import MLDashboard from '../components/admin/MLDashboard';
 import GeneralAdminButtons from '../components/admin/GeneralAdminButtons';
 import NotificationsManagement from '../components/notifications/NotificationsManagement';
@@ -134,7 +134,7 @@ const GamechangerAdminPage = (props) => {
 			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 
-			<SearchBanner
+			<TitleBar
 				onTitleClick={() => {
 					window.location.href = `#/gamechanger-admin`;
 					setPageToView(PAGES.general);
