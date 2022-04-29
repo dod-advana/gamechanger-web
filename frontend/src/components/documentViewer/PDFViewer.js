@@ -57,7 +57,9 @@ export default function PDFViewer({ location }) {
 				className="aref"
 				id={'pdfViewer'}
 				ref={measuredRef}
-				onLoad={() => handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer')}
+				onLoad={() =>
+					handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer', cloneIndex, gameChangerAPI)
+				}
 				style={{ width: '100%', height: '100%' }}
 			/>
 		);
