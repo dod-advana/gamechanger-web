@@ -1,57 +1,36 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
-import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
-import NavigationFactory from '../factories/navigationFactory';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+
+const PolicyNavigationHandler = LoadableVisibility({
+	loader: () => import('../modules/policy/policyNavigationHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const DefaultNavigationHandler = LoadableVisibility({
+	loader: () => import('../modules/default/defaultNavigationHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
 
 const SideBarNavigation = (props) => {
 	const { context } = props;
 
 	const { state, dispatch } = context;
 
-	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
-
-	const [navigationHandler, setNavigationHandler] = useState();
-	const [loaded, setLoaded] = useState(false);
-
-	useEffect(() => {
-		// Create the factory
-		if (state.cloneDataSet && !loaded) {
-			const factory = new NavigationFactory(state.cloneData.navigation_module);
-			const handler = factory.createHandler();
-			setNavigationHandler(handler);
-			setLoaded(true);
+	const getNavigationComponent = () => {
+		switch (state.cloneData.navigation_module) {
+			case 'policy/policyNavigationHandler':
+				return <PolicyNavigationHandler state={state} dispatch={dispatch} />;
+			default:
+				return <DefaultNavigationHandler state={state} dispatch={dispatch} />;
 		}
-	}, [state, loaded]);
+	};
 
-	useEffect(() => {
-		// Update the document title using the browser API
-
-		if (navigationHandler) {
-			setToolState(navigationHandler.getToolState(state));
-		}
-
-		return () => {
-			unsetTool();
-		};
-	}, [unsetTool, setToolState, state, navigationHandler]);
-
-	return (
-		<>
-			{loaded ? (
-				<>
-					<SlideOutMenuContent type="closed">
-						{navigationHandler.generateClosedContentArea(state, dispatch)}
-					</SlideOutMenuContent>
-					<SlideOutMenuContent type="open">
-						{navigationHandler.generateOpenedContentArea(state, dispatch)}
-					</SlideOutMenuContent>
-				</>
-			) : (
-				<></>
-			)}
-		</>
-	);
+	return <>{getNavigationComponent()}</>;
 };
 
 SideBarNavigation.propTypes = {
