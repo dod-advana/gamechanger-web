@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const fs = require('fs');
 const https = require('https'); // module for https
@@ -78,6 +79,8 @@ if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
+
+app.use(compression({ filter: startupUtils.shouldCompress }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);

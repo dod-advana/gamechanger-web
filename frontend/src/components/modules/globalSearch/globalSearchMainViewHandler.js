@@ -207,7 +207,7 @@ const GlobalSearchMainViewHandler = {
 									{!hideSearchResults && pageLoaded && searchResultsCount > 0 && (
 										<>
 											{!loading && getViewHeader(state, dispatch)}
-											<div style={{ margin: '0 -15px 0 -30px' }}>
+											<div style={{ margin: '0 15px 0 5px' }}>
 												<ResultView
 													context={{ state, dispatch }}
 													viewNames={viewNames}

@@ -16,6 +16,27 @@ const DefaultNavigationHandler = LoadableVisibility({
 	},
 });
 
+const EDANavigationHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaNavigationHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const GlobalSearchNavigationHandler = LoadableVisibility({
+	loader: () => import('../modules/globalSearch/globalSearchNavigationHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const JBookNavigationHandler = LoadableVisibility({
+	loader: () => import('../modules/jbook/jbookNavigationHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
 const SideBarNavigation = (props) => {
 	const { context } = props;
 
@@ -25,6 +46,12 @@ const SideBarNavigation = (props) => {
 		switch (state.cloneData.navigation_module) {
 			case 'policy/policyNavigationHandler':
 				return <PolicyNavigationHandler state={state} dispatch={dispatch} />;
+			case 'eda/edaNavigationHandler':
+				return <EDANavigationHandler state={state} dispatch={dispatch} />;
+			case 'globalSearch/globalSearchNavigationHandler':
+				return <GlobalSearchNavigationHandler state={state} dispatch={dispatch} />;
+			case 'jbook/jbookNavigationHandler':
+				return <JBookNavigationHandler state={state} dispatch={dispatch} />;
 			default:
 				return <DefaultNavigationHandler state={state} dispatch={dispatch} />;
 		}

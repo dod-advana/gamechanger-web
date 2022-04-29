@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { HoverNavItem, NavItem } from '../../navigation/NavItems';
 import { trackEvent } from '../../telemetry/Matomo';
@@ -12,7 +12,9 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
-// import UserIcon from '../../../images/icon/UserIcon.png';
+import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
+import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
+import PropTypes from 'prop-types';
 
 const getToolTheme = (cloneData) => {
 	return {
@@ -29,202 +31,229 @@ const getToolTheme = (cloneData) => {
 	};
 };
 
-const GlobalSearchNavigationHandler = {
-	getToolState: (state) => {
-		return {
-			knowledgeBaseHref: 'https://wiki.advana.data.mil',
-			toolTheme: getToolTheme(state.cloneData),
-			toolName: state.cloneData?.clone_name?.toUpperCase() || '',
-			hideAllApplicationsSection: false,
-			hideContentSection: false,
-			extraSupportLinks: [],
-			associatedApplications: [],
-		};
-	},
+const getToolState = (state) => {
+	return {
+		knowledgeBaseHref: 'https://wiki.advana.data.mil',
+		toolTheme: getToolTheme(state.cloneData),
+		toolName: state.cloneData?.clone_name?.toUpperCase() || '',
+		hideAllApplicationsSection: false,
+		hideContentSection: false,
+		extraSupportLinks: [],
+		associatedApplications: [],
+	};
+};
 
-	generateClosedContentArea: (state, dispatch) => {
-		const toolTheme = getToolTheme(state.cloneData);
-		return (
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-				}}
-			>
-				{state.notificationIds.length > 0 && (
-					<GCTooltip title="Show Notifications" placement="right" arrow>
-						<HoverNavItem
-							centered
-							onClick={() => {
-								getNotifications(dispatch);
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'SidebarInteraction',
-									'ShowNotifications'
-								);
-							}}
-							toolTheme={toolTheme}
-						>
-							{/* <NotificationsClosed src={BellIcon} notificationCount={state.notifications.length} /> */}
-							<ConstrainedIcon src={BellIcon} />
-						</HoverNavItem>
-					</GCTooltip>
-				)}
-				{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
-					<GCTooltip title="How-to, features, and tips" placement="right" arrow>
-						<HoverNavItem
-							centered
-							onClick={() => {
-								setState(dispatch, {
-									showTutorial: true,
-									clickedTutorial: true,
-								});
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'SidebarInteraction',
-									'ShowTutorial'
-								);
-							}}
-							toolTheme={toolTheme}
-						>
-							<StyledBadgeSmall
-								color="secondary"
-								badgeContent=" "
-								invisible={!state.newUser || state.clickedTutorial}
-							>
-								<ConstrainedIcon src={AppTutorialsIcon} />
-							</StyledBadgeSmall>
-						</HoverNavItem>
-					</GCTooltip>
-				)}
-				<GCTooltip title="User Feedback" placement="right" arrow>
+const generateClosedContentArea = (state, dispatch) => {
+	const toolTheme = getToolTheme(state.cloneData);
+	return (
+		<div
+			style={{
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+			}}
+		>
+			{state.notificationIds.length > 0 && (
+				<GCTooltip title="Show Notifications" placement="right" arrow>
 					<HoverNavItem
 						centered
 						onClick={() => {
-							setState(dispatch, { showFeedbackModal: true });
+							getNotifications(dispatch);
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
 								'SidebarInteraction',
-								'showUserFeedback'
+								'ShowNotifications'
 							);
 						}}
 						toolTheme={toolTheme}
 					>
-						<ConstrainedIcon src={UserFeedbackIcon} />
+						{/* <NotificationsClosed src={BellIcon} notificationCount={state.notifications.length} /> */}
+						<ConstrainedIcon src={BellIcon} />
 					</HoverNavItem>
 				</GCTooltip>
-				{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
-				{/*	<HoverNavItem*/}
-				{/*		centered*/}
-				{/*		onClick={() => {*/}
-				{/*			window.history.pushState(*/}
-				{/*				null,*/}
-				{/*				document.title,*/}
-				{/*				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`*/}
-				{/*			);*/}
-				{/*			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });*/}
-				{/*			trackEvent(*/}
-				{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
-				{/*				'SidebarInteraction',*/}
-				{/*				'showUserDashboard'*/}
-				{/*			);*/}
-				{/*		}}*/}
-				{/*		active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}*/}
-				{/*		toolTheme={toolTheme}*/}
-				{/*	>*/}
-				{/*		<ConstrainedIcon src={UserIcon} />*/}
-				{/*	</HoverNavItem>*/}
-				{/*</GCTooltip>*/}
-				{Permissions.isGameChangerAdmin() && (
-					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
-							<HoverNavItem centered toolTheme={toolTheme}>
-								<ConstrainedIcon src={AdminIcon} />
-							</HoverNavItem>
-						</PageLink>
-					</GCTooltip>
-				)}
-			</div>
-		);
-	},
-
-	generateOpenedContentArea: (state, dispatch) => {
-		const toolTheme = getToolTheme(state.cloneData);
-		return (
-			<div style={{ display: 'flex', flexDirection: 'column' }}>
-				{state.notificationIds.length > 0 && (
-					<GCTooltip title="Show Notifications" placement="right" arrow>
-						<HoverNavItem
-							onClick={() => {
-								getNotifications(dispatch);
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'SidebarInteraction',
-									'ShowNotifications'
-								);
-							}}
-							toolTheme={toolTheme}
+			)}
+			{state.cloneData?.show_tutorial && Object.keys(state.componentStepNumbers).length > 0 && (
+				<GCTooltip title="How-to, features, and tips" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setState(dispatch, {
+								showTutorial: true,
+								clickedTutorial: true,
+							});
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'ShowTutorial'
+							);
+						}}
+						toolTheme={toolTheme}
+					>
+						<StyledBadgeSmall
+							color="secondary"
+							badgeContent=" "
+							invisible={!state.newUser || state.clickedTutorial}
 						>
-							<ConstrainedIcon src={BellIcon} />
-							<span style={{ marginLeft: '10px' }}>Notifications</span>
+							<ConstrainedIcon src={AppTutorialsIcon} />
+						</StyledBadgeSmall>
+					</HoverNavItem>
+				</GCTooltip>
+			)}
+			<GCTooltip title="User Feedback" placement="right" arrow>
+				<HoverNavItem
+					centered
+					onClick={() => {
+						setState(dispatch, { showFeedbackModal: true });
+						trackEvent(
+							getTrackingNameForFactory(state.cloneData.clone_name),
+							'SidebarInteraction',
+							'showUserFeedback'
+						);
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={UserFeedbackIcon} />
+				</HoverNavItem>
+			</GCTooltip>
+			{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
+			{/*	<HoverNavItem*/}
+			{/*		centered*/}
+			{/*		onClick={() => {*/}
+			{/*			window.history.pushState(*/}
+			{/*				null,*/}
+			{/*				document.title,*/}
+			{/*				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`*/}
+			{/*			);*/}
+			{/*			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });*/}
+			{/*			trackEvent(*/}
+			{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
+			{/*				'SidebarInteraction',*/}
+			{/*				'showUserDashboard'*/}
+			{/*			);*/}
+			{/*		}}*/}
+			{/*		active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}*/}
+			{/*		toolTheme={toolTheme}*/}
+			{/*	>*/}
+			{/*		<ConstrainedIcon src={UserIcon} />*/}
+			{/*	</HoverNavItem>*/}
+			{/*</GCTooltip>*/}
+			{Permissions.isGameChangerAdmin() && (
+				<GCTooltip title="Admin Page" placement="right" arrow>
+					<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
+						<HoverNavItem centered toolTheme={toolTheme}>
+							<ConstrainedIcon src={AdminIcon} />
 						</HoverNavItem>
-					</GCTooltip>
-				)}
-				<NavItem style={{ justifyContent: 'space-between' }}>
-					<span>MENU</span>
-				</NavItem>
-				<GCTooltip title="Tell us what you think!" placement="right" arrow>
+					</PageLink>
+				</GCTooltip>
+			)}
+		</div>
+	);
+};
+
+const generateOpenedContentArea = (state, dispatch) => {
+	const toolTheme = getToolTheme(state.cloneData);
+	return (
+		<div style={{ display: 'flex', flexDirection: 'column' }}>
+			{state.notificationIds.length > 0 && (
+				<GCTooltip title="Show Notifications" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							setState(dispatch, { showFeedbackModal: true });
+							getNotifications(dispatch);
 							trackEvent(
 								getTrackingNameForFactory(state.cloneData.clone_name),
 								'SidebarInteraction',
-								'showUserFeedbackSelected'
+								'ShowNotifications'
 							);
 						}}
 						toolTheme={toolTheme}
 					>
-						<ConstrainedIcon src={UserFeedbackIcon} />
-						<span style={{ marginLeft: '10px' }}>User Feedback</span>
+						<ConstrainedIcon src={BellIcon} />
+						<span style={{ marginLeft: '10px' }}>Notifications</span>
 					</HoverNavItem>
 				</GCTooltip>
-				{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
-				{/*	<HoverNavItem*/}
-				{/*		onClick={() => {*/}
-				{/*			window.history.pushState(*/}
-				{/*				null,*/}
-				{/*				document.title,*/}
-				{/*				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`*/}
-				{/*			);*/}
-				{/*			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });*/}
-				{/*			trackEvent(*/}
-				{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
-				{/*				'SidebarInteraction',*/}
-				{/*				'shoeUserDashboard'*/}
-				{/*			);*/}
-				{/*		}}*/}
-				{/*		active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}*/}
-				{/*		toolTheme={toolTheme}*/}
-				{/*	>*/}
-				{/*		<ConstrainedIcon src={UserIcon} />*/}
-				{/*		<span style={{ marginLeft: '10px' }}>User Dashboard</span>*/}
-				{/*	</HoverNavItem>*/}
-				{/*</GCTooltip>*/}
-				{Permissions.isGameChangerAdmin() && (
-					<GCTooltip title="Admin Page" placement="right" arrow>
-						<PageLink href={`#/${state.cloneData.url}/admin`}>
-							<HoverNavItem toolTheme={toolTheme}>
-								<ConstrainedIcon src={AdminIcon} />
-								<span style={{ marginLeft: '10px' }}>Admin Page</span>
-							</HoverNavItem>
-						</PageLink>
-					</GCTooltip>
-				)}
-			</div>
-		);
-	},
+			)}
+			<NavItem style={{ justifyContent: 'space-between' }}>
+				<span>MENU</span>
+			</NavItem>
+			<GCTooltip title="Tell us what you think!" placement="right" arrow>
+				<HoverNavItem
+					onClick={() => {
+						setState(dispatch, { showFeedbackModal: true });
+						trackEvent(
+							getTrackingNameForFactory(state.cloneData.clone_name),
+							'SidebarInteraction',
+							'showUserFeedbackSelected'
+						);
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={UserFeedbackIcon} />
+					<span style={{ marginLeft: '10px' }}>User Feedback</span>
+				</HoverNavItem>
+			</GCTooltip>
+			{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
+			{/*	<HoverNavItem*/}
+			{/*		onClick={() => {*/}
+			{/*			window.history.pushState(*/}
+			{/*				null,*/}
+			{/*				document.title,*/}
+			{/*				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`*/}
+			{/*			);*/}
+			{/*			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });*/}
+			{/*			trackEvent(*/}
+			{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
+			{/*				'SidebarInteraction',*/}
+			{/*				'shoeUserDashboard'*/}
+			{/*			);*/}
+			{/*		}}*/}
+			{/*		active={state.pageDisplayed === PAGE_DISPLAYED.userDashboard}*/}
+			{/*		toolTheme={toolTheme}*/}
+			{/*	>*/}
+			{/*		<ConstrainedIcon src={UserIcon} />*/}
+			{/*		<span style={{ marginLeft: '10px' }}>User Dashboard</span>*/}
+			{/*	</HoverNavItem>*/}
+			{/*</GCTooltip>*/}
+			{Permissions.isGameChangerAdmin() && (
+				<GCTooltip title="Admin Page" placement="right" arrow>
+					<PageLink href={`#/${state.cloneData.url}/admin`}>
+						<HoverNavItem toolTheme={toolTheme}>
+							<ConstrainedIcon src={AdminIcon} />
+							<span style={{ marginLeft: '10px' }}>Admin Page</span>
+						</HoverNavItem>
+					</PageLink>
+				</GCTooltip>
+			)}
+		</div>
+	);
+};
+
+const GlobalSearchNavigationHandler = (props) => {
+	const { state, dispatch } = props;
+
+	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
+
+	useEffect(() => {
+		setToolState(getToolState(state));
+
+		return () => {
+			unsetTool();
+		};
+	}, [unsetTool, setToolState, state]);
+
+	return (
+		<>
+			<SlideOutMenuContent type="closed">{generateClosedContentArea(state, dispatch)}</SlideOutMenuContent>
+			<SlideOutMenuContent type="open">{generateOpenedContentArea(state, dispatch)}</SlideOutMenuContent>
+		</>
+	);
+};
+
+GlobalSearchNavigationHandler.propTypes = {
+	state: PropTypes.shape({
+		cloneData: PropTypes.object,
+		componentStepNumbers: PropTypes.array,
+	}),
+	dispatch: PropTypes.func,
 };
 
 export default GlobalSearchNavigationHandler;
