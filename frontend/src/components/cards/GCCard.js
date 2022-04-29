@@ -24,60 +24,61 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Checkbox } from '@material-ui/core';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
 const DefaultCardHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const CDOCardHandler = LoadableVisibility({
 	loader: () => import('../modules/cdo/cdoCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const EDACardHandler = LoadableVisibility({
 	loader: () => import('../modules/eda/edaCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const GlobalSearchCardHandler = LoadableVisibility({
 	loader: () => import('../modules/globalSearch/globalSearchCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const HermesCardHandler = LoadableVisibility({
 	loader: () => import('../modules/hermes/hermesCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const JBookCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const JexnetCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jexnet/jexnetCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
 const PolicyCardHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyCardHandler'),
 	loading: () => {
-		return <></>;
+		return <LoadingIndicator />;
 	},
 });
 
