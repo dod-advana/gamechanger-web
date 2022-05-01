@@ -532,7 +532,7 @@ export const getTypeQuery = (allTypesSelected, types) => {
 		let query = [];
 		for (let type in types) {
 			if (types[type]) {
-				query.push(type.substring(0, type.length - 1));
+				query.push(type);
 			}
 		}
 		return query;
