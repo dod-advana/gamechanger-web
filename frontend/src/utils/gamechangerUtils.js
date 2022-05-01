@@ -119,7 +119,6 @@ export const orgFilters = {
 	'US Navy': false,
 	'US Navy Reserve': false,
 	'US Navy Medicine': false,
-	OPM: false,
 	'Classification Guides': false,
 	FMR: false,
 	NATO: false,
