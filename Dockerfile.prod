@@ -66,17 +66,15 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     )) \
     && (\ 
         cd "$APP_SHARED_DIR" \
-        && npm install nodemon \
-        && npm install sequelize-cli \
-        && npm install jest \
+        && npm install nodemon sequelize-cli jest pnpm \
     )\
     && (\
         cd "${APP_FRONTEND_DIR}" \
-        && npm install --production \
+        && NODE_ENV=production pnpm install \
     )\
     && (\
         cd "${APP_BACKEND_DIR}" \
-        && npm install --production \
+        && NODE_ENV=production pnpm install \
     )\
     && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
@@ -84,7 +82,7 @@ COPY --chown="$APP_UID:$APP_GID" ./ "${APP_DIR}"
 
 RUN (\
         cd "${APP_FRONTEND_DIR}" \
-        && npm run build \
+        && pnpm build \
         && mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}" \
         && cd "${APP_BACKEND_DIR}" \
         && rm -rf "${APP_FRONTEND_DIR}" \

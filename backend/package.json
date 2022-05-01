@@ -4,12 +4,11 @@
   "description": "gamechanger backend",
   "main": "index.js",
   "scripts": {
-    "preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
     "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
-    "prestart": "npm install",
+    "prestart": "pnpm i",
     "start": "node index.js",
-    "awsDocker": "npm start",
+    "awsDocker": "pnpm start",
     "jest-coverage": "jest --coverage",
     "sonarscan": "sonar-scanner",
     "gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
@@ -20,9 +19,11 @@
   },
   "author": "",
   "license": "ISC",
-  "resolutions": {
-    "node-forge": "1.2.1",
-    "types/node": "12.20.13"
+  "pnpm": {
+    "override": {
+      "node-forge": "1.2.1",
+      "@types/node": "12.20.13"
+    }
   },
   "dependencies": {
     "@dod-advana/advana-api-auth": "0.0.44",
@@ -43,18 +44,19 @@
     "exceljs": "4.3.0",
     "express": "4.17.1",
     "express-session": "1.17.2",
-    "express-static-gzip": "^2.1.5",
+    "express-static-gzip": "2.1.5",
     "hat": "0.0.3",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
     "lunr": "2.3.9",
     "moment": "2.20.1",
+    "moment-timezone": "0.5.34",
     "mysql": "2.18.1",
     "neo4j-driver": "4.3.1",
     "node-cron": "2.0.3",
     "node-forge": "1.2.1",
     "nodemailer": "6.6.3",
-    "npm-force-resolutions": "0.0.10",
+    "openapi-types": "^11.0.0",
     "pagerank.js": "1.0.2",
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
