@@ -271,7 +271,7 @@ class AppStatsController {
 				`
 				select 
 					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime,
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
