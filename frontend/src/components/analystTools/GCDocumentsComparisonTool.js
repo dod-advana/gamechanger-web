@@ -133,6 +133,9 @@ const DocumentInputContainer = styled.div`
 
 const getPresearchData = async (state, dispatch) => {
 	const { cloneData } = state;
+
+	if (cloneData.clone_name === 'eda') return;
+
 	if (_.isEmpty(state.presearchSources)) {
 		const resp = await gameChangerAPI.callSearchFunction({
 			functionName: 'getPresearchData',
@@ -180,8 +183,20 @@ const GCDocumentsComparisonTool = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 	const { analystToolsSearchSettings } = state;
-	const { allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked } =
-		analystToolsSearchSettings;
+	const {
+		allOrgsSelected,
+		orgFilter,
+		organizations,
+		allTypesSelected,
+		typeFilter,
+		publicationDateFilter,
+		includeRevoked,
+		majcoms,
+		fiscalYears,
+		allYearsSelected,
+		contractsOrMods,
+		idvPIID,
+	} = analystToolsSearchSettings;
 
 	const [paragraphText, setParagraphText] = useState('');
 	const [paragraphs, setParagraphs] = useState([]);
@@ -268,7 +283,17 @@ const GCDocumentsComparisonTool = (props) => {
 
 	useEffect(() => {
 		setFilterChange(true);
-	}, [orgFilter, typeFilter, publicationDateFilter, includeRevoked]);
+	}, [
+		orgFilter,
+		typeFilter,
+		publicationDateFilter,
+		includeRevoked,
+		majcoms,
+		fiscalYears,
+		allYearsSelected,
+		contractsOrMods,
+		idvPIID,
+	]);
 
 	useEffect(() => {
 		setNoResults(false);
@@ -279,12 +304,30 @@ const GCDocumentsComparisonTool = (props) => {
 			setLoading(true);
 			setCollapseKeys([]);
 
-			const filters = {
-				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
-				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
-				dateFilter: publicationDateFilter,
-				canceledDocs: includeRevoked,
-			};
+			let filters = {};
+
+			if (state.cloneData.clone_name === 'eda') {
+				filters = {
+					// issueOrgFilters: majcoms,
+					// fiscalYearFilters: fiscalYears,
+					// contractsModsFilters: contractsOrMods,
+					// idvPiidFilters: idvPIID,
+					allOrgsSelected,
+					organizations,
+					majcoms,
+					allYearsSelected,
+					fiscalYears,
+					contractsOrMods,
+					idvPIID,
+				};
+			} else {
+				filters = {
+					orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
+					typeFilters: getTypeQuery(allTypesSelected, typeFilter),
+					dateFilter: publicationDateFilter,
+					canceledDocs: includeRevoked,
+				};
+			}
 
 			gameChangerAPI
 				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
@@ -325,10 +368,16 @@ const GCDocumentsComparisonTool = (props) => {
 		dispatch,
 		allOrgsSelected,
 		orgFilter,
+		organizations,
 		allTypesSelected,
 		typeFilter,
 		publicationDateFilter,
 		includeRevoked,
+		majcoms,
+		fiscalYears,
+		allYearsSelected,
+		contractsOrMods,
+		idvPIID,
 		paragraphs,
 		selectedInput,
 	]);
@@ -580,10 +629,9 @@ const GCDocumentsComparisonTool = (props) => {
 			<Grid item xs={12}>
 				<div style={{ display: 'flex' }}>
 					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER
-						policy repository with semantically similar language. Using the Document Comparison Tool below,
-						you can conduct deeper policy analysis and understand how one piece of policy compares to the
-						GAMECHANGER policy repository.
+						{state.cloneData.clone_name === 'eda'
+							? 'The Document Comparison Tool enables you to input text and locate contracts in the GAMECHANGER contract repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper contract analysis and understand how one piece of a contract compares to the GAMECHANGER contract repository.'
+							: 'The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER policy repository with semantically similar language. Using the Document Comparison Tool below, you can conduct deeper policy analysis and understand how one piece of policy compares to the GAMECHANGER policy repository.'}
 					</div>
 					{!loading && returnedDocs.length > 0 && (
 						<div style={{ display: 'flex', marginLeft: 20 }}>
