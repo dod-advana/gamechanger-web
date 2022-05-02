@@ -34,40 +34,45 @@ export default ({ showModal, setShowModal, portfolioData, handleAddTag, renderSe
 		setNewTagText(event.target.value);
 	};
 
+	// using the portfolio data, render the currently added tags
 	const renderTagsList = () => {
-		let tagDivs = [];
+		try {
+			let tagDivs = [];
 
-		let style = {
-			margin: '10px',
-			minWidth: 60,
-			backgroundColor: 'white',
-			borderColor: '#757575',
-			color: '#757575',
-			borderWidth: '1px',
-			padding: '0 10px',
-		};
+			let style = {
+				margin: '10px',
+				minWidth: 60,
+				backgroundColor: 'white',
+				borderColor: '#757575',
+				color: '#757575',
+				borderWidth: '1px',
+				padding: '0 10px',
+			};
 
-		if (portfolioData) {
-			let tags = portfolioData.tags;
-			for (const index in tags) {
-				let tag = tags[index];
-				tagDivs.push(
-					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-						<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
-							{tag}
-						</Typography>
-						<GCButton style={style} onClick={() => handleAddTag(tag, false)}>
-							Delete
-						</GCButton>
-					</div>
-				);
+			if (portfolioData) {
+				let tags = portfolioData.tags;
+				for (const index in tags) {
+					let tag = tags[index];
+					tagDivs.push(
+						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+							<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+								{tag}
+							</Typography>
+							<GCButton style={style} onClick={() => handleAddTag(tag, false)}>
+								Delete
+							</GCButton>
+						</div>
+					);
+				}
 			}
+
+			return tagDivs;
+		} catch (e) {
+			console.log(e);
+			console.log('Error rendering tags list');
+			return '';
 		}
-
-		return tagDivs;
 	};
-
-	console.log(portfolioData);
 
 	return (
 		<Dialog
