@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { styles, useStyles } from '../../admin/util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
-import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
+// import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
@@ -18,17 +18,18 @@ const gameChangerAPI = new GameChangerAPI();
 
 const portfolioStyles = {
 	portfolio: {
-		border: '1px solid rgb(209, 215, 220)',
-		padding: '10px',
+		border: '2px solid rgb(209, 215, 220)',
+		padding: '20px',
 		borderRadius: '10px',
 		margin: '10px 20px',
 		width: '400px',
 	},
 	portfolioHeader: {
 		fontSize: '1.5em',
-		paddingBottom: '20px',
+		paddingBottom: '10px',
 		display: 'flex',
 		justifyContent: 'space-between',
+		alignItems: 'center',
 	},
 	pillbox: {
 		maxHeight: '100px',
@@ -109,7 +110,9 @@ const PortfolioBuilder = (props) => {
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
-						<div>{portfolio.name}</div>
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							{portfolio.name}
+						</Typography>
 						<div>
 							<IconButton
 								aria-label="close"
@@ -146,7 +149,12 @@ const PortfolioBuilder = (props) => {
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
 					<hr />
-					<div style={portfolioStyles.portfolioHeader}>People With Access</div>
+					<div style={portfolioStyles.portfolioHeader}>
+						{' '}
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							People with Access
+						</Typography>
+					</div>
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.user_ids.length === 0 &&
 							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
@@ -161,7 +169,11 @@ const PortfolioBuilder = (props) => {
 						})}
 					</div>
 					<hr />
-					<div style={portfolioStyles.portfolioHeader}>Associated Tags</div>
+					<div style={portfolioStyles.portfolioHeader}>
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							Associated Tags
+						</Typography>
+					</div>
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.tags.length === 0 && '(none)'}
 						{portfolio.tags.map((tag, index) => {
