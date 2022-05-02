@@ -43,7 +43,7 @@ const Pill = styled.button`
  *
  * @class Add Users Modal
  */
-export default ({ showModal, setShowModal, userList, portfolioData, handleAddButton, renderSelectedUsers }) => {
+export default ({ showModal, setShowModal, userList, portfolioData, handleAddUser, renderSelectedUsers }) => {
 	const classes = useStyles();
 
 	const [searchFilterText, setSearchFilterText] = useState('');
@@ -93,7 +93,7 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddBut
 						<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 							{user.first_name}, {user.last_name}
 						</Typography>
-						<GCButton style={style} id={user.id} onClick={() => handleAddButton(user.id)}>
+						<GCButton style={style} id={user.id} onClick={() => handleAddUser(user.id)}>
 							{added ? <CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} /> : ''}
 							Add
 						</GCButton>
@@ -120,7 +120,7 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddBut
 			<DialogTitle>
 				<div style={{ display: 'flex', width: '100%' }}>
 					<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
-						Add People
+						Add Users
 					</Typography>
 				</div>
 				<IconButton
@@ -183,15 +183,6 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddBut
 					buttonColor={'#8091A5'}
 				>
 					Close
-				</GCButton>
-				<GCButton
-					id={'editReviewerSubmit'}
-					onClick={async () => {
-						closeReviewerModal();
-					}}
-					style={{ margin: '10px' }}
-				>
-					Generate
 				</GCButton>
 			</DialogActions>
 		</Dialog>

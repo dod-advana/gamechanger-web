@@ -12,97 +12,59 @@ import {
 } from '@material-ui/core';
 import GCButton from '../../common/GCButton';
 import { styles, useStyles } from '../../admin/util/GCAdminStyles';
-import styled from 'styled-components';
 
-import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import SearchIcon from '@mui/icons-material/Search';
-
-const Pill = styled.button`
-	padding: 2px 10px 3px;
-	border: none;
-	border-radius: 15px;
-	background-color: white;
-	color: black;
-	white-space: nowrap;
-	text-align: center;
-	display: inline-block;
-	margin-left: 6px;
-	margin-right: 6px;
-	margin-bottom: 3px;
-	border: 1px solid rgb(209, 215, 220);
-	cursor: default !important;
-	> i {
-		margin-left: 3px;
-		color: #e9691d;
-	}
-`;
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 /**
  *
  * @class Add Tags Modal
  */
-export default ({ showModal, setShowModal, tagList, portfolioData, handleAddButton, renderSelectedTags }) => {
+export default ({ showModal, setShowModal, portfolioData, handleAddTag, renderSelectedTags }) => {
 	const classes = useStyles();
 
-	const [searchFilterText, setSearchFilterText] = useState('');
+	const [newTagText, setNewTagText] = useState('');
 
 	const closeModal = () => {
 		setShowModal(false);
 	};
 
 	const handleInput = (event) => {
-		setSearchFilterText(event.target.value);
+		setNewTagText(event.target.value);
 	};
 
 	const renderTagsList = () => {
-		let userDivs = [];
+		let tagDivs = [];
 
-		if (portfolioData && tagList) {
-			let filteredList = tagList;
+		let style = {
+			margin: '10px',
+			minWidth: 60,
+			backgroundColor: 'white',
+			borderColor: '#757575',
+			color: '#757575',
+			borderWidth: '1px',
+			padding: '0 10px',
+		};
 
-			if (searchFilterText && searchFilterText.length > 0) {
-				const regexString = `.*${searchFilterText}.*`;
-				const regex = new RegExp(regexString, 'gi');
-				filteredList = tagList.filter((user) => {
-					let name = user.first_name + ' ' + user.last_name;
-					return name.match(regex);
-				});
-			}
-
-			for (const user of filteredList) {
-				let added = portfolioData.user_ids.indexOf(user.id) !== -1;
-				let style = {
-					margin: '10px',
-					minWidth: 60,
-					backgroundColor: 'white',
-					borderColor: '#757575',
-					color: '#757575',
-					borderWidth: '1px',
-					padding: '0 10px',
-				};
-
-				if (added) {
-					style.borderColor = '#2F4A7F';
-					style.color = '#2F4A7F';
-				}
-
-				userDivs.push(
+		if (portfolioData) {
+			let tags = portfolioData.tags;
+			for (const index in tags) {
+				let tag = tags[index];
+				tagDivs.push(
 					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 						<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
-							{user.first_name}, {user.last_name}
+							{tag}
 						</Typography>
-						<GCButton style={style} id={user.id} onClick={() => handleAddButton(user.id)}>
-							{added ? <CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} /> : ''}
-							Add
+						<GCButton style={style} onClick={() => handleAddTag(tag, false)}>
+							Delete
 						</GCButton>
 					</div>
 				);
 			}
 		}
 
-		return userDivs;
+		return tagDivs;
 	};
 
 	console.log(portfolioData);
@@ -153,23 +115,35 @@ export default ({ showModal, setShowModal, tagList, portfolioData, handleAddButt
 					<Grid container>
 						<Grid item xs={12}>
 							<FormControl fullWidth className={classes.margin} variant="outlined">
-								<OutlinedInput
-									// value={[]}
-									placeholder="Search Tags..."
-									variant="outlined"
-									style={{ backgroundColor: 'white', marginTop: '10px' }}
-									startAdornment={
-										<InputAdornment position="start">
-											<SearchIcon />
-										</InputAdornment>
-									}
-									onChange={handleInput}
-								/>
+								<div style={{ display: 'flex', alignItems: 'center' }}>
+									<OutlinedInput
+										placeholder="Add a new tag"
+										variant="outlined"
+										style={{ backgroundColor: 'white', height: 50, width: '100%' }}
+										startAdornment={
+											<InputAdornment position="start">
+												<LocalOfferIcon />
+											</InputAdornment>
+										}
+										onChange={handleInput}
+										value={newTagText}
+									/>
+									<GCButton
+										onClick={() => {
+											handleAddTag(newTagText, true);
+											setNewTagText('');
+										}}
+										style={{ margin: '0 0 0 10px', height: 50 }}
+									>
+										Add Tag
+									</GCButton>
+								</div>
+
 								{/* <div style={{ margin: '20px 0 10px', minHeight: 35 }}>{renderSelectedUsers()}</div> */}
 							</FormControl>
 							<hr />
 							<div style={{ display: 'flex', flexDirection: 'column', overflow: 'auto', height: 320 }}>
-								{/* {renderUsersList()} */}
+								{renderTagsList()}
 							</div>
 						</Grid>
 					</Grid>
@@ -178,14 +152,6 @@ export default ({ showModal, setShowModal, tagList, portfolioData, handleAddButt
 			<DialogActions>
 				<GCButton onClick={closeModal} style={{ margin: '10px' }} buttonColor={'#8091A5'}>
 					Close
-				</GCButton>
-				<GCButton
-					onClick={async () => {
-						closeModal();
-					}}
-					style={{ margin: '10px' }}
-				>
-					Generate
 				</GCButton>
 			</DialogActions>
 		</Dialog>

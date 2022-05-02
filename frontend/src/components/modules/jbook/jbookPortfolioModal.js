@@ -61,28 +61,55 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 	const [data, setData] = useState(emptyData);
 	const [create, setCreate] = useState(true);
 
-	const closeReviewerModal = () => {
+	const closeModal = () => {
 		setShowModal(false);
 		setData(emptyData);
 	};
 
-	const handleTextChange = (val, key) => {
+	const handleDataChange = (val, key) => {
 		const newData = { ...data };
 		newData[key] = val;
 		setData(newData);
 	};
 
-	const handleAddButton = (id) => {
-		if (!isNaN(id)) {
-			let newList = [...data.user_ids];
-			let idIndex = newList.indexOf(id);
-			if (idIndex !== -1) {
-				newList.splice(idIndex, 1);
+	const handleAddUser = (id) => {
+		try {
+			if (!isNaN(id)) {
+				let newList = [...data.user_ids];
+				let idIndex = newList.indexOf(id);
+				if (idIndex !== -1) {
+					newList.splice(idIndex, 1);
+				} else {
+					newList.push(id);
+				}
+
+				handleDataChange(newList, 'user_ids');
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
+	const handleAddTag = (tag, add) => {
+		try {
+			let tagIndex = data.tags.indexOf(tag);
+			let newList = [...data.tags];
+
+			if (add) {
+				if (tagIndex === -1 && tag !== '') {
+					newList.push(tag);
+				} else {
+					// notification
+				}
 			} else {
-				newList.push(id);
+				if (tagIndex !== -1) {
+					newList.splice(tagIndex, 1);
+				}
 			}
 
-			handleTextChange(newList, 'user_ids');
+			handleDataChange(newList, 'tags');
+		} catch (e) {
+			console.log(e);
 		}
 	};
 
@@ -92,10 +119,9 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		for (let i = 0; i < userIDs.length; i++) {
 			let user = userMap[userIDs[i]];
 			selectedUsers.push(
-				<Pill id={userIDs[i]} style={{ margin: '0 5px 10px' }}>
+				<Pill style={{ margin: '0 5px 10px' }}>
 					{user.first_name} {user.last_name}
 					<IconButton
-						id={userIDs[i]}
 						aria-label="close"
 						style={{
 							backgroundColor: '#BDBDBD',
@@ -105,15 +131,43 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 							color: 'white',
 							padding: 0,
 						}}
-						onClick={() => handleAddButton(userIDs[i])}
+						onClick={() => handleAddUser(userIDs[i])}
 					>
-						<CloseIcon style={{ fontSize: 12 }} id={userIDs[i]} />
+						<CloseIcon style={{ fontSize: 11 }} />
 					</IconButton>
 				</Pill>
 			);
 		}
 
 		return selectedUsers;
+	};
+
+	const renderSelectedTags = () => {
+		let selectedTags = [];
+		let tags = data.tags;
+		for (const tag of tags) {
+			selectedTags.push(
+				<Pill style={{ margin: '0 5px 10px' }}>
+					{tag}
+					<IconButton
+						aria-label="close"
+						style={{
+							backgroundColor: '#BDBDBD',
+							width: 17,
+							height: 17,
+							margin: '0 0 0 5px',
+							color: 'white',
+							padding: 0,
+						}}
+						onClick={() => handleAddTag(tag, false)}
+					>
+						<CloseIcon style={{ fontSize: 11 }} />
+					</IconButton>
+				</Pill>
+			);
+		}
+
+		return selectedTags;
 	};
 
 	useEffect(() => {
@@ -137,13 +191,14 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 				userList={userList}
 				portfolioData={data}
 				renderSelectedUsers={renderSelectedUsers}
-				handleAddButton={handleAddButton}
+				handleAddUser={handleAddUser}
 			/>
 			<JbookAddTagsModal
 				showModal={showTagsModal}
 				setShowModal={setShowTagsModal}
 				tagsList={[]}
 				portfolioData={data}
+				handleAddTag={handleAddTag}
 			/>
 			<Dialog
 				open={showModal}
@@ -173,7 +228,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 							backgroundColor: styles.backgroundGreyLight,
 							borderRadius: 0,
 						}}
-						onClick={() => closeReviewerModal()}
+						onClick={closeModal}
 					>
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
@@ -202,7 +257,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 									id="margin-dense"
 									variant="outlined"
 									defaultValue={data.name ?? null}
-									onChange={(event) => handleTextChange(event.target.value, 'name')}
+									onChange={(event) => handleDataChange(event.target.value, 'name')}
 									className={classes.textField}
 									margin="dense"
 								/>
@@ -212,7 +267,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 									id="margin-dense"
 									variant="outlined"
 									defaultValue={data.description ?? null}
-									onChange={(event) => handleTextChange(event.target.value, 'description')}
+									onChange={(event) => handleDataChange(event.target.value, 'description')}
 									className={classes.textField}
 									margin="dense"
 									multiline
@@ -249,35 +304,34 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight }}
+										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
 										onClick={() => setShowTagsModal(true)}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
 									</IconButton>
-									<div style={{ minHeight: 35 }}></div>
+									<div style={{ minHeight: 35 }}>{renderSelectedTags()}</div>
 								</FormControl>
 							</Grid>
 						</Grid>
 					</div>
 				</DialogContent>
 				<DialogActions>
-					<GCButton
-						id={'editReviewerClose'}
-						onClick={closeReviewerModal}
-						style={{ margin: '10px' }}
-						buttonColor={'#8091A5'}
-					>
+					<GCButton onClick={closeModal} style={{ margin: '10px' }} buttonColor={'#8091A5'}>
 						Close
 					</GCButton>
 					<GCButton
-						id={'editReviewerSubmit'}
 						onClick={async () => {
-							const res = await gameChangerAPI.callDataFunction({
-								functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
-								cloneName: 'jbook',
-								options: { ...data },
-							});
-							closeReviewerModal();
+							try {
+								const res = await gameChangerAPI.callDataFunction({
+									functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
+									cloneName: 'jbook',
+									options: { ...data },
+								});
+							} catch (e) {
+								console.log(e);
+							}
+
+							closeModal();
 						}}
 						style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
 					>
