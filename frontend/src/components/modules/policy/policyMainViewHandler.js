@@ -9,6 +9,7 @@ import {
 	styles,
 	handlePageLoad as defaultHandlePageLoad,
 	getViewNames as defaultGetViewNames,
+	getUserProfilePage,
 } from '../default/defaultMainViewHandler';
 import PolicyDocumentExplorer from './policyDocumentExplorer';
 import ViewHeader from '../../mainView/ViewHeader';
@@ -1136,7 +1137,6 @@ const PolicyMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
-	const [userProfileHandler, setUserProfileHandler] = useState();
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
