@@ -13,7 +13,7 @@
 			"bezier-js": "4.0.3",
 			"immer": "9.0.6",
 			"node-fetch": "2.6.1",
-			"node-forge": "^1.2.1",
+			"node-forge": "1.0.0",
 			"browserslist": "4.17.3",
 			"set-value": "4.0.1",
 			"nth-check": "2.0.1",
@@ -23,7 +23,8 @@
 			"ua-parser-js": "0.7.30",
 			"@types/node": "12.20.13",
 			"@testing-library/react": "12.0.0",
-			"webpack": "4.44.2"
+			"webpack": "4.44.2",
+			"cookie": "0.5.0"
 		}
 	},
 	"dependencies": {
@@ -69,7 +70,7 @@
 		"material-ui": "0.20.2",
 		"moment": "2.20.1",
 		"node-fetch": "2.6.1",
-		"node-forge": "1.2.1",
+		"node-forge": "1.0.0",
 		"node-sass": "6.0.1",
 		"piwik-react-router": "0.12.1",
 		"popper.js": "^1.16.1",
