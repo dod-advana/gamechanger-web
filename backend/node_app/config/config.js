@@ -28,6 +28,7 @@ if (fs.existsSync(secretsPath)) {
 } else {
 	console.log('Using default secrets');
 }
+console.log('config');
 
 module.exports = {
 	development: {
