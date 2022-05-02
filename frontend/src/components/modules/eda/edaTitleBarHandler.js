@@ -4,14 +4,24 @@ import defaultTitleBarHandler from '../default/defaultTitleBarHandler';
 
 const EdaTitleBarHandler = {
 	getTitleBar: (props) => {
-		const { componentStepNumbers } = props;
+		const { componentStepNumbers, onTitleClick, cloneData } = props;
 		return (
-			<img
-				src={ContractSearchLogo}
-				style={{ ...styles.title, cursor: 'auto', width: 320 }}
-				alt="contractSearch"
-				className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Gamechanger Title']}` : null}
-			/>
+			<div
+				className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+				onClick={onTitleClick}
+			>
+				<img
+					src={ContractSearchLogo}
+					style={styles.title}
+					onClick={onTitleClick}
+					alt="contractSearch"
+					className={
+						componentStepNumbers
+							? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`
+							: null
+					}
+				/>
+			</div>
 		);
 	},
 
@@ -30,5 +40,10 @@ const styles = {
 	wording: {
 		color: '#131E43',
 		marginRight: 15,
+	},
+	title: {
+		margin: '0 25px 0 15px',
+		cursor: 'pointer',
+		height: '50px',
 	},
 };
