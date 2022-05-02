@@ -21,8 +21,10 @@
   "license": "ISC",
   "pnpm": {
     "override": {
-      "node-forge": "1.2.1",
-      "@types/node": "12.20.13"
+      "node-forge": "1.0.0",
+      "@types/node": "12.20.13",
+      "redis": "4.0.6",
+      "cookie": "0.5.0"
     }
   },
   "dependencies": {
@@ -61,7 +63,7 @@
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
     "pdfmake": "0.2.4",
-    "redis": "3.1.2",
+    "redis": "4.0.6",
     "secure-random": "1.1.1",
     "sequelize": "6.6.5",
     "spark-md5": "3.0.1",
