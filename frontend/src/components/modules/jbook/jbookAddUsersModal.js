@@ -56,56 +56,65 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddUse
 		setSearchFilterText(event.target.value);
 	};
 
+	// render all users to select from, excludes users that are filtered by the searchFilterText
 	const renderUsersList = () => {
-		let userDivs = [];
+		try {
+			let userDivs = [];
 
-		if (portfolioData && userList) {
-			let filteredList = userList;
+			if (portfolioData && userList) {
+				let filteredList = userList;
 
-			if (searchFilterText && searchFilterText.length > 0) {
-				const regexString = `.*${searchFilterText}.*`;
-				const regex = new RegExp(regexString, 'gi');
-				filteredList = userList.filter((user) => {
-					let name = user.first_name + ' ' + user.last_name;
-					return name.match(regex);
-				});
-			}
-
-			for (const user of filteredList) {
-				let added = portfolioData.user_ids.indexOf(user.id) !== -1;
-				let style = {
-					margin: '10px',
-					minWidth: 60,
-					backgroundColor: 'white',
-					borderColor: '#757575',
-					color: '#757575',
-					borderWidth: '1px',
-					padding: '0 10px',
-				};
-
-				if (added) {
-					style.borderColor = '#2F4A7F';
-					style.color = '#2F4A7F';
+				if (searchFilterText && searchFilterText.length > 0) {
+					const regexString = `.*${searchFilterText}.*`;
+					const regex = new RegExp(regexString, 'gi');
+					filteredList = userList.filter((user) => {
+						let name = user.first_name + ' ' + user.last_name;
+						return name.match(regex);
+					});
 				}
 
-				userDivs.push(
-					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-						<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
-							{user.first_name}, {user.last_name}
-						</Typography>
-						<GCButton style={style} id={user.id} onClick={() => handleAddUser(user.id)}>
-							{added ? <CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} /> : ''}
-							Add
-						</GCButton>
-					</div>
-				);
+				for (const user of filteredList) {
+					let added = portfolioData.user_ids.indexOf(user.id) !== -1;
+					let style = {
+						margin: '10px',
+						minWidth: 60,
+						backgroundColor: 'white',
+						borderColor: '#757575',
+						color: '#757575',
+						borderWidth: '1px',
+						padding: '0 10px',
+					};
+
+					if (added) {
+						style.borderColor = '#2F4A7F';
+						style.color = '#2F4A7F';
+					}
+
+					userDivs.push(
+						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+							<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+								{user.first_name}, {user.last_name}
+							</Typography>
+							<GCButton style={style} id={user.id} onClick={() => handleAddUser(user.id)}>
+								{added ? (
+									<CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} />
+								) : (
+									''
+								)}
+								Add
+							</GCButton>
+						</div>
+					);
+				}
 			}
+
+			return userDivs;
+		} catch (e) {
+			console.log(e);
+			console.log('Error rendering the users list');
+			return '';
 		}
-
-		return userDivs;
 	};
-
-	console.log(portfolioData);
 
 	return (
 		<Dialog

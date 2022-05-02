@@ -47,7 +47,7 @@ const Pill = styled.button`
  */
 export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 	const classes = useStyles();
-	const [init, setInit] = useState(false);
+	// const [init, setInit] = useState(false);
 	const [showUsersModal, setShowUsersModal] = useState(false);
 	const [showTagsModal, setShowTagsModal] = useState(false);
 
@@ -72,6 +72,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		setData(newData);
 	};
 
+	// add user to portfolio data user_ids
 	const handleAddUser = (id) => {
 		try {
 			if (!isNaN(id)) {
@@ -90,6 +91,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		}
 	};
 
+	// add tag to portfolio data tags
 	const handleAddTag = (tag, add) => {
 		try {
 			let tagIndex = data.tags.indexOf(tag);
@@ -99,7 +101,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 				if (tagIndex === -1 && tag !== '') {
 					newList.push(tag);
 				} else {
-					// notification
+					// potentially add a notification here
 				}
 			} else {
 				if (tagIndex !== -1) {
@@ -113,61 +115,74 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		}
 	};
 
+	// render the selected users as pills on the portfolio editor
 	const renderSelectedUsers = () => {
-		let selectedUsers = [];
-		let userIDs = data.user_ids;
-		for (let i = 0; i < userIDs.length; i++) {
-			let user = userMap[userIDs[i]];
-			selectedUsers.push(
-				<Pill style={{ margin: '0 5px 10px' }}>
-					{user.first_name} {user.last_name}
-					<IconButton
-						aria-label="close"
-						style={{
-							backgroundColor: '#BDBDBD',
-							width: 17,
-							height: 17,
-							margin: '0 0 0 5px',
-							color: 'white',
-							padding: 0,
-						}}
-						onClick={() => handleAddUser(userIDs[i])}
-					>
-						<CloseIcon style={{ fontSize: 11 }} />
-					</IconButton>
-				</Pill>
-			);
-		}
+		try {
+			let selectedUsers = [];
+			let userIDs = data.user_ids;
+			for (let i = 0; i < userIDs.length; i++) {
+				let user = userMap[userIDs[i]];
+				selectedUsers.push(
+					<Pill style={{ margin: '0 5px 10px' }}>
+						{user.first_name} {user.last_name}
+						<IconButton
+							aria-label="close"
+							style={{
+								backgroundColor: '#BDBDBD',
+								width: 17,
+								height: 17,
+								margin: '0 0 0 5px',
+								color: 'white',
+								padding: 0,
+							}}
+							onClick={() => handleAddUser(userIDs[i])}
+						>
+							<CloseIcon style={{ fontSize: 11 }} />
+						</IconButton>
+					</Pill>
+				);
+			}
 
-		return selectedUsers;
+			return selectedUsers;
+		} catch (e) {
+			console.log(e);
+			console.log('Error rendering selected users on edit portfolio modal');
+			return '';
+		}
 	};
 
+	// render the selected users as pills on the portfolio editor
 	const renderSelectedTags = () => {
-		let selectedTags = [];
-		let tags = data.tags;
-		for (const tag of tags) {
-			selectedTags.push(
-				<Pill style={{ margin: '0 5px 10px' }}>
-					{tag}
-					<IconButton
-						aria-label="close"
-						style={{
-							backgroundColor: '#BDBDBD',
-							width: 17,
-							height: 17,
-							margin: '0 0 0 5px',
-							color: 'white',
-							padding: 0,
-						}}
-						onClick={() => handleAddTag(tag, false)}
-					>
-						<CloseIcon style={{ fontSize: 11 }} />
-					</IconButton>
-				</Pill>
-			);
-		}
+		try {
+			let selectedTags = [];
+			let tags = data.tags;
+			for (const tag of tags) {
+				selectedTags.push(
+					<Pill style={{ margin: '0 5px 10px' }}>
+						{tag}
+						<IconButton
+							aria-label="close"
+							style={{
+								backgroundColor: '#BDBDBD',
+								width: 17,
+								height: 17,
+								margin: '0 0 0 5px',
+								color: 'white',
+								padding: 0,
+							}}
+							onClick={() => handleAddTag(tag, false)}
+						>
+							<CloseIcon style={{ fontSize: 11 }} />
+						</IconButton>
+					</Pill>
+				);
+			}
 
-		return selectedTags;
+			return selectedTags;
+		} catch (e) {
+			console.log(e);
+			console.log('Error rendering the selected tag pills on edit portfolio modal');
+		}
 	};
 
 	useEffect(() => {
