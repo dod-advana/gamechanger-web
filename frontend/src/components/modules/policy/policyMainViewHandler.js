@@ -4,7 +4,7 @@ import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import GameChangerSideBar from '../../searchMetrics/GCSideBar';
 import DefaultGraphView from '../../graph/defaultGraphView';
 import {
-	getMainView as defaultGetMainView,
+	getMainView,
 	handleDidYouMeanClicked,
 	styles,
 	handlePageLoad as defaultHandlePageLoad,
@@ -14,7 +14,18 @@ import PolicyDocumentExplorer from './policyDocumentExplorer';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Typography } from '@material-ui/core';
-import { setState, handleSaveFavoriteTopic, getNonMainPageOuterContainer } from '../../../utils/sharedFunctions';
+import {
+	setState,
+	handleSaveFavoriteTopic,
+	getNonMainPageOuterContainer,
+	getUserData,
+	handleSaveFavoriteDocument,
+	handleDeleteFavoriteSearch,
+	handleClearFavoriteSearchNotification,
+	handleSaveFavoriteSearchHistory,
+	handleSaveFavoriteOrganization,
+	checkUserInfo,
+} from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -46,8 +57,8 @@ import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
-import UserProfileHandlerFactory from '../../factories/userProfileFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import GCUserDashboard from '../../user/GCUserDashboard';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -370,10 +381,6 @@ const handlePageLoad = async (props) => {
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
 	handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
 	handleLastOpened(pdf_opened, state, dispatch, props.cancelToken);
-};
-
-const getMainView = (props) => {
-	return defaultGetMainView(props);
 };
 
 const renderHideTabs = (props) => {
@@ -1089,6 +1096,42 @@ const getDataTracker = (state) => {
 	return <GCDataStatusTracker state={state} />;
 };
 
+const getGCUserDashboard = (props) => {
+	const { state, dispatch } = props;
+	return (
+		<GCUserDashboard
+			state={state}
+			userData={state.userData}
+			updateUserData={() => getUserData(dispatch)}
+			handleSaveFavoriteDocument={(document) => handleSaveFavoriteDocument(document, state, dispatch)}
+			handleDeleteSearch={(search) => handleDeleteFavoriteSearch(search, dispatch)}
+			handleClearFavoriteSearchNotification={(search) => handleClearFavoriteSearchNotification(search, dispatch)}
+			saveFavoriteSearch={(favoriteName, favoriteSummary, favorite, tinyUrl, searchText, count) =>
+				handleSaveFavoriteSearchHistory(
+					favoriteName,
+					favoriteSummary,
+					favorite,
+					tinyUrl,
+					searchText,
+					count,
+					dispatch
+				)
+			}
+			handleFavoriteTopic={({ topic_name, topic_summary, favorite }) =>
+				handleSaveFavoriteTopic(topic_name, topic_summary, favorite, dispatch)
+			}
+			handleFavoriteOrganization={({ organization_name, organization_summary, favorite }) =>
+				handleSaveFavoriteOrganization(organization_name, organization_summary, favorite, dispatch)
+			}
+			cloneData={state.cloneData}
+			checkUserInfo={() => {
+				return checkUserInfo(state, dispatch);
+			}}
+			dispatch={dispatch}
+		/>
+	);
+};
+
 const PolicyMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime } = props;
 
@@ -1099,11 +1142,6 @@ const PolicyMainViewHandler = (props) => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
-
-			const profileFactory = new UserProfileHandlerFactory(state.cloneData.main_view_module);
-
-			const profileHandler = profileFactory.createHandler();
-			setUserProfileHandler(profileHandler);
 
 			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
@@ -1128,11 +1166,7 @@ const PolicyMainViewHandler = (props) => {
 		case PAGE_DISPLAYED.dataTracker:
 			return getNonMainPageOuterContainer(getDataTracker(state), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(
-				userProfileHandler.getUserProfilePage({ state, dispatch }),
-				state,
-				dispatch
-			);
+			return getNonMainPageOuterContainer(getUserProfilePage(getGCUserDashboard), state, dispatch);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs({ state }), state, dispatch);
 		case PAGE_DISPLAYED.main:

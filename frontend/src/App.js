@@ -20,12 +20,8 @@ import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import ThemeDefault from '@dod-advana/advana-platform-ui/dist/theme-default';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
-import NotFoundPage from '@dod-advana/advana-platform-ui/dist/containers/NotFoundPage';
-import UnauthorizedPage from '@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage';
-import ErrorPage from '@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage';
 import { ErrorBoundary } from 'react-error-boundary';
 import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
-import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
 import './index.css';
 
 require('typeface-noto-sans');
@@ -39,9 +35,55 @@ const ConsentAgreement = LoadableVisibility({
 	},
 });
 
+const SlideOutMenu = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenu'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const ErrorPage = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage'),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const NotFoundPage = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/NotFoundPage'),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
+const UnauthorizedPage = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage'),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<LoadingIndicator />
+			</div>
+		);
+	},
+});
+
 const JBookProfilePage = LoadableVisibility({
 	loader: () => import('./containers/JBookProfilePage'),
-	loading: LoadingIndicator,
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<LoadingIndicator />
+			</div>
+		);
+	},
 });
 
 const GamechangerPage = LoadableVisibility({

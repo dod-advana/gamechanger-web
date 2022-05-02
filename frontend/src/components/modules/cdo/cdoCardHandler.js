@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
-import styled from 'styled-components';
 import {
 	capitalizeFirst,
-	CARD_FONT_SIZE,
 	getSubTypes,
 	getTrackingNameForFactory,
 	getTypeDisplay,

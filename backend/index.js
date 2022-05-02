@@ -2,7 +2,6 @@
 
 require('dotenv').config();
 const express = require('express');
-const compression = require('compression');
 const http = require('http');
 const fs = require('fs');
 const https = require('https'); // module for https
@@ -80,7 +79,34 @@ if (constants.EXPRESS_TRUST_PROXY) {
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
 
-app.use(compression({ filter: startupUtils.shouldCompress }));
+app.get('*.js', function (req, res, next) {
+	if (req.url === '/config.js') {
+		next();
+	} else {
+		const encodeHeaders = req.get('accept-encoding');
+		if (encodeHeaders.includes('br')) {
+			req.url = req.url + '.br';
+			res.set('Content-Encoding', 'br');
+		} else {
+			req.url = req.url + '.gz';
+			res.set('Content-Encoding', 'gzip');
+		}
+		res.set('Content-Type', 'text/javascript');
+		next();
+	}
+});
+app.get('*.css', function (req, res, next) {
+	const encodeHeaders = req.get('accept-encoding');
+	if (encodeHeaders.includes('br')) {
+		req.url = req.url + '.br';
+		res.set('Content-Encoding', 'br');
+	} else {
+		req.url = req.url + '.gz';
+		res.set('Content-Encoding', 'gzip');
+	}
+	res.set('Content-Type', 'text/css');
+	next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);

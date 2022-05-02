@@ -2,7 +2,6 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { getAuthConfig, getCollibraUrl } = require('./DataCatalogUtils');
-const compression = require('compression');
 
 const copyConfigToBuild = () => {
 	try {
@@ -59,16 +58,7 @@ const storeDataCatalogInfo = async (redisAsyncClient) => {
 	);
 };
 
-const shouldCompress = (req, res) => {
-	if (req.url.includes('/static')) {
-		return compression.filter(req, res);
-	} else {
-		return false;
-	}
-};
-
 module.exports = {
 	copyConfigToBuild,
 	storeDataCatalogInfo,
-	shouldCompress,
 };

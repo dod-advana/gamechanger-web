@@ -36,9 +36,11 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import MagellanTrendingLinkList from '../../common/MagellanTrendingLinkList';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
-import UserProfileHandlerFactory from '../../factories/userProfileFactory';
+import UserProfile from '../../user/UserProfile';
+import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 export const fullWidthCentered = {
 	width: '100%',
@@ -110,6 +112,104 @@ export const styles = {
 		alignItems: 'center',
 		justifyContent: 'center',
 		cursor: 'pointer',
+	},
+	leftContainerSummary: {
+		width: '15%',
+		marginTop: 10,
+	},
+	rightContainerSummary: {
+		marginLeft: '17.5%',
+		width: '79.7%',
+	},
+	showingResultsRow: {
+		width: '100%',
+		display: 'inline-flex',
+		justifyContent: 'space-between',
+		marginBottom: 10,
+		marginTop: 15,
+	},
+	container: {
+		minWidth: 148,
+	},
+	containerDiv: {
+		marginTop: 10,
+		marginLeft: 0,
+		marginRight: 0,
+	},
+	listViewContainer: {
+		marginTop: 10,
+		marginLeft: 0,
+		marginRight: 0,
+		paddingRight: 40,
+	},
+	text: {
+		margin: 'auto 0px',
+	},
+	buttons: {
+		height: 50,
+		width: 64,
+		margin: '0px 5px',
+		minWidth: 64,
+	},
+	unselectedButton: {
+		border: 'solid 2px #DFE6EE',
+		color: '#8091A5',
+	},
+	icon: {
+		fontSize: 30,
+	},
+	filterBox: {
+		backgroundColor: '#ffffff',
+		borderRadius: '5px',
+		padding: '2px',
+		border: '2px solid #bdccde',
+		pointerEvents: 'none',
+		margin: '2px 5px 0px',
+	},
+	titleText: {
+		fontSize: 22,
+		fontWeight: 500,
+		color: '#131E43',
+		margin: '20px 0',
+		fontFamily: 'Montserrat',
+	},
+	tableColumn: {
+		textAlign: 'center',
+		margin: '4px 0',
+	},
+	tabsList: {
+		borderBottom: `2px solid ${'#1C2D65'}`,
+		padding: 0,
+		display: 'flex',
+		alignItems: 'center',
+		flex: 9,
+		marginRight: 15,
+	},
+	tabStyle: {
+		border: `1px solid ${'#DCDCDC'}`,
+		borderBottom: 'none !important',
+		borderRadius: `6px 6px 0px 0px`,
+		position: ' relative',
+		listStyle: 'none',
+		padding: '2px 12px',
+		cursor: 'pointer',
+		textAlign: 'center',
+		backgroundColor: '#ffffff',
+		marginRight: '2px',
+		marginLeft: '2px',
+		height: 45,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	tabSelectedStyle: {
+		border: `1px solid ${'#0000001F'}`,
+		backgroundColor: '#1C2D65',
+		color: 'white',
+	},
+	orangeText: {
+		fontWeight: 'bold',
+		color: '#E9691D',
 	},
 };
 
@@ -229,7 +329,7 @@ export const handlePageLoad = async (props) => {
 	}
 };
 
-const renderHideTabs = (props) => {
+export const renderHideTabs = (props) => {
 	const { state, dispatch, searchHandler } = props;
 	const { componentStepNumbers, cloneData, resetSettingsSwitch, didYouMean, loading, prevSearchText } = state;
 	const showDidYouMean = didYouMean && !loading;
@@ -600,7 +700,26 @@ const getCardViewPanel = (props) => {
 	);
 };
 
-const getAboutUs = (props) => {
+export const getAboutUs = (props) => {
+	return <></>;
+};
+
+export const getUserProfilePage = (displayUserRelatedItems, primaryColor, secondaryColor) => {
+	return (
+		<UserProfile
+			getUserData={gameChangerUserAPI.getUserProfileData}
+			updateUserData={gameChangerUserAPI.updateUserProfileData}
+			getAppRelatedUserData={() => {}}
+			updateAppRelatedUserData={() => {}}
+			displayCustomAppContent={displayUserRelatedItems}
+			style={{ width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)' }}
+			primaryColor={primaryColor || '#1C2D65'}
+			secondaryColor={secondaryColor || '#8091A5'}
+		/>
+	);
+};
+
+const displayUserRelatedItems = () => {
 	return <></>;
 };
 
@@ -608,17 +727,11 @@ const DefaultMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
-	const [userProfileHandler, setUserProfileHandler] = useState();
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
-
-			const profileFactory = new UserProfileHandlerFactory(state.cloneData.main_view_module);
-
-			const profileHandler = profileFactory.createHandler();
-			setUserProfileHandler(profileHandler);
 
 			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
@@ -639,9 +752,9 @@ const DefaultMainViewHandler = (props) => {
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(userProfileHandler.getUserProfilePage({ state, dispatch }));
+			return getNonMainPageOuterContainer(getUserProfilePage(displayUserRelatedItems), state, dispatch);
 		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs);
+			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({

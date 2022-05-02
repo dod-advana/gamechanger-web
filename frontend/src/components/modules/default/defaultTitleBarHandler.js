@@ -259,9 +259,9 @@ export const styles = {
 		width: '100%',
 	},
 	title: {
-		margin: '0 50px 0 15px',
+		margin: '0 20px 0 15px',
 		cursor: 'pointer',
-		width: '255px',
+		width: '400px',
 		height: '50x',
 	},
 	divider: {

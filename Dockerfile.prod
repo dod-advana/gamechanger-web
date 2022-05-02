@@ -66,23 +66,29 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     )) \
     && (\ 
         cd "$APP_SHARED_DIR" \
-        && npm install nodemon sequelize-cli jest pnpm \
+        && npm install nodemon \
+        && npm install sequelize-cli \
+        && npm install jest \
     )\
     && (\
         cd "${APP_FRONTEND_DIR}" \
-        && pnpm install --prod \
+        && npm install --production \
     )\
     && (\
         cd "${APP_BACKEND_DIR}" \
-        && pnpm install --prod \
+        && npm install --production \
     )\
     && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
 COPY --chown="$APP_UID:$APP_GID" ./ "${APP_DIR}"
 
-RUN cd "${APP_FRONTEND_DIR}" && pnpm build
-RUN cp -r "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
-RUN cd "${APP_BACKEND_DIR}" && rm -rf "${APP_FRONTEND_DIR}"
+RUN (\
+        cd "${APP_FRONTEND_DIR}" \
+        && npm run build \
+        && mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}" \
+        && cd "${APP_BACKEND_DIR}" \
+        && rm -rf "${APP_FRONTEND_DIR}" \
+    )
 
 # http & https
 EXPOSE 8990 8443

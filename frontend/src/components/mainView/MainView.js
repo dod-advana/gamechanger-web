@@ -14,6 +14,27 @@ const DefaultMainViewHandler = LoadableVisibility({
 	},
 });
 
+const EDAMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaMainViewHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const GlobalSearchMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/globalSearch/globalSearchMainViewHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const JBookMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/jbook/jbookMainViewHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
 const PolicyMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyMainViewHandler'),
 	loading: () => {
@@ -140,6 +161,12 @@ const MainView = (props) => {
 
 	const getMainViewComponent = (props) => {
 		switch (state.cloneData.main_view_module) {
+			case 'eda/edaMainViewHandler':
+				return <EDAMainViewHandler {...props} />;
+			case 'globalSearch/globalSearchMainViewHandler':
+				return <GlobalSearchMainViewHandler {...props} />;
+			case 'jbook/jbookMainViewHandler':
+				return <JBookMainViewHandler {...props} />;
 			case 'policy/policyMainViewHandler':
 				return <PolicyMainViewHandler {...props} />;
 			default:
