@@ -1078,6 +1078,125 @@ class EDASearchUtility {
 
 		return { id, idv };
 	}
+
+	getESSimilarityQuery(paragraphs, filters) {
+		let filterQueries = [];
+		filterQueries = filterQueries.concat(this.getEDASearchQuery(filters));
+
+		const paragraphsQuery = paragraphs.map((paragraph) => {
+			return {
+				nested: {
+					score_mode: 'max',
+					path: 'pages',
+					query: {
+						match: { 'pages.p_raw_text': paragraph.text },
+					},
+					inner_hits: { size: 1 },
+				},
+			};
+		});
+
+		const query = {
+			track_total_hits: true,
+			size: 10,
+			_source: false,
+			query: {
+				bool: {
+					must: filterQueries,
+					should: paragraphsQuery,
+				},
+			},
+		};
+
+		return query;
+	}
+
+	getParagraphResults(esResults) {
+		const paragraphResults = {};
+
+		esResults.body.hits.hits.forEach((hit, index) => {
+			paragraphResults[index] = {
+				id: hit.inner_hits.pages.hits.hits[0]._source.id,
+				text: hit.inner_hits.pages.hits.hits[0]._source.p_raw_text,
+				score: hit.inner_hits.pages.hits.hits[0]._score,
+			};
+		});
+
+		return [{ paragraphIdBeingMatched: '0', ...paragraphResults }];
+	}
+
+	getDocumentParagraphsByPageIDs(ids = [], filters = {}, offset = 0) {
+		const query = {
+			from: offset,
+			size: 100,
+			_source: {
+				includes: ['pagerank_r', 'kw_doc_score_r'],
+			},
+			stored_fields: [
+				'filename',
+				'title',
+				'page_count',
+				'doc_type',
+				'doc_num',
+				'ref_list',
+				'id',
+				'summary_30',
+				'keyw_5',
+				'p_text',
+				'type',
+				'p_page',
+				'display_title_s',
+				'display_org_s',
+				'display_doc_type_s',
+				'is_revoked_b',
+				'access_timestamp_dt',
+				'publication_date_dt',
+				'crawler_used_s',
+				'topics_s',
+			],
+			query: {
+				bool: {
+					must: [],
+					filter: [],
+					should: [
+						{
+							nested: {
+								path: 'paragraphs',
+								inner_hits: {
+									_source: true,
+									highlight: {
+										fields: {
+											'paragraphs.filename.search': {
+												number_of_fragments: 0,
+											},
+											'paragraphs.par_raw_text_t': {
+												fragment_size: 200,
+												number_of_fragments: 1,
+											},
+										},
+										fragmenter: 'span',
+									},
+								},
+								query: {
+									bool: {
+										must: [
+											{
+												terms: {
+													'pages.id': ids,
+												},
+											},
+										],
+									},
+								},
+							},
+						},
+					],
+				},
+			},
+		};
+
+		return query;
+	}
 }
 
 module.exports = EDASearchUtility;

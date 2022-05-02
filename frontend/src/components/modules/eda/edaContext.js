@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { orgFilters, typeFilters } from '../../../utils/gamechangerUtils';
+import { orgFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	edaSearchSettings: {
@@ -69,7 +69,6 @@ const initState = {
 		orgUpdate: false,
 		orgFilter: orgFilters,
 		orgCount: {},
-		typeCount: {},
 		organizations: [],
 		majcoms: {
 			'air force': [],
@@ -81,11 +80,8 @@ const initState = {
 		allYearsSelected: true,
 		contractsOrMods: 'both',
 		idvPIID: '',
-		typeFilter: typeFilters,
 		allOrgsSelected: true,
 		specificOrgsSelected: false,
-		allTypesSelected: true,
-		specificTypesSelected: false,
 	},
 	rawSearchResults: [],
 	userData: {
