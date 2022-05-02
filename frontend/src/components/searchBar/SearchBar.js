@@ -4,7 +4,7 @@ import { setState } from '../../utils/sharedFunctions';
 import ModularSearchBarHandler from './ModularSearchBarHandler';
 import TitleBar from './TitleBar';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
-import MainViewFactory from '../factories/mainViewFactory';
+import MainViewUtilityFactory from '../factories/mainViewUtilityFactory';
 
 const SearchBar = (props) => {
 	const { context } = props;
@@ -12,7 +12,7 @@ const SearchBar = (props) => {
 
 	const { rawSearchResults } = state;
 	const [searchHandler, setSearchHandler] = useState();
-	const [mainViewHandler, setMainViewHandler] = useState();
+	const [mainViewUtilityHandler, setMainViewUtilityHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
@@ -21,9 +21,9 @@ const SearchBar = (props) => {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const tmpSearchHandler = searchFactory.createHandler();
 			setSearchHandler(tmpSearchHandler);
-			const mainViewFactory = new MainViewFactory(state.cloneData.main_view_module);
+			const mainViewFactory = new MainViewUtilityFactory(state.cloneData.main_view_module);
 			const tmpMainViewHandler = mainViewFactory.createHandler();
-			setMainViewHandler(tmpMainViewHandler);
+			setMainViewUtilityHandler(tmpMainViewHandler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
@@ -40,7 +40,7 @@ const SearchBar = (props) => {
 	};
 
 	const handleCategoryTabChange = (tabName) => {
-		mainViewHandler.handleCategoryTabChange({ tabName, state, dispatch });
+		mainViewUtilityHandler.handleCategoryTabChange({ tabName, state, dispatch });
 	};
 
 	return (

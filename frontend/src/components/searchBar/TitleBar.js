@@ -33,7 +33,7 @@ const EDATitleBarHandler = LoadableVisibility({
 const PolicyTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div styles={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 

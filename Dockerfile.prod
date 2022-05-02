@@ -70,23 +70,19 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     )\
     && (\
         cd "${APP_FRONTEND_DIR}" \
-        && NODE_ENV=production pnpm install \
+        && pnpm install --prod \
     )\
     && (\
         cd "${APP_BACKEND_DIR}" \
-        && NODE_ENV=production pnpm install \
+        && pnpm install --prod \
     )\
     && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
 COPY --chown="$APP_UID:$APP_GID" ./ "${APP_DIR}"
 
-RUN (\
-        cd "${APP_FRONTEND_DIR}" \
-        && pnpm build \
-        && mv "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}" \
-        && cd "${APP_BACKEND_DIR}" \
-        && rm -rf "${APP_FRONTEND_DIR}" \
-    )
+RUN cd "${APP_FRONTEND_DIR}" && pnpm build
+RUN cp -r "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
+RUN cd "${APP_BACKEND_DIR}" && rm -rf "${APP_FRONTEND_DIR}"
 
 # http & https
 EXPOSE 8990 8443
