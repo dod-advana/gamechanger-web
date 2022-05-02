@@ -48,7 +48,7 @@ const GamechangerPage = LoadableVisibility({
 	loader: () => import('./containers/GameChangerPage'),
 	loading: () => {
 		return (
-			<div className="main-container">
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
 				<LoadingIndicator />
 			</div>
 		);
@@ -56,10 +56,10 @@ const GamechangerPage = LoadableVisibility({
 });
 
 const GamechangerAdminPage = LoadableVisibility({
-	loader: () => import('./containers/GamechangerLiteAdminPage'),
+	loader: () => import('./containers/GamechangerAdminPage'),
 	loading: () => {
 		return (
-			<div className="main-container">
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 220px)' }}>
 				<LoadingIndicator />
 			</div>
 		);
