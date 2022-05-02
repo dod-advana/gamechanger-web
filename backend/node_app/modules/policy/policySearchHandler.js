@@ -809,8 +809,9 @@ class PolicySearchHandler extends SearchHandler {
 			const orgResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, orgQuery, userId);
 			const typeResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, typeQuery, userId);
 			const results = await Promise.all([orgResults, typeResults]);
-
-			const orgsCleaned = results[0].body.aggregations.display_org.buckets.map((item) => item.key.type);
+			const orgsCleaned = results[0].body.aggregations.display_org.buckets
+				.map((item) => (item.revoke_filter.buckets.query.doc_count !== 0 ? item.key.type : null))
+				.filter((item) => item !== null);
 			const typesCleaned = results[1].body.aggregations.display_type.buckets.map((item) => item.key.type);
 			return { orgs: orgsCleaned, types: typesCleaned };
 		} catch (e) {
