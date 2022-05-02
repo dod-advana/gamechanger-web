@@ -14,7 +14,7 @@ const getTitleBar = (props) => {
 		>
 			<img
 				src={JAICLogo}
-				style={styles.title}
+				style={{ ...styles.title, width: 500, marginRight: 0 }}
 				onClick={onTitleClick}
 				alt="gamechanger jbook"
 				id={'titleButton'}

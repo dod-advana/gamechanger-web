@@ -4,11 +4,12 @@
   "description": "gamechanger backend",
   "main": "index.js",
   "scripts": {
+    "preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
     "test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
     "watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
-    "prestart": "pnpm i",
+    "prestart": "npm install",
     "start": "node index.js",
-    "awsDocker": "pnpm start",
+    "awsDocker": "npm start",
     "jest-coverage": "jest --coverage",
     "sonarscan": "sonar-scanner",
     "gc:migrate": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate",
@@ -19,16 +20,12 @@
   },
   "author": "",
   "license": "ISC",
-  "pnpm": {
-    "override": {
-      "node-forge": "1.0.0",
-      "@types/node": "12.20.13",
-      "redis": "4.0.6",
-      "cookie": "0.5.0"
-    }
+  "resolutions": {
+    "node-forge": "1.2.1",
+    "types/node": "12.20.13"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.44",
+    "@dod-advana/advana-api-auth": "0.0.45",
     "@dod-advana/advana-logger": "0.0.4",
     "@elastic/elasticsearch": "7.10.0",
     "async": "2.6.3",
@@ -37,7 +34,6 @@
     "axios": "0.24.0",
     "body-parser": "1.19.0",
     "chai": "4.3.0",
-    "compression": "^1.7.4",
     "cors": "2.8.5",
     "crypto-js": "3.2.0",
     "csv-stringify": "5.6.2",
@@ -46,7 +42,6 @@
     "exceljs": "4.3.0",
     "express": "4.17.1",
     "express-session": "1.17.2",
-    "express-static-gzip": "2.1.5",
     "hat": "0.0.3",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
@@ -58,12 +53,12 @@
     "node-cron": "2.0.3",
     "node-forge": "1.2.1",
     "nodemailer": "6.6.3",
-    "openapi-types": "^11.0.0",
+    "npm-force-resolutions": "0.0.10",
     "pagerank.js": "1.0.2",
     "passport": "0.4.1",
     "passport-ldapauth": "2.1.4",
     "pdfmake": "0.2.4",
-    "redis": "4.0.6",
+    "redis": "3.1.2",
     "secure-random": "1.1.1",
     "sequelize": "6.6.5",
     "spark-md5": "3.0.1",

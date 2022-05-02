@@ -25,6 +25,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Checkbox } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { gcOrange } from '../common/gc-colors';
 
 const DefaultCardHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultCardHandler'),
@@ -64,7 +65,7 @@ const HermesCardHandler = LoadableVisibility({
 const JBookCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookCardHandler'),
 	loading: () => {
-		return <LoadingIndicator />;
+		return <LoadingIndicator customColor={'#1C2D65'} />;
 	},
 });
 
@@ -78,7 +79,7 @@ const JexnetCardHandler = LoadableVisibility({
 const PolicyCardHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyCardHandler'),
 	loading: () => {
-		return <LoadingIndicator />;
+		return <LoadingIndicator customColor={gcOrange} />;
 	},
 });
 
