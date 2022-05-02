@@ -21,7 +21,7 @@ const portfolioStyles = {
 		border: '2px solid rgb(209, 215, 220)',
 		padding: '20px',
 		borderRadius: '10px',
-		margin: '10px 20px',
+		margin: '10px 35px 0 0',
 		width: '400px',
 	},
 	portfolioHeader: {
@@ -205,12 +205,21 @@ const PortfolioBuilder = (props) => {
 					}}
 				>
 					<div style={{ flex: 2 }}>
-						{`Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-						laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-						voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-						non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-            `}
+						<div>
+							Rapidly discover and label all Program Elements/Budget Line Items related to a spend
+							category by creating a Portfolio.
+						</div>
+						<div style={{ marginTop: 15 }}>
+							Using the Portfolio Builder, users can:
+							<ul>
+								<li>Create a new portfolio</li>
+								<li>Define a portfolio description</li>
+								<li>Upload a portfolio ontology</li>
+								<li>Create tags/labels for use within the portfolio</li>
+								<li>Set user permissions</li>
+								<li>View all portfolios</li>
+							</ul>
+						</div>
 					</div>
 					<div>
 						<GCButton
