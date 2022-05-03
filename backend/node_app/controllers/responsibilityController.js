@@ -51,7 +51,7 @@ class ResponsibilityController {
 	async getOtherEntResponsibilityFilterList(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const results = await this.responsibilities.findAll({
 				raw: true,
 				attributes: ['otherOrganizationPersonnel'],
@@ -173,7 +173,7 @@ class ResponsibilityController {
 		// the paragraph number for the string.
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneData = {}, filename = '', text = '' } = req.body;
@@ -224,7 +224,7 @@ class ResponsibilityController {
 		// the paragraph number for the string.
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
 			const { cloneData = {}, filename = '', text = '' } = req.body;
@@ -325,7 +325,7 @@ class ResponsibilityController {
 	async getResponsibilityData(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.body;
 			order.push(['documentTitle', 'ASC']);
@@ -403,7 +403,7 @@ class ResponsibilityController {
 	async getResponsibilityDocTitles(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const where = {};
 			where['status'] = { [Op.not]: 'rejected' };
@@ -421,7 +421,7 @@ class ResponsibilityController {
 	}
 
 	async rejectResponsibility(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const { id } = req.body;
@@ -445,7 +445,7 @@ class ResponsibilityController {
 	// Old update function for chart responsibility update functionality:
 
 	// async updateResponsibility(req, res) {
-	// 	const userId = req.get('SSL_CLIENT_S_DN_CN');
+	// 	const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 	// 	try {
 	// 		const { id, updateProps } = req.body;
@@ -469,7 +469,7 @@ class ResponsibilityController {
 	// }
 
 	async updateResponsibility(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			const { update, responsibility, status } = req.body;
@@ -570,7 +570,7 @@ class ResponsibilityController {
 	async updateResponsibilityReport(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id, updatedText, textPosition } = req.body;
 
 			const result = await this.responsibility_reports.update(
@@ -594,7 +594,7 @@ class ResponsibilityController {
 	async storeResponsibilityReports(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id, issue_description, updatedColumn, updatedText, textPosition } = req.body;
 			if (id == null || !issue_description) return res.status(400).send();
 
@@ -627,7 +627,7 @@ class ResponsibilityController {
 	// async getResponsibilityUpdates(req, res) {
 	// 	let userId = 'unknown_webapp';
 	// 	try {
-	// 		userId = req.get('SSL_CLIENT_S_DN_CN');
+	// 		userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 	// 		const { where } = req.body;
 
@@ -647,7 +647,7 @@ class ResponsibilityController {
 	async getResponsibilityUpdates(req, res) {
 		let userId = 'unknown_webapp';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
 			order.push(['filename', 'ASC']);
