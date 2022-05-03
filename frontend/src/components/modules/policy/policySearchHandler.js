@@ -64,6 +64,7 @@ const PolicySearchHandler = {
 			runningSearch,
 			currentSort,
 			currentOrder,
+			activeCategoryTab,
 		} = state;
 
 		const {
@@ -342,10 +343,6 @@ const PolicySearchHandler = {
 
 						doc_types.forEach((element) => {
 							var docTypeName = element.key;
-							if (docTypeName.slice(-1) !== 's') {
-								docTypeName = docTypeName + 's';
-							}
-
 							docTypeMap[docTypeName] = docTypeMap[docTypeName]
 								? docTypeMap[docTypeName] + element.doc_count
 								: element.doc_count;
@@ -475,9 +472,19 @@ const PolicySearchHandler = {
 						);
 					}
 
+					let newActiveCategory = activeCategoryTab;
+
+					if (entities.length === 0 && topics.length === 0) {
+						newActiveCategory = 'Documents';
+					} else if (entities.length === 0 && newActiveCategory === 'Organizations') {
+						newActiveCategory = 'Documents';
+					} else if (topics.length === 0 && newActiveCategory === 'Topics') {
+						newActiveCategory = 'Documents';
+					}
+
 					setState(dispatch, {
 						searchSettings: newSearchSettings,
-						activeCategoryTab: entities.length === 0 && topics.length === 0 ? 'Documents' : 'all',
+						activeCategoryTab: newActiveCategory,
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						prevSearchText: searchText,
 						loading: false,
@@ -722,9 +729,6 @@ const PolicySearchHandler = {
 			const typeFilters = {};
 			for (const key in resp.data.types) {
 				let name = resp.data.types[key];
-				if (name.slice(-1) !== 's') {
-					name = name + 's';
-				}
 				typeFilters[name] = false;
 			}
 			const newSearchSettings = _.cloneDeep(state.searchSettings);

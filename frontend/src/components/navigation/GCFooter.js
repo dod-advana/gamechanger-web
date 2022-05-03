@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
 import { Button, Checkbox, FormControlLabel, FormGroup, Modal, TextField, Typography } from '@material-ui/core';
-import JAICLogo from '../../images/logos/JAIC_wht.png';
+// import JAICLogo from '../../images/logos/JAIC_wht.png';
 import styled from 'styled-components';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -283,10 +283,10 @@ const GCFooter = (props) => {
 	return (
 		<>
 			<FooterDiv>
-				<div style={styles.footerStyle}>
-					<Typography style={styles.footerText}>in partnership with</Typography>
-					<img src={JAICLogo} style={styles.title} alt="jaic-title" id={'titleButton'} />
-				</div>
+				{/*<div style={styles.footerStyle}>*/}
+				{/*	<Typography style={styles.footerText}>in partnership with</Typography>*/}
+				{/*	<img src={JAICLogo} style={styles.title} alt="jaic-title" id={'titleButton'} />*/}
+				{/*</div>*/}
 				<AdvanaFooter
 					extraLinks={[
 						<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
@@ -367,22 +367,22 @@ const GCFooter = (props) => {
 	);
 };
 
-const styles = {
-	title: {
-		width: 80,
-	},
-	footerStyle: {
-		display: 'flex',
-		position: 'absolute',
-	},
-	footerText: {
-		color: '#ffffff',
-		alignSelf: 'center',
-		margin: '0 10px 0 40px',
-		fontFamily: 'Montserrat',
-		fontWeight: 'bold',
-		fontSize: 14,
-	},
-};
+// const styles = {
+// 	title: {
+// 		width: 80,
+// 	},
+// 	footerStyle: {
+// 		display: 'flex',
+// 		position: 'absolute',
+// 	},
+// 	footerText: {
+// 		color: '#ffffff',
+// 		alignSelf: 'center',
+// 		margin: '0 10px 0 40px',
+// 		fontFamily: 'Montserrat',
+// 		fontWeight: 'bold',
+// 		fontSize: 14,
+// 	},
+// };
 
 export default GCFooter;
