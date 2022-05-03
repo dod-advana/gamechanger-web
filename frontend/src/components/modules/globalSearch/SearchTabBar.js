@@ -74,7 +74,7 @@ const styles = {
 	},
 	left: {
 		width: 440,
-		padding: '0 10px',
+		padding: '0 25px',
 		height: '100%',
 		display: 'flex',
 		alignItems: 'center',

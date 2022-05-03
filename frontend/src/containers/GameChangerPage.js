@@ -60,6 +60,10 @@ const GameChangerPage = (props) => {
 				setState(dispatch, { userData: data.data, userDataSet: true });
 			});
 		}
+
+		if (state.cloneDataSet && state.cloneData?.display_name) {
+			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
+		}
 	}, [cloneData, state, dispatch, history]);
 
 	return (
@@ -107,16 +111,16 @@ const GameChangerPage = (props) => {
 						<Snackbar
 							style={{ marginTop: 20 }}
 							anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-							open={state.showSnackbar}
+							open={state.showSnackbar || false}
 							autoHideDuration={3000}
 							onClose={() => setState(dispatch, { showSnackbar: false })}
-							message={state.snackBarMsg}
+							message={state.snackBarMsg || ''}
 						/>
 					</div>
 
 					<GCErrorSnackbar
-						open={state.showBackendError}
-						message={state.backendErrorMsg}
+						open={state.showBackendError || false}
+						message={state.backendErrorMsg || ''}
 						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
 				</>

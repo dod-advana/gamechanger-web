@@ -8,7 +8,7 @@ const axios = require('axios');
 const fs = require('fs');
 const https = require('https');
 const _ = require('lodash');
-const dcUtils = require('../../utils/DataCatalogUtils');
+const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
@@ -22,12 +22,18 @@ const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and strea
 
 class GlobalSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
-		const { logger = LOGGER, constants = constantsFile, database = databaseFile } = opts;
+		const {
+			logger = LOGGER,
+			constants = constantsFile,
+			database = databaseFile,
+			dcUtils = dataCatalogUtils,
+		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
 		this.logger = logger;
 		this.constants = constants;
 		this.database = database;
+		this.dcUtils = dcUtils;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -73,38 +79,39 @@ class GlobalSearchHandler extends SearchHandler {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			const searchResults = { applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0 };
+			const searchesToRun = {};
 
 			// Applications
 			if (getApplications) {
-				searchResults.applications = await this.getApplicationResults(searchText, offset, limit, userId);
+				searchesToRun['applications'] = this.getApplicationResults(searchText, offset, limit, userId);
 			}
 
 			// Dashboards
 			if (getDashboards) {
-				searchResults.dashboards = await this.getDashboardResults(searchText, offset, limit, userId);
+				searchesToRun['dashboards'] = this.getDashboardResults(searchText, offset, limit, userId);
 			}
 
 			// Data Sources
 			if (getDataSources) {
-				searchResults.dataSources = await this.getDataCatalogResults(
+				searchesToRun['dataSources'] = this.getDataCatalogResults(
 					searchText,
 					offset,
 					limit,
-					'dataSources',
+					'Data Source',
 					userId
 				);
 			}
 
 			// Databases
 			if (getDatabases) {
-				searchResults.databases = await this.getDataCatalogResults(
-					searchText,
-					offset,
-					limit,
-					'databases',
-					userId
-				);
+				searchesToRun['databases'] = this.getDataCatalogResults(searchText, offset, limit, 'Database', userId);
 			}
+
+			const results = await Promise.all(Object.values(searchesToRun));
+
+			Object.keys(searchesToRun).forEach((searchKey, index) => {
+				searchResults[searchKey] = results[index];
+			});
 
 			// try to store to cache
 			if (useGCCache && searchResults) {
@@ -179,37 +186,39 @@ class GlobalSearchHandler extends SearchHandler {
 	}
 
 	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
-		const defaultSearchOptions = {
-			keywords: dcUtils.cleanSearchText(searchText),
-			filters: [
-				{
-					field: 'assetType',
-					values: dcUtils.getSearchTypeId(searchType),
-				},
-				{
-					field: 'status',
-					values: dcUtils.getQueryableStatuses(),
-				},
-			],
-			highlights: {
-				preTag: '<highlight>',
-				postTag: '</highlight>',
-			},
-			limit,
-			offset,
-		};
-
+		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+		const qStatus = await this.dcUtils.getQueryableStatuses();
 		try {
+			const defaultSearchOptions = {
+				keywords: this.dcUtils.cleanSearchText(searchText),
+				filters: [
+					{
+						field: 'assetType',
+						values: searchTypeIds,
+					},
+					{
+						field: 'status',
+						values: qStatus,
+					},
+				],
+				highlights: {
+					preTag: '<highlight>',
+					postTag: '</highlight>',
+				},
+				limit,
+				offset,
+			};
+
 			if (!searchText) throw new Error('keywords is required in the request body');
 
-			const url = dcUtils.getCollibraUrl() + '/search';
+			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
-			const response = await axios.post(url, fullSearch, dcUtils.getAuthConfig());
+			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
 
-			return response.data || [];
+			return response.data || { total: 0, results: [] };
 		} catch (err) {
 			this.logger.error(err, 'FE656U9', userId);
-			return [];
+			return { total: 0, results: [] };
 		}
 	}
 

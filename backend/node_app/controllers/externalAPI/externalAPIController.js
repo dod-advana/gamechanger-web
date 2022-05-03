@@ -121,7 +121,7 @@ class ExternalAPIController {
 	async getAPIKeyRequests(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const requests = await this.apiKeyRequests.findAll({
 				raw: false,
@@ -174,7 +174,7 @@ class ExternalAPIController {
 	async approveRejectAPIKeyRequest(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id, approve = false } = req.body;
 
 			if (id >= 0) {
@@ -240,7 +240,7 @@ class ExternalAPIController {
 	async revokeAPIKeyRequest(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { id } = req.body;
 
 			if (id >= 0) {
@@ -264,7 +264,7 @@ class ExternalAPIController {
 	async createAPIKeyRequest(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { name, email, reason, clones } = req.body;
 
 			if (name && email && reason) {
@@ -305,7 +305,7 @@ class ExternalAPIController {
 	async updateAPIKeyDescription(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { description, key } = req.body;
 			const update = await this.apiKeys.update({ description }, { where: { apiKey: key } });
 			if (update) {
@@ -370,7 +370,7 @@ class ExternalAPIController {
 			const attachment = [
 				{
 					filename: 'GC-api-access.png',
-					path: __dirname + '/../../images/email/GC-api-access.png',
+					path: __dirname + '/../../images/email/GAMECHANGER API Newsletter.png',
 					cid: 'gc-api-access',
 				},
 				{
