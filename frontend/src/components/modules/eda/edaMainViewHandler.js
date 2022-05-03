@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import EDASummaryView from './edaSummaryView';
 import JumpButton from '../globalSearch/JumpButton';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
-
-import EDADocumentExplorer from './edaDocumentExplorer';
+import { styles } from '../../mainView/commonStyles';
+import { renderHideTabs, getAboutUs, getUserProfilePage } from '../../mainView/commonFunctions';
 import Pagination from 'react-js-pagination';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import {
@@ -17,19 +17,21 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
 import { Card } from '../../cards/GCCard';
 import ViewHeader from '../../mainView/ViewHeader';
-import {
-	getAboutUs,
-	getMainView,
-	getUserProfilePage,
-	getViewNames as defaultGetViewNames,
-	handlePageLoad,
-	renderHideTabs,
-	styles,
-} from '../default/defaultMainViewHandler';
+import { getMainView, getViewNames as defaultGetViewNames, handlePageLoad } from '../default/defaultMainViewHandler';
 import { Typography } from '@material-ui/core';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import { gcOrange } from '../../common/gc-colors';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
 const _ = require('lodash');
+
+const EDADocumentExplorer = LoadableVisibility({
+	loader: () => import('./edaDocumentExplorer'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 
 const getViewNames = (props) => {
 	const viewNames = defaultGetViewNames(props);
@@ -249,7 +251,7 @@ const displayUserRelatedItems = () => {
 };
 
 const EdaMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 
@@ -258,11 +260,11 @@ const EdaMainViewHandler = (props) => {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
+			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken, gameChangerAPI });
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
@@ -277,7 +279,11 @@ const EdaMainViewHandler = (props) => {
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserProfilePage(displayUserRelatedItems), state, dispatch);
+			return getNonMainPageOuterContainer(
+				getUserProfilePage(displayUserRelatedItems, gameChangerUserAPI),
+				state,
+				dispatch
+			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs({ state }), state, dispatch);
 		case PAGE_DISPLAYED.main:

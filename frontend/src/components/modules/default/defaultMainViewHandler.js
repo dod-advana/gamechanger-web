@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
-
+import { styles } from '../../mainView/commonStyles';
+import { renderHideTabs, getAboutUs, getUserProfilePage } from '../../mainView/commonFunctions';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
@@ -9,7 +10,6 @@ import {
 	getUserData,
 	setState,
 } from '../../../utils/sharedFunctions';
-import DefaultDocumentExplorer from './defaultDocumentExplorer';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { Card } from '../../cards/GCCard';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
@@ -28,197 +28,21 @@ import {
 } from '../../../utils/gamechangerUtils';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import { gcOrange } from '../../common/gc-colors';
-import { DidYouMean } from '../../searchBar/SearchBarStyledComponents';
 import ResultView from '../../mainView/ResultView';
 import QueryDialog from '../../admin/util/QueryDialog';
 import DocDialog from '../../admin/util/DocDialog';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import MagellanTrendingLinkList from '../../common/MagellanTrendingLinkList';
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
-import UserProfile from '../../user/UserProfile';
-import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 
-const gameChangerAPI = new GameChangerAPI();
-const gameChangerUserAPI = new GamechangerUserManagementAPI();
+const DefaultDocumentExplorer = LoadableVisibility({
+	loader: () => import('./defaultDocumentExplorer'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 
-export const fullWidthCentered = {
-	width: '100%',
-	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
-	alignItems: 'center',
-};
-
-export const styles = {
-	listViewBtn: {
-		minWidth: 0,
-		margin: '20px 0px 0px',
-		marginLeft: 10,
-		padding: '0px 7px 0',
-		fontSize: 20,
-		height: 34,
-	},
-	cachedResultIcon: {
-		display: 'flex',
-		justifyContent: 'center',
-		padding: '0 0 1% 0',
-	},
-	searchResults: fullWidthCentered,
-	paginationWrapper: fullWidthCentered,
-	tabContainer: {
-		alignItems: 'center',
-		marginBottom: '14px',
-		height: '600px',
-		margin: '0px 4% 0 65px',
-	},
-	tabButtonContainer: {
-		width: '100%',
-		padding: '0em 1em',
-		alignItems: 'center',
-	},
-	spacer: {
-		flex: '0.375',
-	},
-	resultsCount: {
-		fontFamily: 'Noto Sans',
-		fontSize: 22,
-		fontWeight: 'bold',
-		color: '#131E43',
-		paddingTop: '10px',
-	},
-	subtext: {
-		color: '#8091A5',
-		fontSize: 12,
-	},
-	containerText: {
-		fontSize: 16,
-		fontWeight: 'bold',
-	},
-	checkboxPill: {
-		textAlign: 'center',
-		borderRadius: '10px',
-		paddingLeft: '10px',
-		paddingRight: '10px',
-		lineHeight: 1.2,
-		fontSize: '12px',
-		marginLeft: '10px',
-		border: '2px solid #bdccde',
-		backgroundColor: 'white',
-		boxSizing: 'border-box',
-		color: 'black',
-		minHeight: '35px',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		cursor: 'pointer',
-	},
-	leftContainerSummary: {
-		width: '15%',
-		marginTop: 10,
-	},
-	rightContainerSummary: {
-		marginLeft: '17.5%',
-		width: '79.7%',
-	},
-	showingResultsRow: {
-		width: '100%',
-		display: 'inline-flex',
-		justifyContent: 'space-between',
-		marginBottom: 10,
-		marginTop: 15,
-	},
-	container: {
-		minWidth: 148,
-	},
-	containerDiv: {
-		marginTop: 10,
-		marginLeft: 0,
-		marginRight: 0,
-	},
-	listViewContainer: {
-		marginTop: 10,
-		marginLeft: 0,
-		marginRight: 0,
-		paddingRight: 40,
-	},
-	text: {
-		margin: 'auto 0px',
-	},
-	buttons: {
-		height: 50,
-		width: 64,
-		margin: '0px 5px',
-		minWidth: 64,
-	},
-	unselectedButton: {
-		border: 'solid 2px #DFE6EE',
-		color: '#8091A5',
-	},
-	icon: {
-		fontSize: 30,
-	},
-	filterBox: {
-		backgroundColor: '#ffffff',
-		borderRadius: '5px',
-		padding: '2px',
-		border: '2px solid #bdccde',
-		pointerEvents: 'none',
-		margin: '2px 5px 0px',
-	},
-	titleText: {
-		fontSize: 22,
-		fontWeight: 500,
-		color: '#131E43',
-		margin: '20px 0',
-		fontFamily: 'Montserrat',
-	},
-	tableColumn: {
-		textAlign: 'center',
-		margin: '4px 0',
-	},
-	tabsList: {
-		borderBottom: `2px solid ${'#1C2D65'}`,
-		padding: 0,
-		display: 'flex',
-		alignItems: 'center',
-		flex: 9,
-		marginRight: 15,
-	},
-	tabStyle: {
-		border: `1px solid ${'#DCDCDC'}`,
-		borderBottom: 'none !important',
-		borderRadius: `6px 6px 0px 0px`,
-		position: ' relative',
-		listStyle: 'none',
-		padding: '2px 12px',
-		cursor: 'pointer',
-		textAlign: 'center',
-		backgroundColor: '#ffffff',
-		marginRight: '2px',
-		marginLeft: '2px',
-		height: 45,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	tabSelectedStyle: {
-		border: `1px solid ${'#0000001F'}`,
-		backgroundColor: '#1C2D65',
-		color: 'white',
-	},
-	orangeText: {
-		fontWeight: 'bold',
-		color: '#E9691D',
-	},
-};
-
-export const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
-	setState(dispatch, { searchText: didYouMean, runSearch: true });
-};
-
-const getDocumentProperties = async (dispatch) => {
+const getDocumentProperties = async (dispatch, gameChangerAPI) => {
 	let documentProperties = [];
 
 	try {
@@ -243,7 +67,7 @@ const getDocumentProperties = async (dispatch) => {
 	return documentProperties;
 };
 
-const checkForTinyURL = async (location) => {
+const checkForTinyURL = async (location, gameChangerAPI) => {
 	const tiny = getQueryVariable('tiny');
 
 	if (!location || !tiny) {
@@ -257,17 +81,17 @@ const checkForTinyURL = async (location) => {
 };
 
 export const handlePageLoad = async (props) => {
-	const { state, dispatch, history, searchHandler } = props;
+	const { state, dispatch, history, searchHandler, gameChangerAPI } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 	if (state.runSearch || state.runDocumentComparisonSearch) return;
 
-	const documentProperties = await getDocumentProperties(dispatch);
+	const documentProperties = await getDocumentProperties(dispatch, gameChangerAPI);
 	let newState = { ...state, documentProperties };
 
 	// redirect the page if using tinyurl
-	const url = await checkForTinyURL(window.location);
+	const url = await checkForTinyURL(window.location, gameChangerAPI);
 	if (url) {
 		history.replace(`#/${url}`);
 		//setPageLoaded(false);
@@ -327,98 +151,6 @@ export const handlePageLoad = async (props) => {
 
 		searchHandler.setSearchURL(newState);
 	}
-};
-
-export const renderHideTabs = (props) => {
-	const { state, dispatch, searchHandler } = props;
-	const { componentStepNumbers, cloneData, resetSettingsSwitch, didYouMean, loading, prevSearchText } = state;
-	const showDidYouMean = didYouMean && !loading;
-	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
-	const trendingStorage = localStorage.getItem(`trending${cloneData.clone_name}Searches`) || '[]';
-	let trendingLinks = [];
-	if (trendingStorage) {
-		JSON.parse(trendingStorage).forEach((search) => {
-			if (search.search) {
-				trendingLinks.push(search.search.replaceAll('&#039;', '"'));
-			}
-		});
-	}
-
-	if (prevSearchText) {
-		if (!resetSettingsSwitch) {
-			dispatch({ type: 'RESET_SEARCH_SETTINGS' });
-			setState(dispatch, {
-				resetSettingsSwitch: true,
-				showSnackbar: true,
-				snackBarMsg: 'Search settings reset',
-			});
-			if (searchHandler) searchHandler.setSearchURL(state);
-		}
-	}
-
-	const handleLinkListItemClick = (searchText) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
-		setState(dispatch, {
-			searchText,
-			autoCompleteItems: [],
-			metricsCounted: false,
-			runSearch: true,
-		});
-	};
-
-	return (
-		<div style={{ marginTop: '40px' }}>
-			{prevSearchText && (
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div style={styles.resultsCount}>
-						<p style={{ fontWeight: 'normal', display: 'inline' }}>
-							Looks like we don't have any matches for{' '}
-						</p>
-						"{prevSearchText}"
-					</div>
-				</div>
-			)}
-			{showDidYouMean && (
-				<div
-					style={{
-						margin: '10px auto',
-						fontSize: '25px',
-						width: '67%',
-						paddingLeft: 'auto',
-					}}
-				>
-					Did you mean{' '}
-					<DidYouMean onClick={() => handleDidYouMeanClicked(didYouMean, state, dispatch)}>
-						{didYouMean}
-					</DidYouMean>
-					?
-				</div>
-			)}
-			{cloneData.clone_name === 'gamechanger' && (
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div className={`tutorial-step-${componentStepNumbers['Trending Searches']}`}>
-						<MagellanTrendingLinkList
-							onLinkClick={handleLinkListItemClick}
-							links={trendingLinks}
-							title="Trending Searches This Week"
-							padding={10}
-						/>
-					</div>
-				</div>
-			)}
-			{cloneData.clone_name !== 'gamechanger' && (
-				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}>
-						<MagellanTrendingLinkList
-							onLinkClick={handleLinkListItemClick}
-							links={JSON.parse(latestLinks)}
-							title="Recent Searches"
-						/>
-					</div>
-				</div>
-			)}
-		</div>
-	);
 };
 
 export const getMainView = (props) => {
@@ -700,44 +432,46 @@ const getCardViewPanel = (props) => {
 	);
 };
 
-export const getAboutUs = (props) => {
-	return <></>;
-};
-
-export const getUserProfilePage = (displayUserRelatedItems, primaryColor, secondaryColor) => {
-	return (
-		<UserProfile
-			getUserData={gameChangerUserAPI.getUserProfileData}
-			updateUserData={gameChangerUserAPI.updateUserProfileData}
-			getAppRelatedUserData={() => {}}
-			updateAppRelatedUserData={() => {}}
-			displayCustomAppContent={displayUserRelatedItems}
-			style={{ width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)' }}
-			primaryColor={primaryColor || '#1C2D65'}
-			secondaryColor={secondaryColor || '#8091A5'}
-		/>
-	);
-};
-
 const displayUserRelatedItems = () => {
 	return <></>;
 };
 
 const DefaultMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
+	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		if (state.cloneData.clone_name.toLowerCase() === 'cdo') {
+			if (state.docsPagination && searchHandler) {
+				setState(dispatch, {
+					docsPagination: false,
+				});
+				searchHandler.handleSearch(state, dispatch, state.replaceResults);
+			}
+		}
+	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-			const searchHandler = searchFactory.createHandler();
+			const tmpSearchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
+			setSearchHandler(tmpSearchHandler);
+
+			handlePageLoad({
+				state,
+				dispatch,
+				history: state.history,
+				searchHandler: tmpSearchHandler,
+				cancelToken,
+				gameChangerAPI,
+			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
@@ -752,7 +486,11 @@ const DefaultMainViewHandler = (props) => {
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserProfilePage(displayUserRelatedItems), state, dispatch);
+			return getNonMainPageOuterContainer(
+				getUserProfilePage(displayUserRelatedItems, gameChangerUserAPI),
+				state,
+				dispatch
+			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
 		case PAGE_DISPLAYED.main:

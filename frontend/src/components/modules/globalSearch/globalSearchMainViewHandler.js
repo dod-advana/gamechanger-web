@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
-
-// import GameChangerSearchMatrix from "../../searchMetrics/GCSearchMatrix";
+import { styles } from '../../mainView/commonStyles';
+import { renderHideTabs, getAboutUs } from '../../mainView/commonFunctions';
 import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
 import SearchSection from '../globalSearch/SearchSection';
@@ -21,15 +21,11 @@ import ResultView from '../../mainView/ResultView';
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
 import GCButton from '../../common/GCButton';
-import { getAboutUs, renderHideTabs, styles } from '../default/defaultMainViewHandler';
 import ApplicationsIcon from '../../../images/icon/slideout-menu/applications icon.png';
 import DashboardsIcon from '../../../images/icon/slideout-menu/dashboard icon.png';
 import DatabasesIcon from '../../../images/icon/slideout-menu/database icon.png';
 import DataSourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
-
-const gameChangerAPI = new GameChangerAPI();
 
 const getViewHeader = (state, dispatch) => {
 	return (
@@ -83,7 +79,7 @@ const getSearchResults = (searchResultData, state, dispatch) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { state, dispatch, searchHandler } = props;
+	const { state, dispatch, searchHandler, gameChangerAPI } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
@@ -395,20 +391,45 @@ const getCardViewPanel = (props) => {
 };
 
 const GlobalSearchMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
+	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		if (state.applicationsPagination && searchHandler) {
+			searchHandler.handleApplicationsPagination(state, dispatch);
+		}
+		if (state.dashboardsPagination && searchHandler) {
+			searchHandler.handleDashboardsPagination(state, dispatch);
+		}
+		if (state.dataSourcesPagination && searchHandler) {
+			searchHandler.handleDataSourcesPagination(state, dispatch);
+		}
+		if (state.databasesPagination && searchHandler) {
+			searchHandler.handleDatabasesPagination(state, dispatch);
+		}
+	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-			const searchHandler = searchFactory.createHandler();
+			const tmpSearchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
+			setSearchHandler(tmpSearchHandler);
+
+			handlePageLoad({
+				state,
+				dispatch,
+				history: state.history,
+				searchHandler: tmpSearchHandler,
+				cancelToken,
+				gameChangerAPI,
+			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };

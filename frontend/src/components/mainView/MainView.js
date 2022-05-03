@@ -4,6 +4,11 @@ import PropTypes from 'prop-types';
 import { setState, getUserData } from '../../utils/sharedFunctions';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
+
+const gameChangerAPI = new GameChangerAPI();
+const gcUserManagementAPI = new GamechangerUserManagementAPI();
 
 let cancelToken = axios.CancelToken.source();
 
@@ -87,43 +92,6 @@ const MainView = (props) => {
 		}
 	}, [state.isFavoriteSearch, state.userData, dispatch]);
 
-	// useEffect(() => {
-	// 	if (state.cloneData.clone_name === 'gamechanger') {
-	// 		if (state.docsPagination && searchHandler) {
-	// 			searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
-	// 		}
-	// 		if (state.entityPagination && searchHandler) {
-	// 			searchHandler.handleEntityPagination(state, dispatch);
-	// 		}
-	// 		if (state.topicPagination && searchHandler) {
-	// 			searchHandler.handleTopicPagination(state, dispatch);
-	// 		}
-	// 	} else if (state.cloneData.clone_name === 'globalSearch') {
-	// 		if (state.applicationsPagination && searchHandler) {
-	// 			searchHandler.handleApplicationsPagination(state, dispatch);
-	// 		}
-	// 		if (state.dashboardsPagination && searchHandler) {
-	// 			searchHandler.handleDashboardsPagination(state, dispatch);
-	// 		}
-	// 		if (state.dataSourcesPagination && searchHandler) {
-	// 			searchHandler.handleDataSourcesPagination(state, dispatch);
-	// 		}
-	// 		if (state.databasesPagination && searchHandler) {
-	// 			searchHandler.handleDatabasesPagination(state, dispatch);
-	// 		}
-	// 	} else if (
-	// 		state.cloneData.clone_name.toLowerCase() === 'cdo' ||
-	// 		state.cloneData.clone_name.toLowerCase() === 'jbook'
-	// 	) {
-	// 		if (state.docsPagination && searchHandler) {
-	// 			setState(dispatch, {
-	// 				docsPagination: false,
-	// 			});
-	// 			searchHandler.handleSearch(state, dispatch, state.replaceResults);
-	// 		}
-	// 	}
-	// }, [state, dispatch, searchHandler]);
-
 	useBottomScrollListener(
 		() => {
 			if (
@@ -181,6 +149,8 @@ const MainView = (props) => {
 				dispatch,
 				cancelToken,
 				setCurrentTime,
+				gameChangerAPI,
+				gcUserManagementAPI,
 			})}
 		</>
 	);
