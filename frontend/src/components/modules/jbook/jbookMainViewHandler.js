@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
+import { getUserProfilePage } from '../../mainView/commonFunctions';
+import { styles } from '../../mainView/commonStyles';
 import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
 import { Card } from '../../cards/GCCard';
@@ -16,13 +18,11 @@ import {
 } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
-import { getUserProfilePage, styles } from '../default/defaultMainViewHandler';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
 import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCToggle from '../../common/GCToggleSwitch';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
@@ -30,8 +30,6 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
 
 const _ = require('lodash');
-
-const gameChangerAPI = new GameChangerAPI();
 
 export const GC_COLORS = {
 	primary: '#1C2D65',
@@ -60,7 +58,7 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { dispatch, state } = props;
+	const { dispatch, state, gameChangerAPI } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
@@ -390,20 +388,39 @@ const displayUserRelatedItems = () => {
 };
 
 const JBookMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
+	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		if (state.docsPagination && searchHandler) {
+			setState(dispatch, {
+				docsPagination: false,
+			});
+			searchHandler.handleSearch(state, dispatch, state.replaceResults);
+		}
+	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-			const searchHandler = searchFactory.createHandler();
+			const tmpSearchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
+			setSearchHandler(tmpSearchHandler);
+
+			handlePageLoad({
+				state,
+				dispatch,
+				history: state.history,
+				searchHandler: tmpSearchHandler,
+				cancelToken,
+				gameChangerAPI,
+			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
@@ -418,7 +435,11 @@ const JBookMainViewHandler = (props) => {
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserProfilePage(displayUserRelatedItems), state, dispatch);
+			return getNonMainPageOuterContainer(
+				getUserProfilePage(displayUserRelatedItems, gameChangerUserAPI),
+				state,
+				dispatch
+			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
 		case PAGE_DISPLAYED.main:

@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import { styles } from '../../mainView/commonStyles';
+import { handleDidYouMeanClicked, getUserProfilePage } from '../../mainView/commonFunctions';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
-import GameChangerSideBar from '../../searchMetrics/GCSideBar';
-import DefaultGraphView from '../../graph/defaultGraphView';
 import {
 	getMainView,
-	handleDidYouMeanClicked,
-	styles,
 	handlePageLoad as defaultHandlePageLoad,
 	getViewNames as defaultGetViewNames,
-	getUserProfilePage,
 } from '../default/defaultMainViewHandler';
-import PolicyDocumentExplorer from './policyDocumentExplorer';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
 import { Typography } from '@material-ui/core';
@@ -52,19 +48,27 @@ import {
 	SourceContainer,
 } from '../../mainView/HomePageStyledComponents';
 import GameChangerThumbnailRow from '../../mainView/ThumbnailRow';
-import GameChangerAPI from '../../api/gameChanger-service-api';
 import '../../mainView/main-view.css';
 import DefaultSeal from '../../mainView/img/GC Default Seal.png';
 import DefaultPub from '../../mainView/img/default_cov.png';
-import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
-import GCUserDashboard from '../../user/GCUserDashboard';
+
 const _ = require('lodash');
 
-const gameChangerAPI = new GameChangerAPI();
-const gcUserManagementAPI = new GamechangerUserManagementAPI();
+const PolicyDocumentExplorer = LoadableVisibility({
+	loader: () => import('./policyDocumentExplorer'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 
+const GCUserDashboard = LoadableVisibility({
+	loader: () => import('../../user/GCUserDashboard'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 const AnalystTools = LoadableVisibility({
 	loader: () => import('../../analystTools'),
 	loading: () => {
@@ -81,6 +85,20 @@ const GCDataStatusTracker = LoadableVisibility({
 
 const GCAboutUs = LoadableVisibility({
 	loader: () => import('../../aboutUs/GCAboutUs'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const DefaultGraphView = LoadableVisibility({
+	loader: () => import('../../graph/defaultGraphView'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const GameChangerSideBar = LoadableVisibility({
+	loader: () => import('../../searchMetrics/GCSideBar'),
 	loading: () => {
 		return <LoadingIndicator customColor={gcOrange} />;
 	},
@@ -158,7 +176,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 	);
 };
 
-const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken) => {
+const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI) => {
 	let filteredPubs = _.filter(pop_pubs, (item) => {
 		return !_.includes(pop_pubs_inactive, item.id);
 	});
@@ -194,7 +212,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 	}
 };
 
-const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) => {
+const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let cleanedDocs = [];
 	let filteredPubs = [];
 
@@ -240,7 +258,7 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken) 
 	}
 };
 
-const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
+const handleRecDocs = async (rec_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let filteredPubs = [];
 	try {
 		filteredPubs = rec_docs.map((name) => ({
@@ -279,7 +297,7 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken) => {
 	}
 };
 
-const handleSources = async (state, dispatch, cancelToken) => {
+const handleSources = async (state, dispatch, cancelToken, gameChangerAPI) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
 		...item,
@@ -337,7 +355,7 @@ const formatString = (text) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { state, dispatch } = props;
+	const { state, dispatch, gameChangerUserAPI, gameChangerAPI, cancelToken } = props;
 	await defaultHandlePageLoad(props);
 	setState(dispatch, { loadingrecDocs: true });
 	setState(dispatch, { loadingLastOpened: true });
@@ -347,7 +365,7 @@ const handlePageLoad = async (props) => {
 	let pop_pubs_inactive = [];
 	let rec_docs = [];
 
-	const user = await gcUserManagementAPI.getUserData();
+	const user = await gameChangerUserAPI.getUserData();
 	const { favorite_documents = [], export_history = [], pdf_opened = [] } = user.data;
 
 	try {
@@ -378,10 +396,10 @@ const handlePageLoad = async (props) => {
 			: { adminTopics: topics }
 	);
 	// handlePubs(pubs, state, dispatch);
-	handleSources(state, dispatch, props.cancelToken);
-	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, props.cancelToken);
-	handleRecDocs(rec_docs, state, dispatch, props.cancelToken);
-	handleLastOpened(pdf_opened, state, dispatch, props.cancelToken);
+	handleSources(state, dispatch, cancelToken, gameChangerAPI);
+	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI);
+	handleRecDocs(rec_docs, state, dispatch, cancelToken, gameChangerAPI);
+	handleLastOpened(pdf_opened, state, dispatch, cancelToken, gameChangerAPI);
 };
 
 const renderHideTabs = (props) => {
@@ -1134,20 +1152,43 @@ const getGCUserDashboard = (props) => {
 };
 
 const PolicyMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
+	const [searchHandler, setSearchHandler] = useState();
+
+	useEffect(() => {
+		if (state.docsPagination && searchHandler) {
+			searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+		}
+		if (state.entityPagination && searchHandler) {
+			searchHandler.handleEntityPagination(state, dispatch);
+		}
+		if (state.topicPagination && searchHandler) {
+			searchHandler.handleTopicPagination(state, dispatch);
+		}
+	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-			const searchHandler = searchFactory.createHandler();
+			const tmpSearchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken });
+			setSearchHandler(tmpSearchHandler);
+
+			handlePageLoad({
+				state,
+				dispatch,
+				history: state.history,
+				searchHandler: tmpSearchHandler,
+				cancelToken,
+				gameChangerAPI,
+				gameChangerUserAPI,
+			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
@@ -1166,7 +1207,11 @@ const PolicyMainViewHandler = (props) => {
 		case PAGE_DISPLAYED.dataTracker:
 			return getNonMainPageOuterContainer(getDataTracker(state), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserProfilePage(getGCUserDashboard), state, dispatch);
+			return getNonMainPageOuterContainer(
+				getUserProfilePage(getGCUserDashboard, gameChangerUserAPI),
+				state,
+				dispatch
+			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs({ state }), state, dispatch);
 		case PAGE_DISPLAYED.main:
