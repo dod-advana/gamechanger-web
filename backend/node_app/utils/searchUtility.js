@@ -1903,7 +1903,7 @@ class SearchUtility {
 	}
 	getOrgQuery() {
 		return {
-			size: 0,
+			_source: 'false',
 			aggs: {
 				display_org: {
 					composite: {
@@ -1917,6 +1917,19 @@ class SearchUtility {
 								},
 							},
 						],
+					},
+					aggs: {
+						revoke_filter: {
+							filters: {
+								filters: {
+									query: {
+										term: {
+											is_revoked_b: 'false',
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},

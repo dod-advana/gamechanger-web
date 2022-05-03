@@ -136,7 +136,7 @@ const SearchBanner = (props) => {
 								}
 							/>
 							<Typography variant="h2" style={styles.adminWording} display="inline">
-								Data Tracker
+								Data Status Tracker
 							</Typography>
 						</div>
 					)}

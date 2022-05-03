@@ -120,7 +120,6 @@ export function trackPageView(documentTitle, customDimensions) {
  * @param customDimensions: false or an array of customDimensions.
  */
 export function trackEvent(category, action, name, value, customDimensions) {
-	console.log(localStorage.getItem('userMatomo'));
 	try {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
