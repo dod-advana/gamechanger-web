@@ -176,6 +176,8 @@ const GameChangerDetailsPage = (props) => {
 	const graphRef = useRef();
 	const graphContainerRef = useRef();
 
+	const blacklistedEntityProperties = ['Lp_community', 'Louvain_community', 'Betweenness', 'PageRank'];
+
 	function useQuery(location, setQuery, query) {
 		if (!query) {
 			setQuery(new URLSearchParams(location.search));
@@ -645,7 +647,9 @@ const GameChangerDetailsPage = (props) => {
 								<img
 									className={'img'}
 									alt={`${entity.name} Img`}
-									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									src={
+										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal
+									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
@@ -673,7 +677,9 @@ const GameChangerDetailsPage = (props) => {
 											backgroundColor: '#313541',
 											color: 'white',
 										}}
-										rows={entity.details}
+										rows={entity.details.filter((entity) => {
+											return !blacklistedEntityProperties.includes(entity.name);
+										})}
 										height={'auto'}
 										dontScroll={true}
 										firstColWidth={styles.entityColWidth}
