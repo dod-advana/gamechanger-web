@@ -6,7 +6,7 @@ import { MatomoProvider, createInstance, useMatomo } from '@datapunt/matomo-trac
 import { getProvider } from './components/factories/contextFactory';
 import GameChangerAPI from './components/api/gameChanger-service-api';
 import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createBrowserHistory } from 'history';
 import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from 'spark-md5';
@@ -178,8 +178,6 @@ const history = createBrowserHistory();
 const tutorialOverlayAPI = new TutorialOverlayAPI();
 const gameChangerAPI = new GameChangerAPI();
 
-const theme = createMuiTheme({});
-
 const styles = {
 	splashContainerClosed: {
 		padding: 0,
@@ -276,7 +274,7 @@ const App = () => {
 					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
 						cloneRoutes.push(
 							<PrivateTrackedRoute
-								key={idx}
+								key={`${clone.url}-admin-lite`}
 								path={`/${clone.url}/admin`}
 								render={(props) => (
 									<GamechangerProvider>
@@ -292,7 +290,7 @@ const App = () => {
 						if (clone.permissions_required) {
 							cloneRoutes.push(
 								<PrivateTrackedRoute
-									key={idx}
+									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
 									render={(props) => (
 										<GamechangerProvider>
@@ -325,7 +323,7 @@ const App = () => {
 							}
 							cloneRoutes.push(
 								<PrivateTrackedRoute
-									key={idx}
+									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
 									render={(props) => (
 										<GamechangerProvider>
@@ -364,6 +362,7 @@ const App = () => {
 
 		return (
 			<PrivateTrackedRoute
+				key={`jbook-profile`}
 				path={`/jbook/profile`}
 				render={(props) => (
 					<JBookProvider>
@@ -444,79 +443,79 @@ const App = () => {
 		<Router>
 			<MatomoProvider value={instance}>
 				<MuiThemeProvider theme={ThemeDefault}>
-					<MuiThemeProvider muiTheme={theme}>
-						<ClassificationBanner />
-						<ConsentAgreement />
+					<ClassificationBanner />
+					<ConsentAgreement />
 
-						<Route
-							exact
-							path="/"
-							children={({ match, location, history }) => (
-								<div style={getStyleType(match, location)}>
-									<SlideOutMenuContextHandler>
-										<>
-											<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
-												{!isShowNothingButComponent(location) && (
-													<SlideOutMenu match={match} location={location} history={history} />
-												)}
-												<Switch>
-													{tokenLoaded &&
-														gameChangerCloneRoutes.map((route) => {
-															return route;
-														})}
-													<Route
-														exact
-														path="/"
-														render={() => (
-															<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
-														)}
-													/>
-													<Route
-														exact
-														path="/gamechanger-details"
-														component={GameChangerDetailsPage}
-														location={location}
-													/>
-													<PrivateTrackedRoute
-														path="/gamechanger-admin"
-														pageName={'GamechangerAdminPage'}
-														component={GamechangerAdminPage}
-														allowFunction={() => {
-															return Permissions.permissionValidator(
-																'Gamechanger Super Admin',
-																true
-															);
-														}}
-													/>
-													<PrivateTrackedRoute
-														path="/gamechanger-es"
-														pageName={'GamechangerEsPage'}
-														component={GamechangerEsPage}
-														allowFunction={() => {
-															return true;
-														}}
-													/>
-													<TrackedPDFView
-														path="/pdfviewer/gamechanger"
-														component={GamechangerPdfViewer}
-														location={location}
-													/>
-													<Route
-														exact
-														path="/unauthorized"
-														component={UnauthorizedPage}
-														location={location}
-													/>
-													<Route path="*" component={NotFoundPage} />
-												</Switch>
-											</ErrorBoundary>
-										</>
-									</SlideOutMenuContextHandler>
-									<GCFooter setUserMatomo={setUserMatomo} />
-								</div>
-							)}
-						/>
-					</MuiThemeProvider>
+					<Route
+						exact
+						path="/"
+						children={({ match, location, history }) => (
+							<div style={getStyleType(match, location)}>
+								<SlideOutMenuContextHandler>
+									<>
+										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
+											{!isShowNothingButComponent(location) && (
+												<SlideOutMenu match={match} location={location} history={history} />
+											)}
+											<Switch>
+												{tokenLoaded &&
+													gameChangerCloneRoutes.map((route) => {
+														return route;
+													})}
+												<Route
+													exact
+													path="/"
+													render={() => (
+														<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+													)}
+												/>
+												<Route
+													exact
+													path="/gamechanger-details"
+													component={GameChangerDetailsPage}
+													location={location}
+												/>
+												<PrivateTrackedRoute
+													key={`gamechanger-main-admin`}
+													path="/gamechanger-admin"
+													pageName={'GamechangerAdminPage'}
+													component={GamechangerAdminPage}
+													allowFunction={() => {
+														return Permissions.permissionValidator(
+															'Gamechanger Super Admin',
+															true
+														);
+													}}
+												/>
+												<PrivateTrackedRoute
+													key={`gamechanger-es`}
+													path="/gamechanger-es"
+													pageName={'GamechangerEsPage'}
+													component={GamechangerEsPage}
+													allowFunction={() => {
+														return true;
+													}}
+												/>
+												<TrackedPDFView
+													path="/pdfviewer/gamechanger"
+													component={GamechangerPdfViewer}
+													location={location}
+												/>
+												<Route
+													exact
+													path="/unauthorized"
+													component={UnauthorizedPage}
+													location={location}
+												/>
+												<Route path="*" component={NotFoundPage} />
+											</Switch>
+										</ErrorBoundary>
+									</>
+								</SlideOutMenuContextHandler>
+								<GCFooter setUserMatomo={setUserMatomo} />
+							</div>
+						)}
+					/>
 				</MuiThemeProvider>
 			</MatomoProvider>
 		</Router>
