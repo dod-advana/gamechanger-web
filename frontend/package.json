@@ -59,6 +59,7 @@
 		"node-sass": "6.0.1",
 		"npm-force-resolutions": "0.0.10",
 		"piwik-react-router": "0.12.1",
+		"pluralize": "^8.0.0",
 		"prop-types": "15.8.1",
 		"react": "17.0.2",
 		"react-bottom-scroll-listener": "5.0.0",

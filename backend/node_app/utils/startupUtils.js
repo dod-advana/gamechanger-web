@@ -13,7 +13,7 @@ const copyConfigToBuild = () => {
 			}
 
 			fs.writeFileSync(
-				path.join(__dirname, './build', 'config.js'),
+				path.join(__dirname, '../../build', 'config.js'),
 				`window.__env__ = ${JSON.stringify(result)}`
 			);
 		}

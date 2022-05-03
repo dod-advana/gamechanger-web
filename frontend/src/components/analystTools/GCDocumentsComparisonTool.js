@@ -150,9 +150,6 @@ const getPresearchData = async (state, dispatch) => {
 		const typeFilters = {};
 		for (const key in resp.data.types) {
 			let name = resp.data.types[key];
-			if (name.slice(-1) !== 's') {
-				name = name + 's';
-			}
 			typeFilters[name] = false;
 		}
 		const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
@@ -227,10 +224,10 @@ const GCDocumentsComparisonTool = (props) => {
 			const typeCount = {};
 
 			returnedDocs.forEach((doc) => {
-				if (typeCount[doc.display_doc_type_s + 's']) {
-					typeCount[doc.display_doc_type_s + 's']++;
+				if (typeCount[doc.display_doc_type_s]) {
+					typeCount[doc.display_doc_type_s]++;
 				} else {
-					typeCount[doc.display_doc_type_s + 's'] = 1;
+					typeCount[doc.display_doc_type_s] = 1;
 				}
 				if (sourceCount[doc.display_org_s]) {
 					sourceCount[doc.display_org_s]++;
