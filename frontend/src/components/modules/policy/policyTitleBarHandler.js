@@ -11,7 +11,7 @@ const getTitleBar = (props) => {
 	return (
 		<img
 			src={GamechangerLogo}
-			style={styles.title}
+			style={{ ...styles.title, width: 300 }}
 			onClick={onTitleClick}
 			alt="gamechanger"
 			id={'titleButton'}

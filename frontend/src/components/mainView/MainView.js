@@ -8,7 +8,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
 
 const gameChangerAPI = new GameChangerAPI();
-const gcUserManagementAPI = new GamechangerUserManagementAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 let cancelToken = axios.CancelToken.source();
 
@@ -150,7 +150,7 @@ const MainView = (props) => {
 				cancelToken,
 				setCurrentTime,
 				gameChangerAPI,
-				gcUserManagementAPI,
+				gameChangerUserAPI,
 			})}
 		</>
 	);

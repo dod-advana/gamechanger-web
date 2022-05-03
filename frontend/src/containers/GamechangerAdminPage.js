@@ -1,26 +1,84 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
-
 import TitleBar from '../components/searchBar/TitleBar';
-import MLDashboard from '../components/admin/MLDashboard';
-import GeneralAdminButtons from '../components/admin/GeneralAdminButtons';
-import NotificationsManagement from '../components/notifications/NotificationsManagement';
-// import InternalUsersManagement from '../components/user/InternalUserManagement';
-import GamechangerAppStats from '../components/searchMetrics/GamechangerAppStats';
-import SearchPdfMapping from '../components/admin/SearchPdfMapping';
-import CloneList from '../components/admin/CloneList';
-import ResponsibilityUpdates from '../components/admin/ResponsibilityUpdates';
-import UserList from '../components/admin/UserList';
-import AdminList from '../components/admin/AdminList';
-import APIRequests from '../components/admin/APIRequests';
 import HomepageEditor from '../components/admin/HomepageEditor';
 import { ClosedAdminMenu, OpenedAdminMenu } from '../components/admin/AdminMenu';
-
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { trackEvent } from '../components/telemetry/Matomo';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import { GCCheckbox, styles, TableRow, toolTheme } from '../components/admin/util/GCAdminStyles';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import { gcOrange } from '../components/common/gc-colors';
 
-const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
+const NotificationsManagement = LoadableVisibility({
+	loader: () => import('../components/notifications/NotificationsManagement'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const ResponsibilityUpdates = LoadableVisibility({
+	loader: () => import('../components/admin/ResponsibilityUpdates'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const UserList = LoadableVisibility({
+	loader: () => import('../components/admin/UserList'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const AdminList = LoadableVisibility({
+	loader: () => import('../components/admin/AdminList'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const APIRequests = LoadableVisibility({
+	loader: () => import('../components/admin/APIRequests'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const SearchPdfMapping = LoadableVisibility({
+	loader: () => import('../components/admin/SearchPdfMapping'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const GamechangerAppStats = LoadableVisibility({
+	loader: () => import('../components/searchMetrics/GamechangerAppStats'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const MLDashboard = LoadableVisibility({
+	loader: () => import('../components/admin/MLDashboard'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const CloneList = LoadableVisibility({
+	loader: () => import('../components/admin/CloneList'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
+const GeneralAdminButtons = LoadableVisibility({
+	loader: () => import('../components/admin/GeneralAdminButtons'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 
 const PAGES = {
 	general: 'General',
@@ -118,7 +176,7 @@ const GamechangerAdminPage = (props) => {
 			knowledgeBaseHref: 'https://wiki.advana.data.mil',
 			toolTheme,
 			toolName: 'GAMECHANGER ADMIN',
-			hideAllApplicationsSection: isDecoupled,
+			hideAllApplicationsSection: false,
 			hideContentSection: false,
 			extraSupportLinks: [],
 			associatedApplications: [],

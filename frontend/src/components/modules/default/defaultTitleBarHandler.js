@@ -256,6 +256,7 @@ export const styles = {
 		alignItems: 'center',
 		flex: 1,
 		minHeight: 80,
+		maxHeight: 80,
 		width: '100%',
 	},
 	title: {

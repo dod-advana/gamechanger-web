@@ -854,145 +854,147 @@ const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
-const PolicySearchMatrixHandler = {
-	getSearchMatrixItems(props) {
-		const { state, dispatch, classes } = props;
+const getSearchMatrixItems = (props) => {
+	const { state, dispatch, classes } = props;
 
-		return (
-			<>
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.searchSettings.specificOrgsSelected}
-						header={'SOURCE'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						{renderSources(state, dispatch, classes)}
-					</GCAccordion>
-				</div>
+	return (
+		<>
+			<div style={{ width: '100%', marginBottom: 10 }}>
+				<GCAccordion
+					expanded={state.searchSettings.specificOrgsSelected}
+					header={'SOURCE'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderSources(state, dispatch, classes)}
+				</GCAccordion>
+			</div>
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.searchSettings.specificTypesSelected}
-						header={'TYPE'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						{renderTypes(state, dispatch, classes)}
-					</GCAccordion>
-				</div>
+			<div style={{ width: '100%', marginBottom: 10 }}>
+				<GCAccordion
+					expanded={state.searchSettings.specificTypesSelected}
+					header={'TYPE'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderTypes(state, dispatch, classes)}
+				</GCAccordion>
+			</div>
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={!state.searchSettings.publicationDateAllTime}
-						header={'PUBLICATION DATE'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						{renderDates(state, dispatch, classes)}
-					</GCAccordion>
-				</div>
+			<div style={{ width: '100%', marginBottom: 10 }}>
+				<GCAccordion
+					expanded={!state.searchSettings.publicationDateAllTime}
+					header={'PUBLICATION DATE'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderDates(state, dispatch, classes)}
+				</GCAccordion>
+			</div>
 
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={state.searchSettings.includeRevoked}
-						header={'STATUS'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						{renderStatus(state, dispatch, classes)}
-					</GCAccordion>
-				</div>
+			<div style={{ width: '100%', marginBottom: 10 }}>
+				<GCAccordion
+					expanded={state.searchSettings.includeRevoked}
+					header={'STATUS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderStatus(state, dispatch, classes)}
+				</GCAccordion>
+			</div>
 
-				<button
-					type="button"
+			<button
+				type="button"
+				style={{
+					border: 'none',
+					backgroundColor: '#B0BAC5',
+					padding: '0 15px',
+					display: 'flex',
+					height: 50,
+					alignItems: 'center',
+					borderRadius: 5,
+				}}
+				onClick={() => {
+					resetAdvancedSettings(dispatch);
+					setState(dispatch, { runSearch: true, runGraphSearch: true });
+				}}
+			>
+				<span
 					style={{
-						border: 'none',
-						backgroundColor: '#B0BAC5',
-						padding: '0 15px',
-						display: 'flex',
-						height: 50,
-						alignItems: 'center',
-						borderRadius: 5,
-					}}
-					onClick={() => {
-						resetAdvancedSettings(dispatch);
-						setState(dispatch, { runSearch: true, runGraphSearch: true });
+						fontFamily: 'Montserrat',
+						fontWeight: 600,
+						width: '100%',
+						marginTop: '5px',
+						marginBottom: '10px',
+						marginLeft: '-1px',
 					}}
 				>
-					<span
+					Clear Filters
+				</span>
+			</button>
+		</>
+	);
+};
+
+export const getAdvancedOptions = (props) => {
+	const { state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed } = props;
+
+	return (
+		<>
+			<div style={styles.filterDiv}>
+				<strong style={styles.boldText}>SOURCE</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderSources(state, dispatch, classes, true)}</div>
+			</div>
+
+			<div style={styles.filterDiv}>
+				<strong style={styles.boldText}>TYPE</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				{renderTypes(state, dispatch, classes, true)}
+			</div>
+
+			<div style={styles.filterDiv}>
+				<strong style={styles.boldText}>PUBLICATION DATE</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
+			</div>
+
+			<div style={styles.filterDiv}>
+				<strong style={styles.boldText}>STATUS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				{renderStatus(state, dispatch, classes)}
+			</div>
+			<div style={{ display: 'flex', margin: '10px' }}>
+				<div style={{ width: '120px', height: '40px', marginRight: '20px' }}>
+					<GCButton
 						style={{
-							fontFamily: 'Montserrat',
-							fontWeight: 600,
+							border: 'none',
 							width: '100%',
-							marginTop: '5px',
-							marginBottom: '10px',
-							marginLeft: '-1px',
+							height: '100%',
+							padding: '0px',
 						}}
+						isSecondaryBtn={true}
+						onClick={() => resetAdvancedSettings(dispatch)}
 					>
 						Clear Filters
-					</span>
-				</button>
-			</>
-		);
-	},
-
-	getAdvancedOptions(props) {
-		const { state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed } = props;
-
-		return (
-			<>
-				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>SOURCE</strong>
-					<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-					<div>{renderSources(state, dispatch, classes, true)}</div>
+					</GCButton>
 				</div>
+				<div style={{ width: '120px', height: '40px' }}>
+					<GCButton style={{ width: '100%', height: '100%' }} onClick={handleSubmit}>
+						Search
+					</GCButton>
+				</div>
+			</div>
+		</>
+	);
+};
 
-				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>TYPE</strong>
-					<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-					{renderTypes(state, dispatch, classes, true)}
-				</div>
-
-				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>PUBLICATION DATE</strong>
-					<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-					{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
-				</div>
-
-				<div style={styles.filterDiv}>
-					<strong style={styles.boldText}>STATUS</strong>
-					<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-					{renderStatus(state, dispatch, classes)}
-				</div>
-				<div style={{ display: 'flex', margin: '10px' }}>
-					<div style={{ width: '120px', height: '40px', marginRight: '20px' }}>
-						<GCButton
-							style={{
-								border: 'none',
-								width: '100%',
-								height: '100%',
-								padding: '0px',
-							}}
-							isSecondaryBtn={true}
-							onClick={() => resetAdvancedSettings(dispatch)}
-						>
-							Clear Filters
-						</GCButton>
-					</div>
-					<div style={{ width: '120px', height: '40px' }}>
-						<GCButton style={{ width: '100%', height: '100%' }} onClick={handleSubmit}>
-							Search
-						</GCButton>
-					</div>
-				</div>
-			</>
-		);
-	},
+const PolicySearchMatrixHandler = (props) => {
+	return <>{getSearchMatrixItems(props)}</>;
 };
 
 const styles = {
