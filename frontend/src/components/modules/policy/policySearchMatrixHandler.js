@@ -1,4 +1,6 @@
 import React from 'react';
+import Pluralize from 'pluralize';
+
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
 import _ from 'lodash';
@@ -316,7 +318,7 @@ const handleSelectArchivedCongress = (event, state, dispatch) => {
 	});
 };
 
-const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
+const handleTypeFilterChangeLocal = (event, type, state, dispatch, searchbar) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let typeName = event.target.name;
 	if (typeName.includes('(')) {
@@ -324,7 +326,7 @@ const handleTypeFilterChangeLocal = (event, state, dispatch, searchbar) => {
 	}
 	newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
-		[typeName]: event.target.checked,
+		[type]: event.target.checked,
 	};
 	if (searchbar) {
 		setState(dispatch, {
@@ -423,11 +425,13 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{state.searchSettings.specificTypesSelected &&
 							Object.keys(typeFilter).map((type, index) => {
+								let typeString = Pluralize(type);
+
 								if (index < 10 || state.seeMoreTypes) {
 									return (
 										<FormControlLabel
-											key={`${type}`}
-											value={`${type}`}
+											key={`${typeString}`}
+											value={`${typeString}`}
 											classes={{
 												root: classes.rootLabel,
 												label: classes.checkboxPill,
@@ -438,14 +442,14 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 														root: classes.rootButton,
 														checked: classes.checkedButton,
 													}}
-													name={`${type}`}
+													name={`${typeString}`}
 													checked={state.searchSettings.typeFilter[type]}
 													onClick={(event) =>
-														handleTypeFilterChangeLocal(event, state, dispatch, true)
+														handleTypeFilterChangeLocal(event, type, state, dispatch)
 													}
 												/>
 											}
-											label={`${type}`}
+											label={`${typeString}`}
 											labelPlacement="end"
 										/>
 									);
@@ -534,11 +538,12 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{state.searchSettings.specificTypesSelected &&
 							Object.keys(betterTypeData).map((type) => {
+								let typeString = Pluralize(type);
 								return (
 									<FormControlLabel
 										disabled={!betterTypeData[type] && !state.searchSettings.typeFilter[type]}
-										key={`${type} (${betterTypeData[type]})`}
-										value={`${type} (${betterTypeData[type]})`}
+										key={`${typeString} (${betterTypeData[type]})`}
+										value={`${typeString} (${betterTypeData[type]})`}
 										classes={{
 											root: classes.rootLabel,
 											label: classes.checkboxPill,
@@ -549,12 +554,14 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 													root: classes.rootButton,
 													checked: classes.checkedButton,
 												}}
-												name={`${type} (${betterTypeData[type]})`}
+												name={`${typeString} (${betterTypeData[type]})`}
 												checked={state.searchSettings.typeFilter[type]}
-												onClick={(event) => handleTypeFilterChangeLocal(event, state, dispatch)}
+												onClick={(event) =>
+													handleTypeFilterChangeLocal(event, type, state, dispatch)
+												}
 											/>
 										}
-										label={`${type} (${betterTypeData[type]})`}
+										label={`${typeString} (${betterTypeData[type]})`}
 										labelPlacement="end"
 									/>
 								);

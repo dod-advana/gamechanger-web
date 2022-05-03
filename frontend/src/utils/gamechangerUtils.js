@@ -119,7 +119,6 @@ export const orgFilters = {
 	'US Navy': false,
 	'US Navy Reserve': false,
 	'US Navy Medicine': false,
-	OPM: false,
 	'Classification Guides': false,
 	FMR: false,
 	NATO: false,
@@ -533,7 +532,7 @@ export const getTypeQuery = (allTypesSelected, types) => {
 		let query = [];
 		for (let type in types) {
 			if (types[type]) {
-				query.push(type.substring(0, type.length - 1));
+				query.push(type);
 			}
 		}
 		return query;
