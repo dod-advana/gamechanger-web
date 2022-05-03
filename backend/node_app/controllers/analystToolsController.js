@@ -123,7 +123,9 @@ class AnalystToolsController {
 			);
 
 			const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
-			returnData.docs = cleanedDocs.lengh > 0 ? cleanedDocs : returnData.docs.slice(0, 12);
+
+			// Temporarily return first 12 results for testing eda
+			returnData.docs = cleanedDocs.length > 0 ? cleanedDocs : returnData.docs.slice(0, 12);
 
 			res.status(200).send(returnData);
 		} catch (e) {
