@@ -1195,6 +1195,14 @@ class EDASearchUtility {
 			},
 		};
 
+		if (!filters?.canceledDocs) {
+			query.query.bool.filter.push({
+				term: {
+					is_revoked_b: 'false',
+				},
+			});
+		}
+
 		return query;
 	}
 }
