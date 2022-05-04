@@ -19,7 +19,19 @@ const getTitleBar = (props) => {
 };
 
 const DetailsTitleBar = (props) => {
-	const { style, children, componentStepNumbers = [], jupiter, detailsType, rawSearchResults, pageDisplayed } = props;
+	const {
+		style,
+		children,
+		componentStepNumbers = [],
+		jupiter,
+		detailsType,
+		rawSearchResults,
+		pageDisplayed,
+		openPillRight,
+		openPillTop,
+		closeButtonRight,
+		closeButtonTop,
+	} = props;
 
 	return (
 		<div
@@ -36,7 +48,16 @@ const DetailsTitleBar = (props) => {
 					detailsType,
 				})}
 				<div style={styles.searchBar}>{children}</div>
-				{!jupiter && <AdvanaMegaMenuPill margin="0 -30px 0 20px" defaultHeader="Applications" />}
+				{!jupiter && (
+					<AdvanaMegaMenuPill
+						margin="0 -30px 0 20px"
+						defaultHeader="Applications"
+						openPillRight={openPillRight}
+						openPillTop={openPillTop}
+						closeButtonRight={closeButtonRight}
+						closeButtonTop={closeButtonTop}
+					/>
+				)}
 			</div>
 
 			<></>

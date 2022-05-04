@@ -5,71 +5,79 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 const DefaultTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const AdminTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/admin/adminTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const DetailsTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/details/detailsTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const EDATitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/eda/edaTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const PolicyTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyTitleBarHandler'),
 	loading: () => {
-		return <div styles={{ minHeight: 80, width: '100%' }} />;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const GlobalSearchTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/globalSearch/globalSearchTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const JBookSearchTitleBarHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookTitleBarHandler'),
 	loading: () => {
-		return <></>;
+		return <div style={{ minHeight: 80, width: '100%' }} />;
 	},
 });
 
 const SearchBanner = (props) => {
 	const { titleBarModule } = props;
 
+	const newProps = {
+		...props,
+		openPillRight: '68px',
+		openPillTop: '60px',
+		closeButtonRight: '37px',
+		closeButtonTop: '160px',
+	};
+
 	const getTitleBarComponent = () => {
 		switch (titleBarModule) {
 			case 'policy/policyTitleBarHandler':
-				return <PolicyTitleBarHandler {...props} />;
+				return <PolicyTitleBarHandler {...newProps} />;
 			case 'eda/edaTitleBarHandler':
-				return <EDATitleBarHandler {...props} />;
+				return <EDATitleBarHandler {...newProps} />;
 			case 'details/detailsTitleBarHandler':
-				return <DetailsTitleBarHandler {...props} />;
+				return <DetailsTitleBarHandler {...newProps} />;
 			case 'globalSearch/globalSearchTitleBarHandler':
-				return <GlobalSearchTitleBarHandler {...props} />;
+				return <GlobalSearchTitleBarHandler {...newProps} />;
 			case 'admin/adminTitleBarHandler':
-				return <AdminTitleBarHandler {...props} />;
+				return <AdminTitleBarHandler {...newProps} />;
 			case 'jbook/jbookTitleBarHandler':
-				return <JBookSearchTitleBarHandler {...props} />;
+				return <JBookSearchTitleBarHandler {...newProps} />;
 			default:
-				return <DefaultTitleBarHandler {...props} />;
+				return <DefaultTitleBarHandler {...newProps} />;
 		}
 	};
 

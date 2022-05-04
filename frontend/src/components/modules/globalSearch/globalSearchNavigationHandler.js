@@ -7,7 +7,7 @@ import { ConstrainedIcon, PageLink, StyledBadgeSmall } from '@dod-advana/advana-
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import { setState } from '../../../utils/sharedFunctions';
 import AppTutorialsIcon from '../../../images/icon/AppTutorialsIcon.png';
-import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
+// import UserFeedbackIcon from '../../../images/icon/UserFeedbackIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import AdvanaDarkTheme from '@dod-advana/advana-platform-ui/dist/images/AdvanaDarkTheme.png';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
@@ -99,22 +99,22 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="User Feedback" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						setState(dispatch, { showFeedbackModal: true });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showUserFeedback'
-						);
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={UserFeedbackIcon} />
-				</HoverNavItem>
-			</GCTooltip>
+			{/*<GCTooltip title="User Feedback" placement="right" arrow>*/}
+			{/*	<HoverNavItem*/}
+			{/*		centered*/}
+			{/*		onClick={() => {*/}
+			{/*			setState(dispatch, { showFeedbackModal: true });*/}
+			{/*			trackEvent(*/}
+			{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
+			{/*				'SidebarInteraction',*/}
+			{/*				'showUserFeedback'*/}
+			{/*			);*/}
+			{/*		}}*/}
+			{/*		toolTheme={toolTheme}*/}
+			{/*	>*/}
+			{/*		<ConstrainedIcon src={UserFeedbackIcon} />*/}
+			{/*	</HoverNavItem>*/}
+			{/*</GCTooltip>*/}
 			{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
 			{/*	<HoverNavItem*/}
 			{/*		centered*/}
@@ -175,22 +175,22 @@ const generateOpenedContentArea = (state, dispatch) => {
 			<NavItem style={{ justifyContent: 'space-between' }}>
 				<span>MENU</span>
 			</NavItem>
-			<GCTooltip title="Tell us what you think!" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						setState(dispatch, { showFeedbackModal: true });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showUserFeedbackSelected'
-						);
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={UserFeedbackIcon} />
-					<span style={{ marginLeft: '10px' }}>User Feedback</span>
-				</HoverNavItem>
-			</GCTooltip>
+			{/*<GCTooltip title="Tell us what you think!" placement="right" arrow>*/}
+			{/*	<HoverNavItem*/}
+			{/*		onClick={() => {*/}
+			{/*			setState(dispatch, { showFeedbackModal: true });*/}
+			{/*			trackEvent(*/}
+			{/*				getTrackingNameForFactory(state.cloneData.clone_name),*/}
+			{/*				'SidebarInteraction',*/}
+			{/*				'showUserFeedbackSelected'*/}
+			{/*			);*/}
+			{/*		}}*/}
+			{/*		toolTheme={toolTheme}*/}
+			{/*	>*/}
+			{/*		<ConstrainedIcon src={UserFeedbackIcon} />*/}
+			{/*		<span style={{ marginLeft: '10px' }}>User Feedback</span>*/}
+			{/*	</HoverNavItem>*/}
+			{/*</GCTooltip>*/}
 			{/*<GCTooltip title="User Dashboard" placement="right" arrow>*/}
 			{/*	<HoverNavItem*/}
 			{/*		onClick={() => {*/}

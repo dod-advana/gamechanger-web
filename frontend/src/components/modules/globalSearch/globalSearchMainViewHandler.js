@@ -93,12 +93,12 @@ const handlePageLoad = async (props) => {
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, pageLoaded, getViewPanels } = props;
+	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs } = props;
 
-	const { loading, viewNames, searchResultsCount, runningSearch, searchText } = state;
+	const { loading, viewNames, searchResultsCount, pageDisplayed } = state;
 
-	const noResults = Boolean(searchResultsCount === 0);
-	const hideSearchResults = noResults && !loading;
+	const noResults = Boolean(!searchResultsCount || searchResultsCount === 0);
+	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
 
 	return (
 		<div style={styles.tabButtonContainer}>
@@ -113,6 +113,7 @@ const getMainView = (props) => {
 										<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
 									</div>
 								)}
+								{hideSearchResults && renderHideTabs(props)}
 								{!hideSearchResults && pageLoaded && searchResultsCount > 0 && (
 									<>
 										{!loading && getViewHeader(state, dispatch)}
@@ -125,17 +126,6 @@ const getMainView = (props) => {
 										</div>
 										<div style={styles.spacer} />
 									</>
-								)}
-								{hideSearchResults && !runningSearch && (
-									<Typography
-										variant="h3"
-										style={{
-											...styles.text,
-											margin: '20px 15px',
-										}}
-									>
-										No results found for <b>{searchText}</b>
-									</Typography>
 								)}
 							</div>
 						</StyledCenterContainer>

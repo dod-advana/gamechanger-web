@@ -6,6 +6,7 @@ import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
 const gameChangerAPI = new GameChangerAPI();
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
@@ -15,35 +16,55 @@ let cancelToken = axios.CancelToken.source();
 const DefaultMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultMainViewHandler'),
 	loading: () => {
-		return <></>;
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
 	},
 });
 
 const EDAMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/eda/edaMainViewHandler'),
 	loading: () => {
-		return <></>;
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
 	},
 });
 
 const GlobalSearchMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/globalSearch/globalSearchMainViewHandler'),
 	loading: () => {
-		return <></>;
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
 	},
 });
 
 const JBookMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookMainViewHandler'),
 	loading: () => {
-		return <></>;
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
 	},
 });
 
 const PolicyMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/policy/policyMainViewHandler'),
 	loading: () => {
-		return <></>;
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
 	},
 });
 
