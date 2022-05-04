@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Icon from '@material-ui/core/Icon';
+import ExportIcon from '../../images/icon/Export.svg';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { trackEvent } from '../telemetry/Matomo';
 import GCButton from '../common/GCButton';
@@ -199,19 +199,36 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		<div>
 			<div className="row" style={{ height: 65, margin: 0, padding: 0 }}>
 				<div style={{ display: 'flex', justifyContent: 'flex-end', padding: 0 }}>
-					<GCButton
-						onClick={exportCSV}
+					<span
 						style={{
-							minWidth: 50,
-							padding: '0px 7px',
 							margin: '6px 10px 0px 0px',
-							height: 50,
 						}}
 					>
-						<GCToolTip title="Export" placement="bottom" arrow enterDelay={500}>
-							<Icon className="fa fa-external-link" style={{ paddingTop: 2, transform: 'scale(1.3)' }} />
+						<GCToolTip title="Export" placement="top" arrow enterDelay={500}>
+							<span>
+								<GCButton
+									onClick={exportCSV}
+									style={{
+										minWidth: 50,
+										padding: '0px 7px',
+										height: 50,
+										marginLeft: 0,
+									}}
+									disabled={Object.keys(docResponsibilityData).length ? false : true}
+								>
+									<img
+										src={ExportIcon}
+										style={{
+											margin: '0 0 3px 3px',
+											width: 15,
+											opacity: Object.keys(docResponsibilityData).length ? 1 : 0.6,
+										}}
+										alt="export"
+									/>
+								</GCButton>
+							</span>
 						</GCToolTip>
-					</GCButton>
+					</span>
 					<FormControl
 						variant="outlined"
 						classes={{ root: classes.root }}
