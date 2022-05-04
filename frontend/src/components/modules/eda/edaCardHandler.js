@@ -7,15 +7,21 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import { getEDAMetadataForPropertyTable, getDisplayTitle } from './edaUtils';
+import { getEDAMetadataForCard, getDisplayTitle } from './edaUtils';
 import { List, ListItem, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
 import { primary } from '../../../components/common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-import SimpleTable from '../../common/SimpleTable';
+// import SimpleTable from '../../common/SimpleTable';
 import { KeyboardArrowRight, Star } from '@material-ui/icons';
 import styled from 'styled-components';
 import _ from 'lodash';
@@ -26,7 +32,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import sanitizeHtml from 'sanitize-html';
 const gameChangerAPI = new GameChangerAPI();
 
-//
+// the fields that will show in the back of the card
 export const EDA_FIELDS = [
 	'award_id_eda_ext',
 	'modification_eda_ext',
@@ -51,25 +57,29 @@ export const EDA_FIELDS = [
 	'fpds_funding_agency_name_eda_ext',
 	'fpds_funding_office_code_eda_ext',
 	'fpds_description_of_requirement_eda_ext',
+	'fpds_psc_eda_ext',
+	'fpds_psc_desc_eda_ext',
 	// 'fpds_closed_date_eda_ext'
 ];
 
+// mapping the older field names to their newer fpds field names
 export const EDA_FPDS_MAP = {
 	reference_idv_eda_ext: 'fpds_idv_piid_eda_ext',
 	award_id_eda_ext: 'fpds_piid_eda_ext',
 	modification_eda_ext: 'fpds_modification_number_eda_ext',
-	signature_date_eda_ext: 'fpds_date_signed_eda_ext',
-	effective_date_eda_ext: 'fpds_effective_date_eda_ext',
+	signature_date_eda_ext: 'fpds_date_signed_eda_ext_dt',
+	effective_date_eda_ext: 'fpds_effective_date_eda_ext_dt',
 	naics_eda_ext: 'fpds_naics_code_eda_ext',
 	vendor_name_eda_ext: 'fpds_vendor_name_eda_ext',
 	vendor_duns_eda_ext: 'fpds_duns_eda_ext',
 	vendor_cage_eda_ext: 'fpds_cage_code_eda_ext',
-	contract_issue_name_eda_ext: 'fpds_contracting_agency_name_eda_ext',
+	contract_issue_name_eda_ext: 'fpds_contracting_office_name_eda_ext',
 	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
 	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
 	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext',
 };
 
+// mapping the name of the field to the label
 export const EDA_FIELD_JSON_MAP = {
 	award_id_eda_ext: 'Award ID',
 	reference_idv_eda_ext: 'Referenced IDV',
@@ -444,6 +454,8 @@ const StyledFrontCardContent = styled.div`
 	}
 `;
 
+const tableColumns = [{ id: 'name' }, { id: 'fpds' }, { id: 'eda' }];
+
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
@@ -815,6 +827,8 @@ const EdaCardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
+			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP);
+
 			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
@@ -927,7 +941,7 @@ const EdaCardHandler = {
 
 			return (
 				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
-					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+					<div style={{ height: '100%', overflow: 'hidden' }}>
 						{item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage && (
 							<GCAccordion
 								onChange={loadContractAward}
@@ -937,7 +951,7 @@ const EdaCardHandler = {
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
-								style={{ marginBottom: '0px !important' }}
+								marginBottom={'0px !important'}
 							>
 								<List style={{ width: '100%', padding: '0' }}>
 									<ListItem>
@@ -956,7 +970,7 @@ const EdaCardHandler = {
 							</GCAccordion>
 						)}
 
-						<SimpleTable
+						{/* <SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
@@ -972,7 +986,36 @@ const EdaCardHandler = {
 									? '-10px 0 0 0'
 									: ''
 							}
-						/>
+						/> */}
+						<TableContainer sx={{ maxHeight: 295 }}>
+							<Table stickyHeader aria-label="sticky table">
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell>FPDS</TableCell>
+										<TableCell>EDA</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => {
+										return (
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+												{tableColumns.map((column) => {
+													const value = row[column.id];
+													return (
+														<TableCell key={column.id} align={column.align}>
+															{column.format && typeof value === 'number'
+																? column.format(value)
+																: value}
+														</TableCell>
+													);
+												})}
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+						</TableContainer>
 					</div>
 				</GCTooltip>
 			);
