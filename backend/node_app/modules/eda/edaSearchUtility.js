@@ -1092,7 +1092,9 @@ class EDASearchUtility {
 						match: { 'pages.p_raw_text': page.text },
 					},
 					inner_hits: {
-						_source: false,
+						_source: {
+							includes: ['p_page', 'p_raw_text', 'id', 'max_score'],
+						},
 						stored_fields: ['pages.filename', 'pages.p_raw_text'],
 						from: 0,
 						size: 5,
@@ -1116,7 +1118,9 @@ class EDASearchUtility {
 		const query = {
 			track_total_hits: true,
 			size: 10,
-			_source: false,
+			_source: {
+				includes: ['p_page', 'p_raw_text', 'id', 'max_score'],
+			},
 			stored_fields: [
 				'filename',
 				'title',
@@ -1130,6 +1134,7 @@ class EDASearchUtility {
 				'p_text',
 				'type',
 				'p_page',
+				'p_raw_text',
 				'display_title_s',
 				'display_org_s',
 				'display_doc_type_s',
