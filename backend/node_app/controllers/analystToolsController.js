@@ -102,7 +102,8 @@ class AnalystToolsController {
 				const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
 				returnData.docs = cleanedDocs;
 			}
-
+			console.log('Returned Docs!!!');
+			console.log(returnData.docs);
 			res.status(200).send(returnData);
 		} catch (e) {
 			this.logger.error(e, '60OOE62', userId);

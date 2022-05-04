@@ -120,10 +120,11 @@ const EDADocumentsComparisonTool = (props) => {
 						setNoResults(true);
 					} else {
 						let paragraph;
+						console.log('DOCS!!!');
+						console.log(resp.data.docs);
+						console.log(selectedInput);
 						const document = resp.data.docs.find((doc) => {
-							const foundPar = doc.paragraphs.find(
-								(par) => par.paragraphIdBeingMatched === selectedInput
-							);
+							const foundPar = doc.pageHits[0];
 							if (foundPar) {
 								paragraph = foundPar;
 								return true;
@@ -165,7 +166,7 @@ const EDADocumentsComparisonTool = (props) => {
 		if (needsSort && returnedDocs.length) {
 			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter((doc) => {
-				return doc.paragraphs.find((match) => match.paragraphIdBeingMatched === selectedInput);
+				return doc.pageHits.find((match) => match.pageNumber === selectedInput);
 			});
 			const order = sortOrder === 'desc' ? 1 : -1;
 			let sortFunc = () => {};
@@ -187,11 +188,11 @@ const EDADocumentsComparisonTool = (props) => {
 					};
 					break;
 				default:
-					sortFunc = (docA, docB) => {
-						if (docA.score > docB.score) return -order;
-						if (docA.score < docB.score) return order;
-						return 0;
-					};
+					// sortFunc = (docA, docB) => {
+					// 	if (docA.score > docB.score) return -order;
+					// 	if (docA.score < docB.score) return order;
+					// 	return 0;
+					// };
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
@@ -205,10 +206,10 @@ const EDADocumentsComparisonTool = (props) => {
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		let undo = false;
-		if (positiveFeedback === feedbackList[paragraph.id]) {
+		if (positiveFeedback === feedbackList[paragraph.pageNumber]) {
 			undo = true;
 			const newList = { ...feedbackList };
-			delete newList[paragraph.id];
+			delete newList[paragraph.pageNumber];
 			setFeedbackList(newList);
 		} else {
 			setFeedbackList({ ...feedbackList, [paragraph.id]: positiveFeedback });
@@ -233,8 +234,8 @@ const EDADocumentsComparisonTool = (props) => {
 					gameChangerAPI
 						.dataStorageDownloadGET(
 							encode(compareDocument.filename || ''),
-							`"${selectedParagraph.par_raw_text_t}"`,
-							selectedParagraph.page_num_i + 1,
+							`"${selectedParagraph.snippet}"`,
+							selectedParagraph.pageNumber,
 							true,
 							state.cloneData
 						)
