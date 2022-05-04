@@ -67,6 +67,10 @@ const GlobalSearchTitleBarHandler = (props) => {
 		activeCategoryTab,
 		setActiveCategoryTab,
 		pageDisplayed,
+		openPillRight,
+		openPillTop,
+		closeButtonRight,
+		closeButtonTop,
 	} = props;
 
 	return (
@@ -85,7 +89,17 @@ const GlobalSearchTitleBarHandler = (props) => {
 					cloneData,
 				})}
 				<div style={styles.searchBar}>{children}</div>
-				{!jupiter && <AdvanaMegaMenuPill margin="0 -30px 0 20px" defaultHeader="Applications" />}
+				{!jupiter && (
+					<AdvanaMegaMenuPill
+						margin="0 -30px 0 20px"
+						defaultHeader="Applications"
+						location={{ pathname: 'search' }}
+						openPillRight={openPillRight}
+						openPillTop={openPillTop}
+						closeButtonRight={closeButtonRight}
+						closeButtonTop={closeButtonTop}
+					/>
+				)}
 			</div>
 
 			{getCategoryTabs({

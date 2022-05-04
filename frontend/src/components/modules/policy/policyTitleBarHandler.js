@@ -71,6 +71,10 @@ const PolicyTitleBarHandler = (props) => {
 		pageDisplayed,
 		dispatch,
 		loading,
+		openPillRight,
+		openPillTop,
+		closeButtonRight,
+		closeButtonTop,
 	} = props;
 
 	return (
@@ -89,7 +93,16 @@ const PolicyTitleBarHandler = (props) => {
 					componentStepNumbers,
 				})}
 				<div style={styles.searchBar}>{children}</div>
-				{!jupiter && <AdvanaMegaMenuPill margin="0 -30px 0 20px" defaultHeader="Applications" />}
+				{!jupiter && (
+					<AdvanaMegaMenuPill
+						margin="0 -30px 0 20px"
+						defaultHeader="Applications"
+						openPillRight={openPillRight}
+						openPillTop={openPillTop}
+						closeButtonRight={closeButtonRight}
+						closeButtonTop={closeButtonTop}
+					/>
+				)}
 			</div>
 
 			{getCategoryTabs({

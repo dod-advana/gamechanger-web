@@ -8,7 +8,6 @@ import GameChangerAPI from './components/api/gameChanger-service-api';
 import TrackerWrapper from './components/telemetry/TrackerWrapperHooks';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { createBrowserHistory } from 'history';
-import SlideOutMenuContextHandler from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SparkMD5 from 'spark-md5';
 import _ from 'lodash';
 import './styles.css';
@@ -22,6 +21,8 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import ClassificationBanner from '@dod-advana/advana-platform-ui/dist/ClassificationBanner';
 import { ErrorBoundary } from 'react-error-boundary';
 import TutorialOverlayAPI from '@dod-advana/advana-tutorial-overlay/dist/api/TutorialOverlay';
+import SlideOutMenu from '@dod-advana/advana-side-nav/dist/SlideOutMenu';
+
 import './index.css';
 
 require('typeface-noto-sans');
@@ -35,10 +36,39 @@ const ConsentAgreement = LoadableVisibility({
 	},
 });
 
-const SlideOutMenu = LoadableVisibility({
-	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenu'),
+// const SlideOutMenu = LoadableVisibility({
+// 	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenu'),
+// 	loading: () => {
+// 		return (
+// 			<div
+// 				style={{
+// 					position: 'fixed',
+// 					left: 0,
+// 					top: '2em',
+// 					bottom: 0,
+// 					zIndex: 500,
+// 					backgroundColor: '#171A23',
+// 				}}
+// 			/>
+// 		);
+// 	},
+// });
+
+const SlideOutMenuContextHandler = LoadableVisibility({
+	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenuContext'),
 	loading: () => {
-		return <></>;
+		return (
+			<div
+				style={{
+					position: 'fixed',
+					left: 0,
+					top: '2em',
+					bottom: 0,
+					zIndex: 500,
+					backgroundColor: '#171A23',
+				}}
+			/>
+		);
 	},
 });
 
@@ -58,7 +88,7 @@ const NotFoundPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -69,7 +99,7 @@ const UnauthorizedPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -80,7 +110,7 @@ const JBookProfilePage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -90,8 +120,10 @@ const GamechangerPage = LoadableVisibility({
 	loader: () => import('./containers/GameChangerPage'),
 	loading: () => {
 		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<LoadingIndicator />
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 220px)' }}>
+				<div style={{ width: window.screen.width - 50 }}>
+					<LoadingIndicator shadedOverlay={true} />
+				</div>
 			</div>
 		);
 	},
@@ -102,7 +134,7 @@ const GamechangerAdminPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container" style={{ minHeight: 'calc(100vh - 220px)' }}>
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -113,7 +145,7 @@ const GamechangerEsPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container">
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -124,7 +156,7 @@ const GameChangerDetailsPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container">
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -135,7 +167,7 @@ const GamechangerPdfViewer = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container">
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -146,7 +178,7 @@ const GamechangerLiteAdminPage = LoadableVisibility({
 	loading: () => {
 		return (
 			<div className="main-container">
-				<LoadingIndicator />
+				<></>
 			</div>
 		);
 	},
@@ -512,7 +544,7 @@ const App = () => {
 										</ErrorBoundary>
 									</>
 								</SlideOutMenuContextHandler>
-								<GCFooter setUserMatomo={setUserMatomo} />
+								<GCFooter setUserMatomo={setUserMatomo} location={location} />
 							</div>
 						)}
 					/>
