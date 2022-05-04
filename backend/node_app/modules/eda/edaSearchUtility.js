@@ -1079,19 +1079,36 @@ class EDASearchUtility {
 		return { id, idv };
 	}
 
-	getESSimilarityQuery(paragraphs, filters) {
+	getESSimilarityQuery(pages, filters) {
 		let filterQueries = [];
 		filterQueries = filterQueries.concat(this.getEDASearchQuery(filters));
 
-		const paragraphsQuery = paragraphs.map((paragraph) => {
+		const pagesQuery = pages.map((page) => {
 			return {
 				nested: {
 					score_mode: 'max',
 					path: 'pages',
 					query: {
-						match: { 'pages.p_raw_text': paragraph.text },
+						match: { 'pages.p_raw_text': page.text },
 					},
-					inner_hits: { size: 1 },
+					inner_hits: {
+						_source: false,
+						stored_fields: ['pages.filename', 'pages.p_raw_text'],
+						from: 0,
+						size: 5,
+						highlight: {
+							fields: {
+								'pages.filename.search': {
+									number_of_fragments: 0,
+								},
+								'pages.p_raw_text': {
+									fragment_size: 2,
+									number_of_fragments: 1,
+								},
+							},
+							fragmenter: 'span',
+						},
+					},
 				},
 			};
 		});
@@ -1100,38 +1117,6 @@ class EDASearchUtility {
 			track_total_hits: true,
 			size: 10,
 			_source: false,
-			query: {
-				bool: {
-					must: filterQueries,
-					should: paragraphsQuery,
-				},
-			},
-		};
-
-		return query;
-	}
-
-	getParagraphResults(esResults) {
-		const paragraphResults = {};
-
-		esResults.body.hits.hits.forEach((hit, index) => {
-			paragraphResults[index] = {
-				id: hit.inner_hits.pages.hits.hits[0]._source.id,
-				text: hit.inner_hits.pages.hits.hits[0]._source.p_raw_text,
-				score: hit.inner_hits.pages.hits.hits[0]._score,
-			};
-		});
-
-		return [{ paragraphIdBeingMatched: '0', ...paragraphResults }];
-	}
-
-	getDocumentParagraphsByPageIDs(ids = [], filters = {}, offset = 0) {
-		const query = {
-			from: offset,
-			size: 100,
-			_source: {
-				includes: ['pagerank_r', 'kw_doc_score_r'],
-			},
 			stored_fields: [
 				'filename',
 				'title',
@@ -1156,52 +1141,11 @@ class EDASearchUtility {
 			],
 			query: {
 				bool: {
-					must: [],
-					filter: [],
-					should: [
-						{
-							nested: {
-								path: 'paragraphs',
-								inner_hits: {
-									_source: true,
-									highlight: {
-										fields: {
-											'paragraphs.filename.search': {
-												number_of_fragments: 0,
-											},
-											'paragraphs.par_raw_text_t': {
-												fragment_size: 200,
-												number_of_fragments: 1,
-											},
-										},
-										fragmenter: 'span',
-									},
-								},
-								query: {
-									bool: {
-										must: [
-											{
-												terms: {
-													'pages.id': ids,
-												},
-											},
-										],
-									},
-								},
-							},
-						},
-					],
+					must: filterQueries,
+					should: pagesQuery,
 				},
 			},
 		};
-
-		if (!filters?.canceledDocs) {
-			query.query.bool.filter.push({
-				term: {
-					is_revoked_b: 'false',
-				},
-			});
-		}
 
 		return query;
 	}

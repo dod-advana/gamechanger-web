@@ -46,31 +46,7 @@ class AnalystToolsController {
 			let esResults = {};
 
 			if (cloneName === 'eda') {
-				const pageESQuery = this.edaSearchUtility.getESSimilarityQuery(paragraphs, filters);
-
-				const pageResults = await this.dataLibrary.queryElasticSearch(
-					clientObj.esClientName,
-					clientObj.esIndex,
-					pageESQuery,
-					userId
-				);
-
-				const paragraphResults = this.edaSearchUtility.getParagraphResults(pageResults);
-
-				paragraphResults.forEach((result) => {
-					Object.keys(result).forEach((id) => {
-						if (result[id].id && result[id]?.score >= 0.65) {
-							resultsObject[result[id].id] = {
-								score: result[id].score,
-								text: result[id].text,
-								paragraphIdBeingMatched: result.paragraphIdBeingMatched,
-							};
-						}
-					});
-				});
-
-				const ids = Object.keys(resultsObject);
-				esQuery = this.edaSearchUtility.getDocumentParagraphsByPageIDs(ids, filters);
+				esQuery = this.edaSearchUtility.getESSimilarityQuery(paragraphs, filters);
 
 				esResults = await this.dataLibrary.queryElasticSearch(
 					clientObj.esClientName,
@@ -122,10 +98,10 @@ class AnalystToolsController {
 				resultsObject
 			);
 
-			const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
-
-			// Temporarily return first 12 results for testing eda
-			returnData.docs = cleanedDocs.length > 0 ? cleanedDocs : returnData.docs.slice(0, 12);
+			if (cloneName !== 'eda') {
+				const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
+				returnData.docs = cleanedDocs;
+			}
 
 			res.status(200).send(returnData);
 		} catch (e) {
