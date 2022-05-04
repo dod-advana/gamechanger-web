@@ -5,7 +5,8 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import propTypes from 'prop-types';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
+import PolicyDocumentsComparisonTool from '../modules/policy/policyDocumentsComparisonTool';
+import EDADocumentsComparisonTool from '../modules/eda/edaDocumentsComparisonTool';
 import { setState } from '../../utils/sharedFunctions';
 import GCResponsibilityExplorer from './GCResponsibilityExplorer';
 
@@ -101,7 +102,11 @@ const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocument
 							)}
 							{showDocumentComparisonTool && (
 								<TabPanel>
-									<GCDocumentsComparisonTool context={context} />
+									{state.cloneData.clone_name === 'eda' ? (
+										<EDADocumentsComparisonTool context={context} />
+									) : (
+										<PolicyDocumentsComparisonTool context={context} />
+									)}
 								</TabPanel>
 							)}
 						</div>
