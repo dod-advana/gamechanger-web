@@ -6,7 +6,6 @@ const ORGDOCMAP = {
 	'United States Code': ['Title'],
 	'Executive Branch': ['EO'],
 	'Classification Guides': ['(SCG Army)', '(SCG Navy)'],
-	OPM: ['OMBM'],
 	Legislation: ['h.con. res', 'h.j. res.', 'hr.r.', 'h. res', 's.', 's. con. res', 's.j. res.', 's. res.'],
 	'Dept. of the Air Force': [
 		'AFI',

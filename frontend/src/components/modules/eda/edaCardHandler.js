@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
-	encode,
 	getTrackingNameForFactory,
 	getTypeIcon,
 	getTypeTextColor,
@@ -18,18 +17,29 @@ import TableRow from '@mui/material/TableRow';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
-import { primary } from '../../../components/common/gc-colors';
+import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 // import SimpleTable from '../../common/SimpleTable';
 import { KeyboardArrowRight, Star } from '@material-ui/icons';
-import styled from 'styled-components';
 import _ from 'lodash';
 import { setState } from '../../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../../common/gc-colors';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import sanitizeHtml from 'sanitize-html';
+import {
+	getDefaultComponent,
+	styles,
+	colWidth,
+	StyledFrontCardHeader,
+	StyledFrontCardSubHeader,
+	StyledListViewFrontCardContent,
+	StyledFrontCardContent,
+	clickFn,
+	RevokedTag,
+} from '../default/defaultCardHandler';
+
 const gameChangerAPI = new GameChangerAPI();
 
 // the fields that will show in the back of the card
@@ -586,7 +596,7 @@ const EdaCardHandler = {
 
 			if (state.listView && !intelligentSearch) {
 				return (
-					<StyledListViewFrontCardContent>
+					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
 						{item.pageHits && item.pageHits.length > 0 && (
 							<button
 								type="button"
@@ -682,7 +692,7 @@ const EdaCardHandler = {
 				);
 			} else if (state.listView && intelligentSearch) {
 				return (
-					<StyledListViewFrontCardContent>
+					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
 						<div className={'expanded-hits'}>
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
@@ -1084,7 +1094,7 @@ const EdaCardHandler = {
 						</GCTooltip>
 					</>
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -1096,7 +1106,11 @@ const EdaCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: primary }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
@@ -1109,97 +1123,22 @@ const EdaCardHandler = {
 		getFilename: (item) => {
 			return item.file_location_eda_ext;
 		},
-	},
 
-	publication: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 	},
+};
 
-	entity: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
+const EdaCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	topic: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default EdaCardHandler;

@@ -3,7 +3,6 @@ import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
 	convertDCTScoreToText,
-	encode,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable,
@@ -29,40 +28,9 @@ import dodSeal from '../../../images/United_States_Department_of_Defense_Seal.sv
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
+import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
 
 const gameChangerAPI = new GameChangerAPI();
-
-const styles = {
-	footerButtonBack: {
-		margin: '0 10px 0 0 ',
-		padding: '8px 12px',
-	},
-	viewMoreChevron: {
-		fontSize: 14,
-		color: '#1E88E5',
-		fontWeight: 'normal',
-		marginLeft: 5,
-	},
-	viewMoreButton: {
-		fontSize: 16,
-		color: '#1E88E5',
-		fontWeight: 'bold',
-		cursor: 'pointer',
-		minWidth: 60,
-	},
-	collectionContainer: {
-		margin: '1em',
-		overflow: 'auto',
-	},
-	bodyImg: {
-		width: 75,
-		margin: '10px',
-	},
-	bodyText: {
-		margin: '10px',
-		fontSize: '14px',
-	},
-};
 
 const useStyles = makeStyles((theme) => ({
 	paper: {
@@ -71,13 +39,6 @@ const useStyles = makeStyles((theme) => ({
 		backgroundColor: theme.palette.background.paper,
 	},
 }));
-
-const colWidth = {
-	maxWidth: '900px',
-	whiteSpace: 'nowrap',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-};
 
 const FavoriteTopic = styled.button`
 	border: none;
@@ -251,23 +212,6 @@ const StyledFrontCardSubHeader = styled.div`
 		font-size: 14px;
 		margin-top: 8px;
 	}
-`;
-
-const RevokedTag = styled.div`
-	font-size: 11px;
-	font-weight: 600;
-	border: none;
-	height: 25px;
-	border-radius: 15px;
-	background-color: #e50000;
-	color: white;
-	white-space: nowrap;
-	text-align: center;
-	display: inline-block;
-	padding-left: 15px;
-	padding-right: 15px;
-	margin-top: 10px;
-	margin-bottom: 10px;
 `;
 
 const StyledListViewFrontCardContent = styled.div`
@@ -515,17 +459,6 @@ const StyledQuickCompareContent = styled.div`
 	}
 `;
 
-const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'PDFOpen', filename, `search : ${searchText}`);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
-			searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''
-		}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`
-	);
-};
-
 const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, cloneName }) => {
 	const classes = useStyles();
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
@@ -764,16 +697,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
-const getCardHeaderHandler = ({
-	item,
-	state,
-	idx,
-	checkboxComponent,
-	favoriteComponent,
-	graphView,
-	intelligentSearch,
-	quickCompareToggleComponent,
-}) => {
+const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
@@ -1042,7 +966,7 @@ const handleImgSrcError = (event, fallbackSources) => {
 	}
 };
 
-const PolicyCardHandler = {
+const cardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
 			return getDisplayTitle(item);
@@ -1566,7 +1490,7 @@ const PolicyCardHandler = {
 								)}
 							</>
 							<div
-								style={{ ...styles.viewMoreButton }}
+								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
@@ -1578,7 +1502,11 @@ const PolicyCardHandler = {
 								}}
 							>
 								{toggledMore ? 'Overview' : 'More'}
-								<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+								<i
+									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									className="fa fa-chevron-right"
+									aria-hidden="true"
+								/>
 							</div>
 						</>
 					)}
@@ -1911,7 +1839,7 @@ const PolicyCardHandler = {
 						)}
 					</>
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -1923,7 +1851,11 @@ const PolicyCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
@@ -2126,7 +2058,7 @@ const PolicyCardHandler = {
 							</CardButton>
 						)}
 						<div
-							style={{ ...styles.viewMoreButton }}
+							style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 							onClick={() => {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
@@ -2138,7 +2070,11 @@ const PolicyCardHandler = {
 							}}
 						>
 							{toggledMore ? 'Overview' : 'More'}
-							<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+							<i
+								style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+								className="fa fa-chevron-right"
+								aria-hidden="true"
+							/>
 						</div>
 					</>
 				</>
@@ -2153,6 +2089,17 @@ const PolicyCardHandler = {
 			return '';
 		},
 	},
+};
+
+const PolicyCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
+
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
+
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default PolicyCardHandler;
