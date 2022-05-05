@@ -1,6 +1,6 @@
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { ForceGraph2D } from 'react-force-graph';
-import { backgroundWhite, gcOrange } from '../../components/common/gc-colors';
+import ForceGraph2D from 'react-force-graph-2d';
+import { backgroundWhite, gcOrange } from '../common/gc-colors';
 import React, { useEffect, useRef } from 'react';
 import {
 	calcLinkControlPoints,
