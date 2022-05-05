@@ -445,292 +445,164 @@ export default function ResponsibilityDocumentExplorer({
 					height: '800px',
 					overflowY: 'auto',
 				}}
-				ref={infiniteScrollRef}
 			>
-				<GCAccordion
-					expanded={filters.length}
-					header={
-						<span>
-							FILTERS{' '}
-							{filters.length ? <span style={{ color: '#ed691d' }}>{`(${filters.length})`}</span> : ''}
-						</span>
-					}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					<div style={{ width: '100%' }}>
-						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
-								header={
-									<span>
-										DOCUMENT TITLE{' '}
-										{filters.filter((f) => f.id === 'documentTitle').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'documentTitle').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<Autocomplete
-									classes={{ root: classes.root }}
-									key={clearFilters}
-									multiple
-									options={documentList}
-									getOptionLabel={(option) => option.documentTitle}
-									defaultValue={docTitle}
-									onChange={(event, newValue) => {
-										setDocTitle(newValue);
-									}}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											classes={{ root: classes.root }}
-											variant="outlined"
-											label="Document Titles"
-										/>
+				<div style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}>
+					FILTERS {filters.length ? <span style={{ color: '#ed691d' }}>{`(${filters.length})`}</span> : ''}
+				</div>
+				<div style={{ width: '100%' }}>
+					<div style={{ width: '100%', marginBottom: 10 }}>
+						<GCAccordion
+							expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
+							header={
+								<span>
+									DOCUMENT TITLE{' '}
+									{filters.filter((f) => f.id === 'documentTitle').length ? (
+										<span style={{ color: '#ed691d' }}>{`(${
+											filters.filter((f) => f.id === 'documentTitle').length
+										})`}</span>
+									) : (
+										''
 									)}
-								/>
-							</GCAccordion>
-						</div>
-						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={
-									filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false
-								}
-								header={
-									<span>
-										ORGANIZATION{' '}
-										{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'organizationPersonnel').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<Autocomplete
-									classes={{ root: classes.root }}
-									key={clearFilters}
-									multiple
-									options={[]}
-									freeSolo
-									autoSelect
-									getOptionLabel={(option) => option}
-									defaultValue={organization}
-									onChange={(event, newValue) => {
-										setOrganization(newValue);
-									}}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											classes={{ root: classes.root }}
-											variant="outlined"
-											label="Organizations"
-										/>
-									)}
-								/>
-							</GCAccordion>
-						</div>
-						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={filters.find((filter) => filter.id === 'responsibilityText') ? true : false}
-								header={
-									<span>
-										RESPONSIBILITY TEXT{' '}
-										{filters.filter((f) => f.id === 'responsibilityText').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'responsibilityText').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<div style={{ width: '100%' }}>
+								</span>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<Autocomplete
+								classes={{ root: classes.root }}
+								key={clearFilters}
+								multiple
+								options={documentList}
+								getOptionLabel={(option) => option.documentTitle}
+								defaultValue={docTitle}
+								onChange={(event, newValue) => {
+									setDocTitle(newValue);
+								}}
+								renderInput={(params) => (
 									<TextField
+										{...params}
 										classes={{ root: classes.root }}
 										variant="outlined"
-										placeholder="Responsibility Text"
-										value={responsibilityText?.value || ''}
-										onChange={(e) =>
-											setResponsibilityText({ id: 'responsibilityText', value: e.target.value })
-										}
+										label="Document Titles"
 									/>
-								</div>
-							</GCAccordion>
-							<GCButton
-								onClick={() => {
-									setResponsibilityText({});
-									setOrganization([]);
-									setDocTitle([]);
-									setClearFilters(!clearFilters);
-									setFilters([]);
-									setResultsPage(1);
-									setReloadResponsibilities(true);
-								}}
-								style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
-								isSecondaryBtn
-							>
-								Clear Filters
-							</GCButton>
-							<GCButton
-								onClick={() => {
-									const filters = [];
-									if (Object.keys(responsibilityText).length) filters.push(responsibilityText);
-									if (organization.length) {
-										organization.forEach((org) => {
-											filters.push({ id: 'organizationPersonnel', value: org });
-										});
-									}
-									if (docTitle.length) {
-										docTitle.forEach((doc) => {
-											filters.push({ id: 'documentTitle', value: doc.documentTitle });
-										});
-									}
-									setCollapseKeys({});
-									setFilters(filters);
-									setResultsPage(1);
-									setReloadResponsibilities(true);
-								}}
-								style={{ display: 'block', width: '100%', margin: 0 }}
-							>
-								Update Search
-							</GCButton>
-						</div>
+								)}
+							/>
+						</GCAccordion>
 					</div>
-				</GCAccordion>
-				{Object.keys(responsibilityData).length > 0 &&
-					_.map(Object.keys(responsibilityData), (doc, key) => {
-						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
-						const displayTitle = doc;
-						return (
-							<div key={key}>
-								<div
-									className="searchdemo-modal-result-header"
-									onClick={(e) => {
-										e.preventDefault();
-										setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
-									}}
-								>
-									<i
-										style={{
-											marginRight: docOpen ? 10 : 14,
-											fontSize: 20,
-											cursor: 'pointer',
-										}}
-										className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+					<div style={{ width: '100%', marginBottom: 10 }}>
+						<GCAccordion
+							expanded={filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false}
+							header={
+								<span>
+									ORGANIZATION{' '}
+									{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+										<span style={{ color: '#ed691d' }}>{`(${
+											filters.filter((f) => f.id === 'organizationPersonnel').length
+										})`}</span>
+									) : (
+										''
+									)}
+								</span>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<Autocomplete
+								classes={{ root: classes.root }}
+								key={clearFilters}
+								multiple
+								options={[]}
+								freeSolo
+								autoSelect
+								getOptionLabel={(option) => option}
+								defaultValue={organization}
+								onChange={(event, newValue) => {
+									setOrganization(newValue);
+								}}
+								renderInput={(params) => (
+									<TextField
+										{...params}
+										classes={{ root: classes.root }}
+										variant="outlined"
+										label="Organizations"
 									/>
-									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
-								</div>
-								<Collapse isOpened={docOpen}>
-									{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
-										const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
-										return (
-											<div key={entKey}>
-												<div
-													className="searchdemo-modal-result-header"
-													onClick={(e) => {
-														e.preventDefault();
-														setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
-													}}
-													style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
-												>
-													<i
-														style={{
-															marginRight: entOpen ? 10 : 14,
-															fontSize: 20,
-															cursor: 'pointer',
-														}}
-														className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
-													/>
-													<span className="gc-document-explorer-result-header-text">
-														{entity}
-													</span>
-												</div>
-												<Collapse isOpened={entOpen && docOpen}>
-													<div>
-														{responsibilityData[doc][entity].map(
-															(responsibility, respKey) => {
-																let isHighlighted =
-																	selectedResponsibility.responsibilityText ===
-																	responsibility.responsibilityText;
-																let blockquoteClass = 'searchdemo-blockquote-sm';
-
-																if (isHighlighted)
-																	blockquoteClass +=
-																		' searchdemo-blockquote-sm-active';
-																return (
-																	<div
-																		key={key + respKey}
-																		style={{ position: 'relative' }}
-																	>
-																		<div
-																			className="searchdemo-quote-link"
-																			onClick={(e) => {
-																				handleQuoteLinkClick(e, responsibility);
-																			}}
-																		>
-																			<div
-																				className={blockquoteClass}
-																				style={{ marginLeft: 40 }}
-																			>
-																				<span>
-																					{responsibility.responsibilityText}
-																				</span>
-																			</div>
-																		</div>
-																		{isHighlighted && (
-																			<span className="searchdemo-arrow-right-sm"></span>
-																		)}
-																	</div>
-																);
-															}
-														)}
-													</div>
-												</Collapse>
-											</div>
-										);
-									})}
-								</Collapse>
+								)}
+							/>
+						</GCAccordion>
+					</div>
+					<div style={{ width: '100%', marginBottom: 10 }}>
+						<GCAccordion
+							expanded={filters.find((filter) => filter.id === 'responsibilityText') ? true : false}
+							header={
+								<span>
+									RESPONSIBILITY TEXT{' '}
+									{filters.filter((f) => f.id === 'responsibilityText').length ? (
+										<span style={{ color: '#ed691d' }}>{`(${
+											filters.filter((f) => f.id === 'responsibilityText').length
+										})`}</span>
+									) : (
+										''
+									)}
+								</span>
+							}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div style={{ width: '100%' }}>
+								<TextField
+									classes={{ root: classes.root }}
+									variant="outlined"
+									placeholder="Responsibility Text"
+									value={responsibilityText?.value || ''}
+									onChange={(e) =>
+										setResponsibilityText({ id: 'responsibilityText', value: e.target.value })
+									}
+								/>
 							</div>
-						);
-					})}
-				{Object.keys(responsibilityData).length < 1 && !loading && (
-					<div
-						style={{
-							fontSize: 24,
-							fontFamily: 'Montserrat',
-							borderBottom: '2px solid #BCCBDB',
-							display: 'flex',
-							placeContent: 'space-between',
-							marginTop: 20,
-						}}
-					>
-						<div className={'text'}>No results found</div>
+						</GCAccordion>
+						<GCButton
+							onClick={() => {
+								setResponsibilityText({});
+								setOrganization([]);
+								setDocTitle([]);
+								setClearFilters(!clearFilters);
+								setFilters([]);
+								setResultsPage(1);
+								setReloadResponsibilities(true);
+							}}
+							style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
+							isSecondaryBtn
+						>
+							Clear Filters
+						</GCButton>
+						<GCButton
+							onClick={() => {
+								const filters = [];
+								if (Object.keys(responsibilityText).length) filters.push(responsibilityText);
+								if (organization.length) {
+									organization.forEach((org) => {
+										filters.push({ id: 'organizationPersonnel', value: org });
+									});
+								}
+								if (docTitle.length) {
+									docTitle.forEach((doc) => {
+										filters.push({ id: 'documentTitle', value: doc.documentTitle });
+									});
+								}
+								setCollapseKeys({});
+								setFilters(filters);
+								setResultsPage(1);
+								setReloadResponsibilities(true);
+							}}
+							style={{ display: 'block', width: '100%', margin: 0 }}
+						>
+							Update Search
+						</GCButton>
 					</div>
-				)}
-				{loading && (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={'#E9691D'} />
-					</div>
-				)}
+				</div>
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
@@ -856,6 +728,7 @@ export default function ResponsibilityDocumentExplorer({
 					overflowY: 'auto',
 					zIndex: 100,
 				}}
+				ref={infiniteScrollRef}
 			>
 				{Object.keys(responsibilityData).length > 0 && (
 					<SimpleTable
@@ -869,6 +742,134 @@ export default function ResponsibilityDocumentExplorer({
 						disableWrap={true}
 						title={'Metadata'}
 					/>
+				)}
+				{Object.keys(responsibilityData).length > 0 &&
+					_.map(Object.keys(responsibilityData), (doc, key) => {
+						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
+						const displayTitle = doc;
+						return (
+							<div key={key}>
+								<div
+									className="searchdemo-modal-result-header"
+									onClick={(e) => {
+										e.preventDefault();
+										setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
+									}}
+								>
+									<i
+										style={{
+											marginRight: docOpen ? 10 : 14,
+											fontSize: 20,
+											cursor: 'pointer',
+										}}
+										className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+									/>
+									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+								</div>
+								<Collapse isOpened={docOpen}>
+									{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
+										const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
+										return (
+											<div key={entKey}>
+												<div
+													className="searchdemo-modal-result-header"
+													onClick={(e) => {
+														e.preventDefault();
+														setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
+													}}
+													style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
+												>
+													<i
+														style={{
+															marginRight: entOpen ? 10 : 14,
+															fontSize: 20,
+															cursor: 'pointer',
+														}}
+														className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
+													/>
+													<span className="gc-document-explorer-result-header-text">
+														{entity}
+													</span>
+												</div>
+												<Collapse isOpened={entOpen && docOpen}>
+													<div>
+														{responsibilityData[doc][entity].map(
+															(responsibility, respKey) => {
+																let isHighlighted =
+																	selectedResponsibility.responsibilityText ===
+																	responsibility.responsibilityText;
+																let blockquoteClass = 'searchdemo-blockquote-sm';
+
+																if (isHighlighted)
+																	blockquoteClass +=
+																		' searchdemo-blockquote-sm-active';
+																return (
+																	<div
+																		key={key + respKey}
+																		style={{ position: 'relative' }}
+																	>
+																		<div
+																			className="searchdemo-quote-link"
+																			onClick={(e) => {
+																				handleQuoteLinkClick(e, responsibility);
+																			}}
+																		>
+																			<div
+																				className={blockquoteClass}
+																				style={{
+																					marginLeft: 40,
+																					marginRight: 0,
+																					borderRight: '1px solid gray',
+																					borderLeft: 'none',
+																				}}
+																			>
+																				<span>
+																					{responsibility.responsibilityText}
+																				</span>
+																			</div>
+																		</div>
+																		{isHighlighted && (
+																			<span
+																				style={{
+																					left: 21,
+																					borderTop: '14px solid transparent',
+																					borderBottom:
+																						'14px solid transparent',
+																				}}
+																				className="searchdemo-arrow-left-sm"
+																			></span>
+																		)}
+																	</div>
+																);
+															}
+														)}
+													</div>
+												</Collapse>
+											</div>
+										);
+									})}
+								</Collapse>
+							</div>
+						);
+					})}
+				{Object.keys(responsibilityData).length < 1 && !loading && (
+					<div
+						style={{
+							fontSize: 24,
+							fontFamily: 'Montserrat',
+							borderBottom: '2px solid #BCCBDB',
+							display: 'flex',
+							placeContent: 'space-between',
+							marginTop: 20,
+						}}
+					>
+						<div className={'text'}>No results found</div>
+					</div>
+				)}
+				{loading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={'#E9691D'} />
+					</div>
 				)}
 			</div>
 			{alertActive ? (

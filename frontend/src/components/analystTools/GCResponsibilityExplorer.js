@@ -15,6 +15,16 @@ import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerU
 
 const gameChangerAPI = new GameChangerAPI();
 
+const parseFilename = (filename) => {
+	const splitName = filename.split(' ');
+	const letters = splitName[0];
+	let numbers = splitName[1];
+	if (numbers.includes('.pdf')) {
+		numbers = numbers.slice(0, -4);
+	}
+	return `${letters} ${numbers}`;
+};
+
 const useStyles = makeStyles({
 	root: {
 		paddingTop: '16px',
@@ -129,11 +139,10 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			setLoading(false);
 		}
 	};
-
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility) => {
-			const doc = responsibility.documentTitle;
+			const doc = `${parseFilename(responsibility.filename)} ${responsibility.documentTitle}`;
 			let entity = responsibility.organizationPersonnel;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
