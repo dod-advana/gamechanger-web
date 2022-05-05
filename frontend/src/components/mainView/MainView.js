@@ -1,28 +1,77 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
-import { Button } from '@material-ui/core';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { trackEvent } from '../telemetry/Matomo';
-import GCDataStatusTracker from '../dataTracker/GCDataStatusTracker';
 import { setState, getUserData } from '../../utils/sharedFunctions';
-import MainViewFactory from '../factories/mainViewFactory';
-import SearchHandlerFactory from '../factories/searchHandlerFactory';
-import UserProfileHandlerFactory from '../factories/userProfileFactory';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import GameChangerAPI from '../api/gameChanger-service-api';
+import GamechangerUserManagementAPI from '../api/GamechangerUserManagement';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+
+const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
 let cancelToken = axios.CancelToken.source();
+
+const DefaultMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/default/defaultMainViewHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
+
+const EDAMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaMainViewHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
+
+const GlobalSearchMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/globalSearch/globalSearchMainViewHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
+
+const JBookMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/jbook/jbookMainViewHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
+
+const PolicyMainViewHandler = LoadableVisibility({
+	loader: () => import('../modules/policy/policyMainViewHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
 
 const MainView = (props) => {
 	const { context } = props;
 
 	const { state, dispatch } = context;
-
-	const [pageLoaded, setPageLoaded] = useState(false);
-	const [mainViewHandler, setMainViewHandler] = useState();
-	const [searchHandler, setSearchHandler] = useState();
-	const [userProfileHandler, setUserProfileHandler] = useState();
 
 	useEffect(() => {
 		if (state.cloneDataSet && !state.userDataSet) {
@@ -50,35 +99,6 @@ const MainView = (props) => {
 	}, [dispatch]);
 
 	useEffect(() => {
-		if (state.cloneDataSet && state.historySet && !pageLoaded) {
-			const factory = new MainViewFactory(state.cloneData.main_view_module);
-			const handler = factory.createHandler();
-			setMainViewHandler(handler);
-			setPageLoaded(true);
-			const viewNames = handler.getViewNames({ cloneData: state.cloneData });
-
-			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
-			const searchHandler = searchFactory.createHandler();
-			setSearchHandler(searchHandler);
-
-			const profileFactory = new UserProfileHandlerFactory(state.cloneData.main_view_module);
-
-			const profileHandler = profileFactory.createHandler();
-			setUserProfileHandler(profileHandler);
-
-			handler.handlePageLoad({
-				state,
-				dispatch,
-				history: state.history,
-				searchHandler,
-				cancelToken,
-			});
-
-			setState(dispatch, { viewNames });
-		}
-	}, [state, dispatch, pageLoaded]);
-
-	useEffect(() => {
 		const favSearchUrls = state.userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
@@ -91,44 +111,7 @@ const MainView = (props) => {
 		if (state.isFavoriteSearch !== searchFavorite) {
 			setState(dispatch, { isFavoriteSearch: searchFavorite });
 		}
-	}, [state.isFavoriteSearch, state.userData, dispatch, pageLoaded]);
-
-	useEffect(() => {
-		if (state.cloneData.clone_name === 'gamechanger') {
-			if (state.docsPagination && searchHandler) {
-				searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
-			}
-			if (state.entityPagination && searchHandler) {
-				searchHandler.handleEntityPagination(state, dispatch);
-			}
-			if (state.topicPagination && searchHandler) {
-				searchHandler.handleTopicPagination(state, dispatch);
-			}
-		} else if (state.cloneData.clone_name === 'globalSearch') {
-			if (state.applicationsPagination && searchHandler) {
-				searchHandler.handleApplicationsPagination(state, dispatch);
-			}
-			if (state.dashboardsPagination && searchHandler) {
-				searchHandler.handleDashboardsPagination(state, dispatch);
-			}
-			if (state.dataSourcesPagination && searchHandler) {
-				searchHandler.handleDataSourcesPagination(state, dispatch);
-			}
-			if (state.databasesPagination && searchHandler) {
-				searchHandler.handleDatabasesPagination(state, dispatch);
-			}
-		} else if (
-			state.cloneData.clone_name.toLowerCase() === 'cdo' ||
-			state.cloneData.clone_name.toLowerCase() === 'jbook'
-		) {
-			if (state.docsPagination && searchHandler) {
-				setState(dispatch, {
-					docsPagination: false,
-				});
-				searchHandler.handleSearch(state, dispatch, state.replaceResults);
-			}
-		}
-	}, [state, dispatch, searchHandler]);
+	}, [state.isFavoriteSearch, state.userData, dispatch]);
 
 	useBottomScrollListener(
 		() => {
@@ -149,131 +132,6 @@ const MainView = (props) => {
 		{ offset: 200, debounce: 5000 }
 	);
 
-	const getViewPanels = () => {
-		const viewPanels = { Card: mainViewHandler.getCardViewPanel({ context }) };
-
-		const extraViewPanels = mainViewHandler.getExtraViewPanels({ context });
-		extraViewPanels.forEach(({ panelName, panel }) => {
-			viewPanels[panelName] = panel;
-		});
-
-		return viewPanels;
-	};
-
-	const getAnalystTools = () => {
-		return mainViewHandler.getAnalystToolsPage({ context });
-	};
-
-	const getDataTracker = () => {
-		return <GCDataStatusTracker state={state} />;
-	};
-
-	const getUserDashboard = () => {
-		return userProfileHandler.getUserProfilePage({ state, dispatch });
-	};
-
-	const getAboutUs = () => {
-		return mainViewHandler.getAboutUs({ state });
-	};
-
-	const getNonMainPageOuterContainer = (getInnerChildren) => {
-		return (
-			<div>
-				<div
-					style={{
-						backgroundColor: 'rgba(223, 230, 238, 0.5)',
-						minHeight: 'calc(100vh - 200px)',
-					}}
-				>
-					{state.pageDisplayed !== 'aboutUs' && (
-						<div
-							style={{
-								borderTop: '1px solid #B0BAC5',
-								width: '96.5%',
-								marginLeft: 'auto',
-								marginRight: 'auto',
-							}}
-						/>
-					)}
-					<React.Fragment>
-						{state.pageDisplayed !== 'aboutUs' && (
-							<Button
-								style={{
-									marginLeft: '10px',
-									marginTop: '8px',
-									fontFamily: 'Montserrat',
-									color: '#313541',
-									position: 'absolute',
-								}}
-								startIcon={<ArrowBackIcon />}
-								onClick={() => {
-									window.history.pushState(
-										null,
-										document.title,
-										`/#/${state.cloneData.url.toLowerCase()}`
-									);
-									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
-									let viewName;
-									switch (state.pageDisplayed) {
-										case PAGE_DISPLAYED.dataTracker:
-											viewName = 'DataTracker';
-											break;
-										case PAGE_DISPLAYED.userDashboard:
-											viewName = 'UserDashboard';
-											break;
-										case PAGE_DISPLAYED.analystTools:
-											viewName = 'AnalystTools';
-											break;
-										default:
-											viewName = 'Main';
-											break;
-									}
-									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
-								}}
-							>
-								<></>
-							</Button>
-						)}
-						<div>
-							<p
-								style={{
-									fontSize: '26px',
-									marginLeft: '80px',
-									fontFamily: 'Montserrat',
-									fontWeight: 'bold',
-									marginTop: '10px',
-									color: '#313541',
-								}}
-							>
-								{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
-								{state.pageDisplayed === PAGE_DISPLAYED.analystTools && (
-									<span>
-										Analyst Tools | {state.analystToolsPageDisplayed}{' '}
-										<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
-									</span>
-								)}
-								{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
-							</p>
-						</div>
-
-						<div
-							style={{
-								backgroundColor:
-									state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
-									state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-									state.pageDisplayed === PAGE_DISPLAYED.aboutUs
-										? '#ffffff'
-										: '#DFE6EE',
-							}}
-						>
-							{getInnerChildren()}
-						</div>
-					</React.Fragment>
-				</div>
-			</div>
-		);
-	};
-
 	const setCurrentTime = () => {
 		// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -290,34 +148,33 @@ const MainView = (props) => {
 		return currentTime;
 	};
 
-	const renderHideTabs = (props) => {
-		return mainViewHandler.renderHideTabs(props);
+	const getMainViewComponent = (props) => {
+		switch (state.cloneData.main_view_module) {
+			case 'eda/edaMainViewHandler':
+				return <EDAMainViewHandler {...props} />;
+			case 'globalSearch/globalSearchMainViewHandler':
+				return <GlobalSearchMainViewHandler {...props} />;
+			case 'jbook/jbookMainViewHandler':
+				return <JBookMainViewHandler {...props} />;
+			case 'policy/policyMainViewHandler':
+				return <PolicyMainViewHandler {...props} />;
+			default:
+				return <DefaultMainViewHandler {...props} />;
+		}
 	};
 
-	switch (state.pageDisplayed) {
-		case PAGE_DISPLAYED.analystTools:
-			return getNonMainPageOuterContainer(getAnalystTools);
-		case PAGE_DISPLAYED.dataTracker:
-			return getNonMainPageOuterContainer(getDataTracker);
-		case PAGE_DISPLAYED.userDashboard:
-			return getNonMainPageOuterContainer(getUserDashboard);
-		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs);
-		case PAGE_DISPLAYED.main:
-		default:
-			if (mainViewHandler) {
-				return mainViewHandler.getMainView({
-					state,
-					dispatch,
-					setCurrentTime,
-					renderHideTabs,
-					pageLoaded,
-					getViewPanels,
-				});
-			} else {
-				return <></>;
-			}
-	}
+	return (
+		<>
+			{getMainViewComponent({
+				state,
+				dispatch,
+				cancelToken,
+				setCurrentTime,
+				gameChangerAPI,
+				gameChangerUserAPI,
+			})}
+		</>
+	);
 };
 
 MainView.propTypes = {

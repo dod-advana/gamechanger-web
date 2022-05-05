@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import SearchBanner from '../searchBar/GCSearchBanner';
+import TitleBar from '../searchBar/TitleBar';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import AdminMainViewFactory from '../factories/adminMainViewFactory';
@@ -58,7 +58,7 @@ const AdminMainView = (props) => {
 						{mainViewHandler.openedAdminMenu(setPageToView, pages, state.cloneData.clone_name)}
 					</SlideOutMenuContent>
 
-					<SearchBanner
+					<TitleBar
 						onTitleClick={() => {
 							window.location.href = `#/${state.cloneData.clone_name}/admin`;
 							setPageToView(pages.general);

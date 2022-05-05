@@ -99,7 +99,7 @@ const DocumentDetailsPage = (props) => {
 			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
 			setMetadata(favoritableData);
 		}
-	}, [document]);
+	}, [cloneData, document, userData]);
 
 	useEffect(() => {
 		if (document) {
