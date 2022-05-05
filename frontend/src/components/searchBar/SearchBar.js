@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { setState } from '../../utils/sharedFunctions';
 import ModularSearchBarHandler from './ModularSearchBarHandler';
-import SearchBanner from './GCSearchBanner';
+import TitleBar from './TitleBar';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
-import MainViewFactory from '../factories/mainViewFactory';
+import MainViewUtilityFactory from '../factories/mainViewUtilityFactory';
 
 const SearchBar = (props) => {
 	const { context } = props;
@@ -12,7 +12,7 @@ const SearchBar = (props) => {
 
 	const { rawSearchResults } = state;
 	const [searchHandler, setSearchHandler] = useState();
-	const [mainViewHandler, setMainViewHandler] = useState();
+	const [mainViewUtilityHandler, setMainViewUtilityHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
@@ -21,9 +21,9 @@ const SearchBar = (props) => {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const tmpSearchHandler = searchFactory.createHandler();
 			setSearchHandler(tmpSearchHandler);
-			const mainViewFactory = new MainViewFactory(state.cloneData.main_view_module);
+			const mainViewFactory = new MainViewUtilityFactory(state.cloneData.main_view_module);
 			const tmpMainViewHandler = mainViewFactory.createHandler();
-			setMainViewHandler(tmpMainViewHandler);
+			setMainViewUtilityHandler(tmpMainViewHandler);
 			setLoaded(true);
 		}
 	}, [state, loaded]);
@@ -40,37 +40,39 @@ const SearchBar = (props) => {
 	};
 
 	const handleCategoryTabChange = (tabName) => {
-		mainViewHandler.handleCategoryTabChange({ tabName, state, dispatch });
+		mainViewUtilityHandler.handleCategoryTabChange({ tabName, state, dispatch });
 	};
 
 	return (
 		<>
-			<SearchBanner
-				titleBarModule={state.cloneData.title_bar_module}
-				onTitleClick={() => {
-					window.location.href = `#/${state.cloneData.url}`;
-					dispatch({ type: 'RESET_STATE' });
-				}}
-				componentStepNumbers={state.componentStepNumbers}
-				toggleMenu={toggleMenu}
-				borderRadius="10px"
-				menuOpen={state.menuOpen}
-				menuColor="#13A792"
-				cloneData={state.cloneData}
-				expansionDict={state.expansionDict}
-				searchText={state.searchText}
-				jupiter={props.jupiter}
-				rawSearchResults={rawSearchResults}
-				selectedCategories={state.selectedCategories}
-				activeCategoryTab={state.activeCategoryTab}
-				setActiveCategoryTab={(tabName) => handleCategoryTabChange(tabName)}
-				categoryMetadata={state.categoryMetadata}
-				pageDisplayed={state.pageDisplayed}
-				dispatch={dispatch}
-				loading={state.loading}
-			>
-				<ModularSearchBarHandler context={context} />
-			</SearchBanner>
+			{loaded && (
+				<TitleBar
+					titleBarModule={state.cloneData.title_bar_module}
+					onTitleClick={() => {
+						window.location.href = `#/${state.cloneData.url}`;
+						dispatch({ type: 'RESET_STATE' });
+					}}
+					componentStepNumbers={state.componentStepNumbers}
+					toggleMenu={toggleMenu}
+					borderRadius="10px"
+					menuOpen={state.menuOpen}
+					menuColor="#13A792"
+					cloneData={state.cloneData}
+					expansionDict={state.expansionDict}
+					searchText={state.searchText}
+					jupiter={props.jupiter}
+					rawSearchResults={rawSearchResults}
+					selectedCategories={state.selectedCategories}
+					activeCategoryTab={state.activeCategoryTab}
+					setActiveCategoryTab={handleCategoryTabChange}
+					categoryMetadata={state.categoryMetadata}
+					pageDisplayed={state.pageDisplayed}
+					dispatch={dispatch}
+					loading={state.loading}
+				>
+					<ModularSearchBarHandler context={context} />
+				</TitleBar>
+			)}
 		</>
 	);
 };

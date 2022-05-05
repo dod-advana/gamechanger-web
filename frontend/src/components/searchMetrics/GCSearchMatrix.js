@@ -1,13 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { setState } from '../../utils/sharedFunctions';
 import _ from 'lodash';
-import SearchMatrixFactory from '../factories/searchMatrixFactory';
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { commaThousands } from '../../utils/gamechangerUtils';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+
+const DefaultSearchMatrixHandler = LoadableVisibility({
+	loader: () => import('../modules/default/defaultSearchMatrixHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const EDASearchMatrixHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaSearchMatrixHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const PolicySearchMatrixHandler = LoadableVisibility({
+	loader: () => import('../modules/policy/policySearchMatrixHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const JBookSearchMatrixHandler = LoadableVisibility({
+	loader: () => import('../modules/jbook/jbookSearchMatrixHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
 
 const styles = {
 	innerContainer: {
@@ -256,20 +284,6 @@ export default function SearchMatrix(props) {
 
 	const classes = useStyles();
 
-	const [matrixHandler, setMatrixHandler] = useState();
-	const [loaded, setLoaded] = useState(false);
-
-	useEffect(() => {
-		// Create the factory
-		if (state.cloneDataSet && !loaded) {
-			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
-			const handler = factory.createHandler();
-
-			setMatrixHandler(handler);
-			setLoaded(true);
-		}
-	}, [state, loaded]);
-
 	const handleSelectAllCategories = (state, dispatch) => {
 		const newSelectedCategories = _.cloneDeep(state.selectedCategories);
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
@@ -386,6 +400,19 @@ export default function SearchMatrix(props) {
 		);
 	};
 
+	const getMatrixHandler = (props) => {
+		switch (state.cloneData.main_view_module) {
+			case 'policy/policyMainViewHandler':
+				return <PolicySearchMatrixHandler {...props} />;
+			case 'eda/edaMainViewHandler':
+				return <EDASearchMatrixHandler {...props} />;
+			case 'jbook/jbookMainViewHandler':
+				return <JBookSearchMatrixHandler {...props} />;
+			default:
+				return <DefaultSearchMatrixHandler {...props} />;
+		}
+	};
+
 	return (
 		<div className={''} style={{ height: 'fit-content', minWidth: '100%', marginRight: -10 }}>
 			<div className={''}>
@@ -395,13 +422,12 @@ export default function SearchMatrix(props) {
 						className={`tutorial-step-${state.componentStepNumbers['Advanced Settings']}`}
 					>
 						<div style={styles.innerContainer}>
-							{loaded &&
-								matrixHandler.getSearchMatrixItems({
-									renderCategories,
-									state,
-									classes,
-									dispatch,
-								})}
+							{getMatrixHandler({
+								renderCategories,
+								state,
+								classes,
+								dispatch,
+							})}
 						</div>
 					</div>
 				</div>
