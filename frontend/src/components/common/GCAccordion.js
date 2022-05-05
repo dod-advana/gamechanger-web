@@ -87,8 +87,6 @@ const GCAccordion = (props) => {
 		marginBottom,
 	} = props;
 
-	console.log(marginBottom);
-
 	const StyledAccordion = withStyles({
 		root: {
 			border: '1px solid rgba(0, 0, 0, .125)',

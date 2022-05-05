@@ -1,6 +1,6 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-import SimpleTable from '../../common/SimpleTable';
+// import SimpleTable from '../../common/SimpleTable';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
@@ -10,6 +10,7 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../../common/gc-colors';
 import GCButton from '../../common/GCButton';
+import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from 'recharts';
 
 const _ = require('lodash');
 
@@ -187,38 +188,74 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 };
 
 const getIssuingOrgData = (state) => {
-	return Object.keys(state.issuingOrgs).map((org) => ({
-		Key: org,
-		Value: state.issuingOrgs[org],
+	const COLORS = ['#067BC2', '#84BCDA', '#ECC30B', '#F37748', '#D56062'];
+
+	// for the stats pie chart
+	return Object.keys(state.issuingOrgs).map((org, index) => ({
+		type: org,
+		value: state.issuingOrgs[org],
+		color: COLORS[index],
 	}));
+
+	// for the stats table
+	// return Object.keys(state.issuingOrgs).map((org) => ({
+	// 	Key: org,
+	// 	Value: state.issuingOrgs[org],
+	// }));
 };
 
 const getStatsData = (state) => {
 	const issuingOrgData = getIssuingOrgData(state);
-	const totalObligation = [
-		{
-			Key: 'Total Obligated Amount',
-			Value: '$' + state.totalObligatedAmount.toLocaleString(),
-		},
-	];
 
-	return issuingOrgData.concat(totalObligation);
+	// for stats table
+	// const totalObligation = [
+	// 	{
+	// 		Key: 'Total Obligated Amount',
+	// 		Value: '$' + state.totalObligatedAmount.toLocaleString(),
+	// 	},
+	// ];
+
+	return issuingOrgData; //.concat(totalObligation);
 };
 
 const renderStats = (state) => {
+	let data = getStatsData(state);
 	return (
-		<SimpleTable
-			tableClass={'magellan-table'}
-			zoom={1}
-			// headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-			rows={getStatsData(state)}
-			height={'auto'}
-			dontScroll={true}
-			// colWidth={colWidth}
-			disableWrap={true}
-			// title={'Metadata'}
-			hideHeader={true}
-		/>
+		// <SimpleTable
+		// 	tableClass={'magellan-table'}
+		// 	zoom={1}
+		// 	// headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+		// 	rows={getStatsData(state)}
+		// 	height={'auto'}
+		// 	dontScroll={true}
+		// 	// colWidth={colWidth}
+		// 	disableWrap={true}
+		// 	// title={'Metadata'}
+		// 	hideHeader={true}
+		// />
+		<ResponsiveContainer width="100%" height={300}>
+			<PieChart width={300} height={300}>
+				<Pie
+					innerRadius={60}
+					outerRadius={80}
+					data={data}
+					cx="50%"
+					cy="50%"
+					dataKey="value"
+					nameKey="type"
+					label
+				>
+					<text x={'50%'} y={'50%'} dy={8} textAnchor="middle">
+						{state.totalObligatedAmount.toLocaleString()}$M
+					</text>
+					{data.map((entry, index) => (
+						<Cell key={`cell-${index}`} fill={data[index].color} />
+					))}
+				</Pie>
+				<Legend />
+				<Tooltip />
+			</PieChart>
+		</ResponsiveContainer>
 	);
 };
 
@@ -887,23 +924,6 @@ const EDASearchMatrixHandler = {
 
 				<GCAccordion
 					contentPadding={15}
-					expanded={
-						!edaSearchSettings.allDataSelected &&
-						(edaSearchSettings.contractData.pds ||
-							edaSearchSettings.contractData.syn ||
-							edaSearchSettings.contractData.fpds ||
-							edaSearchSettings.contractData.none)
-					}
-					header={'EDA CONTRACT DATA'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderContractDataFilter(state, dispatch)}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
 					expanded={edaSearchSettings.minObligatedAmount || edaSearchSettings.maxObligatedAmount}
 					header={'OBLIGATED AMOUNT'}
 					headerBackground={'rgb(238,241,242)'}
@@ -911,28 +931,6 @@ const EDASearchMatrixHandler = {
 					headerTextWeight={'normal'}
 				>
 					{renderObligatedAmountFilter(state, dispatch)}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.contractsOrMods !== 'both'}
-					header={'CONTRACTS OR MODS'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderModificationFilter(state, dispatch)}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.excludeTerms !== null}
-					header={'EXCLUDED TERMS'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderExcludeTerms(state, dispatch)}
 				</GCAccordion>
 
 				<GCAccordion
@@ -949,7 +947,7 @@ const EDASearchMatrixHandler = {
 				<GCAccordion
 					contentPadding={15}
 					expanded={edaSearchSettings.fundingOfficeCode}
-					header={'FUNDING OFFICE CODE'}
+					header={'FUNDING OFFICE DoDAAC'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -959,57 +957,13 @@ const EDASearchMatrixHandler = {
 
 				<GCAccordion
 					contentPadding={15}
-					expanded={edaSearchSettings.idvPIID}
-					header={'IDV PIID'}
+					expanded={edaSearchSettings.fundingAgencyName}
+					header={'FUNDING AGENCY NAME'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.modNumber}
-					header={'MOD NUMBER'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.pscDesc}
-					header={'PSC DESCRIPTION'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.piid}
-					header={'PIID'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}
-				</GCAccordion>
-
-				<GCAccordion
-					contentPadding={15}
-					expanded={edaSearchSettings.reqDesc}
-					header={'DESCRIPTION OF REQS'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}
+					{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}
 				</GCAccordion>
 
 				<GCAccordion
@@ -1025,13 +979,13 @@ const EDASearchMatrixHandler = {
 
 				<GCAccordion
 					contentPadding={15}
-					expanded={edaSearchSettings.fundingAgencyName}
-					header={'FUNDING AGENCY NAME'}
+					expanded={edaSearchSettings.pscDesc}
+					header={'PSC DESCRIPTION'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}
+					{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
 				</GCAccordion>
 
 				<GCAccordion
@@ -1048,12 +1002,95 @@ const EDASearchMatrixHandler = {
 				<GCAccordion
 					contentPadding={15}
 					expanded={edaSearchSettings.duns}
-					header={'DUNS'}
+					header={'UEI'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
 					{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={
+						!edaSearchSettings.allDataSelected &&
+						(edaSearchSettings.contractData.pds ||
+							edaSearchSettings.contractData.syn ||
+							edaSearchSettings.contractData.fpds ||
+							edaSearchSettings.contractData.none)
+					}
+					header={'AVAILABLE EDA FORMAT'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderContractDataFilter(state, dispatch)}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.excludeTerms !== null}
+					header={'EXCLUDED TERMS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderExcludeTerms(state, dispatch)}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.reqDesc}
+					header={'DESCRIPTION OF REQS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.contractsOrMods !== 'both'}
+					header={'CONTRACTS OR MODS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderModificationFilter(state, dispatch)}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.idvPIID}
+					header={'IDV PIID'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.piid}
+					header={'PIID'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}
+				</GCAccordion>
+
+				<GCAccordion
+					contentPadding={15}
+					expanded={edaSearchSettings.modNumber}
+					header={'MOD NUMBER'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
 				</GCAccordion>
 
 				<GCButton
