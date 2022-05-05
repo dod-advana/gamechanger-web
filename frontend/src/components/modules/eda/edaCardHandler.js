@@ -1064,7 +1064,8 @@ const EdaCardHandler = {
 		},
 
 		getFilename: (item) => {
-			return item.file_location_eda_ext;
+			// return item.file_location_eda_ext;
+			return item.dir_location_eda_ext + '/' + item.filename;
 		},
 	},
 

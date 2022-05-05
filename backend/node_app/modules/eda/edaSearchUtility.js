@@ -851,8 +851,10 @@ class EDASearchUtility {
 								r.inner_hits[id].hits.hits.forEach((phit) => {
 									const pageIndex = phit._nested.offset;
 									const paragraphIdBeingMatched = parseInt(id);
-									// const snippet =  phit.fields["pages.p_raw_text"][0];
+									const text = phit.fields['pages.p_raw_text'][0];
+									const score = phit._score;
 									let pageNumber = pageIndex + 1;
+
 									// one hit per page max
 									if (!pageSet.has(pageNumber)) {
 										const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(
@@ -868,7 +870,14 @@ class EDASearchUtility {
 											}
 										}
 										pageSet.add(pageNumber);
-										result.pageHits.push({ snippet, pageNumber, paragraphIdBeingMatched });
+										result.pageHits.push({
+											snippet,
+											pageNumber,
+											paragraphIdBeingMatched,
+											score,
+											text,
+											id,
+										});
 									}
 								});
 							});
