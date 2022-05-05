@@ -56,10 +56,6 @@ class AnalystToolsController {
 					esQuery,
 					userId
 				);
-				console.log('Initial Results!!!');
-				console.log(esResults.body.hits.hits[0].inner_hits[0].hits.hits[0]);
-				console.log('ESQuery!!!');
-				console.log(esQuery);
 
 				returnData = this.edaSearchUtility.cleanUpEsResults(
 					esResults,
@@ -118,8 +114,6 @@ class AnalystToolsController {
 					returnData.docs = cleanedDocs;
 				}
 			}
-			console.log('Returned Docs!!!');
-			console.log(esResults.body.hits.hits);
 
 			res.status(200).send(returnData);
 		} catch (e) {
