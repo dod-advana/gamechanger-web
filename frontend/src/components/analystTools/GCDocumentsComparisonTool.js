@@ -547,182 +547,193 @@ const GCDocumentsComparisonTool = ({
 											</span>
 										</div>
 										<Collapse isOpened={docOpen}>
-											{doc.paragraphs
-												.filter(
-													(paragraph) => paragraph.paragraphIdBeingMatched === selectedInput
-												)
-												.map((paragraph) => {
-													let blockquoteClass = 'searchdemo-blockquote-sm';
-													const pOpen = selectedParagraph?.id === paragraph.id;
-													const isHighlighted = pOpen && docOpen;
-													if (isHighlighted)
-														blockquoteClass += ' searchdemo-blockquote-sm-active';
-													return (
-														<div key={paragraph.id} style={{ position: 'relative' }}>
-															{isHighlighted && (
-																<span className="searchdemo-arrow-left-sm"></span>
-															)}
-															<div
-																className={blockquoteClass}
-																onClick={(e) => {
-																	e.preventDefault();
-																	setCompareDocument(doc);
-																	setSelectedParagraph(paragraph);
-																}}
-																style={{
-																	marginLeft: 20,
-																	marginRight: 0,
-																	border: isHighlighted
-																		? 'none'
-																		: '1px solid #DCDCDC',
-																	padding: '3px',
-																	cursor: 'pointer',
-																}}
-															>
-																<span
-																	className="gc-document-explorer-result-header-text"
-																	style={{
-																		color: isHighlighted ? 'white' : '#131E43',
-																	}}
-																>
-																	{isHighlighted
-																		? `Page: ${paragraph.page_num_i + 1}, Par: ${
-																				paragraph.id.split('_')[1]
-																		  }, Similarity Score: ${convertDCTScoreToText(
-																				paragraph.score
-																		  )}`
-																		: paragraph.par_raw_text_t}
-																</span>
-															</div>
-															<Collapse isOpened={pOpen && docOpen}>
+											{doc.paragraphs &&
+												doc.paragraphs
+													.filter(
+														(paragraph) =>
+															paragraph.paragraphIdBeingMatched === selectedInput
+													)
+													.map((paragraph) => {
+														let blockquoteClass = 'searchdemo-blockquote-sm';
+														const pOpen = selectedParagraph?.id === paragraph.id;
+														const isHighlighted = pOpen && docOpen;
+														if (isHighlighted)
+															blockquoteClass += ' searchdemo-blockquote-sm-active';
+														return (
+															<div key={paragraph.id} style={{ position: 'relative' }}>
+																{isHighlighted && (
+																	<span className="searchdemo-arrow-left-sm"></span>
+																)}
 																<div
-																	className="searchdemo-blockquote-sm"
+																	className={blockquoteClass}
+																	onClick={(e) => {
+																		e.preventDefault();
+																		setCompareDocument(doc);
+																		setSelectedParagraph(paragraph);
+																	}}
 																	style={{
 																		marginLeft: 20,
 																		marginRight: 0,
-																		border: '1px solid #DCDCDC',
-																		padding: '10px',
-																		whiteSpace: 'normal',
+																		border: isHighlighted
+																			? 'none'
+																			: '1px solid #DCDCDC',
+																		padding: '3px',
+																		cursor: 'pointer',
 																	}}
 																>
 																	<span
 																		className="gc-document-explorer-result-header-text"
-																		style={{ fontWeight: 'normal' }}
-																	>
-																		{paragraph.par_raw_text_t}
-																	</span>
-																	<div
 																		style={{
-																			display: 'flex',
-																			justifyContent: 'right',
-																			marginTop: '10px',
+																			color: isHighlighted ? 'white' : '#131E43',
 																		}}
 																	>
-																		<GCTooltip
-																			title={'Export document matches to CSV'}
-																			placement="bottom"
-																			arrow
+																		{isHighlighted
+																			? `Page: ${
+																					paragraph.page_num_i + 1
+																			  }, Par: ${
+																					paragraph.id.split('_')[1]
+																			  }, Similarity Score: ${convertDCTScoreToText(
+																					paragraph.score
+																			  )}`
+																			: paragraph.par_raw_text_t}
+																	</span>
+																</div>
+																<Collapse isOpened={pOpen && docOpen}>
+																	<div
+																		className="searchdemo-blockquote-sm"
+																		style={{
+																			marginLeft: 20,
+																			marginRight: 0,
+																			border: '1px solid #DCDCDC',
+																			padding: '10px',
+																			whiteSpace: 'normal',
+																		}}
+																	>
+																		<span
+																			className="gc-document-explorer-result-header-text"
+																			style={{ fontWeight: 'normal' }}
 																		>
-																			<div>
-																				<GCButton
-																					onClick={() => exportSingleDoc(doc)}
-																					style={{
-																						marginLeft: 10,
-																						height: 36,
-																						padding: '0px, 10px',
-																						minWidth: 0,
-																						fontSize: '14px',
-																						lineHeight: '15px',
-																					}}
-																				>
-																					Export
-																				</GCButton>
-																			</div>
-																		</GCTooltip>
-																		<GCTooltip
-																			title={'Save document to favorites'}
-																			placement="bottom"
-																			arrow
+																			{paragraph.par_raw_text_t}
+																		</span>
+																		<div
+																			style={{
+																				display: 'flex',
+																				justifyContent: 'right',
+																				marginTop: '10px',
+																			}}
 																		>
-																			<div>
-																				<GCButton
+																			<GCTooltip
+																				title={'Export document matches to CSV'}
+																				placement="bottom"
+																				arrow
+																			>
+																				<div>
+																					<GCButton
+																						onClick={() =>
+																							exportSingleDoc(doc)
+																						}
+																						style={{
+																							marginLeft: 10,
+																							height: 36,
+																							padding: '0px, 10px',
+																							minWidth: 0,
+																							fontSize: '14px',
+																							lineHeight: '15px',
+																						}}
+																					>
+																						Export
+																					</GCButton>
+																				</div>
+																			</GCTooltip>
+																			<GCTooltip
+																				title={'Save document to favorites'}
+																				placement="bottom"
+																				arrow
+																			>
+																				<div>
+																					<GCButton
+																						onClick={() =>
+																							saveDocToFavorites(
+																								doc.filename,
+																								paragraph
+																							)
+																						}
+																						style={{
+																							marginLeft: 10,
+																							height: 36,
+																							padding: '0px, 10px',
+																							minWidth: 0,
+																							fontSize: '14px',
+																							lineHeight: '15px',
+																						}}
+																					>
+																						Save to Favorites
+																					</GCButton>
+																				</div>
+																			</GCTooltip>
+																			<GCTooltip
+																				title={'Was this result relevant?'}
+																				placement="bottom"
+																				arrow
+																			>
+																				<i
+																					className={
+																						classes.feedback +
+																						' fa fa-thumbs-up'
+																					}
+																					style={
+																						feedbackList[paragraph.id]
+																							? {
+																									color: '#939395',
+																									WebkitTextStroke:
+																										'1px black',
+																							  }
+																							: {}
+																					}
 																					onClick={() =>
-																						saveDocToFavorites(
-																							doc.filename,
-																							paragraph
+																						handleFeedback(
+																							doc,
+																							paragraph,
+																							true
 																						)
 																					}
-																					style={{
-																						marginLeft: 10,
-																						height: 36,
-																						padding: '0px, 10px',
-																						minWidth: 0,
-																						fontSize: '14px',
-																						lineHeight: '15px',
-																					}}
-																				>
-																					Save to Favorites
-																				</GCButton>
-																			</div>
-																		</GCTooltip>
-																		<GCTooltip
-																			title={'Was this result relevant?'}
-																			placement="bottom"
-																			arrow
-																		>
-																			<i
-																				className={
-																					classes.feedback +
-																					' fa fa-thumbs-up'
-																				}
-																				style={
-																					feedbackList[paragraph.id]
-																						? {
-																								color: '#939395',
-																								WebkitTextStroke:
-																									'1px black',
-																						  }
-																						: {}
-																				}
-																				onClick={() =>
-																					handleFeedback(doc, paragraph, true)
-																				}
-																			/>
-																		</GCTooltip>
-																		<GCTooltip
-																			title={'Was this result relevant?'}
-																			placement="bottom"
-																			arrow
-																		>
-																			<i
-																				className={
-																					classes.feedback +
-																					' fa fa-thumbs-down'
-																				}
-																				style={
-																					feedbackList[paragraph.id] === false
-																						? {
-																								color: '#939395',
-																								WebkitTextStroke:
-																									'1px black',
-																						  }
-																						: {}
-																				}
-																				onClick={() =>
-																					handleFeedback(
-																						doc,
-																						paragraph,
+																				/>
+																			</GCTooltip>
+																			<GCTooltip
+																				title={'Was this result relevant?'}
+																				placement="bottom"
+																				arrow
+																			>
+																				<i
+																					className={
+																						classes.feedback +
+																						' fa fa-thumbs-down'
+																					}
+																					style={
+																						feedbackList[paragraph.id] ===
 																						false
-																					)
-																				}
-																			/>
-																		</GCTooltip>
+																							? {
+																									color: '#939395',
+																									WebkitTextStroke:
+																										'1px black',
+																							  }
+																							: {}
+																					}
+																					onClick={() =>
+																						handleFeedback(
+																							doc,
+																							paragraph,
+																							false
+																						)
+																					}
+																				/>
+																			</GCTooltip>
+																		</div>
 																	</div>
-																</div>
-															</Collapse>
-														</div>
-													);
-												})}
+																</Collapse>
+															</div>
+														);
+													})}
 										</Collapse>
 									</div>
 								);

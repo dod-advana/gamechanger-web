@@ -123,8 +123,12 @@ const EDADocumentsComparisonTool = (props) => {
 						console.log('DOCS!!!');
 						console.log(resp.data.docs);
 						console.log(selectedInput);
+						console.log('PARAGRAPHS!!!');
+						console.log(paragraphs);
 						const document = resp.data.docs.find((doc) => {
-							const foundPar = doc.pageHits[0];
+							const foundPar = doc.pageHits.find(
+								(page) => page.paragraphIdBeingMatched === selectedInput
+							);
 							if (foundPar) {
 								paragraph = foundPar;
 								return true;
@@ -166,7 +170,7 @@ const EDADocumentsComparisonTool = (props) => {
 		if (needsSort && returnedDocs.length) {
 			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter((doc) => {
-				return doc.pageHits.find((match) => match.pageNumber === selectedInput);
+				return doc.pageHits.find((match) => match.paragraphIdBeingMatched === selectedInput);
 			});
 			const order = sortOrder === 'desc' ? 1 : -1;
 			let sortFunc = () => {};
@@ -188,11 +192,11 @@ const EDADocumentsComparisonTool = (props) => {
 					};
 					break;
 				default:
-					// sortFunc = (docA, docB) => {
-					// 	if (docA.score > docB.score) return -order;
-					// 	if (docA.score < docB.score) return order;
-					// 	return 0;
-					// };
+					sortFunc = (docA, docB) => {
+						if (docA.score > docB.score) return -order;
+						if (docA.score < docB.score) return order;
+						return 0;
+					};
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
@@ -206,10 +210,10 @@ const EDADocumentsComparisonTool = (props) => {
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		let undo = false;
-		if (positiveFeedback === feedbackList[paragraph.pageNumber]) {
+		if (positiveFeedback === feedbackList[paragraph.paragraphIdBeingMatched]) {
 			undo = true;
 			const newList = { ...feedbackList };
-			delete newList[paragraph.pageNumber];
+			delete newList[paragraph.paragraphIdBeingMatched];
 			setFeedbackList(newList);
 		} else {
 			setFeedbackList({ ...feedbackList, [paragraph.id]: positiveFeedback });
@@ -233,7 +237,7 @@ const EDADocumentsComparisonTool = (props) => {
 				if (compareDocument && selectedParagraph) {
 					gameChangerAPI
 						.dataStorageDownloadGET(
-							encode(compareDocument.filename || ''),
+							encode(compareDocument.file_location_eda_ext || ''),
 							`"${selectedParagraph.snippet}"`,
 							selectedParagraph.pageNumber,
 							true,
@@ -261,7 +265,7 @@ const EDADocumentsComparisonTool = (props) => {
 		}
 		setParagraphs(newParagraphs);
 		const newReturnedDocs = returnedDocs.filter((doc) => {
-			const newParagraphs = doc.paragraphs.filter((par) => {
+			const newParagraphs = doc.pageHits.filter((par) => {
 				return par.paragraphIdBeingMatched !== id;
 			});
 			return newParagraphs.length;
@@ -317,15 +321,15 @@ const EDADocumentsComparisonTool = (props) => {
 
 	const exportSingleDoc = (document) => {
 		const exportList = [];
-		document.paragraphs.forEach((paragraph) => {
-			const textInput = paragraphs.find((input) => paragraph.paragraphIdBeingMatched === input.id).text;
+		document.pageHits.forEach((page) => {
+			const textInput = paragraphs.find((input) => page.paragraphIdBeingMatched === input.id).text;
 			exportList.push({
 				filename: document.filename,
 				title: document.title,
-				page: paragraph.page_num_i + 1,
+				page: page.pageNumber,
 				textInput,
-				textMatch: paragraph.par_raw_text_t,
-				score: convertDCTScoreToText(paragraph.score),
+				textMatch: page.snippet,
+				score: convertDCTScoreToText(page.score),
 			});
 		});
 		heandleExport(exportList, 'ExportSindleDocCSV');
@@ -334,15 +338,15 @@ const EDADocumentsComparisonTool = (props) => {
 	const exportAll = () => {
 		const exportList = [];
 		returnedDocs.forEach((document) => {
-			document.paragraphs.forEach((paragraph) => {
-				const textInput = paragraphs.find((input) => paragraph.paragraphIdBeingMatched === input.id).text;
+			document.pageHits.forEach((page) => {
+				const textInput = paragraphs.find((input) => page.paragraphIdBeingMatched === input.id).text;
 				exportList.push({
 					filename: document.filename,
 					title: document.title,
-					page: paragraph.page_num_i + 1,
+					page: page.pageNumber,
 					textInput,
-					textMatch: paragraph.par_raw_text_t,
-					score: convertDCTScoreToText(paragraph.score),
+					textMatch: page.snippet,
+					score: convertDCTScoreToText(page.score),
 				});
 			});
 		});
@@ -367,7 +371,7 @@ const EDADocumentsComparisonTool = (props) => {
 	const setToFirstResultofInput = (inputId) => {
 		let paragraph;
 		const document = viewableDocs.find((doc) => {
-			const foundPar = doc.paragraphs.find((par) => par.paragraphIdBeingMatched === inputId);
+			const foundPar = doc.pageHits.find((page) => page.paragraphIdBeingMatched === inputId);
 			if (foundPar) {
 				paragraph = foundPar;
 				return true;

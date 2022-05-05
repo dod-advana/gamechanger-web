@@ -45,7 +45,11 @@ class AnalystToolsController {
 			const clientObj = this.searchUtility.getESClient(cloneName, permissions);
 			let esResults = {};
 
+			let returnData = {};
+
 			if (cloneName === 'eda') {
+				console.log('PARAGRAGHS!!!');
+				console.log(paragraphs);
 				esQuery = this.edaSearchUtility.getESSimilarityQuery(paragraphs, filters);
 
 				esResults = await this.dataLibrary.queryElasticSearch(
@@ -53,6 +57,20 @@ class AnalystToolsController {
 					clientObj.esIndex,
 					esQuery,
 					userId
+				);
+				console.log('Initial Results!!!');
+				console.log(esResults.body.hits.hits[0].inner_hits[0].hits.hits[0]);
+				console.log('ESQuery!!!');
+				console.log(esQuery);
+
+				returnData = this.edaSearchUtility.cleanUpEsResults(
+					esResults,
+					[],
+					userId,
+					[],
+					{},
+					clientObj.esIndex,
+					esQuery
 				);
 			} else {
 				// ML API Call Goes Here
@@ -83,27 +101,28 @@ class AnalystToolsController {
 					esQuery,
 					userId
 				);
-			}
 
-			// Aggregate Data
-			const returnData = this.searchUtility.cleanUpEsResults(
-				esResults,
-				[],
-				userId,
-				[],
-				{},
-				null,
-				esQuery,
-				true,
-				resultsObject
-			);
+				// Aggregate Data
+				returnData = this.searchUtility.cleanUpEsResults(
+					esResults,
+					[],
+					userId,
+					[],
+					{},
+					null,
+					esQuery,
+					true,
+					resultsObject
+				);
 
-			if (cloneName !== 'eda') {
-				const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
-				returnData.docs = cleanedDocs;
+				if (cloneName !== 'eda') {
+					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
+					returnData.docs = cleanedDocs;
+				}
 			}
 			console.log('Returned Docs!!!');
-			console.log(returnData.docs);
+			console.log(esResults.body.hits.hits);
+
 			res.status(200).send(returnData);
 		} catch (e) {
 			this.logger.error(e, '60OOE62', userId);
