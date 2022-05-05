@@ -25,7 +25,7 @@
     "types/node": "12.20.13"
   },
   "dependencies": {
-    "@dod-advana/advana-api-auth": "0.0.44",
+    "@dod-advana/advana-api-auth": "0.0.45",
     "@dod-advana/advana-logger": "0.0.4",
     "@elastic/elasticsearch": "7.10.0",
     "async": "2.6.3",
@@ -47,6 +47,7 @@
     "lodash": "4.17.21",
     "lunr": "2.3.9",
     "moment": "2.20.1",
+    "moment-timezone": "0.5.34",
     "mysql": "2.18.1",
     "neo4j-driver": "4.3.1",
     "node-cron": "2.0.3",

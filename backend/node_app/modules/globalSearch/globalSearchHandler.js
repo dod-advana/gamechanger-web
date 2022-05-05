@@ -155,13 +155,17 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async getApplicationResults(searchText, offset, limit, userId) {
 		try {
+			const t0 = new Date().getTime();
 			const hitQuery = `select description, permission, href, link_label, id
 							  from megamenu_links
 							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
 								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
 			const results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
 			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
-			return this.generateRespData(apps, appResults, offset, limit);
+			const tmpReturn = this.generateRespData(apps, appResults, offset, limit);
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Application Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'MJ2D6VGTime', userId);
+			return tmpReturn;
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6VG', userId);
 			return { hits: [], totalCount: 0, count: 0 };
@@ -170,6 +174,7 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
+			const t0 = new Date().getTime();
 			let results = await Promise.all([
 				this.getQlikApps(),
 				this.getQlikApps({}, userId.substring(0, userId.length - 4)),
@@ -178,7 +183,10 @@ class GlobalSearchHandler extends SearchHandler {
 				this.mergeUserApps(results[0].data || [], results[1].data || []),
 				lunrSearchUtils.parse(searchText)
 			);
-			return this.generateRespData(apps, searchResults, offset, limit);
+			const tmpReturn = this.generateRespData(apps, searchResults, offset, limit);
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
+			return tmpReturn;
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
@@ -186,6 +194,7 @@ class GlobalSearchHandler extends SearchHandler {
 	}
 
 	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
+		const t0 = new Date().getTime();
 		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
 		const qStatus = await this.dcUtils.getQueryableStatuses();
 		try {
@@ -214,6 +223,13 @@ class GlobalSearchHandler extends SearchHandler {
 			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
+
+			const t1 = new Date().getTime();
+			this.logger.info(
+				`Get Data Catalog Results Time for ${searchType}: ${((t1 - t0) / 1000).toFixed(2)}`,
+				'FE656U9Time',
+				userId
+			);
 
 			return response.data || { total: 0, results: [] };
 		} catch (err) {
