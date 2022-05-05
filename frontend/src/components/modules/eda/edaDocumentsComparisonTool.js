@@ -120,7 +120,8 @@ const EDADocumentsComparisonTool = (props) => {
 						setNoResults(true);
 					} else {
 						let paragraph;
-
+						// console.log(resp.data.docs);
+						// console.log(selectedInput);
 						const document = resp.data.docs.find((doc) => {
 							const foundPar = doc.pageHits.find(
 								(page) => page.paragraphIdBeingMatched === selectedInput
