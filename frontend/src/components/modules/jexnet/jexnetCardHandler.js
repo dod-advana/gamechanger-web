@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import {
@@ -9,71 +9,28 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 	getMetadataForPropertyTable,
-	encode,
 } from '../../../utils/gamechangerUtils';
-import {
-	StyledFrontCardContent,
-	StyledFrontCardHeader,
-	StyledFrontCardSubHeader,
-	StyledListViewFrontCardContent,
-} from '../default/defaultCardHandler';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import { primary } from '../../../components/common/gc-colors';
+import { primary } from '../../common/gc-colors';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import sanitizeHtml from 'sanitize-html';
 import config from '../../../config/config';
+import {
+	getDefaultComponent,
+	styles,
+	colWidth,
+	StyledFrontCardHeader,
+	StyledFrontCardSubHeader,
+	StyledListViewFrontCardContent,
+	StyledFrontCardContent,
+	clickFn,
+	makeRows,
+} from '../default/defaultCardHandler';
 
-const colWidth = {
-	maxWidth: '900px',
-	whiteSpace: 'nowrap',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-};
-
-const styles = {
-	footerButtonBack: {
-		margin: '0 10px 0 0 ',
-		padding: '8px 12px',
-	},
-	viewMoreChevron: {
-		fontSize: 14,
-		color: primary,
-		fontWeight: 'normal',
-		marginLeft: 5,
-	},
-	viewMoreButton: {
-		fontSize: 16,
-		color: primary,
-		fontWeight: 'bold',
-		cursor: 'pointer',
-		minWidth: 60,
-	},
-	collectionContainer: {
-		margin: '1em',
-		overflow: 'auto',
-	},
-	bodyImg: {
-		width: 75,
-		margin: '10px',
-	},
-	bodyText: {
-		margin: '10px',
-		fontSize: '14px',
-	},
-};
-
-const getCardHeaderHandler = ({
-	item,
-	state,
-	idx,
-	checkboxComponent,
-	favoriteComponent,
-	graphView,
-	intelligentSearch,
-}) => {
+const getCardHeaderHandler = ({ item, state, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
 	// const isRevoked = item.is_revoked_b;
 
@@ -161,63 +118,7 @@ const getDisplayTitle = (item) => {
 	return item.title;
 };
 
-const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText.replace(
-			/"/gi,
-			''
-		)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
-	);
-};
-
-const Row = ({ label, value, minWidth = 'inherit' }) => {
-	return (
-		<div style={styles.row}>
-			<div style={{ fontWeight: 'bold', minWidth }}>{label}</div>
-			<div style={{ marginLeft: '12px', flex: 1 }}>{value}</div>
-		</div>
-	);
-};
-
-const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
-	const rows = [];
-	for (const fieldName of fieldsArr) {
-		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
-		const displayName = displayNameMap?.[fieldName] ?? fieldName;
-		let value = itemWithValues[cleanFieldName] ?? 'Unknown';
-		if (Array.isArray(value)) {
-			value = value.join(', ');
-		}
-
-		if (cleanFieldName === 'body') {
-			let splitValue = value.split('-----');
-			value = splitValue[splitValue.length - 1];
-		}
-
-		// shorten text longer than x length
-		if (value.length > 230) {
-			value = value.substring(0, 230) + '...';
-		}
-
-		if (value) {
-			if (forTable) {
-				const row = {};
-				row['Key'] = displayName.replace(/:/g, '');
-				row['Value'] = value;
-				rows.push(row);
-			} else {
-				rows.push(<Row key={cleanFieldName} label={displayName} value={value} minWidth={40} />);
-			}
-		}
-	}
-
-	return rows;
-};
-
-const JexnetCardHandler = {
+const cardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
 			return getDisplayTitle(item);
@@ -575,7 +476,7 @@ const JexnetCardHandler = {
 						)}
 					</>
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -587,7 +488,11 @@ const JexnetCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: primary }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
@@ -601,96 +506,17 @@ const JexnetCardHandler = {
 			return item.filename;
 		},
 	},
+};
 
-	publication: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
+const JexnetCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	entity: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	topic: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default JexnetCardHandler;

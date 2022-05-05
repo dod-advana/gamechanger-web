@@ -202,7 +202,13 @@ export default class SimpleTable extends React.Component {
 									key={`${rIdx}_${cIdx}`}
 								>
 									{editIcon}
-									{useParser ? parse(r[c]) : Array.isArray(r[c]) ? r[c].join(', ') : r[c]}
+									{useParser
+										? parse(r[c])
+										: Array.isArray(r[c])
+										? r[c].join(', ')
+										: typeof r[c] === 'boolean'
+										? r[c].toString()
+										: r[c]}
 								</td>
 							);
 						}
@@ -237,8 +243,19 @@ export default class SimpleTable extends React.Component {
 	};
 
 	render() {
-		const { rows, colKeys, columnMap, onRowClick, height, zoom, tableClass, dontScroll, inheritOverflow, margin } =
-			this.props;
+		const {
+			rows,
+			colKeys,
+			columnMap,
+			onRowClick,
+			height,
+			maxHeight,
+			zoom,
+			tableClass,
+			dontScroll,
+			inheritOverflow,
+			margin,
+		} = this.props;
 		if (rows.length === 0) return <i></i>;
 		const cols = colKeys || _.keys(rows[0]);
 		const head = this.getHeader(cols, columnMap);
@@ -255,6 +272,7 @@ export default class SimpleTable extends React.Component {
 			container: {
 				width: '100%',
 				height,
+				maxHeight,
 				overflow: 'auto',
 				margin,
 			},

@@ -1,10 +1,12 @@
 <img src="./img/tags/GAMECHANGER-NoPentagon_RGB@3x.png" align="right"
      alt="Mission Vision Icons" width="300" >
+
 # Introduction
 
 Over 15 thousand documents govern how the Department of Defense (DoD) operates. The documents exist in different repositories, often exist on different networks, are discoverable to different communities, are updated independently, and evolve rapidly. No single ability has ever existed that would enable navigation of the vast universe of governing requirements and guidance documents, leaving the Department unable to make evidence-based, data-driven decisions. Today GAMECHANGER offers a scalable solution with an authoritative corpus comprising a single trusted repository of all statutory and policy driven requirements based on Artificial-Intelligence (AI) enabled technologies.
 
 #
+
 <img src="./img/original/Brand_Platform.png" align="right"
      alt="Mission Vision Icons" width="320" >
 
@@ -13,6 +15,7 @@ Over 15 thousand documents govern how the Department of Defense (DoD) operates. 
 Fundamentally changing the way in which the DoD navigates its universe of requirements and makes decisions
 
 ### Mission
+
 GAMECHANGER aspires to be the Department’s trusted solution for evidence-based, data-driven decision-making across the universe of DoD requirements by:
 
 - Building the DoD’s authoritative corpus of requirements and policy to drive search, discovery, understanding, and analytic capabilities
@@ -21,9 +24,12 @@ GAMECHANGER aspires to be the Department’s trusted solution for evidence-based
 - Engaging the open-source community to build generalizable and replicable technology
 
 ## License & Contributions
+
 See LICENSE.md (including licensing intent - INTENT.md) and CONTRIBUTING.md
 
 ## How to Setup Local Env for Development
+
+**If you have access to GAMECHANGER's DI2E Confluence space, see the guide [here](https://confluence.di2e.net/display/UOT/GC+Web+Getting+Started+Guide).**
 
 These are the recommended steps if you are just trying to get coding.
 
@@ -32,10 +38,10 @@ These are the recommended steps if you are just trying to get coding.
 - In gamechanger-web/backend, copy .env.template to .env and fill in the values to point to your databases appropriately
 - In gamechanger-web/frontend, copy .env.template to .env.development and fill in the values to point to your URLs appropriately
 - In gamechanger-web/backend _and_ frontend, copy .npmrc.template to .npmrc and edit the files to contain a valid GitHub Personal Access Token with "read:packages" permissions (you can generate a new token by visiting https://github.com/settings/tokens)
-- **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+-+Development+Resources)
+- **Side note** - If you have access to GAMECHANGER's DI2E Confluence space, you can grab our pre-canned versions of the above files from [here](https://confluence.di2e.net/display/UOT/GC+Web+.env)
 - At the top level run **./resetDocker.sh**
 - Your frontend will be available at http://localhost:8080/#/gamechanger
-- To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the key **x-env-ssl_client_certificate** with a value of CN=007
+- To access the frontend, you should set up the modheader extension for chrome and set your request headers to include the keys **x-env-ssl_client_certificate** (with a value of something like YOUR.NAME.xx where xx is any number you like) and **SSL_CLIENT_S_DN_CN** (with a value of xx@mil where xx is the same number you like).
 
 ## How to Setup Local Single Node K8s Env for Development/Testing
 

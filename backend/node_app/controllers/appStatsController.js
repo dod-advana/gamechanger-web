@@ -3,6 +3,7 @@ const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
+const USER = require('../models').user;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const sparkMD5Lib = require('spark-md5');
 
@@ -20,6 +21,7 @@ class AppStatsController {
 			searchUtility = new SearchUtility(opts),
 			dataApi = new DataLibrary(opts),
 			sparkMD5 = sparkMD5Lib,
+			user = USER,
 		} = opts;
 
 		this.logger = logger;
@@ -28,7 +30,7 @@ class AppStatsController {
 		this.dataApi = dataApi;
 		this.mysql = mysql_lib;
 		this.sparkMD5 = sparkMD5;
-
+		this.user = user;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.getRecentlyOpenedDocs = this.getRecentlyOpenedDocs.bind(this);
@@ -230,7 +232,8 @@ class AppStatsController {
 					hex(a.idvisitor) as idvisitor,
 					idaction_name, 
 					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime,
+					DATE_FORMAT(CONVERT_TZ(a.server_time,'UTC','EST'),'%Y-%m-%d %H:%i') as documenttime_formatted
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
@@ -240,8 +243,8 @@ class AppStatsController {
 					and a.server_time >= ?
 					and a.server_time <= ?
 				order by 
-					idvisit,
-					documenttime desc;`,
+					documenttime desc,
+					idvisit;`,
 				[`${startDate}`, endDate],
 				(error, results, fields) => {
 					if (error) {
@@ -268,7 +271,7 @@ class AppStatsController {
 				`
 				select 
 					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime 
+					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime
 				from 
 					matomo_log_link_visit_action a, 
 					matomo_log_action b 
@@ -284,8 +287,9 @@ class AppStatsController {
 					if (error) {
 						this.logger.error('No userids found', 'B07IQHT');
 						resolve([]);
+					} else {
+						resolve(results);
 					}
-					resolve(results);
 				}
 			);
 		});
@@ -308,6 +312,7 @@ class AppStatsController {
 				a.search_cat,
 				b.name as value,
 				CONVERT_TZ(a.server_time,'UTC','EST') as searchtime,
+				DATE_FORMAT(CONVERT_TZ(a.server_time,'UTC','EST'),'%Y-%m-%d %H:%i') as searchtime_formatted,
 				hex(a.idvisitor) as idvisitor,
 				'Search' as action
 			from
@@ -346,19 +351,21 @@ class AppStatsController {
 			connection.query(
 				`
 			select
-				DISTINCT hex(c.idvisitor) as idvisitor
+				distinct hex(c.idvisitor) as idvisitor,
+				c.user_id as user_id
 			from
 				matomo_log_visit c
 			where 
-				c.user_id = ?
+				c.user_id in (?)
 			`,
 				[userID],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
-						throw error;
+						resolve([]);
+					} else {
+						resolve(results);
 					}
-					resolve(results);
 				}
 			);
 		});
@@ -387,7 +394,7 @@ class AppStatsController {
 				JOIN matomo_log_action as la_names
 				WHERE llva.idaction_event_action = la.idaction
 				AND llva.idaction_name = la_names.idaction
-				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument')
+				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument' OR la.name LIKE 'Highlight')
 				AND server_time >= ?
 				AND server_time <= ?
 			`,
@@ -439,7 +446,9 @@ class AppStatsController {
 				}
 				event = { ...event, value: search };
 			}
-			searchMap[event.idvisit].push(event);
+			if (searchMap[event.idvisit]) {
+				searchMap[event.idvisit].push(event);
+			}
 		}
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
@@ -509,7 +518,7 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getSearchPdfMapping(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
@@ -556,7 +565,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const results = await this.queryPDFOpenedByUserId([userId], clone_name, connection);
+			const results = await this.queryPDFOpenedByUserId([userId], connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -647,7 +656,7 @@ class AppStatsController {
 	 */
 	async getDocumentUsageData(req, res) {
 		let connection;
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { daysBack, offset, filters, sorting, pageSize };
 		const startDate = this.getDateNDaysAgo(opts.daysBack);
@@ -712,7 +721,6 @@ class AppStatsController {
 				}
 				doc.document = doc.document.substring(12).split(' - ')[0];
 			}
-
 			// filename mapping to titles; pulled from ES
 			let filenames = docData.map((item) => item.document);
 			const esQuery = this.searchUtility.getDocMetadataQuery('filenames', filenames);
@@ -752,7 +760,9 @@ class AppStatsController {
 				select
 					hex(a.idvisitor) as idvisitor,
 					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
-					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made
+					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made,
+					max(server_time) as last_search,
+					date_format(max(server_time),'%Y-%m-%d %H:%i') as last_search_formatted
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
@@ -830,8 +840,8 @@ class AppStatsController {
 					AND server_time >= ?
 					AND server_time <= ?
 				order by 
-					idvisitor,
-					documenttime desc;`,
+					documenttime desc,
+					idvisitor;`,
 				[startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
@@ -851,11 +861,11 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getUserAggregations(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
 		const documentMap = {};
-
+		const vistitIDMap = {};
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -865,33 +875,77 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const users = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
+			const users = await this.user.findAll();
+			const visitorIDs = await this.getUserVisitorID(
+				users.map((x) => this.sparkMD5.hash(x.user_id)),
+				connection
+			);
+
+			for (let user of users) {
+				documentMap[this.sparkMD5.hash(user.user_id)] = {
+					opened: [],
+					ExportDocument: [],
+					Favorite: [],
+					docs_opened: 0,
+					searches_made: 0,
+					// name: user.first_name + ' ' + user.last_name,
+					// email: user.email,
+					user_id: this.sparkMD5.hash(user.user_id),
+					org: user.organization,
+					last_search: null,
+					last_search_formatted: '',
+				};
+			}
+			for (let visit of visitorIDs) {
+				vistitIDMap[visit.idvisitor] = visit.user_id;
+			}
+
+			const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
 			const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
 			const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
 			const cards = await this.getCardAggregationQuery(opts.startDate, opts.endDate, connection);
-			for (let user of users) {
-				documentMap[user.idvisitor] = { opened: [], ExportDocument: [], Favorite: [] };
+
+			for (let search of searches) {
+				if (vistitIDMap[search.idvisitor]) {
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
+					}
+				}
 			}
 			for (let doc of documents) {
-				if (!documentMap[doc.idvisitor][doc.action].includes(doc.document)) {
-					documentMap[doc.idvisitor][doc.action].push(doc.document);
+				if (vistitIDMap[doc.idvisitor]) {
+					if (
+						!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
+					) {
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					} else {
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+						documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
+					}
 				}
 			}
 			for (let open of opened) {
-				if (!documentMap[open.idvisitor]['opened'].includes(open.document)) {
-					documentMap[open.idvisitor]['opened'].push(open.document);
+				if (vistitIDMap[open.idvisitor]) {
+					if (
+						!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+						documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
+					) {
+						documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					} else {
+						documentMap[vistitIDMap[open.idvisitor]][['opened']].push(open.document);
+						documentMap[vistitIDMap[open.idvisitor]][['opened']].shift();
+					}
 				}
 			}
-			users.forEach((user, index) => {
-				users[index] = {
-					...user,
-					opened: documentMap[user.idvisitor]['opened'].slice(-5),
-					export: documentMap[user.idvisitor]['ExportDocument'].slice(-5),
-					favorite: documentMap[user.idvisitor]['Favorite'].slice(-5),
-				};
-			});
 
-			res.status(200).send({ users: users, cards: cards[0] });
+			res.status(200).send({ users: Object.values(documentMap), cards: cards[0] });
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
 			res.status(500).send(err);
@@ -914,7 +968,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const visitorID = await this.getUserVisitorID(userdID, connection);
+			const visitorID = await this.getUserVisitorID([userdID], connection);
 			const opened = await this.queryPDFOpenedByUserId(
 				visitorID.map((x) => x.idvisitor),
 				connection
@@ -924,7 +978,7 @@ class AppStatsController {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];
 		} finally {
-			connection.end();
+			if (connection) connection.end();
 		}
 	}
 }

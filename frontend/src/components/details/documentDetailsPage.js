@@ -12,12 +12,7 @@ import { MainContainer } from '../../containers/GameChangerDetailsPage';
 import { MemoizedPolicyGraphView } from '../graph/policyGraphView';
 import { trackEvent } from '../telemetry/Matomo';
 import Pagination from 'react-js-pagination';
-import {
-	getTrackingNameForFactory,
-	numberWithCommas,
-	policyMetadata,
-	getMetadataForPropertyTable,
-} from '../../utils/gamechangerUtils';
+import { getTrackingNameForFactory, policyMetadata, getMetadataForPropertyTable } from '../../utils/gamechangerUtils';
 import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
@@ -104,7 +99,7 @@ const DocumentDetailsPage = (props) => {
 			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
 			setMetadata(favoritableData);
 		}
-	}, [document]);
+	}, [cloneData, document, userData]);
 
 	useEffect(() => {
 		if (document) {
@@ -265,9 +260,21 @@ const DocumentDetailsPage = (props) => {
 				});
 				const emptyDoc = { ...document };
 				Object.keys(emptyDoc).forEach((prop) => (emptyDoc[prop] = null));
-				notInCorpusDocs?.forEach((doc) =>
-					docsVisible.push({ ...emptyDoc, display_title_s: doc, type: 'document', notInCorpus: true })
-				);
+				if (notInCorpusDocs) {
+					for (
+						let i = docsReferencedPage * 10 - documentObj.docCount - 10;
+						i < docsReferencedPage * 10 - documentObj.docCount;
+						i++
+					) {
+						if (i < 0 || !notInCorpusDocs[i]) continue;
+						docsVisible.push({
+							...emptyDoc,
+							display_title_s: notInCorpusDocs[i],
+							type: 'document',
+							notInCorpus: true,
+						});
+					}
+				}
 				break;
 			case 'referencedByDocs':
 				docsVisible = referencedByDocs.docs.slice(
@@ -304,21 +311,16 @@ const DocumentDetailsPage = (props) => {
 		return (
 			<div className={`related-documents`} style={{ width: '100%' }}>
 				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-					<div style={styles.resultsCount}>
-						{runningQuery
-							? 'Searching for documents...'
-							: documentObj.docCount > 0
-							? `${numberWithCommas(documentObj.docCount)} results found in ${
-									documentObj.timeFound
-							  } seconds`
-							: ''}
-					</div>
 					<div style={{ display: 'flex' }} className={'gcPagination'}>
 						{!runningQuery && documentObj.docCount > 0 && (
 							<Pagination
 								activePage={docPage}
 								itemsCountPerPage={10}
-								totalItemsCount={documentObj.docCount}
+								totalItemsCount={
+									section === 'docsReferenced'
+										? notInCorpusDocs?.length + documentObj.docCount
+										: documentObj.docCount
+								}
 								pageRangeDisplayed={8}
 								onChange={(page) => {
 									trackEvent(
@@ -405,7 +407,6 @@ const DocumentDetailsPage = (props) => {
 											}}
 											rows={metadata || []}
 											height={'auto'}
-											dontScroll={true}
 											colWidth={colWidth}
 											disableWrap={true}
 											title={'Metadata'}
@@ -420,7 +421,7 @@ const DocumentDetailsPage = (props) => {
 											}}
 											rows={refList}
 											height={'auto'}
-											dontScroll={true}
+											maxHeight={500}
 											colWidth={{ minWidth: '25%', maxWidth: '25%' }}
 											disableWrap={true}
 										/>
