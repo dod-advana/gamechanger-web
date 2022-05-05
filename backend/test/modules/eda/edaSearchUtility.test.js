@@ -2390,6 +2390,7 @@ describe('EDASearchUtility', function () {
 					mockESIndex,
 					mockESQuery
 				);
+				console.log(JSON.stringify(actual));
 				const expected = {
 					query: {
 						_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
@@ -2602,6 +2603,7 @@ describe('EDASearchUtility', function () {
 							esIndex: 'gc_eda_vendor_org_hierarchy_2',
 							keyw_5: '',
 							ref_list: [],
+							score: 8.036867,
 						},
 					],
 					doc_types: [],
@@ -2618,9 +2620,7 @@ describe('EDASearchUtility', function () {
 						],
 					},
 				};
-				//NEED TO FIX THIS NEXT DEPLOYMENT!!!^
-				// assert.deepStrictEqual(actual, expected);
-				assert.deepStrictEqual(expected, expected);
+				assert.deepStrictEqual(actual, expected);
 				done();
 			} catch (err) {
 				assert.fail(err);
