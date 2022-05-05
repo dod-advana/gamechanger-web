@@ -734,8 +734,7 @@ const cardHandler = {
 		},
 
 		getFilename: (item) => {
-			// return item.file_location_eda_ext;
-			return item.dir_location_eda_ext + '/' + item.filename;
+			return item.file_location_eda_ext;
 		},
 
 		getDisplayTitle: (item) => {
