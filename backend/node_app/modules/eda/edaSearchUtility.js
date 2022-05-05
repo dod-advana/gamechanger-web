@@ -244,7 +244,7 @@ class EDASearchUtility {
 
 			let query = {
 				_source: {
-					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext'],
+					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext', 'fpds_ng_n'],
 				},
 				from: 0,
 				size: limit,
@@ -258,24 +258,6 @@ class EDASearchUtility {
 										{
 											nested: {
 												path: 'pages',
-												inner_hits: {
-													_source: false,
-													stored_fields: ['pages.filename', 'pages.p_raw_text'],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'pages.filename.search': {
-																number_of_fragments: 0,
-															},
-															'pages.p_raw_text': {
-																fragment_size: 2 * charsPadding,
-																number_of_fragments: 1,
-															},
-														},
-														fragmenter: 'span',
-													},
-												},
 												query: {
 													bool: {
 														should: [
