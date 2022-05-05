@@ -25,7 +25,7 @@ class FeedbackController {
 	}
 
 	async sendIntelligentSearchFeedback(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
 			const feedback = await this.feedback.create({
@@ -43,7 +43,7 @@ class FeedbackController {
 	}
 
 	async sendQAFeedback(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, question, answer, qaContext, params } = req.body;
 		try {
 			const feedback = await this.feedback.create({
@@ -64,7 +64,7 @@ class FeedbackController {
 	}
 
 	async getFeedbackData(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { limit = 100, offset = 0, order = [], where = {} } = req.body;
 			const results = await this.feedback.findAndCountAll({
@@ -92,7 +92,7 @@ class FeedbackController {
 	}
 
 	async sendJiraFeedback(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { name, email, feedback, rating } = req.body;
 			console.log('(JIRA FEEDBACK) req.body: ', req.body);
@@ -139,7 +139,7 @@ class FeedbackController {
 	}
 
 	async requestDocIngest(req, res) {
-		let userId = req.get('SSL_CLIENT_S_DN_CN');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { docId } = req.body;
 

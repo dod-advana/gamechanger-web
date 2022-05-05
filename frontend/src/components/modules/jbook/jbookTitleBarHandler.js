@@ -1,35 +1,89 @@
 import React from 'react';
-import DefaultTitleBarHandler from '../default/defaultTitleBarHandler';
+import { getTitleBarStyle, styles } from '../default/defaultTitleBarHandler';
+import PropTypes from 'prop-types';
+import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
+import JAICLogo from '../../../images/logos/JBooks Logo_wht.svg';
 
-const jbookTitleBarHandler = {
-	getTitleBar: (props) => {
-		return DefaultTitleBarHandler.getTitleBar(props);
-	},
+const getTitleBar = (props) => {
+	const { onTitleClick, componentStepNumbers, cloneData } = props;
 
-	getCategoryTabs(props) {
-		return <></>;
-	},
-
-	getTitleBarStyle(props) {
-		const { rawSearchResults, pageDisplayed } = props;
-		return {
-			...styles.titleBar,
-			borderBottom: rawSearchResults.length > 0 && pageDisplayed === 'main' ? '2px solid rgb(176, 186, 197)' : '',
-			backgroundColor: '#1C2D64',
-		};
-	},
+	return (
+		<div
+			className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+			onClick={onTitleClick}
+		>
+			<img
+				src={JAICLogo}
+				style={{ ...styles.title, width: 500, marginRight: 0 }}
+				onClick={onTitleClick}
+				alt="gamechanger jbook"
+				id={'titleButton'}
+				className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+			/>
+		</div>
+	);
 };
 
-export default jbookTitleBarHandler;
+const JBookTitleBarHandler = (props) => {
+	const {
+		style,
+		children,
+		onTitleClick,
+		componentStepNumbers = [],
+		jupiter,
+		cloneData,
+		rawSearchResults,
+		pageDisplayed,
+		openPillRight,
+		openPillTop,
+		closeButtonRight,
+		closeButtonTop,
+	} = props;
 
-const styles = {
-	titleBar: {
-		padding: '0 1em',
-		display: 'flex',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		flex: 1,
-		minHeight: 80,
-		width: '100%',
-	},
+	return (
+		<div
+			style={{ ...styles.container, ...style }}
+			className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Search Bar']}` : null}
+		>
+			<div
+				style={getTitleBarStyle({
+					rawSearchResults,
+					pageDisplayed,
+					backgroundColor: '#1C2D64',
+				})}
+			>
+				{getTitleBar({
+					componentStepNumbers,
+					onTitleClick,
+					cloneData,
+				})}
+				<div style={styles.searchBar}>{children}</div>
+				{!jupiter && (
+					<AdvanaMegaMenuPill
+						margin="0 -30px 0 20px"
+						defaultHeader="Applications"
+						openPillRight={openPillRight}
+						openPillTop={openPillTop}
+						closeButtonRight={closeButtonRight}
+						closeButtonTop={closeButtonTop}
+					/>
+				)}
+			</div>
+
+			<></>
+		</div>
+	);
 };
+
+JBookTitleBarHandler.propTypes = {
+	style: PropTypes.objectOf(PropTypes.string),
+	children: PropTypes.element,
+	onTitleClick: PropTypes.func,
+	componentStepNumbers: PropTypes.objectOf(PropTypes.number),
+	jupiter: PropTypes.bool,
+	cloneData: PropTypes.object,
+	rawSearchResults: PropTypes.array,
+	pageDisplayed: PropTypes.string,
+};
+
+export default JBookTitleBarHandler;

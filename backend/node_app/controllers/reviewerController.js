@@ -22,7 +22,7 @@ class ReviewerController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			this.reviewer.findAll().then((results) => {
 				console.log(results);
 				res.status(200).send(results);
@@ -37,7 +37,7 @@ class ReviewerController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { reviewerRowId } = req.body;
 			const reviewer = await this.reviewer.findOne({ where: { id: reviewerRowId } });
 			await reviewer.destroy();
@@ -53,7 +53,7 @@ class ReviewerController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { reviewerData, fromApp } = req.body;
 			res.status(200).send(await this.updateOrCreateReviewerHelper(reviewerData, userId, fromApp));
 		} catch (err) {

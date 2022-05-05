@@ -262,6 +262,10 @@ const makeFilteredGraph = (is2D, graph, collections) => {
 	};
 };
 
+const getSourceOrTargetID = (sourceOrTarget) => {
+	return sourceOrTarget.hasOwnProperty('id') ? sourceOrTarget.id : sourceOrTarget;
+};
+
 const filterGraphData = (nodes, edges) => {
 	const visibleEdges = edges.filter((edge) => !edge.source.hidden && !edge.target.hidden);
 
@@ -322,8 +326,8 @@ const filterGraphData = (nodes, edges) => {
 				filteredGraph.edges.push(edge);
 				edgeIds.push(edge.id);
 
-				const source = edge.source.hasOwnProperty('id') ? edge.source.id : edge.source;
-				const target = edge.target.hasOwnProperty('id') ? edge.target.id : edge.target;
+				const source = getSourceOrTargetID(edge.source);
+				const target = getSourceOrTargetID(edge.target);
 
 				edgeToNodeCountMap[source] += 1;
 				edgeToNodeCountMap[target] += 1;
@@ -1001,32 +1005,42 @@ export default function PolicyGraphView(props) {
 	 */
 
 	const showEntitiesForNode = () => {
-		const node = graph.nodes.filter((node) => {
-			return node.id === selectedID;
-		})[0];
+		const node = graph.nodes.find((node) => node.id === selectedID);
 
 		if (node.showingEntities) {
-			const entityIDs = [];
+			const tempGraph = _.cloneDeep(graph);
+			const nodesToRemove = [];
 			const edgesToRemove = [];
+			const targetNodes = graph.edges.map((edge) => getSourceOrTargetID(edge.target));
+
 			graph.edges.forEach((edge) => {
-				if (edge.label === 'MENTIONS' && edge.notInOriginalSearch) {
-					entityIDs.push(edge.target.id);
+				const source = getSourceOrTargetID(edge.source);
+				const target = getSourceOrTargetID(edge.target);
+
+				if (edge.notInOriginalSearch && source === selectedID) {
 					edgesToRemove.push(edge.id);
+					graph.nodes.forEach((node) => {
+						if (
+							node.notInOriginalSearch &&
+							node.id === target &&
+							targetNodes.filter((target) => target === node.id).length <= 1 // only remove this node if this edge is the only one connected to it
+						) {
+							nodesToRemove.push(node.id);
+						}
+					});
 				}
 			});
 
-			graph.edges = graph.edges.filter((edge) => {
-				return !edgesToRemove.includes(edge.id);
-			});
+			tempGraph.edges = graph.edges.filter((edge) => !edgesToRemove.includes(edge.id));
+			tempGraph.nodes = graph.nodes.filter((node) => !nodesToRemove.includes(node.id));
 
-			graph.nodes = graph.nodes.filter((node) => {
-				return !entityIDs.includes(node.id);
-			});
+			const selectedNode = tempGraph.nodes.find((node) => node.id === selectedID);
+			selectedNode.showingEntities = false;
+			const tempNodes = [...tempGraph.nodes.filter((node) => node.id !== selectedNode.id), selectedNode];
 
+			setGraph({ ...tempGraph, nodes: tempNodes });
 			lockNodeInPlace(node, false);
 			reloadAndRunSimulation();
-
-			node.showingEntities = false;
 			return;
 		}
 
@@ -1040,36 +1054,36 @@ export default function PolicyGraphView(props) {
 			})
 			.then((data) => {
 				const graphData = data.data;
+				const tempGraph = _.cloneDeep(graph);
 				const nodeIds = graph.nodes.map((node) => {
 					return node.id;
 				});
-				const parentId = node.id;
-				graphData.nodes.forEach((tmpNode) => {
-					if (tmpNode.label === 'Document') {
-						tmpNode.id = parentId;
-					} else {
-						tmpNode.id = 200000 + tmpNode.id;
-					}
-					if (!nodeIds.includes(tmpNode.id)) {
-						graph.nodes.push(tmpNode);
-						nodeIds.push(tmpNode.id);
-					}
-				});
-				const edgeIds = [];
-				graphData.edges.forEach((edge) => {
-					edge.source = parentId;
-					edge.target = 200000 + edge.target;
-					if (!edgeIds.includes(`${edge.source},${edge.target}`)) {
-						edge.notInOriginalSearch = true;
-						graph.edges.push(edge);
-						edgeIds.push(`${edge.source},${edge.target}`);
+				graphData.nodes.forEach((node) => {
+					if (node.label === 'Entity' && !nodeIds.includes(node.id)) {
+						node.notInOriginalSearch = true;
+						tempGraph.nodes.push(node);
+						nodeIds.push(node.id);
 					}
 				});
 
+				const edgeIds = graph.edges.map((edge) => {
+					return edge.id;
+				});
+				graphData.edges.forEach((edge) => {
+					if (!edgeIds.includes(edge.id)) {
+						edge.notInOriginalSearch = true;
+						tempGraph.edges.push(edge);
+						edgeIds.push(edge.id);
+					}
+				});
+
+				const selectedNode = tempGraph.nodes.find((node) => node.id === selectedID);
+				selectedNode.showingEntities = true;
+				const tempNodes = [...tempGraph.nodes.filter((node) => node.id !== selectedNode.id), selectedNode];
+
+				setGraph({ ...tempGraph, nodes: tempNodes });
 				lockNodeInPlace(node, true);
 				reloadAndRunSimulation();
-
-				node.showingEntities = true;
 			});
 	};
 
@@ -1498,7 +1512,7 @@ export default function PolicyGraphView(props) {
 				nodeRelSize +
 				(combinedTypes.includes(node.label)
 					? 1
-					: Math.max(node.normalizedSize || 0 * (scalingParam / zoom), 1));
+					: Math.max((node.normalizedSize || 0) * (scalingParam / zoom), 1));
 		}
 		node.nodeSize = isNaN(nodeSize) ? nodeRelSize : nodeSize;
 

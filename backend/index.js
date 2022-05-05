@@ -29,6 +29,7 @@ const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
 const moment = require('moment');
+const startupUtils = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -41,8 +42,12 @@ const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 're
 
 // var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
 const keyFileData = constants.TLS_KEY;
-const private_key = '-----BEGIN RSA PRIVATE KEY-----\n' + (RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')).match(/.{1,64}/g).join('\n') + '\n-----END RSA PRIVATE KEY-----';
-
+const private_key =
+	'-----BEGIN RSA PRIVATE KEY-----\n' +
+	RSAkeyDecrypt(keyFileData, constants.TLS_KEY_PASSPHRASE, 'base64')
+		.match(/.{1,64}/g)
+		.join('\n') +
+	'\n-----END RSA PRIVATE KEY-----';
 
 logger.boot(`
                 
@@ -66,65 +71,72 @@ thes.waitForLoad().then(() => {
 	console.log(thes.lookUp('win'));
 });
 
-try {
-	if (process.env.DISABLE_FRONT_END_CONFIG !== 'true') {
-		let result = {};
-
-		for (let envvar in process.env) {
-			if (envvar.startsWith('REACT_APP_'))
-				result[envvar] = process.env[envvar];
-		}
-
-		fs.writeFileSync(
-			path.join(__dirname, './build', 'config.js'),
-			`window.__env__ = ${JSON.stringify(result)}`
-		);
-	}
-
-} catch (err) {
-	console.error(err);
-	console.error('No env variables created');
-}
+startupUtils.copyConfigToBuild();
+startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
 
+app.get('*.js', function (req, res, next) {
+	if (req.url === '/config.js') {
+		next();
+	} else {
+		const encodeHeaders = req.get('accept-encoding');
+		if (encodeHeaders.includes('br')) {
+			req.url = req.url + '.br';
+			res.set('Content-Encoding', 'br');
+		} else {
+			req.url = req.url + '.gz';
+			res.set('Content-Encoding', 'gzip');
+		}
+		res.set('Content-Type', 'text/javascript');
+		next();
+	}
+});
+app.get('*.css', function (req, res, next) {
+	const encodeHeaders = req.get('accept-encoding');
+	if (encodeHeaders.includes('br')) {
+		req.url = req.url + '.br';
+		res.set('Content-Encoding', 'br');
+	} else {
+		req.url = req.url + '.gz';
+		res.set('Content-Encoding', 'gzip');
+	}
+	res.set('Content-Type', 'text/css');
+	next();
+});
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
 app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-app.use(AAA.redisSession());
-AAA.setupSaml(app);
-app.use(AAA.ensureAuthenticated);
-
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	app.use(async function (req, res, next) {
-		req.headers['x-env-ssl_client_certificate'] = (
-			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`
-		);
+		req.headers['x-env-ssl_client_certificate'] =
+			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`;
 		next();
 	});
 }
 
+app.use(AAA.redisSession());
+AAA.setupSaml(app);
+app.use(AAA.ensureAuthenticated);
+
 app.use(async function (req, res, next) {
-	let cn;
 	let user_id;
 	if (req.session.user) {
-		cn = req.session.user.cn;
 		user_id = getUserIdFromSAMLUserId(req);
-		req.headers['ssl_client_s_dn_cn'] = cn;
-		req.headers['SSL_CLIENT_S_DN_CN'] = cn;
 		req.permissions = req.session.user.perms;
+	} else if (req.user) {
+		req.permissions = req.user.perms;
+	} else {
+		req.permissions = [];
 	}
 
-	if (!cn) {
-		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			user_id = 'ml-api';
-		}
-	}
+	if (!req.session.user.cn && req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') user_id = 'ml-api';
 
 	await redisAsyncClient.select(12);
 	const perms = await redisAsyncClient.get(`${user_id}-perms`);
@@ -137,31 +149,13 @@ app.use(async function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-	let approvedClients = constants.APPROVED_API_CALLERS;
-	const { headers, hostname } = req;
-	const { origin } = headers;
-	const userId = req.get('SSL_CLIENT_S_DN_CN');
-	logger.http(`[${process.env.pm_id || 0}][${req.ip}] [${userId}] Request for: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-	if (approvedClients.includes(hostname)) {
-		res.setHeader('Access-Control-Allow-Origin', hostname);
-	} else if (origin) {
-		res.setHeader('Access-Control-Allow-Origin', origin);
-	}
-	// res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-	// res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, x-env-ssl_client_certificate');
-	res.header('Access-Control-Allow-Headers', 'Accept, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept-Language, SSL_CLIENT_S_DN_CN, X-UA-SIGNATURE, permissions');
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
-	// intercepts OPTIONS method
-	if (req.method === 'OPTIONS') {
-		res.sendStatus(200);
-	} else {
-		if (!req.permissions) {
-			req.permissions = [];
-		}
-		next();
-	}
+	const userId = req.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+	logger.http(
+		`[${process.env.pm_id || 0}][${req.ip}] [${req.session?.user?.cn || userId}] Request for: ${
+			req.protocol
+		}://${req.get('host')}${req.originalUrl}`
+	);
+	AAA.getAllowedOriginMiddleware(req, res, next);
 });
 
 // Setting up swagger
@@ -176,14 +170,16 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 		const [key] = await ApiKey.findAll({
 			where: { apiKey: req.headers['x-api-key'] },
 			raw: false,
-			include: [{
-				model: CloneMeta,
-				attributes: ['clone_name'],
-				through: { attributes: [] }
-			}],
+			include: [
+				{
+					model: CloneMeta,
+					attributes: ['clone_name'],
+					through: { attributes: [] },
+				},
+			],
 		});
 		let cloneAccess;
-		if (key) cloneAccess = key.clone_meta.map(clone => clone.clone_name);
+		if (key) cloneAccess = key.clone_meta.map((clone) => clone.clone_name);
 		if (key && key.active && cloneAccess.includes(req.query.cloneName)) {
 			req.headers['ssl_client_s_dn_cn'] = key.username;
 			req.headers['SSL_CLIENT_S_DN_CN'] = key.username;
@@ -194,7 +190,10 @@ app.use('/api/gamechanger/external', async function (req, res, next) {
 	}
 });
 
-app.use('/api/gamechanger/external', [require('./node_app/routes/externalSearchRouter'), require('./node_app/routes/externalGraphRouter')]);
+app.use('/api/gamechanger/external', [
+	require('./node_app/routes/externalSearchRouter'),
+	require('./node_app/routes/externalGraphRouter'),
+]);
 
 app.post('/api/auth/token', async function (req, res) {
 	let cn = 'unknown user';
@@ -203,17 +202,17 @@ app.post('/api/auth/token', async function (req, res) {
 	await redisAsyncClient.select(12);
 
 	try {
-		cn = sessUser.cn;
+		cn = req.session.user.cn;
 
 		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 
 		if (!user || user === null) {
-			await userController.updateOrCreateUserHelper(sessUser, cn);
+			await userController.updateOrCreateUserHelper(sessUser);
 			user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
 		}
 
 		// Remove once we feel like most admins have used the new system
-		const admin = await Admin.findOne({ where: { username: cn } });
+		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
 
 		if (admin) {
 			perms.push('Gamechanger Super Admin');
@@ -227,7 +226,7 @@ app.post('/api/auth/token', async function (req, res) {
 			// Other attributes in extra_fields other than clone specific
 			const fieldsToIgnore = ['clones_visited'];
 
-			Object.keys(user.extra_fields).forEach(extraKey => {
+			Object.keys(user.extra_fields).forEach((extraKey) => {
 				if (!fieldsToIgnore.includes(extraKey) && user.extra_fields[extraKey].hasOwnProperty('is_admin')) {
 					if (user.extra_fields[extraKey].is_admin) {
 						perms.push(`${extraKey} Admin`);
@@ -237,20 +236,6 @@ app.post('/api/auth/token', async function (req, res) {
 			});
 
 			if (isAdminLite) perms.push('Gamechanger Admin Lite');
-		}
-
-		sessUser.id = getUserIdFromSAMLUserId(req);
-
-		if (sessUser.disabled === undefined) {
-			sessUser.disabled = false;
-		}
-
-		if (sessUser.displayName === undefined) {
-			sessUser.displayName = `${sessUser.firstName} ${sessUser.lastName}`;
-		}
-
-		if (sessUser.sandboxId === undefined) {
-			sessUser.sandboxId = 1;
 		}
 
 		sessUser.perms = sessUser.perms.concat(perms);
@@ -277,19 +262,18 @@ app.post('/api/auth/token', async function (req, res) {
 			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
 		}
 
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(perms));
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
 		jwtClaims['csrf-token'] = csrfHash;
 		let token = '';
 		token = jwt.sign(jwtClaims, private_key, {
-			algorithm: 'RS256'
+			algorithm: 'RS256',
 		});
 
 		res.json({
-			token: token
+			token: token,
 		});
-
 	} catch (e) {
 		logger.error(e.message, '9SuBdeus', cn);
 		res.sendStatus(500);
@@ -297,8 +281,11 @@ app.post('/api/auth/token', async function (req, res) {
 });
 
 app.use(async function (req, res, next) {
-	const routesAllowedWithoutToken = ['/api/gamechanger/modular/getAllCloneMeta', '/api/tutorialOverlay', '/api/userAppVersion'];
-	// SIG BYTES ERROR is HERE TODO
+	const routesAllowedWithoutToken = [
+		'/api/gamechanger/modular/getAllCloneMeta',
+		'/api/tutorialOverlay',
+		'/api/userAppVersion',
+	];
 
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
@@ -307,10 +294,11 @@ app.use(async function (req, res, next) {
 		await redisAsyncClient.select(12);
 		let csrfHash = '';
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			csrfHash = process.env.ML_WEB_TOKEN;
+			csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
 		} else {
 			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		}
+		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
 			next();
@@ -328,12 +316,11 @@ app.all('/api/*/admin/*', async function (req, res, next) {
 	if (req.permissions.includes('Gamechanger Super Admin') || req.permissions.includes('Webapp Super Admin')) {
 		next();
 	} else {
-		const match = req.permissions.find(perm => {
+		const match = req.permissions.find((perm) => {
 			return perm.includes('Admin');
 		});
 
 		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-
 			const signatureFromApp = req.get('x-ua-signature');
 			const userToken = Base64.stringify(CryptoJS.HmacSHA256(req.path, process.env.ML_WEB_TOKEN));
 			if (signatureFromApp === userToken) {
@@ -386,7 +373,7 @@ const options = {
 	cert: constants.TLS_CERT,
 	ca: constants.TLS_CERT_CA,
 	requestCert: false,
-	rejectUnauthorized: false
+	rejectUnauthorized: false,
 };
 
 https.createServer(options, app).listen(securePort);
@@ -432,4 +419,6 @@ if (process.env.PRINT_ROUTES === 'true') {
 	});
 }
 
-setInterval(() => { logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick') }, 10000);
+setInterval(() => {
+	logger.info(`---> Process ${process.env.pm_id || 0}` + ' tick');
+}, 10000);
