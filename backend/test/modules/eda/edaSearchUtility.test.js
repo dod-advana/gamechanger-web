@@ -1798,7 +1798,7 @@ describe('EDASearchUtility', function () {
 		});
 	});
 
-	describe('getElasticSearchStatsQuery', function () {
+	describe('getElasticsearchStatsQuery', function () {
 		it('should return an ES query for a search with filters included', async (done) => {
 			const opts = {
 				...constructorOptionsMock,
@@ -1853,7 +1853,7 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchStatsQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['extracted_data_eda_n', 'metadata_type_eda_ext'] },
+					_source: { includes: ['extracted_data_eda_n', 'metadata_type_eda_ext', 'fpds_ng_n'] },
 					from: 0,
 					size: 10000,
 					track_total_hits: true,
@@ -1866,22 +1866,6 @@ describe('EDASearchUtility', function () {
 											{
 												nested: {
 													path: 'pages',
-													inner_hits: {
-														_source: false,
-														stored_fields: ['pages.filename', 'pages.p_raw_text'],
-														from: 0,
-														size: 5,
-														highlight: {
-															fields: {
-																'pages.filename.search': { number_of_fragments: 0 },
-																'pages.p_raw_text': {
-																	fragment_size: 180,
-																	number_of_fragments: 1,
-																},
-															},
-															fragmenter: 'span',
-														},
-													},
 													query: {
 														bool: {
 															should: [
