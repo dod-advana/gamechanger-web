@@ -94,7 +94,7 @@ const CloseButton = styled.div`
 const GCFooter = (props) => {
 	const classes = useStyles();
 
-	const { setUserMatomo } = props;
+	const { setUserMatomo, location } = props;
 
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 	const [apiRequestModalOpen, setApiRequestModalOpen] = useState(false);
@@ -280,6 +280,22 @@ const GCFooter = (props) => {
 			});
 	};
 
+	const getExtraLinks = () => {
+		const extraLinks = [
+			<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
+				App-wide Tracking Agreement
+			</LinkButton>,
+		];
+		if (!location['pathname'].includes('search')) {
+			extraLinks.push(
+				<LinkButton key="apiKeyRequest" onClick={() => setApiRequestModalOpen(true)}>
+					Request API Key
+				</LinkButton>
+			);
+		}
+		return extraLinks;
+	};
+
 	return (
 		<>
 			<FooterDiv>
@@ -287,16 +303,7 @@ const GCFooter = (props) => {
 				{/*	<Typography style={styles.footerText}>in partnership with</Typography>*/}
 				{/*	<img src={JAICLogo} style={styles.title} alt="jaic-title" id={'titleButton'} />*/}
 				{/*</div>*/}
-				<AdvanaFooter
-					extraLinks={[
-						<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
-							App-wide Tracking Agreement
-						</LinkButton>,
-						<LinkButton key="apiKeyRequest" onClick={() => setApiRequestModalOpen(true)}>
-							Request API Key
-						</LinkButton>,
-					]}
-				/>
+				<AdvanaFooter extraLinks={getExtraLinks()} />
 			</FooterDiv>
 
 			<Modal open={trackingModalOpen} onClose={() => setTrackingModalOpen(false)}>

@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import UoTAlert from '../common/GCAlert';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+
+const UoTAlert = LoadableVisibility({
+	loader: () => import('../common/GCAlert'),
+	loading: () => {
+		return <></>;
+	},
+});
 
 const Alerts = (props) => {
 	const { state, dispatch } = props.context;
