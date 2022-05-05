@@ -35,7 +35,7 @@ export const getEDAMetadataForCard = (edaFieldJSONMap, edaFields, item, edaFPDSM
 	if (edaFields) {
 		for (const fieldName of edaFields) {
 			let name = edaFieldJSONMap[fieldName] ?? '';
-			let fpds = edaFPDSMap[fieldName] ? item[edaFPDSMap[fieldName]] : 'Data Not Available';
+			let fpds = item?.[edaFPDSMap[fieldName]] ?? 'Data Not Available';
 			let eda = item[fieldName] ?? 'Data Not Available';
 
 			if (fieldName.slice(0, 5) === 'fpds_') {

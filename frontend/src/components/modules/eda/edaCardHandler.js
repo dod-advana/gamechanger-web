@@ -168,12 +168,12 @@ const styles = {
 	},
 };
 
-const colWidth = {
-	maxWidth: '900px',
-	whiteSpace: 'nowrap',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-};
+// const colWidth = {
+// 	maxWidth: '900px',
+// 	whiteSpace: 'nowrap',
+// 	overflow: 'hidden',
+// 	textOverflow: 'ellipsis',
+// };
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
