@@ -120,11 +120,7 @@ const EDADocumentsComparisonTool = (props) => {
 						setNoResults(true);
 					} else {
 						let paragraph;
-						console.log('DOCS!!!');
-						console.log(resp.data.docs);
-						console.log(selectedInput);
-						console.log('PARAGRAPHS!!!');
-						console.log(paragraphs);
+
 						const document = resp.data.docs.find((doc) => {
 							const foundPar = doc.pageHits.find(
 								(page) => page.paragraphIdBeingMatched === selectedInput
@@ -201,7 +197,7 @@ const EDADocumentsComparisonTool = (props) => {
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
 			if (!selectedParagraph && sortedDocs.length) {
-				setSelectedParagraph(sortedDocs[0].paragraphs[0]);
+				setSelectedParagraph(sortedDocs[0].pageHits[0]);
 				setCompareDocument(sortedDocs[0]);
 			}
 			setViewableDocs(sortedDocs);

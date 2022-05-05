@@ -48,8 +48,6 @@ class AnalystToolsController {
 			let returnData = {};
 
 			if (cloneName === 'eda') {
-				console.log('PARAGRAGHS!!!');
-				console.log(paragraphs);
 				esQuery = this.edaSearchUtility.getESSimilarityQuery(paragraphs, filters);
 
 				esResults = await this.dataLibrary.queryElasticSearch(
