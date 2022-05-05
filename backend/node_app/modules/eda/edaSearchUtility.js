@@ -812,9 +812,8 @@ class EDASearchUtility {
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.searchUtility.transformEsFields(r.fields);
 				const { _source = {}, fields = {}, _score = 0 } = r;
-				const { topics_s = {}, file_location_eda_ext } = _source;
+				const { topics_s = {} } = _source;
 				result.topics_s = topics_s;
-				result.file_location_eda_ext = file_location_eda_ext;
 				result.score = _score;
 
 				if (
