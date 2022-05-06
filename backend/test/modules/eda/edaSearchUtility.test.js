@@ -2586,6 +2586,7 @@ describe('EDASearchUtility', function () {
 							esIndex: 'gc_eda_vendor_org_hierarchy_2',
 							keyw_5: '',
 							ref_list: [],
+							score: 8.036867,
 						},
 					],
 					doc_types: [],
@@ -2602,7 +2603,6 @@ describe('EDASearchUtility', function () {
 						],
 					},
 				};
-
 				assert.deepStrictEqual(actual, expected);
 				done();
 			} catch (err) {
