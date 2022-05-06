@@ -185,27 +185,25 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			{state.cloneData?.show_analyst_tools && (
-				<GCTooltip title="Analyst Tools" placement="right" arrow>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							setState(dispatch, {
-								pageDisplayed: PAGE_DISPLAYED.analystTools,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'showResponsibilityTracker',
-								'onCLick'
-							);
-						}}
-						active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AnalystToolsIcon} />
-					</HoverNavItem>
-				</GCTooltip>
-			)}
+			<GCTooltip title="Analyst Tools" placement="right" arrow>
+				<HoverNavItem
+					centered
+					onClick={() => {
+						setState(dispatch, {
+							pageDisplayed: PAGE_DISPLAYED.analystTools,
+						});
+						trackEvent(
+							getTrackingNameForFactory(state.cloneData.clone_name),
+							'showResponsibilityTracker',
+							'onCLick'
+						);
+					}}
+					active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={AnalystToolsIcon} />
+				</HoverNavItem>
+			</GCTooltip>
 			<GCTooltip title="Clone Request" placement="right" arrow>
 				<a
 					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
@@ -372,23 +370,21 @@ const generateOpenedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			{state.cloneData?.show_analyst_tools && (
-				<GCTooltip title="Analyst Tools" placement="right" arrow>
-					<HoverNavItem
-						onClick={() => {
-							setState(dispatch, {
-								pageDisplayed: PAGE_DISPLAYED.analystTools,
-							});
-							trackEvent('DataTracker', 'onCLick');
-						}}
-						active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={AnalystToolsIcon} />
-						<span style={{ marginLeft: '10px' }}>Analyst Tools</span>
-					</HoverNavItem>
-				</GCTooltip>
-			)}
+			<GCTooltip title="Analyst Tools" placement="right" arrow>
+				<HoverNavItem
+					onClick={() => {
+						setState(dispatch, {
+							pageDisplayed: PAGE_DISPLAYED.analystTools,
+						});
+						trackEvent('DataTracker', 'onCLick');
+					}}
+					active={state.pageDisplayed === PAGE_DISPLAYED.analystTools}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={AnalystToolsIcon} />
+					<span style={{ marginLeft: '10px' }}>Analyst Tools</span>
+				</HoverNavItem>
+			</GCTooltip>
 			<GCTooltip title="Clone Request" placement="right" arrow>
 				<a
 					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
