@@ -43,15 +43,15 @@ const useStyles = makeStyles((theme) => ({
 const FavoriteTopic = styled.button`
 	border: none;
 	height: 25px;
+	max-width: ${({ maxWidth }) => maxWidth ?? 'none'};
+	position: relative;
 	border-radius: 15px;
 	background-color: white;
 	color: black;
 	white-space: nowrap;
 	text-align: center;
-	display: inline-block;
-	padding-left: 5px;
-	padding-right: 5px;
-	margin-left: 6px;
+	display: inline-flex;
+	padding: 0px 5px;
 	margin-right: 6px;
 	margin-bottom: 3px;
 	cursor: pointer;
@@ -118,9 +118,6 @@ const StyledFrontCardHeader = styled.div`
 
 			.text {
 				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
-				-webkit-line-clamp: 2;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
 			}
 
 			.list-view-arrow {
@@ -639,7 +636,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText) => {
+export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText, maxWidth) => {
 	const { favorite_topics = null } = userData ?? {};
 	let favorites = [];
 
@@ -664,21 +661,52 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 						topic = topic.trim();
 						const favorited = favorites.includes(topic);
 						return (
-							<FavoriteTopic key={index} favorited={favorited}>
-								<span
-									onClick={() => {
-										trackEvent(
-											getTrackingNameForFactory(cloneData.clone_name),
-											'TopicOpened',
-											topic
-										);
-										window.open(
-											`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
-										);
-									}}
-								>
-									{topic}
-								</span>
+							<FavoriteTopic key={index} favorited={favorited} maxWidth={maxWidth}>
+								{maxWidth ? (
+									<GCTooltip title={topic} placement="top" arrow>
+										<div
+											style={{
+												overflow: 'hidden',
+												textOverflow: 'ellipsis',
+												marginTop: '-1px',
+												maxWidth: 'calc(100% - 15px)',
+											}}
+											onClick={() => {
+												trackEvent(
+													getTrackingNameForFactory(cloneData.clone_name),
+													'TopicOpened',
+													topic
+												);
+												window.open(
+													`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
+												);
+											}}
+										>
+											{topic}
+										</div>
+									</GCTooltip>
+								) : (
+									<div
+										style={{
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+											marginTop: '-1px',
+											maxWidth: 'calc(100% - 15px)',
+										}}
+										onClick={() => {
+											trackEvent(
+												getTrackingNameForFactory(cloneData.clone_name),
+												'TopicOpened',
+												topic
+											);
+											window.open(
+												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
+											);
+										}}
+									>
+										{topic}
+									</div>
+								)}
 								<FavoriteTopicFromCardBack
 									topic={topic}
 									favorited={favorited}
