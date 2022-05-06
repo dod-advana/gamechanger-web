@@ -2390,7 +2390,6 @@ describe('EDASearchUtility', function () {
 					mockESIndex,
 					mockESQuery
 				);
-				console.log(JSON.stringify(actual));
 				const expected = {
 					query: {
 						_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
