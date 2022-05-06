@@ -244,7 +244,7 @@ class EDASearchUtility {
 
 			let query = {
 				_source: {
-					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext'],
+					includes: ['extracted_data_eda_n', 'metadata_type_eda_ext', 'fpds_ng_n'],
 				},
 				from: 0,
 				size: limit,
@@ -258,24 +258,6 @@ class EDASearchUtility {
 										{
 											nested: {
 												path: 'pages',
-												inner_hits: {
-													_source: false,
-													stored_fields: ['pages.filename', 'pages.p_raw_text'],
-													from: 0,
-													size: 5,
-													highlight: {
-														fields: {
-															'pages.filename.search': {
-																number_of_fragments: 0,
-															},
-															'pages.p_raw_text': {
-																fragment_size: 2 * charsPadding,
-																number_of_fragments: 1,
-															},
-														},
-														fragmenter: 'span',
-													},
-												},
 												query: {
 													bool: {
 														should: [
@@ -933,10 +915,6 @@ class EDASearchUtility {
 		const { extracted_data_eda_n, fpds_ng_n } = source;
 		const data = extracted_data_eda_n;
 
-		if (!data) {
-			return result;
-		}
-
 		// temporarily pull in all fpds data
 		if (fpds_ng_n) {
 			let fpdsKeys = Object.keys(fpds_ng_n);
@@ -945,63 +923,65 @@ class EDASearchUtility {
 			}
 		}
 
-		// Contract Issuing Office Name and Contract Issuing Office DoDaaC
-		result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
-		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
+		if (data) {
+			// Contract Issuing Office Name and Contract Issuing Office DoDaaC
+			result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
+			result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
 
-		// Vendor Name, Vendor DUNS, and Vendor CAGE
-		result.vendor_name_eda_ext = data.vendor_name_eda_ext;
-		result.vendor_duns_eda_ext = data.vendor_duns_eda_ext;
-		result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
+			// Vendor Name, Vendor DUNS, and Vendor CAGE
+			result.vendor_name_eda_ext = data.vendor_name_eda_ext;
+			result.vendor_duns_eda_ext = data.vendor_duns_eda_ext;
+			result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
 
-		// Contract Admin Agency Name and Contract Admin Office DoDAAC
-		const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
-		if (adminPresent) {
-			result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
-			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
-		}
+			// Contract Admin Agency Name and Contract Admin Office DoDAAC
+			const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
+			if (adminPresent) {
+				result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
+				result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
+			}
 
-		// Paying Office
-		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
-		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
+			// Paying Office
+			result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
+			result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
 
-		// Modifications
-		result.modification_eda_ext = data.modification_number_eda_ext;
+			// Modifications
+			result.modification_eda_ext = data.modification_number_eda_ext;
 
-		// Award ID and Reference IDV
-		if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
-			result.award_id_eda_ext = data.referenced_idv_eda_ext + '-' + data.award_id_eda_ext;
-		} else {
-			result.award_id_eda_ext = data.award_id_eda_ext;
-		}
-		result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
+			// Award ID and Reference IDV
+			if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
+				result.award_id_eda_ext = data.referenced_idv_eda_ext + '-' + data.award_id_eda_ext;
+			} else {
+				result.award_id_eda_ext = data.award_id_eda_ext;
+			}
+			result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
 
-		// Signature Date and Effective Date
-		result.signature_date_eda_ext = data.signature_date_eda_ext_dt;
-		result.effective_date_eda_ext = data.effective_date_eda_ext_dt;
+			// Signature Date and Effective Date
+			result.signature_date_eda_ext = data.signature_date_eda_ext_dt;
+			result.effective_date_eda_ext = data.effective_date_eda_ext_dt;
 
-		// Obligated Amounts
-		result.obligated_amounts_eda_ext = data.total_obligated_amount_eda_ext_f;
+			// Obligated Amounts
+			result.obligated_amounts_eda_ext = data.total_obligated_amount_eda_ext_f;
 
-		// NAICS
-		result.naics_eda_ext = data.naics_eda_ext;
-		result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
+			// NAICS
+			result.naics_eda_ext = data.naics_eda_ext;
+			result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
 
-		// get paying, admin, issue
-		if (data.vendor_org_hierarchy_eda_n && data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n) {
-			const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
+			// get paying, admin, issue
+			if (data.vendor_org_hierarchy_eda_n && data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n) {
+				const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
 
-			for (const org of orgData) {
-				if (org.dodaac_eda_ext) {
-					if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) {
-						// match issue office
-						result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-					} else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) {
-						// match paying office
-						result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-					} else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) {
-						// match admin office
-						result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+				for (const org of orgData) {
+					if (org.dodaac_eda_ext) {
+						if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) {
+							// match issue office
+							result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+						} else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) {
+							// match paying office
+							result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+						} else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) {
+							// match admin office
+							result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+						}
 					}
 				}
 			}

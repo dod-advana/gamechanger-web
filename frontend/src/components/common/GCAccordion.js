@@ -10,25 +10,6 @@ import { Typography } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Remove';
 import AddIcon from '@material-ui/icons/Add';
 
-const StyledAccordion = withStyles({
-	root: {
-		border: '1px solid rgba(0, 0, 0, .125)',
-		boxShadow: 'none',
-		borderTopLeftRadius: 6,
-		borderTopRightRadius: 6,
-		'&:not(:last-child)': {
-			marginBottom: '10px !important',
-		},
-		'&:before': {
-			display: 'none',
-		},
-		'&$expanded': {
-			margin: 'auto',
-		},
-	},
-	expanded: {},
-})(Accordion);
-
 const StyledAccordionSummary = withStyles({
 	root: {
 		backgroundColor: gcBlue,
@@ -103,7 +84,27 @@ const GCAccordion = (props) => {
 		notBordered,
 		onChange,
 		onClick = _.noop,
+		marginBottom,
 	} = props;
+
+	const StyledAccordion = withStyles({
+		root: {
+			border: '1px solid rgba(0, 0, 0, .125)',
+			boxShadow: 'none',
+			borderTopLeftRadius: 6,
+			borderTopRightRadius: 6,
+			'&:not(:last-child)': {
+				marginBottom: marginBottom ?? '10px !important',
+			},
+			'&:before': {
+				display: 'none',
+			},
+			'&$expanded': {
+				margin: 'auto',
+			},
+		},
+		expanded: {},
+	})(Accordion);
 
 	const [isExpanded, setIsExpanded] = useState(false);
 
