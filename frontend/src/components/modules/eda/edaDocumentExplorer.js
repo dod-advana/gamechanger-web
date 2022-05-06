@@ -17,7 +17,7 @@ import { getEDAMetadataForPropertyTable, getDisplayTitle } from '../../modules/e
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
-import { EDA_FIELDS, EDA_FIELD_JSON_MAP } from '../../modules/eda/edaCardHandler';
+import { EDA_FIELDS, EDA_FIELD_JSON_MAP, EDA_FPDS_MAP } from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -204,7 +204,7 @@ export default function EDADocumentExplorer({
 	const previewData =
 		(data.length > 0 &&
 			currentDocData &&
-			getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData)) ||
+			getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData, EDA_FPDS_MAP)) ||
 		[];
 	const previewDataReflist =
 		(data.length > 0 && currentDocData && getReferenceListMetadataPropertyTable(currentDocData.ref_list)) || [];
