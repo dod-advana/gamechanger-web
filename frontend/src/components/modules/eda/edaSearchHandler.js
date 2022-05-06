@@ -63,7 +63,7 @@ const EdaSearchHandler = {
 			}
 		}
 
-		const favSearchUrls = userData.favorite_searches.map((search) => {
+		const favSearchUrls = userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 
