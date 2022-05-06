@@ -37,6 +37,7 @@ const StyledAccordionSummary = withStyles({
 		marginBottom: -1,
 		minHeight: 'unset',
 		height: '44px',
+		width: '100%',
 		'&$expanded': {
 			minHeight: 'unset',
 			height: '44px',
