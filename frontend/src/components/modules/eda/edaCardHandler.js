@@ -84,7 +84,7 @@ export const EDA_FPDS_MAP = {
 	contract_issue_name_eda_ext: 'fpds_contracting_office_name_eda_ext',
 	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
 	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
-	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext',
+	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext_f',
 };
 
 // mapping the name of the field to the label
