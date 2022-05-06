@@ -258,7 +258,7 @@ const displayUserRelatedItems = () => {
 };
 
 const getAnalystTools = (context) => {
-	return <AnalystTools context={context} />;
+	return <AnalystTools context={context} showResponsibilityExplorer={false} />;
 };
 
 const EdaMainViewHandler = (props) => {
