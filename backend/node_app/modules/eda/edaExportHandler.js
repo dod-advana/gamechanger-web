@@ -87,18 +87,19 @@ class EdaExportHandler extends ExportHandler {
 					);
 					const filenames = searchResults.docs.map((a) => a.filename);
 
-					const tables = ['"pds_parsed"."line_item_details"'];
-					const columns = ['filename', 'prod_or_svc_des', 'buying_currency'];
+					//Removing because will not work in prod
+					// const tables = ['"pds_parsed"."line_item_details"'];
+					// const columns = ['filename', 'prod_or_svc_des', 'buying_currency'];
 
-					const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
+					// const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
 
-					for (const result of searchResults.docs) {
-						if (result.filename && pgResults) {
-							result.line_items = pgResults.filter(
-								(lineItem) => lineItem.pdf_filename === result.filename
-							);
-						}
-					}
+					// for (const result of searchResults.docs) {
+					// 	if (result.filename && pgResults) {
+					// 		result.line_items = pgResults.filter(
+					// 			(lineItem) => lineItem.pdf_filename === result.filename
+					// 		);
+					// 	}
+					// }
 				} else {
 					this.logger.error('Error with Elasticsearch download results', 'T5GRJ4Lzdf', userId);
 					searchResults = { totalCount: 0, docs: [] };
@@ -178,47 +179,52 @@ class EdaExportHandler extends ExportHandler {
 				'Contract Number',
 				'Page Count',
 				'Issuing Organization',
-				'',
-				'',
-				'CLINS',
-				'Prod or Svc',
-				'Description',
-				'Base',
-				'Type',
+				// '',
+				// '',
+				// 'CLINS',
+				// 'Prod or Svc',
+				'PCS Code',
+				'PSC Description',
+				// 'Base',
+				// 'Type',
 				'Obligated Amount',
-				'Obligated Amount CIN',
-				'Row ID',
+				// 'Obligated Amount CIN',
+				// 'Row ID',
 			];
 			stringifier.write(header);
-
+			console.log('DOCS');
+			console.log(data.docs);
 			data.docs.forEach((doc) => {
 				const item = [
 					doc.filename,
 					this.getDisplayTitle(doc),
 					doc.page_count,
 					doc.issuing_organization_eda_ext,
+					doc.fpds_psc_eda_ext,
+					doc.fpds_psc_desc_eda_ext,
+					doc.obligated_amounts_eda_ext,
 				];
 				stringifier.write(item);
 
-				for (const item of doc.line_items) {
-					const line_item = [
-						'',
-						'',
-						'',
-						'',
-						'',
-						'',
-						'',
-						item.prod_or_svc,
-						item.prod_or_svc_desc,
-						item.li_base,
-						item.li_type,
-						item.obligated_amount,
-						item.obligated_amount_cin,
-						item.row_id,
-					];
-					stringifier.write(line_item);
-				}
+				// for (const item of doc.line_items) {
+				// 	const line_item = [
+				// 		'',
+				// 		'',
+				// 		'',
+				// 		'',
+				// 		'',
+				// 		'',
+				// 		'',
+				// 		item.prod_or_svc,
+				// 		item.prod_or_svc_desc,
+				// 		item.li_base,
+				// 		item.li_type,
+				// 		item.obligated_amount,
+				// 		item.obligated_amount_cin,
+				// 		item.row_id,
+				// 	];
+				// 	stringifier.write(line_item);
+				// }
 			});
 		}
 	}
