@@ -223,13 +223,25 @@ const GCDocumentsComparisonTool = ({
 									classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
 									autoWidth
 								>
-									<MenuItem key={`Similarity Score`} value={'Similarity Score'}>
+									<MenuItem
+										key={`Similarity Score`}
+										value={'Similarity Score'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										Similarity Score
 									</MenuItem>
-									<MenuItem key={`Alphabetically`} value={'Alphabetically'}>
+									<MenuItem
+										key={`Alphabetically`}
+										value={'Alphabetically'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										Alphabetically
 									</MenuItem>
-									<MenuItem key={`Date Published`} value={'Date Published'}>
+									<MenuItem
+										key={`Date Published`}
+										value={'Date Published'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										Date Published
 									</MenuItem>
 								</Select>
