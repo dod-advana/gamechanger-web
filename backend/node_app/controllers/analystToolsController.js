@@ -66,6 +66,12 @@ class AnalystToolsController {
 					clientObj.esIndex,
 					esQuery
 				);
+
+				returnData.docs.forEach((doc) => {
+					doc.pageHits.forEach((hit) => {
+						hit.id = `${doc.title}_${hit.pageNumber}`;
+					});
+				});
 			} else {
 				// ML API Call Goes Here
 				const paragraphSearches = paragraphs.map((paragraph) =>
