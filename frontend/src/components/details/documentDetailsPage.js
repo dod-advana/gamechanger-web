@@ -96,7 +96,10 @@ const DocumentDetailsPage = (props) => {
 		if (document) {
 			const data = getMetadataForPropertyTable(document);
 			let favoritableData = policyMetadata(document);
-			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
+			favoritableData = [
+				...favoritableData,
+				...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '', '150px'),
+			];
 			setMetadata(favoritableData);
 		}
 	}, [cloneData, document, userData]);
