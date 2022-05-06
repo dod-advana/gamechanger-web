@@ -847,6 +847,9 @@ class EDASearchUtility {
 							});
 						} else {
 							Object.keys(r.inner_hits).forEach((id) => {
+								const { file_location_eda_ext } = _source;
+								result.file_location_eda_ext = file_location_eda_ext;
+								result.score = _score;
 								r.inner_hits[id].hits.hits.forEach((phit) => {
 									const pageIndex = phit._nested.offset;
 									const paragraphIdBeingMatched = parseInt(id);
