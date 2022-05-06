@@ -2,19 +2,27 @@ import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
+	encode,
 	getTrackingNameForFactory,
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import { getEDAMetadataForPropertyTable, getDisplayTitle } from './edaUtils';
+import styled from 'styled-components';
+import { getEDAMetadataForCard, getDisplayTitle } from './edaUtils';
 import { List, ListItem, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-import SimpleTable from '../../common/SimpleTable';
+// import SimpleTable from '../../common/SimpleTable';
 import { KeyboardArrowRight, Star } from '@material-ui/icons';
 import _ from 'lodash';
 import { setState } from '../../../utils/sharedFunctions';
@@ -24,18 +32,15 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import sanitizeHtml from 'sanitize-html';
 import {
 	getDefaultComponent,
-	styles,
-	colWidth,
 	StyledFrontCardHeader,
 	StyledFrontCardSubHeader,
-	StyledListViewFrontCardContent,
 	StyledFrontCardContent,
-	clickFn,
 	RevokedTag,
 } from '../default/defaultCardHandler';
 
 const gameChangerAPI = new GameChangerAPI();
 
+// the fields that will show in the back of the card
 export const EDA_FIELDS = [
 	'award_id_eda_ext',
 	'modification_eda_ext',
@@ -60,25 +65,29 @@ export const EDA_FIELDS = [
 	'fpds_funding_agency_name_eda_ext',
 	'fpds_funding_office_code_eda_ext',
 	'fpds_description_of_requirement_eda_ext',
+	'fpds_psc_eda_ext',
+	'fpds_psc_desc_eda_ext',
 	// 'fpds_closed_date_eda_ext'
 ];
 
+// mapping the older field names to their newer fpds field names
 export const EDA_FPDS_MAP = {
 	reference_idv_eda_ext: 'fpds_idv_piid_eda_ext',
 	award_id_eda_ext: 'fpds_piid_eda_ext',
 	modification_eda_ext: 'fpds_modification_number_eda_ext',
-	signature_date_eda_ext: 'fpds_date_signed_eda_ext',
-	effective_date_eda_ext: 'fpds_effective_date_eda_ext',
+	signature_date_eda_ext: 'fpds_date_signed_eda_ext_dt',
+	effective_date_eda_ext: 'fpds_effective_date_eda_ext_dt',
 	naics_eda_ext: 'fpds_naics_code_eda_ext',
 	vendor_name_eda_ext: 'fpds_vendor_name_eda_ext',
 	vendor_duns_eda_ext: 'fpds_duns_eda_ext',
 	vendor_cage_eda_ext: 'fpds_cage_code_eda_ext',
-	contract_issue_name_eda_ext: 'fpds_contracting_agency_name_eda_ext',
+	contract_issue_name_eda_ext: 'fpds_contracting_office_name_eda_ext',
 	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
 	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
 	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext',
 };
 
+// mapping the name of the field to the label
 export const EDA_FIELD_JSON_MAP = {
 	award_id_eda_ext: 'Award ID',
 	reference_idv_eda_ext: 'Referenced IDV',
@@ -119,6 +128,161 @@ export const EDA_FIELD_JSON_MAP = {
 	fpds_funding_agency_name_eda_ext: 'FPDS Funding Agency',
 	fpds_naics_code_eda_ext: 'FPDS NAICS Code',
 	fpds_duns_eda_ext: 'FPDS DUNS',
+};
+
+const styles = {
+	bodyContainer: {
+		display: 'flex',
+		height: '100%',
+		flexDirection: 'column',
+	},
+	scrollBodyContainer: {
+		backgroundColor: 'rgb(238,241,242)',
+		display: 'block',
+	},
+	cardBody: {
+		fontFamily: 'Noto Sans',
+		overflow: 'auto',
+	},
+	actionButtonGroup: {
+		flex: 1,
+		justifyContent: 'flex-end',
+		display: 'flex',
+		alignItems: 'center',
+	},
+	footerButtonFront: {
+		margin: '0 10px 0 0 ',
+		padding: '5px 12px',
+		height: 50,
+		display: 'flex',
+		alignItems: 'center',
+	},
+	footerButtonBack: {
+		margin: '0 10px 0 0 ',
+		padding: '8px 12px',
+	},
+	viewMoreChevron: {
+		fontSize: 14,
+		color: primary,
+		fontWeight: 'normal',
+		marginLeft: 5,
+	},
+	viewMoreButton: {
+		fontSize: 16,
+		color: primary,
+		fontWeight: 'bold',
+		cursor: 'pointer',
+		minWidth: 60,
+	},
+};
+
+const StyledListViewFrontCardContent = styled.div`
+	.list-view-button {
+		width: 100%;
+		height: fit-content;
+		margin-top: 10px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		i {
+			font-size: ${CARD_FONT_SIZE}px;
+			color: #386f94;
+			font-weight: normal;
+			margin-left: 5px;
+			margin-right: 20px;
+		}
+	}
+
+	.expanded-hits {
+		display: flex;
+		height: 100%;
+
+		.page-hits {
+			min-width: 100px;
+			height: 100%;
+			border: 1px solid rgb(189, 189, 189);
+			border-top: 0px;
+
+			.page-hit {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding-right: 5px;
+				padding-left: 5px;
+				border-top: 1px solid rgb(189, 189, 189);
+				cursor: pointer;
+				color: #386f94;
+
+				span {
+					font-size: ${CARD_FONT_SIZE}px;
+				}
+
+				i {
+					font-size: ${CARD_FONT_SIZE}px;
+					margin-left: 10px;
+				}
+			}
+		}
+
+		> .expanded-metadata {
+			border: 1px solid rgb(189, 189, 189);
+			border-left: 0px;
+			min-height: 126px;
+			width: 100%;
+
+			> blockquote {
+				font-size: ${CARD_FONT_SIZE}px;
+				line-height: 20px;
+
+				background: #eceef1;
+				margin-bottom: 0;
+				height: 165px;
+				border-left: 0;
+				overflow: hidden;
+				font-family: Noto Sans, Arial, Helvetica, sans-serif;
+				padding: 0.5em 10px;
+				margin-left: 0;
+				quotes: '\\201C''\\201D''\\2018''\\2019';
+
+				> em {
+					color: white;
+					background-color: #e9691d;
+					margin-right: 5px;
+					padding: 4px;
+					font-style: normal;
+				}
+			}
+		}
+	}
+
+	.metadata {
+		display: flex;
+		height: 100%;
+		flex-direction: column;
+		border-radius: 5px;
+		overflow: auto;
+
+		.inner-scroll-container {
+			background-color: rgb(238, 241, 242);
+			display: block;
+			overflow: auto;
+			height: 100%;
+		}
+	}
+`;
+
+const tableColumns = [{ id: 'name' }, { id: 'fpds' }, { id: 'eda' }];
+
+const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	window.open(
+		`/#/pdfviewer/gamechanger?filename=${encode(
+			filename
+		)}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+	);
 };
 
 const cardHandler = {
@@ -481,6 +645,8 @@ const cardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
+			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP);
+
 			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
@@ -593,7 +759,7 @@ const cardHandler = {
 
 			return (
 				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
-					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+					<div style={{ height: '100%', overflow: 'hidden' }}>
 						{item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage && (
 							<GCAccordion
 								onChange={loadContractAward}
@@ -603,7 +769,7 @@ const cardHandler = {
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
-								style={{ marginBottom: '0px !important' }}
+								marginBottom={'0px !important'}
 							>
 								<List style={{ width: '100%', padding: '0' }}>
 									<ListItem>
@@ -622,7 +788,7 @@ const cardHandler = {
 							</GCAccordion>
 						)}
 
-						<SimpleTable
+						{/* <SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
@@ -638,7 +804,36 @@ const cardHandler = {
 									? '-10px 0 0 0'
 									: ''
 							}
-						/>
+						/> */}
+						<TableContainer sx={{ maxHeight: 295 }}>
+							<Table stickyHeader aria-label="sticky table">
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell>FPDS</TableCell>
+										<TableCell>EDA</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => {
+										return (
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+												{tableColumns.map((column) => {
+													const value = row[column.id];
+													return (
+														<TableCell key={column.id} align={column.align}>
+															{column.format && typeof value === 'number'
+																? column.format(value)
+																: value}
+														</TableCell>
+													);
+												})}
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+						</TableContainer>
 					</div>
 				</GCTooltip>
 			);

@@ -69,6 +69,7 @@ const GCUserDashboard = LoadableVisibility({
 		return <LoadingIndicator customColor={gcOrange} />;
 	},
 });
+
 const AnalystTools = LoadableVisibility({
 	loader: () => import('../../analystTools'),
 	loading: () => {
