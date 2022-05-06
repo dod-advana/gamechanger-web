@@ -290,6 +290,9 @@ const cardHandler = {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
 
+			const { cloneData } = state;
+			const { clone_name } = cloneData;
+
 			const displayTitle = getDisplayTitle(item);
 			const isRevoked = item.is_revoked_b;
 			const subType = 'PDF';
@@ -305,7 +308,7 @@ const cardHandler = {
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.filename, 0) : () => {}}
+								onClick={docListView ? () => clickFn(item.filename, clone_name, '', 0) : () => {}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -384,6 +387,9 @@ const cardHandler = {
 				intelligentFeedbackComponent,
 			} = props;
 
+			const { cloneData } = state;
+			const { clone_name } = cloneData;
+
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
@@ -443,7 +449,7 @@ const cardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, page.pageNumber);
+														clickFn(item.filename, clone_name, '', page.pageNumber);
 													}}
 												>
 													<span>
@@ -518,7 +524,7 @@ const cardHandler = {
 												onMouseEnter={() => setHoveredHit(key)}
 												onClick={(e) => {
 													e.preventDefault();
-													clickFn(item.filename, page.pageNumber);
+													clickFn(item.filename, clone_name, '', page.pageNumber);
 												}}
 											>
 												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
@@ -608,7 +614,7 @@ const cardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, page.pageNumber);
+														clickFn(item.filename, clone_name, '', page.pageNumber);
 													}}
 												>
 													<span>
