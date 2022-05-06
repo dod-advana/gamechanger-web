@@ -192,8 +192,6 @@ class EdaExportHandler extends ExportHandler {
 				// 'Row ID',
 			];
 			stringifier.write(header);
-			console.log('DOCS');
-			console.log(data.docs);
 			data.docs.forEach((doc) => {
 				const item = [
 					doc.filename,
