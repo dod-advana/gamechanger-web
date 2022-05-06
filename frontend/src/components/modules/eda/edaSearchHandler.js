@@ -72,7 +72,7 @@ const EdaSearchHandler = {
 		let url = window.location.hash.toString();
 		url = url.replace('#/', '');
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url) || false;
 
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
