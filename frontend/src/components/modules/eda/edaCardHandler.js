@@ -308,7 +308,11 @@ const cardHandler = {
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.filename, clone_name, '', 0) : () => {}}
+								onClick={
+									docListView
+										? () => clickFn(item.file_location_eda_ext, clone_name, '', 0)
+										: () => {}
+								}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -449,7 +453,12 @@ const cardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, clone_name, '', page.pageNumber);
+														clickFn(
+															item.file_location_eda_ext,
+															clone_name,
+															'',
+															page.pageNumber
+														);
 													}}
 												>
 													<span>
@@ -524,7 +533,12 @@ const cardHandler = {
 												onMouseEnter={() => setHoveredHit(key)}
 												onClick={(e) => {
 													e.preventDefault();
-													clickFn(item.filename, clone_name, '', page.pageNumber);
+													clickFn(
+														item.file_location_eda_ext,
+														clone_name,
+														'',
+														page.pageNumber
+													);
 												}}
 											>
 												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
@@ -614,7 +628,12 @@ const cardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, clone_name, '', page.pageNumber);
+														clickFn(
+															item.file_location_eda_ext,
+															clone_name,
+															'',
+															page.pageNumber
+														);
 													}}
 												>
 													<span>
