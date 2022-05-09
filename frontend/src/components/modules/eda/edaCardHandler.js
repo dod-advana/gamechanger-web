@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
@@ -7,26 +7,40 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import { getEDAMetadataForPropertyTable, getDisplayTitle } from './edaUtils';
+import styled from 'styled-components';
+import { getEDAMetadataForCard, getDisplayTitle } from './edaUtils';
 import { List, ListItem, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
-import { primary } from '../../../components/common/gc-colors';
+import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-import SimpleTable from '../../common/SimpleTable';
+// import SimpleTable from '../../common/SimpleTable';
 import { KeyboardArrowRight, Star } from '@material-ui/icons';
-import styled from 'styled-components';
 import _ from 'lodash';
 import { setState } from '../../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../../common/gc-colors';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import sanitizeHtml from 'sanitize-html';
+import {
+	getDefaultComponent,
+	StyledFrontCardHeader,
+	StyledFrontCardSubHeader,
+	StyledFrontCardContent,
+	RevokedTag,
+} from '../default/defaultCardHandler';
+
 const gameChangerAPI = new GameChangerAPI();
 
-//
+// the fields that will show in the back of the card
 export const EDA_FIELDS = [
 	'award_id_eda_ext',
 	'modification_eda_ext',
@@ -51,25 +65,29 @@ export const EDA_FIELDS = [
 	'fpds_funding_agency_name_eda_ext',
 	'fpds_funding_office_code_eda_ext',
 	'fpds_description_of_requirement_eda_ext',
+	'fpds_psc_eda_ext',
+	'fpds_psc_desc_eda_ext',
 	// 'fpds_closed_date_eda_ext'
 ];
 
+// mapping the older field names to their newer fpds field names
 export const EDA_FPDS_MAP = {
 	reference_idv_eda_ext: 'fpds_idv_piid_eda_ext',
 	award_id_eda_ext: 'fpds_piid_eda_ext',
 	modification_eda_ext: 'fpds_modification_number_eda_ext',
-	signature_date_eda_ext: 'fpds_date_signed_eda_ext',
-	effective_date_eda_ext: 'fpds_effective_date_eda_ext',
+	signature_date_eda_ext: 'fpds_date_signed_eda_ext_dt',
+	effective_date_eda_ext: 'fpds_effective_date_eda_ext_dt',
 	naics_eda_ext: 'fpds_naics_code_eda_ext',
 	vendor_name_eda_ext: 'fpds_vendor_name_eda_ext',
 	vendor_duns_eda_ext: 'fpds_duns_eda_ext',
 	vendor_cage_eda_ext: 'fpds_cage_code_eda_ext',
-	contract_issue_name_eda_ext: 'fpds_contracting_agency_name_eda_ext',
+	contract_issue_name_eda_ext: 'fpds_contracting_office_name_eda_ext',
 	contract_issue_dodaac_eda_ext: 'fpds_contracting_office_code_eda_ext',
 	misc_fsc_eda_ext: 'fpds_psc_eda_ext',
 	obligated_amounts_eda_ext: 'fpds_dollars_obligated_eda_ext',
 };
 
+// mapping the name of the field to the label
 export const EDA_FIELD_JSON_MAP = {
 	award_id_eda_ext: 'Award ID',
 	reference_idv_eda_ext: 'Referenced IDV',
@@ -157,118 +175,6 @@ const styles = {
 		minWidth: 60,
 	},
 };
-
-const colWidth = {
-	maxWidth: '900px',
-	whiteSpace: 'nowrap',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-};
-
-const StyledFrontCardHeader = styled.div`
-	font-size: 1.2em;
-	display: inline-block;
-	color: black;
-	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
-	font-weight: bold;
-	font-family: Montserrat;
-	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
-	padding: ${({ listView }) => (listView ? '0px' : '5px')};
-	margin-left: ${({ listView }) => (listView ? '10px' : '0px')};
-	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
-
-	.title-text-selected-favorite-div {
-		max-height: ${({ listView }) => (listView ? '' : '50px')};
-		height: ${({ listView }) => (listView ? '35px' : '')};
-		overflow: hidden;
-		display: flex;
-		justify-content: space-between;
-
-		.title-text {
-			cursor: pointer;
-			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
-			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
-
-			.text {
-				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
-				-webkit-line-clamp: 2;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
-			}
-
-			.list-view-arrow {
-				display: inline-block;
-				margin-top: 7px;
-			}
-		}
-
-		.selected-favorite {
-			display: inline-block;
-			font-family: 'Noto Sans';
-			font-weight: 400;
-			font-size: 14px;
-			margin-top: ${({ listView }) => (listView ? '2px' : '0px')};
-		}
-	}
-
-	.list-view-sub-header {
-		font-size: 0.8em;
-		display: flex;
-		color: black;
-		margin-bottom: 0px;
-		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
-		font-family: Montserrat;
-		height: 24px;
-		justify-content: space-between;
-	}
-`;
-
-const StyledFrontCardSubHeader = styled.div`
-	display: flex;
-	position: relative;
-
-	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
-		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
-		width: 50%;
-		padding: 8px;
-		display: flex;
-		align-items: center;
-
-		img {
-			width: 25px;
-			margin: 0px 10px 0px 0px;
-		}
-	}
-
-	.sub-header-two {
-		width: 50%;
-		color: white;
-		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
-	}
-`;
-
-const RevokedTag = styled.div`
-	font-size: 11px;
-	font-weight: 600;
-	border: none;
-	height: 25px;
-	border-radius: 15px;
-	background-color: #e50000;
-	color: white;
-	white-space: nowrap;
-	text-align: center;
-	display: inline-block;
-	padding-left: 15px;
-	padding-right: 15px;
-	margin-top: 10px;
-	margin-bottom: 10px;
-`;
 
 const StyledListViewFrontCardContent = styled.div`
 	.list-view-button {
@@ -366,83 +272,7 @@ const StyledListViewFrontCardContent = styled.div`
 	}
 `;
 
-const StyledFrontCardContent = styled.div`
-	font-family: 'Noto Sans';
-	overflow: auto;
-	font-size: ${CARD_FONT_SIZE}px;
-
-	.current-as-of-div {
-		display: flex;
-		justify-content: space-between;
-
-		.current-text {
-			margin: 10px 0;
-		}
-	}
-
-	.hits-container {
-		display: flex;
-		height: 100%;
-
-		.page-hits {
-			min-width: 100px;
-			height: 100%;
-			border: 1px solid rgb(189, 189, 189);
-			border-top: 0px;
-
-			.page-hit {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				padding-right: 5px;
-				padding-left: 5px;
-				border-top: 1px solid rgb(189, 189, 189);
-				cursor: pointer;
-				color: #386f94;
-
-				span {
-					font-size: ${CARD_FONT_SIZE}px;
-				}
-
-				i {
-					font-size: ${CARD_FONT_SIZE}px;
-					margin-left: 10px;
-				}
-			}
-
-			> .expanded-metadata {
-				border: 1px solid rgb(189, 189, 189);
-				border-left: 0px;
-				min-height: 126px;
-				width: 100%;
-				max-width: ${({ isWideCard }) => (isWideCard ? '' : '280px')};
-
-				> blockquote {
-					font-size: ${CARD_FONT_SIZE}px;
-					line-height: 20px;
-
-					background: #dde1e0;
-					margin-bottom: 0;
-					height: 165px;
-					border-left: 0;
-					overflow: hidden;
-					font-family: Noto Sans, Arial, Helvetica, sans-serif;
-					padding: 0.5em 10px;
-					margin-left: 0;
-					quotes: '\\201C''\\201D''\\2018''\\2019';
-
-					> em {
-						color: white;
-						background-color: #e9691d;
-						margin-right: 5px;
-						padding: 4px;
-						font-style: normal;
-					}
-				}
-			}
-		}
-	}
-`;
+const tableColumns = [{ id: 'name' }, { id: 'fpds' }, { id: 'eda' }];
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
@@ -455,10 +285,13 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 	);
 };
 
-const EdaCardHandler = {
+const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
+
+			const { cloneData } = state;
+			const { clone_name } = cloneData;
 
 			const displayTitle = getDisplayTitle(item);
 			const isRevoked = item.is_revoked_b;
@@ -475,7 +308,11 @@ const EdaCardHandler = {
 						<GCTooltip title={displayTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(item.filename, 0) : () => {}}
+								onClick={
+									docListView
+										? () => clickFn(item.file_location_eda_ext, clone_name, '', 0)
+										: () => {}
+								}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -554,6 +391,9 @@ const EdaCardHandler = {
 				intelligentFeedbackComponent,
 			} = props;
 
+			const { cloneData } = state;
+			const { clone_name } = cloneData;
+
 			let hoveredSnippet = '';
 			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
@@ -574,7 +414,7 @@ const EdaCardHandler = {
 
 			if (state.listView && !intelligentSearch) {
 				return (
-					<StyledListViewFrontCardContent>
+					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
 						{item.pageHits && item.pageHits.length > 0 && (
 							<button
 								type="button"
@@ -613,7 +453,12 @@ const EdaCardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, page.pageNumber);
+														clickFn(
+															item.file_location_eda_ext,
+															clone_name,
+															'',
+															page.pageNumber
+														);
 													}}
 												>
 													<span>
@@ -670,7 +515,7 @@ const EdaCardHandler = {
 				);
 			} else if (state.listView && intelligentSearch) {
 				return (
-					<StyledListViewFrontCardContent>
+					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
 						<div className={'expanded-hits'}>
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
@@ -688,7 +533,12 @@ const EdaCardHandler = {
 												onMouseEnter={() => setHoveredHit(key)}
 												onClick={(e) => {
 													e.preventDefault();
-													clickFn(item.filename, page.pageNumber);
+													clickFn(
+														item.file_location_eda_ext,
+														clone_name,
+														'',
+														page.pageNumber
+													);
 												}}
 											>
 												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
@@ -778,7 +628,12 @@ const EdaCardHandler = {
 													onMouseEnter={() => setHoveredHit(key)}
 													onClick={(e) => {
 														e.preventDefault();
-														clickFn(item.filename, page.pageNumber);
+														clickFn(
+															item.file_location_eda_ext,
+															clone_name,
+															'',
+															page.pageNumber
+														);
 													}}
 												>
 													<span>
@@ -815,6 +670,8 @@ const EdaCardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
+			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP);
+
 			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
 					tooltipText = 'Pulled from PDS data';
@@ -927,7 +784,7 @@ const EdaCardHandler = {
 
 			return (
 				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
-					<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+					<div style={{ height: '100%', overflow: 'hidden' }}>
 						{item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage && (
 							<GCAccordion
 								onChange={loadContractAward}
@@ -937,7 +794,7 @@ const EdaCardHandler = {
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'normal'}
-								style={{ marginBottom: '0px !important' }}
+								marginBottom={'0px !important'}
 							>
 								<List style={{ width: '100%', padding: '0' }}>
 									<ListItem>
@@ -956,7 +813,7 @@ const EdaCardHandler = {
 							</GCAccordion>
 						)}
 
-						<SimpleTable
+						{/* <SimpleTable
 							tableClass={'magellan-table'}
 							zoom={1}
 							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
@@ -972,7 +829,36 @@ const EdaCardHandler = {
 									? '-10px 0 0 0'
 									: ''
 							}
-						/>
+						/> */}
+						<TableContainer sx={{ maxHeight: 295 }}>
+							<Table stickyHeader aria-label="sticky table">
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell>FPDS</TableCell>
+										<TableCell>EDA</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => {
+										return (
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+												{tableColumns.map((column) => {
+													const value = row[column.id];
+													return (
+														<TableCell key={column.id} align={column.align}>
+															{column.format && typeof value === 'number'
+																? column.format(value)
+																: value}
+														</TableCell>
+													);
+												})}
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+						</TableContainer>
 					</div>
 				</GCTooltip>
 			);
@@ -1041,7 +927,7 @@ const EdaCardHandler = {
 						</GCTooltip>
 					</>
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -1053,7 +939,11 @@ const EdaCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: primary }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
@@ -1066,97 +956,22 @@ const EdaCardHandler = {
 		getFilename: (item) => {
 			return item.file_location_eda_ext;
 		},
-	},
 
-	publication: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 	},
+};
 
-	entity: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
+const EdaCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	topic: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default EdaCardHandler;

@@ -511,8 +511,16 @@ class MLSearchUtility {
 	async intelligentSearchHandler(sentenceResults, userId, req, clientObj) {
 		let filename;
 		let result;
+		let display = false;
 		//let sentenceResults = await this.mlApi.getSentenceTransformerResults(searchText, userId);
-		if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.7) {
+		if (sentenceResults[0] !== undefined && sentenceResults[0].passing_result) {
+			if (sentenceResults[0].passing_result == 1) {
+				display = true;
+			}
+		} else if (sentenceResults[0] !== undefined && sentenceResults[0].score >= 0.7) {
+			display = true;
+		}
+		if (display == true) {
 			filename = sentenceResults[0].id;
 			const sentenceSearchRes = await this.searchUtility.documentSearchOneID(
 				req,
