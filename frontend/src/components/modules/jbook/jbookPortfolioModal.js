@@ -134,6 +134,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								margin: '0 0 0 5px',
 								color: 'white',
 								padding: 0,
+								borderRadius: '15px',
 							}}
 							onClick={() => handleAddUser(userIDs[i])}
 						>
@@ -169,6 +170,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								margin: '0 0 0 5px',
 								color: 'white',
 								padding: 0,
+								borderRadius: '15px',
 							}}
 							onClick={() => handleAddTag(tag, false)}
 						>
