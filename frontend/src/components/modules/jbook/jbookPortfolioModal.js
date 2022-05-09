@@ -302,7 +302,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
 										onClick={() => {}}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
@@ -320,7 +326,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
 										onClick={() => setShowUsersModal(true)}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
@@ -339,7 +351,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
 										onClick={() => setShowTagsModal(true)}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
