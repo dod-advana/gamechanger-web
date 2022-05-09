@@ -248,7 +248,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
 				</DialogTitle>
-				<DialogContent style={{ height: 500, padding: '8px 5px' }}>
+				<DialogContent style={{ height: 600, padding: '8px 5px' }}>
 					<div style={{ margin: '0 20px' }}>
 						<Grid
 							container
@@ -288,6 +288,24 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 									multiline
 									rows={4}
 								/>
+								<hr />
+								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+									Upload Ontology
+								</Typography>
+								<FormControl
+									fullWidth
+									sx={{ m: 1 }}
+									variant="standard"
+									style={{ marginTop: 15, display: 'flex', flexDirection: 'row' }}
+								>
+									<IconButton
+										aria-label="close"
+										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										onClick={() => {}}
+									>
+										<AddIcon style={{ cursor: 'pointer' }} />
+									</IconButton>
+								</FormControl>
 								<hr />
 								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 									ADD PEOPLE WITH ACCESS
