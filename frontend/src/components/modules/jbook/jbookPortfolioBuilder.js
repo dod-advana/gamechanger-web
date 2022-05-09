@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { styles, useStyles } from '../../admin/util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
-import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
+// import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
@@ -18,17 +18,18 @@ const gameChangerAPI = new GameChangerAPI();
 
 const portfolioStyles = {
 	portfolio: {
-		border: '1px solid rgb(209, 215, 220)',
-		padding: '10px',
+		border: '2px solid rgb(209, 215, 220)',
+		padding: '20px',
 		borderRadius: '10px',
-		margin: '10px 20px',
+		margin: '10px 35px 0 0',
 		width: '400px',
 	},
 	portfolioHeader: {
 		fontSize: '1.5em',
-		paddingBottom: '20px',
+		paddingBottom: '10px',
 		display: 'flex',
 		justifyContent: 'space-between',
+		alignItems: 'center',
 	},
 	pillbox: {
 		maxHeight: '100px',
@@ -63,8 +64,10 @@ const PortfolioBuilder = (props) => {
 	const [portfolios, setPortfolios] = useState([]);
 	const [showModal, setShowModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
+	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
-
+	const [userList, setUserList] = useState([]);
+	const [userMap, setUserMap] = useState({});
 	let [init, setInit] = useState(false);
 	const classes = useStyles();
 
@@ -85,12 +88,31 @@ const PortfolioBuilder = (props) => {
 		}
 	}, [init, setInit, portfolios, setPortfolios]);
 
+	useEffect(() => {
+		const getUserData = async () => {
+			const data = await gameChangerAPI.getUserData('jbook');
+			setUserList(data.data.users);
+			const newMap = {};
+			data.data.users.forEach((user) => {
+				newMap[user.id] = user;
+			});
+			setUserMap(newMap);
+		};
+
+		if (!init) {
+			getUserData();
+			setInit(true);
+		}
+	}, [init, setInit, userList, setUserList]);
+
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
 			return (
-				<div style={portfolioStyles.portfolio}>
+				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
-						<div>{portfolio.name}</div>
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							{portfolio.name}
+						</Typography>
 						<div>
 							<IconButton
 								aria-label="close"
@@ -117,6 +139,7 @@ const PortfolioBuilder = (props) => {
 									borderRadius: 0,
 								}}
 								onClick={() => {
+									setDeleteID(portfolio.id);
 									setDeleteModal(true);
 								}}
 							>
@@ -126,20 +149,31 @@ const PortfolioBuilder = (props) => {
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
 					<hr />
-					<div style={portfolioStyles.portfolioHeader}>People With Access</div>
+					<div style={portfolioStyles.portfolioHeader}>
+						{' '}
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							People with Access
+						</Typography>
+					</div>
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.user_ids.length === 0 &&
 							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
 						{portfolio.user_ids.map((user, index) => {
 							return (
 								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px' }}>{user}</div>
+									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
+										{userMap[user].first_name + ' ' + userMap[user].last_name}
+									</div>
 								</Pill>
 							);
 						})}
 					</div>
 					<hr />
-					<div style={portfolioStyles.portfolioHeader}>Associated Tags</div>
+					<div style={portfolioStyles.portfolioHeader}>
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							Associated Tags
+						</Typography>
+					</div>
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.tags.length === 0 && '(none)'}
 						{portfolio.tags.map((tag, index) => {
@@ -171,12 +205,21 @@ const PortfolioBuilder = (props) => {
 					}}
 				>
 					<div style={{ flex: 2 }}>
-						{`Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-						labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-						laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-						voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-						non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-            `}
+						<div>
+							Rapidly discover and label all Program Elements/Budget Line Items related to a spend
+							category by creating a Portfolio.
+						</div>
+						<div style={{ marginTop: 15 }}>
+							Using the Portfolio Builder, users can:
+							<ul>
+								<li>Create a new portfolio</li>
+								<li>Define a portfolio description</li>
+								<li>Upload a portfolio ontology</li>
+								<li>Create tags/labels for use within the portfolio</li>
+								<li>Set user permissions</li>
+								<li>View all portfolios</li>
+							</ul>
+						</div>
 					</div>
 					<div>
 						<GCButton
@@ -191,60 +234,18 @@ const PortfolioBuilder = (props) => {
 				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
 					{listPortfolios(portfolios)}
-					{listPortfolios([
-						{
-							name: 'Portfolio 1',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-              labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-              voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-							user_ids: [
-								'User 1',
-								'User 2 long ',
-								'User 3 longer',
-								'User 1 longest',
-								'User 2',
-								'User 3 long',
-								'User 1',
-								'User 2 longer',
-								'User 3',
-								'User 1 longest',
-								'User 2',
-								'User 3 even longer name',
-							],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							name: 'Portfolio 2',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-              labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-              laboris nisi ut aliquip ex ea commodo consequat.`,
-							user_ids: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							name: 'Portfolio 3',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-              labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in
-              voluptate velit esse cillum dolore eu fugiat nulla pariatur.`,
-							user_ids: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-						{
-							name: 'Portfolio 4',
-							description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-              labore et dolore magna aliqua. `,
-							user_ids: ['User 1', 'User 2', 'User 3'],
-							tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-						},
-					])}
 				</div>
 			</div>
 			<JbookPortfolioModal
 				showModal={showModal}
-				setShowModal={setShowModal}
+				setShowModal={() => {
+					setShowModal(false);
+					setInit(false);
+				}}
 				modalData={modalData}
-			></JbookPortfolioModal>
+				userList={userList}
+				userMap={userMap}
+			/>
 			<Dialog
 				open={deleteModal}
 				scroll={'paper'}
@@ -298,7 +299,13 @@ const PortfolioBuilder = (props) => {
 					</GCButton>
 					<GCButton
 						id={'editReviewerSubmit'}
-						onClick={() => {
+						onClick={async () => {
+							const res = await gameChangerAPI.callDataFunction({
+								functionName: 'deletePortfolio',
+								cloneName: 'jbook',
+								options: { id: deleteID },
+							});
+							setInit(false);
 							setDeleteModal(false);
 						}}
 						style={{ margin: '10px' }}
