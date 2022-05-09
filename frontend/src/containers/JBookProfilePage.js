@@ -26,6 +26,7 @@ import {
 	Metadata,
 	ProjectDescription,
 	SideNav,
+	ClassificationScoreCard,
 } from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
 	CloseButton,
@@ -866,17 +867,41 @@ const JBookProfilePage = (props) => {
 			<SearchBar context={context} />
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
-				<BasicData
-					budgetType={budgetType}
-					admin={Permissions.hasPermission('JBOOK Admin')}
-					loading={profileLoading}
-					programElement={programElement}
-					projectNum={projectNum}
-					budgetYear={budgetYear}
-					budgetLineItem={budgetLineItem}
-					id={id}
-					appropriationNumber={appropriationNumber}
-				/>
+				<div style={{ width: '400px' }}>
+					<BasicData
+						budgetType={budgetType}
+						admin={Permissions.hasPermission('JBOOK Admin')}
+						loading={profileLoading}
+						programElement={programElement}
+						projectNum={projectNum}
+						budgetYear={budgetYear}
+						budgetLineItem={budgetLineItem}
+						id={id}
+						appropriationNumber={appropriationNumber}
+					/>
+					<ClassificationScoreCard
+						scores={[
+							{
+								name: 'AI CLASSIFIER',
+								description: 'The AI tool classified the BLI as [Tag] with a confidence score of 9.6',
+								value: 9.6,
+							},
+							{
+								name: 'REVIEWER',
+								description:
+									reviewData.primaryReviewer +
+									' classified this BLI as "' +
+									reviewData.primaryClassLabel +
+									'"',
+								timestamp: 'MM/DD/YYYY',
+								justification: reviewData.primaryReviewNotes
+									? reviewData.primaryReviewNotes
+									: '[Justification text]',
+							},
+						]}
+					/>
+				</div>
+
 				<ProjectDescription
 					profileLoading={profileLoading}
 					projectData={projectData}
