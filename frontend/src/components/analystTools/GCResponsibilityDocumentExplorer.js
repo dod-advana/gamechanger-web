@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import _ from 'underscore';
-import { Collapse } from 'react-collapse';
+import { UnmountClosed } from 'react-collapse';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
@@ -10,6 +10,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import '../cards/keyword-result-card.css';
 import '../../containers/gamechanger.css';
 import GCAccordion from '../common/GCAccordion';
+import GCTooltip from '../common/GCToolTip';
 import { handlePdfOnLoad, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 import PDFHighlighter from './PDFHighlighter';
@@ -19,8 +20,8 @@ import { styles as adminStyles } from '../../components/admin/util/GCAdminStyles
 
 const gameChangerAPI = new GameChangerAPI();
 const SIDEBAR_TOGGLE_WIDTH = 20;
-const LEFT_PANEL_COL_WIDTH = 3;
-const RIGHT_PANEL_COL_WIDTH = 3;
+const LEFT_PANEL_COL_WIDTH = 2;
+const RIGHT_PANEL_COL_WIDTH = 4;
 const useStyles = makeStyles({
 	root: {
 		width: '100%',
@@ -259,105 +260,6 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	};
 
-	const getMetadataForTable = () => {
-		const keyMap = {
-			filename: 'File Name',
-			documentTitle: 'Document Title',
-			organizationPersonnel: 'Organization/Personnel',
-			responsibilityText: 'Responsibility Text',
-			documentsReferenced: 'Documents Referenced',
-		};
-		const metaData = [];
-		Object.keys(selectedResponsibility).forEach((key) => {
-			if (keyMap[key]) {
-				const editButtons =
-					key === 'responsibilityText' || key === 'organizationPersonnel' ? (
-						<div className="row" style={{ justifyContent: 'right' }}>
-							{(key === 'responsibilityText' || isEditingEntity) && (
-								<GCButton
-									onClick={() => {
-										if (isEditingResp || isEditingEntity) {
-											setIsEditingEntity(false);
-											setIsEditingResp(false);
-											setDocumentLink('');
-										} else {
-											rejectResponsibility(selectedResponsibility);
-										}
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-										width: 'auto',
-									}}
-									isSecondaryBtn
-									disabled={isEditingEntity && key === 'responsibilityText'}
-								>
-									{key === 'organizationPersonnel' && <>{'Cancel'}</>}
-									{key === 'responsibilityText' && <>{isEditingResp ? 'Cancel' : 'Reject'}</>}
-								</GCButton>
-							)}
-							{!isEditingResp && key === 'responsibilityText' && (
-								<GCButton
-									onClick={() => {
-										getResponsibilityPageInfo(selectedResponsibility.responsibilityText);
-										setIsEditingResp(true);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-										width: 'auto',
-									}}
-									disabled={isEditingEntity}
-								>
-									Edit
-								</GCButton>
-							)}
-							{!isEditingEntity && key === 'organizationPersonnel' && (
-								<GCButton
-									onClick={() => {
-										getResponsibilityPageInfo(
-											selectedResponsibility.organizationPersonnel ||
-												selectedResponsibility.responsibilityText
-										);
-										setIsEditingEntity(true);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-										width: 'auto',
-									}}
-									disabled={isEditingResp}
-								>
-									Edit
-								</GCButton>
-							)}
-						</div>
-					) : (
-						<></>
-					);
-				metaData.push({
-					Key: keyMap[key],
-					Value: (
-						<div style={{ wordBreak: 'break-word' }}>
-							{selectedResponsibility[key]}
-							{editButtons}
-						</div>
-					),
-				});
-			}
-		});
-		return metaData;
-	};
-
 	const rejectResponsibility = (responsibility) => {
 		gameChangerAPI
 			.storeResponsibilityReportData({
@@ -423,11 +325,6 @@ export default function ResponsibilityDocumentExplorer({
 
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
-
-	const colWidth = {
-		minWidth: '75%',
-		maxWidth: '75%',
-	};
 
 	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
@@ -631,7 +528,7 @@ export default function ResponsibilityDocumentExplorer({
 								margin: '20px 0 20px 2px',
 							}}
 						/>
-						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
+						<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
 						<i
 							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
 							style={{
@@ -704,7 +601,7 @@ export default function ResponsibilityDocumentExplorer({
 								margin: '20px 0 20px 2px',
 							}}
 						/>
-						<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
+						<span>{rightPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
 							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
 							style={{
@@ -722,7 +619,7 @@ export default function ResponsibilityDocumentExplorer({
 				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
 				style={{
 					display: rightPanelOpen ? 'block' : 'none',
-					padding: 0,
+					paddingRight: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '800px',
 					overflowY: 'auto',
@@ -730,19 +627,6 @@ export default function ResponsibilityDocumentExplorer({
 				}}
 				ref={infiniteScrollRef}
 			>
-				{Object.keys(responsibilityData).length > 0 && (
-					<SimpleTable
-						tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={getMetadataForTable()}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidth}
-						disableWrap={true}
-						title={'Metadata'}
-					/>
-				)}
 				{Object.keys(responsibilityData).length > 0 &&
 					_.map(Object.keys(responsibilityData), (doc, key) => {
 						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
@@ -755,6 +639,7 @@ export default function ResponsibilityDocumentExplorer({
 										e.preventDefault();
 										setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
 									}}
+									style={{ marginTop: 0 }}
 								>
 									<i
 										style={{
@@ -765,8 +650,31 @@ export default function ResponsibilityDocumentExplorer({
 										className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
 									/>
 									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+									{docOpen && (
+										<GCButton
+											onClick={(e) => {
+												trackEvent(
+													getTrackingNameForFactory(cloneData.clone_name),
+													'CardInteraction',
+													'showDocumentDetails'
+												);
+												window.open(
+													`#/gamechanger-details?cloneName=${
+														cloneData.clone_name
+													}&type=document&documentName=${
+														responsibilityData[doc][
+															Object.keys(responsibilityData[doc])[0]
+														][0].filename
+													}_0`
+												);
+												e.preventDefault();
+											}}
+										>
+											Details
+										</GCButton>
+									)}
 								</div>
-								<Collapse isOpened={docOpen}>
+								<UnmountClosed isOpened={docOpen}>
 									{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
 										const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
 										return (
@@ -777,7 +685,7 @@ export default function ResponsibilityDocumentExplorer({
 														e.preventDefault();
 														setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
 													}}
-													style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
+													style={{ margin: '0 0 0 20px', backgroundColor: '#eceff1' }}
 												>
 													<i
 														style={{
@@ -791,7 +699,7 @@ export default function ResponsibilityDocumentExplorer({
 														{entity}
 													</span>
 												</div>
-												<Collapse isOpened={entOpen && docOpen}>
+												<UnmountClosed isOpened={entOpen && docOpen}>
 													<div>
 														{responsibilityData[doc][entity].map(
 															(responsibility, respKey) => {
@@ -831,7 +739,7 @@ export default function ResponsibilityDocumentExplorer({
 																		{isHighlighted && (
 																			<span
 																				style={{
-																					left: 21,
+																					left: 20,
 																					borderTop: '14px solid transparent',
 																					borderBottom:
 																						'14px solid transparent',
@@ -839,16 +747,182 @@ export default function ResponsibilityDocumentExplorer({
 																				className="searchdemo-arrow-left-sm"
 																			></span>
 																		)}
+																		<UnmountClosed isOpened={isHighlighted}>
+																			<div
+																				className="searchdemo-blockquote-sm"
+																				style={{
+																					marginLeft: 40,
+																					marginRight: 0,
+																					border: '1px solid #DCDCDC',
+																					padding: '10px',
+																					whiteSpace: 'normal',
+																				}}
+																			>
+																				<span
+																					className="gc-document-explorer-result-header-text"
+																					style={{ fontWeight: 'normal' }}
+																				>
+																					{responsibility.responsibilityText}
+																				</span>
+																				<div
+																					style={{
+																						display: 'flex',
+																						justifyContent: 'right',
+																						marginTop: '10px',
+																					}}
+																				>
+																					<GCTooltip
+																						title={'Edit entity'}
+																						placement="bottom"
+																						arrow
+																					>
+																						<div>
+																							<GCButton
+																								onClick={() => {
+																									if (
+																										isEditingEntity
+																									) {
+																										setIsEditingEntity(
+																											false
+																										);
+																										setDocumentLink(
+																											''
+																										);
+																									} else {
+																										getResponsibilityPageInfo(
+																											selectedResponsibility.organizationPersonnel ||
+																												selectedResponsibility.responsibilityText
+																										);
+																										setIsEditingEntity(
+																											true
+																										);
+																									}
+																								}}
+																								style={{
+																									height: 40,
+																									minWidth: 40,
+																									padding:
+																										'2px 8px 0px',
+																									fontSize: 14,
+																									margin: '16px 0px 0px 10px',
+																									width: 'auto',
+																								}}
+																								disabled={isEditingResp}
+																								isSecondaryBtn={
+																									isEditingEntity
+																								}
+																							>
+																								{isEditingEntity
+																									? 'Cancel'
+																									: 'Edit Entity'}
+																							</GCButton>
+																						</div>
+																					</GCTooltip>
+																					<GCTooltip
+																						title={'Reject responsibility'}
+																						placement="bottom"
+																						arrow
+																					>
+																						<div>
+																							<GCButton
+																								onClick={() => {
+																									if (
+																										isEditingResp ||
+																										isEditingEntity
+																									) {
+																										setIsEditingEntity(
+																											false
+																										);
+																										setIsEditingResp(
+																											false
+																										);
+																										setDocumentLink(
+																											''
+																										);
+																									} else {
+																										rejectResponsibility(
+																											selectedResponsibility
+																										);
+																									}
+																								}}
+																								style={{
+																									height: 40,
+																									minWidth: 40,
+																									padding:
+																										'2px 8px 0px',
+																									fontSize: 14,
+																									margin: '16px 0px 0px 10px',
+																									width: 'auto',
+																								}}
+																								isSecondaryBtn
+																								disabled={
+																									isEditingEntity ||
+																									isEditingResp
+																								}
+																							>
+																								Reject
+																							</GCButton>
+																						</div>
+																					</GCTooltip>
+																					<GCTooltip
+																						title={'Edit Responsibility'}
+																						placement="bottom"
+																						arrow
+																					>
+																						<div>
+																							<GCButton
+																								onClick={() => {
+																									if (isEditingResp) {
+																										setIsEditingResp(
+																											false
+																										);
+																										setDocumentLink(
+																											''
+																										);
+																									} else {
+																										getResponsibilityPageInfo(
+																											selectedResponsibility.responsibilityText
+																										);
+																										setIsEditingResp(
+																											true
+																										);
+																									}
+																								}}
+																								style={{
+																									height: 40,
+																									minWidth: 40,
+																									padding:
+																										'2px 8px 0px',
+																									fontSize: 14,
+																									margin: '16px 0px 0px 10px',
+																									width: 'auto',
+																								}}
+																								disabled={
+																									isEditingEntity
+																								}
+																								isSecondaryBtn={
+																									isEditingResp
+																								}
+																							>
+																								{isEditingResp
+																									? 'Cancel'
+																									: 'Edit Responsibility'}
+																							</GCButton>
+																						</div>
+																					</GCTooltip>
+																				</div>
+																			</div>
+																		</UnmountClosed>
 																	</div>
 																);
 															}
 														)}
 													</div>
-												</Collapse>
+												</UnmountClosed>
 											</div>
 										);
 									})}
-								</Collapse>
+								</UnmountClosed>
 							</div>
 						);
 					})}
