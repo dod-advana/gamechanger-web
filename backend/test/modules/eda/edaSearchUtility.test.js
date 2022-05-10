@@ -166,28 +166,10 @@ describe('EDASearchUtility', function () {
 								},
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
-										query: {
-											bool: {
-												should: [
-													{
-														match: {
-															'extracted_data_eda_n.dodaac_org_type_eda_ext': {
-																query: 'DEPT OF THE ARMY',
-															},
-														},
-													},
-												],
-											},
-										},
-									},
-								},
-								{
-									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'extracted_data_eda_n.signature_date_eda_ext_dt': { gte: '2017-06-11' },
+												'fpds_ng_n.date_signed_eda_ext_dt': { gte: '2017-06-11' },
 											},
 										},
 									},
@@ -351,13 +333,13 @@ describe('EDASearchUtility', function () {
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
 												should: [
 													{
 														range: {
-															'extracted_data_eda_n.signature_date_eda_ext_dt': {
+															'fpds_ng_n.date_signed_eda_ext_dt': {
 																gte: '2017',
 																lte: '2018',
 																format: 'yyyy',
@@ -544,14 +526,15 @@ describe('EDASearchUtility', function () {
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
-												must: [
+												should: [
 													{
-														match: {
-															'extracted_data_eda_n.contract_issue_office_dodaac_eda_ext':
-																'N66001',
+														query_string: {
+															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
+															fuzziness: 2,
+															query: '*N66001*',
 														},
 													},
 												],
@@ -561,10 +544,10 @@ describe('EDASearchUtility', function () {
 								},
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'extracted_data_eda_n.total_obligated_amount_eda_ext_f': {
+												'fpds_ng_n.dollars_obligated_eda_ext_f': {
 													gte: '200000',
 												},
 											},
@@ -884,14 +867,16 @@ describe('EDASearchUtility', function () {
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
 												should: [
 													{
 														match: {
-															'extracted_data_eda_n.contract_issue_office_majcom_eda_ext':
-																{ query: 'information systems', operator: 'AND' },
+															'fpds_ng_n.contracting_agency_name_eda_ext': {
+																query: 'information systems',
+																operator: 'AND',
+															},
 														},
 													},
 												],
@@ -1054,14 +1039,15 @@ describe('EDASearchUtility', function () {
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
-												must: [
+												should: [
 													{
-														match: {
-															'extracted_data_eda_n.contract_issue_office_dodaac_eda_ext':
-																'FA8075',
+														query_string: {
+															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
+															fuzziness: 2,
+															query: '*FA8075*',
 														},
 													},
 												],
@@ -1071,14 +1057,15 @@ describe('EDASearchUtility', function () {
 								},
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
-												must: [
+												should: [
 													{
-														match: {
-															'extracted_data_eda_n.contract_issue_office_name_eda_ext':
-																'AFICA/KD',
+														query_string: {
+															default_field: 'fpds_ng_n.contracting_office_name_eda_ext',
+															fuzziness: 2,
+															query: '*AFICA\\/KD*',
 														},
 													},
 												],
@@ -1240,14 +1227,16 @@ describe('EDASearchUtility', function () {
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
 												should: [
 													{
 														match: {
-															'extracted_data_eda_n.contract_issue_office_majcom_eda_ext':
-																{ query: 'information systems', operator: 'AND' },
+															'fpds_ng_n.contracting_agency_name_eda_ext': {
+																query: 'information systems',
+																operator: 'AND',
+															},
 														},
 													},
 												],
@@ -1436,18 +1425,359 @@ describe('EDASearchUtility', function () {
 								{ rank_feature: { field: 'pagerank_r', boost: 0.5 } },
 								{ rank_feature: { field: 'kw_doc_score_r', boost: 0.1 } },
 							],
+						},
+					},
+				};
+
+				assert.deepStrictEqual(actual, expected);
+				done();
+			} catch (err) {
+				assert.fail(err);
+			}
+		});
+
+		it('should return an ES query with vendor name, funding office code, idv piid, mod num, psc description, piid, desc of req, psc, funding agency name, naics, and duns', async (done) => {
+			const opts = {
+				...constructorOptionsMock,
+			};
+
+			const mockBody = {
+				charsPadding: 90,
+				combinedSearch: 'false',
+				edaSearchSettings: {
+					contractsOrMods: 'both',
+					allOrgsSelected: true,
+					organizations: [],
+					aggregations: [],
+					startDate: null,
+					endDate: null,
+					issueAgency: null,
+					issueOfficeDoDAAC: null,
+					issueOfficeName: null,
+					allYearsSelected: true,
+					fiscalYears: [],
+					allDataSelected: true,
+					contractData: { pds: false, syn: false, fpds: false, none: false },
+					minObligatedAmount: null,
+					maxObligatedAmount: null,
+					majcoms: { 'air force': [], army: [], defense: [], navy: [] },
+					excludeTerms: null,
+					vendorName: 'test',
+					fundingOfficeCode: 'test',
+					idvPIID: 'test',
+					modNumber: 'test',
+					pscDesc: 'test-',
+					piid: 'test',
+					reqDesc: 'test',
+					psc: 'test',
+					fundingAgencyName: 'test',
+					naicsCode: 'test',
+					duns: 'test',
+				},
+				searchVersion: 1,
+				searchText: 'defense',
+				offset: 0,
+				limit: 18,
+				cloneName: 'eda',
+				expansionDict: {},
+				operator: 'and',
+				searchTerms: ['defense'],
+				parsedQuery: 'defense',
+				extSearchFields: ['*_eda_ext'],
+				extStoredFields: ['*_eda_ext'],
+			};
+
+			const target = new EDASearchUtility(opts);
+			try {
+				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
+				const expected = {
+					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					stored_fields: [
+						'filename',
+						'title',
+						'page_count',
+						'doc_type',
+						'doc_num',
+						'ref_list',
+						'id',
+						'summary_30',
+						'keyw_5',
+						'p_text',
+						'type',
+						'p_page',
+						'display_title_s',
+						'display_org_s',
+						'display_doc_type_s',
+						'*_eda_ext',
+					],
+					from: 0,
+					size: 18,
+					track_total_hits: true,
+					query: {
+						bool: {
+							must: [
+								{
+									bool: {
+										should: [
+											{
+												nested: {
+													path: 'pages',
+													inner_hits: {
+														_source: false,
+														stored_fields: ['pages.filename', 'pages.p_raw_text'],
+														from: 0,
+														size: 5,
+														highlight: {
+															fields: {
+																'pages.filename.search': { number_of_fragments: 0 },
+																'pages.p_raw_text': {
+																	fragment_size: 180,
+																	number_of_fragments: 1,
+																},
+															},
+															fragmenter: 'span',
+														},
+													},
+													query: {
+														bool: {
+															should: [
+																{
+																	wildcard: {
+																		'pages.filename.search': {
+																			value: 'defense*',
+																			boost: 15,
+																		},
+																	},
+																},
+																{
+																	query_string: {
+																		query: 'defense',
+																		default_field: 'pages.p_raw_text',
+																		default_operator: 'and',
+																		fuzzy_max_expansions: 100,
+																		fuzziness: 'AUTO',
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												multi_match: {
+													query: 'defense',
+													fields: ['*_eda_ext'],
+													operator: 'or',
+												},
+											},
+										],
+									},
+								},
+							],
+							should: [
+								{
+									multi_match: {
+										query: 'defense',
+										fields: ['keyw_5^2', 'id^2', 'summary_30', 'pages.p_raw_text'],
+										operator: 'or',
+									},
+								},
+								{ rank_feature: { field: 'pagerank_r', boost: 0.5 } },
+								{ rank_feature: { field: 'kw_doc_score_r', boost: 0.1 } },
+							],
 							filter: [
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											bool: {
 												should: [
 													{
-														match: {
-															'extracted_data_eda_n.dodaac_org_type_eda_ext': {
-																query: 'defense',
-															},
+														query_string: {
+															default_field: 'fpds_ng_n.vendor_name_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.funding_office_code_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.idv_piid_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.modification_number_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.psc_desc_eda_ext',
+															fuzziness: 2,
+															query: '*test\\-*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.piid_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field:
+																'fpds_ng_n.description_of_requirement_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.psc_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.funding_agency_name_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.naics_code_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.duns_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
 														},
 													},
 												],
@@ -1468,7 +1798,7 @@ describe('EDASearchUtility', function () {
 		});
 	});
 
-	describe('getElasticSearchStatsQuery', function () {
+	describe('getElasticsearchStatsQuery', function () {
 		it('should return an ES query for a search with filters included', async (done) => {
 			const opts = {
 				...constructorOptionsMock,
@@ -1523,7 +1853,7 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchStatsQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['extracted_data_eda_n', 'metadata_type_eda_ext'] },
+					_source: { includes: ['extracted_data_eda_n', 'metadata_type_eda_ext', 'fpds_ng_n'] },
 					from: 0,
 					size: 10000,
 					track_total_hits: true,
@@ -1536,22 +1866,6 @@ describe('EDASearchUtility', function () {
 											{
 												nested: {
 													path: 'pages',
-													inner_hits: {
-														_source: false,
-														stored_fields: ['pages.filename', 'pages.p_raw_text'],
-														from: 0,
-														size: 5,
-														highlight: {
-															fields: {
-																'pages.filename.search': { number_of_fragments: 0 },
-																'pages.p_raw_text': {
-																	fragment_size: 180,
-																	number_of_fragments: 1,
-																},
-															},
-															fragmenter: 'span',
-														},
-													},
 													query: {
 														bool: {
 															should: [
@@ -1600,10 +1914,10 @@ describe('EDASearchUtility', function () {
 								},
 								{
 									nested: {
-										path: 'extracted_data_eda_n',
+										path: 'fpds_ng_n',
 										query: {
 											range: {
-												'extracted_data_eda_n.signature_date_eda_ext_dt': { gte: '2017-06-11' },
+												'fpds_ng_n.date_signed_eda_ext_dt': { gte: '2017-06-11' },
 											},
 										},
 									},
@@ -2272,6 +2586,7 @@ describe('EDASearchUtility', function () {
 							esIndex: 'gc_eda_vendor_org_hierarchy_2',
 							keyw_5: '',
 							ref_list: [],
+							score: 8.036867,
 						},
 					],
 					doc_types: [],
@@ -2288,7 +2603,6 @@ describe('EDASearchUtility', function () {
 						],
 					},
 				};
-
 				assert.deepStrictEqual(actual, expected);
 				done();
 			} catch (err) {
