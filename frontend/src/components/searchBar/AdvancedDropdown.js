@@ -2,8 +2,22 @@ import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import { AdvDropdownWrapper } from './SearchBarStyledComponents';
-import SearchMatrixFactory from '../factories/searchMatrixFactory';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+
+const PolicyAdvancedOptionsHandler = LoadableVisibility({
+	loader: () => import('../modules/policy/policyAdvancedOptionsHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
+
+const EDAAdvancedOptionsHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaAdvancedOptionsHandler'),
+	loading: () => {
+		return <></>;
+	},
+});
 
 const useStyles = makeStyles({
 	radioButtonLabel: {
@@ -139,7 +153,6 @@ const AdvancedDropdown = (props) => {
 	const { state, dispatch } = context;
 	const classes = useStyles();
 
-	const [matrixHandler, setMatrixHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 
 	const [datePickerOpen, setDatePicker] = useState(false);
@@ -149,15 +162,11 @@ const AdvancedDropdown = (props) => {
 	useEffect(() => {
 		// Create the factory
 		if (state.cloneDataSet && !loaded) {
-			const factory = new SearchMatrixFactory(state.cloneData.main_view_module);
-			const handler = factory.createHandler();
-
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandlerTmp = searchFactory.createHandler();
 			// get pre-search data
 			searchHandlerTmp.getPresearchData(state, dispatch);
 
-			setMatrixHandler(handler);
 			setLoaded(true);
 		}
 	}, [state, loaded, dispatch]);
@@ -217,17 +226,27 @@ const AdvancedDropdown = (props) => {
 		setDatePicker(false);
 	};
 
+	const getAdvancedOptionsComponent = (props) => {
+		switch (state.cloneData.main_view_module) {
+			case 'eda/edaMainViewHandler':
+				return <EDAAdvancedOptionsHandler {...props} />;
+			case 'policy/policyMainViewHandler':
+				return <PolicyAdvancedOptionsHandler {...props} />;
+			default:
+				return <></>;
+		}
+	};
+
 	return (
 		<AdvDropdownWrapper ref={ref} id="advanced-filters" style={{ display: open ? 'block' : 'none' }}>
-			{matrixHandler &&
-				matrixHandler.getAdvancedOptions({
-					state,
-					dispatch,
-					classes,
-					handleSubmit,
-					setDatePickerOpen,
-					setDatePickerClosed,
-				})}
+			{getAdvancedOptionsComponent({
+				state,
+				dispatch,
+				classes,
+				handleSubmit,
+				setDatePickerOpen,
+				setDatePickerClosed,
+			})}
 		</AdvDropdownWrapper>
 	);
 };
