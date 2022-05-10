@@ -1209,7 +1209,7 @@ const PolicyMainViewHandler = (props) => {
 			return getNonMainPageOuterContainer(getDataTracker(state), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(getGCUserDashboard, gameChangerUserAPI),
+				getUserProfilePage(getGCUserDashboard({ state, dispatch }), gameChangerUserAPI),
 				state,
 				dispatch
 			);
