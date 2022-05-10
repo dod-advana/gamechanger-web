@@ -21,6 +21,7 @@ const MLRoutes = {
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
 	transSentenceSearch: `${transformerBaseUrl}/transSentenceSearch`,
+	documentCompare: `${transformerBaseUrl}/documentCompare`,
 	transformResults: `${transformerBaseUrl}/transformerSearch`,
 	reloadModels: `${transformerBaseUrl}/reloadModels`,
 	downloadCorpus: `${transformerBaseUrl}/downloadCorpus`,
@@ -91,7 +92,7 @@ class MLApiClient {
 
 	async getSentenceTransformerResultsForCompare(searchText, userId = 'unknown', paragraphIdBeingMatched) {
 		const data = { text: searchText };
-		const returnData = await this.postData('transSentenceSearch', userId, data, '?num_results=15');
+		const returnData = await this.postData('documentCompare', userId, data, '?num_results=15');
 
 		return { ...returnData, paragraphIdBeingMatched };
 	}

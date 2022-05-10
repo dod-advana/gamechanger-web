@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import SearchBanner from '../components/searchBar/GCSearchBanner';
 import MLDashboard from '../components/admin/MLDashboard';
@@ -80,6 +81,7 @@ const GamechangerAdminPage = (props) => {
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
+	const { path } = useRouteMatch();
 
 	const renderSwitch = (page) => {
 		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
@@ -145,7 +147,10 @@ const GamechangerAdminPage = (props) => {
 				cloneData={{ clone_name: 'gamechanger' }}
 			/>
 
-			{renderSwitch(pageToView)}
+			<Switch>
+				<Route exact path={`${path}/mldashboard`} component={MLDashboard} />
+				<Route path="*" component={() => renderSwitch(pageToView)} />
+			</Switch>
 		</div>
 	);
 };

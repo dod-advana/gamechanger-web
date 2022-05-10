@@ -937,6 +937,7 @@ const GCDocumentsComparisonTool = (props) => {
 													(paragraph) => paragraph.paragraphIdBeingMatched === selectedInput
 												)
 												.map((paragraph) => {
+													console.log('PARAGRAPH', paragraph);
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 													const pOpen = selectedParagraph?.id === paragraph.id;
 													const isHighlighted = pOpen && docOpen;
@@ -973,9 +974,10 @@ const GCDocumentsComparisonTool = (props) => {
 																	{isHighlighted
 																		? `Page: ${paragraph.page_num_i + 1}, Par: ${
 																				paragraph.id.split('_')[1]
-																		  }, Similarity Score: ${convertDCTScoreToText(
-																				paragraph.score
-																		  )}`
+																		  }, Similarity Score: ${
+																				paragraph.score_display
+																		  }
+																		  `
 																		: paragraph.par_raw_text_t}
 																</span>
 															</div>
