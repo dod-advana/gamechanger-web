@@ -372,7 +372,6 @@ export default (props) => {
 							onClick={() => {
 								triggerDownloadCorpus();
 							}}
-							disabled={checkCorpusDownloading()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Download

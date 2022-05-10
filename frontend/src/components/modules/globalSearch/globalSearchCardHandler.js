@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
@@ -14,72 +14,7 @@ import QLIKICON from '../../../images/icon/QLIK.svg';
 import moment from 'moment';
 import { parseOwnerName } from './search';
 import { primary } from '../../common/gc-colors';
-
-const styles = {
-	container: {
-		marginBottom: 15,
-	},
-	footerButtonBack: {
-		margin: '0 10px 0 0 ',
-		padding: '8px 12px',
-	},
-	button: {
-		height: 50,
-		width: 120,
-		margin: 'auto 0px auto auto',
-	},
-	link: {
-		fontSize: 16,
-		fontFamily: 'Montserrat',
-		color: '#386F94',
-		letter: '-0.4px',
-		fontWeight: '600',
-		margin: 'auto 0px',
-	},
-	linkIcon: {
-		fontSize: 19,
-		verticalAlign: 'middle',
-	},
-	viewMoreChevron: {
-		fontSize: 14,
-		color: primary,
-		fontWeight: 'normal',
-		marginLeft: 5,
-	},
-	viewMoreButton: {
-		fontSize: 16,
-		color: primary,
-		fontWeight: 'bold',
-		cursor: 'pointer',
-		minWidth: 60,
-	},
-
-	title: (restricted) => ({
-		backgroundColor: restricted ? '#F1F5F9' : 'rgba(223,230,238,0.5)',
-		border: '1px solid #9BB1C8',
-		borderRadius: '5px 5px 0 0',
-		borderBottom: 0,
-		height: 70,
-		padding: 15,
-	}),
-	body: (restricted) => ({
-		border: '1px solid #9BB1C8',
-		padding: 15,
-		height: 330,
-		backgroundColor: restricted ? '#B6C6D8' : 'white',
-		textAlign: 'left',
-	}),
-	footer: (restricted) => ({
-		border: '1px solid #9BB1C8',
-		borderTop: 0,
-		padding: 8,
-		borderRadius: '0 0 12px 12px ',
-		height: 80,
-		display: 'flex',
-		backgroundColor: restricted ? '#B6C6D8' : 'white',
-		justifyContent: 'flex-end',
-	}),
-};
+import { getDefaultComponent, styles } from '../default/defaultCardHandler';
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
@@ -140,25 +75,6 @@ const StyledFrontCardHeader = styled.div`
 	}
 `;
 
-// const StyledFrontCardSubHeader = styled.div`
-// 	display: flex;
-// 	position: relative;
-//
-// 	.sub-header-one {
-// 		color: ${({typeTextColor}) => typeTextColor ? typeTextColor : '#ffffff'};
-// 		background-color: ${({typeColor}) => typeColor ? typeColor : '#000000'};
-// 		width: 100%;
-// 		padding: 8px;
-// 		display: flex;
-// 		align-items: center;
-//
-// 		img {
-// 			width: 25px;
-//     		margin: 0px 10px 0px 0px;
-// 		}
-// 	}
-// `;
-
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
 	overflow: auto;
@@ -203,41 +119,10 @@ const getUrl = (id, restricted) => {
 };
 
 const cardSubHeaderHandler = (props) => {
-	// const {item} = props;
-	//
-	// let typeColor;
-	// switch (item.type) {
-	// 	case 'application':
-	// 		typeColor = 'rgb(50, 18, 77)';
-	// 		break;
-	// 	case 'dashboard':
-	// 		typeColor = 'rgb(11, 167, 146)';
-	// 		break;
-	// 	case 'dataSource':
-	// 		typeColor = 'rgb(5, 159, 217)';
-	// 		break;
-	// 	case 'database':
-	// 		typeColor = 'rgb(233, 105, 29)';
-	// 		break;
-	// 	default:
-	// 		typeColor = 'rgb(233, 105, 29)';
-	// 		break;
-	// }
-
-	return (
-		<>
-			{/*{!state.listView && !toggledMore &&*/}
-			{/*	<StyledFrontCardSubHeader typeTextColor={'white'} typeColor={typeColor}>*/}
-			{/*		<div className={'sub-header-one'}>*/}
-			{/*			{capitalizeFirst(item.type)}*/}
-			{/*		</div>*/}
-			{/*	</StyledFrontCardSubHeader>*/}
-			{/*}*/}
-		</>
-	);
+	return <></>;
 };
 
-const GlobalSearchCardHandler = {
+const cardHandler = {
 	application: {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
@@ -331,6 +216,10 @@ const GlobalSearchCardHandler = {
 		},
 
 		getFilename: (item) => {
+			return '';
+		},
+
+		getDisplayTitle: (item) => {
 			return '';
 		},
 	},
@@ -454,7 +343,7 @@ const GlobalSearchCardHandler = {
 				<>
 					{PreparedLink}
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -466,7 +355,11 @@ const GlobalSearchCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: primary }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
@@ -500,6 +393,10 @@ const GlobalSearchCardHandler = {
 		},
 
 		getFilename: (item) => {
+			return '';
+		},
+
+		getDisplayTitle: (item) => {
 			return '';
 		},
 	},
@@ -603,6 +500,10 @@ const GlobalSearchCardHandler = {
 		getFilename: (item) => {
 			return '';
 		},
+
+		getDisplayTitle: (item) => {
+			return '';
+		},
 	},
 
 	database: {
@@ -704,7 +605,22 @@ const GlobalSearchCardHandler = {
 		getFilename: (item) => {
 			return '';
 		},
+
+		getDisplayTitle: (item) => {
+			return '';
+		},
 	},
+};
+
+const GlobalSearchCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
+
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
+
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default GlobalSearchCardHandler;
