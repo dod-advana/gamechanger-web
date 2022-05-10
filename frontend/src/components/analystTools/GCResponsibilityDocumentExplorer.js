@@ -4,7 +4,6 @@ import { UnmountClosed } from 'react-collapse';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
-import SimpleTable from '../common/SimpleTable';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import '../cards/keyword-result-card.css';
