@@ -2140,8 +2140,11 @@ class SearchUtility {
 									transformTextMatch: paragraphResults[paragraph._source.id].text,
 									paragraphIdBeingMatched:
 										paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
+									score_display: paragraphResults[paragraph._source.id].score_display,
 								});
 							});
+
+							result.paragraphs.sort((a, b) => b.score - a.score);
 
 							result.score /= result.paragraphs.length;
 						} else {
