@@ -937,7 +937,6 @@ const GCDocumentsComparisonTool = (props) => {
 													(paragraph) => paragraph.paragraphIdBeingMatched === selectedInput
 												)
 												.map((paragraph) => {
-													console.log('PARAGRAPH', paragraph);
 													let blockquoteClass = 'searchdemo-blockquote-sm';
 													const pOpen = selectedParagraph?.id === paragraph.id;
 													const isHighlighted = pOpen && docOpen;
