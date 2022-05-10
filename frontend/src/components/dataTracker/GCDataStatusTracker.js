@@ -132,13 +132,20 @@ const styles = {
 const useStyles = makeStyles({
 	select: {
 		'& ul': {
-			paddingTop: '4px',
-			paddingBottom: '4px',
+			padding: '4px',
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			alignItems: 'start',
 		},
 		'& li': {
 			fontSize: '1rem',
 			paddingTop: '1px',
 			paddingBottom: '1px',
+			whiteSpace: 'unset',
+			wordBreak: 'break-all',
+			paddingLeft: '1em',
+			textIndent: '-1em',
 		},
 	},
 });
