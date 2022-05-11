@@ -12,13 +12,10 @@ const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
+const { getQlikApps } = require('./globalSearchUtils');
+const asyncRedisLib = require('async-redis');
 
 const redisAsyncClientDB = 7;
-
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
-
-const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
-const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
 class GlobalSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -60,7 +57,7 @@ class GlobalSearchHandler extends SearchHandler {
 			searchText,
 			limit,
 			offset,
-			category = 'applications',
+			category,
 		} = req.body;
 
 		try {
@@ -172,12 +169,28 @@ class GlobalSearchHandler extends SearchHandler {
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
 			const t0 = new Date().getTime();
-			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
-			let redisAppResults = await this.redisDB.get('qlik-full-app-list');
-			redisAppResults = JSON.parse(redisAppResults || []);
-			let results = await this.getQlikApps({}, userId.substring(0, userId.length - 4));
+			const redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
+			await redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
+			let redisAppResults = await redisDB.get('qlik-full-app-list');
+			let userResults;
+			if (!redisAppResults) {
+				console.log('Doing FULL Search');
+				let results = await Promise.all([
+					getQlikApps(undefined, undefined, this.logger, false, true),
+					getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false),
+				]);
+				redisAppResults = results[0].data;
+				userResults = results[1].data;
+				redisDB.set('qlik-full-app-list', JSON.stringify(redisAppResults));
+			} else {
+				console.log('Not Doing FULL Search');
+				redisAppResults = JSON.parse(redisAppResults || '[]');
+				userResults = await getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false);
+				userResults = userResults.data;
+			}
+
 			const [apps, searchResults] = this.performSearch(
-				this.mergeUserApps(redisAppResults || [], results.data || []),
+				this.mergeUserApps(redisAppResults || [], userResults || []),
 				lunrSearchUtils.parse(searchText)
 			);
 			const tmpReturn = this.generateRespData(apps, searchResults, offset, limit);
@@ -273,44 +286,6 @@ class GlobalSearchHandler extends SearchHandler {
 			this.logger.error(e, 'QW8UGJM');
 			return { hits: [], totalCount: 0, count: 0 };
 		}
-	}
-
-	async getQlikApps(params = {}, userId) {
-		try {
-			let url = `${QLIK_URL}/qrs/app/full`;
-			let result = await axios.get(url, this.getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
-			return result;
-		} catch (err) {
-			if (!userId)
-				// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
-				this.logger.error(err, 'O799J51', userId);
-
-			return {};
-		}
-	}
-
-	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
-		return {
-			params: {
-				Xrfkey: 1234567890123456,
-				...params,
-			},
-			headers: {
-				'content-type': 'application/json',
-				'X-Qlik-xrfkey': '1234567890123456',
-				'X-Qlik-user': this.getUserHeader(userid),
-			},
-			httpsAgent: new https.Agent({
-				rejectUnauthorized: false,
-				ca: CA,
-				key: KEY,
-				cert: CERT,
-			}),
-		};
-	}
-
-	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
-		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
 	}
 
 	performSearch(allApps, searchText) {
