@@ -67,7 +67,7 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
 			const { limit = 100, offset = 0, order = [], where = {} } = req.body;
-			const results =  await this.feedback.findAndCountAll({
+			const results = await this.feedback.findAndCountAll({
 				limit,
 				offset,
 				order,
