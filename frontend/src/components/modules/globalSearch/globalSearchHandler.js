@@ -134,14 +134,13 @@ const GlobalSearchHandler = {
 						showTutorial,
 						useGCCache,
 						tiny_url,
-						getApplications: selectedCategories.Applications,
-						getDashboards: selectedCategories.Dashboards,
-						getDataSources: selectedCategories.DataSources,
-						getDatabases: selectedCategories.Databases,
+						category: 'dashboards',
 					},
 				});
 
 				respData = data;
+
+				console.log(respData);
 
 				data.applications.hits.forEach((hit) => {
 					hit.type = 'application';
