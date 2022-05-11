@@ -86,7 +86,6 @@
 		"typeface-noto-sans": "0.0.54",
 		"underscore": "1.13.2",
 		"uuid": "3.4.0",
-		"xlsx": "0.17.0"
 	},
 	"devDependencies": {
 		"chai": "^4.3.4",
