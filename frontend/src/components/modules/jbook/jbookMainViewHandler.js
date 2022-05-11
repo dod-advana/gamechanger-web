@@ -70,6 +70,22 @@ const handlePageLoad = async (props) => {
 	// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
 	// 	mainTabSelected = 1;
 	// }
+
+	// grab the portfolio data
+	let portfolios = [];
+	await gameChangerAPI
+		.callDataFunction({
+			functionName: 'getPortfolios',
+			cloneName: 'jbook',
+			options: {},
+		})
+		.then((data) => {
+			console.log(data);
+			portfolios = data.data !== undefined ? data.data : [];
+		});
+
+	console.log(portfolios);
+
 	// the main setstate that triggers the initial search
 	setState(dispatch, {
 		searchText,
@@ -80,6 +96,7 @@ const handlePageLoad = async (props) => {
 		jbookSearchSettings,
 		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
 		dropdownData,
+		portfolios,
 	});
 };
 

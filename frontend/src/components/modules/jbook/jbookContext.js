@@ -394,6 +394,9 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
+
+	// jbook portfolios
+	portfolios: [],
 };
 
 const init = (initialState) => {
