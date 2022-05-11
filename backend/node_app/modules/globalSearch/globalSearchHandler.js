@@ -53,18 +53,17 @@ class GlobalSearchHandler extends SearchHandler {
 			useGCCache,
 			forCacheReload = false,
 			showTutorial,
-			getApplications,
-			getDashboards,
-			getDataSources,
-			getDatabases,
 			tiny_url,
 			cloneName,
 			searchType,
 			searchVersion,
+			searchText,
+			limit,
+			offset,
+			category = 'applications',
 		} = req.body;
 
 		try {
-			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
 			historyRec.showTutorial = showTutorial;
 			historyRec.tiny_url = tiny_url;
@@ -78,40 +77,38 @@ class GlobalSearchHandler extends SearchHandler {
 			// if (!forCacheReload && useGCCache && offset === 0) {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
-			const searchResults = { applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0 };
-			const searchesToRun = {};
+			const searchResults = { totalCount: 0 };
+			searchResults[category] = {};
 
-			// Applications
-			if (getApplications) {
-				searchesToRun['applications'] = this.getApplicationResults(searchText, offset, limit, userId);
+			let results = [];
+			switch (category) {
+				case 'applications':
+					searchResults[category] = await this.getApplicationResults(searchText, offset, limit, userId);
+					break;
+				case 'dashboards':
+					searchResults[category] = await this.getDashboardResults(searchText, offset, limit, userId);
+					break;
+				case 'dataSources':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						'Data Source',
+						userId
+					);
+					break;
+				case 'databases':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						'Database',
+						userId
+					);
+					break;
+				default:
+					break;
 			}
-
-			// Dashboards
-			if (getDashboards) {
-				searchesToRun['dashboards'] = this.getDashboardResults(searchText, offset, limit, userId);
-			}
-
-			// Data Sources
-			if (getDataSources) {
-				searchesToRun['dataSources'] = this.getDataCatalogResults(
-					searchText,
-					offset,
-					limit,
-					'Data Source',
-					userId
-				);
-			}
-
-			// Databases
-			if (getDatabases) {
-				searchesToRun['databases'] = this.getDataCatalogResults(searchText, offset, limit, 'Database', userId);
-			}
-
-			const results = await Promise.all(Object.values(searchesToRun));
-
-			Object.keys(searchesToRun).forEach((searchKey, index) => {
-				searchResults[searchKey] = results[index];
-			});
 
 			// try to store to cache
 			if (useGCCache && searchResults) {
@@ -175,12 +172,12 @@ class GlobalSearchHandler extends SearchHandler {
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
 			const t0 = new Date().getTime();
-			let results = await Promise.all([
-				this.getQlikApps(),
-				this.getQlikApps({}, userId.substring(0, userId.length - 4)),
-			]);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
+			let redisAppResults = await this.redisDB.get('qlik-full-app-list');
+			redisAppResults = JSON.parse(redisAppResults || []);
+			let results = await this.getQlikApps({}, userId.substring(0, userId.length - 4));
 			const [apps, searchResults] = this.performSearch(
-				this.mergeUserApps(results[0].data || [], results[1].data || []),
+				this.mergeUserApps(redisAppResults || [], results.data || []),
 				lunrSearchUtils.parse(searchText)
 			);
 			const tmpReturn = this.generateRespData(apps, searchResults, offset, limit);
