@@ -430,13 +430,15 @@ export default function ResponsibilityUpdates() {
 
 	return (
 		<div className="contatiner" style={{ marginLeft: 20 }}>
+			<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10[x 80px' }}>
+				<p style={{ ...adminStyles.sectionHeader, marginLeft: 0, marginTop: 10, marginBottom: 20 }}>
+					Responsibility Updates
+				</p>
+			</div>
 			<div
 				className="row"
 				style={{ height: 'calc(100% - 70px)', marginTop: '10px', padding: '2px 10px 2px 0px' }}
 			>
-				<p style={{ ...adminStyles.sectionHeader, marginLeft: 0, marginTop: 10, marginBottom: 20 }}>
-					Responsibility Updates
-				</p>
 				<div
 					className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 					style={{
@@ -453,7 +455,7 @@ export default function ResponsibilityUpdates() {
 							color: grey800,
 							fontWeight: 'bold',
 							display: 'flex',
-							marginBottom: '10px',
+							margin: '10px 0px',
 						}}
 					>
 						<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
