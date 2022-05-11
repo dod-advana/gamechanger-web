@@ -462,4 +462,7 @@ module.exports = Object.freeze({
 		"why's",
 		'would',
 	],
+	REDIS_CONFIG: {
+		QLIK_APPS_CACHE_DB: 22,
+	},
 });
