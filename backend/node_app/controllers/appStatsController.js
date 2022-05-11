@@ -7,7 +7,7 @@ const USER = require('../models').user;
 const FEEDBACK = require('../models').feedback;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { sendExcelFile } = require('../utils/sendFileUtility');
-const { queryFeedbackData } = ('./feedbackController');
+const { queryFeedbackData } = './feedbackController';
 const sparkMD5Lib = require('spark-md5');
 const ExcelJS = require('exceljs');
 
@@ -26,7 +26,7 @@ class AppStatsController {
 			dataApi = new DataLibrary(opts),
 			sparkMD5 = sparkMD5Lib,
 			user = USER,
-			feedback = FEEDBACK
+			feedback = FEEDBACK,
 		} = opts;
 
 		this.logger = logger;
@@ -525,9 +525,9 @@ class AppStatsController {
 	 * @param {*} req
 	 * @param {*} res
 	 */
-	 async exportUserData(req, res) {
+	async exportUserData(req, res) {
 		const { startDate, endDate, table, daysBack } = req.query;
-		const opts = { startDate, endDate, daysBack }
+		const opts = { startDate, endDate, daysBack };
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		let connection;
@@ -540,7 +540,7 @@ class AppStatsController {
 			});
 			connection.connect();
 
-			if (table === 'SearchPdfMapping'){
+			if (table === 'SearchPdfMapping') {
 				const columns = [
 					{ header: 'User ID', key: 'idvisitor' },
 					{ header: 'Visit ID', key: 'idvisit' },
@@ -551,12 +551,11 @@ class AppStatsController {
 					{ header: 'Document Time', key: 'documenttime_formatted' },
 					{ header: 'Document Type', key: 'doc_type' },
 					{ header: 'Source', key: 'display_org_s' },
-					{ header: 'Keywords', key: 'keyw_5' }
+					{ header: 'Keywords', key: 'keyw_5' },
 				];
 				const excelData = await this.querySearchPdfMapping(opts, connection);
 				sendExcelFile(res, 'Searches', columns, excelData);
-			}
-			else if (table === 'UserData'){
+			} else if (table === 'UserData') {
 				const columns = [
 					{ header: 'User ID', key: 'user_id' },
 					{ header: 'Organization', key: 'org' },
@@ -565,12 +564,11 @@ class AppStatsController {
 					{ header: 'Last Search', key: 'last_search_formatted' },
 					{ header: 'Export', key: 'ExportDocument' },
 					{ header: 'Opened', key: 'opened' },
-					{ header: 'Favorited', key: 'Favorite' }
+					{ header: 'Favorited', key: 'Favorite' },
 				];
 				const excelData = await this.queryUserAggregations(opts, connection);
 				sendExcelFile(res, 'Users', columns, excelData.users);
-			}
-			else if (table === 'Feedback'){
+			} else if (table === 'Feedback') {
 				const columns = [
 					{ header: 'Feedback Event', key: 'event_name' },
 					{ header: 'User ID', key: 'user_id' },
@@ -578,12 +576,12 @@ class AppStatsController {
 					{ header: 'Search', key: 'value_2' },
 					{ header: 'Returned', key: 'value_1' },
 				];
-				
+
 				const feedbackData = await this.feedback.findAndCountAll({
-					limit:100,
-					offset:0,
-					order:[],
-					where:{},
+					limit: 100,
+					offset: 0,
+					order: [],
+					where: {},
 					attributes: [
 						'event_name',
 						'user_id',
@@ -597,20 +595,18 @@ class AppStatsController {
 					],
 				});
 				sendExcelFile(res, 'Feedback', columns, feedbackData.rows);
-			}
-			else if (table === 'DocumentUsage'){
+			} else if (table === 'DocumentUsage') {
 				const columns = [
 					{ header: 'Document', key: 'document' },
 					{ header: 'View Count', key: 'visit_count' },
 					{ header: 'Unique Viewers', key: 'user_count' },
 					{ header: 'Viewer List', key: 'user_list' },
-					{ header: 'Searches', key: 'searches' }
+					{ header: 'Searches', key: 'searches' },
 				];
 				const docDate = this.getDateNDaysAgo(opts.daysBack);
 				const docData = await this.createDocumentUsageData(docDate, userId, connection);
 				sendExcelFile(res, 'Documents', columns, docData);
 			}
-
 		} catch (err) {
 			this.logger.error(err, '11MLULU');
 			res.status(500).send(err);
@@ -756,7 +752,7 @@ class AppStatsController {
 		});
 	}
 
-	async createDocumentUsageData(startDate,userId,connection){
+	async createDocumentUsageData(startDate, userId, connection) {
 		const searches = await this.getSearchesAndPdfs(startDate, connection);
 		const docData = await this.queryDocumentUsageData(startDate, connection);
 
@@ -824,7 +820,7 @@ class AppStatsController {
 				doc.document = title;
 			}
 		}
-		return docData
+		return docData;
 	}
 	/**
 	 * This method is called by an endpoint to query matomo to list documents, visit count, and list of users that visited.
@@ -850,7 +846,7 @@ class AppStatsController {
 				data: [],
 			};
 
-			const docData = await this.createDocumentUsageData(startDate,userId,connection);
+			const docData = await this.createDocumentUsageData(startDate, userId, connection);
 			results.data = docData;
 			res.status(200).send(results);
 		} catch (err) {
@@ -1037,8 +1033,7 @@ class AppStatsController {
 					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 				if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 					documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-					documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
-						search.last_search_formatted;
+					documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
 				}
 			}
 		}
@@ -1068,7 +1063,7 @@ class AppStatsController {
 				}
 			}
 		}
-		return { users: Object.values(documentMap), cards: cards[0] }
+		return { users: Object.values(documentMap), cards: cards[0] };
 	}
 	/**
 	 *
