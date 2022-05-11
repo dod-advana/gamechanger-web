@@ -1,0 +1,24 @@
+const ExcelJS = require('exceljs');
+
+
+const sendExcelFile = async (res,sheetName, columns, data) => {
+    try {
+        const workbook = new ExcelJS.Workbook();
+        let worksheet = workbook.addWorksheet(sheetName);
+        worksheet.columns = columns;
+        worksheet.addRows(data);
+        res.status(200);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=SearchPdfMapping.xlsx`);
+        await workbook.xlsx.write(res);
+        res.end();
+    }
+    catch (err) {
+        this.logger.error(err, '11MLULU');
+        res.status(500).send(err);
+    }
+}
+
+module.exports = {
+	sendExcelFile
+};
