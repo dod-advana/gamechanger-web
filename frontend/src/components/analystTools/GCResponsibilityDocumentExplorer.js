@@ -15,6 +15,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import PDFHighlighter from './PDFHighlighter';
 import GCButton from '../common/GCButton';
 import UOTAlert from '../common/GCAlert';
+import GCResponsiblityEditModal from './GCResponsiblityEditModal';
 import { styles as adminStyles } from '../../components/admin/util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -105,6 +106,7 @@ export default function ResponsibilityDocumentExplorer({
 	const [alertTitle, setAlertTitle] = useState('');
 	const [alertType, setAlertType] = useState('');
 	const [alertMessage, setAlertMessage] = useState('');
+	const [editModalOpen, setEditModalOpen] = useState(false);
 
 	const createAlert = (title, type, message) => {
 		setAlertTitle(title);
@@ -259,10 +261,10 @@ export default function ResponsibilityDocumentExplorer({
 		}
 	};
 
-	const rejectResponsibility = (responsibility) => {
+	const rejectResponsibility = () => {
 		gameChangerAPI
 			.storeResponsibilityReportData({
-				id: responsibility.id,
+				id: selectedResponsibility.id,
 				issue_description: 'review',
 				updatedColumn: 'Reject',
 				updatedText: '',
@@ -317,6 +319,18 @@ export default function ResponsibilityDocumentExplorer({
 					'There was an error sending your responsibility update. Please try againg later.'
 				);
 			});
+	};
+
+	const editResponsibility = () => {
+		getResponsibilityPageInfo(selectedResponsibility.responsibilityText);
+		setIsEditingResp(true);
+	};
+
+	const editEntity = () => {
+		getResponsibilityPageInfo(
+			selectedResponsibility.organizationPersonnel || selectedResponsibility.responsibilityText
+		);
+		setIsEditingEntity(true);
 	};
 
 	const iframePanelSize =
@@ -770,7 +784,7 @@ export default function ResponsibilityDocumentExplorer({
 																						marginTop: '10px',
 																					}}
 																				>
-																					<GCTooltip
+																					{/* <GCTooltip
 																						title={'Edit entity'}
 																						placement="bottom"
 																						arrow
@@ -908,6 +922,53 @@ export default function ResponsibilityDocumentExplorer({
 																									: 'Edit Responsibility'}
 																							</GCButton>
 																						</div>
+																					</GCTooltip> */}
+																					<GCTooltip
+																						title={
+																							'Report any existing issues with this data'
+																						}
+																						placement="Top"
+																						arrow
+																					>
+																						<div>
+																							<GCButton
+																								onClick={() => {
+																									if (isEditingResp) {
+																										setIsEditingResp(
+																											false
+																										);
+																										setIsEditingEntity(
+																											false
+																										);
+																										setDocumentLink(
+																											''
+																										);
+																									} else {
+																										setEditModalOpen(
+																											true
+																										);
+																									}
+																								}}
+																								style={{
+																									height: 40,
+																									minWidth: 40,
+																									padding:
+																										'2px 8px 0px',
+																									fontSize: 14,
+																									margin: '16px 0px 0px 10px',
+																									width: 'auto',
+																								}}
+																								isSecondaryBtn={
+																									isEditingEntity ||
+																									isEditingResp
+																								}
+																							>
+																								{isEditingEntity ||
+																								isEditingResp
+																									? 'Cancel'
+																									: 'Report Issue'}
+																							</GCButton>
+																						</div>
 																					</GCTooltip>
 																				</div>
 																			</div>
@@ -963,6 +1024,15 @@ export default function ResponsibilityDocumentExplorer({
 			) : (
 				<></>
 			)}
+			<GCResponsiblityEditModal
+				open={editModalOpen}
+				setOpen={setEditModalOpen}
+				responsibility={selectedResponsibility.responsibilityText}
+				entity={selectedResponsibility.organizationPersonnel ?? 'NO ENTITY'}
+				editEntity={editEntity}
+				editResponsibility={editResponsibility}
+				rejectResponsibility={rejectResponsibility}
+			/>
 		</div>
 	);
 }
