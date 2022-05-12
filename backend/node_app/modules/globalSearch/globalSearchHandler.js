@@ -170,7 +170,7 @@ class GlobalSearchHandler extends SearchHandler {
 		try {
 			const t0 = new Date().getTime();
 			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
-			let redisAppResults = await redisDB.get('qlik-full-app-list');
+			let redisAppResults = await this.redisDB.get('qlik-full-app-list');
 			let userResults;
 			if (!redisAppResults) {
 				console.log('Doing FULL Search');
