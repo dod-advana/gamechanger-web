@@ -169,8 +169,7 @@ class GlobalSearchHandler extends SearchHandler {
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
 			const t0 = new Date().getTime();
-			const redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
-			await redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
 			let redisAppResults = await redisDB.get('qlik-full-app-list');
 			let userResults;
 			if (!redisAppResults) {
@@ -181,7 +180,7 @@ class GlobalSearchHandler extends SearchHandler {
 				]);
 				redisAppResults = results[0].data;
 				userResults = results[1].data;
-				redisDB.set('qlik-full-app-list', JSON.stringify(redisAppResults));
+				this.redisDB.set('qlik-full-app-list', JSON.stringify(redisAppResults));
 			} else {
 				console.log('Not Doing FULL Search');
 				redisAppResults = JSON.parse(redisAppResults || '[]');
