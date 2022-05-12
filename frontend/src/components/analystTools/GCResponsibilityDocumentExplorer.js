@@ -754,7 +754,6 @@ export default function ResponsibilityDocumentExplorer({
 																				style={{
 																					marginLeft: 40,
 																					marginRight: 0,
-																					borderRight: '1px solid gray',
 																					borderLeft: 'none',
 																				}}
 																			>
@@ -808,7 +807,10 @@ export default function ResponsibilityDocumentExplorer({
 																						<div>
 																							<GCButton
 																								onClick={() => {
-																									if (isEditingResp) {
+																									if (
+																										isEditingResp ||
+																										isEditingEntity
+																									) {
 																										setIsEditingResp(
 																											false
 																										);

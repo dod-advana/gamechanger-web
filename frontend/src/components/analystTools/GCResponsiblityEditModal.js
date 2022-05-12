@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/Close';
@@ -41,6 +41,12 @@ const useStyles = makeStyles((theme) => ({
 export default function GCResponsiblityEditModal(props) {
 	const { open, setOpen, entity, responsibility, editResponsibility, editEntity, rejectResponsibility } = props;
 	const [issueType, setIssueType] = useState(0);
+
+	useEffect(() => {
+		if (!open) {
+			setIssueType(0);
+		}
+	}, [open]);
 
 	const classes = useStyles();
 
