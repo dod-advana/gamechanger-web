@@ -871,7 +871,6 @@ const JBookProfilePage = (props) => {
 				value: PredictionData,
 			});
 		}
-		console.log(reviewData);
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
 				name: 'Reviewer Tag',
