@@ -2,9 +2,8 @@
 
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const fs = require('fs');
-const https = require('https'); // module for https
+const spdy = require('spdy');
 const bodyParser = require('body-parser');
 const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
@@ -384,8 +383,8 @@ const options = {
 	rejectUnauthorized: false,
 };
 
-https.createServer(options, app).listen(securePort);
-http.createServer(app).listen(port);
+spdy.createServer(options, app).listen(securePort);
+spdy.createServer({ spdy: { plain: true, ssl: false } }, app).listen(port);
 
 // shoutout to the user
 logger.boot(`
