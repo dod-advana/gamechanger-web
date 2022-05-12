@@ -192,12 +192,31 @@ const getCardViewPanel = (props) => {
 							</div>
 						)}
 
-						<div className={'right-container'} style={{ marginTop: -75 }}>
+						<div className={'right-container'} style={{ marginTop: 0 }}>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
 							>
 								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+									<div
+										className="row"
+										style={{ marginLeft: 20, marginRight: 20, padding: 10, marginTop: 20 }}
+									>
+										{!loading && (
+											<div>
+												<Typography style={{ fontWeight: 600 }}>Qlik Dashoard</Typography>
+												<div style={{ marginBottom: 10 }}>
+													Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+													eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+													ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+													aliquip ex ea commodo consequat. Duis aute irure dolor in
+													reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+													pariatur.
+												</div>
+												<a href="">View Qlik Dashboard > </a>
+											</div>
+										)}
+									</div>
 									<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
 										{false && !loading && <GetQAResults context={context} />}
 									</div>
