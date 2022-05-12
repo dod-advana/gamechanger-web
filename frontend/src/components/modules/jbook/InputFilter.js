@@ -17,7 +17,7 @@ const InputFilter = (props) => {
 	const [searchText, setSearchText] = useState(state.jbookSearchSettings[field]);
 	const [debouncedText, setDebouncedText] = useState('');
 
-	const handleChange = (event: any) => {
+	const handleChange = (event) => {
 		setSearchText(event.target.value);
 		debounce(event.target.value);
 	};
