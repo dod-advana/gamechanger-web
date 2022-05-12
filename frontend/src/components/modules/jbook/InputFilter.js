@@ -1,7 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { setState } from '../../../utils/sharedFunctions';
 import { JBookContext } from './jbookContext';
+import _ from 'lodash';
 
 const StyledInput = styled.input`
 	width: 100%;
@@ -14,28 +15,31 @@ const InputFilter = (props) => {
 	const { state, dispatch } = context;
 
 	const [searchText, setSearchText] = useState(state.jbookSearchSettings[field]);
+	const [debouncedText, setDebouncedText] = useState('');
 
-	const useDebounce = (value, delay) => {
-		const [debouncedValue, setDebouncedValue] = useState(value);
-		useEffect(() => {
-			const handler = setTimeout(() => {
-				setDebouncedValue(value);
-			}, delay);
-			return () => {
-				clearTimeout(handler);
-			};
-		}, [value, delay]);
-		return debouncedValue;
+	const handleChange = (event: any) => {
+		setSearchText(event.target.value);
+		debounce(event.target.value);
 	};
-	const debouncedSearchTerm = useDebounce(searchText, 500);
 
-	useEffect(() => {
-		if (!state.initial) {
-			setJBookSetting(field, debouncedSearchTerm.trim(), state, dispatch);
-			setState(dispatch, { runSearch: true, loading: true });
-		}
-		// eslint-disable-next-line
-	}, [debouncedSearchTerm]);
+	const debounce = useCallback(
+		_.debounce((_searchVal) => {
+			setDebouncedText(_searchVal);
+			// send the server request here
+			if (!state.initial) {
+				setJBookSetting(field, _searchVal.trim(), state, dispatch);
+				setState(dispatch, { runSearch: true, loading: true });
+			}
+		}, 500),
+		[]
+	);
+	// useEffect(() => {
+	// 	console.log(debouncedSearchTerm);
+	// 	if (!state.initial) {
+	// 		setJBookSetting(field, debouncedSearchTerm.trim(), state, dispatch);
+	// 		setState(dispatch, { runSearch: true, loading: true });
+	// 	}
+	// }, [debouncedSearchTerm]);
 
 	useEffect(() => {
 		if (state.jbookSearchSettings[field] === '') {
@@ -43,16 +47,7 @@ const InputFilter = (props) => {
 		} // eslint-disable-next-line
 	}, [state.jbookSearchSettings[field]]);
 
-	return (
-		<StyledInput
-			onChange={(event) => {
-				if (!state.runSearch) {
-					setSearchText(event.target.value);
-				}
-			}}
-			value={searchText}
-		/>
-	);
+	return <StyledInput onChange={handleChange} value={searchText} />;
 };
 
 export default InputFilter;
