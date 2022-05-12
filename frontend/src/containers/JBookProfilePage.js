@@ -861,6 +861,30 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
+	const scorecardData = (reviewData) => {
+		let data = [];
+		let PredictionData = 9.6;
+		if (PredictionData) {
+			data.push({
+				name: 'Predicted Tag',
+				description: 'The AI tool classified the BLI as [Tag] with a confidence score of ' + PredictionData,
+				value: PredictionData,
+			});
+		}
+		console.log(reviewData);
+		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			data.push({
+				name: 'Reviewer Tag',
+				description:
+					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
+				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
+			});
+		}
+
+		return data;
+	};
+
 	return (
 		<div>
 			<Notifications context={context} />
@@ -868,7 +892,7 @@ const JBookProfilePage = (props) => {
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<div style={{ width: '400px' }}>
-					<BasicData
+					{/* <BasicData
 						budgetType={budgetType}
 						admin={Permissions.hasPermission('JBOOK Admin')}
 						loading={profileLoading}
@@ -878,28 +902,8 @@ const JBookProfilePage = (props) => {
 						budgetLineItem={budgetLineItem}
 						id={id}
 						appropriationNumber={appropriationNumber}
-					/>
-					<ClassificationScoreCard
-						scores={[
-							{
-								name: 'AI CLASSIFIER',
-								description: 'The AI tool classified the BLI as [Tag] with a confidence score of 9.6',
-								value: 9.6,
-							},
-							{
-								name: 'REVIEWER',
-								description:
-									reviewData.primaryReviewer +
-									' classified this BLI as "' +
-									reviewData.primaryClassLabel +
-									'"',
-								timestamp: 'MM/DD/YYYY',
-								justification: reviewData.primaryReviewNotes
-									? reviewData.primaryReviewNotes
-									: '[Justification text]',
-							},
-						]}
-					/>
+					/> */}
+					<ClassificationScoreCard scores={scorecardData(reviewData)} />
 				</div>
 
 				<ProjectDescription
