@@ -61,9 +61,14 @@ const getIframePreviewLinkInferred = (
 		highlight = `"${responsibilityText}"`;
 	}
 	return new Promise((resolve, reject) => {
-		gameChangerAPI.dataStorageDownloadGET(filename, highlight, pageNumber, isClone, cloneData).then((url) => {
-			resolve(url);
-		});
+		gameChangerAPI
+			.dataStorageDownloadGET(filename, highlight, pageNumber, isClone, cloneData)
+			.then((url) => {
+				resolve(url);
+			})
+			.catch((e) => {
+				reject(e);
+			});
 	});
 };
 
@@ -171,10 +176,19 @@ export default function ResponsibilityDocumentExplorer({
 							pageNumber,
 							isClone,
 							cloneData
-						).then((url) => {
-							node.src = url;
-							setIframeLoading(false);
-						});
+						)
+							.then((url) => {
+								node.src = url;
+								setIframeLoading(false);
+							})
+							.catch(() => {
+								setIframeLoading(false);
+								createAlert(
+									'Error Loading PDF',
+									'error',
+									'It looks like this document has been canceled or removed from GAMECHANGER. We apologize for the inconvenience. Please contact the GAMECHANGER support team if you believe this is a mistake.'
+								);
+							});
 					}
 				}
 			}
@@ -784,145 +798,6 @@ export default function ResponsibilityDocumentExplorer({
 																						marginTop: '10px',
 																					}}
 																				>
-																					{/* <GCTooltip
-																						title={'Edit entity'}
-																						placement="bottom"
-																						arrow
-																					>
-																						<div>
-																							<GCButton
-																								onClick={() => {
-																									if (
-																										isEditingEntity
-																									) {
-																										setIsEditingEntity(
-																											false
-																										);
-																										setDocumentLink(
-																											''
-																										);
-																									} else {
-																										getResponsibilityPageInfo(
-																											selectedResponsibility.organizationPersonnel ||
-																												selectedResponsibility.responsibilityText
-																										);
-																										setIsEditingEntity(
-																											true
-																										);
-																									}
-																								}}
-																								style={{
-																									height: 40,
-																									minWidth: 40,
-																									padding:
-																										'2px 8px 0px',
-																									fontSize: 14,
-																									margin: '16px 0px 0px 10px',
-																									width: 'auto',
-																								}}
-																								disabled={isEditingResp}
-																								isSecondaryBtn={
-																									isEditingEntity
-																								}
-																							>
-																								{isEditingEntity
-																									? 'Cancel'
-																									: 'Edit Entity'}
-																							</GCButton>
-																						</div>
-																					</GCTooltip>
-																					<GCTooltip
-																						title={'Reject responsibility'}
-																						placement="bottom"
-																						arrow
-																					>
-																						<div>
-																							<GCButton
-																								onClick={() => {
-																									if (
-																										isEditingResp ||
-																										isEditingEntity
-																									) {
-																										setIsEditingEntity(
-																											false
-																										);
-																										setIsEditingResp(
-																											false
-																										);
-																										setDocumentLink(
-																											''
-																										);
-																									} else {
-																										rejectResponsibility(
-																											selectedResponsibility
-																										);
-																									}
-																								}}
-																								style={{
-																									height: 40,
-																									minWidth: 40,
-																									padding:
-																										'2px 8px 0px',
-																									fontSize: 14,
-																									margin: '16px 0px 0px 10px',
-																									width: 'auto',
-																								}}
-																								isSecondaryBtn
-																								disabled={
-																									isEditingEntity ||
-																									isEditingResp
-																								}
-																							>
-																								Reject
-																							</GCButton>
-																						</div>
-																					</GCTooltip>
-																					<GCTooltip
-																						title={'Edit Responsibility'}
-																						placement="bottom"
-																						arrow
-																					>
-																						<div>
-																							<GCButton
-																								onClick={() => {
-																									if (isEditingResp) {
-																										setIsEditingResp(
-																											false
-																										);
-																										setDocumentLink(
-																											''
-																										);
-																									} else {
-																										getResponsibilityPageInfo(
-																											selectedResponsibility.responsibilityText
-																										);
-																										setIsEditingResp(
-																											true
-																										);
-																									}
-																								}}
-																								style={{
-																									height: 40,
-																									minWidth: 40,
-																									padding:
-																										'2px 8px 0px',
-																									fontSize: 14,
-																									margin: '16px 0px 0px 10px',
-																									width: 'auto',
-																								}}
-																								disabled={
-																									isEditingEntity
-																								}
-																								isSecondaryBtn={
-																									isEditingResp
-																								}
-																							>
-																								{isEditingResp
-																									? 'Cancel'
-																									: 'Edit Responsibility'}
-																							</GCButton>
-																						</div>
-																					</GCTooltip> */}
 																					<GCTooltip
 																						title={
 																							'Report any existing issues with this data'
@@ -1016,7 +891,8 @@ export default function ResponsibilityDocumentExplorer({
 					containerStyles={{
 						...adminStyles.alert,
 						top: 31,
-						width: '94%',
+						left: '50px',
+						width: 'calc(100% - 50px)',
 						marginLeft: 0,
 						zIndex: 1011,
 					}}
