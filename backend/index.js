@@ -366,6 +366,14 @@ try {
 	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process');
 }
 
+try {
+	// start qlik search full app cache
+	const qlikAppFullList = cron.getQlikAppsFullListJob();
+	qlikAppFullList.start();
+} catch (e) {
+	logger.error(`Error initializing update qlik app full app cron job: ${e.message}`, 'ZY0KRIN', 'Startup Process');
+}
+
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
 	key: constants.TLS_KEY,
