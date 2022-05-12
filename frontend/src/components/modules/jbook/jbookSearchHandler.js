@@ -230,8 +230,8 @@ const JBookSearchHandler = {
 				});
 			}
 
-			const index = 'gamechanger';
-			getAndSetDidYouMean(index, searchText, dispatch);
+			// const index = 'gamechanger';
+			// getAndSetDidYouMean(index, searchText, dispatch);
 		}
 	},
 
