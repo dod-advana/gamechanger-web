@@ -202,7 +202,7 @@ const getCardViewPanel = (props) => {
 										className="row"
 										style={{ marginLeft: 20, marginRight: 20, padding: 10, marginTop: 20 }}
 									>
-										{!loading && (
+										{!loading && ( // possibly need this to be admin only?
 											<div>
 												<Typography style={{ fontWeight: 600 }}>Qlik Dashoard</Typography>
 												<div style={{ marginBottom: 10 }}>
