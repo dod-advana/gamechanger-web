@@ -30,44 +30,50 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 const getViewHeader = (state, dispatch) => {
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText && !_.isEmpty(state.categoryMetadata) && (
-				<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
-					Showing results for <b>{state.searchText}</b>
-				</Typography>
-			)}
-			<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
-				<div style={{ ...styles.container, margin: '0px 25px' }}>
-					<GCButton
-						onClick={() => setState(dispatch, { listView: false })}
-						style={{
-							...styles.buttons,
-							...(!state.listView ? styles.unselectedButton : {}),
-						}}
-						textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-						buttonColor={!state.listView ? gcOrange : backgroundWhite}
-						borderColor={!state.listView ? gcOrange : '#B0B9BE'}
-					>
-						<div style={{ marginTop: 5 }}>
-							<AppsIcon style={styles.icon} />
-						</div>
-					</GCButton>
+			{state.searchText &&
+				(!state.applicationsLoading ||
+					!state.dashboardsLoading ||
+					!state.dataSourcesLoading ||
+					!state.databasesLoading) && (
+					<>
+						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
+							Showing results for <b>{state.searchText}</b>
+						</Typography>
+						<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
+							<div style={{ ...styles.container, margin: '0px 25px' }}>
+								<GCButton
+									onClick={() => setState(dispatch, { listView: false })}
+									style={{
+										...styles.buttons,
+										...(!state.listView ? styles.unselectedButton : {}),
+									}}
+									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
+									buttonColor={!state.listView ? gcOrange : backgroundWhite}
+									borderColor={!state.listView ? gcOrange : '#B0B9BE'}
+								>
+									<div style={{ marginTop: 5 }}>
+										<AppsIcon style={styles.icon} />
+									</div>
+								</GCButton>
 
-					<GCButton
-						onClick={() => setState(dispatch, { listView: true })}
-						style={{
-							...styles.buttons,
-							...(!state.listView ? {} : styles.unselectedButton),
-						}}
-						textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-						buttonColor={!state.listView ? backgroundWhite : gcOrange}
-						borderColor={!state.listView ? '#B0B9BE' : gcOrange}
-					>
-						<div style={{ marginTop: 5 }}>
-							<ListIcon style={styles.icon} />
+								<GCButton
+									onClick={() => setState(dispatch, { listView: true })}
+									style={{
+										...styles.buttons,
+										...(!state.listView ? {} : styles.unselectedButton),
+									}}
+									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
+									buttonColor={!state.listView ? backgroundWhite : gcOrange}
+									borderColor={!state.listView ? '#B0B9BE' : gcOrange}
+								>
+									<div style={{ marginTop: 5 }}>
+										<ListIcon style={styles.icon} />
+									</div>
+								</GCButton>
+							</div>
 						</div>
-					</GCButton>
-				</div>
-			</div>
+					</>
+				)}
 		</div>
 	);
 };
@@ -118,20 +124,15 @@ const getMainView = (props) => {
 						<div id="game-changer-content-top" />
 						<StyledCenterContainer showSideFilters={false}>
 							<div className={'right-container'}>
-								{loading && (
-									<div style={{ margin: '0 auto' }}>
-										<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
-									</div>
-								)}
 								{hideSearchResults && renderHideTabs(props)}
 								{!hideSearchResults &&
 									pageLoaded &&
 									(applicationsTotalCount > 0 ||
-										dashboardsTotalCount > 0 ||
-										dataSourcesTotalCount > 0 ||
-										databasesTotalCount > 0) && (
+									dashboardsTotalCount > 0 ||
+									dataSourcesTotalCount > 0 ||
+									databasesTotalCount > 0 ? (
 										<>
-											{!loading && getViewHeader(state, dispatch)}
+											{getViewHeader(state, dispatch)}
 											<div style={{ margin: '0 15px 0 5px' }}>
 												<ResultView
 													context={{ state, dispatch }}
@@ -141,7 +142,11 @@ const getMainView = (props) => {
 											</div>
 											<div style={styles.spacer} />
 										</>
-									)}
+									) : (
+										<div className="col-xs-12">
+											<LoadingIndicator customColor={gcOrange} />
+										</div>
+									))}
 							</div>
 						</StyledCenterContainer>
 					</div>
@@ -183,6 +188,7 @@ const getCardViewPanel = (props) => {
 		databasesPage,
 		databasesLoading,
 		databasesPagination,
+		loading,
 	} = state;
 
 	const applications = applicationsSearchResults;
@@ -360,6 +366,11 @@ const getCardViewPanel = (props) => {
 							</SearchSection>
 						</div>
 					)}
+				{loading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
+					</div>
+				)}
 			</div>
 		</div>
 	);
@@ -425,6 +436,7 @@ const GlobalSearchMainViewHandler = (props) => {
 					Services: { total: 0 },
 				},
 				runningSearch: false,
+				loading: false,
 			});
 		}
 	}, [
@@ -437,6 +449,7 @@ const GlobalSearchMainViewHandler = (props) => {
 		state.dashboardsTotalCount,
 		state.dataSourcesTotalCount,
 		state.databasesTotalCount,
+		state.loading,
 		dispatch,
 	]);
 
