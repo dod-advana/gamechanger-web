@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import SearchBanner from '../components/searchBar/GCSearchBanner';
+import TitleBar from '../components/searchBar/TitleBar';
 import { trackEvent, trackPageView } from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import { gcColors } from './GameChangerPage';
@@ -175,6 +175,8 @@ const GameChangerDetailsPage = (props) => {
 
 	const graphRef = useRef();
 	const graphContainerRef = useRef();
+
+	const blacklistedEntityProperties = ['Lp_community', 'Louvain_community', 'Betweenness', 'PageRank'];
 
 	function useQuery(location, setQuery, query) {
 		if (!query) {
@@ -645,7 +647,9 @@ const GameChangerDetailsPage = (props) => {
 								<img
 									className={'img'}
 									alt={`${entity.name} Img`}
-									src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+									src={
+										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal
+									}
 									onError={(event) => {
 										handleImgSrcError(event, fallbackSources);
 										if (fallbackSources.admin) fallbackSources.admin = undefined;
@@ -673,7 +677,9 @@ const GameChangerDetailsPage = (props) => {
 											backgroundColor: '#313541',
 											color: 'white',
 										}}
-										rows={entity.details}
+										rows={entity.details.filter((entity) => {
+											return !blacklistedEntityProperties.includes(entity.name);
+										})}
 										height={'auto'}
 										dontScroll={true}
 										firstColWidth={styles.entityColWidth}
@@ -911,11 +917,11 @@ const GameChangerDetailsPage = (props) => {
 
 	return (
 		<div style={{ minHeight: 'calc(100% - 89px)', background: 'white' }}>
-			<SearchBanner
+			<TitleBar
 				detailsType={detailsType}
 				titleBarModule={'details/detailsTitleBarHandler'}
 				rawSearchResults={[]}
-			></SearchBanner>
+			></TitleBar>
 
 			{showEntityContainer && renderEntityContainer()}
 

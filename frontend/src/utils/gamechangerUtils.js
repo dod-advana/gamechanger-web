@@ -119,7 +119,6 @@ export const orgFilters = {
 	'US Navy': false,
 	'US Navy Reserve': false,
 	'US Navy Medicine': false,
-	OPM: false,
 	'Classification Guides': false,
 	FMR: false,
 	NATO: false,
@@ -533,7 +532,7 @@ export const getTypeQuery = (allTypesSelected, types) => {
 		let query = [];
 		for (let type in types) {
 			if (types[type]) {
-				query.push(type.substring(0, type.length - 1));
+				query.push(type);
 			}
 		}
 		return query;
@@ -742,7 +741,7 @@ export const shadeColor = (col, amt) => {
 	return (usePound ? '#' : '') + RR + GG + BB;
 };
 
-export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
+export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneName, gameChangerAPI) => {
 	let isScrolling, start, end, distance;
 
 	const iframe = document.getElementById(iframeID);
@@ -774,6 +773,21 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category) => {
 					distance = null;
 				}, 120);
 			};
+			element.addEventListener('mouseup', function (event) {
+				const win = iframe.contentWindow;
+				const doc = win.document;
+				var text;
+
+				if (win.getSelection) {
+					text = win.getSelection().toString();
+				} else if (doc.selection && doc.selection.createRange) {
+					text = doc.selection.createRange().text;
+				}
+				if (text !== '') {
+					trackEvent(getTrackingNameForFactory(cloneName), 'Highlight', filename);
+					gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
+				}
+			});
 		}
 	}
 };

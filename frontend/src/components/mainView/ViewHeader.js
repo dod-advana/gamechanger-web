@@ -183,6 +183,8 @@ const ViewHeader = (props) => {
 	};
 
 	const handleChangeSort = (event) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
 		const {
 			target: { value },
 		} = event;
@@ -192,18 +194,22 @@ const ViewHeader = (props) => {
 			resultsPage: 1,
 			docSearchResults: [],
 			replaceResults: true,
-			docsPagination: true,
+			runSearch: true,
 			infiniteScrollPage: 1,
+			searchSettings: newSearchSettings,
 		});
 	};
 
 	const handleChangeOrder = (value) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
 		setState(dispatch, {
 			currentOrder: value,
 			resultsPage: 1,
 			docSearchResults: [],
 			replaceResults: true,
-			docsPagination: true,
+			runSearch: true,
+			searchSettings: newSearchSettings,
 		});
 	};
 
@@ -352,7 +358,11 @@ const ViewHeader = (props) => {
 							>
 								{categorySorting[activeCategoryTab].map((sort) => {
 									return (
-										<MenuItem key={`${sort}-key`} value={sort}>
+										<MenuItem
+											key={`${sort}-key`}
+											value={sort}
+											style={{ display: 'flex', padding: '3px 6px' }}
+										>
 											{sort}
 										</MenuItem>
 									);
@@ -435,16 +445,28 @@ const ViewHeader = (props) => {
 						{viewNames.map((view) => {
 							if (view.name === 'Card') {
 								return [
-									<MenuItem key={`Card-List`} value={'List'}>
+									<MenuItem
+										key={`Card-List`}
+										value={'List'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										List View
 									</MenuItem>,
-									<MenuItem key={`Card-Grid`} value={'Grid'}>
+									<MenuItem
+										key={`Card-Grid`}
+										value={'Grid'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										Grid View
 									</MenuItem>,
 								];
 							} else {
 								return (
-									<MenuItem key={`${view.name}-key`} value={view.name}>
+									<MenuItem
+										key={`${view.name}-key`}
+										value={view.name}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										{view.title}
 									</MenuItem>
 								);

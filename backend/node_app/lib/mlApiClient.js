@@ -29,6 +29,7 @@ const MLRoutes = {
 	createModelLTR: `${transformerBaseUrl}/LTR/createModel`,
 	recommender: `${transformerBaseUrl}/recommender`,
 	stopProcess: `${transformerBaseUrl}/stopProcess`,
+	sendUserAggregations: `${transformerBaseUrl}/sendUserAggregations`,
 };
 /**
  * @class MLApiClient
@@ -66,6 +67,7 @@ class MLApiClient {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
+		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown', qe_model = undefined) {

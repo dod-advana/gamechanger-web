@@ -32,6 +32,7 @@ class TransformerController {
 			initializeLTR: this.mlApi.initializeLTR,
 			createModelLTR: this.mlApi.createModelLTR,
 			stopProcess: this.mlApi.stopProcess,
+			sendUserAggregations: this.mlApi.sendUserAggregations,
 		};
 
 		// Get methods
@@ -54,6 +55,7 @@ class TransformerController {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
+		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 	}
 	/**
 	 * A generic get method to query the ML API.
@@ -67,7 +69,7 @@ class TransformerController {
 	async getData(key, req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const resp = await this.registry[key](userId);
 			res.send(resp);
 		} catch (err) {
@@ -88,7 +90,7 @@ class TransformerController {
 		let userId = 'webapp_unknown';
 		try {
 			const data = req.body;
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const resp = await this.registry[key](userId, data);
 			res.send(resp);
 		} catch (err) {

@@ -5,8 +5,11 @@ const asyncRedisLib = require('async-redis');
 const { SearchController } = require('./searchController');
 const Sequelize = require('sequelize');
 const abbreviations = require('./abbcounts.json');
+const constants = require('../config/constants');
+const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 
 const CACHE_RELOAD_KEY = 'gcCacheReloadingStatus';
+const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
 const ABB_RELOAD_KEY = 'gcAbbreviationsReloadingStatus';
 const ABB_ACTIVE_STATUS_KEY = 'gcAbbreviationsStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
@@ -63,17 +66,24 @@ class CacheController {
 		this.clearGraphDataCacheHelper = this.clearGraphDataCacheHelper.bind(this);
 		this.createGraphDataCache = this.createGraphDataCache.bind(this);
 		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
+		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
+		this.setStartupQlikFullAppCacheKeys = this.setStartupQlikFullAppCacheKeys.bind(this);
+		this.cacheQlikAppFullList = this.cacheQlikAppFullList.bind(this);
 	}
 
 	async setStartupSearchHistoryCacheKeys() {
 		this.redisAsyncClient.set(CACHE_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 	}
 
+	async setStartupQlikFullAppCacheKeys() {
+		this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+	}
+
 	async createSearchHistoryCache(req, res) {
 		// this will be cut in prod it limits to 10 mins top in network
 		req.setTimeout(72000000); // 20 hours
 
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.createSearchHistoryCacheHelper(userId);
@@ -208,7 +218,7 @@ class CacheController {
 	}
 
 	async clearSearchHistoryCache(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.clearSearchHistoryCacheHelper(userId);
@@ -246,7 +256,7 @@ class CacheController {
 		// this will be cut in prod it limits to 10 mins top in network
 		req.setTimeout(72000000); // 20 hours
 
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.createAbbreviationsCacheHelper(userId);
@@ -297,7 +307,7 @@ class CacheController {
 	}
 
 	async clearAbbreviationsCache(req, res) {
-		const userId = req.get('SSL_CLIENT_S_DN_CN');
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		try {
 			await this.clearAbbreviationsCacheHelper(userId);
@@ -335,7 +345,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			let useGCCache = await this.redisAsyncClient.get(CACHE_ACTIVE_STATUS_KEY);
 			useGCCache = false;
@@ -355,7 +365,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const useGCCache = await this.redisAsyncClient.get(CACHE_ACTIVE_STATUS_KEY);
 			const toggle = useGCCache === 'false';
@@ -372,7 +382,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.clearGraphDataCacheHelper(userId);
 			res.status(200).send('Graph data cache cleared');
 		} catch (err) {
@@ -412,7 +422,7 @@ class CacheController {
 		let userId = 'webapp_unknown';
 
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			await this.createGraphDataCacheHelper(userId);
 			res.status(200).send('Graph data cache created');
 		} catch (err) {
@@ -541,6 +551,46 @@ class CacheController {
 			this.logger.error(message, 'FDQ9EDC', userId);
 		} finally {
 			await this.redisAsyncClient.set(CACHE_GRAPH_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
+		}
+	}
+
+	async cacheQlikAppFullList() {
+		try {
+			await this.redisAsyncClient.select(constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
+			const isReloading = await this.redisAsyncClient.get(CACHE_QLIK_RELOAD_KEY);
+			if (isReloading === CACHE_GRAPH_IS_RELOADING) {
+				throw new Error('Will not create graph data cache - cache is already reloading');
+			}
+			this.logger.info('START qlik full app cache');
+
+			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_RELOADING);
+
+			let redisAppResults = await this.redisAsyncClient.get('qlik-full-app-list');
+			let respData;
+
+			if (!redisAppResults) {
+				respData = await getQlikApps(undefined, undefined, this.logger, false, true);
+				respData = JSON.stringify(respData.data);
+				await this.redisAsyncClient.set('qlik-full-app-list', respData);
+			} else {
+				let countResp = await getQlikApps(undefined, undefined, this.logger, true, false);
+				countResp = countResp.data['value'];
+
+				respData = JSON.parse(redisAppResults);
+
+				if (respData.length < countResp) {
+					console.log('DIF RESULTS');
+					respData = await getQlikApps(undefined, undefined, this.logger, false, true);
+					respData = JSON.stringify(respData.data);
+					await this.redisAsyncClient.set('qlik-full-app-list', respData);
+				}
+			}
+
+			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
+			this.logger.info('FINISHED qlik full app cache');
+		} catch (e) {
+			this.logger.error(e, '6GE345P', 'Qlik Cache Function');
+			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
 		}
 	}
 }

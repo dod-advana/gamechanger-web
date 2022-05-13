@@ -1,6 +1,7 @@
 const LOGGER = require('@dod-advana/advana-logger');
 const COMPARE_FEEDBACK = require('../models').compare_feedback;
 const SearchUtility = require('../utils/searchUtility');
+const EDASearchUtility = require('../modules/eda/edaSearchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
 const sparkMD5Lib = require('spark-md5');
@@ -13,6 +14,7 @@ class AnalystToolsController {
 			logger = LOGGER,
 			compareFeedbackModel = COMPARE_FEEDBACK,
 			searchUtility = new SearchUtility(opts),
+			edaSearchUtility = new EDASearchUtility(opts),
 			dataLibrary = new DataLibrary(opts),
 			mlApi = new MLApiClient(opts),
 			sparkMD5 = sparkMD5Lib,
@@ -21,6 +23,7 @@ class AnalystToolsController {
 		this.logger = logger;
 		this.compareFeedbackModel = compareFeedbackModel;
 		this.searchUtility = searchUtility;
+		this.edaSearchUtility = edaSearchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
 		this.sparkMD5 = sparkMD5;
@@ -32,58 +35,93 @@ class AnalystToolsController {
 	async compareDocument(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const { cloneName, paragraphs = [], filters } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
 
-			// ML API Call Goes Here
-			const paragraphSearches = paragraphs.map((paragraph) =>
-				this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, userId, paragraph.id)
-			);
-			const paragraphResults = await Promise.all(paragraphSearches);
-
+			let esQuery = {};
 			const resultsObject = {};
+			const clientObj = this.searchUtility.getESClient(cloneName, permissions);
+			let esResults = {};
 
-			paragraphResults.forEach((result) => {
-				Object.keys(result).forEach((id) => {
-					if (result[id].id && result[id]?.score >= 0.65) {
-						resultsObject[result[id].id] = {
-							score: result[id].score,
-							text: result[id].text,
-							paragraphIdBeingMatched: result.paragraphIdBeingMatched,
-						};
-					}
+			let returnData = {};
+
+			if (cloneName === 'eda') {
+				esQuery = this.edaSearchUtility.getESSimilarityQuery(paragraphs, filters);
+
+				esResults = await this.dataLibrary.queryElasticSearch(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					esQuery,
+					userId
+				);
+
+				returnData = this.edaSearchUtility.cleanUpEsResults(
+					esResults,
+					[],
+					userId,
+					[],
+					{},
+					clientObj.esIndex,
+					esQuery
+				);
+
+				if (returnData?.docs) {
+					returnData.docs.forEach((doc) => {
+						doc.pageHits.forEach((hit) => {
+							hit.id = `${doc.title}_${hit.pageNumber}`;
+						});
+					});
+				}
+			} else {
+				// ML API Call Goes Here
+				const paragraphSearches = paragraphs.map((paragraph) =>
+					this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, userId, paragraph.id)
+				);
+				const paragraphResults = await Promise.all(paragraphSearches);
+
+				paragraphResults.forEach((result) => {
+					Object.keys(result).forEach((id) => {
+						if (result[id].id && result[id]?.score >= 0.65) {
+							resultsObject[result[id].id] = {
+								score: result[id].score,
+								text: result[id].text,
+								paragraphIdBeingMatched: result.paragraphIdBeingMatched,
+							};
+						}
+					});
 				});
-			});
 
-			const ids = Object.keys(resultsObject);
-			// Query ES
-			const esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
-			let clientObj = this.searchUtility.getESClient(cloneName, permissions);
+				const ids = Object.keys(resultsObject);
+				// Query ES
+				esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
 
-			let esResults = await this.dataLibrary.queryElasticSearch(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				esQuery,
-				userId
-			);
+				esResults = await this.dataLibrary.queryElasticSearch(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					esQuery,
+					userId
+				);
 
-			// Aggregate Data
-			const returnData = this.searchUtility.cleanUpEsResults(
-				esResults,
-				[],
-				userId,
-				[],
-				{},
-				null,
-				esQuery,
-				true,
-				resultsObject
-			);
+				// Aggregate Data
+				returnData = this.searchUtility.cleanUpEsResults(
+					esResults,
+					[],
+					userId,
+					[],
+					{},
+					null,
+					esQuery,
+					true,
+					resultsObject
+				);
 
-			const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
-			returnData.docs = cleanedDocs;
+				if (cloneName !== 'eda') {
+					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
+					returnData.docs = cleanedDocs;
+				}
+			}
 
 			res.status(200).send(returnData);
 		} catch (e) {
@@ -95,7 +133,7 @@ class AnalystToolsController {
 	async compareFeedback(req, res) {
 		let userId = 'webapp_unknown';
 		try {
-			userId = req.get('SSL_CLIENT_S_DN_CN');
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const { searchedParagraph, matchedParagraphId, docId, positiveFeedback, undo = false } = req.body;
 
 			if (undo) {
