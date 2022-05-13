@@ -437,7 +437,7 @@ const getSearchMatrixItems = (props) => {
 	);
 };
 
-const PolicySearchMatrixHandler = (props) => {
+const JBookSearchMatrixHandler = (props) => {
 	return <>{getSearchMatrixItems(props)}</>;
 };
 
@@ -474,4 +474,4 @@ const styles = {
 	},
 };
 
-export default PolicySearchMatrixHandler;
+export default JBookSearchMatrixHandler;

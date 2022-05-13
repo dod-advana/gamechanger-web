@@ -513,7 +513,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
 					{trendingLinks.map(({ search, favorite, count }, idx) => (
 						<TrendingSearchContainer
-							onClick={() => setState(dispatch, { searchText: search, runSearch: true })}
+							onClick={() => {
+								setState(dispatch, { searchText: search, runSearch: true });
+							}}
 						>
 							<div
 								style={{
