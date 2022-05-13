@@ -2,9 +2,8 @@
 
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const fs = require('fs');
-const https = require('https'); // module for https
+const spdy = require('spdy');
 const bodyParser = require('body-parser');
 const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
@@ -366,6 +365,14 @@ try {
 	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process');
 }
 
+try {
+	// start qlik search full app cache
+	const qlikAppFullList = cron.getQlikAppsFullListJob();
+	qlikAppFullList.start();
+} catch (e) {
+	logger.error(`Error initializing update qlik app full app cron job: ${e.message}`, 'ZY0KRIN', 'Startup Process');
+}
+
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
 	key: constants.TLS_KEY,
@@ -376,8 +383,8 @@ const options = {
 	rejectUnauthorized: false,
 };
 
-https.createServer(options, app).listen(securePort);
-http.createServer(app).listen(port);
+spdy.createServer(options, app).listen(securePort);
+spdy.createServer({ spdy: { plain: true, ssl: false } }, app).listen(port);
 
 // shoutout to the user
 logger.boot(`
