@@ -89,6 +89,10 @@ html {
   .m-r-15 {
 	  margin-right: 15px;
   }
+
+	.font-size-rem {
+		font-size: 1rem !important;
+	}
   
   .react-tabs__tab {
 	text-transform: uppercase;

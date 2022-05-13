@@ -22,6 +22,7 @@ jest/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log
 
 uotapp-react.out
 src/sonar-project.properties
