@@ -2,9 +2,8 @@
 
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const fs = require('fs');
-const https = require('https'); // module for https
+const spdy = require('spdy');
 const bodyParser = require('body-parser');
 const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
@@ -29,6 +28,7 @@ const AAA = require('@dod-advana/advana-api-auth');
 const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
 const moment = require('moment');
+const startupUtils = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -70,25 +70,42 @@ thes.waitForLoad().then(() => {
 	console.log(thes.lookUp('win'));
 });
 
-try {
-	if (process.env.DISABLE_FRONT_END_CONFIG !== 'true') {
-		let result = {};
-
-		for (let envvar in process.env) {
-			if (envvar.startsWith('REACT_APP_')) result[envvar] = process.env[envvar];
-		}
-
-		fs.writeFileSync(path.join(__dirname, './build', 'config.js'), `window.__env__ = ${JSON.stringify(result)}`);
-	}
-} catch (err) {
-	console.error(err);
-	console.error('No env variables created');
-}
+startupUtils.copyConfigToBuild();
+startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
+
+app.get('*.js', function (req, res, next) {
+	if (req.url === '/config.js') {
+		next();
+	} else {
+		const encodeHeaders = req.get('accept-encoding');
+		if (encodeHeaders.includes('br')) {
+			req.url = req.url + '.br';
+			res.set('Content-Encoding', 'br');
+		} else {
+			req.url = req.url + '.gz';
+			res.set('Content-Encoding', 'gzip');
+		}
+		res.set('Content-Type', 'text/javascript');
+		next();
+	}
+});
+app.get('*.css', function (req, res, next) {
+	const encodeHeaders = req.get('accept-encoding');
+	if (encodeHeaders.includes('br')) {
+		req.url = req.url + '.br';
+		res.set('Content-Encoding', 'br');
+	} else {
+		req.url = req.url + '.gz';
+		res.set('Content-Encoding', 'gzip');
+	}
+	res.set('Content-Type', 'text/css');
+	next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
@@ -348,6 +365,14 @@ try {
 	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process');
 }
 
+try {
+	// start qlik search full app cache
+	const qlikAppFullList = cron.getQlikAppsFullListJob();
+	qlikAppFullList.start();
+} catch (e) {
+	logger.error(`Error initializing update qlik app full app cron job: ${e.message}`, 'ZY0KRIN', 'Startup Process');
+}
+
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
 	key: constants.TLS_KEY,
@@ -358,8 +383,8 @@ const options = {
 	rejectUnauthorized: false,
 };
 
-https.createServer(options, app).listen(securePort);
-http.createServer(app).listen(port);
+spdy.createServer(options, app).listen(securePort);
+spdy.createServer({ spdy: { plain: true, ssl: false } }, app).listen(port);
 
 // shoutout to the user
 logger.boot(`

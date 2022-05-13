@@ -9,7 +9,7 @@ import GCAccordion from '../common/GCAccordion';
 //import GameChangerAPI from '../api/gameChanger-service-api';
 import JAICLogo from '../../images/logos/JAIC_logo.png';
 import { StyledSummaryFAQContainer } from '../modules/jbook/jbookMainViewStyles';
-import { GC_COLORS } from '../modules/jbook/jbookMainViewHandler2';
+import { GC_COLORS } from '../modules/jbook/jbookMainViewHandler';
 
 //const gameChangerAPI = new GameChangerAPI();
 

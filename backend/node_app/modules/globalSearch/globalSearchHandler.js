@@ -5,29 +5,29 @@ const __ = require('lodash');
 const lunrSearchUtils = require('../../utils/lunrSearchUtils');
 const constantsFile = require('../../config/constants');
 const axios = require('axios');
-const fs = require('fs');
-const https = require('https');
 const _ = require('lodash');
-const dcUtils = require('../../utils/DataCatalogUtils');
+const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
+const { getQlikApps } = require('./globalSearchUtils');
 
 const redisAsyncClientDB = 7;
 
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
-
-const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
-const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
-
 class GlobalSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
-		const { logger = LOGGER, constants = constantsFile, database = databaseFile } = opts;
+		const {
+			logger = LOGGER,
+			constants = constantsFile,
+			database = databaseFile,
+			dcUtils = dataCatalogUtils,
+		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
 		this.logger = logger;
 		this.constants = constants;
 		this.database = database;
+		this.dcUtils = dcUtils;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -47,18 +47,17 @@ class GlobalSearchHandler extends SearchHandler {
 			useGCCache,
 			forCacheReload = false,
 			showTutorial,
-			getApplications,
-			getDashboards,
-			getDataSources,
-			getDatabases,
 			tiny_url,
 			cloneName,
 			searchType,
 			searchVersion,
+			searchText,
+			limit,
+			offset,
+			category,
 		} = req.body;
 
 		try {
-			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
 			historyRec.showTutorial = showTutorial;
 			historyRec.tiny_url = tiny_url;
@@ -72,38 +71,37 @@ class GlobalSearchHandler extends SearchHandler {
 			// if (!forCacheReload && useGCCache && offset === 0) {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
-			const searchResults = { applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0 };
+			const searchResults = { totalCount: 0 };
+			searchResults[category] = {};
 
-			// Applications
-			if (getApplications) {
-				searchResults.applications = await this.getApplicationResults(searchText, offset, limit, userId);
-			}
-
-			// Dashboards
-			if (getDashboards) {
-				searchResults.dashboards = await this.getDashboardResults(searchText, offset, limit, userId);
-			}
-
-			// Data Sources
-			if (getDataSources) {
-				searchResults.dataSources = await this.getDataCatalogResults(
-					searchText,
-					offset,
-					limit,
-					'dataSources',
-					userId
-				);
-			}
-
-			// Databases
-			if (getDatabases) {
-				searchResults.databases = await this.getDataCatalogResults(
-					searchText,
-					offset,
-					limit,
-					'databases',
-					userId
-				);
+			let results = [];
+			switch (category) {
+				case 'applications':
+					searchResults[category] = await this.getApplicationResults(searchText, offset, limit, userId);
+					break;
+				case 'dashboards':
+					searchResults[category] = await this.getDashboardResults(searchText, offset, limit, userId);
+					break;
+				case 'dataSources':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						'Data Source',
+						userId
+					);
+					break;
+				case 'databases':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						'Database',
+						userId
+					);
+					break;
+				default:
+					break;
 			}
 
 			// try to store to cache
@@ -148,13 +146,17 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async getApplicationResults(searchText, offset, limit, userId) {
 		try {
+			const t0 = new Date().getTime();
 			const hitQuery = `select description, permission, href, link_label, id
 							  from megamenu_links
 							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
 								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
 			const results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
 			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
-			return this.generateRespData(apps, appResults, offset, limit);
+			const tmpReturn = this.generateRespData(apps, appResults, offset, limit);
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Application Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'MJ2D6VGTime', userId);
+			return tmpReturn;
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6VG', userId);
 			return { hits: [], totalCount: 0, count: 0 };
@@ -163,15 +165,34 @@ class GlobalSearchHandler extends SearchHandler {
 
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
-			let results = await Promise.all([
-				this.getQlikApps(),
-				this.getQlikApps({}, userId.substring(0, userId.length - 4)),
-			]);
+			const t0 = new Date().getTime();
+			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
+			let redisAppResults = await this.redisDB.get('qlik-full-app-list');
+			let userResults;
+			if (!redisAppResults) {
+				console.log('Doing FULL Search');
+				let results = await Promise.all([
+					getQlikApps(undefined, undefined, this.logger, false, true),
+					getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false),
+				]);
+				redisAppResults = results[0].data;
+				userResults = results[1].data;
+				this.redisDB.set('qlik-full-app-list', JSON.stringify(redisAppResults));
+			} else {
+				console.log('Not Doing FULL Search');
+				redisAppResults = JSON.parse(redisAppResults || '[]');
+				userResults = await getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false);
+				userResults = userResults.data;
+			}
+
 			const [apps, searchResults] = this.performSearch(
-				this.mergeUserApps(results[0].data || [], results[1].data || []),
+				this.mergeUserApps(redisAppResults || [], userResults || []),
 				lunrSearchUtils.parse(searchText)
 			);
-			return this.generateRespData(apps, searchResults, offset, limit);
+			const tmpReturn = this.generateRespData(apps, searchResults, offset, limit);
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
+			return tmpReturn;
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
@@ -179,37 +200,47 @@ class GlobalSearchHandler extends SearchHandler {
 	}
 
 	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
-		const defaultSearchOptions = {
-			keywords: dcUtils.cleanSearchText(searchText),
-			filters: [
-				{
-					field: 'assetType',
-					values: dcUtils.getSearchTypeId(searchType),
-				},
-				{
-					field: 'status',
-					values: dcUtils.getQueryableStatuses(),
-				},
-			],
-			highlights: {
-				preTag: '<highlight>',
-				postTag: '</highlight>',
-			},
-			limit,
-			offset,
-		};
-
+		const t0 = new Date().getTime();
+		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+		const qStatus = await this.dcUtils.getQueryableStatuses();
 		try {
+			const defaultSearchOptions = {
+				keywords: this.dcUtils.cleanSearchText(searchText),
+				filters: [
+					{
+						field: 'assetType',
+						values: searchTypeIds,
+					},
+					{
+						field: 'status',
+						values: qStatus,
+					},
+				],
+				highlights: {
+					preTag: '<highlight>',
+					postTag: '</highlight>',
+				},
+				limit,
+				offset,
+			};
+
 			if (!searchText) throw new Error('keywords is required in the request body');
 
-			const url = dcUtils.getCollibraUrl() + '/search';
+			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
-			const response = await axios.post(url, fullSearch, dcUtils.getAuthConfig());
+			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
 
-			return response.data || [];
+			const t1 = new Date().getTime();
+			this.logger.info(
+				`Get Data Catalog Results Time for ${searchType}: ${((t1 - t0) / 1000).toFixed(2)}`,
+				'FE656U9Time',
+				userId
+			);
+
+			return response.data || { total: 0, results: [] };
 		} catch (err) {
 			this.logger.error(err, 'FE656U9', userId);
-			return [];
+			return { total: 0, results: [] };
 		}
 	}
 
@@ -251,44 +282,6 @@ class GlobalSearchHandler extends SearchHandler {
 			this.logger.error(e, 'QW8UGJM');
 			return { hits: [], totalCount: 0, count: 0 };
 		}
-	}
-
-	async getQlikApps(params = {}, userId) {
-		try {
-			let url = `${QLIK_URL}/qrs/app/full`;
-			let result = await axios.get(url, this.getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
-			return result;
-		} catch (err) {
-			if (!userId)
-				// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
-				this.logger.error(err, 'O799J51', userId);
-
-			return {};
-		}
-	}
-
-	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
-		return {
-			params: {
-				Xrfkey: 1234567890123456,
-				...params,
-			},
-			headers: {
-				'content-type': 'application/json',
-				'X-Qlik-xrfkey': '1234567890123456',
-				'X-Qlik-user': this.getUserHeader(userid),
-			},
-			httpsAgent: new https.Agent({
-				rejectUnauthorized: false,
-				ca: CA,
-				key: KEY,
-				cert: CERT,
-			}),
-		};
-	}
-
-	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
-		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
 	}
 
 	performSearch(allApps, searchText) {
