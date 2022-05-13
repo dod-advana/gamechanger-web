@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import _ from 'lodash';
 import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import { Divider, Checkbox } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import '../../components/common/magellan-table.css';
 import './keyword-result-card.css';
@@ -14,7 +13,6 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import CardFactory from '../factories/cardFactory';
 import {
 	handleSaveFavoriteDocument,
 	handleSaveFavoriteTopic,
@@ -24,6 +22,66 @@ import {
 import Fade from '@material-ui/core/Fade';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import { Checkbox } from '@material-ui/core';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { gcOrange } from '../common/gc-colors';
+
+const DefaultCardHandler = LoadableVisibility({
+	loader: () => import('../modules/default/defaultCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const CDOCardHandler = LoadableVisibility({
+	loader: () => import('../modules/cdo/cdoCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const EDACardHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const GlobalSearchCardHandler = LoadableVisibility({
+	loader: () => import('../modules/globalSearch/globalSearchCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const HermesCardHandler = LoadableVisibility({
+	loader: () => import('../modules/hermes/hermesCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const JBookCardHandler = LoadableVisibility({
+	loader: () => import('../modules/jbook/jbookCardHandler'),
+	loading: () => {
+		return <LoadingIndicator customColor={'#1C2D65'} />;
+	},
+});
+
+const JexnetCardHandler = LoadableVisibility({
+	loader: () => import('../modules/jexnet/jexnetCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
+
+const PolicyCardHandler = LoadableVisibility({
+	loader: () => import('../modules/policy/policyCardHandler'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
 
 const CARD_HEIGHT = 412;
 
@@ -377,20 +435,15 @@ function GCCard(props) {
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
 	const [favoriteSummary, setFavoriteSummary] = useState('');
 	const [feedback, setFeedback] = useState('');
-	const [cardHandler, setCardHandler] = useState();
 	const [loaded, setLoaded] = useState(false);
 	const [filename, setFilename] = useState('');
+	const [displayTitle, setDisplayTitle] = useState('');
 	const [modalOpen, setModalOpen] = useState(false);
 
 	useEffect(() => {
 		// Create the factory
 		if (cardType && !loaded) {
-			let module_name = card_module ?? state.cloneData.card_module;
-			const factory = new CardFactory(module_name);
-			const handler = factory.createHandler();
-			setCardHandler(handler[cardType]);
 			setLoaded(true);
-			setFilename(handler[cardType].getFilename(item));
 			if (cardType === 'organization') {
 				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({ data }) => {
 					item.sealURLOverride = data[item.name];
@@ -408,8 +461,6 @@ function GCCard(props) {
 	}, [state.listView]);
 
 	let searchText = state.searchText;
-
-	const tutorialComponent = 'Search Result Card';
 
 	const openFavoritePopper = (target) => {
 		if (popperIsOpen) {
@@ -542,13 +593,13 @@ function GCCard(props) {
 								setFeedback('thumbsUp');
 								gameChangerAPI.sendIntelligentSearchFeedback(
 									'intelligent_search_thumbs_up',
-									cardHandler.getDisplayTitle(item),
+									displayTitle,
 									searchText
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsUp',
-									cardHandler.getFilename(item)`search : ${searchText}`
+									filename`search : ${searchText}`
 								);
 							}
 						}}
@@ -561,13 +612,13 @@ function GCCard(props) {
 								setFeedback('thumbsDown');
 								gameChangerAPI.sendIntelligentSearchFeedback(
 									'intelligent_search_thumbs_down',
-									cardHandler.getDisplayTitle(item),
+									displayTitle,
 									searchText
 								);
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsDown',
-									cardHandler.getFilename(item)`search : ${searchText}`
+									filename`search : ${searchText}`
 								);
 							}
 						}}
@@ -576,6 +627,29 @@ function GCCard(props) {
 			</Fade>
 		</div>
 	);
+
+	const getCardComponent = (props) => {
+		const module_name = card_module ?? state.cloneData.card_module;
+
+		switch (module_name) {
+			case 'policy/policyCardHandler':
+				return <PolicyCardHandler {...props} />;
+			case 'hermes/hermesCardHandler':
+				return <HermesCardHandler {...props} />;
+			case 'cdo/cdoCardHandler':
+				return <CDOCardHandler {...props} />;
+			case 'globalSearch/globalSearchCardHandler':
+				return <GlobalSearchCardHandler {...props} />;
+			case 'eda/edaCardHandler':
+				return <EDACardHandler {...props} />;
+			case 'jbook/jbookCardHandler':
+				return <JBookCardHandler {...props} />;
+			case 'jexnet/jexnetCardHandler':
+				return <JexnetCardHandler {...props} />;
+			default:
+				return <DefaultCardHandler {...props} />;
+		}
+	};
 
 	return (
 		<StyledCardContainer
@@ -632,13 +706,13 @@ function GCCard(props) {
 										handleSaveFavorite(false);
 										gameChangerAPI.sendIntelligentSearchFeedback(
 											'intelligent_search_cancel_favorite_document',
-											cardHandler.getDisplayTitle(item),
+											displayTitle,
 											searchText
 										);
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'CancelFavorite',
-											cardHandler.getFilename(item),
+											filename,
 											`search : ${searchText}`
 										);
 									}}
@@ -691,13 +765,13 @@ function GCCard(props) {
 										handleSaveFavorite(true);
 										gameChangerAPI.sendIntelligentSearchFeedback(
 											'intelligent_search_favorite_document',
-											cardHandler.getDisplayTitle(item),
+											displayTitle,
 											searchText
 										);
 										trackEvent(
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'Favorite',
-											cardHandler.getFilename(item),
+											filename,
 											`search : ${searchText}`
 										);
 									}}
@@ -717,156 +791,42 @@ function GCCard(props) {
 				)}
 			</Popover>
 
-			<div className={'styled-card-container'} id={id}>
-				<div
-					className={'styled-card-inner'}
-					ref={(node) => {
-						if (node && IS_EDGE) {
-							node.style.setProperty('transform-style', 'flat', 'important');
-						}
-					}}
-				>
-					{/* START CARD FRONT */}
-					<div
-						className={`styled-card-inner-front tutorial-step-${state.componentStepNumbers[tutorialComponent]}`}
-					>
-						<div className={'styled-card-inner-wrapper'}>
-							{/* START CARD HEADER */}
-							{loaded &&
-								cardHandler.getCardHeader({
-									item,
-									state,
-									idx,
-									checkboxComponent,
-									favoriteComponent,
-									graphView,
-									intelligentSearch,
-								})}
-							{/* END CARD HEADER */}
-
-							{/* START CARD SUBHEADER */}
-							{loaded && cardHandler.getCardSubHeader({ item, state, toggledMore })}
-							{/* END CARD SUBHEADER */}
-
-							{/* START CARD CONTENT */}
-							<div className={`styled-card-front-content`}>
-								{loaded && (
-									<>
-										{cardHandler.getCardFront({
-											item,
-											state,
-											backBody: cardHandler.getCardBack({
-												item,
-												state,
-												detailPage,
-											}),
-											hitsExpanded,
-											setHitsExpanded,
-											hoveredHit,
-											setHoveredHit,
-											metadataExpanded,
-											setMetadataExpanded,
-											intelligentSearch,
-											intelligentFeedbackComponent,
-											collection,
-										})}
-									</>
-								)}
-							</div>
-							{/* END CARD CONTENT */}
-
-							{/* START CARD FRONT FOOTER */}
-							{!state.listView && (
-								<div className={'styled-card-front-buttons'}>
-									<div className={'styled-action-buttons-group'}>
-										{intelligentSearch && intelligentFeedbackComponent()}
-										{loaded &&
-											cardHandler.getFooter({
-												toggledMore,
-												graphView,
-												cloneName: state.cloneData.clone_name,
-												filename,
-												searchText,
-												setToggledMore,
-												closeGraphCard,
-												name: item.title,
-												item,
-												setModalOpen,
-												showEsDoc: () => {
-													console.log(item);
-													setState(dispatch, { selectedDoc: item, showEsDocDialog: true });
-												},
-												state,
-											})}
-									</div>
-								</div>
-							)}
-							{/* END CARD FRONT FOOTER */}
-						</div>
-					</div>
-					{/* END CARD FRONT */}
-
-					{/* START CARD BACK */}
-					<div className={'styled-card-inner-back'}>
-						<div className={'styled-card-inner-wrapper'}>
-							{/* CARD BACK CONTENT */}
-							<div className={'styled-card-back-content'}>
-								{loaded &&
-									cardHandler.getCardBack({
-										item,
-										state,
-										dispatch,
-										setFavorite,
-										detailPage,
-									})}
-							</div>
-
-							{/* CARD BACK FOOTER */}
-							<div className={'styled-card-back-buttons'}>
-								<div className={'styled-action-buttons-group'}>
-									{loaded &&
-										cardHandler.getFooter({
-											toggledMore,
-											graphView,
-											cloneName: state.cloneData.clone_name,
-											filename,
-											searchText,
-											setToggledMore,
-											closeGraphCard,
-											name: item.title,
-											item,
-											setModalOpen,
-											showEsDoc: () => {
-												console.log(item);
-												setState(dispatch, {
-													selectedDoc: item,
-													showEsDocDialog: true,
-												});
-											},
-											state,
-										})}
-								</div>
-							</div>
-						</div>
-					</div>
-					{/* END CARD BACK */}
-
-					{/* START CARD EXTRAS */}
-					{loaded &&
-						cardHandler.getCardExtras({
-							isFavorite: favorite,
-							favoriteSummary,
-							setFavoriteSummary,
-							classes,
-							modalOpen,
-							setModalOpen,
-							item,
-						})}
-					{/* END CARD EXTRAS */}
-				</div>
-
-				{state.listView && <Divider flexItem />}
-			</div>
+			{getCardComponent({
+				id,
+				IS_EDGE,
+				state,
+				cardType,
+				item,
+				idx,
+				checkboxComponent,
+				favoriteComponent,
+				graphView,
+				intelligentSearch,
+				toggledMore,
+				detailPage,
+				hitsExpanded,
+				setHitsExpanded,
+				hoveredHit,
+				setHoveredHit,
+				metadataExpanded,
+				setMetadataExpanded,
+				intelligentFeedbackComponent,
+				collection,
+				filename,
+				searchText,
+				setToggledMore,
+				closeGraphCard,
+				setModalOpen,
+				dispatch,
+				setFavorite,
+				favorite,
+				favoriteSummary,
+				setFavoriteSummary,
+				classes,
+				modalOpen,
+				setFilename,
+				setDisplayTitle,
+			})}
 		</StyledCardContainer>
 	);
 }
@@ -874,7 +834,7 @@ function GCCard(props) {
 GCCard.propTypes = {
 	idx: PropTypes.number.isRequired,
 	state: PropTypes.shape({
-		selectedDocuments: PropTypes.instanceOf(Map).isRequired,
+		selectedDocuments: PropTypes.instanceOf(Map),
 		listView: PropTypes.bool.isRequired,
 		componentStepNumbers: PropTypes.objectOf(PropTypes.number),
 		showSideFilters: PropTypes.bool.isRequired,
@@ -887,10 +847,10 @@ GCCard.propTypes = {
 	dispatch: PropTypes.func.isRequired,
 	item: PropTypes.shape({
 		type: PropTypes.string.isRequired,
-		title: PropTypes.string.isRequired,
-		filename: PropTypes.string.isRequired,
-		favorite: PropTypes.bool.isRequired,
-		is_revoked_b: PropTypes.bool.isRequired,
+		title: PropTypes.string,
+		filename: PropTypes.string,
+		favorite: PropTypes.bool,
+		is_revoked_b: PropTypes.bool,
 		search_mode: PropTypes.string,
 	}),
 	id: PropTypes.number,

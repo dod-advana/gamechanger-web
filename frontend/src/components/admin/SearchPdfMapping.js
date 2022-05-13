@@ -74,7 +74,7 @@ const columns = [
 	},
 	{
 		Header: 'Search Time',
-		accessor: 'searchtime',
+		accessor: 'searchtime_formatted',
 		width: 200,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
@@ -147,19 +147,40 @@ const columns = [
 ];
 
 const userAggColumns = [
+	// {
+	// 	Header: 'Name',
+	// 	accessor: 'name',
+	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
+	// },
+	// {
+	// 	Header: 'Email',
+	// 	accessor: 'email',
+	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
+	// },
+
 	{
 		Header: 'User ID',
-		accessor: 'idvisitor',
+		accessor: 'user_id',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Searches Made',
-		accessor: 'searches_made',
+		Header: 'Organization',
+		accessor: 'org',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Documents Opened',
 		accessor: 'docs_opened',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Total Searches',
+		accessor: 'searches_made',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Last Search Made',
+		accessor: 'last_search_formatted',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
@@ -285,7 +306,7 @@ const getDocumentData = async (daysBack, setDocumentData) => {
 };
 
 /**
- * This method queries postgres for feedback data.
+ * This method queries postgres for user aggregations.
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
@@ -410,7 +431,7 @@ export default () => {
 					<Grid item xs={3}>
 						<p>Exported:</p>
 						<ol>
-							{row.original.export.map((e) => (
+							{row.original.ExportDocument.map((e) => (
 								<li>
 									<a
 										target={'_blank'}
@@ -427,7 +448,7 @@ export default () => {
 					<Grid item xs={4}>
 						<p>Favorited:</p>
 						<ol>
-							{row.original.favorite.map((f) => (
+							{row.original.Favorite.map((f) => (
 								<li>
 									<a
 										target={'_blank'}

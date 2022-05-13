@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { orgFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	edaSearchSettings: {
@@ -16,6 +17,7 @@ const initState = {
 		contractData: {
 			pds: false,
 			syn: false,
+			fpds: false,
 			none: false,
 		},
 		minObligatedAmount: null,
@@ -28,6 +30,17 @@ const initState = {
 			navy: [],
 		},
 		excludeTerms: null,
+		vendorName: null,
+		fundingOfficeCode: null,
+		idvPIID: null,
+		modNumber: null,
+		pscDesc: null,
+		piid: null,
+		reqDesc: null,
+		psc: null,
+		fundingAgencyName: null,
+		naicsCode: null,
+		duns: null,
 	},
 	contractAwards: {},
 	showDialog: false,
@@ -50,6 +63,25 @@ const initState = {
 	searchSettings: {
 		allCategoriesSelected: true,
 		specificCategoriesSelected: false,
+	},
+	analystToolsSearchSettings: {
+		isFilterUpdate: false,
+		orgUpdate: false,
+		orgFilter: orgFilters,
+		orgCount: {},
+		organizations: [],
+		majcoms: {
+			'air force': [],
+			army: [],
+			defense: [],
+			navy: [],
+		},
+		fiscalYears: [],
+		allYearsSelected: true,
+		contractsOrMods: 'both',
+		idvPIID: '',
+		allOrgsSelected: true,
+		specificOrgsSelected: false,
 	},
 	rawSearchResults: [],
 	userData: {
@@ -81,6 +113,14 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
+		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
+			const newState = {
+				...state,
+				analystToolsSearchSettings: initState.analystToolsSearchSettings,
+			};
+			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
+			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
+			return newState;
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
