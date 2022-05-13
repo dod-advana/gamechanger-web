@@ -6,6 +6,7 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import JBookJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
 import JBookServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
 import JBookPOCReviewForm from '../components/modules/jbook/jbookPOCReviewForm';
+import JBookSimpleReviewForm from '../components/modules/jbook/jbookSimpleReviewForm';
 import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
@@ -80,6 +81,8 @@ const JBookProfilePage = (props) => {
 	const [accomplishments, setAccomplishments] = useState([]);
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
+
+	const [simpleReview, setSimpleReview] = useState(true);
 
 	const getProjectData = async (
 		programElement,
@@ -926,140 +929,192 @@ const JBookProfilePage = (props) => {
 							</GCAccordion>
 						</StyledAccordionContainer>
 					)}
-					<StyledAccordionContainer id={'Primary Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader headerWidth="100%">
-									<strong>PRIMARY REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.primaryReviewStatus === 'Finished Review'
-													? 'green'
-													: '#F9B32D',
-										}}
-									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookJAICReviewForm
-								renderReenableModal={renderReenableModal}
-								reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												permissions.is_primary_reviewer &&
-												Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
-										  )
-								}
-								finished={reviewData.primaryReviewStatus === 'Finished Review'}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								dropdownData={dropdownData}
-								reviewerProp={projectData.reviewer}
-								serviceReviewerProp={projectData.serviceReview}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
 
-					<StyledAccordionContainer id={'Service / DoD Component Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader>
-									<strong>SERVICE REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.serviceReviewStatus === 'Finished Review'
-													? 'green'
-													: '#F9B32D',
-										}}
-									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookServiceReviewForm
-								renderReenableModal={renderReenableModal}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												permissions.is_service_reviewer &&
-												(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
-													Auth.getTokenPayload().email ===
-														reviewData.serviceSecondaryReviewerEmail)
-										  )
+					{simpleReview ? (
+						<StyledAccordionContainer id={'Simplified Reviewer Section'}>
+							<GCAccordion
+								contentPadding={0}
+								expanded={true}
+								headerWidth="100%"
+								header={
+									<StyledAccordionHeader>
+										<strong>REVIEW</strong>
+										<FiberManualRecordIcon
+											style={{
+												color:
+													reviewData.primaryReviewStatus === 'Finished Review'
+														? 'green'
+														: '#F9B32D',
+											}}
+										/>
+									</StyledAccordionHeader>
 								}
-								reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
-								finished={reviewData.serviceReviewStatus === 'Finished Review'}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								vendorData={projectData.vendors}
-								dropdownData={dropdownData}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'600'}
+							>
+								<JBookSimpleReviewForm
+									renderReenableModal={renderReenableModal}
+									reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
+									roleDisabled={
+										Permissions.hasPermission('JBOOK Admin')
+											? false
+											: !(
+													permissions.is_primary_reviewer &&
+													Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
+											  )
+									}
+									finished={reviewData.primaryReviewStatus === 'Finished Review'}
+									submitReviewForm={submitReviewForm}
+									setReviewData={setReviewData}
+									dropdownData={dropdownData}
+									reviewerProp={projectData.reviewer}
+									serviceReviewerProp={projectData.serviceReview}
+								></JBookSimpleReviewForm>
+							</GCAccordion>
+						</StyledAccordionContainer>
+					) : (
+						<>
+							<StyledAccordionContainer id={'Primary Reviewer Section'}>
+								<GCAccordion
+									contentPadding={0}
+									expanded={true}
+									headerWidth="100%"
+									header={
+										<StyledAccordionHeader headerWidth="100%">
+											<strong>PRIMARY REVIEWER</strong>
+											<FiberManualRecordIcon
+												style={{
+													color:
+														reviewData.primaryReviewStatus === 'Finished Review'
+															? 'green'
+															: '#F9B32D',
+												}}
+											/>
+										</StyledAccordionHeader>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'600'}
+								>
+									<JBookJAICReviewForm
+										renderReenableModal={renderReenableModal}
+										reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
+										roleDisabled={
+											Permissions.hasPermission('JBOOK Admin')
+												? false
+												: !(
+														permissions.is_primary_reviewer &&
+														Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
+												  )
+										}
+										finished={reviewData.primaryReviewStatus === 'Finished Review'}
+										submitReviewForm={submitReviewForm}
+										setReviewData={setReviewData}
+										dropdownData={dropdownData}
+										reviewerProp={projectData.reviewer}
+										serviceReviewerProp={projectData.serviceReview}
+									/>
+								</GCAccordion>
+							</StyledAccordionContainer>
 
-					<StyledAccordionContainer id={'POC Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader>
-									<strong>POC REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.pocReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
-										}}
+							<StyledAccordionContainer id={'Service / DoD Component Reviewer Section'}>
+								<GCAccordion
+									contentPadding={0}
+									expanded={true}
+									headerWidth="100%"
+									header={
+										<StyledAccordionHeader>
+											<strong>SERVICE REVIEWER</strong>
+											<FiberManualRecordIcon
+												style={{
+													color:
+														reviewData.serviceReviewStatus === 'Finished Review'
+															? 'green'
+															: '#F9B32D',
+												}}
+											/>
+										</StyledAccordionHeader>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'600'}
+								>
+									<JBookServiceReviewForm
+										renderReenableModal={renderReenableModal}
+										roleDisabled={
+											Permissions.hasPermission('JBOOK Admin')
+												? false
+												: !(
+														permissions.is_service_reviewer &&
+														(Auth.getTokenPayload().email ===
+															reviewData.serviceReviewerEmail ||
+															Auth.getTokenPayload().email ===
+																reviewData.serviceSecondaryReviewerEmail)
+												  )
+										}
+										reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
+										finished={reviewData.serviceReviewStatus === 'Finished Review'}
+										submitReviewForm={submitReviewForm}
+										setReviewData={setReviewData}
+										vendorData={projectData.vendors}
+										dropdownData={dropdownData}
 									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookPOCReviewForm
-								renderReenableModal={renderReenableModal}
-								finished={reviewData.pocReviewStatus === 'Finished Review'}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												Permissions.hasPermission('JBOOK POC Reviewer') &&
-												(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-													Auth.getTokenPayload().email === reviewData.altPOCEmail)
-										  )
-								}
-								reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
-								dropdownData={dropdownData}
-								vendorData={projectData.vendors}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								totalBudget={
-									projectData.currentYearAmount && projectData.currentYearAmount > 0
-										? projectData.currentYearAmount
-										: projectData.currentYearAmountMax && projectData.currentYearAmountMax > 0
-										? projectData.currentYearAmountMax
-										: 3000
-								}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
+								</GCAccordion>
+							</StyledAccordionContainer>
+
+							<StyledAccordionContainer id={'POC Reviewer Section'}>
+								<GCAccordion
+									contentPadding={0}
+									expanded={true}
+									headerWidth="100%"
+									header={
+										<StyledAccordionHeader>
+											<strong>POC REVIEWER</strong>
+											<FiberManualRecordIcon
+												style={{
+													color:
+														reviewData.pocReviewStatus === 'Finished Review'
+															? 'green'
+															: '#F9B32D',
+												}}
+											/>
+										</StyledAccordionHeader>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'600'}
+								>
+									<JBookPOCReviewForm
+										renderReenableModal={renderReenableModal}
+										finished={reviewData.pocReviewStatus === 'Finished Review'}
+										roleDisabled={
+											Permissions.hasPermission('JBOOK Admin')
+												? false
+												: !(
+														Permissions.hasPermission('JBOOK POC Reviewer') &&
+														(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
+															Auth.getTokenPayload().email === reviewData.altPOCEmail)
+												  )
+										}
+										reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
+										dropdownData={dropdownData}
+										vendorData={projectData.vendors}
+										submitReviewForm={submitReviewForm}
+										setReviewData={setReviewData}
+										totalBudget={
+											projectData.currentYearAmount && projectData.currentYearAmount > 0
+												? projectData.currentYearAmount
+												: projectData.currentYearAmountMax &&
+												  projectData.currentYearAmountMax > 0
+												? projectData.currentYearAmountMax
+												: 3000
+										}
+									/>
+								</GCAccordion>
+							</StyledAccordionContainer>
+						</>
+					)}
 				</StyledReviewLeftContainer>
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
