@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Input, IconButton } from '@material-ui/core';
 import { TableRow, BorderDiv } from './util/styledDivs';
 import { CloudDownload } from '@material-ui/icons';
+import moment from 'moment';
+import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from '../../common/GCButton';
@@ -24,7 +28,8 @@ export default (props) => {
 	// Set state variables
 	const [s3List, setS3List] = useState([]);
 	const [s3DataList, setS3DataList] = useState([]);
-
+	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 }));
+	const [endDate, setEndDate] = useState(moment());
 	const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
 
 	// flags that parameters have been changed and on
@@ -163,6 +168,29 @@ export default (props) => {
 	const checkCorpusDownloading = () => {
 		return checkFlag('corpus:');
 	};
+
+	const handleDateChange = (date, setFunction) => {
+		setFunction(date);
+	};
+	/**
+	 * Get user aggregations data and sends that to the ml-api
+	 * @method sendUserAggData
+	 */
+	const sendUserAggData = async (startDate, endDate) => {
+		try {
+			const params = {
+				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			};
+			const { data = {} } = await gameChangerAPI.getUserAggregations(params);
+			const mlParams = {
+				data: data.users,
+			};
+			gameChangerAPI.sendUserAggregations(mlParams);
+		} catch (e) {
+			console.error(e);
+		}
+	};
 	/**
 	 * Takes a String and checks if it is in any of the flag keys and checks
 	 * those values. If any of them are true it returns true
@@ -289,13 +317,61 @@ export default (props) => {
 							justifyContent: 'space-between',
 						}}
 					>
+						<b>Send User Data to ML-API</b>
+						<MuiPickersUtilsProvider utils={DateFnsUtils}>
+							<KeyboardDateTimePicker
+								margin="normal"
+								format="MM/dd/yyyy hh:mm"
+								InputProps={{
+									style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
+								}}
+								value={startDate}
+								label="Start Date"
+								onChange={(date) => handleDateChange(date, setStartDate)}
+								// onOpen={setDatePickerOpen}
+								// onClose={setDatePickerClosed}
+								style={{ flex: '110px', margin: '5px' }}
+							/>
+							<KeyboardDateTimePicker
+								margin="normal"
+								format="MM/dd/yyyy hh:mm"
+								InputProps={{
+									style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
+								}}
+								value={endDate}
+								label="End Date"
+								onChange={(date) => handleDateChange(date, setEndDate)}
+								// onOpen={setDatePickerOpen}
+								// onClose={setDatePickerClosed}
+								style={{ flex: '110px', margin: '5px' }}
+							/>
+						</MuiPickersUtilsProvider>
+						<GCPrimaryButton
+							onClick={() => {
+								sendUserAggData(startDate, endDate);
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Send Data
+						</GCPrimaryButton>
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
 						<b>Download Corpus</b>
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
 								triggerDownloadCorpus();
 							}}
-							disabled={checkCorpusDownloading()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Download

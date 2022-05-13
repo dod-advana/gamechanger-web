@@ -1,9 +1,12 @@
 import _ from 'lodash';
 
-import { getTrackingNameForFactory, SEARCH_TYPES } from './gamechangerUtils';
+import { getTrackingNameForFactory, PAGE_DISPLAYED, SEARCH_TYPES } from './gamechangerUtils';
 import { trackEvent } from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
+import React from 'react';
+import { Button } from '@material-ui/core';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -272,4 +275,102 @@ export const setCurrentTime = (dispatch) => {
 
 export const sendJiraFeedback = (data) => {
 	return gameChangerAPI.sendJiraFeedback(data);
+};
+
+export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => {
+	return (
+		<div>
+			<div
+				style={{
+					backgroundColor: 'rgba(223, 230, 238, 0.5)',
+					minHeight: 'calc(100vh - 200px)',
+				}}
+			>
+				{state.pageDisplayed !== 'aboutUs' && (
+					<div
+						style={{
+							borderTop: '1px solid #B0BAC5',
+							width: '96.5%',
+							marginLeft: 'auto',
+							marginRight: 'auto',
+						}}
+					/>
+				)}
+				<React.Fragment>
+					{state.pageDisplayed !== 'aboutUs' && (
+						<Button
+							style={{
+								marginLeft: '10px',
+								marginTop: '8px',
+								fontFamily: 'Montserrat',
+								color: '#313541',
+								position: 'absolute',
+							}}
+							startIcon={<ArrowBackIcon />}
+							onClick={() => {
+								window.history.pushState(
+									null,
+									document.title,
+									`/#/${state.cloneData.url.toLowerCase()}`
+								);
+								setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+								let viewName;
+								switch (state.pageDisplayed) {
+									case PAGE_DISPLAYED.dataTracker:
+										viewName = 'DataTracker';
+										break;
+									case PAGE_DISPLAYED.userDashboard:
+										viewName = 'UserDashboard';
+										break;
+									case PAGE_DISPLAYED.analystTools:
+										viewName = 'AnalystTools';
+										break;
+									default:
+										viewName = 'Main';
+										break;
+								}
+								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
+							}}
+						>
+							<></>
+						</Button>
+					)}
+					<div>
+						<p
+							style={{
+								fontSize: '26px',
+								marginLeft: '80px',
+								fontFamily: 'Montserrat',
+								fontWeight: 'bold',
+								marginTop: '10px',
+								color: '#313541',
+							}}
+						>
+							{state.pageDisplayed === PAGE_DISPLAYED.dataTracker && 'Data Status Tracker'}
+							{state.pageDisplayed === PAGE_DISPLAYED.analystTools && (
+								<span>
+									Analyst Tools | {state.analystToolsPageDisplayed}{' '}
+									<b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
+								</span>
+							)}
+							{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
+						</p>
+					</div>
+
+					<div
+						style={{
+							backgroundColor:
+								state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
+								state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
+								state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+									? '#ffffff'
+									: '#DFE6EE',
+						}}
+					>
+						{innerChildren}
+					</div>
+				</React.Fragment>
+			</div>
+		</div>
+	);
 };
