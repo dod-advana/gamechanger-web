@@ -161,7 +161,7 @@ const ClassificationScoreCard = (props) => {
 												data={[
 													{
 														name: 'score',
-														value: 10 - score.value,
+														value: 1 - score.value,
 														fill: 'rgb(166, 206, 227)',
 													},
 													{ name: 'score', value: score.value, fill: 'rgb(32, 119, 180)' },

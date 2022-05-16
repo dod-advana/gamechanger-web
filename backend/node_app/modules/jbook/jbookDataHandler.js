@@ -11,6 +11,7 @@ const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK = require('../../models').feedback;
+const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -49,6 +50,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK,
+			jbook_classification = JBOOK_CLASSIFICATION,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
 
@@ -74,6 +76,7 @@ class JBookDataHandler extends DataHandler {
 		this.feedback = feedback;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
+		this.jbook_classification = jbook_classification;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -190,9 +193,10 @@ class JBookDataHandler extends DataHandler {
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
-			const { type, id } = req.body;
+			const { type, id, budgetLineItem, budgetYear } = req.body;
 			let docType = type;
 			let data;
+			let classification;
 			let totalBudget = 0;
 
 			switch (docType) {
@@ -200,6 +204,13 @@ class JBookDataHandler extends DataHandler {
 					data = await this.pdocs.findOne({
 						where: {
 							id,
+						},
+					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							'P40-01_LI_Number': budgetLineItem,
+							budgetYear,
+							docType: 'pdoc',
 						},
 					});
 					break;
@@ -220,6 +231,8 @@ class JBookDataHandler extends DataHandler {
 				default:
 					break;
 			}
+
+			console.log(classification.dataValues);
 
 			docType = types[docType];
 
@@ -257,6 +270,16 @@ class JBookDataHandler extends DataHandler {
 
 					if (maxVal && maxVal.dataValues) {
 						data.currentYearAmountMax = maxVal.dataValues.currentYearAmountMax;
+					}
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
 					}
 				}
 
