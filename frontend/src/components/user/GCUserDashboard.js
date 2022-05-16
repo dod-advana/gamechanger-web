@@ -698,8 +698,6 @@ const GCUserDashboard = React.memo((props) => {
 		}
 	}, [userData, cloneData.clone_name, cloneData.url]);
 
-	useEffect(() => {}, [reload]);
-
 	const handleTabClicked = (tabIndex, lastIndex, event) => {
 		const tabName = event.target.title;
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTab', 'onClick', tabName);

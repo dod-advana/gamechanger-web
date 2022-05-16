@@ -51,16 +51,16 @@ const GameChangerPage = (props) => {
 			setState(dispatch, { history: history, historySet: true });
 		}
 
-		if (!state.userDataSet) {
-			gameChangerUserAPI.getUserProfileData().then((data) => {
-				setState(dispatch, { userData: data.data, userDataSet: true });
-			});
-		}
-
 		if (state.cloneDataSet && state.cloneData?.display_name) {
 			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
 		}
 	}, [cloneData, state, dispatch, history]);
+
+	useEffect(() => {
+		if (!state.userDataSet) {
+			gameChangerUserAPI.getUserData();
+		}
+	}, [state.userDataSet]);
 
 	return (
 		<div className="main-container">
