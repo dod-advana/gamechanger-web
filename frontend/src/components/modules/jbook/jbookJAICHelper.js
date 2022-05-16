@@ -264,10 +264,10 @@ const JustificationValue = React.memo((props) => {
 	return (
 		<>
 			<TextField
-				placeholder="Reviewer Notes"
+				placeholder="Provide justification for the tag selected above"
 				variant="outlined"
 				value={reviewerNotes}
-				style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
+				style={{ backgroundColor: 'white', width: '100%', margin: '0 0 0 0' }}
 				onBlur={(event) => setReviewData('primaryReviewNotes', event.target.value)}
 				onChange={(event, value) => setReviewerNotes(value)}
 				inputProps={{
