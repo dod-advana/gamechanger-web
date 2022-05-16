@@ -104,7 +104,7 @@ const useStyles = makeStyles({
 	},
 });
 
-const ViewHeader = (props) => {
+const PolicyViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {} } = props;
 
@@ -243,95 +243,90 @@ const ViewHeader = (props) => {
 
 	return (
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
-			{state.cloneData.clone_name === 'gamechanger' ? (
-				<>
-					<div className={'view-filters-container'}>
-						{state.searchSettings.specificOrgsSelected &&
-							Object.keys(orgFilter).map((org, index) => {
-								if (state.searchSettings.orgFilter[org]) {
-									return (
-										<Button
-											variant="outlined"
-											backgroundColor="white"
-											display="inline-flex"
-											name={org}
-											value={org}
-											style={{
-												marginRight: '10px',
-												padding: '10px 15px',
-												backgroundColor: 'white',
-												color: 'orange',
-												height: 40,
-												ariaPressed: 'true',
-											}}
-											endIcon={<CloseIcon />}
-											onClick={(event) => {
-												handleOrganizationFilterChange(event, state, dispatch);
-											}}
-										>
-											<span
-												style={{
-													fontFamily: 'Montserrat',
-													fontWeight: 300,
-													color: 'black',
-													width: '100%',
-													marginTop: '5px',
-													marginBottom: '5px',
-												}}
-											>
-												{org}
-											</span>
-										</Button>
-									);
-								} else {
-									return null;
-								}
-							})}
+			<div className={'view-filters-container'}>
+				{state.searchSettings.specificOrgsSelected &&
+					Object.keys(orgFilter).map((org, index) => {
+						if (state.searchSettings.orgFilter[org]) {
+							return (
+								<Button
+									variant="outlined"
+									backgroundColor="white"
+									display="inline-flex"
+									name={org}
+									value={org}
+									style={{
+										marginRight: '10px',
+										padding: '10px 15px',
+										backgroundColor: 'white',
+										color: 'orange',
+										height: 40,
+										ariaPressed: 'true',
+									}}
+									endIcon={<CloseIcon />}
+									onClick={(event) => {
+										handleOrganizationFilterChange(event, state, dispatch);
+									}}
+								>
+									<span
+										style={{
+											fontFamily: 'Montserrat',
+											fontWeight: 300,
+											color: 'black',
+											width: '100%',
+											marginTop: '5px',
+											marginBottom: '5px',
+										}}
+									>
+										{org}
+									</span>
+								</Button>
+							);
+						} else {
+							return null;
+						}
+					})}
 
-						{state.searchSettings.specificTypesSelected &&
-							Object.keys(typeFilter).map((type, index) => {
-								if (state.searchSettings.typeFilter[type]) {
-									return (
-										<Button
-											variant="outlined"
-											backgroundColor="white"
-											display="inline-flex"
-											style={{
-												marginRight: '10px',
-												padding: '10px 15px',
-												backgroundColor: 'white',
-												color: 'orange',
-												height: 40,
-											}}
-											endIcon={<CloseIcon />}
-											value={type}
-											onClick={(event) => {
-												handleTypeFilterChange(event, state, dispatch);
-											}}
-										>
-											<span
-												style={{
-													fontFamily: 'Montserrat',
-													fontWeight: 300,
-													color: 'black',
-													width: '100%',
-													marginTop: '5px',
-													marginBottom: '5px',
-												}}
-											>
-												{type}
-											</span>
-										</Button>
-									);
-								} else {
-									return null;
-								}
-							})}
-					</div>
-				</>
-			) : (
-				<> </>
-			)}
+				{state.searchSettings.specificTypesSelected &&
+					Object.keys(typeFilter).map((type, index) => {
+						if (state.searchSettings.typeFilter[type]) {
+							return (
+								<Button
+									variant="outlined"
+									backgroundColor="white"
+									display="inline-flex"
+									style={{
+										marginRight: '10px',
+										padding: '10px 15px',
+										backgroundColor: 'white',
+										color: 'orange',
+										height: 40,
+									}}
+									endIcon={<CloseIcon />}
+									value={type}
+									onClick={(event) => {
+										handleTypeFilterChange(event, state, dispatch);
+									}}
+								>
+									<span
+										style={{
+											fontFamily: 'Montserrat',
+											fontWeight: 300,
+											color: 'black',
+											width: '100%',
+											marginTop: '5px',
+											marginBottom: '5px',
+										}}
+									>
+										{type}
+									</span>
+								</Button>
+							);
+						} else {
+							return null;
+						}
+					})}
+			</div>
+
 			<div
 				className={'view-buttons-container'}
 				style={
@@ -458,17 +453,6 @@ const ViewHeader = (props) => {
 						})}
 					</Select>
 				</FormControl>
-				{cloneData?.clone_name === 'eda' && (
-					<a
-						target="_blank"
-						rel="noopener noreferrer"
-						href="https://qlik.advana.data.mil/sense/app/604403a7-bf08-4d56-8807-7b5491a3db22/sheet/96329f3e-18a3-40e8-8b02-99d82feb1a6b/state/analysis"
-					>
-						<GCButton style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}>
-							Validation Metrics
-						</GCButton>
-					</a>
-				)}
 				<GCButton
 					className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 					id={'gcShareSearch'}
@@ -504,7 +488,7 @@ const ViewHeader = (props) => {
 	);
 };
 
-ViewHeader.propTypes = {
+PolicyViewHeaderHandler.propTypes = {
 	activeCategoryTab: PropTypes.string,
 	cloneData: PropTypes.shape({
 		url: PropTypes.string,
@@ -528,4 +512,4 @@ ViewHeader.propTypes = {
 	currentOrder: PropTypes.string,
 };
 
-export default ViewHeader;
+export default PolicyViewHeaderHandler;
