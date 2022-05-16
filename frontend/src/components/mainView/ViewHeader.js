@@ -35,11 +35,20 @@ const JbookViewHeaderHandler = LoadableVisibility({
 	},
 });
 
+const EDAViewHeaderHandler = LoadableVisibility({
+	loader: () => import('../modules/eda/edaViewHeaderHandler'),
+	loading: () => {
+		return (
+			<div style={{ width: window.screen.width - 50 }}>
+				<LoadingIndicator shadedOverlay={true} />
+			</div>
+		);
+	},
+});
+
 const ViewHeader = (props) => {
 	const { context } = props;
-	const { state, dispatch } = context;
-
-	console.log(props);
+	const { state } = context;
 
 	const getViewHeaderComponent = (props) => {
 		switch (state.cloneData.view_header_module) {
@@ -47,19 +56,14 @@ const ViewHeader = (props) => {
 				return <PolicyViewHeaderHandler {...props} />;
 			case 'jbook/jbookViewHeaderHandler':
 				return <JbookViewHeaderHandler {...props} />;
+			case 'eda/edaViewHeaderHandler':
+				return <EDAViewHeaderHandler {...props} />;
 			default:
 				return <DefaultViewHeaderHandler {...props} />;
 		}
 	};
 
-	return (
-		<>
-			{getViewHeaderComponent({
-				state,
-				dispatch,
-			})}
-		</>
-	);
+	return <>{getViewHeaderComponent(props)}</>;
 };
 
 export default ViewHeader;

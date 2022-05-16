@@ -285,7 +285,7 @@ class JBookSearchHandler extends SearchHandler {
 				return this.postgresDocumentSearch(req, userId, res, statusExport);
 			}
 		} catch (e) {
-			console.log(e);
+			console.log('Error running jbook document search');
 			const { message } = e;
 			this.logger.error(message, 'IDD6Y19', userId);
 			throw e;
@@ -300,8 +300,9 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
+			// v ------ PG / REVIEW TABLE ------ v   new function?
+
 			// check if there are PG filters
-			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
 			// clean empty options:
 			Object.keys(req.body.jbookSearchSettings).forEach((key) => {
@@ -313,6 +314,7 @@ class JBookSearchHandler extends SearchHandler {
 					delete req.body.jbookSearchSettings[key];
 				}
 			});
+
 			let pgQueryWhere = ``;
 			const pgFilters = [
 				'reviewStatus',
@@ -325,9 +327,6 @@ class JBookSearchHandler extends SearchHandler {
 			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
 			pgFilters.forEach((filter) => {
 				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
-					console.log(filter);
-					console.log(jbookSearchSettings[filter]);
-
 					if (pgQueryWhere.length > 0) {
 						pgQueryWhere += ` AND ( `;
 					} else {
@@ -351,6 +350,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
+			// generate pg list of possible reviews where filters are applied
 			const keys = [];
 			if (pgQueryWhere.length > 0) {
 				let pgQuery =
@@ -383,7 +383,11 @@ class JBookSearchHandler extends SearchHandler {
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(
+
+			// ^ ------ PG / REVIEW TABLE ------ ^
+
+			// query ES
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
 				req.body,
 				userId,
 				this.jbookSearchUtility.getMapping('esServiceAgency', false)

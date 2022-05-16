@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
@@ -51,16 +51,14 @@ const useStyles = makeStyles({
 	},
 });
 
-const JbookViewHeaderHandler = (props) => {
+const EDAViewHeaderHandler = (props) => {
 	const classes = useStyles();
-	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
+	const { context = {}, extraStyle = {} } = props;
 
 	const { state, dispatch } = context;
 	const { cloneData, componentStepNumbers, currentViewName, listView, viewNames } = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
-	const [portfolios, setPortfolios] = useState([]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -69,108 +67,37 @@ const JbookViewHeaderHandler = (props) => {
 		}
 	}, [dispatch]);
 
-	// fetch portfolio data for portfolio selector
-	useEffect(() => {
-		try {
-			const fetchPortfolios = async () => {
-				gameChangerAPI
-					.callDataFunction({
-						functionName: 'getPortfolios',
-						cloneName: 'jbook',
-						options: {},
-					})
-					.then((data) => {
-						let pData = data.data !== undefined ? data.data : [];
-						setPortfolios(pData);
-					});
-			};
-
-			fetchPortfolios();
-		} catch (e) {
-			console.log('Error fetching jbook portfolios');
-			console.log(e);
+	const handleChangeView = (event) => {
+		const {
+			target: { value },
+		} = event;
+		const params = new URLSearchParams(window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, ''));
+		switch (value) {
+			case 'List':
+				setState(dispatch, { currentViewName: 'Card', listView: true });
+				params.delete('view');
+				break;
+			case 'Grid':
+				setState(dispatch, { currentViewName: 'Card', listView: false });
+				params.delete('view');
+				break;
+			case 'Graph':
+				setState(dispatch, { currentViewName: value, runGraphSearch: true });
+				params.set('view', 'graph');
+				break;
+			case 'Explorer':
+			default:
+				setState(dispatch, { currentViewName: value });
+				params.delete('view');
 		}
-	}, [gameChangerAPI]);
-
-	// handle view selector change
-	const handleChangeView = useCallback(
-		(event) => {
-			try {
-				const {
-					target: { value },
-				} = event;
-				const params = new URLSearchParams(
-					window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, '')
-				);
-				switch (value) {
-					case 'List':
-						setState(dispatch, { currentViewName: 'Card', listView: true });
-						params.delete('view');
-						break;
-					case 'Grid':
-						setState(dispatch, { currentViewName: 'Card', listView: false });
-						params.delete('view');
-						break;
-					case 'Graph':
-						setState(dispatch, { currentViewName: value, runGraphSearch: true });
-						params.set('view', 'graph');
-						break;
-					case 'Explorer':
-					default:
-						setState(dispatch, { currentViewName: value });
-						params.delete('view');
-				}
-				setDropdownValue(value);
-				const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
-				window.history.pushState(null, document.title, linkString);
-			} catch (err) {
-				console.log('Error changing the view');
-				console.log(err);
-			}
-		},
-		[dispatch, state.cloneData.url]
-	);
-
-	// handle portfolio selector change
-	const handleChangePortfolio = useCallback(
-		(event) => {
-			try {
-				const name = event.target.value;
-				setSelectedPortfolio(name);
-				setState(dispatch, { selectedPortfolio: name });
-			} catch (err) {
-				console.log('Error setting portfolio');
-				console.log(err);
-			}
-		},
-		[dispatch]
-	);
+		setDropdownValue(value);
+		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
+		window.history.pushState(null, document.title, linkString);
+	};
 
 	return (
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
-				<FormControl variant="outlined" classes={{ root: classes.root }}>
-					<InputLabel classes={{ root: classes.formlabel }} id="portfolio-name-select">
-						Portfolio
-					</InputLabel>
-					<Select
-						labelId="portfolio-name"
-						label="Portfolio"
-						id="portfolio-name-select"
-						value={selectedPortfolio}
-						onChange={handleChangePortfolio}
-						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-						autoWidth
-					>
-						{portfolios.map((portfolio) => {
-							return (
-								<MenuItem key={portfolio.name} value={portfolio.name}>
-									{portfolio.name}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
 					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 						View
@@ -205,6 +132,15 @@ const JbookViewHeaderHandler = (props) => {
 						})}
 					</Select>
 				</FormControl>
+				<a
+					target="_blank"
+					rel="noopener noreferrer"
+					href="https://qlik.advana.data.mil/sense/app/604403a7-bf08-4d56-8807-7b5491a3db22/sheet/96329f3e-18a3-40e8-8b02-99d82feb1a6b/state/analysis"
+				>
+					<GCButton style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}>
+						Validation Metrics
+					</GCButton>
+				</a>
 				<GCButton
 					className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 					id={'gcShareSearch'}
@@ -221,9 +157,9 @@ const JbookViewHeaderHandler = (props) => {
 	);
 };
 
-JbookViewHeaderHandler.propTypes = {
+EDAViewHeaderHandler.propTypes = {
 	context: PropTypes.objectOf(PropTypes.string),
 	extraStyle: PropTypes.objectOf(PropTypes.string),
 };
 
-export default JbookViewHeaderHandler;
+export default EDAViewHeaderHandler;

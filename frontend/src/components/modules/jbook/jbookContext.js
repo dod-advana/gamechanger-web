@@ -397,6 +397,7 @@ const initState = {
 
 	// jbook portfolios
 	portfolios: [],
+	selectedPortfolio: 'General',
 };
 
 const init = (initialState) => {
