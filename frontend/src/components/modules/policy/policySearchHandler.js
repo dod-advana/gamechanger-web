@@ -114,7 +114,6 @@ const PolicySearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: '',
 			infiniteScrollPage: 1,
 		});
 
