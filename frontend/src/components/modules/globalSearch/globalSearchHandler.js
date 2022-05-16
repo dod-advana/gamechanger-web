@@ -53,7 +53,6 @@ const GlobalSearchHandler = {
 			isDataTracker: false,
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();
