@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import styled from 'styled-components';
+import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import GCButton from '../../common/GCButton';
 
@@ -26,6 +26,31 @@ import ReactTable from 'react-table';
 import { setState } from '../../../utils/sharedFunctions';
 
 const _ = require('lodash');
+
+const DatePickerWrapper = styled.div`
+	margin-right: 10px;
+	display: flex;
+	flex-direction: column;
+
+	> label {
+		text-align: left;
+		margin-bottom: 2px;
+		color: #3f4a56;
+		font-size: 15px;
+		font-family: Noto Sans;
+	}
+
+	> .react-datepicker-wrapper {
+		> .react-datepicker__input-container {
+			> input {
+				width: 225px;
+				border: 0;
+				outline: 0;
+				border-bottom: 1px solid black;
+			}
+		}
+	}
+`;
 
 const styles = {
 	titleText: {
@@ -98,7 +123,7 @@ export const EDASummaryView = (props) => {
 		}
 	}, [currentViewName, dispatch, summaryCardView]);
 
-	const setEDASearchSetting = (field, value, isStartDate) => {
+	const setEDASearchSetting = (field, value, isStartDate, runSearch = true) => {
 		const edaSettings = _.cloneDeep(edaSearchSettings);
 		let doSearch = false;
 
@@ -110,24 +135,28 @@ export const EDASummaryView = (props) => {
 				edaSettings.aggregations.push(value);
 			}
 		} else if (field === 'issueDateRange') {
-			if (Object.prototype.toString.call(value) === '[object Date]') {
-				value.setDate(value.getDate() + 1);
-			}
-
+			let newDate = new moment(value).format('YYYY-MM-DD');
 			if (isStartDate) {
-				edaSettings.startDate = new moment(value).format('YYYY-MM-DD');
+				if (newDate === 'Invalid date') {
+					edaSettings.startDate = null;
+				} else {
+					edaSettings.startDate = newDate;
+				}
 			} else {
-				edaSettings.endDate = new moment(value).format('YYYY-MM-DD');
+				if (newDate === 'Invalid date') {
+					edaSettings.endDate = null;
+				} else {
+					edaSettings.endDate = newDate;
+				}
 			}
 
 			if (value && value.toString() !== 'Invalid Date') {
-				doSearch = true;
+				doSearch = runSearch;
 			}
 		} else if (field === 'contractIssueAgency') {
-			doSearch = true;
+			doSearch = runSearch;
 			edaSettings.issueAgency = value;
 		}
-
 		setState(dispatch, { edaSearchSettings: edaSettings, runSearch: doSearch });
 	};
 
@@ -633,27 +662,55 @@ export const EDASummaryView = (props) => {
 						}}
 					>
 						<Typography style={styles.filterTitle}> PIID Issue Date Range: </Typography>
-						<div style={{ ...styles.filterInput, display: 'inline-block' }}>
-							<MuiPickersUtilsProvider utils={DateFnsUtils}>
-								<KeyboardDatePicker
-									margin="normal"
-									style={{ margin: '0 15px 0 0' }}
-									label="Start Date"
-									format="MM/dd/yyyy"
-									InputProps={{ style: { backgroundColor: 'white' } }}
-									value={edaSearchSettings && edaSearchSettings.startDate}
-									onChange={(date) => setEDASearchSetting('issueDateRange', date, true)}
+						<div style={{ ...styles.filterInput, display: 'flex' }}>
+							<DatePickerWrapper>
+								<label>Start Date</label>
+								<DatePicker
+									selected={
+										Number.isNaN(new moment(edaSearchSettings.startDate)._i) ||
+										new moment(edaSearchSettings.startDate)._i === 'Invalid date'
+											? null
+											: new moment(edaSearchSettings.startDate)._d
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											setEDASearchSetting('issueDateRange', e.target.value, true);
+										}
+									}}
+									onChange={(date) => setEDASearchSetting('issueDateRange', date, true, false)}
+									onSelect={(date) => setEDASearchSetting('issueDateRange', date, true)}
+									filterDate={(date) => {
+										const today = new moment();
+										return date < today;
+									}}
 								/>
-								<KeyboardDatePicker
-									margin="normal"
-									style={{ margin: '0 15px 0 0' }}
-									label="End Date"
-									format="MM/dd/yyyy"
-									InputProps={{ style: { backgroundColor: 'white' } }}
-									value={edaSearchSettings && edaSearchSettings.endDate}
-									onChange={(date) => setEDASearchSetting('issueDateRange', date, false)}
+							</DatePickerWrapper>
+							<DatePickerWrapper>
+								<label>End Date</label>
+								<DatePicker
+									selected={
+										Number.isNaN(new moment(edaSearchSettings.endDate)._i) ||
+										new moment(edaSearchSettings.endDate)._i === 'Invalid date'
+											? null
+											: new moment(edaSearchSettings.endDate)._d
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											setEDASearchSetting('issueDateRange', e.target.value, false);
+										}
+									}}
+									onChange={(date) => {
+										setEDASearchSetting('issueDateRange', date, false, false);
+									}}
+									onSelect={(date) => {
+										setEDASearchSetting('issueDateRange', date, false);
+									}}
+									filterDate={(date) => {
+										const today = new moment().add(10, 'y');
+										return date < today;
+									}}
 								/>
-							</MuiPickersUtilsProvider>
+							</DatePickerWrapper>
 						</div>
 					</div>
 				</div>
