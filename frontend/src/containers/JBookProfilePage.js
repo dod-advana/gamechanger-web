@@ -862,14 +862,23 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
-	const scorecardData = (reviewData) => {
+	const scorecardData = (classification, reviewData) => {
 		let data = [];
-		let PredictionData = 9.6;
-		if (PredictionData) {
+
+		if (classification) {
+			let num = classification.modelPredictionProbability;
+			num = num.toString(); //If it's not already a String
+			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
+			Number(num); //If you need it back as a Number
+
 			data.push({
 				name: 'Predicted Tag',
-				description: 'The AI tool classified the BLI as [Tag] with a confidence score of ' + PredictionData,
-				value: PredictionData,
+				description:
+					'The AI tool classified the BLI as "' +
+					classification.modelPrediction +
+					'" with a confidence score of ' +
+					num,
+				value: num,
 			});
 		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
@@ -903,7 +912,7 @@ const JBookProfilePage = (props) => {
 						id={id}
 						appropriationNumber={appropriationNumber}
 					/> */}
-					<ClassificationScoreCard scores={scorecardData(reviewData)} />
+					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
 				</div>
 
 				<ProjectDescription
