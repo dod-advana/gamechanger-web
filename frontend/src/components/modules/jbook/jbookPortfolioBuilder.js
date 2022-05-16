@@ -162,7 +162,9 @@ const PortfolioBuilder = (props) => {
 							return (
 								<Pill>
 									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
-										{userMap[user].first_name + ' ' + userMap[user].last_name}
+										{(userMap[user] ? userMap[user].first_name : '') +
+											' ' +
+											(userMap[user] ? userMap[user].last_name : '')}
 									</div>
 								</Pill>
 							);

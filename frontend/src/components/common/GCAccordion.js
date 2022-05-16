@@ -43,6 +43,7 @@ const StyledAccordionSummary = withStyles({
 			borderBottomLeftRadius: '0px !important',
 			borderBottomRightRadius: '0px !important',
 		},
+		width: '100%',
 	},
 	content: {
 		'&$expanded': {
@@ -133,9 +134,9 @@ const GCAccordion = (props) => {
 				id="accordion-header"
 				expandIcon={
 					isExpanded ? (
-						<CollapseIcon style={{ color: headerTextColor }} />
+						<CollapseIcon style={{ color: headerTextColor, width: 45 }} />
 					) : (
-						<ExpandIcon style={{ color: headerTextColor }} />
+						<ExpandIcon style={{ color: headerTextColor, width: 45 }} />
 					)
 				}
 			>
