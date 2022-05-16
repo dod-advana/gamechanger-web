@@ -63,7 +63,7 @@ const EdaSearchHandler = {
 			}
 		}
 
-		const favSearchUrls = userData.favorite_searches.map((search) => {
+		const favSearchUrls = userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 
@@ -72,7 +72,7 @@ const EdaSearchHandler = {
 		let url = window.location.hash.toString();
 		url = url.replace('#/', '');
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url) || false;
 
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
@@ -306,8 +306,13 @@ const EdaSearchHandler = {
 						};
 
 						let totalObligatedAmount = 0;
+
+						// doc.issuing_organization_eda_ext which is set in edaSearchUtility > getExtractedFields is no longer being used
+						// fpds_contracting_agency_name_eda_ext could work, but not every doc has fpds
+
 						for (const doc of docs) {
-							const org = orgNames[doc.issuing_organization_eda_ext];
+							const org =
+								orgNames[doc.issuing_organization_eda_ext ?? doc.fpds_contracting_agency_name_eda_ext];
 							if (org && issuingOrgs[org] !== undefined) {
 								issuingOrgs[org] += 1;
 							}

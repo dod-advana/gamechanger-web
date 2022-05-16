@@ -1,5 +1,6 @@
 const DefaultAnalyticsToolsHandler = require(`../modules/default/defaultAnalyticsToolsHandler`);
 const PolicyAnalyticsToolsHandler = require(`../modules/policy/policyAnalyticsToolsHandler`);
+const edaAnalyticsToolsHandler = require(`../modules/eda/edaAnalyticsToolsHandler`);
 
 class AnalystToolsFactory {
 	constructor(module) {
@@ -13,7 +14,7 @@ class AnalystToolsFactory {
 					this.handler = DefaultAnalyticsToolsHandler;
 					break;
 				case 'eda/edaMainViewHandler':
-					this.handler = DefaultAnalyticsToolsHandler;
+					this.handler = edaAnalyticsToolsHandler;
 					break;
 				default:
 					this.handler = DefaultAnalyticsToolsHandler;

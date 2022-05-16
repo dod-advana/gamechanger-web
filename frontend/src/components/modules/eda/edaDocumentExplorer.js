@@ -17,7 +17,7 @@ import { getEDAMetadataForPropertyTable, getDisplayTitle } from '../../modules/e
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
-import { EDA_FIELDS, EDA_FIELD_JSON_MAP } from '../../modules/eda/edaCardHandler';
+import { EDA_FIELDS, EDA_FIELD_JSON_MAP, EDA_FPDS_MAP } from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -204,7 +204,7 @@ export default function EDADocumentExplorer({
 	const previewData =
 		(data.length > 0 &&
 			currentDocData &&
-			getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData)) ||
+			getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, EDA_FIELDS, currentDocData, EDA_FPDS_MAP)) ||
 		[];
 	const previewDataReflist =
 		(data.length > 0 && currentDocData && getReferenceListMetadataPropertyTable(currentDocData.ref_list)) || [];
@@ -243,14 +243,14 @@ export default function EDADocumentExplorer({
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div className="row" style={{ height: '100%', marginTop: '10px' }}>
+		<div className="row" style={{ height: 'calc(100% - 12px)', marginTop: '10px' }}>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
 					borderRight: '1px solid lightgrey',
-					height: '94%',
+					height: '100%',
 					overflow: 'scroll',
 				}}
 			>
@@ -381,7 +381,10 @@ export default function EDADocumentExplorer({
 						}
 					})}
 			</div>
-			<div className={`col-xs-${iframePanelSize}`} style={{ height: '99%', paddingLeft: 0, paddingRight: 0 }}>
+			<div
+				className={`col-xs-${iframePanelSize}`}
+				style={{ height: '100%', paddingLeft: 0, paddingRight: 0, position: 'relative' }}
+			>
 				<div
 					style={{
 						display: 'flex',
@@ -392,7 +395,7 @@ export default function EDADocumentExplorer({
 				>
 					<div
 						className="searchdemo-vertical-bar-toggle"
-						style={leftBarExtraStyles}
+						style={{ ...leftBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
@@ -429,20 +432,23 @@ export default function EDADocumentExplorer({
 							height: '100%',
 						}}
 					>
-						<iframe
-							className="aref"
-							id={'docPdfViewer'}
-							onLoad={handlePdfOnLoadStart}
-							ref={measuredRef}
-							style={{
-								borderStyle: 'none',
-								display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
-							}}
-							title="pdf"
-							width="100%"
-							height="100%%"
-						></iframe>
+						<div style={{ height: '100%' }}>
+							<iframe
+								className="aref"
+								id={'docPdfViewer'}
+								onLoad={handlePdfOnLoadStart}
+								ref={measuredRef}
+								style={{
+									borderStyle: 'none',
+									display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
+								}}
+								title="pdf"
+								width="100%"
+								height="100%%"
+							></iframe>
+						</div>
 					</div>
+
 					{iframeLoading && (
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={'#E9691D'} />
@@ -450,7 +456,7 @@ export default function EDADocumentExplorer({
 					)}
 					<div
 						className="searchdemo-vertical-bar-toggle"
-						style={rightBarExtraStyles}
+						style={{ ...rightBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleRightPanelToggle()}
 					>
 						<i
@@ -484,7 +490,7 @@ export default function EDADocumentExplorer({
 						display: rightPanelOpen ? 'block' : 'none',
 						paddingLeft: 0,
 						borderLeft: '1px solid lightgrey',
-						height: '94%',
+						height: '100%',
 						overflow: 'scroll',
 					}}
 				>
