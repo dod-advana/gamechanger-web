@@ -110,7 +110,9 @@ const UserProfile = React.memo((props) => {
 		updateUserData = async () => {},
 		// getAppRelatedUserData = () => {return {}},
 		// updateAppRelatedUserData = () => {},
-		displayCustomAppContent = <></>,
+		displayCustomAppContent = () => {
+			return <></>;
+		},
 		style = {},
 		primaryColor = '#E9691D',
 		secondaryColor = '#8091A5',
@@ -296,7 +298,7 @@ const UserProfile = React.memo((props) => {
 					</StyledUserProfileDataDiv>
 				</Grid>
 				<Grid container item xs={9} style={{ paddingRight: 0 }}>
-					<StyledCustomAppDataDiv>{displayCustomAppContent()}</StyledCustomAppDataDiv>
+					<StyledCustomAppDataDiv>{displayCustomAppContent}</StyledCustomAppDataDiv>
 				</Grid>
 			</Grid>
 
