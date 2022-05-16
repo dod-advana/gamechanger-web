@@ -4,8 +4,12 @@ const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
 const USER = require('../models').user;
+const FEEDBACK = require('../models').feedback;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
+const { sendExcelFile } = require('../utils/sendFileUtility');
+const { queryFeedbackData } = './feedbackController';
 const sparkMD5Lib = require('spark-md5');
+const ExcelJS = require('exceljs');
 
 /**
  * This class queries matomo for app stats and passes
@@ -22,6 +26,7 @@ class AppStatsController {
 			dataApi = new DataLibrary(opts),
 			sparkMD5 = sparkMD5Lib,
 			user = USER,
+			feedback = FEEDBACK,
 		} = opts;
 
 		this.logger = logger;
@@ -31,8 +36,10 @@ class AppStatsController {
 		this.mysql = mysql_lib;
 		this.sparkMD5 = sparkMD5;
 		this.user = user;
+		this.feedback = feedback;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
+		this.exportUserData = this.exportUserData.bind(this);
 		this.getRecentlyOpenedDocs = this.getRecentlyOpenedDocs.bind(this);
 		this.getAvgSearchesPerSession = this.getAvgSearchesPerSession.bind(this);
 		this.getTopSearches = this.getTopSearches.bind(this);
@@ -511,6 +518,103 @@ class AppStatsController {
 		}
 		return results;
 	}
+
+	/**
+	 * This method is called to export Matomo data into an excel document.
+	 * It first makes the connection with matomo then populates the data for the results into an excel file.
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	async exportUserData(req, res) {
+		const { startDate, endDate, table, daysBack } = req.query;
+		const opts = { startDate, endDate, daysBack };
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database,
+			});
+			connection.connect();
+
+			if (table === 'SearchPdfMapping') {
+				const columns = [
+					{ header: 'User ID', key: 'idvisitor' },
+					{ header: 'Visit ID', key: 'idvisit' },
+					{ header: 'Search Time', key: 'searchtime_formatted' },
+					{ header: 'Action', key: 'action' },
+					{ header: 'Search', key: 'value' },
+					{ header: 'Document Opened', key: 'display_title_s' },
+					{ header: 'Document Time', key: 'documenttime_formatted' },
+					{ header: 'Document Type', key: 'doc_type' },
+					{ header: 'Source', key: 'display_org_s' },
+					{ header: 'Keywords', key: 'keyw_5' },
+				];
+				const excelData = await this.querySearchPdfMapping(opts, connection);
+				sendExcelFile(res, 'Searches', columns, excelData);
+			} else if (table === 'UserData') {
+				const columns = [
+					{ header: 'User ID', key: 'user_id' },
+					{ header: 'Organization', key: 'org' },
+					{ header: 'Document Opened', key: 'docs_opened' },
+					{ header: 'Total Search', key: 'searches_made' },
+					{ header: 'Last Search', key: 'last_search_formatted' },
+					{ header: 'Export', key: 'ExportDocument' },
+					{ header: 'Opened', key: 'opened' },
+					{ header: 'Favorited', key: 'Favorite' },
+				];
+				const excelData = await this.queryUserAggregations(opts, connection);
+				sendExcelFile(res, 'Users', columns, excelData.users);
+			} else if (table === 'Feedback') {
+				const columns = [
+					{ header: 'Feedback Event', key: 'event_name' },
+					{ header: 'User ID', key: 'user_id' },
+					{ header: 'Feedback Time', key: 'createdAt' },
+					{ header: 'Search', key: 'value_2' },
+					{ header: 'Returned', key: 'value_1' },
+				];
+
+				const feedbackData = await this.feedback.findAndCountAll({
+					limit: 100,
+					offset: 0,
+					order: [],
+					where: {},
+					attributes: [
+						'event_name',
+						'user_id',
+						'createdAt',
+						'value_1',
+						'value_2',
+						'value_3',
+						'value_4',
+						'value_5',
+						'value_7',
+					],
+				});
+				sendExcelFile(res, 'Feedback', columns, feedbackData.rows);
+			} else if (table === 'DocumentUsage') {
+				const columns = [
+					{ header: 'Document', key: 'document' },
+					{ header: 'View Count', key: 'visit_count' },
+					{ header: 'Unique Viewers', key: 'user_count' },
+					{ header: 'Viewer List', key: 'user_list' },
+					{ header: 'Searches', key: 'searches' },
+				];
+				const docDate = this.getDateNDaysAgo(opts.daysBack);
+				const docData = await this.createDocumentUsageData(docDate, userId, connection);
+				sendExcelFile(res, 'Documents', columns, docData);
+			}
+		} catch (err) {
+			this.logger.error(err, '11MLULU');
+			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
 	/**
 	 * This method is called by an endpoint to query matomo for a search to document mapping.
 	 * It first makes the connection with matomo then populates the data for the results.
@@ -648,6 +752,76 @@ class AppStatsController {
 		});
 	}
 
+	async createDocumentUsageData(startDate, userId, connection) {
+		const searches = await this.getSearchesAndPdfs(startDate, connection);
+		const docData = await this.queryDocumentUsageData(startDate, connection);
+
+		// create search map, grouping searches by visit ID, ordered by time.
+		const searchMap = {};
+		for (let search of searches) {
+			if (!searchMap[search.idvisit]) {
+				searchMap[search.idvisit] = [];
+			}
+			searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
+		}
+
+		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
+		const docMap = {};
+		for (const [visitID, arr] of Object.entries(searchMap)) {
+			let currentSearch = '';
+			for (const search_doc of arr) {
+				const currItem = this.htmlDecode(search_doc.search_doc);
+				if (!currItem.startsWith('PDFViewer -')) {
+					currentSearch = currItem;
+				} else if (currentSearch !== '') {
+					if (docMap[currItem] === undefined) {
+						docMap[currItem] = {};
+					}
+					if (docMap[currItem][currentSearch] === undefined) {
+						docMap[currItem][currentSearch] = 0;
+					}
+					docMap[currItem][currentSearch] += 1;
+				}
+			}
+		}
+
+		// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
+		for (const doc of docData) {
+			const searches = docMap[doc.document];
+			if (searches !== undefined) {
+				const sortSearches = Object.keys(searches)
+					.sort(function (a, b) {
+						return searches[b] - searches[a];
+					})
+					.map((item) => item + ' (' + searches[item] + ')')
+					.slice(0, 5);
+				const strSearches = sortSearches.join(', ');
+				doc.searches = strSearches;
+			} else {
+				doc.searches = '';
+			}
+			doc.document = doc.document.substring(12).split(' - ')[0];
+		}
+		// filename mapping to titles; pulled from ES
+		let filenames = docData.map((item) => item.document);
+		const esQuery = this.searchUtility.getDocMetadataQuery('filenames', filenames);
+		const esClientName = 'gamechanger';
+		const esIndex = 'gamechanger';
+		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+		esResults = esResults.body.hits.hits;
+		const filenameMap = {};
+		for (const doc of esResults) {
+			const item = doc._source;
+			filenameMap[item.filename] = item.display_title_s;
+		}
+		for (const doc of docData) {
+			const title = filenameMap[doc.document];
+			if (title !== undefined) {
+				doc.document = title;
+			}
+		}
+		return docData;
+	}
 	/**
 	 * This method is called by an endpoint to query matomo to list documents, visit count, and list of users that visited.
 	 * by a user
@@ -672,73 +846,7 @@ class AppStatsController {
 				data: [],
 			};
 
-			const searches = await this.getSearchesAndPdfs(startDate, connection);
-			const docData = await this.queryDocumentUsageData(startDate, connection);
-
-			// create search map, grouping searches by visit ID, ordered by time.
-			const searchMap = {};
-			for (let search of searches) {
-				if (!searchMap[search.idvisit]) {
-					searchMap[search.idvisit] = [];
-				}
-				searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
-			}
-
-			// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
-			const docMap = {};
-			for (const [visitID, arr] of Object.entries(searchMap)) {
-				let currentSearch = '';
-				for (const search_doc of arr) {
-					const currItem = this.htmlDecode(search_doc.search_doc);
-					if (!currItem.startsWith('PDFViewer -')) {
-						currentSearch = currItem;
-					} else if (currentSearch !== '') {
-						if (docMap[currItem] === undefined) {
-							docMap[currItem] = {};
-						}
-						if (docMap[currItem][currentSearch] === undefined) {
-							docMap[currItem][currentSearch] = 0;
-						}
-						docMap[currItem][currentSearch] += 1;
-					}
-				}
-			}
-
-			// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
-			for (const doc of docData) {
-				const searches = docMap[doc.document];
-				if (searches !== undefined) {
-					const sortSearches = Object.keys(searches)
-						.sort(function (a, b) {
-							return searches[b] - searches[a];
-						})
-						.map((item) => item + ' (' + searches[item] + ')')
-						.slice(0, 5);
-					const strSearches = sortSearches.join(', ');
-					doc.searches = strSearches;
-				} else {
-					doc.searches = '';
-				}
-				doc.document = doc.document.substring(12).split(' - ')[0];
-			}
-			// filename mapping to titles; pulled from ES
-			let filenames = docData.map((item) => item.document);
-			const esQuery = this.searchUtility.getDocMetadataQuery('filenames', filenames);
-			const esClientName = 'gamechanger';
-			const esIndex = 'gamechanger';
-			let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			esResults = esResults.body.hits.hits;
-			const filenameMap = {};
-			for (const doc of esResults) {
-				const item = doc._source;
-				filenameMap[item.filename] = item.display_title_s;
-			}
-			for (const doc of docData) {
-				const title = filenameMap[doc.document];
-				if (title !== undefined) {
-					doc.document = title;
-				}
-			}
+			const docData = await this.createDocumentUsageData(startDate, userId, connection);
 			results.data = docData;
 			res.status(200).send(results);
 		} catch (err) {
@@ -864,8 +972,6 @@ class AppStatsController {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
-		const documentMap = {};
-		const vistitIDMap = {};
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -875,77 +981,8 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const users = await this.user.findAll();
-			const visitorIDs = await this.getUserVisitorID(
-				users.map((x) => this.sparkMD5.hash(x.user_id)),
-				connection
-			);
-
-			for (let user of users) {
-				documentMap[this.sparkMD5.hash(user.user_id)] = {
-					opened: [],
-					ExportDocument: [],
-					Favorite: [],
-					docs_opened: 0,
-					searches_made: 0,
-					// name: user.first_name + ' ' + user.last_name,
-					// email: user.email,
-					user_id: this.sparkMD5.hash(user.user_id),
-					org: user.organization,
-					last_search: null,
-					last_search_formatted: '',
-				};
-			}
-			for (let visit of visitorIDs) {
-				vistitIDMap[visit.idvisitor] = visit.user_id;
-			}
-
-			const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
-			const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
-			const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-			const cards = await this.getCardAggregationQuery(opts.startDate, opts.endDate, connection);
-
-			for (let search of searches) {
-				if (vistitIDMap[search.idvisitor]) {
-					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
-						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
-					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
-						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
-					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
-						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
-							search.last_search_formatted;
-					}
-				}
-			}
-			for (let doc of documents) {
-				if (vistitIDMap[doc.idvisitor]) {
-					if (
-						!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
-						documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
-					) {
-						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
-					} else {
-						documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
-						documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
-					}
-				}
-			}
-			for (let open of opened) {
-				if (vistitIDMap[open.idvisitor]) {
-					if (
-						!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
-						documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
-					) {
-						documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
-					} else {
-						documentMap[vistitIDMap[open.idvisitor]][['opened']].push(open.document);
-						documentMap[vistitIDMap[open.idvisitor]][['opened']].shift();
-					}
-				}
-			}
-
-			res.status(200).send({ users: Object.values(documentMap), cards: cards[0] });
+			const userData = await this.queryUserAggregations(opts, connection);
+			res.status(200).send(userData);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
 			res.status(500).send(err);
@@ -954,6 +991,80 @@ class AppStatsController {
 		}
 	}
 
+	async queryUserAggregations(opts, connection) {
+		const documentMap = {};
+		const vistitIDMap = {};
+
+		const users = await this.user.findAll();
+		const visitorIDs = await this.getUserVisitorID(
+			users.map((x) => this.sparkMD5.hash(x.user_id)),
+			connection
+		);
+
+		for (let user of users) {
+			documentMap[this.sparkMD5.hash(user.user_id)] = {
+				opened: [],
+				ExportDocument: [],
+				Favorite: [],
+				docs_opened: 0,
+				searches_made: 0,
+				// name: user.first_name + ' ' + user.last_name,
+				// email: user.email,
+				user_id: this.sparkMD5.hash(user.user_id),
+				org: user.organization,
+				last_search: null,
+				last_search_formatted: '',
+			};
+		}
+		for (let visit of visitorIDs) {
+			vistitIDMap[visit.idvisitor] = visit.user_id;
+		}
+
+		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
+		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
+		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
+		const cards = await this.getCardAggregationQuery(opts.startDate, opts.endDate, connection);
+
+		for (let search of searches) {
+			if (vistitIDMap[search.idvisitor]) {
+				documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+				documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+				if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+					documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+					documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
+				}
+			}
+		}
+		for (let doc of documents) {
+			if (vistitIDMap[doc.idvisitor]) {
+				if (
+					!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
+				) {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+				} else {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
+				}
+			}
+		}
+		for (let open of opened) {
+			if (vistitIDMap[open.idvisitor]) {
+				if (
+					!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
+				) {
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+				} else {
+					documentMap[vistitIDMap[open.idvisitor]][['opened']].push(open.document);
+					documentMap[vistitIDMap[open.idvisitor]][['opened']].shift();
+				}
+			}
+		}
+		return { users: Object.values(documentMap), cards: cards[0] };
+	}
 	/**
 	 *
 	 * @param {*} userdID
