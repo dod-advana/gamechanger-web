@@ -182,9 +182,11 @@ export default (props) => {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 			};
-			const { data = {} } = await gameChangerAPI.getUserAggregations(params);
+			const userData = await gameChangerAPI.getUserAggregations(params);
+			const searchData = await gameChangerAPI.getSearchPdfMapping(params);
 			const mlParams = {
-				data: data.users,
+				searchData: searchData.data.data,
+				userData: userData.data.users,
 			};
 			gameChangerAPI.sendUserAggregations(mlParams);
 		} catch (e) {
