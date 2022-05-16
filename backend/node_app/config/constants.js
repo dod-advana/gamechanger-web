@@ -91,7 +91,7 @@ module.exports = Object.freeze({
 		isDemoDeployment: (process.env.GAMECHANGER_DEMO_DEPLOYMENT?.trim() || 'false') === 'true',
 		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || '007',
 		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === 'true',
-		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
+		isDecoupled: process.env.IS_DECOUPLED === 'true',
 		rootClone: process.env.REACT_APP_ROOT_CLONE,
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
@@ -462,4 +462,10 @@ module.exports = Object.freeze({
 		"why's",
 		'would',
 	],
+	REDIS_CONFIG: {
+		QLIK_APPS_CACHE_DB: 10,
+	},
+	GLOBAL_SEARCH_OPTS: {
+		FULL_APPS_POLL_INTERVAL: process.env.QLIK_APP_FULL_LIST_POLL_INTERVAL,
+	},
 });

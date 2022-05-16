@@ -28,6 +28,7 @@ class CronJobs {
 
 	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
+		this.cacheController.setStartupQlikFullAppCacheKeys();
 	}
 
 	getReloadJob() {
@@ -112,6 +113,45 @@ class CronJobs {
 				}
 			},
 		};
+	}
+
+	getQlikAppsFullListJob() {
+		return {
+			start: () => {
+				const qlikAppsFullPollInterval = parseInt(
+					this.constants.GLOBAL_SEARCH_OPTS.FULL_APPS_POLL_INTERVAL,
+					10
+				);
+				if (!this.constants.GAME_CHANGER_OPTS.isDecoupled && qlikAppsFullPollInterval > 0) {
+					this.logger.info(`Polling for qlik app full list updates every ${qlikAppsFullPollInterval}ms.`);
+					this.cacheController.cacheQlikAppFullList();
+					distributedPoll(
+						this.cacheController.cacheQlikAppFullList,
+						qlikAppsFullPollInterval,
+						'locks.qlikFullAppsPollList'
+					);
+				} else {
+					this.logger.info('Polling for full apps list updates disabled.');
+				}
+			},
+		};
+		// return cron.schedule(
+		// 	this.constants.GLOBAL_SEARCH_OPTS.CACHE_CRON_TIMING,
+		// 	async () => {
+		// 		try {
+		// 			await this.cacheController.cacheQlikAppFullList();
+		// 		} catch (e) {
+		// 			this.logger.error(
+		// 				`Cron job error in caching Qlik App Full List: ${e.message}`,
+		// 				'OV3A1SB',
+		// 				'api-request-reset-cron'
+		// 			);
+		// 		}
+		// 	},
+		// 	{
+		// 		scheduled: false,
+		// 	}
+		// );
 	}
 }
 

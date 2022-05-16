@@ -33,6 +33,13 @@ const EDADocumentExplorer = LoadableVisibility({
 	},
 });
 
+const AnalystTools = LoadableVisibility({
+	loader: () => import('../../analystTools'),
+	loading: () => {
+		return <LoadingIndicator customColor={gcOrange} />;
+	},
+});
+
 const getViewNames = (props) => {
 	const viewNames = defaultGetViewNames(props);
 	viewNames.push({
@@ -250,6 +257,10 @@ const displayUserRelatedItems = () => {
 	return <></>;
 };
 
+const getAnalystTools = (context) => {
+	return <AnalystTools context={context} showResponsibilityExplorer={false} />;
+};
+
 const EdaMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
@@ -278,9 +289,11 @@ const EdaMainViewHandler = (props) => {
 	};
 
 	switch (state.pageDisplayed) {
+		case PAGE_DISPLAYED.analystTools:
+			return getNonMainPageOuterContainer(getAnalystTools({ state, dispatch }), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(displayUserRelatedItems, gameChangerUserAPI),
+				getUserProfilePage(displayUserRelatedItems(), gameChangerUserAPI),
 				state,
 				dispatch
 			);

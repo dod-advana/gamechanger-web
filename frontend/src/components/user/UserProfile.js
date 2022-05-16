@@ -110,9 +110,7 @@ const UserProfile = React.memo((props) => {
 		updateUserData = async () => {},
 		// getAppRelatedUserData = () => {return {}},
 		// updateAppRelatedUserData = () => {},
-		displayCustomAppContent = () => {
-			return <></>;
-		},
+		displayCustomAppContent = <></>,
 		style = {},
 		primaryColor = '#E9691D',
 		secondaryColor = '#8091A5',

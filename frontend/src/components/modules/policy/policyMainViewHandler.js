@@ -69,6 +69,7 @@ const GCUserDashboard = LoadableVisibility({
 		return <LoadingIndicator customColor={gcOrange} />;
 	},
 });
+
 const AnalystTools = LoadableVisibility({
 	loader: () => import('../../analystTools'),
 	loading: () => {
@@ -512,7 +513,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
 					{trendingLinks.map(({ search, favorite, count }, idx) => (
 						<TrendingSearchContainer
-							onClick={() => setState(dispatch, { searchText: search, runSearch: true })}
+							onClick={() => {
+								setState(dispatch, { searchText: search, runSearch: true });
+							}}
 						>
 							<div
 								style={{
@@ -1208,7 +1211,7 @@ const PolicyMainViewHandler = (props) => {
 			return getNonMainPageOuterContainer(getDataTracker(state), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(getGCUserDashboard, gameChangerUserAPI),
+				getUserProfilePage(getGCUserDashboard({ state, dispatch }), gameChangerUserAPI),
 				state,
 				dispatch
 			);
