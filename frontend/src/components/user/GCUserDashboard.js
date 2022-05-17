@@ -6,7 +6,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { trackEvent } from '../telemetry/Matomo';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
-import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import GCTooltip from '../common/GCToolTip';
 import { backgroundGreyDark, backgroundWhite } from '../common/gc-colors';
 import { gcOrange } from '../common/gc-colors';
@@ -15,30 +15,21 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Icon from '@material-ui/core/Icon';
 import GCButton from '../common/GCButton';
-import ExportResultsDialog, { downloadFile } from '../export/ExportResultsDialog';
+import { downloadFile } from '../export/ExportResultsDialog';
 import Popover from '@material-ui/core/Popover';
 import Popper from '@material-ui/core/Popper';
 import Link from '@material-ui/core/Link';
 import Badge from '@material-ui/core/Badge';
-import { decodeTinyUrl, getTrackingNameForFactory, getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
+import { decodeTinyUrl, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import FavoriteCard from '../cards/GCFavoriteCard';
 import ReactTable from 'react-table';
 import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
-import Modal from 'react-modal';
 import GCAccordion from '../common/GCAccordion';
-import {
-	handleGenerateGroup,
-	getSearchObjectFromString,
-	setCurrentTime,
-	getUserData,
-	setState,
-	clearDashboardNotification,
-} from '../../utils/sharedFunctions';
-import GCGroupCard from '../../components/cards/GCGroupCard';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import { clearDashboardNotification } from '../../utils/sharedFunctions';
 import moment from 'moment';
+import GroupsPanel from './GroupsPanel';
+import AddToGroupModal from './AddToGroupModal';
 
 const _ = require('lodash');
 
@@ -309,10 +300,6 @@ const useStyles = makeStyles((theme) => ({
 		backgroundColor: 'white',
 		padding: '0px 10px',
 	},
-	groupSelect: {
-		fontSize: '16px',
-		'&:focus': { backgroundColor: 'white' },
-	},
 }));
 
 const RESULTS_PER_PAGE = 12;
@@ -383,9 +370,6 @@ const GCUserDashboard = React.memo((props) => {
 	});
 	const [searchHistoryIdx, setSearchHistoryIdx] = useState(-1);
 
-	const [groupName, setGroupName] = useState('');
-	const [groupDescription, setGroupDescription] = useState('');
-
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
 	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
@@ -396,14 +380,7 @@ const GCUserDashboard = React.memo((props) => {
 	});
 
 	const [documentGroups, setDocumentGroups] = useState([]);
-	const [showNewGroupModal, setShowNewGroupModal] = useState(false);
 	const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
-	const [selectedGroup, setSelectedGroup] = useState({});
-	const [documentsToGroup, setDocumentsToGroup] = useState([]);
-	const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
-	const [groupsToDelete, setGroupsToDelete] = useState([]);
-	const [addToGroupError, setAddToGroupError] = useState('');
-	const [createGroupError, setCreateGroupError] = useState('');
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
@@ -413,13 +390,6 @@ const GCUserDashboard = React.memo((props) => {
 	const classes = useStyles();
 
 	const preventDefault = (event) => event.preventDefault();
-
-	const handleChange = ({ target }) => {
-		setAddToGroupError('');
-		const groupId = documentGroups.find((group) => group.group_name === target.value).id;
-		setDocumentsToGroup([]);
-		setSelectedGroup({ id: groupId, name: target.value });
-	};
 
 	const searchHistoryColumns = [
 		{
@@ -685,7 +655,6 @@ const GCUserDashboard = React.memo((props) => {
 
 		if (userData.favorite_groups) {
 			setDocumentGroups(userData.favorite_groups);
-			setSelectedGroup({ id: null, name: '' });
 		}
 
 		if (userData.favorite_organizations) {
@@ -921,93 +890,6 @@ const GCUserDashboard = React.memo((props) => {
 		updateUserData();
 	};
 
-	const handleAddToGroupCheckbox = (value) => {
-		const newDocumentsToGroup = [...documentsToGroup];
-		const index = newDocumentsToGroup.indexOf(value);
-		if (index > -1) {
-			newDocumentsToGroup.splice(index, 1);
-		} else {
-			newDocumentsToGroup.push(value);
-		}
-		setDocumentsToGroup(newDocumentsToGroup);
-	};
-
-	const handleDeleteGroupCheckbox = (value) => {
-		const newGroupsToDelete = [...groupsToDelete];
-		const index = newGroupsToDelete.indexOf(value);
-		if (index > -1) {
-			newGroupsToDelete.splice(index, 1);
-		} else {
-			newGroupsToDelete.push(value);
-		}
-		setGroupsToDelete(newGroupsToDelete);
-	};
-
-	const handleAddToFavorites = async () => {
-		if (!selectedGroup.name) return setAddToGroupError('Please select a group');
-		const selectedGroupInfo = userData.favorite_groups.find((group) => group.id === selectedGroup.id);
-		let totalInGroup = documentsToGroup.length;
-		selectedGroupInfo.favorites.forEach((favId) => {
-			if (!documentsToGroup.includes(favId)) totalInGroup++;
-		});
-		if (totalInGroup > 5) return setAddToGroupError('Groups can only contain up to 5 items');
-		await gameChangerAPI.addTofavoriteGroupPOST({ groupId: selectedGroup.id, documentIds: documentsToGroup });
-		updateUserData();
-		handleCloseAddGroupModal();
-	};
-
-	const handleCloseAddGroupModal = () => {
-		setAddToGroupError('');
-		setShowAddToGroupModal(false);
-		setDocumentsToGroup([]);
-	};
-
-	const renderDocumentsToAdd = () => {
-		let groupFavorites;
-		if (selectedGroup.name)
-			groupFavorites = userData.favorite_groups.find(
-				(group) => group.group_name === selectedGroup.name
-			)?.favorites;
-		return (
-			<div style={{ overflow: 'scroll', maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-				{_.map(favoriteDocuments, (doc) => {
-					if (selectedGroup.name) {
-						if (groupFavorites?.includes(doc.favorite_id)) {
-							return <></>;
-						}
-					}
-					return (
-						<GCTooltip title={doc.title} placement="top" style={{ zIndex: 1001 }}>
-							<FormControlLabel
-								control={
-									<Checkbox
-										onChange={() => handleAddToGroupCheckbox(doc.favorite_id)}
-										color="primary"
-										icon={
-											<CheckBoxOutlineBlankIcon
-												style={{ width: 25, height: 25, fill: 'rgb(224, 224, 224)' }}
-												fontSize="large"
-											/>
-										}
-										checkedIcon={
-											<CheckBoxIcon style={{ width: 25, height: 25, fill: '#386F94' }} />
-										}
-										key={doc.id}
-									/>
-								}
-								label={
-									<Typography variant="h6" noWrap className={classes.label}>
-										{doc.title}
-									</Typography>
-								}
-							/>
-						</GCTooltip>
-					);
-				})}
-			</div>
-		);
-	};
-
 	const renderDocumentFavorites = () => {
 		return (
 			<div style={{ width: '100%', height: '100%' }}>
@@ -1036,77 +918,15 @@ const GCUserDashboard = React.memo((props) => {
 								</GCButton>
 							)}
 						</div>
-						<Modal
-							isOpen={showAddToGroupModal}
-							onRequestClose={() => handleCloseAddGroupModal()}
-							className={classes.addToGroupModal}
-							overlayClassName="new-group-modal-overlay"
-							id="new-group-modal"
-							closeTimeoutMS={300}
-							style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
-						>
-							<div>
-								<CloseButton onClick={() => handleCloseAddGroupModal()}>
-									<CloseIcon fontSize="large" />
-								</CloseButton>
-								<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
-									Add Favorite Document to Group
-								</Typography>
-								<div style={{ width: 815 }}>
-									{selectedGroup.name && renderDocumentsToAdd()}
-									<FormControl variant="outlined" style={{ width: '100%' }}>
-										<InputLabel className={classes.labelFont}>Select Group</InputLabel>
-										<Select
-											classes={{ root: classes.groupSelect }}
-											value={selectedGroup.name}
-											onChange={handleChange}
-										>
-											{_.map(documentGroups, (group) => {
-												return (
-													<MenuItem
-														style={styles.menuItem}
-														value={group.group_name}
-														key={group.id}
-													>
-														{group.group_name}
-													</MenuItem>
-												);
-											})}
-										</Select>
-									</FormControl>
-									<div style={{ display: 'flex' }}>
-										{addToGroupError && <div style={styles.modalError}>{addToGroupError}</div>}
-										<div style={{ marginLeft: 'auto' }}>
-											<GCButton
-												onClick={() => handleCloseAddGroupModal()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-												isSecondaryBtn
-											>
-												Close
-											</GCButton>
-											<GCButton
-												onClick={() => handleAddToFavorites()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-											>
-												Save
-											</GCButton>
-										</div>
-									</div>
-								</div>
-							</div>
-						</Modal>
+						<AddToGroupModal
+							showAddToGroupModal={showAddToGroupModal}
+							setShowAddToGroupModal={setShowAddToGroupModal}
+							documentGroups={documentGroups}
+							userData={userData}
+							updateUserData={updateUserData}
+							favoriteDocuments={favoriteDocuments}
+							classes={classes}
+						/>
 						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
 							<div className={'col-xs-12'} style={{ padding: 0 }}>
 								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
@@ -1902,291 +1722,8 @@ const GCUserDashboard = React.memo((props) => {
 		return (
 			<div>
 				<GCAccordion expanded={true} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
-					{renderDocumentGroups()}
+					<GroupsPanel state={state} dispatch={dispatch} documentGroups={documentGroups} />
 				</GCAccordion>
-			</div>
-		);
-	};
-
-	const handleSaveGroup = (groupType) => {
-		const group = {
-			group_type: groupType,
-			group_name: groupName,
-			group_description: groupDescription,
-			create: true,
-		};
-		if (documentGroups.filter((group) => group.group_name === groupName).length > 0) {
-			return setCreateGroupError('A group with that name already exists');
-		}
-		handleGenerateGroup(group, state, dispatch);
-		handleCloseNewGroupModal();
-	};
-
-	const handleDeleteGroup = () => {
-		const group = {
-			group_ids: groupsToDelete,
-			create: false,
-		};
-		handleGenerateGroup(group, state, dispatch);
-		handleCloseDeleteGroupModal();
-	};
-
-	const handleCloseDeleteGroupModal = () => {
-		setShowDeleteGroupModal(false);
-		setGroupsToDelete([]);
-	};
-
-	const handleCloseNewGroupModal = () => {
-		setShowNewGroupModal(false);
-		setGroupName('');
-		setGroupDescription('');
-		setCreateGroupError('');
-	};
-
-	const renderDocumentGroups = () => {
-		return (
-			<div style={{ width: '100%', height: '100%' }}>
-				<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
-					<div className={'col-xs-12'} style={{ padding: 0 }}>
-						<div
-							className="row"
-							style={{
-								display: 'flex',
-								justifyContent: 'flex-end',
-								paddingRight: 0,
-								marginLeft: 40,
-								width: '95%',
-							}}
-						>
-							<GCButton onClick={() => setShowDeleteGroupModal(true)} style={{}} isSecondaryBtn={true}>
-								Delete a Group
-							</GCButton>
-							<GCButton onClick={() => setShowNewGroupModal(true)} style={{}}>
-								Create a New Group
-							</GCButton>
-							<Modal
-								isOpen={showNewGroupModal}
-								onRequestClose={() => handleCloseNewGroupModal()}
-								className={classes.newGroupModal}
-								overlayClassName="new-group-modal-overlay"
-								id="new-group-modal"
-								closeTimeoutMS={300}
-								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
-							>
-								<div>
-									<CloseButton onClick={() => handleCloseNewGroupModal()}>
-										<CloseIcon fontSize="large" />
-									</CloseButton>
-									<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
-										Create a New Group
-									</Typography>
-									<div style={{ width: 490 }}>
-										<TextField
-											label={'Name of the Group'}
-											value={groupName}
-											onChange={(event) => {
-												setGroupName(event.target.value);
-												setCreateGroupError('');
-											}}
-											error={createGroupError}
-											helperText={createGroupError}
-											className={classes.modalTextField}
-											margin="none"
-											size="small"
-											variant="outlined"
-										/>
-										<TextField
-											label={'Description'}
-											value={groupDescription}
-											onChange={(event) => {
-												setGroupDescription(event.target.value);
-											}}
-											className={classes.modalTextArea}
-											margin="none"
-											size="small"
-											variant="outlined"
-											multiline={true}
-											rows={4}
-										/>
-										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-											<GCButton
-												onClick={() => handleCloseNewGroupModal()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-												isSecondaryBtn
-											>
-												Close
-											</GCButton>
-											<GCButton
-												onClick={() => handleSaveGroup('document')}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-											>
-												Generate
-											</GCButton>
-										</div>
-									</div>
-								</div>
-							</Modal>
-							<Modal
-								isOpen={showDeleteGroupModal}
-								onRequestClose={() => handleCloseDeleteGroupModal()}
-								className={classes.newGroupModal}
-								overlayClassName="new-group-modal-overlay"
-								id="new-group-modal"
-								closeTimeoutMS={300}
-								style={{ margin: 'auto', marginTop: '30px', display: 'flex', flexDirection: 'column' }}
-							>
-								<div>
-									<CloseButton onClick={() => handleCloseDeleteGroupModal()}>
-										<CloseIcon fontSize="large" />
-									</CloseButton>
-									<Typography variant="h2" style={{ width: '100%', fontSize: '24px' }}>
-										Delete Groups
-									</Typography>
-									<div style={{ width: 490 }}>
-										{_.map(documentGroups, (group) => {
-											return (
-												<FormControlLabel
-													control={
-														<Checkbox
-															onChange={() => handleDeleteGroupCheckbox(group.id)}
-															color="primary"
-															icon={
-																<CheckBoxOutlineBlankIcon
-																	style={{
-																		width: 25,
-																		height: 25,
-																		fill: 'rgb(224, 224, 224)',
-																	}}
-																	fontSize="large"
-																/>
-															}
-															checkedIcon={
-																<CheckBoxIcon
-																	style={{ width: 25, height: 25, fill: '#386F94' }}
-																/>
-															}
-															key={group.id}
-														/>
-													}
-													label={
-														<Typography variant="h6" noWrap className={classes.label}>
-															{group.group_name}
-														</Typography>
-													}
-												/>
-											);
-										})}
-										<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-											<GCButton
-												onClick={() => handleCloseDeleteGroupModal()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-												isSecondaryBtn
-											>
-												Cancel
-											</GCButton>
-											<GCButton
-												onClick={() => handleDeleteGroup()}
-												style={{
-													height: 40,
-													minWidth: 40,
-													padding: '2px 8px 0px',
-													fontSize: 14,
-													margin: '16px 0px 0px 10px',
-												}}
-											>
-												Delete
-											</GCButton>
-										</div>
-									</div>
-								</div>
-							</Modal>
-							<ExportResultsDialog
-								open={state.exportDialogVisible}
-								handleClose={() =>
-									setState(dispatch, {
-										exportDialogVisible: false,
-										selectedDocuments: new Map(),
-										prevSearchText: '',
-									})
-								}
-								searchObject={getSearchObjectFromString(
-									state.prevSearchText ? state.prevSearchText : ''
-								)}
-								setCurrentTime={setCurrentTime}
-								selectedDocuments={state.selectedDocuments}
-								isSelectedDocs={true}
-								orgFilterString={getOrgToOrgQuery(
-									state.searchSettings.allOrgsSelected,
-									state.searchSettings.orgFilter
-								)}
-								typeFilterString={getTypeQuery(
-									state.searchSettings.allTypesSelected,
-									state.searchSettings.typeFilter
-								)}
-								orgFilter={state.searchSettings.orgFilter}
-								typeFilter={state.searchSettings.typeFilter}
-								getUserData={() => getUserData(dispatch)}
-								isClone={true}
-								cloneData={state.cloneData}
-								searchType={state.searchSettings.searchType}
-								edaSearchSettings={state.edaSearchSettings}
-								sort={state.currentSort}
-								order={state.currentOrder}
-							/>
-						</div>
-						{documentGroups.length > 0 ? (
-							<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-								{_.map(documentGroups, (group, idx) => {
-									return (
-										<GCGroupCard
-											group={group}
-											state={state}
-											idx={idx}
-											dispatch={dispatch}
-											favorites={group.favorites}
-											key={group.id}
-										/>
-									);
-								})}
-							</div>
-						) : (
-							<StyledPlaceHolder>Make a group to see it listed here</StyledPlaceHolder>
-						)}
-					</div>
-				</div>
-
-				{/* {favoriteDocumentsSlice.length > 0 &&
-					<div className='gcPagination'>
-						<Pagination
-							activePage={documentFavoritesPage}
-							itemsCountPerPage={RESULTS_PER_PAGE}
-							totalItemsCount={documentFavoritesTotalCount}
-							pageRangeDisplayed={8}
-							onChange={page => {
-								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardDocumentFavorites', 'pagination', page);
-								handlePaginationChange(page, 'documentsFavorites');
-							}}
-						/>
-					</div>
-				} */}
 			</div>
 		);
 	};
