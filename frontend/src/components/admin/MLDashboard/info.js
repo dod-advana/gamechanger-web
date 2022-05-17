@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Tooltip } from '@material-ui/core';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
-import 'react-table/react-table.css';
 import './index.scss';
 const status = ['ok', 'warning', 'error', 'loading'];
 
