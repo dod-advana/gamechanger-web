@@ -23,6 +23,7 @@ import Badge from '@material-ui/core/Badge';
 import { decodeTinyUrl, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import FavoriteCard from '../cards/GCFavoriteCard';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import TextField from '@material-ui/core/TextField';
 import Config from '../../config/config.js';
 import GCAccordion from '../common/GCAccordion';
