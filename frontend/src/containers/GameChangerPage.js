@@ -12,10 +12,8 @@ import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import { Snackbar } from '@material-ui/core';
-import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
-
-const gameChangerUserAPI = new GamechangerUserManagementAPI();
+import { getUserData } from '../utils/sharedFunctions';
 
 const UserFeedback = LoadableVisibility({
 	loader: () => import('../components/user/UserFeedback'),
@@ -58,9 +56,9 @@ const GameChangerPage = (props) => {
 
 	useEffect(() => {
 		if (!state.userDataSet) {
-			gameChangerUserAPI.getUserData();
+			getUserData(dispatch);
 		}
-	}, [state.userDataSet]);
+	}, [state.userDataSet, dispatch]);
 
 	return (
 		<div className="main-container">
