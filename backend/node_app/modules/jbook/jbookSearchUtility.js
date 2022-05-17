@@ -1322,146 +1322,155 @@ class JBookSearchUtility {
 		}
 	}
 
+	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
 		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
 		userId,
 		serviceAgencyMappings
 	) {
-		const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
-		const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+		try {
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-		let query = {
-			track_total_hits: true,
-			from: offset,
-			size: limit,
-			aggregations: {
-				service_agency_aggs: {
-					terms: {
-						field: 'serviceAgency_s',
-						size: 10000,
-					},
-				},
-			},
-			query: {
-				bool: {
-					must: [],
-					should: [
-						{
-							multi_match: {
-								query: `${parsedQuery}`,
-								fields: esTopLevelFields,
-								type: 'best_fields',
-								operator: `${operator}`,
-							},
-						},
-					],
-				},
-			},
-			highlight: {
-				fields: {},
-			},
-		};
-
-		if (jbookSearchSettings.pgKeys !== undefined) {
-			query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
-		}
-
-		esTopLevelFields.forEach((field) => {
-			query.highlight.fields[field] = {};
-		});
-
-		esInnerHitFields.forEach((innerField) => {
-			const nested = {
-				nested: {
-					path: innerField.path,
-					inner_hits: {
-						_source: false,
-						highlight: {
-							fields: {},
+			let query = {
+				track_total_hits: true,
+				from: offset,
+				size: limit,
+				aggregations: {
+					service_agency_aggs: {
+						terms: {
+							field: 'serviceAgency_s',
+							size: 10000,
 						},
 					},
-					query: {
-						bool: {
-							should: [
-								{
-									multi_match: {
-										query: `${parsedQuery}`,
-										fields: innerField.fields,
-										type: 'best_fields',
-										operator: `${operator}`,
-									},
+				},
+				query: {
+					bool: {
+						must: [],
+						should: [
+							{
+								multi_match: {
+									query: `${parsedQuery}`,
+									fields: esTopLevelFields,
+									type: 'best_fields',
+									operator: `${operator}`,
 								},
-							],
-						},
+							},
+						],
 					},
+				},
+				highlight: {
+					fields: {},
 				},
 			};
 
-			innerField.fields.forEach((field) => {
-				nested.nested.inner_hits.highlight.fields[field] = {};
+			if (jbookSearchSettings.pgKeys !== undefined) {
+				query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
+			}
+
+			esTopLevelFields.forEach((field) => {
+				query.highlight.fields[field] = {};
 			});
-			query.query.bool.should.push(nested);
-		});
 
-		const wildcardList = {
-			type_s: 1,
-			key_s: 1,
-			projectTitle_t: 1,
-			projectNum_s: 6,
-			programElementTitle_t: 1,
-			serviceAgency_s: 2,
-			appropriationTitle_t: 1,
-			appropriationNumber_s: 6,
-			budgetActivityTitle_t: 6,
-			budgetActivityTitle_s: 6,
-			programElement_s: 6,
-			accountTitle_s: 1,
-			budgetLineItemTitle_s: 1,
-			budgetLineItem_s: 6,
-		};
-
-		Object.keys(wildcardList).forEach((wildCardKey) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[wildCardKey]: {
-						value: `*${plainQuery}*`,
-						boost: wildcardList[wildCardKey],
+			esInnerHitFields.forEach((innerField) => {
+				const nested = {
+					nested: {
+						path: innerField.path,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {},
+							},
+						},
+						query: {
+							bool: {
+								should: [
+									{
+										multi_match: {
+											query: `${parsedQuery}`,
+											fields: innerField.fields,
+											type: 'best_fields',
+											operator: `${operator}`,
+										},
+									},
+								],
+							},
+						},
 					},
-				},
+				};
+
+				innerField.fields.forEach((field) => {
+					nested.nested.inner_hits.highlight.fields[field] = {};
+				});
+				query.query.bool.should.push(nested);
 			});
-		});
 
-		// ES FILTERS
-		let filterQueries = this.getJbookESFilters(jbookSearchSettings);
+			const wildcardList = {
+				type_s: 1,
+				key_s: 1,
+				projectTitle_t: 1,
+				projectNum_s: 6,
+				programElementTitle_t: 1,
+				serviceAgency_s: 2,
+				appropriationTitle_t: 1,
+				appropriationNumber_s: 6,
+				budgetActivityTitle_t: 6,
+				budgetActivityTitle_s: 6,
+				programElement_s: 6,
+				accountTitle_s: 1,
+				budgetLineItemTitle_s: 1,
+				budgetLineItem_s: 6,
+			};
 
-		if (filterQueries.length > 0) {
-			query.query.bool.filter = filterQueries;
+			Object.keys(wildcardList).forEach((wildCardKey) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[wildCardKey]: {
+							value: `*${plainQuery}*`,
+							boost: wildcardList[wildCardKey],
+						},
+					},
+				});
+			});
+
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
+
+			// SORT
+			switch (jbookSearchSettings.sort[0].id) {
+				case 'budgetYear':
+					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'programElement':
+					query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectNum':
+					query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectTitle':
+					query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'serviceAgency':
+					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				default:
+					break;
+			}
+		} catch (e) {
+			console.log('Error making ES query for jbook');
+			this.logger.error(e.message, 'IEPGRAZ91');
+			return query;
 		}
 
-		// SORT
-		switch (jbookSearchSettings.sort[0].id) {
-			case 'budgetYear':
-				query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'programElement':
-				query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'projectNum':
-				query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'projectTitle':
-				query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'serviceAgency':
-				query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			default:
-				break;
-		}
-		console.log(JSON.stringify(query));
 		return query;
 	}
 
+	// creates the portions of the ES query for filtering based on jbookSearchSettings
+	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings) {
 		let filterQueries = [];
 		try {
