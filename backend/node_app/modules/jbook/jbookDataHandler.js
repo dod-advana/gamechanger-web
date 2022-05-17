@@ -193,7 +193,7 @@ class JBookDataHandler extends DataHandler {
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
-			const { type, id, budgetLineItem, budgetYear } = req.body;
+			const { type, id, budgetLineItem, budgetYear, programElement, projectNum, appropriationNumber } = req.body;
 			let docType = type;
 			let data;
 			let classification;
@@ -220,6 +220,14 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							PE_Num: programElement,
+							Proj_Number: projectNum,
+							budgetYear,
+							docType: 'rdoc',
+						},
+					});
 					break;
 				case 'O&M':
 					data = await this.om.findOne({
@@ -227,12 +235,20 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							line_number: budgetLineItem,
+							sag_bli: programElement,
+							account: appropriationNumber,
+							budgetYear,
+							foreignID: id,
+							docType: 'om',
+						},
+					});
 					break;
 				default:
 					break;
 			}
-
-			console.log(classification.dataValues);
 
 			docType = types[docType];
 

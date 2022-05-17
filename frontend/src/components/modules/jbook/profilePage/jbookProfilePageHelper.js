@@ -131,7 +131,6 @@ const ClassificationScoreCard = (props) => {
 	const { scores } = props;
 	const context = useContext(JBookContext);
 	const { state } = context;
-	const { projectData, reviewData } = state;
 
 	return (
 		<StyledLeftContainer>
@@ -161,10 +160,14 @@ const ClassificationScoreCard = (props) => {
 												data={[
 													{
 														name: 'score',
-														value: 1 - score.value,
+														value: 100 - score.value * 100,
 														fill: 'rgb(166, 206, 227)',
 													},
-													{ name: 'score', value: score.value, fill: 'rgb(32, 119, 180)' },
+													{
+														name: 'score',
+														value: score.value * 100,
+														fill: 'rgb(32, 119, 180)',
+													},
 												]}
 												dataKey="value"
 												nameKey="name"
