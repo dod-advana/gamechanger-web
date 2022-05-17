@@ -23,6 +23,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { backgroundGreyLight } from '../../common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import { setState } from '../../../utils/sharedFunctions';
 
 const _ = require('lodash');

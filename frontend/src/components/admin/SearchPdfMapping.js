@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import XLSX from 'xlsx';
 import DatePicker from 'react-datepicker';
 import { Typography, Grid, Card, CardContent } from '@material-ui/core';
