@@ -157,6 +157,12 @@ const getCardViewPanel = (props) => {
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
 						<div className={'top-container'}>
+							<div style={{ paddingTop: 20, zIndex: 99, paddingRight: 30 }}>
+								<a href="https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis">
+									View JBOOK Search Summary Analytics: Qlik Dashboard
+								</a>
+							</div>
+
 							<div style={{ padding: 10, zIndex: 99 }}>
 								{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
 									<GCToggle
@@ -198,25 +204,6 @@ const getCardViewPanel = (props) => {
 								style={{ padding: 0 }}
 							>
 								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div
-										className="row"
-										style={{ marginLeft: 20, marginRight: 20, padding: 10, marginTop: 20 }}
-									>
-										{!loading && ( // possibly need this to be admin only?
-											<div>
-												<Typography style={{ fontWeight: 600 }}>Qlik Dashoard</Typography>
-												<div style={{ marginBottom: 10 }}>
-													Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-													eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-													ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-													aliquip ex ea commodo consequat. Duis aute irure dolor in
-													reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-													pariatur.
-												</div>
-												<a href="">View Qlik Dashboard > </a>
-											</div>
-										)}
-									</div>
 									<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
 										{false && !loading && <GetQAResults context={context} />}
 									</div>
