@@ -230,11 +230,15 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 							classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
 							autoWidth
 						>
-							<MenuItem key={`Document`} value={'Document'}>
+							<MenuItem
+								key={`Document`}
+								value={'Document'}
+								style={{ display: 'flex', padding: '3px 6px' }}
+							>
 								Document View
 							</MenuItem>
 							,
-							<MenuItem key={`Chart`} value={'Chart'}>
+							<MenuItem key={`Chart`} value={'Chart'} style={{ display: 'flex', padding: '3px 6px' }}>
 								Chart View
 							</MenuItem>
 						</Select>

@@ -69,6 +69,7 @@ const GCUserDashboard = LoadableVisibility({
 		return <LoadingIndicator customColor={gcOrange} />;
 	},
 });
+
 const AnalystTools = LoadableVisibility({
 	loader: () => import('../../analystTools'),
 	loading: () => {
@@ -355,7 +356,7 @@ const formatString = (text) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { state, dispatch, gameChangerUserAPI, gameChangerAPI, cancelToken } = props;
+	const { state, dispatch, gameChangerAPI, cancelToken } = props;
 	await defaultHandlePageLoad(props);
 	setState(dispatch, { loadingrecDocs: true });
 	setState(dispatch, { loadingLastOpened: true });
@@ -365,8 +366,7 @@ const handlePageLoad = async (props) => {
 	let pop_pubs_inactive = [];
 	let rec_docs = [];
 
-	const user = await gameChangerUserAPI.getUserData();
-	const { favorite_documents = [], export_history = [], pdf_opened = [] } = user.data;
+	const { favorite_documents = [], export_history = [], pdf_opened = [] } = state.userData;
 
 	try {
 		const { data } = await gameChangerAPI.getHomepageEditorData({
@@ -512,7 +512,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
 					{trendingLinks.map(({ search, favorite, count }, idx) => (
 						<TrendingSearchContainer
-							onClick={() => setState(dispatch, { searchText: search, runSearch: true })}
+							onClick={() => {
+								setState(dispatch, { searchText: search, runSearch: true });
+							}}
 						>
 							<div
 								style={{
@@ -1170,7 +1172,7 @@ const PolicyMainViewHandler = (props) => {
 	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
-		if (state.cloneDataSet && state.historySet && !pageLoaded) {
+		if (state.cloneDataSet && state.historySet && !pageLoaded && state.userDataSet) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const tmpSearchHandler = searchFactory.createHandler();
 
@@ -1208,7 +1210,7 @@ const PolicyMainViewHandler = (props) => {
 			return getNonMainPageOuterContainer(getDataTracker(state), state, dispatch);
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(getGCUserDashboard, gameChangerUserAPI),
+				getUserProfilePage(getGCUserDashboard({ state, dispatch }), gameChangerUserAPI),
 				state,
 				dispatch
 			);

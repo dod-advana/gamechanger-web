@@ -1291,7 +1291,6 @@ describe('SearchUtility', function () {
 				orgFilterString: [],
 				typeFilterString: [],
 			});
-			console.log(JSON.stringify(actual, 0, 3));
 			const expected = {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
