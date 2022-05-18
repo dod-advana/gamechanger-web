@@ -736,7 +736,7 @@ class JBookSearchHandler extends SearchHandler {
 			return returnData;
 		} catch (e) {
 			console.log('Error getESDataForFilters');
-			this.logger.error(message, 'K318I7C', userId);
+			this.logger.error(e.message, 'K318I7C', userId);
 		}
 	}
 
