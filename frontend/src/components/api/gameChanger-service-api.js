@@ -85,6 +85,7 @@ const endpoints = {
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
+	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
 	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
@@ -367,6 +368,7 @@ export default class GameChangerAPI {
 				)}&dest=${s3Bucket}&filekey=${filename}&isClone=${isClone}&clone_name=${cloneData.clone_name}`,
 				{
 					responseType: 'blob',
+					withCredentials: false,
 				}
 			)
 				.then((resp) => {
@@ -760,6 +762,11 @@ export default class GameChangerAPI {
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
 		return axiosGET(this.axios, url, { params: body });
+	};
+
+	exportUserData = async (body) => {
+		const url = endpoints.exportUserData;
+		return axiosGET(this.axios, url, { params: body, responseType: 'arraybuffer' });
 	};
 
 	getDocumentUsage = async (body) => {
