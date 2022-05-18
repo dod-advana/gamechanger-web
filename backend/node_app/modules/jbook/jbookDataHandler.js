@@ -169,6 +169,58 @@ class JBookDataHandler extends DataHandler {
 			if (!data.currentYearAmount) {
 			}
 
+			// classification
+			try {
+				let classification;
+
+				switch (type) {
+					case 'Procurement':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								'P40-01_LI_Number': budgetLineItem,
+								budgetYear,
+								docType: 'pdoc',
+							},
+						});
+						break;
+					case 'RDT&E':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								PE_Num: programElement,
+								Proj_Number: projectNum,
+								budgetYear,
+								docType: 'rdoc',
+							},
+						});
+						break;
+					case 'O&M':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								line_number: budgetLineItem,
+								sag_bli: programElement,
+								budgetYear,
+								docType: 'om',
+							},
+						});
+						break;
+					default:
+						break;
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
+					}
+				}
+			} catch (e) {
+				console.log('error getting classification');
+				console.log(e);
+			}
+
 			data.review = await this.getReviewData(
 				{
 					budgetYear,
