@@ -53,33 +53,38 @@ class JBookSearchUtility {
 	}
 
 	getMapping(docType, fromFrontend) {
-		let mapping;
-		if (Mappings[`${docType}Mapping`]) {
-			mapping = _.clone(Mappings[`${docType}Mapping`]);
-		} else {
-			console.log(`${docType} mapping not found`);
-			return {};
-		}
-
-		if (fromFrontend) {
-			let frontEndMapping = {};
-			for (const field in mapping) {
-				const newName = mapping[field].newName;
-
-				if (!frontEndMapping[newName]) {
-					frontEndMapping[newName] = _.clone(mapping[field]);
-					frontEndMapping[newName].newName = field;
-				}
+		try {
+			let mapping;
+			if (Mappings[`${docType}Mapping`]) {
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
+			} else {
+				console.log(`${docType} mapping not found`);
+				return {};
 			}
-			return frontEndMapping;
-		} else if (docType !== 'review' || docType !== 'gl') {
-			mapping = {
-				...mapping,
-				...reviewMapping,
-			};
-		}
 
-		return mapping;
+			if (fromFrontend) {
+				let frontEndMapping = {};
+				for (const field in mapping) {
+					const newName = mapping[field].newName;
+
+					if (!frontEndMapping[newName]) {
+						frontEndMapping[newName] = _.clone(mapping[field]);
+						frontEndMapping[newName].newName = field;
+					}
+				}
+				return frontEndMapping;
+			} else if (docType !== 'review' || docType !== 'gl') {
+				mapping = {
+					...mapping,
+					...reviewMapping,
+				};
+			}
+
+			return mapping;
+		} catch (err) {
+			console.log('Error retrieving jbook mapping');
+			this.logger.error(err.message, 'AJTKSKQ');
+		}
 	}
 
 	getDocCols(docType, totals = false, fullPDFExport = false) {
@@ -1328,11 +1333,12 @@ class JBookSearchUtility {
 		userId,
 		serviceAgencyMappings
 	) {
+		let query = {};
 		try {
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-			let query = {
+			query = {
 				track_total_hits: true,
 				from: offset,
 				size: limit,
@@ -1434,7 +1440,7 @@ class JBookSearchUtility {
 			});
 
 			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings);
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
 
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
@@ -1462,16 +1468,16 @@ class JBookSearchUtility {
 			}
 		} catch (e) {
 			console.log('Error making ES query for jbook');
-			this.logger.error(e.message, 'IEPGRAZ91');
+			this.logger.error(e.message, 'IEPGRAZ81');
 			return query;
 		}
-
+		console.log(JSON.stringify(query));
 		return query;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
-	getJbookESFilters(jbookSearchSettings) {
+	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
 		let filterQueries = [];
 		try {
 			if (jbookSearchSettings) {
@@ -1536,6 +1542,7 @@ class JBookSearchUtility {
 					const convertedAgencies = [];
 
 					jbookSearchSettings.serviceAgency.forEach((agency) => {
+						console.log(agency);
 						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
 							if (serviceAgencyMappings[agencyKey] === agency) {
 								convertedAgencies.push(agencyKey);
@@ -1544,7 +1551,7 @@ class JBookSearchUtility {
 					});
 
 					filterQueries.push({
-						match: {
+						terms: {
 							serviceAgency_s: convertedAgencies,
 						},
 					});
