@@ -96,7 +96,6 @@ export function trackPageView(documentTitle, customDimensions) {
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-
 		// Track the new page
 		matomo.push(['trackPageView']);
 
