@@ -1,7 +1,14 @@
 const assert = require('assert');
 const JBookDataHandler = require('../../../node_app/modules/jbook/jbookDataHandler');
 const { constructorOptionsMock } = require('../../resources/testUtility');
-const { profileData, keywordData, reviewData, esData } = require('../../resources/mockResponses/jbookMockData');
+
+const {
+	profileData,
+	keywordData,
+	reviewData,
+	esData,
+	portfolioData,
+} = require('../../resources/mockResponses/jbookMockData');
 
 describe('JBookDataHandler', function () {
 	describe('#getProjectData', () => {
@@ -9,6 +16,7 @@ describe('JBookDataHandler', function () {
 		let keywords = keywordData['pdoc'];
 		let review = reviewData['pdoc'];
 		let esReturn = esData['pdoc'];
+		let portfolios = portfolioData;
 
 		const findOneFromDocs = (id, type) => {
 			return docs[type][id];
@@ -86,6 +94,17 @@ describe('JBookDataHandler', function () {
 			jbook_classification: {
 				findOne() {
 					return Promise.resolve({ dataValues: {} });
+				},
+			},
+			portfolio: {
+				findOne() {
+					return Promise.resolve(portfolios[0]);
+				},
+				findAll() {
+					return Promise.resolve(portfolios);
+				},
+				update() {
+					return Promise.resolve([1]);
 				},
 			},
 		};
@@ -662,6 +681,116 @@ describe('JBookDataHandler', function () {
 			};
 			const actual = await target.getProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should utilize the portfolio APIs (create, delete, get all, get one, restore', async (done) => {
+			const req = {
+				body: {
+					name: 'AI',
+					id: 1,
+				},
+			};
+
+			const target = new JBookDataHandler(opts);
+
+			const expectedGetOne = {
+				id: 1,
+				name: 'AI Inventory',
+				description: 'AI Inventory portfolio description',
+				user_ids: [],
+				tags: [],
+				deleted: false,
+			};
+
+			const expectedGetAll = [
+				{
+					id: 1,
+					name: 'AI Inventory',
+					description: 'AI Inventory portfolio description',
+					user_ids: [],
+					tags: [],
+					deleted: false,
+				},
+			];
+
+			const expectedDelete = {
+				deleted: true,
+			};
+
+			const expectedRestored = {
+				deleted: false,
+			};
+
+			const expectedEdit = {
+				name: 'AI',
+				description: undefined,
+				user_ids: undefined,
+				tags: undefined,
+			};
+
+			const actualGetOne = await target.getPortfolio(req, 'Test');
+			const actualGetAll = await target.getPortfolios(req, 'Test');
+			const actualDelete = await target.deletePortfolio(req, 'Test');
+			const actualRestored = await target.restorePortfolio(req, 'Test');
+			const actualEdit = await target.editPortfolio(req, 'Test');
+
+			assert.deepStrictEqual(actualGetOne, expectedGetOne);
+			assert.deepStrictEqual(actualGetAll, expectedGetAll);
+			assert.deepStrictEqual(actualDelete, expectedDelete);
+			assert.deepStrictEqual(actualRestored, expectedRestored);
+			assert.deepStrictEqual(actualEdit, expectedEdit);
+
+			done();
+		});
+	});
+
+	describe('#getPortfolios', () => {
+		it('should get all portfolios', async (done) => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				dataLibrary: {
+					queryElasticSearch(name, index, query, userId) {
+						return Promise.resolve(esReturn);
+					},
+					getESRequestConfig() {
+						return Promise.resolve({});
+					},
+				},
+				portfolio: {
+					findAll: () => {
+						return Promise.resolve({
+							data: [
+								{
+									name: 'testPortfolio',
+									description: 'testPortfolio description',
+									tags: [],
+									user_ids: [],
+								},
+							],
+						});
+					},
+				},
+			};
+			const req = {};
+			const target = new JBookDataHandler(opts);
+			const expected = {
+				data: [
+					{
+						name: 'testPortfolio',
+						description: 'testPortfolio description',
+						tags: [],
+						user_ids: [],
+					},
+				],
+			};
+			const actual = await target.getPortfolios(req, 'Test');
+			assert.deepStrictEqual(expected, actual);
 			done();
 		});
 	});

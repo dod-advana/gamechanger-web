@@ -157,6 +157,12 @@ const getCardViewPanel = (props) => {
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
 						<div className={'top-container'}>
+							<div style={{ paddingTop: 20, zIndex: 99, paddingRight: 30 }}>
+								<a href="https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis">
+									View JBOOK Search Summary Analytics: Qlik Dashboard
+								</a>
+							</div>
+
 							<div style={{ padding: 10, zIndex: 99 }}>
 								{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
 									<GCToggle
@@ -192,7 +198,7 @@ const getCardViewPanel = (props) => {
 							</div>
 						)}
 
-						<div className={'right-container'} style={{ marginTop: -75 }}>
+						<div className={'right-container'} style={{ marginTop: 0 }}>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
