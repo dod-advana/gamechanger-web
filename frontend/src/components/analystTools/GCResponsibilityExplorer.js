@@ -206,8 +206,8 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	return (
 		<div>
-			<div className="row" style={{ height: 65, margin: 0, padding: 0, justifyContent: 'flex-end' }}>
-				<div style={{ display: 'flex' }}>
+			<div className="row" style={{ margin: 0, padding: 0, justifyContent: 'flex-end' }}>
+				<div style={{ display: 'flex', alignItems: 'center', margin: '10px 0 20px 0' }}>
 					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
 						The Responsibility Explorer enables users to identify the responsibilities that have been
 						assigned to various entities across an expansive corpus of DoD strategy, guidance, and policy
@@ -219,7 +219,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						style={{
 							minWidth: 50,
 							padding: '0px 7px',
-							margin: '6px 10px 0px 10px',
+							margin: '0px 10px',
 							height: 50,
 						}}
 					>
@@ -230,7 +230,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					<FormControl
 						variant="outlined"
 						classes={{ root: classes.root }}
-						style={{ minWidth: 210, margin: '-10px 0px 0px 0px' }}
+						style={{ minWidth: 210, margin: '-16px 0px 0px 0px' }}
 					>
 						<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 							View
