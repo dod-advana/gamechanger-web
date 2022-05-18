@@ -83,9 +83,8 @@
 		"styled-components": "4.3.2",
 		"typeface-montserrat": "0.0.54",
 		"typeface-noto-sans": "0.0.54",
-		"underscore": "1.13.1",
-		"uuid": "3.3.3",
-		"xlsx": "0.17.2"
+		"underscore": "1.13.2",
+		"uuid": "3.3.3"
 	},
 	"devDependencies": {
 		"chai": "^4.3.4",
