@@ -680,19 +680,12 @@ export default function ResponsibilityDocumentExplorer({
 									{docOpen && (
 										<GCButton
 											onClick={(e) => {
-												trackEvent(
-													getTrackingNameForFactory(cloneData.clone_name),
-													'CardInteraction',
-													'showDocumentDetails'
-												);
 												window.open(
-													`#/gamechanger-details?cloneName=${
-														cloneData.clone_name
-													}&type=document&documentName=${
+													`#/gamechanger?q=${
 														responsibilityData[doc][
 															Object.keys(responsibilityData[doc])[0]
 														][0].filename
-													}_0`
+													}&view=Explorer`
 												);
 												e.preventDefault();
 											}}

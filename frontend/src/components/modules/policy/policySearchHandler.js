@@ -811,7 +811,7 @@ const PolicySearchHandler = {
 		if (pubDateText) params.append('pubDate', pubDateText);
 		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
 		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
-		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
+		if (currentParams.get('view')) params.append('view', currentParams.get('view'));
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

@@ -390,12 +390,20 @@ const handlePageLoad = async (props) => {
 		// Do nothing
 		console.log(e);
 	}
-	setState(
-		dispatch,
-		getQueryVariable('view', window.location.hash.toString()) === 'graph'
-			? { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true }
-			: { adminTopics: topics }
-	);
+	const view = getQueryVariable('view', window.location.hash.toString());
+	if (view) {
+		switch (view) {
+			case 'graph':
+				setState(dispatch, { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true });
+				break;
+			default:
+				setState(dispatch, { adminTopics: topics, currentViewName: view });
+				break;
+		}
+	} else {
+		setState(dispatch, { adminTopics: topics });
+	}
+
 	// handlePubs(pubs, state, dispatch);
 	handleSources(state, dispatch, cancelToken, gameChangerAPI);
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI);
