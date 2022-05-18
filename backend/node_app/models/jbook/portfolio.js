@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
 			tags: {
 				type: DataTypes.ARRAY(DataTypes.TEXT),
 			},
+			deleted: {
+				type: DataTypes.BOOLEAN,
+			},
 		},
 		{
 			freezeTableName: true,
