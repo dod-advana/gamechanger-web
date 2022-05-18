@@ -91,7 +91,6 @@ const HermesSearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();

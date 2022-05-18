@@ -284,7 +284,6 @@ const FavoriteCard = (props) => {
 			setPopoverOpen(false);
 			setPopoverIdx(-1);
 		}
-		setReload(!reload);
 	};
 
 	const handleDelete = () => {
