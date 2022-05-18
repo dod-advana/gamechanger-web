@@ -912,7 +912,9 @@ const JBookProfilePage = (props) => {
 						id={id}
 						appropriationNumber={appropriationNumber}
 					/> */}
-					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					{scorecardData(projectData.classification, reviewData).length > 0 ? (
+						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					) : null}
 				</div>
 
 				<ProjectDescription
