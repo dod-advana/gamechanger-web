@@ -295,7 +295,7 @@ const GameChangerDetailsPage = (props) => {
 		if (resp.data.typeData.nodes && resp.data.typeData.nodes.length > 0) {
 			for (var i = 0; i < resp.data.typeData.nodes.length; i++) {
 				types += resp.data.typeData.nodes[i].name;
-				if (i != resp.data.typeData.nodes.length - 1) {
+				if (i !== resp.data.typeData.nodes.length - 1) {
 					types += ', ';
 				}
 			}
