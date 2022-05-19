@@ -213,9 +213,9 @@ class PolicyGraphHandler extends GraphHandler {
 			case 'getTopicDataDetailsPage':
 				return await this.getTopicDataDetailsPageHelper(req, userId);
 			case 'getHeadDataDetailsPage':
-				return await this.getHeadDataDetailsPageHelper(req, userId)
+				return await this.getHeadDataDetailsPageHelper(req, userId);
 			case 'getTypeDataDetailsPage':
-				return await this.getTypeDataDetailsPageHelper(req, userId)
+				return await this.getTypeDataDetailsPageHelper(req, userId);
 			case 'getTopicDataPolicyGraph':
 				return await this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
