@@ -84,8 +84,6 @@ const handlePageLoad = async (props) => {
 			portfolios = data.data !== undefined ? data.data : [];
 		});
 
-	console.log(portfolios);
-
 	// the main setstate that triggers the initial search
 	setState(dispatch, {
 		searchText,
@@ -440,7 +438,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {

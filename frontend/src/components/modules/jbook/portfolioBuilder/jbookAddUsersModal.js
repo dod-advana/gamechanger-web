@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
 	Dialog,
 	DialogActions,
@@ -10,34 +10,14 @@ import {
 	InputAdornment,
 	FormControl,
 } from '@material-ui/core';
-import GCButton from '../../common/GCButton';
-import { styles, useStyles } from '../../admin/util/GCAdminStyles';
+import GCButton from '../../../common/GCButton';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import styled from 'styled-components';
 
 import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@mui/icons-material/Search';
-
-const Pill = styled.button`
-	padding: 2px 10px 3px;
-	border: none;
-	border-radius: 15px;
-	background-color: white;
-	color: black;
-	white-space: nowrap;
-	text-align: center;
-	display: inline-block;
-	margin-left: 6px;
-	margin-right: 6px;
-	margin-bottom: 3px;
-	border: 1px solid rgb(209, 215, 220);
-	cursor: default !important;
-	> i {
-		margin-left: 3px;
-		color: #e9691d;
-	}
-`;
 
 /**
  *
