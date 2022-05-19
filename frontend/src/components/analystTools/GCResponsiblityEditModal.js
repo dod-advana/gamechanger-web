@@ -24,7 +24,6 @@ const CloseButton = styled.div`
 
 const useStyles = makeStyles((theme) => ({
 	formControl: {
-		//margin: theme.spacing(1),
 		minWidth: 350,
 	},
 	selectEmpty: {
@@ -111,16 +110,33 @@ export default function GCResponsiblityEditModal(props) {
 							className={classes.selectEmpty}
 							inputProps={{ 'aria-label': 'Without label' }}
 						>
-							<MenuItem value={0} disabled classes={{ root: { fontSize: '16px' } }}>
+							<MenuItem
+								style={{ display: 'flex', padding: '3px 6px' }}
+								value={0}
+								disabled
+								classes={{ root: { fontSize: '16px' } }}
+							>
 								Select...
 							</MenuItem>
-							<MenuItem value={1} classes={{ root: { fontSize: '16px' } }}>
+							<MenuItem
+								style={{ display: 'flex', padding: '3px 6px' }}
+								value={1}
+								classes={{ root: { fontSize: '16px' } }}
+							>
 								Responsibility is correct, but not linked to the correct Entity
 							</MenuItem>
-							<MenuItem value={2} classes={{ root: { fontSize: '16px' } }}>
+							<MenuItem
+								style={{ display: 'flex', padding: '3px 6px' }}
+								value={2}
+								classes={{ root: { fontSize: '16px' } }}
+							>
 								Entity is correct, but Responsibility Text is incomplete
 							</MenuItem>
-							<MenuItem value={3} classes={{ root: { fontSize: '16px' } }}>
+							<MenuItem
+								style={{ display: 'flex', padding: '3px 6px' }}
+								value={3}
+								classes={{ root: { fontSize: '16px' } }}
+							>
 								This is not a Responsibility
 							</MenuItem>
 						</Select>

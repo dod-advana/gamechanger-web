@@ -4,6 +4,7 @@ import { UnmountClosed } from 'react-collapse';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
+import InfoIcon from '@mui/icons-material/Info';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import '../cards/keyword-result-card.css';
@@ -654,6 +655,9 @@ export default function ResponsibilityDocumentExplorer({
 				}}
 				ref={infiniteScrollRef}
 			>
+				<div style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}>
+					RESULTS
+				</div>
 				{Object.keys(responsibilityData).length > 0 &&
 					_.map(Object.keys(responsibilityData), (doc, key) => {
 						const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
@@ -678,20 +682,23 @@ export default function ResponsibilityDocumentExplorer({
 									/>
 									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
 									{docOpen && (
-										<GCButton
-											onClick={(e) => {
-												window.open(
-													`#/gamechanger?q=${
-														responsibilityData[doc][
-															Object.keys(responsibilityData[doc])[0]
-														][0].filename
-													}&view=Explorer`
-												);
-												e.preventDefault();
-											}}
-										>
-											Details
-										</GCButton>
+										<span style={{ marginLeft: 'auto' }}>
+											<GCTooltip title={'View more details on document'} placement="top" arrow>
+												<div>
+													<InfoIcon
+														onClick={(e) => {
+															window.open(
+																`#/gamechanger?q=${
+																	responsibilityData[doc][
+																		Object.keys(responsibilityData[doc])[0]
+																	][0].filename
+																}&view=Explorer`
+															);
+														}}
+													/>
+												</div>
+											</GCTooltip>
+										</span>
 									)}
 								</div>
 								<UnmountClosed isOpened={docOpen}>
