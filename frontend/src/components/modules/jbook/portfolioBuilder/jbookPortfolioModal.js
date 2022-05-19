@@ -10,15 +10,15 @@ import {
 	FormControl,
 } from '@material-ui/core';
 import AddIcon from '@mui/icons-material/Add';
-import GCButton from '../../common/GCButton';
-import { styles, useStyles } from '../../admin/util/GCAdminStyles';
+import GCButton from '../../../common/GCButton';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import JbookAddUsersModal from './jbookAddUsersModal';
 import JbookAddTagsModal from './jbookAddTagsModal';
 import styled from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import GameChangerAPI from '../../api/gameChanger-service-api';
+import GameChangerAPI from '../../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
 const Pill = styled.button`

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { styles, useStyles } from '../../admin/util/GCAdminStyles';
-import GCButton from '../../common/GCButton';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
+import GCButton from '../../../common/GCButton';
 // import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 
@@ -12,7 +12,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
 
-import GameChangerAPI from '../../api/gameChanger-service-api';
+import GameChangerAPI from '../../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
 

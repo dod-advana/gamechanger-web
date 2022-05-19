@@ -8,6 +8,7 @@ import GCTooltip from '../../common/GCToolTip';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from '../../common/gc-colors';
+import PortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
@@ -131,46 +132,15 @@ const JbookViewHeaderHandler = (props) => {
 		[dispatch, state.cloneData.url]
 	);
 
-	// handle portfolio selector change
-	const handleChangePortfolio = useCallback(
-		(event) => {
-			try {
-				const name = event.target.value;
-				setSelectedPortfolio(name);
-				setState(dispatch, { selectedPortfolio: name });
-			} catch (err) {
-				console.log('Error setting portfolio');
-				console.log(err);
-			}
-		},
-		[dispatch]
-	);
-
 	return (
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
-				<FormControl variant="outlined" classes={{ root: classes.root }}>
-					<InputLabel classes={{ root: classes.formlabel }} id="portfolio-name-select">
-						Portfolio
-					</InputLabel>
-					<Select
-						labelId="portfolio-name"
-						label="Portfolio"
-						id="portfolio-name-select"
-						value={selectedPortfolio}
-						onChange={handleChangePortfolio}
-						classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
-						autoWidth
-					>
-						{portfolios.map((portfolio) => {
-							return (
-								<MenuItem key={portfolio.name} value={portfolio.name}>
-									{portfolio.name}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
+				<PortfolioSelector
+					setPortfolio={setSelectedPortfolio}
+					portfolios={portfolios}
+					selectedPortfolio={selectedPortfolio}
+					dispatch={dispatch}
+				/>
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
 					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 						View

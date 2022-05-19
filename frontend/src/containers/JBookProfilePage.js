@@ -35,9 +35,14 @@ import {
 	StyledReviewRightContainer,
 	StyledAccordionContainer,
 	StyledAccordionHeader,
+	StyledLeftContainer,
+	StyledRightContainer,
+	StyledMainContainer,
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import PortfolioSelector from '../components/modules/jbook/portfolioBuilder/jbookPortfolioSelector';
+
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -79,6 +84,8 @@ const JBookProfilePage = (props) => {
 	const [accomplishments, setAccomplishments] = useState([]);
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
+
+	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? '');
 
 	const getProjectData = async (
 		programElement,
@@ -240,6 +247,21 @@ const JBookProfilePage = (props) => {
 
 			setPermissions(tmpPermissions);
 		}
+
+		const getPortfolioData = async () => {
+			// grab the portfolio data
+			await gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {},
+				})
+				.then((data) => {
+					let portfolios = data.data !== undefined ? data.data : [];
+					setState(dispatch, { portfolios });
+				});
+		};
+		getPortfolioData();
 
 		// eslint-disable-next-line
 	}, []);
@@ -866,30 +888,44 @@ const JBookProfilePage = (props) => {
 			<SearchBar context={context} />
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
-				<BasicData
-					budgetType={budgetType}
-					admin={Permissions.hasPermission('JBOOK Admin')}
-					loading={profileLoading}
-					programElement={programElement}
-					projectNum={projectNum}
-					budgetYear={budgetYear}
-					budgetLineItem={budgetLineItem}
-					id={id}
-					appropriationNumber={appropriationNumber}
-				/>
-				<ProjectDescription
-					profileLoading={profileLoading}
-					projectData={projectData}
-					programElement={programElement}
-					projectNum={projectNum}
-					projectDescriptions={projectDescriptions}
-				/>
-				<Metadata
-					budgetType={budgetType}
-					projectNum={projectNum}
-					keywordCheckboxes={keywordCheckboxes}
-					setKeywordCheck={setKeywordCheck}
-				/>
+				<StyledLeftContainer>
+					<BasicData
+						budgetType={budgetType}
+						admin={Permissions.hasPermission('JBOOK Admin')}
+						loading={profileLoading}
+						programElement={programElement}
+						projectNum={projectNum}
+						budgetYear={budgetYear}
+						budgetLineItem={budgetLineItem}
+						id={id}
+						appropriationNumber={appropriationNumber}
+					/>
+					<PortfolioSelector
+						selectedPortfolio={selectedPortfolio}
+						portfolios={state.portfolios}
+						setPortfolio={setSelectedPortfolio}
+						dispatch={dispatch}
+						formControlStyle={{ margin: '10px 0' }}
+						width={'100%'}
+					/>
+				</StyledLeftContainer>
+				<StyledMainContainer>
+					<ProjectDescription
+						profileLoading={profileLoading}
+						projectData={projectData}
+						programElement={programElement}
+						projectNum={projectNum}
+						projectDescriptions={projectDescriptions}
+					/>
+				</StyledMainContainer>
+				<StyledRightContainer>
+					<Metadata
+						budgetType={budgetType}
+						projectNum={projectNum}
+						keywordCheckboxes={keywordCheckboxes}
+						setKeywordCheck={setKeywordCheck}
+					/>
+				</StyledRightContainer>
 			</StyledContainer>
 			<StyledReviewContainer>
 				<StyledReviewLeftContainer>
