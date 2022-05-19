@@ -426,7 +426,9 @@ const PolicySearchHandler = {
 						}
 						if (searchSettings.orgUpdate) {
 							const typeFilterObject = {};
-							newSearchSettings.originalTypeFilters.forEach((type) => (typeFilterObject[type[0]] = 0));
+							Object.keys(newSearchSettings.originalTypeFilters).forEach(
+								(type) => (typeFilterObject[type] = 0)
+							);
 
 							sidebarTypes.forEach((type) => {
 								typeFilterObject[type[0]] = type[1];
@@ -439,7 +441,9 @@ const PolicySearchHandler = {
 							newSearchSettings.originalTypeFilters.sort((a, b) => b[1] - a[1]);
 						} else if (searchSettings.typeUpdate) {
 							const orgFilterObject = {};
-							newSearchSettings.originalOrgFilters.forEach((org) => (orgFilterObject[org[0]] = 0));
+							Object.keys(newSearchSettings.originalOrgFilters).forEach(
+								(org) => (orgFilterObject[org] = 0)
+							);
 
 							sidebarOrgData.forEach((org) => {
 								orgFilterObject[org[0]] = org[1];
