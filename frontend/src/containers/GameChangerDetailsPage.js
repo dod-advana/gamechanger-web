@@ -222,12 +222,18 @@ const GameChangerDetailsPage = (props) => {
 					}
 				}
 			});
-
+			tmpEntity.details.push({
+				name: 'Org Head',
+				value: await getHeadData(name, cloneName),
+			});
+			tmpEntity.details.push({
+				name: 'Org Type(s)',
+				value: await getTypeData(name, cloneName),
+			});
 			data.entity = tmpEntity;
 		}
 
 		data.graph = resp.data.graph;
-
 		return data;
 	};
 
@@ -260,6 +266,43 @@ const GameChangerDetailsPage = (props) => {
 		}
 
 		return data;
+	};
+
+	const getHeadData = async (name, cloneName) => {
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getHeadDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				headName: name,
+			},
+		});
+		if (resp.data.headData.head) {
+			return resp.data.headData.head;
+		} else {
+			return '';
+		}
+	};
+
+	const getTypeData = async (name, cloneName) => {
+		let types = '';
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getTypeDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				typeName: name,
+			},
+		});
+		if (resp.data.typeData.nodes && resp.data.typeData.nodes.length > 0) {
+			for (var i = 0; i < resp.data.typeData.nodes.length; i++) {
+				types += resp.data.typeData.nodes[i].name;
+				if (i != resp.data.typeData.nodes.length - 1) {
+					types += ', ';
+				}
+			}
+			return types;
+		} else {
+			return '';
+		}
 	};
 
 	const getSourceData = async (searchText, cloneName) => {
