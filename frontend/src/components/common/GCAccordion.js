@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { withStyles } from '@material-ui/core/styles';
@@ -25,6 +25,7 @@ const StyledAccordionSummary = withStyles({
 			borderBottomLeftRadius: '0px !important',
 			borderBottomRightRadius: '0px !important',
 		},
+		width: '100%',
 	},
 	content: {
 		'&$expanded': {
@@ -88,24 +89,28 @@ const GCAccordion = (props) => {
 		marginBottom,
 	} = props;
 
-	const StyledAccordion = withStyles({
-		root: {
-			border: '1px solid rgba(0, 0, 0, .125)',
-			boxShadow: 'none',
-			borderTopLeftRadius: 6,
-			borderTopRightRadius: 6,
-			'&:not(:last-child)': {
-				marginBottom: marginBottom ?? '10px !important',
-			},
-			'&:before': {
-				display: 'none',
-			},
-			'&$expanded': {
-				margin: 'auto',
-			},
-		},
-		expanded: {},
-	})(Accordion);
+	const StyledAccordion = useMemo(
+		() =>
+			withStyles({
+				root: {
+					border: '1px solid rgba(0, 0, 0, .125)',
+					boxShadow: 'none',
+					borderTopLeftRadius: 6,
+					borderTopRightRadius: 6,
+					'&:not(:last-child)': {
+						marginBottom: marginBottom ?? '10px !important',
+					},
+					'&:before': {
+						display: 'none',
+					},
+					'&$expanded': {
+						margin: 'auto',
+					},
+				},
+				expanded: {},
+			})(Accordion),
+		[marginBottom]
+	);
 
 	const [isExpanded, setIsExpanded] = useState(false);
 
@@ -135,9 +140,9 @@ const GCAccordion = (props) => {
 				id="accordion-header"
 				expandIcon={
 					isExpanded ? (
-						<CollapseIcon style={{ color: headerTextColor }} />
+						<CollapseIcon style={{ color: headerTextColor, width: 45 }} />
 					) : (
-						<ExpandIcon style={{ color: headerTextColor }} />
+						<ExpandIcon style={{ color: headerTextColor, width: 45 }} />
 					)
 				}
 			>
