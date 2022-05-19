@@ -21,7 +21,6 @@ import {
 	handleClearFavoriteSearchNotification,
 	handleSaveFavoriteSearchHistory,
 	handleSaveFavoriteOrganization,
-	checkUserInfo,
 } from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchSection from '../globalSearch/SearchSection';
@@ -1145,9 +1144,6 @@ const getGCUserDashboard = (props) => {
 				handleSaveFavoriteOrganization(organization_name, organization_summary, favorite, dispatch)
 			}
 			cloneData={state.cloneData}
-			checkUserInfo={() => {
-				return checkUserInfo(state, dispatch);
-			}}
 			dispatch={dispatch}
 		/>
 	);
