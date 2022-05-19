@@ -212,6 +212,10 @@ class PolicyGraphHandler extends GraphHandler {
 				return await this.getEntityDataDetailsPageHelper(req, userId);
 			case 'getTopicDataDetailsPage':
 				return await this.getTopicDataDetailsPageHelper(req, userId);
+			case 'getHeadDataDetailsPage':
+				return await this.getHeadDataDetailsPageHelper(req, userId)
+			case 'getTypeDataDetailsPage':
+				return await this.getTypeDataDetailsPageHelper(req, userId)
 			case 'getTopicDataPolicyGraph':
 				return await this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
@@ -453,6 +457,54 @@ class PolicyGraphHandler extends GraphHandler {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'XAXUO60', userId);
+			return message;
+		}
+	}
+
+	async getHeadDataDetailsPageHelper(req, userId) {
+		try {
+			const { headName, isTest = false } = req.body;
+
+			const data = {};
+
+			const [headData] = await this.getGraphData(
+				'MATCH (e:Entity) WHERE e.name = $name ' +
+					'WITH e MATCH (e)-[:HAS_HEAD]->(h:Entity) ' +
+					'RETURN h.name as head;',
+				{ name: headName },
+				isTest,
+				userId
+			);
+
+			data.headData = headData;
+
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'XADLO60', userId);
+			return message;
+		}
+	}
+
+	async getTypeDataDetailsPageHelper(req, userId) {
+		try {
+			const { typeName, isTest = false } = req.body;
+			const data = {};
+			const [typeData] = await this.getGraphData(
+				'MATCH (e:Entity) WHERE e.name = $name ' +
+					'WITH e MATCH (e)-[:TYPE_OF]->(t:Entity) ' +
+					'RETURN t as type;',
+				{ name: typeName },
+				isTest,
+				userId
+			);
+
+			data.typeData = typeData;
+
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'BALLO93', userId);
 			return message;
 		}
 	}
