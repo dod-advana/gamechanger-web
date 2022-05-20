@@ -86,16 +86,7 @@ const JBookSimpleReviewForm = React.memo((props) => {
 	return (
 		<StyledTableContainer>
 			{renderReenableModal('JAIC')}
-			<div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row-reverse' }}>
-				<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
-				{finished && (
-					<Typography variant="subtitle1">
-						{reviewData.primaryReviewer} submitted this review labelled as "{reviewData.primaryClassLabel}"
-						on {new Date(reviewData.updatedAt).toLocaleDateString()}
-					</Typography>
-				)}
-			</div>
-
+			<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
 			<SimpleTable
 				tableClass={'magellan-table'}
 				zoom={1}
