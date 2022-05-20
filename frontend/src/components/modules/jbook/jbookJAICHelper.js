@@ -354,7 +354,7 @@ const SimpleButtonFooter = React.memo((props) => {
 	const { finished, roleDisabled, dispatch, setReviewData, submitReviewForm, primaryReviewLoading } = props;
 
 	return (
-		<StyledFooterDiv>
+		<StyledFooterDiv style={{ paddingTop: '10px' }}>
 			{finished && !roleDisabled && (
 				<GCPrimaryButton
 					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
