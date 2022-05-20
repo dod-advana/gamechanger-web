@@ -6,7 +6,7 @@ import {
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
-import { checkUserInfo, createTinyUrl, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -25,12 +25,6 @@ const GlobalSearchHandler = {
 			cloneData,
 			showTutorial,
 		} = state;
-
-		if (userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
 
 		let favSearchUrls = [];
 		if (userData.favorite_searches) {
