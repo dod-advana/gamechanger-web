@@ -5,15 +5,12 @@ const __ = require('lodash');
 const lunrSearchUtils = require('../../utils/lunrSearchUtils');
 const constantsFile = require('../../config/constants');
 const axios = require('axios');
-const fs = require('fs');
-const https = require('https');
 const _ = require('lodash');
 const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 const { getQlikApps } = require('./globalSearchUtils');
-const asyncRedisLib = require('async-redis');
 
 const redisAsyncClientDB = 7;
 
