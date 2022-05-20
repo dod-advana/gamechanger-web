@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import SimpleTable from '../../common/SimpleTable';
+import { Typography } from '@material-ui/core';
+
 import { JBookContext } from './jbookContext';
 import {
 	ReviewersValue,
@@ -84,8 +86,15 @@ const JBookSimpleReviewForm = React.memo((props) => {
 	return (
 		<StyledTableContainer>
 			{renderReenableModal('JAIC')}
-
-			<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
+			<div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row-reverse' }}>
+				<ReviewStatus reviewStatus={reviewStatus} finished={finished} />
+				{finished && (
+					<Typography variant="subtitle1">
+						{reviewData.primaryReviewer} submitted this review labelled as "{reviewData.primaryClassLabel}"
+						on {new Date(reviewData.updatedAt).toLocaleDateString()}
+					</Typography>
+				)}
+			</div>
 
 			<SimpleTable
 				tableClass={'magellan-table'}
