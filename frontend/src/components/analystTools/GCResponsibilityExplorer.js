@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import { trackEvent } from '../telemetry/Matomo';
 import GCButton from '../common/GCButton';
@@ -12,6 +13,8 @@ import GCResponsibilityTracker from './GCResponsibilityTracker';
 import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
 import GCToolTip from '../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
+import { reTutorialSteps } from './reTutotialSteps';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -78,6 +81,9 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const [responsibilityText, setResponsibilityText] = useState({});
 	const [infiniteCount, setInfiniteCount] = useState(1);
 
+	const [stepIndex, setStepIndex] = useState(0);
+	const [showTutorial, setShowTutorial] = useState(false);
+
 	useEffect(() => {
 		if (reloadResponsibilities) {
 			handleFetchData({ page: 1, filtered: filters });
@@ -92,6 +98,13 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		};
 		fetchDocTitles();
 	}, []);
+
+	const resetPage = () => {
+		setStepIndex(0);
+		setFilters([]);
+		setOrganization([]);
+		setResponsibilityText({});
+	};
 
 	const scrollRef = useBottomScrollListener(
 		() => {
@@ -214,6 +227,9 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						documents. Filter capabilities allow users to explore extracted portions of responsibility text
 						in specific documents, by organization/role/entity, and/or by responsibility area.
 					</div>
+					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={() => setShowTutorial(true)} />
+					</GCToolTip>
 					<GCButton
 						onClick={exportCSV}
 						style={{
@@ -291,6 +307,15 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					infiniteScrollRef={scrollRef}
 				/>
 			)}
+			<TutorialOverlay
+				tutorialJoyrideSteps={reTutorialSteps}
+				setShowTutorial={setShowTutorial}
+				showTutorial={showTutorial}
+				buttonColor={gcOrange}
+				resetPage={resetPage}
+				stepIndex={stepIndex}
+				setStepIndex={setStepIndex}
+			/>
 		</div>
 	);
 }

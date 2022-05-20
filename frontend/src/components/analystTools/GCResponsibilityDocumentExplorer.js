@@ -371,7 +371,10 @@ export default function ResponsibilityDocumentExplorer({
 					overflowY: 'auto',
 				}}
 			>
-				<div style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}>
+				<div
+					className="re-tutorial-step-1"
+					style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}
+				>
 					FILTERS {filters.length ? <span style={{ color: '#ed691d' }}>{`(${filters.length})`}</span> : ''}
 				</div>
 				<div style={{ width: '100%' }}>
