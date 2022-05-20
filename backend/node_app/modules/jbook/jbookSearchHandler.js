@@ -301,7 +301,7 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.parsedQuery = parsedQuery;
 
 			// check if there are PG filters
-			// console.log(jbookSearchSettings);
+
 			const { jbookSearchSettings } = req.body;
 			// clean empty options:
 			Object.keys(req.body.jbookSearchSettings).forEach((key) => {
@@ -383,7 +383,8 @@ class JBookSearchHandler extends SearchHandler {
 			if (pgQueryWhere.length > 0) {
 				req.body.jbookSearchSettings.pgKeys = keys;
 			}
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(
+
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
 				req.body,
 				userId,
 				this.jbookSearchUtility.getMapping('esServiceAgency', false)

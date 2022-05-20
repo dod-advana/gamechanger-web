@@ -6,7 +6,7 @@ import {
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
-import { checkUserInfo, createTinyUrl, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -25,12 +25,6 @@ const GlobalSearchHandler = {
 			cloneData,
 			showTutorial,
 		} = state;
-
-		if (userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
 
 		let favSearchUrls = [];
 		if (userData.favorite_searches) {
@@ -53,7 +47,6 @@ const GlobalSearchHandler = {
 			isDataTracker: false,
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();
@@ -96,15 +89,11 @@ const GlobalSearchHandler = {
 			dashboardsLoading: true,
 			dataSourcesLoading: true,
 			databasesLoading: true,
-			categoryMetadata: {
-				Applications: { total: 0 },
-				Dashboards: { total: 0 },
-				DataSources: { total: 0 },
-				Databases: { total: 0 },
-				Documentation: { total: 0 },
-				Organizations: { total: 0 },
-				Services: { total: 0 },
-			},
+			categoryMetadata: {},
+			applicationsTotalCount: 0,
+			dashboardsTotalCount: 0,
+			dataSourcesTotalCount: 0,
+			databasesTotalCount: 0,
 		});
 
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
@@ -139,14 +128,12 @@ const GlobalSearchHandler = {
 							})),
 							applicationsTotalCount: data.data.applications.totalCount,
 							applicationsLoading: false,
-							loading: false,
 						});
 					})
 					.catch(() => {
 						setState(dispatch, {
 							applicationsTotalCount: 0,
 							applicationsLoading: false,
-							loading: false,
 						});
 					});
 			} catch (err) {
@@ -175,14 +162,12 @@ const GlobalSearchHandler = {
 							})),
 							dashboardsTotalCount: data.data.dashboards.totalCount,
 							dashboardsLoading: false,
-							loading: false,
 						});
 					})
 					.catch(() => {
 						setState(dispatch, {
 							dashboardsTotalCount: 0,
 							dashboardsLoading: false,
-							loading: false,
 						});
 					});
 			} catch (err) {
@@ -211,14 +196,12 @@ const GlobalSearchHandler = {
 							})),
 							dataSourcesTotalCount: data.data.dataSources.total,
 							dataSourcesLoading: false,
-							loading: false,
 						});
 					})
 					.catch(() => {
 						setState(dispatch, {
 							dataSourcesTotalCount: 0,
 							dataSourcesLoading: false,
-							loading: false,
 						});
 					});
 			} catch (err) {
@@ -247,14 +230,12 @@ const GlobalSearchHandler = {
 							})),
 							databasesTotalCount: data.data.databases.total,
 							databasesLoading: false,
-							loading: false,
 						});
 					})
 					.catch(() => {
 						setState(dispatch, {
 							databasesTotalCount: 0,
 							databasesLoading: false,
-							loading: false,
 						});
 					});
 			} catch (err) {

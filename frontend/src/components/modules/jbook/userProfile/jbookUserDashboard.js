@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import GCAccordion from '../../../common/GCAccordion';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import GamechangerUserManagementAPI from '../../../api/GamechangerUserManagement';
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 
