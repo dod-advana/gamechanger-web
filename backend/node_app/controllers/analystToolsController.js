@@ -66,6 +66,14 @@ class AnalystToolsController {
 					clientObj.esIndex,
 					esQuery
 				);
+
+				if (returnData?.docs) {
+					returnData.docs.forEach((doc) => {
+						doc.pageHits.forEach((hit) => {
+							hit.id = `${doc.title}_${hit.pageNumber}`;
+						});
+					});
+				}
 			} else {
 				// ML API Call Goes Here
 				const paragraphSearches = paragraphs.map((paragraph) =>
@@ -75,13 +83,12 @@ class AnalystToolsController {
 
 				paragraphResults.forEach((result) => {
 					Object.keys(result).forEach((id) => {
-						if (result[id].id && result[id]?.score >= 0.65) {
-							resultsObject[result[id].id] = {
-								score: result[id].score,
-								text: result[id].text,
-								paragraphIdBeingMatched: result.paragraphIdBeingMatched,
-							};
-						}
+						resultsObject[result[id].id] = {
+							score: result[id].score,
+							text: result[id].text,
+							paragraphIdBeingMatched: result.paragraphIdBeingMatched,
+							score_display: result[id].score_display,
+						};
 					});
 				});
 

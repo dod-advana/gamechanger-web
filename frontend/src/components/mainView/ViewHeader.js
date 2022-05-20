@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { checkUserInfo, createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
+import { createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
 import { getCurrentView } from '../../utils/gamechangerUtils';
 import _ from 'lodash';
 import { Button } from '@material-ui/core';
@@ -514,9 +514,6 @@ const ViewHeader = (props) => {
 					setStepIndex={setStepIndex}
 					showTutorial={state.showTutorial}
 					rawSearchResults={state.rawSearchResults}
-					checkUserInfo={() => {
-						checkUserInfo(state, dispatch);
-					}}
 				/>
 			</div>
 		</div>
