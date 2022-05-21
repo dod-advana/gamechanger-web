@@ -145,6 +145,7 @@ export const StyledInlineContainer = styled.div`
 `;
 
 export const StyledFooterDiv = styled.div`
+	margin: 20px 0 0 0;
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
