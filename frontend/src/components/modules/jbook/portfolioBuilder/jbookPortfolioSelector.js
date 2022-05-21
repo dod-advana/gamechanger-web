@@ -40,7 +40,15 @@ const useStyles = makeStyles({
 	},
 });
 
-const PortfolioSelector = ({ portfolios, selectedPortfolio, setPortfolio, dispatch, formControlStyle, width }) => {
+const PortfolioSelector = ({
+	portfolios,
+	selectedPortfolio,
+	setPortfolio,
+	dispatch,
+	formControlStyle,
+	width,
+	projectData,
+}) => {
 	const classes = useStyles();
 
 	// handle portfolio selector change
@@ -49,13 +57,13 @@ const PortfolioSelector = ({ portfolios, selectedPortfolio, setPortfolio, dispat
 			try {
 				const name = event.target.value;
 				setPortfolio(name);
-				setState(dispatch, { selectedPortfolio: name });
+				setState(dispatch, { selectedPortfolio: name, reviewData: projectData.reviews[name] });
 			} catch (err) {
 				console.log('Error setting portfolio');
 				console.log(err);
 			}
 		},
-		[dispatch, setPortfolio]
+		[dispatch, setPortfolio, projectData]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {

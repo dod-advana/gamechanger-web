@@ -57,7 +57,7 @@ const JbookViewHeaderHandler = (props) => {
 	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
 
 	const { state, dispatch } = context;
-	const { cloneData, componentStepNumbers, currentViewName, listView, viewNames } = state;
+	const { cloneData, componentStepNumbers, currentViewName, listView, viewNames, projectData } = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
@@ -140,6 +140,7 @@ const JbookViewHeaderHandler = (props) => {
 					portfolios={portfolios}
 					selectedPortfolio={selectedPortfolio}
 					dispatch={dispatch}
+					projectData={projectData}
 				/>
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
 					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">

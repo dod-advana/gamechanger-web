@@ -221,8 +221,8 @@ module.exports = (sequelize, DataTypes) => {
 			agency: {
 				type: DataTypes.TEXT,
 			},
-			portfolio_id: {
-				type: DataTypes.INTEGER,
+			portfolio_name: {
+				type: DataTypes.TEXT,
 			},
 		},
 		{

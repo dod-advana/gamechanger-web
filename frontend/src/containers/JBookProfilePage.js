@@ -87,16 +87,7 @@ const JBookProfilePage = (props) => {
 
 	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? '');
 
-	const getProjectData = async (
-		programElement,
-		projectNum,
-		type,
-		budgetYear,
-		budgetLineItem,
-		id,
-		appropriationNumber,
-		useElasticSearch
-	) => {
+	const getProjectData = async (type, id, useElasticSearch) => {
 		setProfileLoading(true);
 
 		let projectData;
@@ -105,40 +96,34 @@ const JBookProfilePage = (props) => {
 				functionName: 'getProjectData',
 				cloneName: cloneData.clone_name,
 				options: {
-					programElement,
-					projectNum,
 					type,
-					budgetYear,
-					budgetLineItem,
 					id,
-					appropriationNumber,
 					useElasticSearch,
+					portfolioName: selectedPortfolio,
 				},
 			});
 
-			if (projectData.data) {
-				if (projectData.data.contracts) {
-					setContracts(projectData.data.contracts);
-					const tempMapping = {};
-					for (let i = 0; i < projectData.data.contracts.length; i++) {
-						const currentContract = projectData.data.contracts[i];
-						if (tempMapping[currentContract.vendorName] === undefined) {
-							tempMapping[currentContract.vendorName] = true;
-						}
+			if (projectData.data && projectData.data.contracts) {
+				setContracts(projectData.data.contracts);
+				const tempMapping = {};
+				for (let i = 0; i < projectData.data.contracts.length; i++) {
+					const currentContract = projectData.data.contracts[i];
+					if (tempMapping[currentContract.vendorName] === undefined) {
+						tempMapping[currentContract.vendorName] = true;
 					}
-					setContractMapping(tempMapping);
-					if (
-						projectData.data.review.serviceMissionPartnersChecklist === null ||
-						projectData.data.review.serviceMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-					}
-					if (
-						projectData.data.review.pocMissionPartnersChecklist === null ||
-						projectData.data.review.pocMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
-					}
+				}
+				setContractMapping(tempMapping);
+				if (
+					projectData.data.review.serviceMissionPartnersChecklist === null ||
+					projectData.data.review.serviceMissionPartnersChecklist === undefined
+				) {
+					projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+				}
+				if (
+					projectData.data.review.pocMissionPartnersChecklist === null ||
+					projectData.data.review.pocMissionPartnersChecklist === undefined
+				) {
+					projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
 				}
 			}
 		} catch (err) {
@@ -162,34 +147,34 @@ const JBookProfilePage = (props) => {
 		setProfileLoading(false);
 
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
-		if (projectData && projectData.data && projectData.data.review) {
+		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			if (projectData.data.review.domainTask && projectData.data.review.domainTaskSecondary) {
-				domainTasks[projectData.data.review.domainTask] = projectData.data.review.domainTaskSecondary;
+			let review = projectData.data.reviews[state.selectedPortfolio];
+			if (review.domainTask && review.domainTaskSecondary) {
+				domainTasks[review.domainTask] = review.domainTaskSecondary;
 			}
 
 			// Review changes to make things behave properly
-			if (!projectData.data.review.serviceAgreeLabel || projectData.data.review.serviceAgreeLabel === null) {
-				projectData.data.review.serviceAgreeLabel = 'Yes';
+			if (!review.serviceAgreeLabel || review.serviceAgreeLabel === null) {
+				review.serviceAgreeLabel = 'Yes';
 			}
-			if (
-				!projectData.data.review.servicePTPAgreeLabel ||
-				projectData.data.review.servicePTPAgreeLabel === null
-			) {
-				projectData.data.review.servicePTPAgreeLabel = 'Yes';
+			if (!review.servicePTPAgreeLabel || review.servicePTPAgreeLabel === null) {
+				review.servicePTPAgreeLabel = 'Yes';
 			}
 			// Review changes to make things behave properly
-			if (!projectData.data.review.pocAgreeLabel || projectData.data.review.pocAgreeLabel === null) {
-				projectData.data.review.pocAgreeLabel = 'Yes';
+			if (!review.pocAgreeLabel || review.pocAgreeLabel === null) {
+				review.pocAgreeLabel = 'Yes';
 			}
-			if (!projectData.data.review.pocPTPAgreeLabel || projectData.data.review.pocPTPAgreeLabel === null) {
-				projectData.data.review.pocPTPAgreeLabel = 'Yes';
+			if (!review.pocPTPAgreeLabel || review.pocPTPAgreeLabel === null) {
+				review.pocPTPAgreeLabel = 'Yes';
 			}
-			if (!projectData.data.review.pocMPAgreeLabel || projectData.data.review.pocMPAgreeLabel === null) {
-				projectData.data.review.pocMPAgreeLabel = 'Yes';
+			if (!review.pocMPAgreeLabel || review.pocMPAgreeLabel === null) {
+				review.pocMPAgreeLabel = 'Yes';
 			}
 
-			setState(dispatch, { reviewData: { ...projectData.data.review }, domainTasks });
+			console.log(state.selectedPortfolio);
+
+			setState(dispatch, { reviewData: review, domainTasks });
 		}
 	};
 
@@ -215,16 +200,7 @@ const JBookProfilePage = (props) => {
 			setID(id);
 			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(
-				programElement,
-				projectNum,
-				type,
-				budgetYear,
-				budgetLineItem,
-				id,
-				appropriationNumber,
-				useElasticSearch
-			);
+			getProjectData(type, id, useElasticSearch);
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
@@ -826,15 +802,19 @@ const JBookProfilePage = (props) => {
 						id: undefined,
 						revBudgetLineItems: budgetLineItem,
 						budgetYear: budgetYear,
+						appropriationNumber,
+						budgetActivityNumber: projectData.budgetActivityNumber,
+						serviceAgency: projectData.serviceAgency,
 					},
 					isSubmit,
 					reviewType,
 					projectNum,
 					appropriationNumber,
+					portfolioName: state.selectedPortfolio,
 				},
 			});
 
-			getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
+			getProjectData(budgetType, id, state.useElasticSearch);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -853,15 +833,7 @@ const JBookProfilePage = (props) => {
 				appropriationNumber,
 			},
 		});
-		await getProjectData(
-			programElement,
-			projectNum,
-			budgetType,
-			budgetYear,
-			budgetLineItem,
-			id,
-			appropriationNumber
-		);
+		await getProjectData(budgetType, id, state.useElasticSearch);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -907,6 +879,7 @@ const JBookProfilePage = (props) => {
 						dispatch={dispatch}
 						formControlStyle={{ margin: '10px 0' }}
 						width={'100%'}
+						projectData={projectData}
 					/>
 				</StyledLeftContainer>
 				<StyledMainContainer>
