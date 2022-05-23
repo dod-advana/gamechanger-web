@@ -89,6 +89,7 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
+						portfolio: state.portfolio || 'AI Inventory',
 					},
 				},
 				cancelToken
@@ -115,6 +116,7 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
+				portfolio: state.portfolio || 'AI Inventory',
 			},
 		});
 		return data;

@@ -165,80 +165,11 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
-			// DO NOT use PG Find a way for ES TODO
-			let pgQueryWhere = ``;
-			const pgFilters = [
-				'reviewStatus',
-				'primaryReviewer',
-				'serviceReviewer',
-				'pocReviewer',
-				'primaryClassLabel',
-				'sourceTag',
-			];
-			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
-			pgFilters.forEach((filter) => {
-				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
-					console.log(filter);
-					console.log(jbookSearchSettings[filter]);
-
-					if (pgQueryWhere.length > 0) {
-						pgQueryWhere += ` AND ( `;
-					} else {
-						pgQueryWhere += `(`;
-					}
-					for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
-						if (i > 0) {
-							pgQueryWhere += ` OR `;
-						}
-						if (filter === 'pocReviewer') {
-							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `;
-						} else {
-							const hasNull = jbookSearchSettings[filter].includes('Blank');
-							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `;
-							if (hasNull) {
-								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `;
-							}
-						}
-					}
-					pgQueryWhere += ` ) `;
-				}
-			});
-
-			const keys = [];
-			if (pgQueryWhere.length > 0) {
-				try {
-					let pgQuery =
-						`SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` +
-						pgQueryWhere +
-						`;`;
-					const pgResults = await this.db.jbook.query(pgQuery, {});
-					pgResults[0].forEach((review) => {
-						let key;
-						let leadingZeroBudgetActivity = review.budget_activity !== null ? review.budget_activity : '';
-						if (leadingZeroBudgetActivity.length === 1) {
-							leadingZeroBudgetActivity = 0 + leadingZeroBudgetActivity;
-						}
-						let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
-						if (review.budget_type === 'pdoc') {
-							key = `pdoc#${review.budget_line_item}#${
-								review.budget_year
-							}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${
-								review.agency !== null ? review.agency : ''
-							}`;
-						} else if (review.budget_type === 'rdoc') {
-							key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
-						} else if (review.budget_type === 'odoc') {
-							key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
-						}
-						keys.push(key);
-					});
-				} catch (err) {
-					console.log('Error querying PG for jbook ES search');
-					this.logger.error(err.message, 'G4W6UNW', userId);
-				}
-			}
-
-			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId);
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
+				req.body,
+				userId,
+				this.jbookSearchUtility.getMapping('esServiceAgency', false)
+			);
 
 			let expansionDict = {};
 
