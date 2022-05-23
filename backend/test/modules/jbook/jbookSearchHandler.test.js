@@ -371,6 +371,59 @@ describe('JBookSearchHandler', function () {
 				],
 			];
 
+			const mockESBudgetYear = {
+				body: {
+					aggregations: {
+						values: {
+							buckets: [
+								{
+									key: {
+										budgetYear_s: '2020',
+									},
+								},
+								{
+									key: {
+										budgetYear_s: '2021',
+									},
+								},
+								{
+									key: {
+										budgetYear_s: '2022',
+									},
+								},
+							],
+						},
+					},
+				},
+			};
+
+			const mockESServiceAgency = {
+				body: {
+					aggregations: {
+						values: {
+							buckets: [
+								{
+									key: {
+										serviceAgency_s: 'AF',
+									},
+								},
+								{
+									key: {
+										serviceAgency_s: 'DCMA',
+									},
+								},
+								{
+									key: {
+										serviceAgency_s: 'CAAF',
+									},
+								},
+							],
+						},
+					},
+				},
+			};
+
+			let esQueryCalled = false;
 			const opts = {
 				db: {
 					jbook: {
@@ -383,6 +436,16 @@ describe('JBookSearchHandler', function () {
 					},
 				},
 				redisDB: {},
+				dataLibrary: {
+					queryElasticSearch() {
+						if (esQueryCalled) {
+							return Promise.resolve(mockESServiceAgency);
+						} else {
+							esQueryCalled = true;
+							return Promise.resolve(mockESBudgetYear);
+						}
+					},
+				},
 			};
 
 			const target = new JBookSearchHandler(opts);
@@ -390,6 +453,12 @@ describe('JBookSearchHandler', function () {
 			try {
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
+					budgetYearES: ['2020', '2021', '2022'],
+					serviceAgencyES: [
+						'Air Force (AF)',
+						'Defense Contract Management Agency (DCMA)',
+						'Court of Appeals for the Armed Forces (CAAF)',
+					],
 					budgetYear: ['2015', '2016', '2020', '2021', '2022'],
 					reviewstatus: [null],
 					serviceAgency: ['Air Force', 'Army', 'Navy', null],
