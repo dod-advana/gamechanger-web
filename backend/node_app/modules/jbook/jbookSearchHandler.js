@@ -426,7 +426,12 @@ class JBookSearchHandler extends SearchHandler {
 			let expansionDict = {};
 
 			if (searchText && searchText !== '') {
-				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+				try {
+					expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
+				} catch (e) {
+					console.log('Error running jbook gatherEspansionTerms');
+					this.logger.error(e, 'IBSMMIP', userId);
+				}
 			}
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
@@ -434,9 +439,8 @@ class JBookSearchHandler extends SearchHandler {
 			const hasSearchText = searchText && searchText !== '';
 			let limit = 18;
 
-			let keywordIds = undefined;
-
-			keywordIds = { pdoc: [], rdoc: [], om: [] };
+			// acquire the IDs of all entries with keywords assoociated with them
+			let keywordIds = { pdoc: [], rdoc: [], om: [] };
 			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
 							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
 							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;

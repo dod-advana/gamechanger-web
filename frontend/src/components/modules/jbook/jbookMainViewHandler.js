@@ -299,7 +299,6 @@ const getCardViewPanel = (props) => {
 																		totalItemsCount={count}
 																		pageRangeDisplayed={8}
 																		onChange={(page) => {
-																			console.log('jbook pagination search');
 																			trackEvent(
 																				getTrackingNameForFactory(
 																					state.cloneData.clone_name
@@ -408,6 +407,7 @@ const JBookMainViewHandler = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
 
+	// handle pagination being clicked
 	useEffect(() => {
 		if (state.docsPagination && searchHandler) {
 			setState(dispatch, {
@@ -417,6 +417,7 @@ const JBookMainViewHandler = (props) => {
 		}
 	}, [state, dispatch, searchHandler]);
 
+	// handle page load
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);

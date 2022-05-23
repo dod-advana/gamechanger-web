@@ -47,7 +47,7 @@ const PortfolioSelector = ({
 	dispatch,
 	formControlStyle,
 	width,
-	projectData,
+	projectData = null,
 }) => {
 	const classes = useStyles();
 
@@ -57,7 +57,13 @@ const PortfolioSelector = ({
 			try {
 				const name = event.target.value;
 				setPortfolio(name);
-				setState(dispatch, { selectedPortfolio: name, reviewData: projectData.reviews[name] });
+				setState(dispatch, {
+					selectedPortfolio: name,
+					reviewData:
+						projectData && projectData.reviews && projectData.reviews[name]
+							? projectData.reviews[name]
+							: {},
+				});
 			} catch (err) {
 				console.log('Error setting portfolio');
 				console.log(err);
