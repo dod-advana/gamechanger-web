@@ -690,7 +690,7 @@ export default () => {
 							data={feedbackData}
 							columns={feedbackColumns}
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
-							defaultSorted={[{ id: 'event_name', desc: false }]}
+							defaultSorted={[{ id: 'createdAt', desc: true }]}
 						/>
 					</TabPanel>
 					<TabPanel>
