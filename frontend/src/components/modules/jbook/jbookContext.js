@@ -3,7 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
 	runSearch: false,
 	runningSearch: false,
-	useElasticSearch: false,
+	useElasticSearch: true,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
 	feedbackText: '',
