@@ -1328,11 +1328,12 @@ class JBookSearchUtility {
 		userId,
 		serviceAgencyMappings
 	) {
+		let query;
 		try {
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-			let query = {
+			query = {
 				track_total_hits: true,
 				from: offset,
 				size: limit,
