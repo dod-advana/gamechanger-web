@@ -124,28 +124,39 @@ export const filterSortFunction = (a, b) => {
 export const populateDropDowns = async (state, dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	const defaultOptions = _.cloneDeep(state.defaultOptions);
-
 	const { data } = await gamechangerAPI.callSearchFunction({
 		functionName: 'getDataForFilters',
 		cloneName: state.cloneData.clone_name,
 		options: {},
 	});
 
-	jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
-		.map((year) => (year !== null ? year : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
-		.map((status) => (status !== null ? status : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
-		.map((agency) => (agency !== null ? agency : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
-		.map((label) => (label !== null ? label : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
-		.map((tag) => (tag !== null ? tag : 'Blank'))
-		.sort(filterSortFunction);
+	try {
+		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
+			.map((year) => (year !== null ? year : 'Blank'))
+			.sort(filterSortFunction);
+		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
+			.map((year) => (year !== null ? year : 'Blank'))
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
+			.map((year) => (year !== null ? year : 'Blank'))
+			.sort(filterSortFunction);
+		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
+			.map((status) => (status !== null ? status : 'Blank'))
+			.sort(filterSortFunction);
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
+			.map((agency) => (agency !== null ? agency : 'Blank'))
+			.sort(filterSortFunction);
+		jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
+			.map((label) => (label !== null ? label : 'Blank'))
+			.sort(filterSortFunction);
+		jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
+			.map((tag) => (tag !== null ? tag : 'Blank'))
+			.sort(filterSortFunction);
+	} catch (err) {
+		console.log('Error setting dropdown data');
+		console.log(err);
+	}
 
 	let dropdownData;
 	try {
@@ -199,13 +210,9 @@ export const populateDropDowns = async (state, dispatch) => {
 		console.log(err);
 	}
 
-	return { defaultOptions, jbookSearchSettings, dropdownData };
+	console.log(defaultOptions);
 
-	// if (initial) {
-	// 	setState(dispatch, {loading: true, runSearch: true, defaultOptions, jbookSearchSettings, dropdownData });
-	// } else {
-	// 	setState(dispatch, {defaultOptions, dropdownData });
-	// }
+	return { defaultOptions, jbookSearchSettings, dropdownData };
 };
 
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
