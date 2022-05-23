@@ -89,7 +89,6 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						useElasticSearch: state.useElasticSearch,
 					},
 				},
 				cancelToken
@@ -116,7 +115,6 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
-				useElasticSearch: state.useElasticSearch,
 			},
 		});
 		return data;

@@ -163,23 +163,6 @@ const getCardViewPanel = (props) => {
 								</a>
 							</div>
 
-							<div style={{ padding: 10, zIndex: 99 }}>
-								{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
-									<GCToggle
-										onClick={() => {
-											setState(dispatch, {
-												useElasticSearch: !state.useElasticSearch,
-												runSearch: true,
-											});
-										}}
-										rightActive={state.useElasticSearch}
-										leftLabel={'Use PG'}
-										rightLabel={'Use ES'}
-										customColor={GC_COLORS.primary}
-									/>
-								)}
-							</div>
-
 							{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 						</div>
 						{showSideFilters && (

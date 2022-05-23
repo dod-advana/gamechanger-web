@@ -1325,14 +1325,14 @@ class JBookSearchUtility {
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
 		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
-		userId,
-		serviceAgencyMappings
+		userId
 	) {
+		let query = {};
 		try {
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-			let query = {
+			query = {
 				track_total_hits: true,
 				from: offset,
 				size: limit,
@@ -1460,13 +1460,13 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
+
+			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
-			this.logger.error(e.message, 'IEPGRAZ91');
+			this.logger.error(e.message, 'IEPGRAZ91', userId);
 			return query;
 		}
-
-		return query;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
