@@ -38,7 +38,6 @@ const portfolioStyles = {
 };
 
 const Pill = styled.button`
-	border: none;
 	border-radius: 15px;
 	background-color: white;
 	color: black;

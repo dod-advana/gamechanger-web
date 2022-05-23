@@ -113,17 +113,27 @@ const JBookProfilePage = (props) => {
 					}
 				}
 				setContractMapping(tempMapping);
-				if (
-					projectData.data.review.serviceMissionPartnersChecklist === null ||
-					projectData.data.review.serviceMissionPartnersChecklist === undefined
-				) {
-					projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-				}
-				if (
-					projectData.data.review.pocMissionPartnersChecklist === null ||
-					projectData.data.review.pocMissionPartnersChecklist === undefined
-				) {
-					projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
+
+				try {
+					let reviewKeys = Object.keys(projectData.data.reviews);
+					for (let i = 0; i < Object.keys(projectData.data.reviews).length; i++) {
+						let review = projectData.data.reviews[reviewKeys[i]];
+						if (
+							review.serviceMissionPartnersChecklist === null ||
+							review.serviceMissionPartnersChecklist === undefined
+						) {
+							review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+						}
+						if (
+							review.pocMissionPartnersChecklist === null ||
+							review.pocMissionPartnersChecklist === undefined
+						) {
+							review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
+						}
+					}
+				} catch (err) {
+					console.log('Error setting mission partners checklist');
+					console.log(err);
 				}
 			}
 		} catch (err) {
@@ -149,30 +159,31 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
 		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			let review = projectData.data.reviews[state.selectedPortfolio];
-			if (review.domainTask && review.domainTaskSecondary) {
-				domainTasks[review.domainTask] = review.domainTaskSecondary;
-			}
+			let review = projectData.data.reviews[state.selectedPortfolio] ?? {};
 
-			// Review changes to make things behave properly
-			if (!review.serviceAgreeLabel || review.serviceAgreeLabel === null) {
-				review.serviceAgreeLabel = 'Yes';
-			}
-			if (!review.servicePTPAgreeLabel || review.servicePTPAgreeLabel === null) {
-				review.servicePTPAgreeLabel = 'Yes';
-			}
-			// Review changes to make things behave properly
-			if (!review.pocAgreeLabel || review.pocAgreeLabel === null) {
-				review.pocAgreeLabel = 'Yes';
-			}
-			if (!review.pocPTPAgreeLabel || review.pocPTPAgreeLabel === null) {
-				review.pocPTPAgreeLabel = 'Yes';
-			}
-			if (!review.pocMPAgreeLabel || review.pocMPAgreeLabel === null) {
-				review.pocMPAgreeLabel = 'Yes';
-			}
+			if (review) {
+				if (review.domainTask && review.domainTaskSecondary) {
+					domainTasks[review.domainTask] = review.domainTaskSecondary;
+				}
 
-			console.log(state.selectedPortfolio);
+				// Review changes to make things behave properly
+				if (!review.serviceAgreeLabel || review.serviceAgreeLabel === null) {
+					review.serviceAgreeLabel = 'Yes';
+				}
+				if (!review.servicePTPAgreeLabel || review.servicePTPAgreeLabel === null) {
+					review.servicePTPAgreeLabel = 'Yes';
+				}
+				// Review changes to make things behave properly
+				if (!review.pocAgreeLabel || review.pocAgreeLabel === null) {
+					review.pocAgreeLabel = 'Yes';
+				}
+				if (!review.pocPTPAgreeLabel || review.pocPTPAgreeLabel === null) {
+					review.pocPTPAgreeLabel = 'Yes';
+				}
+				if (!review.pocMPAgreeLabel || review.pocMPAgreeLabel === null) {
+					review.pocMPAgreeLabel = 'Yes';
+				}
+			}
 
 			setState(dispatch, { reviewData: review, domainTasks });
 		}
