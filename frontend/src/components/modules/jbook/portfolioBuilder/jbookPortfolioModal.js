@@ -133,6 +133,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								margin: '0 0 0 5px',
 								color: 'white',
 								padding: 0,
+								borderRadius: '15px',
 							}}
 							onClick={() => handleAddUser(userIDs[i])}
 						>
@@ -168,6 +169,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								margin: '0 0 0 5px',
 								color: 'white',
 								padding: 0,
+								borderRadius: '15px',
 							}}
 							onClick={() => handleAddTag(tag, false)}
 						>
@@ -247,7 +249,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 						<CloseIcon style={{ fontSize: 30 }} />
 					</IconButton>
 				</DialogTitle>
-				<DialogContent style={{ height: 500, padding: '8px 5px' }}>
+				<DialogContent style={{ height: 600, padding: '8px 5px' }}>
 					<div style={{ margin: '0 20px' }}>
 						<Grid
 							container
@@ -289,6 +291,30 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								/>
 								<hr />
 								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+									Upload Ontology
+								</Typography>
+								<FormControl
+									fullWidth
+									sx={{ m: 1 }}
+									variant="standard"
+									style={{ marginTop: 15, display: 'flex', flexDirection: 'row' }}
+								>
+									<IconButton
+										aria-label="close"
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
+										onClick={() => {}}
+									>
+										<AddIcon style={{ cursor: 'pointer' }} />
+									</IconButton>
+								</FormControl>
+								<hr />
+								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 									ADD PEOPLE WITH ACCESS
 								</Typography>
 								<FormControl
@@ -299,7 +325,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
 										onClick={() => setShowUsersModal(true)}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
@@ -318,7 +350,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 								>
 									<IconButton
 										aria-label="close"
-										style={{ backgroundColor: styles.backgroundGreyLight, marginRight: 15 }}
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
 										onClick={() => setShowTagsModal(true)}
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />

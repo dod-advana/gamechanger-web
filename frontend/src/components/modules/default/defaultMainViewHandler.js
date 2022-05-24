@@ -487,7 +487,7 @@ const DefaultMainViewHandler = (props) => {
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(displayUserRelatedItems, gameChangerUserAPI),
+				getUserProfilePage(displayUserRelatedItems(), gameChangerUserAPI),
 				state,
 				dispatch
 			);

@@ -49,7 +49,6 @@ const initState = {
 	},
 	userDataSet: false,
 	newUser: false,
-	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',
@@ -90,7 +89,7 @@ const initState = {
 	isResetting: false,
 	documentProperties: [],
 	pageDisplayed: 'main',
-	analystToolsPageDisplayed: 'Responsibility Explorer',
+	analystToolsPageDisplayed: '',
 	listView: false,
 
 	// Documents
