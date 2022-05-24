@@ -46,7 +46,6 @@ const initState = {
 		api_key: '',
 	},
 	newUser: false,
-	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',
