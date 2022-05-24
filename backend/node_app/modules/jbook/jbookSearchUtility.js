@@ -1464,8 +1464,6 @@ class JBookSearchUtility {
 					break;
 			}
 
-			console.log(JSON.stringify(query));
-
 			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
@@ -1611,10 +1609,61 @@ class JBookSearchUtility {
 
 		// POC Reviewer
 		if (jbookSearchSettings.pocReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									wildcard: {
+										'review_n.service_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+								{
+									wildcard: {
+										'review_n.alternate_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+							],
+						},
+					},
+				},
+			});
 		}
 
 		// Primary Class Label
 		if (jbookSearchSettings.primaryClassLabel) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									terms: {
+										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+							],
+						},
+					},
+				},
+			});
 		}
 
 		// Source Tag
