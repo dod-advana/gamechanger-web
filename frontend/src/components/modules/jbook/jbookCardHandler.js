@@ -309,6 +309,7 @@ const cardHandler = {
 			const review =
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
+			console.log(item);
 			try {
 				const renderContracts = (contracts) => {
 					let contractElements = `<b>Contracts: ${contracts.length}</b>`;
@@ -604,7 +605,8 @@ const cardHandler = {
 								</div>
 							</div>
 							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-								{review.tags && review.tags.length && 'Tags:'} {renderPortfolioTags(review.tags)}
+								{review && review.primaryClassLabel && 'Tag:'}{' '}
+								{renderPortfolioTags([review.primaryClassLabel])}
 							</div>
 						</StyledFrontCardContent>
 					);
