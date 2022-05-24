@@ -301,7 +301,7 @@ const PortfolioBuilder = (props) => {
 					<GCButton
 						id={'editReviewerSubmit'}
 						onClick={async () => {
-							const res = await gameChangerAPI.callDataFunction({
+							await gameChangerAPI.callDataFunction({
 								functionName: 'deletePortfolio',
 								cloneName: 'jbook',
 								options: { id: deleteID },

@@ -74,7 +74,7 @@ const PortfolioSelector = ({
 
 	const renderPortfolioOptions = useCallback(() => {
 		let menuItems = [
-			<MenuItem key={'General'} value={'General'}>
+			<MenuItem key={'General'} value={'General'} style={{ display: 'flex', padding: '3px 6px' }}>
 				General
 			</MenuItem>,
 		];
@@ -82,7 +82,11 @@ const PortfolioSelector = ({
 		menuItems = menuItems.concat(
 			portfolios.map((portfolio) => {
 				return (
-					<MenuItem key={portfolio.name} value={portfolio.name}>
+					<MenuItem
+						key={portfolio.name}
+						value={portfolio.name}
+						style={{ display: 'flex', padding: '3px 6px' }}
+					>
 						{portfolio.name}
 					</MenuItem>
 				);

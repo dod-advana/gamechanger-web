@@ -159,16 +159,28 @@ const JbookViewHeaderHandler = (props) => {
 						{viewNames.map((view) => {
 							if (view.name === 'Card') {
 								return [
-									<MenuItem key={`Card-List`} value={'List'}>
+									<MenuItem
+										key={`Card-List`}
+										value={'List'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										List View
 									</MenuItem>,
-									<MenuItem key={`Card-Grid`} value={'Grid'}>
+									<MenuItem
+										key={`Card-Grid`}
+										value={'Grid'}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										Grid View
 									</MenuItem>,
 								];
 							} else {
 								return (
-									<MenuItem key={`${view.name}-key`} value={view.name}>
+									<MenuItem
+										key={`${view.name}-key`}
+										value={view.name}
+										style={{ display: 'flex', padding: '3px 6px' }}
+									>
 										{view.title}
 									</MenuItem>
 								);
