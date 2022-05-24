@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
 import { Button, Checkbox, FormControlLabel, FormGroup, Modal, TextField, Typography } from '@material-ui/core';
 // import JAICLogo from '../../images/logos/JAIC_wht.png';
@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import GCButton from '../common/GCButton';
 import RequestAPIKeyDialog from '../api/RequestAPIKeyDialog';
+import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -90,6 +91,19 @@ const CloseButton = styled.div`
 	right: 15px;
 	top: 15px;
 `;
+
+const FAQLinkButton = () => {
+	return (
+		<LinkButton
+			key="faq"
+			onClick={() => {
+				window.open('/#/gamechanger/faq', '_self');
+			}}
+		>
+			FAQ
+		</LinkButton>
+	);
+};
 
 const GCFooter = (props) => {
 	const classes = useStyles();
@@ -281,11 +295,18 @@ const GCFooter = (props) => {
 	};
 
 	const getExtraLinks = () => {
-		const extraLinks = [
+		const extraLinks = [];
+		if (true) {
+			extraLinks.push(
+					<FAQLinkButton />
+			);
+		}
+		extraLinks.push(
 			<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>
 				App-wide Tracking Agreement
-			</LinkButton>,
-		];
+			</LinkButton>
+		);
+
 		if (!location['pathname'].includes('search')) {
 			extraLinks.push(
 				<LinkButton key="apiKeyRequest" onClick={() => setApiRequestModalOpen(true)}>
