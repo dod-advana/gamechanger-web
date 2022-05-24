@@ -356,7 +356,7 @@ const GCResponsibilityTracker = ({
 				),
 			},
 			{
-				Header: 'Organization/Personnel',
+				Header: 'Entity',
 				accessor: 'organizationPersonnel',
 				style: { whiteSpace: 'unset' },
 				Filter: (
@@ -380,30 +380,6 @@ const GCResponsibilityTracker = ({
 						setValue={(filter) => setResponsibilityText({ id: 'responsibilityText', value: filter })}
 					/>
 				),
-				Cell: (row) => <TableRow>{row.value}</TableRow>,
-			},
-			{
-				Header: () => (
-					<div style={{ cursor: 'default' }}>
-						<>Other Organization/Personnel</>
-						<i
-							onClick={(event) => {
-								openFilterPopper(event.target, 'otherOrgsPers');
-							}}
-							className={'fa fa-filter'}
-							style={{
-								color: '#E9691D',
-								marginLeft: '50px',
-								cursor: 'pointer',
-								fontSize: 18,
-							}}
-						/>
-					</div>
-				),
-				accessor: 'otherOrganizationPersonnel',
-				style: { whiteSpace: 'unset' },
-				width: 300,
-				filterable: false,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -503,18 +479,6 @@ const GCResponsibilityTracker = ({
 				}}
 			/>
 		);
-	};
-
-	const openFilterPopper = (target, column) => {
-		if (filterPopperIsOpen) {
-			setFilterPopperIsOpen(false);
-			setFilterPopperAnchorEl(null);
-			//(null);
-		} else {
-			setFilterPopperIsOpen(true);
-			setFilterPopperAnchorEl(target);
-			//setFilterColumn(column);
-		}
 	};
 
 	const fileClicked = (filename, searchText, pageNumber) => {

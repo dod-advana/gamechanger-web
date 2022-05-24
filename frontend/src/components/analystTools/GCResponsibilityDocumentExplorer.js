@@ -18,11 +18,25 @@ import GCButton from '../common/GCButton';
 import UOTAlert from '../common/GCAlert';
 import GCResponsiblityEditModal from './GCResponsiblityEditModal';
 import { styles as adminStyles } from '../../components/admin/util/GCAdminStyles';
+import styled from 'styled-components';
 
 const gameChangerAPI = new GameChangerAPI();
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 2;
 const RIGHT_PANEL_COL_WIDTH = 4;
+
+const AccordianWrapper = styled.div`
+	.MuiAccordionSummary-root {
+		display: flex !important;
+		padding: 0px 10px !important;
+	}
+	.MuiIconButton-edgeEnd {
+		margin-right: -12px;
+	}
+	.MuiIconButton-root {
+		padding: 12px;
+	}
+`;
 const useStyles = makeStyles({
 	root: {
 		width: '100%',
@@ -381,121 +395,132 @@ export default function ResponsibilityDocumentExplorer({
 					</div>
 					<div style={{ width: '100%' }}>
 						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
-								header={
-									<span>
-										DOCUMENT TITLE{' '}
-										{filters.filter((f) => f.id === 'documentTitle').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'documentTitle').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<Autocomplete
-									classes={{ root: classes.root }}
-									key={clearFilters}
-									multiple
-									options={documentList}
-									getOptionLabel={(option) => option.documentTitle}
-									defaultValue={docTitle}
-									onChange={(event, newValue) => {
-										setDocTitle(newValue);
-									}}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											classes={{ root: classes.root }}
-											variant="outlined"
-											label="Document Titles"
-										/>
-									)}
-								/>
-							</GCAccordion>
-						</div>
-						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={
-									filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false
-								}
-								header={
-									<span>
-										ENTITY{' '}
-										{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'organizationPersonnel').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<Autocomplete
-									classes={{ root: classes.root }}
-									key={clearFilters}
-									multiple
-									options={[]}
-									freeSolo
-									autoSelect
-									getOptionLabel={(option) => option}
-									defaultValue={organization}
-									onChange={(event, newValue) => {
-										setOrganization(newValue);
-									}}
-									renderInput={(params) => (
-										<TextField
-											id="this-is-a-test"
-											{...params}
-											classes={{ root: classes.root }}
-											variant="outlined"
-											label="Entities"
-										/>
-									)}
-								/>
-							</GCAccordion>
-						</div>
-						<div style={{ width: '100%', marginBottom: 10 }}>
-							<GCAccordion
-								expanded={filters.find((filter) => filter.id === 'responsibilityText') ? true : false}
-								header={
-									<span>
-										RESPONSIBILITY TEXT{' '}
-										{filters.filter((f) => f.id === 'responsibilityText').length ? (
-											<span style={{ color: '#ed691d' }}>{`(${
-												filters.filter((f) => f.id === 'responsibilityText').length
-											})`}</span>
-										) : (
-											''
-										)}
-									</span>
-								}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<div style={{ width: '100%' }}>
-									<TextField
+							<AccordianWrapper>
+								<GCAccordion
+									expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
+									header={
+										<span>
+											DOCUMENT TITLE{' '}
+											{filters.filter((f) => f.id === 'documentTitle').length ? (
+												<span style={{ color: '#ed691d' }}>{`(${
+													filters.filter((f) => f.id === 'documentTitle').length
+												})`}</span>
+											) : (
+												''
+											)}
+										</span>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'normal'}
+								>
+									<Autocomplete
 										classes={{ root: classes.root }}
-										variant="outlined"
-										placeholder="Responsibility Text"
-										value={responsibilityText?.value || ''}
-										onChange={(e) =>
-											setResponsibilityText({ id: 'responsibilityText', value: e.target.value })
-										}
+										key={clearFilters}
+										multiple
+										options={documentList}
+										getOptionLabel={(option) => option.documentTitle}
+										defaultValue={docTitle}
+										onChange={(event, newValue) => {
+											setDocTitle(newValue);
+										}}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												classes={{ root: classes.root }}
+												variant="outlined"
+												label="Document Titles"
+											/>
+										)}
 									/>
-								</div>
-							</GCAccordion>
+								</GCAccordion>
+							</AccordianWrapper>
+						</div>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<AccordianWrapper>
+								<GCAccordion
+									expanded={
+										filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false
+									}
+									header={
+										<span>
+											ENTITY{' '}
+											{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+												<span style={{ color: '#ed691d' }}>{`(${
+													filters.filter((f) => f.id === 'organizationPersonnel').length
+												})`}</span>
+											) : (
+												''
+											)}
+										</span>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'normal'}
+								>
+									<Autocomplete
+										classes={{ root: classes.root }}
+										key={clearFilters}
+										multiple
+										options={[]}
+										freeSolo
+										autoSelect
+										getOptionLabel={(option) => option}
+										defaultValue={organization}
+										onChange={(event, newValue) => {
+											setOrganization(newValue);
+										}}
+										renderInput={(params) => (
+											<TextField
+												id="this-is-a-test"
+												{...params}
+												classes={{ root: classes.root }}
+												variant="outlined"
+												label="Entities"
+											/>
+										)}
+									/>
+								</GCAccordion>
+							</AccordianWrapper>
+						</div>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<AccordianWrapper>
+								<GCAccordion
+									expanded={
+										filters.find((filter) => filter.id === 'responsibilityText') ? true : false
+									}
+									header={
+										<span>
+											RESPONSIBILITY TEXT{' '}
+											{filters.filter((f) => f.id === 'responsibilityText').length ? (
+												<span style={{ color: '#ed691d' }}>{`(${
+													filters.filter((f) => f.id === 'responsibilityText').length
+												})`}</span>
+											) : (
+												''
+											)}
+										</span>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'normal'}
+								>
+									<div style={{ width: '100%' }}>
+										<TextField
+											classes={{ root: classes.root }}
+											variant="outlined"
+											placeholder="Responsibility Text"
+											value={responsibilityText?.value || ''}
+											onChange={(e) =>
+												setResponsibilityText({
+													id: 'responsibilityText',
+													value: e.target.value,
+												})
+											}
+										/>
+									</div>
+								</GCAccordion>
+							</AccordianWrapper>
 							<GCButton
 								onClick={() => {
 									setResponsibilityText({});
