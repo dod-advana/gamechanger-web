@@ -217,13 +217,19 @@ class SearchUtility {
 	}
 
 	getEsSearchTerms({ searchText, questionFlag }) {
-		let terms = searchText;
-		if (questionFlag) {
-			const stopwordsRemoved = this.remove_stopwords(searchText);
-			const cleanedText = stopwordsRemoved.replace(/\?/g, '');
-			terms = cleanedText;
+		try {
+			let terms = searchText;
+			if (questionFlag) {
+				const stopwordsRemoved = this.remove_stopwords(searchText);
+				const cleanedText = stopwordsRemoved.replace(/\?/g, '');
+				terms = cleanedText;
+			}
+			return this.getQueryAndSearchTerms(terms);
+		} catch (e) {
+			console.log('Error getting es search terms');
+			this.logger.error(e.message, 'D2O1YIB', user);
+			return [];
 		}
-		return this.getQueryAndSearchTerms(terms);
 	}
 
 	getQueryAndSearchTerms(searchText) {
@@ -1347,8 +1353,11 @@ class SearchUtility {
 									transformTextMatch: paragraphResults[paragraph._source.id].text,
 									paragraphIdBeingMatched:
 										paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
+									score_display: paragraphResults[paragraph._source.id].score_display,
 								});
 							});
+
+							result.paragraphs.sort((a, b) => b.score - a.score);
 
 							result.score /= result.paragraphs.length;
 						} else {

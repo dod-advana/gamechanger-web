@@ -30,44 +30,50 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 const getViewHeader = (state, dispatch) => {
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText && !_.isEmpty(state.categoryMetadata) && (
-				<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
-					Showing results for <b>{state.searchText}</b>
-				</Typography>
-			)}
-			<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
-				<div style={{ ...styles.container, margin: '0px 25px' }}>
-					<GCButton
-						onClick={() => setState(dispatch, { listView: false })}
-						style={{
-							...styles.buttons,
-							...(!state.listView ? styles.unselectedButton : {}),
-						}}
-						textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-						buttonColor={!state.listView ? gcOrange : backgroundWhite}
-						borderColor={!state.listView ? gcOrange : '#B0B9BE'}
-					>
-						<div style={{ marginTop: 5 }}>
-							<AppsIcon style={styles.icon} />
-						</div>
-					</GCButton>
+			{state.searchText &&
+				(!state.applicationsLoading ||
+					!state.dashboardsLoading ||
+					!state.dataSourcesLoading ||
+					!state.databasesLoading) && (
+					<>
+						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
+							Showing results for <b>{state.searchText}</b>
+						</Typography>
+						<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
+							<div style={{ ...styles.container, margin: '0px 25px' }}>
+								<GCButton
+									onClick={() => setState(dispatch, { listView: false })}
+									style={{
+										...styles.buttons,
+										...(!state.listView ? styles.unselectedButton : {}),
+									}}
+									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
+									buttonColor={!state.listView ? gcOrange : backgroundWhite}
+									borderColor={!state.listView ? gcOrange : '#B0B9BE'}
+								>
+									<div style={{ marginTop: 5 }}>
+										<AppsIcon style={styles.icon} />
+									</div>
+								</GCButton>
 
-					<GCButton
-						onClick={() => setState(dispatch, { listView: true })}
-						style={{
-							...styles.buttons,
-							...(!state.listView ? {} : styles.unselectedButton),
-						}}
-						textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-						buttonColor={!state.listView ? backgroundWhite : gcOrange}
-						borderColor={!state.listView ? '#B0B9BE' : gcOrange}
-					>
-						<div style={{ marginTop: 5 }}>
-							<ListIcon style={styles.icon} />
+								<GCButton
+									onClick={() => setState(dispatch, { listView: true })}
+									style={{
+										...styles.buttons,
+										...(!state.listView ? {} : styles.unselectedButton),
+									}}
+									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
+									buttonColor={!state.listView ? backgroundWhite : gcOrange}
+									borderColor={!state.listView ? '#B0B9BE' : gcOrange}
+								>
+									<div style={{ marginTop: 5 }}>
+										<ListIcon style={styles.icon} />
+									</div>
+								</GCButton>
+							</div>
 						</div>
-					</GCButton>
-				</div>
-			</div>
+					</>
+				)}
 		</div>
 	);
 };
@@ -95,9 +101,19 @@ const handlePageLoad = async (props) => {
 const getMainView = (props) => {
 	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs } = props;
 
-	const { loading, viewNames, searchResultsCount, pageDisplayed } = state;
+	const {
+		loading,
+		viewNames,
+		applicationsTotalCount,
+		dashboardsTotalCount,
+		dataSourcesTotalCount,
+		databasesTotalCount,
+		pageDisplayed,
+	} = state;
 
-	const noResults = Boolean(!searchResultsCount || searchResultsCount === 0);
+	const noResults = Boolean(
+		!applicationsTotalCount && !dashboardsTotalCount && !dataSourcesTotalCount && !databasesTotalCount
+	);
 	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
 
 	return (
@@ -108,25 +124,29 @@ const getMainView = (props) => {
 						<div id="game-changer-content-top" />
 						<StyledCenterContainer showSideFilters={false}>
 							<div className={'right-container'}>
-								{loading && (
-									<div style={{ margin: '0 auto' }}>
-										<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
-									</div>
-								)}
 								{hideSearchResults && renderHideTabs(props)}
-								{!hideSearchResults && pageLoaded && searchResultsCount > 0 && (
-									<>
-										{!loading && getViewHeader(state, dispatch)}
-										<div style={{ margin: '0 15px 0 5px' }}>
-											<ResultView
-												context={{ state, dispatch }}
-												viewNames={viewNames}
-												viewPanels={getViewPanels()}
-											/>
+								{!hideSearchResults &&
+									pageLoaded &&
+									(applicationsTotalCount > 0 ||
+									dashboardsTotalCount > 0 ||
+									dataSourcesTotalCount > 0 ||
+									databasesTotalCount > 0 ? (
+										<>
+											{getViewHeader(state, dispatch)}
+											<div style={{ margin: '0 15px 0 5px' }}>
+												<ResultView
+													context={{ state, dispatch }}
+													viewNames={viewNames}
+													viewPanels={getViewPanels()}
+												/>
+											</div>
+											<div style={styles.spacer} />
+										</>
+									) : (
+										<div className="col-xs-12">
+											<LoadingIndicator customColor={gcOrange} />
 										</div>
-										<div style={styles.spacer} />
-									</>
-								)}
+									))}
 							</div>
 						</StyledCenterContainer>
 					</div>
@@ -168,7 +188,7 @@ const getCardViewPanel = (props) => {
 		databasesPage,
 		databasesLoading,
 		databasesPagination,
-		searchResultsCount,
+		loading,
 	} = state;
 
 	const applications = applicationsSearchResults;
@@ -187,188 +207,169 @@ const getCardViewPanel = (props) => {
 			style={{ marginTop: 0 }}
 		>
 			<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-				{searchResultsCount > 0 && (
-					<>
-						{applications &&
-							applications.length > 0 &&
-							(activeCategoryTab === 'Applications' || activeCategoryTab === 'all') &&
-							selectedCategories['Applications'] && (
-								<div
-									className={'col-xs-12'}
-									style={state.listView ? styles.listViewContainer : styles.containerDiv}
-								>
-									<SearchSection
-										section={'Applications'}
-										color={'rgb(50, 18, 77)'}
-										icon={ApplicationsIcon}
-									>
-										{!applicationsLoading && !applicationsPagination ? (
-											getSearchResults(applications, state, dispatch)
-										) : (
-											<div className="col-xs-12">
-												<LoadingIndicator customColor={gcOrange} />
-											</div>
-										)}
-										<div className="gcPagination col-xs-12 text-center">
-											<Pagination
-												activePage={applicationsPage}
-												itemsCountPerPage={RESULTS_PER_PAGE}
-												totalItemsCount={state.applicationsTotalCount}
-												pageRangeDisplayed={8}
-												onChange={async (page) => {
-													trackEvent(
-														getTrackingNameForFactory(state.cloneData.clone_name),
-														'PaginationChanged',
-														'page',
-														page
-													);
-													setState(dispatch, {
-														applicationsLoading: true,
-														applicationsPage: page,
-														applicationsPagination: true,
-													});
-												}}
-											/>
-										</div>
-									</SearchSection>
+				{applications?.length > 0 &&
+					(activeCategoryTab === 'Applications' || activeCategoryTab === 'all') &&
+					selectedCategories['Applications'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Applications'} color={'rgb(50, 18, 77)'} icon={ApplicationsIcon}>
+								{!applicationsLoading && !applicationsPagination ? (
+									getSearchResults(applications, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={applicationsPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={state.applicationsTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												applicationsLoading: true,
+												applicationsPage: page,
+												applicationsPagination: true,
+											});
+										}}
+									/>
 								</div>
-							)}
+							</SearchSection>
+						</div>
+					)}
 
-						{dashboards &&
-							dashboards.length > 0 &&
-							(activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') &&
-							selectedCategories['Dashboards'] && (
-								<div
-									className={'col-xs-12'}
-									style={state.listView ? styles.listViewContainer : styles.containerDiv}
-								>
-									<SearchSection
-										section={'Dashboards'}
-										color={'rgb(11, 167, 146)'}
-										icon={DashboardsIcon}
-									>
-										{!dashboardsLoading && !dashboardsPagination ? (
-											getSearchResults(dashboards, state, dispatch)
-										) : (
-											<div className="col-xs-12">
-												<LoadingIndicator customColor={gcOrange} />
-											</div>
-										)}
-										<div className="gcPagination col-xs-12 text-center">
-											<Pagination
-												activePage={dashboardsPage}
-												itemsCountPerPage={RESULTS_PER_PAGE}
-												totalItemsCount={state.dashboardsTotalCount}
-												pageRangeDisplayed={8}
-												onChange={async (page) => {
-													trackEvent(
-														getTrackingNameForFactory(state.cloneData.clone_name),
-														'PaginationChanged',
-														'page',
-														page
-													);
-													setState(dispatch, {
-														dashboardsLoading: true,
-														dashboardsPage: page,
-														dashboardsPagination: true,
-													});
-												}}
-											/>
-										</div>
-									</SearchSection>
+				{dashboards?.length > 0 &&
+					(activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') &&
+					selectedCategories['Dashboards'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Dashboards'} color={'rgb(11, 167, 146)'} icon={DashboardsIcon}>
+								{!dashboardsLoading && !dashboardsPagination ? (
+									getSearchResults(dashboards, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={dashboardsPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={state.dashboardsTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												dashboardsLoading: true,
+												dashboardsPage: page,
+												dashboardsPagination: true,
+											});
+										}}
+									/>
 								</div>
-							)}
+							</SearchSection>
+						</div>
+					)}
 
-						{dataSources &&
-							dataSources.length > 0 &&
-							(activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') &&
-							selectedCategories['DataSources'] && (
-								<div
-									className={'col-xs-12'}
-									style={state.listView ? styles.listViewContainer : styles.containerDiv}
-								>
-									<SearchSection
-										section={'Data Sources'}
-										color={'rgb(5, 159, 217)'}
-										icon={DataSourcesIcon}
-									>
-										{!dataSourcesLoading && !dataSourcesPagination ? (
-											getSearchResults(dataSources, state, dispatch)
-										) : (
-											<div className="col-xs-12">
-												<LoadingIndicator customColor={gcOrange} />
-											</div>
-										)}
-										<div className="gcPagination col-xs-12 text-center">
-											<Pagination
-												activePage={dataSourcesPage}
-												itemsCountPerPage={RESULTS_PER_PAGE}
-												totalItemsCount={state.dataSourcesTotalCount}
-												pageRangeDisplayed={8}
-												onChange={async (page) => {
-													trackEvent(
-														getTrackingNameForFactory(state.cloneData.clone_name),
-														'PaginationChanged',
-														'page',
-														page
-													);
-													setState(dispatch, {
-														dataSourcesLoading: true,
-														dataSourcesPage: page,
-														dataSourcesPagination: true,
-													});
-												}}
-											/>
-										</div>
-									</SearchSection>
+				{dataSources?.length > 0 &&
+					(activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') &&
+					selectedCategories['DataSources'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Data Sources'} color={'rgb(5, 159, 217)'} icon={DataSourcesIcon}>
+								{!dataSourcesLoading && !dataSourcesPagination ? (
+									getSearchResults(dataSources, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={dataSourcesPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={state.dataSourcesTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												dataSourcesLoading: true,
+												dataSourcesPage: page,
+												dataSourcesPagination: true,
+											});
+										}}
+									/>
 								</div>
-							)}
+							</SearchSection>
+						</div>
+					)}
 
-						{databases &&
-							databases.length > 0 &&
-							(activeCategoryTab === 'Databases' || activeCategoryTab === 'all') &&
-							selectedCategories['Databases'] && (
-								<div
-									className={'col-xs-12'}
-									style={state.listView ? styles.listViewContainer : styles.containerDiv}
-								>
-									<SearchSection
-										section={'Databases'}
-										color={'rgb(233, 105, 29)'}
-										icon={DatabasesIcon}
-									>
-										{!databasesLoading && !databasesPagination ? (
-											getSearchResults(databases, state, dispatch)
-										) : (
-											<div className="col-xs-12">
-												<LoadingIndicator customColor={gcOrange} />
-											</div>
-										)}
-										<div className="gcPagination col-xs-12 text-center">
-											<Pagination
-												activePage={databasesPage}
-												itemsCountPerPage={RESULTS_PER_PAGE}
-												totalItemsCount={state.databasesTotalCount}
-												pageRangeDisplayed={8}
-												onChange={async (page) => {
-													trackEvent(
-														getTrackingNameForFactory(state.cloneData.clone_name),
-														'PaginationChanged',
-														'page',
-														page
-													);
-													setState(dispatch, {
-														databasesLoading: true,
-														databasesPage: page,
-														databasesPagination: true,
-													});
-												}}
-											/>
-										</div>
-									</SearchSection>
+				{databases?.length > 0 &&
+					(activeCategoryTab === 'Databases' || activeCategoryTab === 'all') &&
+					selectedCategories['Databases'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Databases'} color={'rgb(233, 105, 29)'} icon={DatabasesIcon}>
+								{!databasesLoading && !databasesPagination ? (
+									getSearchResults(databases, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={databasesPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={state.databasesTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												databasesLoading: true,
+												databasesPage: page,
+												databasesPagination: true,
+											});
+										}}
+									/>
 								</div>
-							)}
-					</>
+							</SearchSection>
+						</div>
+					)}
+				{loading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
+					</div>
 				)}
 			</div>
 		</div>
@@ -415,6 +416,42 @@ const GlobalSearchMainViewHandler = (props) => {
 			setPageLoaded(true);
 		}
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+
+	useEffect(() => {
+		if (
+			state.runningSearch &&
+			!state.applicationsLoading &&
+			!state.dashboardsLoading &&
+			!state.dataSourcesLoading &&
+			!state.databasesLoading
+		) {
+			setState(dispatch, {
+				categoryMetadata: {
+					Applications: { total: state.applicationsTotalCount },
+					Dashboards: { total: state.dashboardsTotalCount },
+					DataSources: { total: state.dataSourcesTotalCount },
+					Databases: { total: state.databasesTotalCount },
+					Documentation: { total: 0 },
+					Organizations: { total: 0 },
+					Services: { total: 0 },
+				},
+				runningSearch: false,
+				loading: false,
+			});
+		}
+	}, [
+		state.runningSearch,
+		state.applicationsLoading,
+		state.dashboardsLoading,
+		state.dataSourcesLoading,
+		state.databasesLoading,
+		state.applicationsTotalCount,
+		state.dashboardsTotalCount,
+		state.dataSourcesTotalCount,
+		state.databasesTotalCount,
+		state.loading,
+		dispatch,
+	]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };

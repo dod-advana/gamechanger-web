@@ -58,33 +58,38 @@ class JBookSearchUtility {
 	}
 
 	getMapping(docType, fromFrontend) {
-		let mapping;
-		if (Mappings[`${docType}Mapping`]) {
-			mapping = _.clone(Mappings[`${docType}Mapping`]);
-		} else {
-			console.log(`${docType} mapping not found`);
-			return {};
-		}
-
-		if (fromFrontend) {
-			let frontEndMapping = {};
-			for (const field in mapping) {
-				const newName = mapping[field].newName;
-
-				if (!frontEndMapping[newName]) {
-					frontEndMapping[newName] = _.clone(mapping[field]);
-					frontEndMapping[newName].newName = field;
-				}
+		try {
+			let mapping;
+			if (Mappings[`${docType}Mapping`]) {
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
+			} else {
+				console.log(`${docType} mapping not found`);
+				return {};
 			}
-			return frontEndMapping;
-		} else if (docType !== 'review' || docType !== 'gl') {
-			mapping = {
-				...mapping,
-				...reviewMapping,
-			};
-		}
 
-		return mapping;
+			if (fromFrontend) {
+				let frontEndMapping = {};
+				for (const field in mapping) {
+					const newName = mapping[field].newName;
+
+					if (!frontEndMapping[newName]) {
+						frontEndMapping[newName] = _.clone(mapping[field]);
+						frontEndMapping[newName].newName = field;
+					}
+				}
+				return frontEndMapping;
+			} else if (docType !== 'review' || docType !== 'gl') {
+				mapping = {
+					...mapping,
+					...reviewMapping,
+				};
+			}
+
+			return mapping;
+		} catch (err) {
+			console.log('Error retrieving jbook mapping');
+			this.logger.error(err.message, 'AJTKSKQ');
+		}
 	}
 
 	getDocCols(docType, totals = false, fullPDFExport = false) {
@@ -1319,190 +1324,243 @@ class JBookSearchUtility {
 		}
 	}
 
+	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText, parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
+		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
 		userId,
 		serviceAgencyMappings
 	) {
-		const isVerbatimSearch = this.isVerbatim(searchText);
-		const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+		let query = {};
+		try {
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-		let query = {
-			track_total_hits: true,
-			from: offset,
-			size: limit,
-			aggregations: {
-				service_agency_aggs: {
-					terms: {
-						field: 'serviceAgency_s',
-						size: 10000,
-					},
-				},
-			},
-			query: {
-				bool: {
-					must: [],
-					should: [
-						{
-							multi_match: {
-								query: `${parsedQuery}`,
-								fields: esTopLevelFields,
-								type: 'best_fields',
-								operator: `${operator}`,
-							},
-						},
-					],
-				},
-			},
-			highlight: {
-				fields: {},
-			},
-		};
-
-		if (jbookSearchSettings.pgKeys !== undefined) {
-			query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
-		}
-
-		esTopLevelFields.forEach((field) => {
-			query.highlight.fields[field] = {};
-		});
-
-		esInnerHitFields.forEach((innerField) => {
-			const nested = {
-				nested: {
-					path: innerField.path,
-					inner_hits: {
-						_source: false,
-						highlight: {
-							fields: {},
+			query = {
+				track_total_hits: true,
+				from: offset,
+				size: limit,
+				aggregations: {
+					service_agency_aggs: {
+						terms: {
+							field: 'serviceAgency_s',
+							size: 10000,
 						},
 					},
-					query: {
-						bool: {
-							should: [
-								{
-									multi_match: {
-										query: `${parsedQuery}`,
-										fields: innerField.fields,
-										type: 'best_fields',
-										operator: `${operator}`,
-									},
+				},
+				query: {
+					bool: {
+						must: [],
+						should: [
+							{
+								multi_match: {
+									query: `${parsedQuery}`,
+									fields: esTopLevelFields,
+									type: 'best_fields',
+									operator: `${operator}`,
 								},
-							],
-						},
+							},
+						],
 					},
+				},
+				highlight: {
+					fields: {},
 				},
 			};
 
-			innerField.fields.forEach((field) => {
-				nested.nested.inner_hits.highlight.fields[field] = {};
+			if (jbookSearchSettings.pgKeys !== undefined) {
+				query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
+			}
+
+			esTopLevelFields.forEach((field) => {
+				query.highlight.fields[field] = {};
 			});
-			query.query.bool.should.push(nested);
-		});
 
-		const wildcardList = {
-			type_s: 1,
-			key_s: 1,
-			projectTitle_t: 1,
-			projectNum_s: 6,
-			programElementTitle_t: 1,
-			serviceAgency_s: 2,
-			appropriationTitle_t: 1,
-			appropriationNumber_s: 6,
-			budgetActivityTitle_t: 6,
-			budgetActivityTitle_s: 6,
-			programElement_s: 6,
-			accountTitle_s: 1,
-			budgetLineItemTitle_s: 1,
-			budgetLineItem_s: 6,
-		};
-
-		Object.keys(wildcardList).forEach((wildCardKey) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[wildCardKey]: {
-						value: `*${plainQuery}*`,
-						boost: wildcardList[wildCardKey],
+			esInnerHitFields.forEach((innerField) => {
+				const nested = {
+					nested: {
+						path: innerField.path,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {},
+							},
+						},
+						query: {
+							bool: {
+								should: [
+									{
+										multi_match: {
+											query: `${parsedQuery}`,
+											fields: innerField.fields,
+											type: 'best_fields',
+											operator: `${operator}`,
+										},
+									},
+								],
+							},
+						},
 					},
-				},
+				};
+
+				innerField.fields.forEach((field) => {
+					nested.nested.inner_hits.highlight.fields[field] = {};
+				});
+				query.query.bool.should.push(nested);
 			});
-		});
 
-		// FILTERS
+			const wildcardList = {
+				type_s: 1,
+				key_s: 1,
+				projectTitle_t: 1,
+				projectNum_s: 6,
+				programElementTitle_t: 1,
+				serviceAgency_s: 2,
+				appropriationTitle_t: 1,
+				appropriationNumber_s: 6,
+				budgetActivityTitle_t: 6,
+				budgetActivityTitle_s: 6,
+				programElement_s: 6,
+				accountTitle_s: 1,
+				budgetLineItemTitle_s: 1,
+				budgetLineItem_s: 6,
+			};
 
-		if (jbookSearchSettings && jbookSearchSettings.budgetYear) {
-			query.query.bool.must.push({
-				terms: {
-					budgetYear_s: jbookSearchSettings.budgetYear,
-				},
-			});
-		}
-
-		if (jbookSearchSettings && jbookSearchSettings.serviceAgency) {
-			const convertedAgencies = [];
-
-			jbookSearchSettings.serviceAgency.forEach((agency) => {
-				Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
-					if (serviceAgencyMappings[agencyKey] === agency) {
-						convertedAgencies.push(agencyKey);
-					}
+			Object.keys(wildcardList).forEach((wildCardKey) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[wildCardKey]: {
+							value: `*${plainQuery}*`,
+							boost: wildcardList[wildCardKey],
+						},
+					},
 				});
 			});
-			query.query.bool.must.push({
-				terms: {
-					serviceAgency_s: convertedAgencies,
-				},
-			});
+
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
+
+			// SORT
+			switch (jbookSearchSettings.sort[0].id) {
+				case 'budgetYear':
+					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'programElement':
+					query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectNum':
+					query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectTitle':
+					query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'serviceAgency':
+					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				default:
+					break;
+			}
+		} catch (e) {
+			console.log('Error making ES query for jbook');
+			this.logger.error(e.message, 'IEPGRAZ81');
+			return query;
 		}
-
-		if (jbookSearchSettings && jbookSearchSettings.budgetType) {
-			const budgetTypesTemp = [];
-
-			jbookSearchSettings.budgetType.forEach((budgetType) => {
-				switch (budgetType) {
-					case 'RDT&E':
-						budgetTypesTemp.push('rdte');
-						break;
-					case 'O&M':
-						budgetTypesTemp.push('om');
-						break;
-					case 'Procurement':
-						budgetTypesTemp.push('procurement');
-						break;
-					default:
-						break;
-				}
-			});
-
-			query.query.bool.must.push({
-				terms: {
-					type_s: budgetTypesTemp,
-				},
-			});
-		}
-
-		// SORT
-		switch (jbookSearchSettings.sort[0].id) {
-			case 'budgetYear':
-				query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'programElement':
-				query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'projectNum':
-				query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'projectTitle':
-				query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			case 'serviceAgency':
-				query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
-				break;
-			default:
-				break;
-		}
-
+		console.log(JSON.stringify(query));
 		return query;
+	}
+
+	// creates the portions of the ES query for filtering based on jbookSearchSettings
+	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
+	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
+		let filterQueries = [];
+		try {
+			if (jbookSearchSettings) {
+				// Budget Type filter
+				if (jbookSearchSettings.budgetType) {
+					const budgetTypesTemp = [];
+
+					jbookSearchSettings.budgetType.forEach((budgetType) => {
+						switch (budgetType) {
+							case 'RDT&E':
+								budgetTypesTemp.push('rdte');
+								break;
+							case 'O&M':
+								budgetTypesTemp.push('om');
+								break;
+							case 'Procurement':
+								budgetTypesTemp.push('procurement');
+								break;
+							default:
+								break;
+						}
+					});
+
+					filterQueries.push({
+						terms: {
+							type_s: budgetTypesTemp,
+						},
+					});
+				}
+
+				// Budget Year filter
+				if (jbookSearchSettings.budgetYear) {
+					filterQueries.push({
+						terms: {
+							budgetYear_s: jbookSearchSettings.budgetYear,
+						},
+					});
+				}
+
+				// Program Element / BLI filter
+				if (jbookSearchSettings.programElement) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.programElement}`,
+							default_field: 'budgetLineItem_s',
+						},
+					});
+				}
+
+				// Project Number filter (doesn't appear in kibana)
+				if (jbookSearchSettings.projectNum) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.projectNum}`,
+							default_field: 'projectNum_s',
+						},
+					});
+				}
+
+				// Service Agency filter
+				if (jbookSearchSettings.serviceAgency) {
+					const convertedAgencies = [];
+
+					jbookSearchSettings.serviceAgency.forEach((agency) => {
+						console.log(agency);
+						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
+							if (serviceAgencyMappings[agencyKey] === agency) {
+								convertedAgencies.push(agencyKey);
+							}
+						});
+					});
+
+					filterQueries.push({
+						terms: {
+							serviceAgency_s: convertedAgencies,
+						},
+					});
+				}
+			}
+		} catch (e) {
+			console.log('Error applying Jbook ES filters');
+			this.logger.error(e.message, 'IEPGRAZ9');
+			return filterQueries;
+		}
+
+		return filterQueries;
 	}
 }
 

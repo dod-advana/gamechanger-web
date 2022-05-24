@@ -54,7 +54,6 @@ export const SelectedDocsDrawer = (props) => {
 		setStepIndex,
 		showTutorial,
 		rawSearchResults,
-		checkUserInfo,
 	} = props;
 
 	const handleRemoveSelection = (key) => {
@@ -104,7 +103,6 @@ export const SelectedDocsDrawer = (props) => {
 		if (!isDrawerReady) {
 			setTimeout(() => {
 				setDrawerReady(true);
-				console.log('ready');
 			}, 600);
 		}
 
@@ -112,10 +110,6 @@ export const SelectedDocsDrawer = (props) => {
 	};
 
 	const handleExportButtonClick = () => {
-		if (checkUserInfo()) {
-			return;
-		}
-
 		if (selectedDocuments.size === 0) {
 			openExport();
 		} else {
@@ -236,5 +230,4 @@ SelectedDocsDrawer.propTypes = {
 	setStepIndex: PropTypes.func,
 	showTutorial: PropTypes.bool,
 	rawSearchResults: PropTypes.arrayOf(PropTypes.object),
-	checkUserInfo: PropTypes.func,
 };

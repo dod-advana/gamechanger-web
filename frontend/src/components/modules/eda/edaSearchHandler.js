@@ -9,14 +9,7 @@ import {
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -57,13 +50,7 @@ const EdaSearchHandler = {
 			edaSearchSettings,
 		} = state;
 
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
-
-		const favSearchUrls = userData.favorite_searches.map((search) => {
+		const favSearchUrls = userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 
@@ -72,7 +59,7 @@ const EdaSearchHandler = {
 		let url = window.location.hash.toString();
 		url = url.replace('#/', '');
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url) || false;
 
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
@@ -82,7 +69,6 @@ const EdaSearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();
@@ -306,8 +292,13 @@ const EdaSearchHandler = {
 						};
 
 						let totalObligatedAmount = 0;
+
+						// doc.issuing_organization_eda_ext which is set in edaSearchUtility > getExtractedFields is no longer being used
+						// fpds_contracting_agency_name_eda_ext could work, but not every doc has fpds
+
 						for (const doc of docs) {
-							const org = orgNames[doc.issuing_organization_eda_ext];
+							const org =
+								orgNames[doc.issuing_organization_eda_ext ?? doc.fpds_contracting_agency_name_eda_ext];
 							if (org && issuingOrgs[org] !== undefined) {
 								issuingOrgs[org] += 1;
 							}

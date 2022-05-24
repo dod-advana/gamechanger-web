@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,25 +10,6 @@ import { Typography } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Remove';
 import AddIcon from '@material-ui/icons/Add';
 
-const StyledAccordion = withStyles({
-	root: {
-		border: '1px solid rgba(0, 0, 0, .125)',
-		boxShadow: 'none',
-		borderTopLeftRadius: 6,
-		borderTopRightRadius: 6,
-		'&:not(:last-child)': {
-			marginBottom: '10px !important',
-		},
-		'&:before': {
-			display: 'none',
-		},
-		'&$expanded': {
-			margin: 'auto',
-		},
-	},
-	expanded: {},
-})(Accordion);
-
 const StyledAccordionSummary = withStyles({
 	root: {
 		backgroundColor: gcBlue,
@@ -37,6 +18,7 @@ const StyledAccordionSummary = withStyles({
 		marginBottom: -1,
 		minHeight: 'unset',
 		height: '44px',
+		width: '100%',
 		'&$expanded': {
 			minHeight: 'unset',
 			height: '44px',
@@ -104,7 +86,31 @@ const GCAccordion = (props) => {
 		notBordered,
 		onChange,
 		onClick = _.noop,
+		marginBottom,
 	} = props;
+
+	const StyledAccordion = useMemo(
+		() =>
+			withStyles({
+				root: {
+					border: '1px solid rgba(0, 0, 0, .125)',
+					boxShadow: 'none',
+					borderTopLeftRadius: 6,
+					borderTopRightRadius: 6,
+					'&:not(:last-child)': {
+						marginBottom: marginBottom ?? '10px !important',
+					},
+					'&:before': {
+						display: 'none',
+					},
+					'&$expanded': {
+						margin: 'auto',
+					},
+				},
+				expanded: {},
+			})(Accordion),
+		[marginBottom]
+	);
 
 	const [isExpanded, setIsExpanded] = useState(false);
 
