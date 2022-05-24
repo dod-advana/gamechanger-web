@@ -259,6 +259,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						<GCToolTip title="Export" placement="top" arrow enterDelay={500}>
 							<span>
 								<GCButton
+									className="re-tutorial-step-5"
 									onClick={exportCSV}
 									style={{
 										minWidth: 50,
