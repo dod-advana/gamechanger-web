@@ -95,17 +95,6 @@ class JBookDataHandler extends DataHandler {
 		});
 	}
 
-	// budget line item : pdoc and project num : rdoc
-	async getProjectData(req, userId) {
-		const { useElasticSearch = false } = req.body;
-
-		if (useElasticSearch) {
-			return this.getESProjectData(req, userId);
-		} else {
-			return this.getPGProjectData(req, userId);
-		}
-	}
-
 	async getESProjectData(req, userId) {
 		try {
 			const { id, type } = req.body;
@@ -190,6 +179,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// REMOVE WHEN WE GOOD
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
@@ -1251,7 +1241,7 @@ class JBookDataHandler extends DataHandler {
 		try {
 			switch (functionName) {
 				case 'getProjectData':
-					return await this.getProjectData(req, userId);
+					return await this.getESProjectData(req, userId);
 				case 'getBudgetDropdownData':
 					return await this.getBudgetDropdownData(req, userId);
 				case 'getBudgetReview':
