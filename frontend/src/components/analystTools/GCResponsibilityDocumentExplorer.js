@@ -467,6 +467,7 @@ export default function ResponsibilityDocumentExplorer({
 										autoSelect
 										getOptionLabel={(option) => option}
 										defaultValue={organization}
+										value={organization}
 										onChange={(event, newValue) => {
 											setOrganization(newValue);
 										}}
