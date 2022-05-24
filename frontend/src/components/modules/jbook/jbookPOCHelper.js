@@ -24,6 +24,7 @@ import {
 	StyledTableValueContainer,
 	StyledInlineContainer,
 	StyledAccordionDiv,
+	ButtonStyles,
 } from './profilePage/profilePageStyles';
 import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import GCPrimaryButton from '../../common/GCButton';
@@ -1034,10 +1035,7 @@ const JCAValue = React.memo((props) => {
 			<JCAChecklist reviewData={reviewData} setReviewData={setReviewData} finished={finished} />
 			<GCPrimaryButton
 				style={{
-					color: '#515151',
-					backgroundColor: '#E0E0E0',
-					borderColor: '#E0E0E0',
-					height: '35px',
+					...ButtonStyles.main,
 					margin: '5px 0px 10px',
 				}}
 				onClick={() => {
@@ -1236,10 +1234,7 @@ const AIDomainValue = React.memo((props) => {
 				</div>
 				<GCPrimaryButton
 					style={{
-						color: '#515151',
-						backgroundColor: '#E0E0E0',
-						borderColor: '#E0E0E0',
-						height: '35px',
+						...ButtonStyles.main,
 						margin: '5px 0px 0px',
 						width: '158px',
 					}}
@@ -1315,10 +1310,7 @@ const DataTypeValue = React.memo((props) => {
 				)}
 				<GCPrimaryButton
 					style={{
-						color: '#515151',
-						backgroundColor: '#E0E0E0',
-						borderColor: '#E0E0E0',
-						height: '35px',
+						...ButtonStyles.main,
 						margin: '0px 0px 10px',
 						width: '158px',
 					}}
