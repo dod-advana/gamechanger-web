@@ -444,6 +444,7 @@ const GCResponsibilityTracker = ({
 
 		return (
 			<ReactTable
+				className="re-tutorial-step-7"
 				data={responsibilityTableData}
 				columns={dataColumns}
 				style={{ height: 700, marginTop: 10 }}

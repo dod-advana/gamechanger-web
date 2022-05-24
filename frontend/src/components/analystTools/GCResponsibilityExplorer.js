@@ -80,9 +80,22 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const [organization, setOrganization] = useState([]);
 	const [responsibilityText, setResponsibilityText] = useState({});
 	const [infiniteCount, setInfiniteCount] = useState(1);
+	const [collapseKeys, setCollapseKeys] = useState({});
 
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+
+	const tutorialSearch = () => {
+		setOrganization(['dod']);
+		const newFilters = [{ id: 'organizationPersonnel', value: 'dod' }];
+		setCollapseKeys({
+			'DoDI 1304.02 Accession Processing Data Collection Forms': true,
+			'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+		});
+		setFilters(newFilters);
+		setInfiniteCount(1);
+		setReloadResponsibilities(true);
+	};
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -101,9 +114,11 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const resetPage = () => {
 		setStepIndex(0);
+		setReView('Document');
 		setFilters([]);
 		setOrganization([]);
 		setResponsibilityText({});
+		setReloadResponsibilities(true);
 	};
 
 	const scrollRef = useBottomScrollListener(
@@ -228,9 +243,16 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						in specific documents, by organization/role/entity, and/or by responsibility area.
 					</div>
 					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={() => setShowTutorial(true)} />
+						<HelpOutlineIcon
+							style={{ cursor: 'pointer' }}
+							onClick={() => {
+								setReView('Document');
+								setShowTutorial(true);
+							}}
+						/>
 					</GCToolTip>
 					<GCButton
+						className="re-tutorial-step-5"
 						onClick={exportCSV}
 						style={{
 							minWidth: 50,
@@ -252,7 +274,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 							View
 						</InputLabel>
 						<Select
-							className={`MuiInputBase-root`}
+							className={`MuiInputBase-root re-tutorial-step-6`}
 							labelId="re-view-name"
 							label="View"
 							id="re-view-name-select"
@@ -309,6 +331,9 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					setFilters={setFilters}
 					documentList={documentList}
 					infiniteScrollRef={scrollRef}
+					collapseKeys={collapseKeys}
+					setCollapseKeys={setCollapseKeys}
+					showTutorial={showTutorial}
 				/>
 			)}
 			<TutorialOverlay
@@ -320,6 +345,9 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				stepIndex={stepIndex}
 				setStepIndex={setStepIndex}
 			/>
+
+			<GCButton style={{ display: 'none' }} id="set-re-view" onClick={() => setReView('Chart')}></GCButton>
+			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
 		</div>
 	);
 }

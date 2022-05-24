@@ -92,11 +92,13 @@ export default function ResponsibilityDocumentExplorer({
 	setFilters,
 	documentList,
 	infiniteScrollRef,
+	collapseKeys,
+	setCollapseKeys,
+	showTutorial,
 }) {
 	const { cloneData } = state;
 	const classes = useStyles();
 
-	const [collapseKeys, setCollapseKeys] = useState({});
 	const [iframeLoading, setIframeLoading] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
@@ -147,7 +149,7 @@ export default function ResponsibilityDocumentExplorer({
 					initialCollapseKeys[doc + entity] = false;
 				});
 			});
-			setCollapseKeys(initialCollapseKeys);
+			if (!showTutorial) setCollapseKeys(initialCollapseKeys);
 			const doc = Object.keys(responsibilityData)[0];
 			const entity = Object.keys(responsibilityData[doc])[0];
 
@@ -155,6 +157,7 @@ export default function ResponsibilityDocumentExplorer({
 		} else if (!Object.keys(responsibilityData).length) {
 			setSelectedResponsibility({});
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [responsibilityData, infiniteCount]);
 
 	useEffect(() => {
@@ -371,164 +374,167 @@ export default function ResponsibilityDocumentExplorer({
 					overflowY: 'auto',
 				}}
 			>
-				<div
-					className="re-tutorial-step-1"
-					style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}
-				>
-					FILTERS {filters.length ? <span style={{ color: '#ed691d' }}>{`(${filters.length})`}</span> : ''}
-				</div>
-				<div style={{ width: '100%' }}>
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
-							header={
-								<span>
-									DOCUMENT TITLE{' '}
-									{filters.filter((f) => f.id === 'documentTitle').length ? (
-										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'documentTitle').length
-										})`}</span>
-									) : (
-										''
-									)}
-								</span>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<Autocomplete
-								classes={{ root: classes.root }}
-								key={clearFilters}
-								multiple
-								options={documentList}
-								getOptionLabel={(option) => option.documentTitle}
-								defaultValue={docTitle}
-								onChange={(event, newValue) => {
-									setDocTitle(newValue);
-								}}
-								renderInput={(params) => (
-									<TextField
-										{...params}
-										classes={{ root: classes.root }}
-										variant="outlined"
-										label="Document Titles"
-									/>
-								)}
-							/>
-						</GCAccordion>
+				<div className="re-tutorial-step-1">
+					<div style={{ fontSize: 16, marginBottom: 10, fontFamily: 'Montserrat', fontWeight: '600' }}>
+						FILTERS{' '}
+						{filters.length ? <span style={{ color: '#ed691d' }}>{`(${filters.length})`}</span> : ''}
 					</div>
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false}
-							header={
-								<span>
-									ORGANIZATION{' '}
-									{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
-										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'organizationPersonnel').length
-										})`}</span>
-									) : (
-										''
-									)}
-								</span>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<Autocomplete
-								classes={{ root: classes.root }}
-								key={clearFilters}
-								multiple
-								options={[]}
-								freeSolo
-								autoSelect
-								getOptionLabel={(option) => option}
-								defaultValue={organization}
-								onChange={(event, newValue) => {
-									setOrganization(newValue);
-								}}
-								renderInput={(params) => (
-									<TextField
-										{...params}
-										classes={{ root: classes.root }}
-										variant="outlined"
-										label="Organizations"
-									/>
-								)}
-							/>
-						</GCAccordion>
-					</div>
-					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'responsibilityText') ? true : false}
-							header={
-								<span>
-									RESPONSIBILITY TEXT{' '}
-									{filters.filter((f) => f.id === 'responsibilityText').length ? (
-										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'responsibilityText').length
-										})`}</span>
-									) : (
-										''
-									)}
-								</span>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div style={{ width: '100%' }}>
-								<TextField
+					<div style={{ width: '100%' }}>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={filters.find((filter) => filter.id === 'documentTitle') ? true : false}
+								header={
+									<span>
+										DOCUMENT TITLE{' '}
+										{filters.filter((f) => f.id === 'documentTitle').length ? (
+											<span style={{ color: '#ed691d' }}>{`(${
+												filters.filter((f) => f.id === 'documentTitle').length
+											})`}</span>
+										) : (
+											''
+										)}
+									</span>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<Autocomplete
 									classes={{ root: classes.root }}
-									variant="outlined"
-									placeholder="Responsibility Text"
-									value={responsibilityText?.value || ''}
-									onChange={(e) =>
-										setResponsibilityText({ id: 'responsibilityText', value: e.target.value })
-									}
+									key={clearFilters}
+									multiple
+									options={documentList}
+									getOptionLabel={(option) => option.documentTitle}
+									defaultValue={docTitle}
+									onChange={(event, newValue) => {
+										setDocTitle(newValue);
+									}}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											classes={{ root: classes.root }}
+											variant="outlined"
+											label="Document Titles"
+										/>
+									)}
 								/>
-							</div>
-						</GCAccordion>
-						<GCButton
-							onClick={() => {
-								setResponsibilityText({});
-								setOrganization([]);
-								setDocTitle([]);
-								setClearFilters(!clearFilters);
-								setFilters([]);
-								setResultsPage(1);
-								setReloadResponsibilities(true);
-							}}
-							style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
-							isSecondaryBtn
-						>
-							Clear Filters
-						</GCButton>
-						<GCButton
-							onClick={() => {
-								const filters = [];
-								if (Object.keys(responsibilityText).length) filters.push(responsibilityText);
-								if (organization.length) {
-									organization.forEach((org) => {
-										filters.push({ id: 'organizationPersonnel', value: org });
-									});
+							</GCAccordion>
+						</div>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={
+									filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false
 								}
-								if (docTitle.length) {
-									docTitle.forEach((doc) => {
-										filters.push({ id: 'documentTitle', value: doc.documentTitle });
-									});
+								header={
+									<span>
+										ENTITY{' '}
+										{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+											<span style={{ color: '#ed691d' }}>{`(${
+												filters.filter((f) => f.id === 'organizationPersonnel').length
+											})`}</span>
+										) : (
+											''
+										)}
+									</span>
 								}
-								setCollapseKeys({});
-								setFilters(filters);
-								setResultsPage(1);
-								setReloadResponsibilities(true);
-							}}
-							style={{ display: 'block', width: '100%', margin: 0 }}
-						>
-							Update Search
-						</GCButton>
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<Autocomplete
+									classes={{ root: classes.root }}
+									key={clearFilters}
+									multiple
+									options={[]}
+									freeSolo
+									autoSelect
+									getOptionLabel={(option) => option}
+									defaultValue={organization}
+									onChange={(event, newValue) => {
+										setOrganization(newValue);
+									}}
+									renderInput={(params) => (
+										<TextField
+											id="this-is-a-test"
+											{...params}
+											classes={{ root: classes.root }}
+											variant="outlined"
+											label="Entities"
+										/>
+									)}
+								/>
+							</GCAccordion>
+						</div>
+						<div style={{ width: '100%', marginBottom: 10 }}>
+							<GCAccordion
+								expanded={filters.find((filter) => filter.id === 'responsibilityText') ? true : false}
+								header={
+									<span>
+										RESPONSIBILITY TEXT{' '}
+										{filters.filter((f) => f.id === 'responsibilityText').length ? (
+											<span style={{ color: '#ed691d' }}>{`(${
+												filters.filter((f) => f.id === 'responsibilityText').length
+											})`}</span>
+										) : (
+											''
+										)}
+									</span>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								<div style={{ width: '100%' }}>
+									<TextField
+										classes={{ root: classes.root }}
+										variant="outlined"
+										placeholder="Responsibility Text"
+										value={responsibilityText?.value || ''}
+										onChange={(e) =>
+											setResponsibilityText({ id: 'responsibilityText', value: e.target.value })
+										}
+									/>
+								</div>
+							</GCAccordion>
+							<GCButton
+								onClick={() => {
+									setResponsibilityText({});
+									setOrganization([]);
+									setDocTitle([]);
+									setClearFilters(!clearFilters);
+									setFilters([]);
+									setResultsPage(1);
+									setReloadResponsibilities(true);
+								}}
+								style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
+								isSecondaryBtn
+							>
+								Clear Filters
+							</GCButton>
+							<GCButton
+								onClick={() => {
+									const filters = [];
+									if (Object.keys(responsibilityText).length) filters.push(responsibilityText);
+									if (organization.length) {
+										organization.forEach((org) => {
+											filters.push({ id: 'organizationPersonnel', value: org });
+										});
+									}
+									if (docTitle.length) {
+										docTitle.forEach((doc) => {
+											filters.push({ id: 'documentTitle', value: doc.documentTitle });
+										});
+									}
+									setCollapseKeys({});
+									setFilters(filters);
+									setResultsPage(1);
+									setReloadResponsibilities(true);
+								}}
+								style={{ display: 'block', width: '100%', margin: 0 }}
+							>
+								Update Search
+							</GCButton>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -577,6 +583,7 @@ export default function ResponsibilityDocumentExplorer({
 							paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0),
 							height: '100%',
 						}}
+						className="re-tutorial-step-4"
 					>
 						<div style={{ height: '100%' }}>
 							{selectedResponsibility.filename && (
@@ -647,7 +654,7 @@ export default function ResponsibilityDocumentExplorer({
 				</div>
 			</div>
 			<div
-				className={`col-xs-${RIGHT_PANEL_COL_WIDTH}`}
+				className={`col-xs-${RIGHT_PANEL_COL_WIDTH} re-tutorial-step-2`}
 				style={{
 					display: rightPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
@@ -809,6 +816,7 @@ export default function ResponsibilityDocumentExplorer({
 																					>
 																						<div>
 																							<GCButton
+																								className="re-tutorial-step-3"
 																								onClick={() => {
 																									if (
 																										isEditingResp ||
