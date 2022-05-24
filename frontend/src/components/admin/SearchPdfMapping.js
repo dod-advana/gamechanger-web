@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
-import XLSX from 'xlsx';
+import 'react-table/react-table.css';
+import DatePicker from 'react-datepicker';
 import { Typography, Grid, Card, CardContent } from '@material-ui/core';
-import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import DateFnsUtils from '@date-io/date-fns';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
 import GameChangerAPI from '../api/gameChanger-service-api';
@@ -17,6 +16,30 @@ import './searchPdfStyles.css';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const DatePickerWrapper = styled.div`
+	margin-right: 10px;
+	display: flex;
+	flex-direction: column;
+
+	> label {
+		text-align: left;
+		margin-bottom: 2px;
+		color: #3f4a56;
+		font-size: 15px;
+		font-family: Noto Sans;
+	}
+
+	> .react-datepicker-wrapper {
+		> .react-datepicker__input-container {
+			> input {
+				width: 225px;
+				border: 0;
+				outline: 0;
+				border-bottom: 1px solid black;
+			}
+		}
+	}
+`;
 const CreateWrapper = styled.div`
 	display: flex;
 	align-items: center;
@@ -314,8 +337,8 @@ export default () => {
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
 	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0 });
-	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 }));
-	const [endDate, setEndDate] = useState(moment());
+	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
+	const [endDate, setEndDate] = useState(moment()._d);
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
 
@@ -449,11 +472,28 @@ export default () => {
 	 * and saves it to the users downloads as a csv.
 	 * @method exportData
 	 */
-	const exportData = (name, data) => {
-		var ws = XLSX.utils.json_to_sheet(data);
-		var wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, name);
-		XLSX.writeFile(wb, name + '.csv');
+	const exportData = async (name) => {
+		try {
+			// daysBack, offset, filters, sorting, pageSize
+			const params = {
+				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+				table: name,
+				daysBack: daysBack,
+			};
+			const data = await gameChangerAPI.exportUserData(params);
+			console.log(data);
+			const url = window.URL.createObjectURL(
+				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+			);
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', `${name}.xlsx`); //or any other extension
+			document.body.appendChild(link);
+			link.click();
+		} catch (e) {
+			console.error(e);
+		}
 	};
 
 	useEffect(() => {
@@ -543,69 +583,61 @@ export default () => {
 							}}
 						>
 							<Grid container spacing={2}>
-								<MuiPickersUtilsProvider utils={DateFnsUtils}>
-									<Grid item xs={3}>
-										<KeyboardDateTimePicker
-											margin="normal"
-											format="MM/dd/yyyy hh:mm"
-											InputProps={{
-												style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
-											}}
-											value={startDate}
+								<Grid item xs={2}>
+									<DatePickerWrapper>
+										<label>Start Date</label>
+										<DatePicker
+											showTimeSelect
+											selected={startDate}
 											onChange={(date) => handleDateChange(date, setStartDate)}
-											// onOpen={setDatePickerOpen}
-											// onClose={setDatePickerClosed}
-											style={{ flex: '110px', margin: '5px' }}
+											dateFormat="MM/dd/yyyy h:mm aa"
 										/>
-									</Grid>
-									<Grid item xs={3}>
-										<KeyboardDateTimePicker
-											margin="normal"
-											format="MM/dd/yyyy hh:mm"
-											InputProps={{
-												style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
-											}}
-											value={endDate}
+									</DatePickerWrapper>
+								</Grid>
+								<Grid item xs={2}>
+									<DatePickerWrapper>
+										<label>End Date</label>
+										<DatePicker
+											showTimeSelect
+											selected={endDate}
 											onChange={(date) => handleDateChange(date, setEndDate)}
-											// onOpen={setDatePickerOpen}
-											// onClose={setDatePickerClosed}
-											style={{ flex: '110px', margin: '5px' }}
+											dateFormat="MM/dd/yyyy h:mm aa"
 										/>
-									</Grid>
-									<Grid item xs={3}></Grid>
-									<Grid item xs={3}>
-										<GCPrimaryButton
-											onClick={() => {
-												trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
-												exportData('SearchPdfMapping', mappingData);
-											}}
-											style={{ minWidth: 'unset' }}
-										>
-											Export Mapping
-										</GCPrimaryButton>
-									</Grid>
-									<Grid item xs={2}>
-										<Card>
-											<CardContent>
-												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-													Total Searches
-												</p>
-												{cardData.total_searches}
-											</CardContent>
-										</Card>
-									</Grid>
-									<Grid item xs={2}>
-										<Card>
-											<CardContent>
-												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-													Unique Users
-												</p>
-												{cardData.unique_users}
-											</CardContent>
-										</Card>
-									</Grid>
-									<Grid item xs={8}></Grid>
-								</MuiPickersUtilsProvider>
+									</DatePickerWrapper>
+								</Grid>
+								<Grid item xs={5}></Grid>
+								<Grid item xs={3}>
+									<GCPrimaryButton
+										onClick={() => {
+											trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
+											exportData('SearchPdfMapping', mappingData);
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Export Mapping
+									</GCPrimaryButton>
+								</Grid>
+								<Grid item xs={2}>
+									<Card>
+										<CardContent>
+											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+												Total Searches
+											</p>
+											{cardData.total_searches}
+										</CardContent>
+									</Card>
+								</Grid>
+								<Grid item xs={2}>
+									<Card>
+										<CardContent>
+											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+												Unique Users
+											</p>
+											{cardData.unique_users}
+										</CardContent>
+									</Card>
+								</Grid>
+								<Grid item xs={8}></Grid>
 							</Grid>
 						</div>
 						<div

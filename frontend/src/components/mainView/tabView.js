@@ -7,7 +7,7 @@ import { gcOrange } from '../../components/common/gc-colors';
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 import GCButton from '../common/GCButton';
-import { checkUserInfo, createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
+import { createCopyTinyUrl, setState } from '../../utils/sharedFunctions';
 import { SelectedDocsDrawer } from '../searchBar/GCSelectedDocsDrawer';
 
 const StyledTabsList = styled(TabList)`
@@ -166,9 +166,6 @@ const TabView = (props) => {
 						setStepIndex={setStepIndex}
 						showTutorial={state.showTutorial}
 						rawSearchResults={state.rawSearchResults}
-						checkUserInfo={() => {
-							checkUserInfo(state, dispatch);
-						}}
 					/>
 				)}
 				<div style={styles.spacer} />
