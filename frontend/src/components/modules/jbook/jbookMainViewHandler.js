@@ -9,6 +9,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { Typography } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
+import '../../../containers/jbook.css';
 import {
 	getQueryVariable,
 	getTrackingNameForFactory,
@@ -23,7 +24,6 @@ import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
 import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
-import GCToggle from '../../common/GCToggleSwitch';
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -160,22 +160,6 @@ const getCardViewPanel = (props) => {
 					<StyledCenterContainer showSideFilters={showSideFilters}>
 						<div className={'top-container'}>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<div style={{ padding: 10, zIndex: 99 }}>
-									{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
-										<GCToggle
-											onClick={() => {
-												setState(dispatch, {
-													useElasticSearch: !state.useElasticSearch,
-													runSearch: true,
-												});
-											}}
-											rightActive={state.useElasticSearch}
-											leftLabel={'Use PG'}
-											rightLabel={'Use ES'}
-											customColor={GC_COLORS.primary}
-										/>
-									)}
-								</div>
 								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
 							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -299,7 +283,10 @@ const getCardViewPanel = (props) => {
 																	state,
 																	dispatch
 																)}
-																<div className="jbookPagination col-xs-12 text-center">
+																<div
+																	className="jbookPagination col-xs-12 text-center"
+																	style={{ marginTop: 10 }}
+																>
 																	<Pagination
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
