@@ -151,17 +151,14 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
-			// check if there are PG filters
-
 			const { jbookSearchSettings } = req.body;
 			// clean empty options:
-			Object.keys(req.body.jbookSearchSettings).forEach((key) => {
+			Object.keys(jbookSearchSettings).forEach((key) => {
 				if (
-					(Array.isArray(req.body.jbookSearchSettings[key]) &&
-						req.body.jbookSearchSettings[key].length === 0) ||
-					req.body.jbookSearchSettings[key] === ''
+					(Array.isArray(jbookSearchSettings[key]) && jbookSearchSettings[key].length === 0) ||
+					jbookSearchSettings[key] === ''
 				) {
-					delete req.body.jbookSearchSettings[key];
+					delete jbookSearchSettings[key];
 				}
 			});
 
@@ -189,7 +186,7 @@ class JBookSearchHandler extends SearchHandler {
 				);
 			} catch (e) {
 				console.log('Error getting jbook search ES results');
-				this.logger.error(message, 'MTQLS2N', userId);
+				this.logger.error(e.message, 'MTQLS2N', userId);
 			}
 
 			let returnData = {};
@@ -464,7 +461,7 @@ class JBookSearchHandler extends SearchHandler {
 
 	async getExcelDataForReviewStatus(req, userId, res) {
 		try {
-			const { test = false } = req;
+			const { test = false, portfolio_name } = req;
 			const workbook = new ExcelJS.Workbook();
 
 			const sheet = workbook.addWorksheet('Review Status', { properties: { tabColor: { argb: 'FFC0000' } } });
@@ -912,15 +909,30 @@ class JBookSearchHandler extends SearchHandler {
 							break;
 					}
 
-					if (result.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
+					const review = {
+						primaryReviewStatus: 'Needs Review',
+						serviceReviewStatus: 'Needs Review',
+						pocReviewStatus: 'Needs Review',
+					};
+					if (Array.isArray(result.review_n)) {
+						result.review_n.forEach((review) => {
+							if (review['portfolio_name'] === portfolio_name) {
+								review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
+								review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
+								review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
+							}
+						});
+					} else {
+						review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
+						review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
+						review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
+					}
+
+					if (review.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
 					if (result.serviceReviewStatus === 'Finished Review') reviewStep = 'poc';
 					if (result.pocReviewStatus === 'Finished Review') reviewStep = 'finished';
 
-					if (result.hasKeywords === true) {
-						keywordsKey = 'hasKeywords';
-					} else {
-						keywordsKey = 'noKeywords';
-					}
+					keywordsKey = result.hasKeywords ? 'hasKeywords' : 'noKeywords';
 
 					if (result.budgetYear === '2022') {
 						yearKey = 'fy22';

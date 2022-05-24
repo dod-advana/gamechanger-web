@@ -394,7 +394,7 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
-	protfolio: 'AI Inventory',
+	portfolio_name: 'AI Inventory',
 };
 
 const init = (initialState) => {
