@@ -276,15 +276,11 @@ const GameChangerDetailsPage = (props) => {
 				headName: name,
 			},
 		});
-		if (resp.data.headData.head) {
-			return resp.data.headData.head;
-		} else {
-			return '';
-		}
+		const head = resp?.data?.headData?.head || '';
+		return head;
 	};
 
 	const getTypeData = async (name, cloneName) => {
-		let types = '';
 		const resp = await gameChangerAPI.callGraphFunction({
 			functionName: 'getTypeDataDetailsPage',
 			cloneName: cloneName,
@@ -292,17 +288,8 @@ const GameChangerDetailsPage = (props) => {
 				typeName: name,
 			},
 		});
-		if (resp.data.typeData.nodes && resp.data.typeData.nodes.length > 0) {
-			for (var i = 0; i < resp.data.typeData.nodes.length; i++) {
-				types += resp.data.typeData.nodes[i].name;
-				if (i !== resp.data.typeData.nodes.length - 1) {
-					types += ', ';
-				}
-			}
-			return types;
-		} else {
-			return '';
-		}
+		const types = resp?.data?.typeData?.nodes?.map((node) => node.name).join(', ') || '';
+		return types;
 	};
 
 	const getSourceData = async (searchText, cloneName) => {
