@@ -9,14 +9,7 @@ import {
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -56,12 +49,6 @@ const EdaSearchHandler = {
 			cloneData,
 			edaSearchSettings,
 		} = state;
-
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
 
 		const favSearchUrls = userData?.favorite_searches?.map((search) => {
 			return search.url;
