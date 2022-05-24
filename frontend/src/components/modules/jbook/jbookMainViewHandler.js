@@ -24,6 +24,8 @@ import FeedbackModal from './jbookFeedbackModal';
 import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
 import GCToggle from '../../common/GCToggleSwitch';
+import GCButton from '../../common/GCButton';
+import GCTooltip from '../../common/GCToolTip';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
@@ -157,33 +159,47 @@ const getCardViewPanel = (props) => {
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
 						<div className={'top-container'}>
-							<div style={{ paddingTop: 20, zIndex: 99, paddingRight: 30 }}>
-								<a href="https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis">
-									View JBOOK Search Summary Analytics: Qlik Dashboard
-								</a>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<div style={{ padding: 10, zIndex: 99 }}>
+									{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
+										<GCToggle
+											onClick={() => {
+												setState(dispatch, {
+													useElasticSearch: !state.useElasticSearch,
+													runSearch: true,
+												});
+											}}
+											rightActive={state.useElasticSearch}
+											leftLabel={'Use PG'}
+											rightLabel={'Use ES'}
+											customColor={GC_COLORS.primary}
+										/>
+									)}
+								</div>
+								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
-
-							<div style={{ padding: 10, zIndex: 99 }}>
-								{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
-									<GCToggle
-										onClick={() => {
-											setState(dispatch, {
-												useElasticSearch: !state.useElasticSearch,
-												runSearch: true,
-											});
-										}}
-										rightActive={state.useElasticSearch}
-										leftLabel={'Use PG'}
-										rightLabel={'Use ES'}
-										customColor={GC_COLORS.primary}
-									/>
-								)}
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<div style={{ paddingTop: 0, zIndex: 99, marginRight: '20px' }}>
+									<GCTooltip
+										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
+										placement="bottom"
+										arrow
+									>
+										<GCButton
+											onClick={() => {
+												window.open(
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis'
+												);
+											}}
+										>
+											Qlik Dashboard
+										</GCButton>
+									</GCTooltip>
+								</div>
 							</div>
-
-							{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 						</div>
 						{showSideFilters && (
-							<div className={'left-container'} style={{ marginTop: -65 }}>
+							<div className={'left-container'} style={{ marginTop: -130 }}>
 								<div className={'side-bar-container'}>
 									<GameChangerSearchMatrix context={context} />
 									{state.expansionDict && Object.keys(state.expansionDict).length > 0 && (
@@ -198,7 +214,7 @@ const getCardViewPanel = (props) => {
 							</div>
 						)}
 
-						<div className={'right-container'} style={{ marginTop: 0 }}>
+						<div className={'right-container'} style={{ marginTop: '-50px' }}>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
