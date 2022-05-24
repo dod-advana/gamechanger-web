@@ -14,14 +14,7 @@ import {
 	displayBackendError,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
@@ -84,12 +77,6 @@ const PolicySearchHandler = {
 		if (runningSearch) {
 			cancelToken.cancel('cancelled axios with consecutive call');
 			cancelToken = axios.CancelToken.source();
-		}
-
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9 && !showTutorial) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
 		}
 
 		let favSearchUrls = [];

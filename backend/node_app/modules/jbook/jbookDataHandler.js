@@ -838,7 +838,7 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				query.budget_line_item = reviewData.budget_line_item;
 				query.program_element = reviewData.program_element;
-				query.budget_activity = appropriationNumber;
+				query.budget_activity = reviewData.budget_activity;
 			}
 
 			const [review, created] = await this.rev
