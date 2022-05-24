@@ -315,7 +315,6 @@ const GCUserDashboard = React.memo((props) => {
 		saveFavoriteSearch,
 		handleFavoriteTopic,
 		handleFavoriteOrganization,
-		checkUserInfo,
 		cloneData,
 		state,
 		dispatch,
@@ -1386,9 +1385,6 @@ const GCUserDashboard = React.memo((props) => {
 			return;
 		}
 		if (!searchHistoryPopperOpen) {
-			if (checkUserInfo()) {
-				return;
-			}
 			setSearchHistoryPopperAnchorEl(target);
 			setSearchHistoryPopperOpen(true);
 			setSearchHistoryFavoriteData({
@@ -2002,7 +1998,6 @@ GCUserDashboard.propTypes = {
 	saveFavoriteSearch: PropTypes.func,
 	handleFavoriteTopic: PropTypes.func,
 	handleFavoriteOrganization: PropTypes.func,
-	checkUserInfo: PropTypes.func,
 	cloneData: PropTypes.shape({
 		clone_name: PropTypes.string,
 	}),
