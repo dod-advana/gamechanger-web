@@ -118,12 +118,10 @@ class JBookDataHandler extends DataHandler {
 
 			let budgetYear;
 			const budgetType = keys[0];
-			let budgetCycle;
 			let budgetActivityNumber;
 			let budgetLineItem;
 			let programElement;
 			let serviceAgency;
-			let projectNum;
 			let appropriationNumber;
 
 			switch (budgetType) {
@@ -169,7 +167,7 @@ class JBookDataHandler extends DataHandler {
 			if (!data.currentYearAmount) {
 			}
 
-			data.review = await this.getReviewData(
+			data.reviews = await this.getReviewData(
 				{
 					budgetYear,
 					appropriationNumber,
