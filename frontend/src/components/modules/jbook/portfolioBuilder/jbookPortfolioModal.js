@@ -374,7 +374,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 					<GCButton
 						onClick={async () => {
 							try {
-								const res = await gameChangerAPI.callDataFunction({
+								await gameChangerAPI.callDataFunction({
 									functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
 									cloneName: 'jbook',
 									options: { ...data },
