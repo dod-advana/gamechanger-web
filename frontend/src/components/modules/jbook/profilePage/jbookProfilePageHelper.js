@@ -17,7 +17,7 @@ import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
-	maxWidth: 100,
+	maxWidth: 150,
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
@@ -176,7 +176,7 @@ const ProjectDescription = (props) => {
 							? 'Project Description'
 							: 'Program Description'}
 					</Typography>
-					<div style={{ maxHeight: '860px', overflow: 'auto' }}>
+					<div style={{ overflow: 'auto' }}>
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions.map((pd) => {
 								return (

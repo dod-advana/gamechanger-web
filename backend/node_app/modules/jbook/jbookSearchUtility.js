@@ -1367,10 +1367,6 @@ class JBookSearchUtility {
 				},
 			};
 
-			if (jbookSearchSettings.pgKeys !== undefined) {
-				query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
-			}
-
 			esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
 			});
@@ -1438,6 +1434,7 @@ class JBookSearchUtility {
 
 			// ES FILTERS
 			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
 
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
@@ -1463,13 +1460,13 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
+
+			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
-			this.logger.error(e.message, 'IEPGRAZ81');
+			this.logger.error(e.message, 'IEPGRAZ91', userId);
 			return query;
 		}
-		console.log(JSON.stringify(query));
-		return query;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
@@ -1561,6 +1558,126 @@ class JBookSearchUtility {
 		}
 
 		return filterQueries;
+	}
+
+	getJBookESReviewFilters(jbookSearchSettings) {
+		const nestedMustObjects = [];
+		// Review Status
+		if (jbookSearchSettings.reviewStatus) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Reviewer
+		if (jbookSearchSettings.primaryReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.primary_reviewer_s': jbookSearchSettings.primaryReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// Service Reviewer
+		if (jbookSearchSettings.serviceReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.service_reviewer_s': jbookSearchSettings.serviceReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// POC Reviewer
+		if (jbookSearchSettings.pocReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									wildcard: {
+										'review_n.service_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+								{
+									wildcard: {
+										'review_n.alternate_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Class Label
+		if (jbookSearchSettings.primaryClassLabel) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									terms: {
+										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Source Tag
+		if (jbookSearchSettings.sourceTag) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.source_tag_s': jbookSearchSettings.sourceTag,
+						},
+					},
+				},
+			});
+		}
+
+		return nestedMustObjects;
 	}
 }
 

@@ -7,6 +7,7 @@ import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { StyledFooterDiv } from './profilePage/profilePageStyles';
+import { ButtonStyles } from './profilePage/profilePageStyles';
 
 const useStyles = makeStyles((theme) => ({
 	customWidth: {
@@ -267,15 +268,12 @@ const ButtonFooter = React.memo((props) => {
 	return (
 		<StyledFooterDiv>
 			{finished && !roleDisabled && (
-				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
-					onClick={() => setState(dispatch, { JAICModalOpen: true })}
-				>
+				<GCPrimaryButton style={ButtonStyles.main} onClick={() => setState(dispatch, { JAICModalOpen: true })}>
 					Re-Enable (Partial Review)
 				</GCPrimaryButton>
 			)}
 			<GCPrimaryButton
-				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+				style={ButtonStyles.main}
 				onClick={() => {
 					setReviewData('jaicForm');
 				}}
@@ -288,7 +286,7 @@ const ButtonFooter = React.memo((props) => {
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
-				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+				style={ButtonStyles.main}
 				onClick={() => submitReviewForm('primaryReviewLoading', false, 'primary')}
 				disabled={finished || roleDisabled}
 			>
@@ -299,7 +297,7 @@ const ButtonFooter = React.memo((props) => {
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
-				style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+				style={ButtonStyles.submit}
 				onClick={() => submitReviewForm('primaryReviewLoading', true, 'primary')}
 				disabled={finished || roleDisabled}
 			>
