@@ -261,7 +261,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					minHeight: 'calc(100vh - 200px)',
 				}}
 			>
-				{state.pageDisplayed !== 'aboutUs' && (
+				{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 					<div
 						style={{
 							borderTop: '1px solid #B0BAC5',
@@ -272,7 +272,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					/>
 				)}
 				<React.Fragment>
-					{state.pageDisplayed !== 'aboutUs' && (
+					{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 						<Button
 							style={{
 								marginLeft: '10px',
@@ -337,7 +337,8 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 							backgroundColor:
 								state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
 								state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-								state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+								state.pageDisplayed === PAGE_DISPLAYED.aboutUs ||
+								state.pageDisplayed === PAGE_DISPLAYED.faq
 									? '#ffffff'
 									: '#DFE6EE',
 						}}
