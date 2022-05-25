@@ -1442,6 +1442,9 @@ class JBookSearchUtility {
 
 			// SORT
 			switch (jbookSearchSettings.sort[0].id) {
+				case 'relevance':
+					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;

@@ -354,6 +354,9 @@ const JBookSearchHandler = {
 		const sortDesc = state.currentOrder === 'desc';
 
 		switch (state.currentSort) {
+			case 'Relevance':
+				searchSettings.sort = [{ id: 'relevance', desc: sortDesc }];
+				break;
 			case 'Program Element':
 				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
