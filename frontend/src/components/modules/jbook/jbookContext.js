@@ -348,6 +348,7 @@ const initState = {
 	resetSettingsSwitch: false,
 	categorySorting: {
 		jbook: [
+			'Relevance',
 			'Budget Year',
 			'Program Element',
 			'Budget Line Item',
@@ -360,7 +361,7 @@ const initState = {
 			'Source',
 		],
 	},
-	currentSort: 'Budget Year',
+	currentSort: 'Relevance',
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
