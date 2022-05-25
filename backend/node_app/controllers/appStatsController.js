@@ -893,12 +893,11 @@ class AppStatsController {
 		});
 	}
 
-
 	/**
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
 	 */
-	 async getCardUsersAggregationQuery(startDate, endDate, connection) {
+	async getCardUsersAggregationQuery(startDate, endDate, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -1053,7 +1052,7 @@ class AppStatsController {
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
 		const cards = await this.getCardSearchAggregationQuery(opts.startDate, opts.endDate, connection);
 		const userCards = await this.getCardUsersAggregationQuery(opts.startDate, opts.endDate, connection);
-		cards[0]['unique_users'] = userCards[0]['unique_users']
+		cards[0]['unique_users'] = userCards[0]['unique_users'];
 
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
