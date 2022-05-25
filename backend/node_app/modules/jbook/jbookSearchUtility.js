@@ -1053,10 +1053,12 @@ class JBookSearchUtility {
 					Object.keys(hit.inner_hits).forEach((hitKey) => {
 						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0],
-								});
+								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+									result.pageHits.push({
+										title: esTopLevelFieldsNameMapping[hitKey],
+										snippet: innerHit.highlight[highlightKey][0],
+									});
+								}
 							});
 						});
 					});
