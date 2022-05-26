@@ -31,6 +31,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import EditEntityDialog from '../components/admin/EditEntityDialog';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -43,6 +44,10 @@ const colWidth = {
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
 	wordBreak: 'break-all',
+};
+
+const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
 };
 
 export const MainContainer = styled.div`
@@ -134,6 +139,22 @@ const FavoriteTopic = styled.button`
 		color: ${({ favorited }) => (favorited ? '#E9691D' : '#B0B9BE')};
 	}
 `;
+
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
 
 const GameChangerDetailsPage = (props) => {
 	const { location } = props;
@@ -916,41 +937,43 @@ const GameChangerDetailsPage = (props) => {
 	};
 
 	return (
-		<div style={{ minHeight: 'calc(100% - 89px)', background: 'white' }}>
+		<div style={{ minHeight: 'calc(100vh - 30px)', background: 'white', display: 'flex', flexDirection: 'column' }}>
 			<TitleBar
 				detailsType={detailsType}
 				titleBarModule={'details/detailsTitleBarHandler'}
 				rawSearchResults={[]}
 			></TitleBar>
+			<div style={{ flexGrow: 1 }}>
+				{showEntityContainer && renderEntityContainer()}
 
-			{showEntityContainer && renderEntityContainer()}
+				{showTopicContainer && renderTopicContainer()}
 
-			{showTopicContainer && renderTopicContainer()}
+				{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) && (
+					<SourceDetailsPage
+						source={source}
+						cloneData={cloneData}
+						initialSourceData={initialSourceData}
+						userData={userData}
+						rawSearchResults={docResults}
+					/>
+				)}
 
-			{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) && (
-				<SourceDetailsPage
-					source={source}
-					cloneData={cloneData}
-					initialSourceData={initialSourceData}
-					userData={userData}
-					rawSearchResults={docResults}
-				/>
-			)}
+				{showDocumentContainer && (
+					<DocumentDetailsPage
+						document={document}
+						cloneData={cloneData}
+						runningQuery={runningQuery}
+						graphData={graph}
+						userData={userData}
+						rawSearchResults={docResults}
+					/>
+				)}
 
-			{showDocumentContainer && (
-				<DocumentDetailsPage
-					document={document}
-					cloneData={cloneData}
-					runningQuery={runningQuery}
-					graphData={graph}
-					userData={userData}
-					rawSearchResults={docResults}
-				/>
-			)}
-
-			{showContractContainer && edaPermissions && (
-				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
-			)}
+				{showContractContainer && edaPermissions && (
+					<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
+				)}
+			</div>
+			<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="gamechanger-details" />
 		</div>
 	);
 };
