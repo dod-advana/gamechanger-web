@@ -10,8 +10,8 @@ import {
 	InputAdornment,
 	FormControl,
 } from '@material-ui/core';
-import GCButton from '../../common/GCButton';
-import { styles, useStyles } from '../../admin/util/GCAdminStyles';
+import GCButton from '../../../common/GCButton';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
