@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
+	encode,
 	getTrackingNameForFactory,
 	getTypeIcon,
 	getTypeTextColor,
@@ -172,6 +173,31 @@ const StyledFrontCardHeader = styled.div`
 		justify-content: space-between;
 	}
 `;
+
+const types = {
+	pdoc: 'Procurement',
+	rdoc: 'RDT&E',
+	odoc: 'O&M',
+};
+
+export const clickFn = (cloneName, searchText, item, portfolioName) => {
+	const {
+		projectTitle,
+		programElement,
+		projectNum,
+		budgetType,
+		budgetLineItem,
+		budgetYear,
+		appropriationNumber,
+		id,
+	} = item;
+
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'LineItemOpen');
+	let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+		types[budgetType]
+	)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
+	window.open(url);
+};
 
 const cardHandler = {
 	document: {
@@ -717,24 +743,9 @@ const cardHandler = {
 				closeGraphCard = () => {},
 			} = props;
 
-			const { searchText } = state;
+			console.log(state);
 
-			const {
-				projectTitle,
-				programElement,
-				projectNum,
-				budgetLineItem,
-				budgetType,
-				budgetYear,
-				id,
-				appropriationNumber,
-			} = item;
-
-			const types = {
-				pdoc: 'Procurement',
-				rdoc: 'RDT&E',
-				odoc: 'O&M',
-			};
+			const { searchText, portfolio_name } = state;
 
 			return (
 				<>
@@ -745,12 +756,7 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
-									types[budgetType]
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&useElasticSearch=${
-									state.useElasticSearch
-								}`;
-								window.open(url);
+								clickFn(cloneName, searchText, item, portfolio_name);
 							}}
 						>
 							Open
