@@ -12,7 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import GCButton from '../common/GCButton';
 import RequestAPIKeyDialog from '../api/RequestAPIKeyDialog';
 import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
-import { setState } from '../../utils/sharedFunctions';
+import { setState, setUserMatomo } from '../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -113,7 +113,7 @@ const FAQLinkButton = () => {
 const GCFooter = (props) => {
 	const classes = useStyles();
 
-	const { setUserMatomo, location, cloneName } = props;
+	const { location, cloneName } = props;
 
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 	const [apiRequestModalOpen, setApiRequestModalOpen] = useState(false);

@@ -46,10 +46,6 @@ const colWidth = {
 	wordBreak: 'break-all',
 };
 
-const setUserMatomo = (value) => {
-	localStorage.setItem('userMatomo', value);
-};
-
 export const MainContainer = styled.div`
 	display: flex;
 	margin: 10px 4%;
@@ -973,7 +969,7 @@ const GameChangerDetailsPage = (props) => {
 					<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
 				)}
 			</div>
-			<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="gamechanger-details" />
+			<GCFooter location={location} cloneName="gamechanger-details" />
 		</div>
 	);
 };
