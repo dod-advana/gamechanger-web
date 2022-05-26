@@ -22,6 +22,26 @@ const UserFeedback = LoadableVisibility({
 	},
 });
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
+const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
+};
+
 export const gcColors = {
 	buttonColor1: '#131E43',
 	buttonColor2: '#E9691D',
@@ -34,9 +54,10 @@ export const scrollToContentTop = () => {
 };
 
 const GameChangerPage = (props) => {
-	const { cloneData, history, jupiter, tutorialData } = props;
+	const { cloneData, history, jupiter, tutorialData, location } = props;
 
 	const cloneName = cloneData.clone_name;
+	console.log(cloneName === 'gamechanger');
 	const context = useContext(getContext(cloneName));
 	const { state, dispatch } = context;
 
@@ -110,6 +131,8 @@ const GameChangerPage = (props) => {
 						message={state.backendErrorMsg || ''}
 						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
+					{/* Footer for main gamechanger */}
+					{cloneName === 'gamechanger' && <GCFooter setUserMatomo={setUserMatomo} location={location} />}
 				</>
 			)}
 		</div>

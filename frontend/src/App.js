@@ -304,13 +304,18 @@ const App = () => {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
-						cloneRoutes.push(
+						cloneRoutes.push((location) => (
 							<PrivateTrackedRoute
 								key={`${clone.url}-admin-lite`}
 								path={`/${clone.url}/admin`}
 								render={(props) => (
 									<GamechangerProvider>
-										<GamechangerLiteAdminPage {...props} cloneData={clone} jupiter={false} />
+										<GamechangerLiteAdminPage
+											{...props}
+											cloneData={clone}
+											jupiter={false}
+											location={location}
+										/>
 									</GamechangerProvider>
 								)}
 								pageName={clone.display_name}
@@ -318,9 +323,9 @@ const App = () => {
 									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
 								}}
 							/>
-						);
+						));
 						if (clone.permissions_required) {
-							cloneRoutes.push(
+							cloneRoutes.push((location) => (
 								<PrivateTrackedRoute
 									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
@@ -336,6 +341,7 @@ const App = () => {
 												history={history}
 												isClone={true}
 												cloneData={clone}
+												location={location}
 											/>
 										</GamechangerProvider>
 									)}
@@ -347,13 +353,13 @@ const App = () => {
 										);
 									}}
 								/>
-							);
+							));
 						} else {
 							// if clone name is jbook, then push jbook route + cloneData
 							if (clone.clone_name === 'jbook') {
-								cloneRoutes.push(getJBookProfileRoute(clone));
+								cloneRoutes.push(() => getJBookProfileRoute(clone));
 							}
-							cloneRoutes.push(
+							cloneRoutes.push(() => (
 								<PrivateTrackedRoute
 									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
@@ -377,7 +383,7 @@ const App = () => {
 										return true;
 									}}
 								/>
-							);
+							));
 						}
 					}
 				}
@@ -492,7 +498,9 @@ const App = () => {
 											<Switch>
 												{tokenLoaded &&
 													gameChangerCloneRoutes.map((route) => {
-														return route;
+														console.log('route lcoation');
+														console.log(route(location));
+														return route(location);
 													})}
 												<Route
 													exact
@@ -544,7 +552,6 @@ const App = () => {
 										</ErrorBoundary>
 									</>
 								</SlideOutMenuContextHandler>
-								<GCFooter setUserMatomo={setUserMatomo} location={location} />
 							</div>
 						)}
 					/>
