@@ -502,6 +502,7 @@ const App = () => {
 															true
 														);
 													}}
+													location={location}
 												/>
 												<PrivateTrackedRoute
 													key={`gamechanger-es`}
