@@ -11,10 +11,6 @@ import { GCCheckbox, styles, TableRow, toolTheme } from '../components/admin/uti
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { gcOrange } from '../components/common/gc-colors';
 
-const setUserMatomo = (value) => {
-	localStorage.setItem('userMatomo', value);
-};
-
 const NotificationsManagement = LoadableVisibility({
 	loader: () => import('../components/notifications/NotificationsManagement'),
 	loading: () => {
@@ -229,7 +225,7 @@ const GamechangerAdminPage = (props) => {
 					<Route path="*" component={() => renderSwitch(pageToView)} />
 				</Switch>
 			</div>
-			<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="gamechanger-admin" />
+			<GCFooter location={location} cloneName="gamechanger-admin" />
 		</div>
 	);
 };

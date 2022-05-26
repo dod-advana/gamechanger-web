@@ -43,9 +43,6 @@ import GameChangerAPI from '../components/api/gameChanger-service-api';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
-const setUserMatomo = (value) => {
-	localStorage.setItem('userMatomo', value);
-};
 
 const GCFooter = LoadableVisibility({
 	loader: () => import('../components/navigation/GCFooter'),
@@ -1084,7 +1081,7 @@ const JBookProfilePage = (props) => {
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
 			{/* Footer */}
-			{<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="jbook" />}
+			{<GCFooter location={location} cloneName="jbook" />}
 		</div>
 	);
 };

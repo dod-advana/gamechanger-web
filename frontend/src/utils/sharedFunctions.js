@@ -350,3 +350,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 		</div>
 	);
 };
+
+export const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
+};

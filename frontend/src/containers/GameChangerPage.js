@@ -38,10 +38,6 @@ const GCFooter = LoadableVisibility({
 	},
 });
 
-const setUserMatomo = (value) => {
-	localStorage.setItem('userMatomo', value);
-};
-
 export const gcColors = {
 	buttonColor1: '#131E43',
 	buttonColor2: '#E9691D',
@@ -132,7 +128,7 @@ const GameChangerPage = (props) => {
 						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
 					{/* Footer */}
-					{<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName={cloneName} />}
+					{<GCFooter location={location} cloneName={cloneName} />}
 				</>
 			)}
 		</div>

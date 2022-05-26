@@ -18,10 +18,6 @@ const styles = {
 	},
 };
 
-const setUserMatomo = (value) => {
-	localStorage.setItem('userMatomo', value);
-};
-
 const GCFooter = LoadableVisibility({
 	loader: () => import('../components/navigation/GCFooter'),
 	loading: () => {
@@ -124,7 +120,7 @@ const GamechangerEsPage = ({ location }) => {
 					<pre>{JSON.stringify(results, null, 2)}</pre>
 				</div>
 			</div>
-			<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="gamechanger-es" />
+			<GCFooter location={location} cloneName="gamechanger-es" />
 		</div>
 	);
 };
