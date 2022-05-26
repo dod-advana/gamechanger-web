@@ -341,9 +341,9 @@ const App = () => {
 						} else {
 							// if clone name is jbook, then push jbook route + cloneData
 							if (clone.clone_name === 'jbook') {
-								cloneRoutes.push(() => getJBookProfileRoute(clone));
+								cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
 							}
-							cloneRoutes.push(() => (
+							cloneRoutes.push((location) => (
 								<PrivateTrackedRoute
 									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
@@ -359,6 +359,7 @@ const App = () => {
 												history={history}
 												isClone={true}
 												cloneData={clone}
+												location={location}
 											/>
 										</GamechangerProvider>
 									)}
@@ -379,7 +380,7 @@ const App = () => {
 		}
 	};
 
-	const getJBookProfileRoute = (cloneData) => {
+	const getJBookProfileRoute = (cloneData, location) => {
 		const JBookProvider = getProvider('jbook');
 
 		return (
@@ -388,7 +389,7 @@ const App = () => {
 				path={`/jbook/profile`}
 				render={(props) => (
 					<JBookProvider>
-						<JBookProfilePage {...props} cloneData={cloneData} />
+						<JBookProfilePage {...props} cloneData={cloneData} location={location} />
 					</JBookProvider>
 				)}
 				pageName={'JBookProfilePage'}
