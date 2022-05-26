@@ -222,12 +222,18 @@ const GameChangerDetailsPage = (props) => {
 					}
 				}
 			});
-
+			tmpEntity.details.push({
+				name: 'Org Head',
+				value: await getHeadData(name, cloneName),
+			});
+			tmpEntity.details.push({
+				name: 'Org Type(s)',
+				value: await getTypeData(name, cloneName),
+			});
 			data.entity = tmpEntity;
 		}
 
 		data.graph = resp.data.graph;
-
 		return data;
 	};
 
@@ -260,6 +266,30 @@ const GameChangerDetailsPage = (props) => {
 		}
 
 		return data;
+	};
+
+	const getHeadData = async (name, cloneName) => {
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getHeadDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				headName: name,
+			},
+		});
+		const head = resp?.data?.headData?.head || '';
+		return head;
+	};
+
+	const getTypeData = async (name, cloneName) => {
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getTypeDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				typeName: name,
+			},
+		});
+		const types = resp?.data?.typeData?.nodes?.map((node) => node.name).join(', ') || '';
+		return types;
 	};
 
 	const getSourceData = async (searchText, cloneName) => {
