@@ -3,7 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
 	runSearch: false,
 	runningSearch: false,
-	useElasticSearch: false,
+	useElasticSearch: true,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
 	feedbackText: '',
@@ -395,6 +395,7 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
+	portfolio_name: 'AI Inventory',
 };
 
 const init = (initialState) => {

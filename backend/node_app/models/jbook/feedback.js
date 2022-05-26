@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const FEEDBACK = sequelize.define(
+	const FEEDBACK_JBOOK = sequelize.define(
 		'feedback_jbook',
 		{
 			id: {
@@ -31,5 +31,5 @@ module.exports = (sequelize, DataTypes) => {
 			tableName: 'feedback',
 		}
 	);
-	return FEEDBACK;
+	return FEEDBACK_JBOOK;
 };

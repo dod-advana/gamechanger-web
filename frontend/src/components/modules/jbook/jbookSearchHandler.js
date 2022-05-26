@@ -89,7 +89,7 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						useElasticSearch: state.useElasticSearch,
+						portfolio: state.portfolio || 'AI Inventory',
 					},
 				},
 				cancelToken
@@ -116,7 +116,7 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
-				useElasticSearch: state.useElasticSearch,
+				portfolio: state.portfolio || 'AI Inventory',
 			},
 		});
 		return data;
