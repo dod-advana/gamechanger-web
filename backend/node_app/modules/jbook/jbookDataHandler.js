@@ -10,7 +10,8 @@ const USER_REQUEST = require('../../models').user_request;
 const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
-const FEEDBACK = require('../../models').feedback;
+const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
+const PORTFOLIO = require('../../models').portfolio;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -48,7 +49,8 @@ class JBookDataHandler extends DataHandler {
 			gl_contracts = GL_CONTRACTS,
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
-			feedback = FEEDBACK,
+			feedback = FEEDBACK_JBOOK,
+			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
 
@@ -72,6 +74,7 @@ class JBookDataHandler extends DataHandler {
 		this.obligations = obligations;
 		this.reviewer = reviewer;
 		this.feedback = feedback;
+		this.portfolio = portfolio;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 
@@ -90,17 +93,6 @@ class JBookDataHandler extends DataHandler {
 			fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 			fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
 		});
-	}
-
-	// budget line item : pdoc and project num : rdoc
-	async getProjectData(req, userId) {
-		const { useElasticSearch = false } = req.body;
-
-		if (useElasticSearch) {
-			return this.getESProjectData(req, userId);
-		} else {
-			return this.getPGProjectData(req, userId);
-		}
 	}
 
 	async getESProjectData(req, userId) {
@@ -187,6 +179,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// REMOVE WHEN WE GOOD
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
@@ -744,7 +737,7 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				query.budget_line_item = reviewData.budget_line_item;
 				query.program_element = reviewData.program_element;
-				query.budget_activity = appropriationNumber;
+				query.budget_activity = reviewData.budget_activity;
 			}
 
 			const [review, created] = await this.rev
@@ -886,6 +879,7 @@ class JBookDataHandler extends DataHandler {
 	async submitFeedbackForm(req, userId) {
 		try {
 			const { feedbackForm } = req.body;
+			feedbackForm.event_name = 'JBOOK_Feedback';
 			return this.feedback.create(feedbackForm);
 		} catch (err) {
 			this.logger.error(err, '9BN7UG1', userId);
@@ -1106,13 +1100,149 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getPortfolios(req, userId) {
+		try {
+			const portfolios = await this.portfolio.findAll({
+				where: {
+					deleted: false,
+				},
+			});
+			return portfolios;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKC', userId);
+			return {};
+		}
+	}
+
+	async getPortfolio(req, userId) {
+		try {
+			const { id, name } = req.body;
+			let portfolio;
+
+			let where = { id };
+
+			if (!id) {
+				where = { name };
+			}
+
+			portfolio = await this.portfolio.findOne({
+				where,
+			});
+
+			return portfolio;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKD', userId);
+			return {};
+		}
+	}
+
+	async editPortfolio(req, userId) {
+		try {
+			const { id, name, description, user_ids, tags } = req.body;
+
+			if (id) {
+				let update = await this.portfolio.update(
+					{
+						name,
+						description,
+						user_ids,
+						tags,
+					},
+					{
+						where: {
+							id,
+						},
+					}
+				);
+
+				if (!update || !update[0] || update[0] !== 1) {
+					throw new Error('Failed to update portfolio');
+				} else {
+					return {
+						name,
+						description,
+						user_ids,
+						tags,
+					};
+				}
+			} else {
+				throw new Error('Missing id to update portfolio');
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKE', userId);
+			return {};
+		}
+	}
+
+	async deletePortfolio(req, userId) {
+		try {
+			const { id, name } = req.body;
+
+			let where = { id };
+
+			if (!id) {
+				where = { name };
+			}
+
+			let update = await this.portfolio.update({ deleted: true }, { where });
+
+			if (!update || !update[0] || update[0] !== 1) {
+				throw new Error('Failed to update portfolio');
+			} else {
+				return { deleted: true };
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKF', userId);
+			return {};
+		}
+	}
+
+	async createPortfolio(req, userId) {
+		try {
+			await this.portfolio.create(req.body);
+			return true;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKF', userId);
+			return false;
+		}
+	}
+
+	async restorePortfolio(req, userId) {
+		try {
+			const { id, name } = req.body;
+
+			let where = { id };
+
+			if (!id) {
+				where = { name };
+			}
+
+			let update = await this.portfolio.update({ deleted: false }, { where });
+
+			if (!update || !update[0] || update[0] !== 1) {
+				throw new Error('Failed to restore portfolio');
+			} else {
+				return { deleted: false };
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '6QJASKG', userId);
+			return {};
+		}
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
 		try {
 			switch (functionName) {
 				case 'getProjectData':
-					return await this.getProjectData(req, userId);
+					return await this.getESProjectData(req, userId);
 				case 'getBudgetDropdownData':
 					return await this.getBudgetDropdownData(req, userId);
 				case 'getBudgetReview':
@@ -1127,6 +1257,16 @@ class JBookDataHandler extends DataHandler {
 					return await this.getUserSpecificReviews(req, userId);
 				case 'getContractTotals':
 					return await this.getContractTotals(req, userId);
+				case 'getPortfolios':
+					return await this.getPortfolios(req, userId);
+				case 'getPortfolio':
+					return await this.getPortfolio(req, userId);
+				case 'editPortfolio':
+					return await this.editPortfolio(req, userId);
+				case 'deletePortfolio':
+					return await this.deletePortfolio(req, userId);
+				case 'createPortfolio':
+					return await this.createPortfolio(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,

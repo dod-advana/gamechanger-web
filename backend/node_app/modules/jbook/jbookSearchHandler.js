@@ -95,15 +95,7 @@ class JBookSearchHandler extends SearchHandler {
 			request_body: {},
 		};
 
-		const {
-			searchText,
-			searchVersion,
-			cloneName,
-			offset,
-			showTutorial = false,
-			tiny_url,
-			jbookSearchSettings = {},
-		} = req.body;
+		const { searchText, searchVersion, cloneName, showTutorial = false, tiny_url } = req.body;
 
 		try {
 			historyRec.search = searchText;
@@ -141,151 +133,10 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	async addKeywords(raw, dataType) {
-		if (!raw || !raw.length) return raw;
-
-		let results = [];
-
-		let rawIds = [];
-		raw.forEach((r) => {
-			rawIds.push(r.id);
-		});
-		let assoc_query = '';
-		if (dataType === 'pdoc') {
-			assoc_query = `SELECT * from keyword_assoc where pdoc_id in (${rawIds})`;
-		} else if (dataType === 'rdoc') {
-			assoc_query = `SELECT * from keyword_assoc where rdoc_id in (${rawIds})`;
-		} else if (dataType === 'om') {
-			assoc_query = `SELECT * from keyword_assoc where om_id in (${rawIds})`;
-		}
-		let assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-		assoc_results = assoc_results && assoc_results[0] ? assoc_results[0] : [];
-
-		let lookup = {};
-		let keyword_ids = [];
-		assoc_results.forEach((ka) => {
-			if (dataType === 'pdoc') {
-				if (ka.pdoc_id) {
-					if (!lookup[ka.pdoc_id]) {
-						lookup[ka.pdoc_id] = [];
-					}
-					lookup[ka.pdoc_id].push(ka.keyword_id);
-					keyword_ids.push(ka.keyword_id);
-				}
-			} else if (dataType === 'rdoc') {
-				if (ka.rdoc_id) {
-					if (!lookup[ka.rdoc_id]) {
-						lookup[ka.rdoc_id] = [];
-					}
-					lookup[ka.rdoc_id].push(ka.keyword_id);
-					keyword_ids.push(ka.keyword_id);
-				}
-			} else if (dataType === 'om') {
-				if (ka.om_id) {
-					if (!lookup[ka.om_id]) {
-						lookup[ka.om_id] = [];
-					}
-					lookup[ka.om_id].push(ka.om_id);
-					keyword_ids.push(ka.keyword_id);
-				}
-			}
-		});
-
-		let keyword_recs = [];
-		if (keyword_ids && keyword_ids.length) {
-			let keyword_query = `SELECT id, name from keyword where id in (${keyword_ids})`;
-			keyword_recs = await KEYWORD.sequelize.query(keyword_query);
-			keyword_recs = keyword_recs && keyword_recs[0] ? keyword_recs[0] : [];
-		}
-
-		raw.forEach((r) => {
-			let result = r;
-			if (lookup[r.id] && lookup[r.id].length) {
-				result.keywords = [];
-				lookup[r.id].forEach((keyword_id) => {
-					keyword_recs.forEach((k) => {
-						if (k.id === keyword_id) {
-							result.keywords.push(k.name);
-						}
-					});
-				});
-			}
-			results.push(result);
-		});
-
-		return results;
-	}
-
-	async addReviewData(raw, dataType) {
-		if (!raw || !raw.length) return raw;
-
-		let results = [];
-
-		let review_query = '';
-		let rawBlis = [];
-		if (dataType === 'pdoc') {
-			raw.forEach((r) => {
-				rawBlis.push("'" + r.budgetLineItem + "'");
-			});
-			review_query = `SELECT * from review where budget_type = 'pdoc' and budget_line_item in (${rawBlis})`;
-		} else if (dataType === 'rdoc') {
-			raw.forEach((r) => {
-				rawBlis.push("'" + r.projectNum + "'");
-			});
-			review_query = `SELECT * from review where budget_type = 'rdoc' and budget_line_item in (${rawBlis})`;
-		} else if (dataType === 'om') {
-			raw.forEach((r) => {
-				rawBlis.push("'" + r.line_number + "'");
-			});
-			review_query = `SELECT * from review where budget_type = 'om' and budget_line_item in (${rawBlis})`; // where doc_id in (${rawIds})`;
-		}
-
-		let review_results = await REVIEW.sequelize.query(review_query);
-		review_results = review_results && review_results[0] ? review_results[0] : [];
-
-		raw.forEach((r) => {
-			let result = r;
-			let reviews = [];
-
-			// don't match on budget year for now
-			if (dataType === 'rdoc') {
-				reviews = review_results.filter(
-					(rev) =>
-						rev.budgetYear === r.BudgetYear &&
-						rev.program_element === r.programElement &&
-						rev.budget_line_item === r.projectNum
-				);
-			} else if (dataType === 'pdoc') {
-				reviews = review_results.filter(
-					(rev) => rev.budgetYear === r['P40-04_BudgetYear'] && rev.budget_line_item === r.budgetLineItem
-				);
-			} else if (dataType === 'om') {
-				reviews = review_results.filter((rev) => rev.budget_line_item === r.line_number);
-			}
-
-			if (reviews && reviews.length) {
-				result.primaryReviewer = reviews[0].primary_reviewer;
-				result.primaryClassLabel = reviews[0].primary_class_label;
-				result.serviceReviewStatus = reviews[0].service_review_status;
-			}
-
-			results.push(result);
-		});
-
-		return results;
-	}
-
 	async documentSearch(req, userId, res, statusExport = false) {
-		const { useElasticSearch = false } = req.body;
-
 		try {
-			if (useElasticSearch) {
-				return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
-			} else {
-				return this.postgresDocumentSearch(req, userId, res, statusExport);
-			}
+			return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
 		} catch (e) {
-			console.log(e);
 			const { message } = e;
 			this.logger.error(message, 'IDD6Y19', userId);
 			throw e;
@@ -300,94 +151,23 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
-			// check if there are PG filters
-			// console.log(jbookSearchSettings);
 			const { jbookSearchSettings } = req.body;
 			// clean empty options:
-			Object.keys(req.body.jbookSearchSettings).forEach((key) => {
+			Object.keys(jbookSearchSettings).forEach((key) => {
 				if (
-					(Array.isArray(req.body.jbookSearchSettings[key]) &&
-						req.body.jbookSearchSettings[key].length === 0) ||
-					req.body.jbookSearchSettings[key] === ''
+					(Array.isArray(jbookSearchSettings[key]) && jbookSearchSettings[key].length === 0) ||
+					jbookSearchSettings[key] === ''
 				) {
-					delete req.body.jbookSearchSettings[key];
-				}
-			});
-			let pgQueryWhere = ``;
-			const pgFilters = [
-				'reviewStatus',
-				'primaryReviewer',
-				'serviceReviewer',
-				'pocReviewer',
-				'primaryClassLabel',
-				'sourceTag',
-			];
-			const reviewMapping = this.jbookSearchUtility.getMapping('review', true);
-			pgFilters.forEach((filter) => {
-				if (jbookSearchSettings[filter] !== undefined && jbookSearchSettings[filter].length > 0) {
-					console.log(filter);
-					console.log(jbookSearchSettings[filter]);
-
-					if (pgQueryWhere.length > 0) {
-						pgQueryWhere += ` AND ( `;
-					} else {
-						pgQueryWhere += `(`;
-					}
-					for (let i = 0; i < jbookSearchSettings[filter].length; i++) {
-						if (i > 0) {
-							pgQueryWhere += ` OR `;
-						}
-						if (filter === 'pocReviewer') {
-							pgQueryWhere += ` ${reviewMapping[filter].newName} ILIKE '%${jbookSearchSettings[filter][i]}%' `;
-						} else {
-							const hasNull = jbookSearchSettings[filter].includes('Blank');
-							pgQueryWhere += ` ${reviewMapping[filter].newName} = '${jbookSearchSettings[filter][i]}' `;
-							if (hasNull) {
-								pgQueryWhere += `OR ${reviewMapping[filter].newName} = '' OR ${reviewMapping[filter].newName} IS NULL `;
-							}
-						}
-					}
-					pgQueryWhere += ` ) `;
+					delete jbookSearchSettings[key];
 				}
 			});
 
-			const keys = [];
-			if (pgQueryWhere.length > 0) {
-				let pgQuery =
-					`SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS review_status FROM REVIEW WHERE ` +
-					pgQueryWhere +
-					`;`;
-				const pgResults = await this.db.jbook.query(pgQuery, {});
-				pgResults[0].forEach((review) => {
-					let key;
-					let leadingZeroBudgetActivity = review.budget_activity !== null ? review.budget_activity : '';
-					if (leadingZeroBudgetActivity.length === 1) {
-						leadingZeroBudgetActivity = 0 + leadingZeroBudgetActivity;
-					}
-					let numOnlyAppnNum = review.appn_num !== null ? review.appn_num.replace(/[^\d.-]/g, '') : '';
-					if (review.budget_type === 'pdoc') {
-						key = `pdoc#${review.budget_line_item}#${
-							review.budget_year
-						}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${
-							review.agency !== null ? review.agency : ''
-						}`;
-					} else if (review.budget_type === 'rdoc') {
-						key = `rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
-					} else if (review.budget_type === 'odoc') {
-						key = `odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${numOnlyAppnNum}#${leadingZeroBudgetActivity}#${review.agency}`;
-					}
-					keys.push(key);
-				});
-			}
-
-			if (pgQueryWhere.length > 0) {
-				req.body.jbookSearchSettings.pgKeys = keys;
-			}
-			const esQuery = this.searchUtility.getElasticSearchQueryForJBook(
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
 				req.body,
 				userId,
 				this.jbookSearchUtility.getMapping('esServiceAgency', false)
 			);
+
 			let expansionDict = {};
 
 			if (req.body.searchText && req.body.searchText !== '') {
@@ -396,200 +176,30 @@ class JBookSearchHandler extends SearchHandler {
 
 			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
 
-			const esResults = await this.dataLibrary.queryElasticSearch(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				esQuery,
-				userId
-			);
-			const returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+			let esResults = [];
+			try {
+				esResults = await this.dataLibrary.queryElasticSearch(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					esQuery,
+					userId
+				);
+			} catch (e) {
+				console.log('Error getting jbook search ES results');
+				this.logger.error(e.message, 'MTQLS2N', userId);
+			}
 
-			returnData.expansionDict = expansionDict;
+			let returnData = {};
+			try {
+				returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+				returnData.expansionDict = expansionDict;
+			} catch (e) {}
+
 			return returnData;
 		} catch (e) {
 			const { message } = e;
+			console.log('Error running jbook ES doc search');
 			this.logger.error(message, 'G4W6UNW', userId);
-			throw e;
-		}
-	}
-
-	async postgresDocumentSearch(req, userId, res, statusExport = false) {
-		try {
-			const { offset, searchText, jbookSearchSettings, exportSearch } = req.body;
-
-			const perms = req.permissions;
-
-			let expansionDict = {};
-
-			if (searchText && searchText !== '') {
-				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
-			}
-
-			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
-
-			const hasSearchText = searchText && searchText !== '';
-			let limit = 18;
-
-			let keywordIds = undefined;
-
-			keywordIds = { pdoc: [], rdoc: [], om: [] };
-			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
-							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
-							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
-			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map((i) => Number(i)) : [0];
-
-			const keywordIdsParam =
-				jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0
-					? keywordIds
-					: null;
-
-			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
-				jbookSearchSettings,
-				hasSearchText,
-				keywordIdsParam,
-				perms,
-				userId
-			);
-			const pQuery = pSelect + pWhere;
-			const rQuery = rSelect + rWhere;
-			const oQuery = oSelect + oWhere;
-
-			let giantQuery = ``;
-
-			// setting up promise.all
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
-				giantQuery = pQuery;
-			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = rQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + rQuery;
-				}
-			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = oQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + oQuery;
-				}
-			}
-
-			const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
-
-			// grab counts, can be optimized with promise.all
-			const totalCountQuery = `SELECT COUNT(*) FROM (` + giantQuery + `) as combinedRows;`;
-
-			let totalCount;
-			try {
-				totalCount = await this.db.jbook.query(totalCountQuery, {
-					replacements: {
-						searchText: structuredSearchText,
-						offset,
-						limit,
-					},
-				});
-				totalCount = totalCount[0][0].count;
-			} catch (e) {
-				console.log('Error getting total count');
-				console.log(e);
-			}
-
-			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
-			giantQuery += queryEnd;
-
-			if (!exportSearch && !statusExport) {
-				giantQuery += ' LIMIT :limit';
-			}
-			giantQuery += ' OFFSET :offset;';
-
-			let data2 = await this.db.jbook.query(giantQuery, {
-				replacements: {
-					searchText: structuredSearchText,
-					offset,
-					limit,
-				},
-			});
-
-			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
-			let returnData = data2[0];
-
-			// set the keywords
-			returnData.map((doc) => {
-				const typeMap = {
-					Procurement: 'pdoc',
-					'RDT&E': 'rdoc',
-					'O&M': 'odoc',
-				};
-				doc.budgetType = typeMap[doc.type];
-				doc.hasKeywords = keywordIds[typeMap[doc.type]]?.indexOf(doc.id) !== -1;
-				if (doc.keywords) {
-					try {
-						let keywords = doc.keywords.replace(/[\(\)\"]\s*/g, '');
-						keywords = keywords.split(',').slice(1);
-						doc.keywords = keywords;
-					} catch (e) {
-						console.log('Error adding keywords to doc');
-						console.log(e);
-					}
-				}
-
-				if (doc.contracts) {
-					try {
-						let contracts = doc.contracts.replace(/[\(\)]\s*/g, '');
-						contracts = contracts.split('",');
-
-						let titles = contracts[0].replace(/[\"]\s*/g, '').split('; ');
-						let piids = contracts[1].replace(/[\"]\s*/g, '').split('; ');
-						let fys = contracts[2].replace(/[\"]\s*/g, '').split('; ');
-
-						let contractData = [];
-						for (let i = 0; i < titles.length; i++) {
-							contractData.push(`${titles[i]} ${piids[i]} ${fys[i]}`);
-						}
-
-						doc.contracts = contractData;
-					} catch (e) {
-						console.log('Error adding contracts to doc');
-						console.log(e);
-					}
-				}
-
-				if (doc.accomplishments) {
-					try {
-						let accomps = doc.accomplishments.replace(/[\(\)]\s*/g, '');
-						accomps = accomps.split('",');
-
-						let titles = accomps[0].replace(/[\"]\s*/g, '').split('; ');
-
-						doc.accomplishments = titles;
-					} catch (e) {
-						console.log('Error adding accomplishments to doc');
-						console.log(e);
-					}
-				}
-
-				return doc;
-			});
-
-			if (exportSearch) {
-				const csvStream = await this.reports.createCsvStream({ docs: returnData }, userId);
-				csvStream.pipe(res);
-				res.status(200);
-			} else {
-				return {
-					totalCount,
-					docs: returnData,
-					expansionDict,
-				};
-			}
-		} catch (e) {
-			const { message } = e;
-			this.logger.error(message, 'O1U2WBP', userId);
 			throw e;
 		}
 	}
@@ -698,6 +308,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
+	// retrieving the data used to populate the filter options on the frontend
 	async getDataForFilters(req, userId) {
 		let returnData = {};
 
@@ -708,6 +319,7 @@ class JBookSearchHandler extends SearchHandler {
 	       array_agg(DISTINCT primary_class_label) as primaryClassLabel,
 	       array_agg(DISTINCT source_tag) as sourceTag
 	       FROM review`;
+
 		const reviewData = await this.db.jbook.query(reviewQuery, { replacements: {} });
 
 		if (reviewData[0][0]) {
@@ -766,12 +378,90 @@ class JBookSearchHandler extends SearchHandler {
 		returnData.serviceAgency.push(null);
 		returnData.reviewstatus.push(null);
 
+		returnData = await this.getESDataForFilters(returnData, userId);
+
 		return returnData;
+	}
+
+	// retrieve data for filter options from ES
+	async getESDataForFilters(returnData, userId) {
+		try {
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+
+			// base query
+			let query = {
+				size: 0,
+				aggs: {
+					values: {
+						composite: {
+							sources: [],
+						},
+					},
+				},
+			};
+
+			const processESResults = (results, field) => {
+				return results.body.aggregations.values.buckets
+					.map((bucket) => bucket.key[field])
+					.filter((value) => value !== '');
+			};
+
+			// get budget year data
+			query.aggs.values.composite.sources = [
+				{
+					budgetYear_s: {
+						terms: {
+							field: 'budgetYear_s',
+						},
+					},
+				},
+			];
+			const budgetYearESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				query,
+				userId
+			);
+			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
+				returnData.budgetYearES = processESResults(budgetYearESResults, 'budgetYear_s');
+			}
+
+			// get service agency data
+			query.aggs.values.composite.sources = [
+				{
+					serviceAgency_s: {
+						terms: {
+							field: 'serviceAgency_s',
+						},
+					},
+				},
+			];
+			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				query,
+				userId
+			);
+
+			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
+				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
+
+				returnData.serviceAgencyES = processESResults(serviceAgencyESResults, 'serviceAgency_s').map(
+					(sa) => saMapping[sa]
+				);
+			}
+
+			// console.log(returnData);
+			return returnData;
+		} catch (e) {
+			console.log('Error getESDataForFilters');
+			this.logger.error(e.message, 'K318I7C', userId);
+		}
 	}
 
 	async getExcelDataForReviewStatus(req, userId, res) {
 		try {
-			const { test = false } = req;
+			const { test = false, portfolio_name } = req;
 			const workbook = new ExcelJS.Workbook();
 
 			const sheet = workbook.addWorksheet('Review Status', { properties: { tabColor: { argb: 'FFC0000' } } });
@@ -1219,15 +909,30 @@ class JBookSearchHandler extends SearchHandler {
 							break;
 					}
 
-					if (result.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
+					const review = {
+						primaryReviewStatus: 'Needs Review',
+						serviceReviewStatus: 'Needs Review',
+						pocReviewStatus: 'Needs Review',
+					};
+					if (Array.isArray(result.review_n)) {
+						result.review_n.forEach((review) => {
+							if (review['portfolio_name'] === portfolio_name) {
+								review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
+								review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
+								review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
+							}
+						});
+					} else {
+						review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
+						review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
+						review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
+					}
+
+					if (review.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
 					if (result.serviceReviewStatus === 'Finished Review') reviewStep = 'poc';
 					if (result.pocReviewStatus === 'Finished Review') reviewStep = 'finished';
 
-					if (result.hasKeywords === true) {
-						keywordsKey = 'hasKeywords';
-					} else {
-						keywordsKey = 'noKeywords';
-					}
+					keywordsKey = result.hasKeywords ? 'hasKeywords' : 'noKeywords';
 
 					if (result.budgetYear === '2022') {
 						yearKey = 'fy22';

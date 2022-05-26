@@ -49,7 +49,6 @@ const initState = {
 	},
 	userDataSet: false,
 	newUser: false,
-	userInfoModalOpen: false,
 	userInfo: {
 		email: '',
 		org: '',

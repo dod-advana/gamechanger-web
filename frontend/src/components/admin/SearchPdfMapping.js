@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
-import XLSX from 'xlsx';
+import 'react-table/react-table.css';
 import DatePicker from 'react-datepicker';
 import { Typography, Grid, Card, CardContent } from '@material-ui/core';
 import moment from 'moment';
@@ -472,11 +472,28 @@ export default () => {
 	 * and saves it to the users downloads as a csv.
 	 * @method exportData
 	 */
-	const exportData = (name, data) => {
-		var ws = XLSX.utils.json_to_sheet(data);
-		var wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, name);
-		XLSX.writeFile(wb, name + '.csv');
+	const exportData = async (name) => {
+		try {
+			// daysBack, offset, filters, sorting, pageSize
+			const params = {
+				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+				table: name,
+				daysBack: daysBack,
+			};
+			const data = await gameChangerAPI.exportUserData(params);
+			console.log(data);
+			const url = window.URL.createObjectURL(
+				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+			);
+			const link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('download', `${name}.xlsx`); //or any other extension
+			document.body.appendChild(link);
+			link.click();
+		} catch (e) {
+			console.error(e);
+		}
 	};
 
 	useEffect(() => {
