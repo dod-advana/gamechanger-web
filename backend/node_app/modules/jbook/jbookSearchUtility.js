@@ -53,33 +53,38 @@ class JBookSearchUtility {
 	}
 
 	getMapping(docType, fromFrontend) {
-		let mapping;
-		if (Mappings[`${docType}Mapping`]) {
-			mapping = _.clone(Mappings[`${docType}Mapping`]);
-		} else {
-			console.log(`${docType} mapping not found`);
-			return {};
-		}
-
-		if (fromFrontend) {
-			let frontEndMapping = {};
-			for (const field in mapping) {
-				const newName = mapping[field].newName;
-
-				if (!frontEndMapping[newName]) {
-					frontEndMapping[newName] = _.clone(mapping[field]);
-					frontEndMapping[newName].newName = field;
-				}
+		try {
+			let mapping;
+			if (Mappings[`${docType}Mapping`]) {
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
+			} else {
+				console.log(`${docType} mapping not found`);
+				return {};
 			}
-			return frontEndMapping;
-		} else if (docType !== 'review' || docType !== 'gl') {
-			mapping = {
-				...mapping,
-				...reviewMapping,
-			};
-		}
 
-		return mapping;
+			if (fromFrontend) {
+				let frontEndMapping = {};
+				for (const field in mapping) {
+					const newName = mapping[field].newName;
+
+					if (!frontEndMapping[newName]) {
+						frontEndMapping[newName] = _.clone(mapping[field]);
+						frontEndMapping[newName].newName = field;
+					}
+				}
+				return frontEndMapping;
+			} else if (docType !== 'review' || docType !== 'gl') {
+				mapping = {
+					...mapping,
+					...reviewMapping,
+				};
+			}
+
+			return mapping;
+		} catch (err) {
+			console.log('Error retrieving jbook mapping');
+			this.logger.error(err.message, 'AJTKSKQ');
+		}
 	}
 
 	getDocCols(docType, totals = false, fullPDFExport = false) {
@@ -1328,11 +1333,12 @@ class JBookSearchUtility {
 		userId,
 		serviceAgencyMappings
 	) {
+		let query = {};
 		try {
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-			let query = {
+			query = {
 				track_total_hits: true,
 				from: offset,
 				size: limit,
@@ -1363,10 +1369,6 @@ class JBookSearchUtility {
 					fields: {},
 				},
 			};
-
-			if (jbookSearchSettings.pgKeys !== undefined) {
-				query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
-			}
 
 			esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
@@ -1434,7 +1436,8 @@ class JBookSearchUtility {
 			});
 
 			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings);
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
 
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
@@ -1460,18 +1463,18 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
+
+			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
-			this.logger.error(e.message, 'IEPGRAZ91');
+			this.logger.error(e.message, 'IEPGRAZ91', userId);
 			return query;
 		}
-
-		return query;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
-	getJbookESFilters(jbookSearchSettings) {
+	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
 		let filterQueries = [];
 		try {
 			if (jbookSearchSettings) {
@@ -1536,6 +1539,7 @@ class JBookSearchUtility {
 					const convertedAgencies = [];
 
 					jbookSearchSettings.serviceAgency.forEach((agency) => {
+						console.log(agency);
 						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
 							if (serviceAgencyMappings[agencyKey] === agency) {
 								convertedAgencies.push(agencyKey);
@@ -1544,7 +1548,7 @@ class JBookSearchUtility {
 					});
 
 					filterQueries.push({
-						match: {
+						terms: {
 							serviceAgency_s: convertedAgencies,
 						},
 					});
@@ -1557,6 +1561,126 @@ class JBookSearchUtility {
 		}
 
 		return filterQueries;
+	}
+
+	getJBookESReviewFilters(jbookSearchSettings) {
+		const nestedMustObjects = [];
+		// Review Status
+		if (jbookSearchSettings.reviewStatus) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Reviewer
+		if (jbookSearchSettings.primaryReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.primary_reviewer_s': jbookSearchSettings.primaryReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// Service Reviewer
+		if (jbookSearchSettings.serviceReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.service_reviewer_s': jbookSearchSettings.serviceReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// POC Reviewer
+		if (jbookSearchSettings.pocReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									wildcard: {
+										'review_n.service_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+								{
+									wildcard: {
+										'review_n.alternate_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Class Label
+		if (jbookSearchSettings.primaryClassLabel) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									terms: {
+										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Source Tag
+		if (jbookSearchSettings.sourceTag) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.source_tag_s': jbookSearchSettings.sourceTag,
+						},
+					},
+				},
+			});
+		}
+
+		return nestedMustObjects;
 	}
 }
 
