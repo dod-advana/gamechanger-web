@@ -512,6 +512,7 @@ const App = () => {
 													allowFunction={() => {
 														return true;
 													}}
+													location={location}
 												/>
 												<TrackedPDFView
 													path="/pdfviewer/gamechanger"
