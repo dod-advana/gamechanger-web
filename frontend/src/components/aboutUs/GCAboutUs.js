@@ -126,7 +126,6 @@ const GCAboutUs = (props) => {
 	// if initialTab changes, navigate to that tab
 	// (this can happen if a user is viewing the FAQ and clicks the sidebar aboutUs button)
 	useEffect(() => {
-		console.log('use effectt: ', initialTab);
 		if (initialTab === 'faq') {
 			window.history.pushState(
 				null,

@@ -57,7 +57,7 @@ const GameChangerPage = (props) => {
 	const { cloneData, history, jupiter, tutorialData, location } = props;
 
 	const cloneName = cloneData.clone_name;
-	console.log(cloneName === 'gamechanger');
+
 	const context = useContext(getContext(cloneName));
 	const { state, dispatch } = context;
 
