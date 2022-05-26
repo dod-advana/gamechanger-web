@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 // Local Imports
 import { SelectedDocsDrawer } from '../searchBar/GCSelectedDocsDrawer';
-import { checkUserInfo, setState, handleRemoveFavoriteFromGroup } from '../../utils/sharedFunctions';
+import { setState, handleRemoveFavoriteFromGroup } from '../../utils/sharedFunctions';
 import GroupFavoriteCard from '../cards/GCGroupFavoriteCard';
 
 const StyledFavoriteGroupCard = styled.div`
@@ -129,9 +129,6 @@ const GroupCard = (props) => {
 					setStepIndex={(stepIndex) => setState(dispatch, { stepIndex: stepIndex })}
 					showTutorial={state.showTutorial}
 					rawSearchResults={[{}]}
-					checkUserInfo={() => {
-						checkUserInfo(state, dispatch);
-					}}
 				/>
 			</div>
 			<div style={styles.titleSection}>

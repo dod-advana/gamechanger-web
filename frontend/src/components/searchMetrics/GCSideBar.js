@@ -9,6 +9,7 @@ import { getTrackingNameForFactory, orgColorMap, exactMatch } from '../../utils/
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import { setState } from '../../utils/sharedFunctions';
