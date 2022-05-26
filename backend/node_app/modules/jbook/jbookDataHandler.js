@@ -10,7 +10,7 @@ const USER_REQUEST = require('../../models').user_request;
 const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
-const FEEDBACK = require('../../models').feedback;
+const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
@@ -49,7 +49,7 @@ class JBookDataHandler extends DataHandler {
 			gl_contracts = GL_CONTRACTS,
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
-			feedback = FEEDBACK,
+			feedback = FEEDBACK_JBOOK,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
@@ -93,17 +93,6 @@ class JBookDataHandler extends DataHandler {
 			fromName: constants.ADVANA_EMAIL_CONTACT_NAME,
 			fromEmail: constants.ADVANA_NOREPLY_EMAIL_ADDRESS,
 		});
-	}
-
-	// budget line item : pdoc and project num : rdoc
-	async getProjectData(req, userId) {
-		const { useElasticSearch = false } = req.body;
-
-		if (useElasticSearch) {
-			return this.getESProjectData(req, userId);
-		} else {
-			return this.getPGProjectData(req, userId);
-		}
 	}
 
 	async getESProjectData(req, userId) {
@@ -190,6 +179,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// REMOVE WHEN WE GOOD
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
@@ -889,6 +879,7 @@ class JBookDataHandler extends DataHandler {
 	async submitFeedbackForm(req, userId) {
 		try {
 			const { feedbackForm } = req.body;
+			feedbackForm.event_name = 'JBOOK_Feedback';
 			return this.feedback.create(feedbackForm);
 		} catch (err) {
 			this.logger.error(err, '9BN7UG1', userId);
@@ -1251,7 +1242,7 @@ class JBookDataHandler extends DataHandler {
 		try {
 			switch (functionName) {
 				case 'getProjectData':
-					return await this.getProjectData(req, userId);
+					return await this.getESProjectData(req, userId);
 				case 'getBudgetDropdownData':
 					return await this.getBudgetDropdownData(req, userId);
 				case 'getBudgetReview':
