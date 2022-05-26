@@ -10,6 +10,7 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { getQueryVariable } from '../utils/gamechangerUtils';
 import './jbook.css';
 import { setState } from '../utils/sharedFunctions';
@@ -42,9 +43,28 @@ import GameChangerAPI from '../components/api/gameChanger-service-api';
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
+const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
+};
+
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
 
 const JBookProfilePage = (props) => {
-	const { cloneData } = props;
+	const { cloneData, location } = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
@@ -1063,6 +1083,8 @@ const JBookProfilePage = (props) => {
 				</StyledReviewLeftContainer>
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
+			{/* Footer */}
+			{<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName="jbook" />}
 		</div>
 	);
 };
