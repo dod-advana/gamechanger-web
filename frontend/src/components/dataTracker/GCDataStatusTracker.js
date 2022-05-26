@@ -11,6 +11,7 @@ import { MenuItem, Select } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
 import _ from 'lodash';
+import { makeStyles } from '@material-ui/core/styles';
 
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
@@ -127,6 +128,27 @@ const styles = {
 		fontWeight: 'bold',
 	},
 };
+
+const useStyles = makeStyles({
+	select: {
+		'& ul': {
+			padding: '4px',
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			alignItems: 'start',
+		},
+		'& li': {
+			fontSize: '1rem',
+			paddingTop: '1px',
+			paddingBottom: '1px',
+			whiteSpace: 'unset',
+			wordBreak: 'break-all',
+			paddingLeft: '1em',
+			textIndent: '-1em',
+		},
+	},
+});
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -259,18 +281,19 @@ const GCDataStatusTracker = (props) => {
 	const [ingestData, setIngestData] = useState({});
 	const [crawlerInfoMap, setCrawlerInfoMap] = useState(null);
 
+	const classes = useStyles();
+
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then((res) => {
 			setIngestData(res.data);
 		});
+		// get crawler seals
 		gameChangerAPI.gcCrawlerSealData().then((res) => {
 			const map = {};
 			res.data.forEach((crawler) => {
 				map[crawler.crawler] = crawler;
 			});
 			setCrawlerInfoMap(map);
-			console.log('map');
-			console.table(map);
 		});
 	}, []);
 	const handleFetchData = async ({ page, sorted, filtered }) => {
@@ -457,6 +480,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Type',
 				accessor: 'pub_type',
+				width: 150,
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
@@ -468,6 +492,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Title',
 				accessor: 'pub_title',
+				width: 200,
 				Cell: (props) => (
 					<TableRow>
 						<Link
@@ -476,7 +501,7 @@ const GCDataStatusTracker = (props) => {
 								preventDefault(event);
 								fileClicked(props.original.doc_filename);
 							}}
-							style={{ color: '#386F94' }}
+							style={{ color: '#386F94', textAlign: 'left' }}
 						>
 							<div>{props.original.pub_title}</div>
 						</Link>
@@ -486,7 +511,7 @@ const GCDataStatusTracker = (props) => {
 			{
 				Header: 'Source',
 				accessor: 'json_metadata',
-				width: 200,
+				width: 300,
 				// filterable: true,
 				sortable: true,
 				Cell: (props) => {
@@ -515,15 +540,32 @@ const GCDataStatusTracker = (props) => {
 						id="select"
 						onChange={(event) => onChange(event.target.value)}
 						style={{ width: '100%' }}
-						className="font-size-rem"
+						className="font-size-14"
 						value={filter ? filter.value : ''}
+						MenuProps={{
+							classes: { paper: classes.select },
+						}}
 					>
 						<MenuItem value="">Show All</MenuItem>
-						{Object.keys(crawlerInfoMap).map((crawler) => (
-							<MenuItem value={crawler} key={crawler}>
-								{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
-							</MenuItem>
-						))}
+						{Object.keys(crawlerInfoMap)
+							.sort((crawlerA, crawlerB) => {
+								if (crawlerInfoMap[crawlerA].data_source_s < crawlerInfoMap[crawlerB].data_source_s)
+									return -1;
+								else if (
+									crawlerInfoMap[crawlerA].data_source_s > crawlerInfoMap[crawlerB].data_source_s
+								)
+									return 1;
+								else if (crawlerInfoMap[crawlerA].source_title < crawlerInfoMap[crawlerB].source_title)
+									return -1;
+								else if (crawlerInfoMap[crawlerA].source_title > crawlerInfoMap[crawlerB].source_title)
+									return 1;
+								else return 0;
+							})
+							.map((crawler) => (
+								<MenuItem value={crawler} key={crawler}>
+									{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
+								</MenuItem>
+							))}
 					</Select>
 				),
 			},

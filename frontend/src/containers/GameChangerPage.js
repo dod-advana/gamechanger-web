@@ -12,10 +12,8 @@ import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import { Snackbar } from '@material-ui/core';
-import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
-
-const gameChangerUserAPI = new GamechangerUserManagementAPI();
+import { getUserData } from '../utils/sharedFunctions';
 
 const UserFeedback = LoadableVisibility({
 	loader: () => import('../components/user/UserFeedback'),
@@ -51,16 +49,16 @@ const GameChangerPage = (props) => {
 			setState(dispatch, { history: history, historySet: true });
 		}
 
-		if (!state.userDataSet) {
-			gameChangerUserAPI.getUserProfileData().then((data) => {
-				setState(dispatch, { userData: data.data, userDataSet: true });
-			});
-		}
-
 		if (state.cloneDataSet && state.cloneData?.display_name) {
 			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
 		}
 	}, [cloneData, state, dispatch, history]);
+
+	useEffect(() => {
+		if (!state.userDataSet) {
+			getUserData(dispatch);
+		}
+	}, [state.userDataSet, dispatch]);
 
 	return (
 		<div className="main-container">
