@@ -83,6 +83,8 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
+	const [portfolioName, setPortfolioName] = useState('AI Inventory');
+
 	const getProjectData = async (
 		programElement,
 		projectNum,
@@ -91,7 +93,7 @@ const JBookProfilePage = (props) => {
 		budgetLineItem,
 		id,
 		appropriationNumber,
-		useElasticSearch
+		portfolioName
 	) => {
 		setProfileLoading(true);
 
@@ -108,7 +110,7 @@ const JBookProfilePage = (props) => {
 					budgetLineItem,
 					id,
 					appropriationNumber,
-					useElasticSearch,
+					portfolioName,
 				},
 			});
 
@@ -201,6 +203,7 @@ const JBookProfilePage = (props) => {
 			const id = getQueryVariable('id', url);
 			const appropriationNumber = getQueryVariable('appropriationNumber', url);
 			const useElasticSearch = getQueryVariable('useElasticSearch', url) === 'true';
+			const tmpPortfolioName = getQueryVariable('portfolioName', url);
 
 			setProgramElement(programElement);
 			setProjectNum(projectNum);
@@ -210,6 +213,7 @@ const JBookProfilePage = (props) => {
 			setSearchText(searchText);
 			setID(id);
 			setAppropriationNumber(appropriationNumber);
+			setPortfolioName(tmpPortfolioName);
 
 			getProjectData(
 				programElement,
@@ -219,7 +223,7 @@ const JBookProfilePage = (props) => {
 				budgetLineItem,
 				id,
 				appropriationNumber,
-				useElasticSearch
+				tmpPortfolioName
 			);
 
 			if (searchText && searchText !== 'undefined') {
@@ -248,7 +252,6 @@ const JBookProfilePage = (props) => {
 	}, []);
 
 	useEffect(() => {
-		console.log(projectData);
 		if (projectData.id) {
 			if (!isCheckboxSet) {
 				setIsCheckboxSet(true);
@@ -804,12 +807,13 @@ const JBookProfilePage = (props) => {
 						...reviewData,
 						budgetType: budgetType,
 						revProgramElement: programElement,
-						id: undefined,
+						id,
 						revBudgetLineItems: budgetLineItem,
 						budgetYear: budgetYear,
 						appropriationNumber,
 						budgetActivityNumber: projectData.budgetActivityNumber,
 						serviceAgency: projectData.serviceAgency,
+						portfolioName,
 					},
 					isSubmit,
 					reviewType,
@@ -818,7 +822,16 @@ const JBookProfilePage = (props) => {
 				},
 			});
 
-			getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
+			getProjectData(
+				programElement,
+				projectNum,
+				budgetType,
+				budgetYear,
+				budgetLineItem,
+				id,
+				appropriationNumber,
+				portfolioName
+			);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -835,6 +848,7 @@ const JBookProfilePage = (props) => {
 				budgetLineItem,
 				projectNum,
 				appropriationNumber,
+				portfolioName,
 			},
 		});
 		await getProjectData(
@@ -844,7 +858,8 @@ const JBookProfilePage = (props) => {
 			budgetYear,
 			budgetLineItem,
 			id,
-			appropriationNumber
+			appropriationNumber,
+			portfolioName
 		);
 		setState(dispatch, { [loading]: false });
 	};
