@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
+import _ from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -57,7 +58,18 @@ const JbookViewHeaderHandler = (props) => {
 	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
 
 	const { state, dispatch } = context;
-	const { cloneData, componentStepNumbers, currentViewName, listView, viewNames, projectData } = state;
+	const {
+		cloneData,
+		componentStepNumbers,
+		currentViewName,
+		listView,
+		viewNames,
+		projectData,
+		categorySorting,
+		activeCategoryTab,
+		currentSort,
+		currentOrder,
+	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
@@ -132,6 +144,37 @@ const JbookViewHeaderHandler = (props) => {
 		[dispatch, state.cloneData.url]
 	);
 
+	const handleChangeSort = (event) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
+		const {
+			target: { value },
+		} = event;
+		setState(dispatch, {
+			currentSort: value,
+			currentOrder: value === 'Alphabetical' ? 'asc' : 'desc',
+			resultsPage: 1,
+			docSearchResults: [],
+			replaceResults: true,
+			runSearch: true,
+			infiniteScrollPage: 1,
+			searchSettings: newSearchSettings,
+		});
+	};
+
+	const handleChangeOrder = (value) => {
+		const newSearchSettings = _.cloneDeep(state.searchSettings);
+		newSearchSettings.isFilterUpdate = true;
+		setState(dispatch, {
+			currentOrder: value,
+			resultsPage: 1,
+			docSearchResults: [],
+			replaceResults: true,
+			runSearch: true,
+			searchSettings: newSearchSettings,
+		});
+	};
+
 	return (
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
@@ -142,6 +185,94 @@ const JbookViewHeaderHandler = (props) => {
 					dispatch={dispatch}
 					projectData={projectData}
 				/>
+				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
+					<>
+						<FormControl variant="outlined" classes={{ root: classes.root }}>
+							<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
+								Sort
+							</InputLabel>
+							<Select
+								labelId="view-name"
+								label="Sort"
+								id="view-name-select"
+								value={currentSort}
+								onChange={handleChangeSort}
+								classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
+								className="MuiInputBase-root"
+								autoWidth
+							>
+								{categorySorting[activeCategoryTab].map((sort) => {
+									return (
+										<MenuItem
+											key={`${sort}-key`}
+											value={sort}
+											style={{ display: 'flex', padding: '3px 6px' }}
+										>
+											{sort}
+										</MenuItem>
+									);
+								})}
+							</Select>
+						</FormControl>
+						{currentSort !== 'Alphabetical' ? (
+							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+								<i
+									className="fa fa-sort-amount-desc"
+									style={{
+										marginTop: '80%',
+										marginRight: '5px',
+										cursor: 'pointer',
+										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+									}}
+									aria-hidden="true"
+									onClick={() => {
+										handleChangeOrder('desc');
+									}}
+								/>
+								<i
+									className="fa fa-sort-amount-asc"
+									style={{
+										marginTop: '80%',
+										cursor: 'pointer',
+										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+									}}
+									aria-hidden="true"
+									onClick={() => {
+										handleChangeOrder('asc');
+									}}
+								/>
+							</div>
+						) : (
+							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+								<i
+									className="fa fa-sort-alpha-asc"
+									style={{
+										marginTop: '80%',
+										marginRight: '5px',
+										cursor: 'pointer',
+										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+									}}
+									aria-hidden="true"
+									onClick={() => {
+										handleChangeOrder('asc');
+									}}
+								/>
+								<i
+									className="fa fa-sort-alpha-desc"
+									style={{
+										marginTop: '80%',
+										cursor: 'pointer',
+										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+									}}
+									aria-hidden="true"
+									onClick={() => {
+										handleChangeOrder('desc');
+									}}
+								/>
+							</div>
+						)}
+					</>
+				)}
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
 					<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 						View
