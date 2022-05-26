@@ -386,6 +386,7 @@ const initState = {
 
 	// contract totals
 	contractTotals: {},
+	statsLoading: false,
 
 	paginationSearch: false,
 
