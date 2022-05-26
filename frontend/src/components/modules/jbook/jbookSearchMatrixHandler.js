@@ -70,7 +70,7 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => {
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
 	const endsInY = displayName[displayName.length - 1] === 'y';
 	const endsInS = displayName[displayName.length - 1] === 's';
 
@@ -82,7 +82,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 		endsInY ? 'ies' : endsInS ? 'es' : 's'
 	}`;
 	const specificSelected = `${type}SpecificSelected`;
-	const options = state.defaultOptions[type];
+
+	let optionType = useES ? type + 'ES' : type;
+	const options = state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -132,6 +134,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 					</FormGroup>
 					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{state.jbookSearchSettings[specificSelected] &&
+							options &&
 							options.map((option) => {
 								return (
 									<FormControlLabel
@@ -242,7 +245,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
 				</GCAccordion>
 			</div>
 
@@ -296,7 +299,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
 				</GCAccordion>
 			</div>
 
