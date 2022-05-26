@@ -10,7 +10,7 @@ const USER_REQUEST = require('../../models').user_request;
 const GL_CONTRACTS = require('../../models').gl_contracts;
 const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
-const FEEDBACK = require('../../models').feedback;
+const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
@@ -49,7 +49,7 @@ class JBookDataHandler extends DataHandler {
 			gl_contracts = GL_CONTRACTS,
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
-			feedback = FEEDBACK,
+			feedback = FEEDBACK_JBOOK,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
@@ -461,6 +461,7 @@ class JBookDataHandler extends DataHandler {
 	async submitFeedbackForm(req, userId) {
 		try {
 			const { feedbackForm } = req.body;
+			feedbackForm.event_name = 'JBOOK_Feedback';
 			return this.feedback.create(feedbackForm);
 		} catch (err) {
 			this.logger.error(err, '9BN7UG1', userId);
