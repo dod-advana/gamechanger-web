@@ -1738,6 +1738,11 @@ module.exports = {
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
 		budgetActivityTitle_s: 'Activity Title',
+		// unaccounted for (and ignored for now):
+		// r2a_other_program_funding_n
+		// p3a_rdte_n
+		// p5_cost_elements_n
+		// p5_res_sum_optional_rows_n
 	},
 
 	esInnerHitFields: [
