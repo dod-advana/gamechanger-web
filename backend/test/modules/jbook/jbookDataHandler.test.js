@@ -94,6 +94,11 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve(esReturn);
 				},
 			},
+			jbook_classification: {
+				findOne() {
+					return Promise.resolve({ dataValues: {} });
+				},
+			},
 			portfolio: {
 				findOne() {
 					return Promise.resolve(portfolios[0]);
@@ -207,6 +212,7 @@ describe('JBookDataHandler', function () {
 					serviceReviewerEmail: null,
 					serviceSecondaryReviewerEmail: null,
 				},
+				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -310,6 +316,7 @@ describe('JBookDataHandler', function () {
 					serviceReviewerEmail: null,
 					serviceSecondaryReviewerEmail: null,
 				},
+				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -402,6 +409,7 @@ describe('JBookDataHandler', function () {
 					serviceReviewerEmail: null,
 					serviceSecondaryReviewerEmail: null,
 				},
+				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
