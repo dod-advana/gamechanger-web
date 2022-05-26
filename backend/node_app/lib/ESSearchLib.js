@@ -54,11 +54,79 @@ class ESSearchLib {
 			return {};
 		}
 	}
-	async addDocument(clientName, index, document) {
+
+	async addDocument(clientName, index, document, user) {
 		try {
 			this._clients[clientName].index({ index: index, body: document });
 		} catch (e) {
 			this.logger.error(e.message, 'NL2FDZA', user);
+		}
+	}
+
+	async updateDocument(clientName, index, updatedDocument, documentId, user) {
+		try {
+			const resp = await this._clients[clientName].update({
+				index,
+				id: documentId,
+				body: { doc: updatedDocument },
+			});
+			return resp.body?.result === 'updated';
+		} catch (e) {
+			this.logger.error(e.message, 'N67SIIJ', user);
+			return false;
+		}
+	}
+
+	async createIndex(clientName, index, mappings, aliases, user) {
+		try {
+			const { body: indexExists } = await this._clients[clientName].indices.exists({ index });
+			if (indexExists) {
+				this.logger.info('Index already exists', '6Q71ARK', user);
+				return true;
+			}
+
+			const { body } = await this._clients[clientName].indices.create({ index, body: mappings });
+			if (body['acknowledged'] === true) {
+				this.logger.info('Index created and mapping applied', '6Q71ARK', user);
+				return true;
+			} else {
+				this.logger.info('Error creating index', '6Q71ARK', user);
+				return false;
+			}
+		} catch (e) {
+			this.logger.error(e.message, '6Q71ARK', user);
+			return false;
+		}
+	}
+
+	async bulkInsert(clientName, index, documents, user) {
+		try {
+			const operations = documents.flatMap((doc) => [{ index: { _index: index, _id: doc['id'] } }, doc]);
+			const bulkResponse = await this._clients[clientName].bulk({ refresh: true, body: operations });
+
+			if (bulkResponse.errors) {
+				const erroredDocuments = [];
+				// The items array has the same order of the dataset we just indexed.
+				// The presence of the `error` key indicates that the operation
+				// that we did for the document has failed.
+				bulkResponse.items.forEach((action, i) => {
+					const operation = Object.keys(action)[0];
+					if (action[operation].error) {
+						erroredDocuments.push({
+							// If the status is 429 it means that you can retry the document,
+							// otherwise it's very likely a mapping error, and you should
+							// fix the document before to try it again.
+							status: action[operation].status,
+							error: action[operation].error,
+							operation: body[i * 2],
+							document: body[i * 2 + 1],
+						});
+					}
+				});
+				console.log(erroredDocuments);
+			}
+		} catch (e) {
+			this.logger.error(e.message, '1458DB1', user);
 		}
 	}
 }

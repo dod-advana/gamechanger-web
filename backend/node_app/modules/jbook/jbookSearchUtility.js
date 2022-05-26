@@ -30,12 +30,12 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
+	parseFields(data, fromFrontend, docType, doMapping = true) {
 		const newData = {};
 		const mapping = this.getMapping(docType, fromFrontend);
 
 		for (const field in data) {
-			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
+			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
 				const newKey = mapping[field].newName;
 				newData[newKey] = mapping[field].processValue(data[field]);
 			} else if (data[field] && data[field] !== null) {

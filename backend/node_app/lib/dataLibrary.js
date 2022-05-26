@@ -185,6 +185,17 @@ class DataLibrary {
 			throw err;
 		}
 	}
+
+	async updateDocument(clientName, index, updatedDoc, docId, userId) {
+		try {
+			return await this.esSearchLib.updateDocument(clientName, index, updatedDoc, docId, userId);
+		} catch (err) {
+			const msg = err && err.message ? `${err.message}` : `${err}`;
+			this.logger.error(msg, 'P7DD1AW');
+			throw err;
+		}
+	}
+
 	async getElasticSearchFields(esIndex, userId) {
 		try {
 			let opts = Object.assign({}, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
