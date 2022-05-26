@@ -502,6 +502,7 @@ class JBookDataHandler extends DataHandler {
 		try {
 			const { frontendReviewData, isSubmit, reviewType, projectNum } = req.body;
 			const permissions = req.permissions;
+			let wasUpdated = false;
 
 			if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
 				if (reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) {
@@ -560,18 +561,42 @@ class JBookDataHandler extends DataHandler {
 
 			console.log(frontendReviewData);
 
-			// const [review, created] = await this.rev
-			// 	.findOrCreate({
-			// 		where: query,
-			// 		defaults: {
-			// 			...reviewData,
-			// 			budget_type: types[reviewData.budget_type],
-			// 		},
-			// 	})
-			// 	.catch((err) => {
-			// 		console.log('Error finding / creating review');
-			// 		console.log(err);
-			// 	});
+			const [review, created] = await this.rev
+				.findOrCreate({
+					where: query,
+					defaults: {
+						...reviewData,
+						budget_type: types[reviewData.budget_type],
+					},
+				})
+				.catch((err) => {
+					console.log('Error finding / creating review');
+					console.log(err);
+				});
+
+			// if an existing row, update
+			if (!created) {
+				const result = await this.rev
+					.update(
+						{
+							...reviewData,
+							budget_type: types[reviewData.budget_type],
+						},
+						{
+							where: query,
+						}
+					)
+					.catch((err) => {
+						console.log('Error updating review row');
+						console.log(err);
+					});
+
+				wasUpdated = result && result.length && result[0] === 1;
+			} else {
+				wasUpdated = true;
+			}
+
+			// Now update ES
 
 			// If Submitting and POC info added email them letting them know.
 			// if (isSubmit && reviewType === 'service') {
@@ -618,27 +643,7 @@ class JBookDataHandler extends DataHandler {
 			// 	);
 			// }
 
-			// if an existing row, update
-			// if (!created) {
-			// 	const result = await this.rev
-			// 		.update(
-			// 			{
-			// 				...reviewData,
-			// 				budget_type: types[reviewData.budget_type],
-			// 			},
-			// 			{
-			// 				where: query,
-			// 			}
-			// 		)
-			// 		.catch((err) => {
-			// 			console.log('Error updating review row');
-			// 			console.log(err);
-			// 		});
-			//
-			// 	return { created: result && result.length && result[0] === 1 };
-			// }
-			//
-			// return { created };
+			return { created: wasUpdated };
 		} catch (err) {
 			this.logger.error(err, 'GZ3D0DR', userId);
 			return {};
