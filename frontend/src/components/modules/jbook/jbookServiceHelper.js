@@ -4,6 +4,7 @@ import {
 	StyledTableValueContainer,
 	StyledInlineContainer,
 	StyledFooterDiv,
+	ButtonStyles,
 } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
@@ -731,7 +732,7 @@ const ButtonFooter = React.memo((props) => {
 					title={'This button will re-enable the service level review for editing'}
 				>
 					<GCPrimaryButton
-						style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+						style={ButtonStyles.main}
 						onClick={() => setState(dispatch, { ServiceModalOpen: true })}
 					>
 						Re-Enable (Partial Service Review)
@@ -740,7 +741,7 @@ const ButtonFooter = React.memo((props) => {
 			)}
 			<Tooltip placement="top" arrow title={'This button will reset the service level review with blank values'}>
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => {
 						setReviewData('serviceForm');
 					}}
@@ -755,7 +756,7 @@ const ButtonFooter = React.memo((props) => {
 			</Tooltip>
 			<Tooltip placement="top" arrow title={'This will save a partial review to finish later'}>
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => submitReviewForm('primaryReviewLoading', false, 'service')}
 					disabled={finished || roleDisabled}
 				>
@@ -772,7 +773,7 @@ const ButtonFooter = React.memo((props) => {
 				title={'Once the review is complete, this button will submit the finished service level review'}
 			>
 				<GCPrimaryButton
-					style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+					style={ButtonStyles.submit}
 					onClick={() => submitReviewForm('primaryReviewLoading', true, 'service')}
 					disabled={finished || roleDisabled}
 				>

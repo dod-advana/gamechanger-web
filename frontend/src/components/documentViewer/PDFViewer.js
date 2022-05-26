@@ -50,7 +50,7 @@ export default function PDFViewer({ location }) {
 		setCloneIndex(query.get('cloneIndex'));
 	}, [query, filename]);
 
-	if (filename && filename.endsWith('pdf')) {
+	if (filename && filename.toLowerCase().endsWith('pdf')) {
 		return (
 			<iframe
 				title={'PDFViewer'}
