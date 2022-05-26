@@ -112,7 +112,7 @@ const GameChangerPage = (props) => {
 					{state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} />}
 
 					{/* Main View */}
-					{state.historySet && <MainView context={context} />}
+					<div style={{ flexGrow: 1 }}>{state.historySet && <MainView context={context} />}</div>
 
 					{/* Snack BAr Messages */}
 					<div>
@@ -131,8 +131,8 @@ const GameChangerPage = (props) => {
 						message={state.backendErrorMsg || ''}
 						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
-					{/* Footer for main gamechanger */}
-					{cloneName === 'gamechanger' && <GCFooter setUserMatomo={setUserMatomo} location={location} />}
+					{/* Footer */}
+					{<GCFooter setUserMatomo={setUserMatomo} location={location} cloneName={cloneName} />}
 				</>
 			)}
 		</div>
