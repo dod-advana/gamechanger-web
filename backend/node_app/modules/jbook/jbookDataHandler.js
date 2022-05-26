@@ -352,19 +352,20 @@ class JBookDataHandler extends DataHandler {
 					break;
 			}
 
-			review = await this.rev.findOne({
+			let reviewData = await this.rev.findAll({
 				where: query,
 			});
 
-			// console.log(review)
-			if (review && review.dataValues) {
-				// parse mission partners
-				if (review.service_mp_list && typeof review.service_mp_list === 'string') {
-					review.service_mp_list = review.service_mp_list
-						.replace(/\[|\]|\\/g, '')
-						.split(';')
-						.join('|');
-				}
+			if (reviewData && reviewData.length > 0) {
+				reviewData.map(async (review) => {
+					try {
+						// parse mission partners
+						if (review.service_mp_list && typeof review.service_mp_list === 'string') {
+							review.service_mp_list = review.service_mp_list
+								.replace(/\[|\]|\\/g, '')
+								.split(';')
+								.join('|');
+						}
 
 				review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review', false);
 			}
@@ -372,7 +373,7 @@ class JBookDataHandler extends DataHandler {
 			console.log('Error fetching for review');
 			console.log(err);
 		}
-		return review;
+		return reviews;
 	}
 
 	async getBudgetDropdownData(req, userId) {
@@ -500,10 +501,12 @@ class JBookDataHandler extends DataHandler {
 
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, projectNum } = req.body;
+			const { frontendReviewData, isSubmit, reviewType, projectNum, portfolioName } = req.body;
+
 			const permissions = req.permissions;
 			let wasUpdated = false;
 
+			// check permissions
 			if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
 				if (reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) {
 					throw 'Unauthorized';
@@ -514,6 +517,7 @@ class JBookDataHandler extends DataHandler {
 				}
 			}
 
+			// Review Status Update logic
 			if (!isSubmit) {
 				frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
 			} else {
@@ -545,6 +549,7 @@ class JBookDataHandler extends DataHandler {
 			const query = {
 				budget_type: types[reviewData.budget_type],
 				budget_year: reviewData.budget_year,
+				portfolio_name: portfolioName === 'General' ? null : portfolioName,
 			};
 
 			if (reviewData.budget_type === 'RDT&E') {

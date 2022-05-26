@@ -221,6 +221,9 @@ module.exports = (sequelize, DataTypes) => {
 			agency: {
 				type: DataTypes.TEXT,
 			},
+			portfolio_name: {
+				type: DataTypes.TEXT,
+			},
 		},
 		{
 			freezeTableName: true,

@@ -137,6 +137,7 @@ class JBookSearchHandler extends SearchHandler {
 		try {
 			return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
 		} catch (e) {
+			console.log('Error running jbook document search');
 			const { message } = e;
 			this.logger.error(message, 'IDD6Y19', userId);
 			throw e;

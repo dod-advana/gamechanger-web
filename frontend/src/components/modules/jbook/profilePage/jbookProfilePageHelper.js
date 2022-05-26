@@ -11,9 +11,6 @@ import {
 	StyledNavBar,
 	StyledNavContainer,
 	StyledSideNavContainer,
-	StyledLeftContainer,
-	StyledRightContainer,
-	StyledMainContainer,
 } from './profilePageStyles';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
@@ -79,7 +76,7 @@ const BasicData = (props) => {
 	const { projectData, reviewData } = state;
 
 	return (
-		<StyledLeftContainer>
+		<>
 			<SimpleTable
 				tableClass={'magellan-table'}
 				zoom={1}
@@ -123,7 +120,7 @@ const BasicData = (props) => {
 				hideSubheader={true}
 				firstColWidth={firstColWidth}
 			/>
-		</StyledLeftContainer>
+		</>
 	);
 };
 
@@ -203,42 +200,40 @@ const Metadata = (props) => {
 	const { projectData, reviewData, keywordsChecked } = state;
 
 	return (
-		<StyledRightContainer>
-			<SimpleTable
-				tableClass={'magellan-table'}
-				zoom={1}
-				rows={
-					projectData
-						? getMetadataTableData(
-								projectData,
-								budgetType,
-								projectNum,
-								reviewData,
-								keywordsChecked,
-								keywordCheckboxes,
-								setKeywordCheck
-						  )
-						: []
-				}
-				height={'auto'}
-				dontScroll={true}
-				disableWrap={true}
-				title={'Metadata'}
-				headerExtraStyle={{
-					backgroundColor: '#313541',
-					color: 'white',
-				}}
-				hideSubheader={true}
-				firstColWidth={firstColWidth}
-			/>
-		</StyledRightContainer>
+		<SimpleTable
+			tableClass={'magellan-table'}
+			zoom={1}
+			rows={
+				projectData
+					? getMetadataTableData(
+							projectData,
+							budgetType,
+							projectNum,
+							reviewData,
+							keywordsChecked,
+							keywordCheckboxes,
+							setKeywordCheck
+					  )
+					: []
+			}
+			height={'auto'}
+			dontScroll={true}
+			disableWrap={true}
+			title={'Metadata'}
+			headerExtraStyle={{
+				backgroundColor: '#313541',
+				color: 'white',
+			}}
+			hideSubheader={true}
+			firstColWidth={firstColWidth}
+		/>
 	);
 };
 
 const ProjectDescription = (props) => {
 	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
 	return (
-		<StyledMainContainer>
+		<>
 			{profileLoading ? (
 				<LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />
 			) : (
@@ -279,7 +274,7 @@ const ProjectDescription = (props) => {
 					</div>
 				</>
 			)}
-		</StyledMainContainer>
+		</>
 	);
 };
 
