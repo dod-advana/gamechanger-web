@@ -184,22 +184,6 @@ const GamechangerLiteAdminPage = LoadableVisibility({
 	},
 });
 
-const GCFooter = LoadableVisibility({
-	loader: () => import('./components/navigation/GCFooter'),
-	loading: () => {
-		return (
-			<div
-				style={{
-					display: 'flex',
-					height: '90px',
-					width: '100%',
-					backgroundColor: 'black',
-				}}
-			/>
-		);
-	},
-});
-
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
 	siteId: Config.MATOMO_SITE_ID || 2,
@@ -473,10 +457,6 @@ const App = () => {
 		}
 	}
 
-	const setUserMatomo = (value) => {
-		localStorage.setItem('userMatomo', value);
-	};
-
 	return (
 		<Router>
 			<MatomoProvider value={instance}>
@@ -496,12 +476,7 @@ const App = () => {
 												<SlideOutMenu match={match} location={location} history={history} />
 											)}
 											<Switch>
-												{tokenLoaded &&
-													gameChangerCloneRoutes.map((route) => {
-														console.log('route lcoation');
-														console.log(route(location));
-														return route(location);
-													})}
+												{tokenLoaded && gameChangerCloneRoutes.map((route) => route(location))}
 												<Route
 													exact
 													path="/"
