@@ -1355,22 +1355,24 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: [],
-						should: [
-							{
-								multi_match: {
-									query: `${parsedQuery}`,
-									fields: esTopLevelFields,
-									type: 'best_fields',
-									operator: `${operator}`,
-								},
-							},
-						],
+						should: [],
 					},
 				},
 				highlight: {
 					fields: {},
 				},
 			};
+
+			if (searchText !== '') {
+				query.query.bool.must.push({
+					multi_match: {
+						query: `${parsedQuery}`,
+						fields: esTopLevelFields,
+						type: 'best_fields',
+						operator: `${operator}`,
+					},
+				});
+			}
 
 			esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
