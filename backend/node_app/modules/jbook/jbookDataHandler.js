@@ -183,6 +183,7 @@ class JBookDataHandler extends DataHandler {
 			let updateESReview_n = false;
 			if (doc.review_n && Array.isArray(doc.review_n)) {
 				console.log('IS ARRAY');
+				console.log(doc.review_n);
 				doc.review_n = [];
 				doc.review_n.forEach((review) => {
 					if (
@@ -196,6 +197,7 @@ class JBookDataHandler extends DataHandler {
 				});
 			} else if (doc.review_n && doc.review_n.constructor === Object) {
 				console.log('IS OBJECT');
+				console.log(doc.review_n);
 				if (
 					doc.review_n?.portfolio_name_s === portfolioName ||
 					doc.review_n?.portfolio_id_s === portfolio.id.toString()
@@ -208,10 +210,12 @@ class JBookDataHandler extends DataHandler {
 				updateESReview_n = true;
 			} else if (!doc.review_n || doc.review_n === null) {
 				console.log('IS NULL');
+				console.log(doc.review_n);
 				doc.review_n = [];
 				updateESReview_n = true;
 			} else {
 				console.log('IS SOMETHING ELSE');
+				console.log(doc.review_n);
 				doc.review_n = [];
 				updateESReview_n = true;
 			}
