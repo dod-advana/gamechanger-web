@@ -885,6 +885,11 @@ const JBookProfilePage = (props) => {
 					num,
 				value: num,
 			});
+		} else {
+			data.push({
+				name: 'No Prediction',
+				description: 'Classification data is not yet available for this exhibit',
+			});
 		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
@@ -917,9 +922,7 @@ const JBookProfilePage = (props) => {
 						id={id}
 						appropriationNumber={appropriationNumber}
 					/> */}
-					{scorecardData(projectData.classification, reviewData).length > 0 ? (
-						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
-					) : null}
+					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
 				</div>
 
 				<ProjectDescription
