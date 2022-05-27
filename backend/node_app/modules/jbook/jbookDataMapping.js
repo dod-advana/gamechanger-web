@@ -793,7 +793,7 @@ module.exports = {
 
 	reviewESMapping: {
 		portfolio_name_s: {
-			newName: 'portfolio_name',
+			newName: 'portfolioName',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -2084,7 +2084,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		key_review_s: {
+		key_s: {
 			newName: 'id',
 			defaultValue: '',
 			processValue: (value) => value,

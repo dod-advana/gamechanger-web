@@ -98,37 +98,43 @@ class JBookDataHandler extends DataHandler {
 		});
 	}
 
+	async getPortfolioAndDocument(id, portfolioName, userId) {
+		const portfolio = await this.getPortfolio({ body: { name: portfolioName } }, userId);
+
+		// Get ES Data
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+		const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
+		const esResults = await this.dataLibrary.queryElasticSearch(
+			clientObj.esClientName,
+			clientObj.esIndex,
+			esQuery,
+			userId
+		);
+		const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+
+		const data = docs[0];
+
+		return { doc: data, portfolio };
+	}
+
 	async getESProjectData(req, userId) {
 		try {
 			const { id, portfolioName } = req.body;
 
-			const portfolio = await this.getPortfolio({ body: { name: portfolioName } }, userId);
-
-			// Get ES Data
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
-			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
-			const esResults = await this.dataLibrary.queryElasticSearch(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				esQuery,
-				userId
-			);
-			const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
-			const data = docs[0];
-			if (!data.currentYearAmount) {
-			}
+			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
 			// classification
 			try {
 				let classification;
 
-				switch (data.budgetType) {
+				switch (doc.budgetType) {
 					case 'pdoc':
 						classification = await this.jbook_classification.findOne({
 							where: {
-								'P40-01_LI_Number': data.budgetLineItem,
-								budgetYear: data.budgetYear,
+								'P40-01_LI_Number': doc.budgetLineItem,
+								budgetYear: doc.budgetYear,
 								docType: 'pdoc',
 							},
 						});
@@ -136,9 +142,9 @@ class JBookDataHandler extends DataHandler {
 					case 'rdoc':
 						classification = await this.jbook_classification.findOne({
 							where: {
-								PE_Num: data.programElement,
-								Proj_Number: data.projectNum,
-								budgetYear: data.budgetYear,
+								PE_Num: doc.programElement,
+								Proj_Number: doc.projectNum,
+								budgetYear: doc.budgetYear,
 								docType: 'rdoc',
 							},
 						});
@@ -146,9 +152,9 @@ class JBookDataHandler extends DataHandler {
 					case 'om':
 						classification = await this.jbook_classification.findOne({
 							where: {
-								line_number: data.budgetLineItem,
-								sag_bli: data.programElement,
-								budgetYear: data.budgetYear,
+								line_number: doc.budgetLineItem,
+								sag_bli: doc.programElement,
+								budgetYear: doc.budgetYear,
 								docType: 'om',
 							},
 						});
@@ -160,7 +166,7 @@ class JBookDataHandler extends DataHandler {
 				// CLASSIFICATION
 				if (classification && classification.dataValues) {
 					try {
-						data.classification = classification.dataValues;
+						doc.classification = classification.dataValues;
 					} catch (e) {
 						console.log('Error fetching classification');
 						console.log(e);
@@ -175,55 +181,69 @@ class JBookDataHandler extends DataHandler {
 			let tmpReview;
 
 			let updateESReview_n = false;
-			if (data.review_n && Array.isArray(data.review_n)) {
-				data.review_n.forEach((review) => {
+			if (doc.review_n && Array.isArray(doc.review_n)) {
+				console.log('IS ARRAY');
+				doc.review_n = [];
+				doc.review_n.forEach((review) => {
 					if (
 						review['portfolio_name_s'] === portfolioName ||
 						review['portfolio_id_s'] === portfolio.id.toString()
 					) {
 						tmpReview = review;
+					} else {
+						doc.review_n.push(review);
 					}
 				});
-			} else if (
-				data.review_n &&
-				(data.review_n.portfolio_name_s === portfolioName ||
-					data.review_n.portfolio_id_s === portfolio.id.toString())
-			) {
-				tmpReview = data.review_n;
-				data.review_n = [tmpReview];
+			} else if (doc.review_n && doc.review_n.constructor === Object) {
+				console.log('IS OBJECT');
+				if (
+					doc.review_n?.portfolio_name_s === portfolioName ||
+					doc.review_n?.portfolio_id_s === portfolio.id.toString()
+				) {
+					tmpReview = doc.review_n;
+					doc.review_n = [];
+				} else {
+					doc.review_n = [doc.review_n];
+				}
+				updateESReview_n = true;
+			} else if (!doc.review_n || doc.review_n === null) {
+				console.log('IS NULL');
+				doc.review_n = [];
 				updateESReview_n = true;
 			} else {
-				data.review_n = [data.review_n];
+				console.log('IS SOMETHING ELSE');
+				doc.review_n = [];
 				updateESReview_n = true;
 			}
 
 			// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
 			if (!tmpReview) {
 				updateESReview_n = true;
-				const tmpData = _.clone(data);
+				const tmpData = _.clone(doc);
 				tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
 				const oldReview = await this.getReviewData(tmpData);
 				if (!oldReview) {
 					tmpReview = {
-						budget_line_item: data.budgetLineItem,
-						budget_type: data.budgetType,
-						budget_year: data.budgetYear,
-						budget_activity: data.budgetActivityNumber,
-						appn_num: data.appropriationNumber,
-						agency: data.agency,
+						budget_line_item: tmpData.budgetLineItem,
+						budget_type: tmpData.budgetType,
+						budget_year: doc.budgetYear,
+						budget_activity: tmpData.budgetActivityNumber,
+						appn_num: tmpData.appropriationNumber,
+						agency: tmpData.agency,
 						portfolio_name: portfolioName,
-						program_element: data.programElement,
+						program_element: tmpData.programElement,
 						review_status: 'Needs Review',
 						primary_review_status: 'Needs Review',
 						service_review_status: 'Needs Review',
 						poc_review_status: 'Needs Review',
 					};
 				} else {
-					oldReview.budget_year = data.budgetYear;
+					oldReview.budget_year = doc.budgetYear;
 					oldReview.review_status = 'Needs Review';
 					oldReview.primary_review_status = 'Needs Review';
 					oldReview.service_review_status = 'Needs Review';
 					oldReview.poc_review_status = 'Needs Review';
+					oldReview.portfolio_name = portfolioName;
 					tmpReview = oldReview;
 					delete tmpReview.id;
 					delete tmpReview.primary_reviewer;
@@ -247,19 +267,18 @@ class JBookDataHandler extends DataHandler {
 				// Now create the entry in PG
 				const newReview = await this.rev.create(tmpReview);
 				tmpReview = newReview['dataValues'];
-				data.review = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
-				data.review['portfolio_name'] = portfolioName;
+				doc.review = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
 			} else {
-				data.review = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
+				doc.review = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
 			}
 
 			if (updateESReview_n) {
-				data.review_n.push(this.jbookSearchUtility.parseFields(data.review, true, 'reviewES', true));
+				doc.review_n.push(this.jbookSearchUtility.parseFields(doc.review, true, 'reviewES', true));
 				const updated = await this.dataLibrary.updateDocument(
 					clientObj.esClientName,
 					clientObj.esIndex,
-					{ review_n: data.review_n },
-					data.key_s,
+					{ review_n: doc.review_n },
+					id,
 					userId
 				);
 				if (!updated) {
@@ -267,7 +286,7 @@ class JBookDataHandler extends DataHandler {
 				}
 			}
 
-			delete data.review_n;
+			delete doc.review_n;
 
 			// Get emails if they exist
 			try {
@@ -316,7 +335,7 @@ class JBookDataHandler extends DataHandler {
 				console.log(err);
 			}
 
-			return data;
+			return doc;
 		} catch (err) {
 			this.logger.error(err, '6T0ILGP', userId);
 			return [];
@@ -356,24 +375,23 @@ class JBookDataHandler extends DataHandler {
 				where: query,
 			});
 
-			if (reviewData && reviewData.length > 0) {
-				reviewData.map(async (review) => {
-					try {
-						// parse mission partners
-						if (review.service_mp_list && typeof review.service_mp_list === 'string') {
-							review.service_mp_list = review.service_mp_list
-								.replace(/\[|\]|\\/g, '')
-								.split(';')
-								.join('|');
-						}
+			// console.log(review)
+			if (reviewData && reviewData.dataValues) {
+				// parse mission partners
+				if (reviewData.service_mp_list && typeof reviewData.service_mp_list === 'string') {
+					reviewData.service_mp_list = reviewData.service_mp_list
+						.replace(/\[|\]|\\/g, '')
+						.split(';')
+						.join('|');
+				}
 
-				review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review', false);
+				review = this.jbookSearchUtility.parseFields(reviewData.dataValues, false, 'review', false);
 			}
 		} catch (err) {
 			console.log('Error fetching for review');
 			console.log(err);
 		}
-		return reviews;
+		return review;
 	}
 
 	async getBudgetDropdownData(req, userId) {
@@ -501,7 +519,7 @@ class JBookDataHandler extends DataHandler {
 
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, projectNum, portfolioName } = req.body;
+			const { frontendReviewData, isSubmit, reviewType, projectNum, portfolioName, id } = req.body;
 
 			const permissions = req.permissions;
 			let wasUpdated = false;
@@ -547,10 +565,30 @@ class JBookDataHandler extends DataHandler {
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
 			const query = {
-				budget_type: types[reviewData.budget_type],
+				budget_type: reviewData.budget_type,
 				budget_year: reviewData.budget_year,
-				portfolio_name: portfolioName === 'General' ? null : portfolioName,
+				appn_num: { [Op.iLike]: `${reviewData.appn_num}%` },
+				budget_activity: reviewData.budget_activity,
+				agency: reviewData.agency,
+				portfolio_name: portfolioName,
 			};
+
+			// in review table, budget_line_item is also projectNum
+			switch (types[reviewData.budget_type]) {
+				case 'pdoc':
+					query.budget_line_item = reviewData.budget_line_item;
+					break;
+				case 'rdoc':
+					query.program_element = reviewData.program_element;
+					query.budget_line_item = reviewData.projectNum;
+					break;
+				case 'om':
+					query.budget_line_item = reviewData.budgetLineItem;
+					query.program_element = reviewData.programElement;
+					break;
+				default:
+					break;
+			}
 
 			if (reviewData.budget_type === 'RDT&E') {
 				query.program_element = reviewData.program_element;
@@ -564,7 +602,7 @@ class JBookDataHandler extends DataHandler {
 				query.budget_activity = reviewData.budget_activity;
 			}
 
-			console.log(frontendReviewData);
+			delete reviewData.id;
 
 			const [review, created] = await this.rev
 				.findOrCreate({
@@ -602,6 +640,40 @@ class JBookDataHandler extends DataHandler {
 			}
 
 			// Now update ES
+			let tmpPGToES = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
+			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+
+			let esReviews = [];
+			if (doc.review_n && Array.isArray(doc.review_n)) {
+				esReviews = doc.review_n;
+			} else if (doc.review_n && doc.review_n !== null) {
+				esReviews = [doc.review_n];
+			} else {
+				esReviews = [];
+			}
+
+			// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+			const newReviews = [];
+			esReviews.forEach((review) => {
+				if (review.portfolio_name_s !== portfolioName && review.portfolio_id_s !== portfolio.id.toString()) {
+					newReviews.push(review);
+				}
+			});
+			newReviews.push(tmpPGToES);
+
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+			const updated = this.dataLibrary.updateDocument(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				{ review_n: newReviews },
+				id,
+				userId
+			);
+			if (!updated) {
+				console.log('ES NOT UPDATED for REVIEW');
+			}
 
 			// If Submitting and POC info added email them letting them know.
 			// if (isSubmit && reviewType === 'service') {
@@ -648,7 +720,7 @@ class JBookDataHandler extends DataHandler {
 			// 	);
 			// }
 
-			return { created: wasUpdated };
+			return { created: wasUpdated && updated };
 		} catch (err) {
 			this.logger.error(err, 'GZ3D0DR', userId);
 			return {};

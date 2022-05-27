@@ -1314,7 +1314,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},
