@@ -1117,6 +1117,9 @@ class JBookDataHandler extends DataHandler {
 					deleted: false,
 				},
 			});
+
+			console.log(portfolios);
+
 			return portfolios;
 		} catch (e) {
 			const { message } = e;
