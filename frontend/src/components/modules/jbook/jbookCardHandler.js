@@ -200,21 +200,12 @@ const types = {
 };
 
 export const clickFn = (cloneName, searchText, item, portfolioName) => {
-	const {
-		projectTitle,
-		programElement,
-		projectNum,
-		budgetType,
-		budgetLineItem,
-		budgetYear,
-		appropriationNumber,
-		id,
-	} = item;
+	const { budgetType, appropriationNumber, id, budgetYear } = item;
 
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'LineItemOpen');
-	let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+	let url = `#/jbook/profile?type=${encodeURIComponent(
 		types[budgetType]
-	)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
+	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
 };
 
@@ -799,7 +790,7 @@ const cardHandler = {
 
 			console.log(state);
 
-			const { searchText, portfolio_name } = state;
+			const { searchText, selectedPortfolio } = state;
 
 			return (
 				<>
@@ -810,7 +801,7 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(cloneName, searchText, item, portfolio_name);
+								clickFn(cloneName, searchText, item, selectedPortfolio);
 							}}
 						>
 							Open

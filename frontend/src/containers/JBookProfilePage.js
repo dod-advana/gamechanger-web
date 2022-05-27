@@ -91,7 +91,7 @@ const JBookProfilePage = (props) => {
 
 	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? 'AI Inventory');
 
-	const getProjectData = async (type, id, portfolioName) => {
+	const getProjectData = async (id, portfolioName) => {
 		setProfileLoading(true);
 
 		let projectData;
@@ -101,9 +101,16 @@ const JBookProfilePage = (props) => {
 				cloneName: cloneData.clone_name,
 				options: {
 					id,
-					portfolioName: selectedPortfolio,
+					portfolioName,
 				},
 			});
+
+			if (projectData.data) {
+				setBudgetLineItem(projectData.data.budgetLineItem || '');
+				setProgramElement(projectData.data.programElement || '');
+				setProjectNum(projectData.data.projectNum || '');
+				setAppropriationNumber(projectData.data.appropriationNumber || '');
+			}
 
 			if (projectData.data && projectData.data.contracts) {
 				setContracts(projectData.data.contracts);
@@ -194,25 +201,17 @@ const JBookProfilePage = (props) => {
 	useEffect(() => {
 		try {
 			const url = window.location.href;
-			const programElement = getQueryVariable('programElement', url);
-			const projectNum = getQueryVariable('projectNum', url);
 			const type = getQueryVariable('type', url);
-			const budgetLineItem = getQueryVariable('budgetLineItem', url);
 			const budgetYear = getQueryVariable('budgetYear', url);
 			const searchText = getQueryVariable('searchText', url);
 			const id = getQueryVariable('id', url);
-			const appropriationNumber = getQueryVariable('appropriationNumber', url);
 			const tmpPortfolioName = getQueryVariable('portfolioName', url);
 
-			setProgramElement(programElement);
-			setProjectNum(projectNum);
 			setBudgetType(type);
-			setBudgetLineItem(budgetLineItem);
 			setBudgetYear(budgetYear);
 			setSearchText(searchText);
 			setID(id);
-			setAppropriationNumber(appropriationNumber);
-			setPortfolioName(tmpPortfolioName);
+			setSelectedPortfolio(tmpPortfolioName);
 
 			getProjectData(id, tmpPortfolioName);
 
@@ -812,23 +811,23 @@ const JBookProfilePage = (props) => {
 						...reviewData,
 						budgetType: budgetType,
 						revProgramElement: programElement,
-						id,
 						revBudgetLineItems: budgetLineItem,
 						budgetYear: budgetYear,
 						appropriationNumber,
 						budgetActivityNumber: projectData.budgetActivityNumber,
 						serviceAgency: projectData.serviceAgency,
-						portfolioName,
+						portfolioName: selectedPortfolio,
 					},
 					isSubmit,
 					reviewType,
 					projectNum,
 					appropriationNumber,
-					portfolioName: state.selectedPortfolio,
+					portfolioName: selectedPortfolio,
+					id,
 				},
 			});
 
-			getProjectData(id, state.selectedPortfolio);
+			getProjectData(id, selectedPortfolio);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -845,10 +844,10 @@ const JBookProfilePage = (props) => {
 				budgetLineItem,
 				projectNum,
 				appropriationNumber,
-				portfolioName: state.selectedPortfolio,
+				portfolioName: selectedPortfolio,
 			},
 		});
-		await getProjectData(id, state.selectedPortfolio);
+		await getProjectData(id, selectedPortfolio);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -902,7 +901,7 @@ const JBookProfilePage = (props) => {
 	};
 
 	return (
-		<StyledLeftContainer>
+		<div>
 			<Notifications context={context} />
 			<SearchBar context={context} />
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
