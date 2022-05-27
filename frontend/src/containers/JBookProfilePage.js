@@ -886,6 +886,11 @@ const JBookProfilePage = (props) => {
 					num,
 				value: num,
 			});
+		} else {
+			data.push({
+				name: 'No Prediction',
+				description: 'Classification data is not yet available for this exhibit',
+			});
 		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
@@ -907,21 +912,7 @@ const JBookProfilePage = (props) => {
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<StyledLeftContainer>
-					{scorecardData(projectData.classification, reviewData).length > 0 ? (
-						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
-					) : (
-						<BasicData
-							budgetType={budgetType}
-							admin={Permissions.hasPermission('JBOOK Admin')}
-							loading={profileLoading}
-							programElement={programElement}
-							projectNum={projectNum}
-							budgetYear={budgetYear}
-							budgetLineItem={budgetLineItem}
-							id={id}
-							appropriationNumber={appropriationNumber}
-						/>
-					)}
+					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
 					<PortfolioSelector
 						selectedPortfolio={selectedPortfolio}
 						portfolios={state.portfolios}
