@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { TextField, Typography, CircularProgress } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCPrimaryButton from '../../common/GCButton';
@@ -7,6 +6,7 @@ import { setState } from '../../../utils/sharedFunctions';
 import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { StyledFooterDiv } from './profilePage/profilePageStyles';
 import { ButtonStyles } from './profilePage/profilePageStyles';
 
 const useStyles = makeStyles((theme) => ({
@@ -15,13 +15,6 @@ const useStyles = makeStyles((theme) => ({
 		padding: '15px 10px 15px 0',
 	},
 }));
-
-const StyledFooterDiv = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	margin-top: 10px;
-`;
 
 const ReviewersValue = React.memo((props) => {
 	const {
