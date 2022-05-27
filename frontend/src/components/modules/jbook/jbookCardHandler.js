@@ -162,6 +162,32 @@ const StyledFrontCardHeader = styled.div`
 	}
 `;
 
+const openDocument = (event, item, state) => {
+	const types = {
+		pdoc: 'Procurement',
+		rdoc: 'RDT&E',
+		odoc: 'O&M',
+	};
+
+	event.preventDefault();
+	const {
+		projectTitle,
+		programElement,
+		projectNum,
+		budgetType,
+		budgetLineItem,
+		budgetYear,
+		id,
+		appropriationNumber,
+	} = item;
+
+	const { searchText, useElasticSearch } = state;
+	let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+		types[budgetType]
+	)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&useElasticSearch=${useElasticSearch}`;
+	window.open(url);
+};
+
 const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
@@ -194,7 +220,7 @@ const cardHandler = {
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								//  onClick={(docListView) ? () => clickFn(item.filename, 0) : () => {}}
+								onClick={docListView ? (e) => openDocument(e, item, state) : () => {}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -712,25 +738,6 @@ const cardHandler = {
 				closeGraphCard = () => {},
 			} = props;
 
-			const { searchText } = state;
-
-			const {
-				projectTitle,
-				programElement,
-				projectNum,
-				budgetLineItem,
-				budgetType,
-				budgetYear,
-				id,
-				appropriationNumber,
-			} = item;
-
-			const types = {
-				pdoc: 'Procurement',
-				rdoc: 'RDT&E',
-				odoc: 'O&M',
-			};
-
 			return (
 				<>
 					<>
@@ -738,15 +745,7 @@ const cardHandler = {
 							target={'_blank'}
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 							href={'#'}
-							onClick={(e) => {
-								e.preventDefault();
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
-									types[budgetType]
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&useElasticSearch=${
-									state.useElasticSearch
-								}`;
-								window.open(url);
-							}}
+							onClick={(e) => openDocument(e, item, state)}
 						>
 							Open
 						</CardButton>
