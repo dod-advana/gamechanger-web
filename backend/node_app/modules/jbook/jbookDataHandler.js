@@ -728,6 +728,11 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				status = 'Needs Review';
 			}
+
+			if (isSubmit && portfolioName !== 'AI Inventory') {
+				status = 'Finished Review';
+			}
+
 			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
