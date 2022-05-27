@@ -12,7 +12,9 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
 import { getQueryVariable } from '../utils/gamechangerUtils';
+import './gamechanger.css';
 import './jbook.css';
+import './jbook-styles.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
@@ -808,6 +810,9 @@ const JBookProfilePage = (props) => {
 						id: undefined,
 						revBudgetLineItems: budgetLineItem,
 						budgetYear: budgetYear,
+						appropriationNumber,
+						budgetActivityNumber: projectData.budgetActivityNumber,
+						serviceAgency: projectData.serviceAgency,
 					},
 					isSubmit,
 					reviewType,
