@@ -105,7 +105,7 @@ const FAQLinkButton = () => {
 				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.faq });
 			}}
 		>
-			FAQ
+			FAQs
 		</LinkButton>
 	);
 };
