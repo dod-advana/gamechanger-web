@@ -10,20 +10,19 @@ import {
 	FormControl,
 } from '@material-ui/core';
 import AddIcon from '@mui/icons-material/Add';
-import GCButton from '../../common/GCButton';
-import { styles, useStyles } from '../../admin/util/GCAdminStyles';
+import GCButton from '../../../common/GCButton';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import JbookAddUsersModal from './jbookAddUsersModal';
 import JbookAddTagsModal from './jbookAddTagsModal';
 import styled from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import GameChangerAPI from '../../api/gameChanger-service-api';
+import GameChangerAPI from '../../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
 const Pill = styled.button`
 	padding: 2px 10px 3px;
-	border: none;
 	border-radius: 15px;
 	background-color: white;
 	color: black;
@@ -375,7 +374,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 					<GCButton
 						onClick={async () => {
 							try {
-								const res = await gameChangerAPI.callDataFunction({
+								await gameChangerAPI.callDataFunction({
 									functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
 									cloneName: 'jbook',
 									options: { ...data },

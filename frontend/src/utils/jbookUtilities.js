@@ -131,6 +131,9 @@ export const getConvertedName = (orgName) => {
 		case 'United States Special Operations Command (SOCOM)':
 			orgName = 'USSOCOM';
 			break;
+		case 'Chemical and Biological Defense Program (CBDP)':
+			orgName = 'CBDP';
+			break;
 		default:
 			break;
 	}
