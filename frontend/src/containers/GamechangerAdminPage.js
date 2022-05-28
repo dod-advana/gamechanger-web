@@ -81,6 +81,22 @@ const GeneralAdminButtons = LoadableVisibility({
 	},
 });
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
 const PAGES = {
 	general: 'General',
 	cloneList: 'CloneList',
@@ -135,7 +151,7 @@ const userListTableAdditions = [
  * @class GamechangerAdminPage
  */
 const GamechangerAdminPage = (props) => {
-	const { jupiter } = props;
+	const { jupiter, location } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
@@ -190,10 +206,9 @@ const GamechangerAdminPage = (props) => {
 	}, [unsetTool, setToolState, setPageToView]);
 
 	return (
-		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
+		<div style={{ minHeight: 'calc(100vh - 30px)', display: 'flex', flexDirection: 'column' }}>
 			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
-
 			<TitleBar
 				onTitleClick={() => {
 					window.location.href = `#/gamechanger-admin`;
@@ -204,11 +219,13 @@ const GamechangerAdminPage = (props) => {
 				rawSearchResults={[]}
 				cloneData={{ clone_name: 'gamechanger' }}
 			/>
-
-			<Switch>
-				<Route exact path={`${path}/mldashboard`} component={MLDashboard} />
-				<Route path="*" component={() => renderSwitch(pageToView)} />
-			</Switch>
+			<div style={{ flexGrow: 1 }}>
+				<Switch>
+					<Route exact path={`${path}/mldashboard`} component={MLDashboard} />
+					<Route path="*" component={() => renderSwitch(pageToView)} />
+				</Switch>
+			</div>
+			<GCFooter location={location} cloneName="gamechanger-admin" />
 		</div>
 	);
 };
