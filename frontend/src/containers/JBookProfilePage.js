@@ -10,6 +10,7 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { getQueryVariable } from '../utils/gamechangerUtils';
 import './gamechanger.css';
 import './jbook.css';
@@ -39,15 +40,36 @@ import {
 	StyledReviewRightContainer,
 	StyledAccordionContainer,
 	StyledAccordionHeader,
+	StyledLeftContainer,
+	StyledRightContainer,
+	StyledMainContainer,
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import PortfolioSelector from '../components/modules/jbook/portfolioBuilder/jbookPortfolioSelector';
+
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
 const JBookProfilePage = (props) => {
-	const { cloneData } = props;
+	const { cloneData, location } = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
@@ -84,16 +106,9 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const getProjectData = async (
-		programElement,
-		projectNum,
-		type,
-		budgetYear,
-		budgetLineItem,
-		id,
-		appropriationNumber,
-		useElasticSearch
-	) => {
+	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? '');
+
+	const getProjectData = async (type, id, useElasticSearch) => {
 		setProfileLoading(true);
 
 		let projectData;
@@ -102,40 +117,44 @@ const JBookProfilePage = (props) => {
 				functionName: 'getProjectData',
 				cloneName: cloneData.clone_name,
 				options: {
-					programElement,
-					projectNum,
 					type,
-					budgetYear,
-					budgetLineItem,
 					id,
-					appropriationNumber,
 					useElasticSearch,
+					portfolioName: selectedPortfolio,
 				},
 			});
 
-			if (projectData.data) {
-				if (projectData.data.contracts) {
-					setContracts(projectData.data.contracts);
-					const tempMapping = {};
-					for (let i = 0; i < projectData.data.contracts.length; i++) {
-						const currentContract = projectData.data.contracts[i];
-						if (tempMapping[currentContract.vendorName] === undefined) {
-							tempMapping[currentContract.vendorName] = true;
+			if (projectData.data && projectData.data.contracts) {
+				setContracts(projectData.data.contracts);
+				const tempMapping = {};
+				for (let i = 0; i < projectData.data.contracts.length; i++) {
+					const currentContract = projectData.data.contracts[i];
+					if (tempMapping[currentContract.vendorName] === undefined) {
+						tempMapping[currentContract.vendorName] = true;
+					}
+				}
+				setContractMapping(tempMapping);
+
+				try {
+					let reviewKeys = Object.keys(projectData.data.reviews);
+					for (let i = 0; i < Object.keys(projectData.data.reviews).length; i++) {
+						let review = projectData.data.reviews[reviewKeys[i]];
+						if (
+							review.serviceMissionPartnersChecklist === null ||
+							review.serviceMissionPartnersChecklist === undefined
+						) {
+							review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+						}
+						if (
+							review.pocMissionPartnersChecklist === null ||
+							review.pocMissionPartnersChecklist === undefined
+						) {
+							review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
 						}
 					}
-					setContractMapping(tempMapping);
-					if (
-						projectData.data.review.serviceMissionPartnersChecklist === null ||
-						projectData.data.review.serviceMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-					}
-					if (
-						projectData.data.review.pocMissionPartnersChecklist === null ||
-						projectData.data.review.pocMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
-					}
+				} catch (err) {
+					console.log('Error setting mission partners checklist');
+					console.log(err);
 				}
 			}
 		} catch (err) {
@@ -159,34 +178,35 @@ const JBookProfilePage = (props) => {
 		setProfileLoading(false);
 
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
-		if (projectData && projectData.data && projectData.data.review) {
+		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			if (projectData.data.review.domainTask && projectData.data.review.domainTaskSecondary) {
-				domainTasks[projectData.data.review.domainTask] = projectData.data.review.domainTaskSecondary;
+			let review = projectData.data.reviews[state.selectedPortfolio] ?? {};
+
+			if (review) {
+				if (review.domainTask && review.domainTaskSecondary) {
+					domainTasks[review.domainTask] = review.domainTaskSecondary;
+				}
+
+				// Review changes to make things behave properly
+				if (!review.serviceAgreeLabel || review.serviceAgreeLabel === null) {
+					review.serviceAgreeLabel = 'Yes';
+				}
+				if (!review.servicePTPAgreeLabel || review.servicePTPAgreeLabel === null) {
+					review.servicePTPAgreeLabel = 'Yes';
+				}
+				// Review changes to make things behave properly
+				if (!review.pocAgreeLabel || review.pocAgreeLabel === null) {
+					review.pocAgreeLabel = 'Yes';
+				}
+				if (!review.pocPTPAgreeLabel || review.pocPTPAgreeLabel === null) {
+					review.pocPTPAgreeLabel = 'Yes';
+				}
+				if (!review.pocMPAgreeLabel || review.pocMPAgreeLabel === null) {
+					review.pocMPAgreeLabel = 'Yes';
+				}
 			}
 
-			// Review changes to make things behave properly
-			if (!projectData.data.review.serviceAgreeLabel || projectData.data.review.serviceAgreeLabel === null) {
-				projectData.data.review.serviceAgreeLabel = 'Yes';
-			}
-			if (
-				!projectData.data.review.servicePTPAgreeLabel ||
-				projectData.data.review.servicePTPAgreeLabel === null
-			) {
-				projectData.data.review.servicePTPAgreeLabel = 'Yes';
-			}
-			// Review changes to make things behave properly
-			if (!projectData.data.review.pocAgreeLabel || projectData.data.review.pocAgreeLabel === null) {
-				projectData.data.review.pocAgreeLabel = 'Yes';
-			}
-			if (!projectData.data.review.pocPTPAgreeLabel || projectData.data.review.pocPTPAgreeLabel === null) {
-				projectData.data.review.pocPTPAgreeLabel = 'Yes';
-			}
-			if (!projectData.data.review.pocMPAgreeLabel || projectData.data.review.pocMPAgreeLabel === null) {
-				projectData.data.review.pocMPAgreeLabel = 'Yes';
-			}
-
-			setState(dispatch, { reviewData: { ...projectData.data.review }, domainTasks });
+			setState(dispatch, { reviewData: review, domainTasks });
 		}
 	};
 
@@ -212,16 +232,7 @@ const JBookProfilePage = (props) => {
 			setID(id);
 			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(
-				programElement,
-				projectNum,
-				type,
-				budgetYear,
-				budgetLineItem,
-				id,
-				appropriationNumber,
-				useElasticSearch
-			);
+			getProjectData(type, id, useElasticSearch);
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
@@ -244,6 +255,21 @@ const JBookProfilePage = (props) => {
 
 			setPermissions(tmpPermissions);
 		}
+
+		const getPortfolioData = async () => {
+			// grab the portfolio data
+			await gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {},
+				})
+				.then((data) => {
+					let portfolios = data.data !== undefined ? data.data : [];
+					setState(dispatch, { portfolios });
+				});
+		};
+		getPortfolioData();
 
 		// eslint-disable-next-line
 	}, []);
@@ -816,10 +842,11 @@ const JBookProfilePage = (props) => {
 					reviewType,
 					projectNum,
 					appropriationNumber,
+					portfolioName: state.selectedPortfolio,
 				},
 			});
 
-			getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
+			getProjectData(budgetType, id, state.useElasticSearch);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -838,15 +865,7 @@ const JBookProfilePage = (props) => {
 				appropriationNumber,
 			},
 		});
-		await getProjectData(
-			programElement,
-			projectNum,
-			budgetType,
-			budgetYear,
-			budgetLineItem,
-			id,
-			appropriationNumber
-		);
+		await getProjectData(budgetType, id, state.useElasticSearch);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -905,36 +924,37 @@ const JBookProfilePage = (props) => {
 			<SearchBar context={context} />
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
-				<div style={{ width: '400px' }}>
-					{/* <BasicData
-						budgetType={budgetType}
-						admin={Permissions.hasPermission('JBOOK Admin')}
-						loading={profileLoading}
-						programElement={programElement}
-						projectNum={projectNum}
-						budgetYear={budgetYear}
-						budgetLineItem={budgetLineItem}
-						id={id}
-						appropriationNumber={appropriationNumber}
-					/> */}
+				<StyledLeftContainer>
 					{scorecardData(projectData.classification, reviewData).length > 0 ? (
 						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
 					) : null}
-				</div>
-
-				<ProjectDescription
-					profileLoading={profileLoading}
-					projectData={projectData}
-					programElement={programElement}
-					projectNum={projectNum}
-					projectDescriptions={projectDescriptions}
-				/>
-				<Metadata
-					budgetType={budgetType}
-					projectNum={projectNum}
-					keywordCheckboxes={keywordCheckboxes}
-					setKeywordCheck={setKeywordCheck}
-				/>
+					<PortfolioSelector
+						selectedPortfolio={selectedPortfolio}
+						portfolios={state.portfolios}
+						setPortfolio={setSelectedPortfolio}
+						dispatch={dispatch}
+						formControlStyle={{ margin: '10px 0' }}
+						width={'100%'}
+						projectData={projectData}
+					/>
+				</StyledLeftContainer>
+				<StyledMainContainer>
+					<ProjectDescription
+						profileLoading={profileLoading}
+						projectData={projectData}
+						programElement={programElement}
+						projectNum={projectNum}
+						projectDescriptions={projectDescriptions}
+					/>
+				</StyledMainContainer>
+				<StyledRightContainer>
+					<Metadata
+						budgetType={budgetType}
+						projectNum={projectNum}
+						keywordCheckboxes={keywordCheckboxes}
+						setKeywordCheck={setKeywordCheck}
+					/>
+				</StyledRightContainer>
 			</StyledContainer>
 			<StyledReviewContainer>
 				<StyledReviewLeftContainer>
@@ -1107,6 +1127,8 @@ const JBookProfilePage = (props) => {
 				</StyledReviewLeftContainer>
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
+			{/* Footer */}
+			{<GCFooter location={location} cloneName="jbook" />}
 		</div>
 	);
 };
