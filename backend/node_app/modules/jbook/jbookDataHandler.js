@@ -728,6 +728,11 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				status = 'Needs Review';
 			}
+
+			if (isSubmit && portfolioName !== 'AI Inventory') {
+				status = 'Finished Review';
+			}
+
 			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
@@ -1117,6 +1122,9 @@ class JBookDataHandler extends DataHandler {
 					deleted: false,
 				},
 			});
+
+			console.log(portfolios);
+
 			return portfolios;
 		} catch (e) {
 			const { message } = e;
