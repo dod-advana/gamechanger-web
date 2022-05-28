@@ -784,6 +784,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		portfolio_name: {
+			newName: 'portfolioName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	accomplishmentMapping: {

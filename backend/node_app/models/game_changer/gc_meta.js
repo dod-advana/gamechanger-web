@@ -101,6 +101,9 @@ module.exports = (sequelize, DataTypes) => {
 			permissions: {
 				type: DataTypes.ARRAY(DataTypes.STRING),
 			},
+			view_header_module: {
+				type: DataTypes.STRING,
+			},
 		},
 		{
 			freezeTableName: true,
