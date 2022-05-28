@@ -421,12 +421,12 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		program_element: {
-			newName: 'revProgramElement', // these mainly act as foreign keys
+			newName: 'programElement', // these mainly act as foreign keys
 			defaultValue: '',
 			processValue: (value) => value,
 		},
 		budget_line_item: {
-			newName: 'revBudgetLineItems',
+			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
 		},

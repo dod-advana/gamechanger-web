@@ -89,10 +89,11 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? 'AI Inventory');
+	const [selectedPortfolio, setSelectedPortfolio] = useState('');
 
 	const getProjectData = async (id, portfolioName) => {
 		setProfileLoading(true);
+		const tempMapping = {};
 
 		let projectData;
 		try {
@@ -105,6 +106,8 @@ const JBookProfilePage = (props) => {
 				},
 			});
 
+			console.log(projectData.data);
+
 			if (projectData.data) {
 				setBudgetLineItem(projectData.data.budgetLineItem || '');
 				setProgramElement(projectData.data.programElement || '');
@@ -114,7 +117,6 @@ const JBookProfilePage = (props) => {
 
 			if (projectData.data && projectData.data.contracts) {
 				setContracts(projectData.data.contracts);
-				const tempMapping = {};
 				for (let i = 0; i < projectData.data.contracts.length; i++) {
 					const currentContract = projectData.data.contracts[i];
 					if (tempMapping[currentContract.vendorName] === undefined) {
@@ -122,28 +124,6 @@ const JBookProfilePage = (props) => {
 					}
 				}
 				setContractMapping(tempMapping);
-
-				try {
-					let reviewKeys = Object.keys(projectData.data.reviews);
-					for (let i = 0; i < Object.keys(projectData.data.reviews).length; i++) {
-						let review = projectData.data.reviews[reviewKeys[i]];
-						if (
-							review.serviceMissionPartnersChecklist === null ||
-							review.serviceMissionPartnersChecklist === undefined
-						) {
-							review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-						}
-						if (
-							review.pocMissionPartnersChecklist === null ||
-							review.pocMissionPartnersChecklist === undefined
-						) {
-							review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
-						}
-					}
-				} catch (err) {
-					console.log('Error setting mission partners checklist');
-					console.log(err);
-				}
 			}
 		} catch (err) {
 			console.log('Error fetching project and review data');
@@ -168,11 +148,21 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
 		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			let review = projectData.data.reviews[state.selectedPortfolio] ?? {};
+			let review = projectData.data.reviews[portfolioName] ?? {};
 
 			if (review) {
 				if (review.domainTask && review.domainTaskSecondary) {
 					domainTasks[review.domainTask] = review.domainTaskSecondary;
+				}
+
+				if (
+					review.serviceMissionPartnersChecklist === null ||
+					review.serviceMissionPartnersChecklist === undefined
+				) {
+					review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+				}
+				if (review.pocMissionPartnersChecklist === null || review.pocMissionPartnersChecklist === undefined) {
+					review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
 				}
 
 				// Review changes to make things behave properly
@@ -211,9 +201,10 @@ const JBookProfilePage = (props) => {
 			setBudgetYear(budgetYear);
 			setSearchText(searchText);
 			setID(id);
-			setSelectedPortfolio(tmpPortfolioName);
 
-			getProjectData(id, tmpPortfolioName);
+			getProjectData(id, tmpPortfolioName).then(() => {
+				setSelectedPortfolio(tmpPortfolioName);
+			});
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
@@ -809,19 +800,18 @@ const JBookProfilePage = (props) => {
 				options: {
 					frontendReviewData: {
 						...reviewData,
-						budgetType: budgetType,
-						revProgramElement: programElement,
-						revBudgetLineItems: budgetLineItem,
-						budgetYear: budgetYear,
+						budgetType,
+						programElement,
+						budgetLineItem,
+						budgetYear,
 						appropriationNumber,
 						budgetActivityNumber: projectData.budgetActivityNumber,
 						serviceAgency: projectData.serviceAgency,
 						portfolioName: selectedPortfolio,
+						projectNum,
 					},
 					isSubmit,
 					reviewType,
-					projectNum,
-					appropriationNumber,
 					portfolioName: selectedPortfolio,
 					id,
 				},
