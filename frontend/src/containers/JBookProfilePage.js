@@ -904,6 +904,11 @@ const JBookProfilePage = (props) => {
 					num,
 				value: num,
 			});
+		} else {
+			data.push({
+				name: 'No Prediction',
+				description: 'Classification data is not yet available for this exhibit',
+			});
 		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
