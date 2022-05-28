@@ -120,7 +120,6 @@ const JBookProfilePage = (props) => {
 				newMap[user.id] = user;
 			});
 			setUserMap(newMap);
-			console.log(newMap);
 		};
 
 		if (!init) {
@@ -143,8 +142,6 @@ const JBookProfilePage = (props) => {
 					portfolioName,
 				},
 			});
-
-			console.log(projectData.data);
 
 			if (projectData.data) {
 				setBudgetLineItem(projectData.data.budgetLineItem || '');
@@ -945,16 +942,18 @@ const JBookProfilePage = (props) => {
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<StyledLeftContainer>
+					<div style={{ paddingLeft: 20 }}>
+						<PortfolioSelector
+							selectedPortfolio={selectedPortfolio}
+							portfolios={state.portfolios}
+							setPortfolio={setSelectedPortfolio}
+							dispatch={dispatch}
+							formControlStyle={{ margin: '10px 0', width: '100%' }}
+							width={'100%'}
+							projectData={projectData}
+						/>
+					</div>
 					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
-					<PortfolioSelector
-						selectedPortfolio={selectedPortfolio}
-						portfolios={state.portfolios}
-						setPortfolio={setSelectedPortfolio}
-						dispatch={dispatch}
-						formControlStyle={{ margin: '10px 0' }}
-						width={'100%'}
-						projectData={projectData}
-					/>
 				</StyledLeftContainer>
 				<StyledMainContainer>
 					<ProjectDescription
@@ -1200,7 +1199,7 @@ const JBookProfilePage = (props) => {
 										}}
 										reviewerProp={projectData.reviewer}
 										serviceReviewerProp={projectData.serviceReview}
-									></JBookSimpleReviewForm>
+									/>
 								</GCAccordion>
 							</StyledAccordionContainer>
 						)
