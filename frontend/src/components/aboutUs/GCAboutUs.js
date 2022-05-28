@@ -5,7 +5,8 @@ import anchorme from 'anchorme';
 import sanitizeHtml from 'sanitize-html';
 import TabStyles from '../common/TabStyles';
 import { Typography } from '@material-ui/core';
-
+import { setState } from '../../utils/sharedFunctions';
+import { PAGE_DISPLAYED } from '../../utils/gamechangerUtils';
 import GCAccordion from '../common/GCAccordion';
 import GameChangerAPI from '../api/gameChanger-service-api';
 
@@ -58,7 +59,8 @@ const styles = {
 };
 
 const GCAboutUs = (props) => {
-	const [tabIndex, setTabIndex] = useState('about');
+	const { initialTab, state, dispatch } = props;
+	const [tabIndex, setTabIndex] = useState(initialTab === 'faq' ? 1 : 0);
 	const [selectedCategory, setSelectedCategory] = useState('general');
 	const [FAQdata, setFAQdata] = useState([]);
 	const categoryRefs = useRef([]);
@@ -120,6 +122,28 @@ const GCAboutUs = (props) => {
 		window.addEventListener('scroll', onScroll);
 		return () => window.removeEventListener('scroll', onScroll);
 	}, [selectedCategory, onScroll]);
+
+	// if initialTab changes, navigate to that tab
+	// (this can happen if a user is viewing the FAQ and clicks the sidebar aboutUs button)
+	useEffect(() => {
+		if (initialTab === 'faq') {
+			window.history.pushState(
+				null,
+				document.title,
+				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.faq}`
+			);
+			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.faq });
+			setTabIndex(1);
+		} else {
+			window.history.pushState(
+				null,
+				document.title,
+				`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
+			);
+			setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+			setTabIndex(0);
+		}
+	}, [initialTab, dispatch, state.cloneData.url]);
 
 	const renderAboutGC = () => {
 		return [
@@ -358,17 +382,36 @@ const GCAboutUs = (props) => {
 
 	return (
 		<div style={TabStyles.tabContainer}>
-			<Tabs>
+			<Tabs
+				selectedIndex={tabIndex}
+				onSelect={(index) => {
+					if (index === 1) {
+						window.history.pushState(
+							null,
+							document.title,
+							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.faq}`
+						);
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.faq });
+					} else {
+						window.history.pushState(
+							null,
+							document.title,
+							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
+						);
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+					}
+					setTabIndex(index);
+				}}
+			>
 				<div style={{ ...TabStyles.tabButtonContainer, paddingLeft: 0 }}>
 					<TabList style={TabStyles.tabsList}>
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'about' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 0 ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userHistory"
-							onClick={() => setTabIndex('about')}
 						>
 							<Typography variant="h6" display="inline" title="cardView">
 								ABOUT GAMECHANGER
@@ -377,11 +420,10 @@ const GCAboutUs = (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'faq' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 1 ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="userHistory"
-							onClick={() => setTabIndex('faq')}
 						>
 							<Typography variant="h6" display="inline" title="cardView">
 								FAQ
