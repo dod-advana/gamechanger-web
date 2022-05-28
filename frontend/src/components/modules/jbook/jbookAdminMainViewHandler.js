@@ -12,7 +12,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler';
 import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
-import PortfolioBuilder from './jbookPortfolioBuilder';
+import PortfolioBuilder from './portfolioBuilder/jbookPortfolioBuilder';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import FolderIcon from '@mui/icons-material/Folder';
