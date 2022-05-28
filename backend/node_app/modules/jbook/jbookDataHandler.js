@@ -130,6 +130,8 @@ class JBookDataHandler extends DataHandler {
 
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
+			console.log(doc);
+
 			// classification
 			try {
 				let classification;
@@ -191,7 +193,7 @@ class JBookDataHandler extends DataHandler {
 				doc.review_n.forEach((review) => {
 					if (
 						review['portfolio_name_s'] === portfolioName ||
-						review['portfolio_id_s'] === portfolio.id.toString()
+						review['portfolio_id_s'] === portfolio?.id.toString()
 					) {
 						tmpReview = review;
 					} else {
@@ -201,7 +203,7 @@ class JBookDataHandler extends DataHandler {
 			} else if (doc.review_n && doc.review_n.constructor === Object) {
 				if (
 					doc.review_n?.portfolio_name_s === portfolioName ||
-					doc.review_n?.portfolio_id_s === portfolio.id.toString()
+					doc.review_n?.portfolio_id_s === portfolio?.id.toString()
 				) {
 					tmpReview = doc.review_n;
 					doc.review_n = [];
@@ -217,85 +219,97 @@ class JBookDataHandler extends DataHandler {
 				updateESReview_n = true;
 			}
 
-			if (!tmpReview.portfolio_name_s) {
-				tmpReview.portfolio_name_s = portfolioName;
-				updateESReview_n = true;
-			}
+			if (portfolio && portfolio !== null) {
+				// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
+				if (!tmpReview) {
+					updateESReview_n = true;
+					const tmpData = _.clone(doc);
+					tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
+					const oldReview = await this.getReviewData(tmpData);
+					if (!oldReview) {
+						tmpReview = {
+							budget_line_item: tmpData.budgetLineItem,
+							budget_type: tmpData.budgetType,
+							budget_year: doc.budgetYear,
+							budget_activity: tmpData.budgetActivityNumber,
+							appn_num: tmpData.appropriationNumber,
+							agency: tmpData.agency,
+							portfolio_name: portfolioName,
+							program_element: tmpData.programElement,
+							review_status: 'Needs Review',
+							primary_review_status: 'Needs Review',
+							service_review_status: 'Needs Review',
+							poc_review_status: 'Needs Review',
+						};
+					} else {
+						oldReview.budget_year = doc.budgetYear;
+						oldReview.review_status = 'Needs Review';
+						oldReview.primary_review_status = 'Needs Review';
+						oldReview.service_review_status = 'Needs Review';
+						oldReview.poc_review_status = 'Needs Review';
+						oldReview.portfolio_name = portfolioName;
+						tmpReview = oldReview;
+						delete tmpReview.id;
+						delete tmpReview.primary_reviewer;
+						delete tmpReview.service_reviewer;
+						delete tmpReview.service_secondary_reviewer;
+						delete tmpReview.service_secondary_reviewer;
+						delete tmpReview.service_poc_email;
+						delete tmpReview.service_poc_name;
+						delete tmpReview.service_poc_org;
+						delete tmpReview.service_poc_title;
+						delete tmpReview.service_poc_phone_number;
+						delete tmpReview.alternate_poc_email;
+						delete tmpReview.alternate_poc_name;
+						delete tmpReview.alternate_poc_org;
+						delete tmpReview.alternate_poc_title;
+						delete tmpReview.alternate_poc_phone_number;
+						delete tmpReview.createdAt;
+						delete tmpReview.updatedAt;
+					}
 
-			// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
-			if (!tmpReview) {
-				updateESReview_n = true;
-				const tmpData = _.clone(doc);
-				tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
-				const oldReview = await this.getReviewData(tmpData);
-				if (!oldReview) {
-					tmpReview = {
-						budget_line_item: tmpData.budgetLineItem,
-						budget_type: tmpData.budgetType,
-						budget_year: doc.budgetYear,
-						budget_activity: tmpData.budgetActivityNumber,
-						appn_num: tmpData.appropriationNumber,
-						agency: tmpData.agency,
-						portfolio_name: portfolioName,
-						program_element: tmpData.programElement,
-						review_status: 'Needs Review',
-						primary_review_status: 'Needs Review',
-						service_review_status: 'Needs Review',
-						poc_review_status: 'Needs Review',
-					};
+					// Now create the entry in PG
+					const newReview = await this.rev.create(tmpReview);
+					tmpReview = newReview['dataValues'];
+					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
 				} else {
-					oldReview.budget_year = doc.budgetYear;
-					oldReview.review_status = 'Needs Review';
-					oldReview.primary_review_status = 'Needs Review';
-					oldReview.service_review_status = 'Needs Review';
-					oldReview.poc_review_status = 'Needs Review';
-					oldReview.portfolio_name = portfolioName;
-					tmpReview = oldReview;
-					delete tmpReview.id;
-					delete tmpReview.primary_reviewer;
-					delete tmpReview.service_reviewer;
-					delete tmpReview.service_secondary_reviewer;
-					delete tmpReview.service_secondary_reviewer;
-					delete tmpReview.service_poc_email;
-					delete tmpReview.service_poc_name;
-					delete tmpReview.service_poc_org;
-					delete tmpReview.service_poc_title;
-					delete tmpReview.service_poc_phone_number;
-					delete tmpReview.alternate_poc_email;
-					delete tmpReview.alternate_poc_name;
-					delete tmpReview.alternate_poc_org;
-					delete tmpReview.alternate_poc_title;
-					delete tmpReview.alternate_poc_phone_number;
-					delete tmpReview.createdAt;
-					delete tmpReview.updatedAt;
+					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
 				}
 
-				// Now create the entry in PG
-				const newReview = await this.rev.create(tmpReview);
-				tmpReview = newReview['dataValues'];
-				tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
-			} else {
-				tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
-			}
+				if (!tmpReview.portfolio_name_s) {
+					tmpReview.portfolio_name_s = portfolioName;
+					updateESReview_n = true;
+				}
 
-			doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
+				doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
 
-			if (updateESReview_n) {
-				const updated = await this.dataLibrary.updateDocument(
-					clientObj.esClientName,
-					clientObj.esIndex,
-					{ review_n: doc.review_n },
-					id,
-					userId
-				);
-				if (!updated) {
-					console.log('ES NOT UPDATED for REVIEW');
+				if (updateESReview_n) {
+					const updated = await this.dataLibrary.updateDocument(
+						clientObj.esClientName,
+						clientObj.esIndex,
+						{ review_n: doc.review_n },
+						id,
+						userId
+					);
+					if (!updated) {
+						console.log('ES NOT UPDATED for REVIEW');
+					}
 				}
 			}
+
 			doc.reviews = {};
 			for (let idx in doc.review_n) {
 				const tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
-				console.log(tmp);
+
+				// If this only has portfolio id look up the portfolio and add the name
+				if (!tmp.portfolioName && tmp.portfolio_id_s) {
+					const tmpPortfolio = await this.getPortfolio(
+						{ body: { id: parseInt(tmp.portfolio_id_s) } },
+						userId
+					);
+					tmp.portfolioName = tmpPortfolio?.name || '';
+				}
+
 				// Get emails if they exist
 				try {
 					// Add reviewer emails for primary secondary and service
@@ -342,6 +356,7 @@ class JBookDataHandler extends DataHandler {
 					console.log('Error fetching reviewer emails');
 					console.log(err);
 				}
+				console.log(tmp);
 				doc.reviews[tmp.portfolioName] = tmp;
 			}
 
@@ -1012,15 +1027,11 @@ class JBookDataHandler extends DataHandler {
 
 	async getPortfolios(req, userId) {
 		try {
-			const portfolios = await this.portfolio.findAll({
+			return await this.portfolio.findAll({
 				where: {
 					deleted: false,
 				},
 			});
-
-			console.log(portfolios);
-
-			return portfolios;
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, '6QJASKC', userId);
