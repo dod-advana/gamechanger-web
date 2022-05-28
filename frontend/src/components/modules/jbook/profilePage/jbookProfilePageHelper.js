@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { PieChart, Pie, Legend, Cell, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -11,6 +12,8 @@ import {
 	StyledNavContainer,
 	StyledSideNavContainer,
 } from './profilePageStyles';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
 import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
@@ -118,6 +121,74 @@ const BasicData = (props) => {
 				firstColWidth={firstColWidth}
 			/>
 		</>
+	);
+};
+
+const ClassificationScoreCard = (props) => {
+	const { scores } = props;
+	const context = useContext(JBookContext);
+	const { state } = context;
+
+	return (
+		<StyledLeftContainer>
+			<div style={{ backgroundColor: 'rgb(239, 241, 246)' }}>
+				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
+					{`Classification Scorecard`}
+				</Typography>
+				{scores.map((score) => {
+					return (
+						<div style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}>
+							<Typography
+								variant="h5"
+								style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
+							>
+								{score.name}
+							</Typography>
+							<div style={{ display: 'flex' }}>
+								<div style={{ flexGrow: 2 }}>
+									<div>{score.description}</div>
+									{score.timestamp && <div>Timestamp: {score.timestamp}</div>}
+									{score.justification && <div>{score.justification}</div>}{' '}
+								</div>
+								{score.value !== undefined && (
+									<div style={{ flexGrow: 1, padding: '10px' }}>
+										<PieChart width={100} height={100}>
+											<Pie
+												data={[
+													{
+														name: 'score',
+														value: 100 - score.value * 100,
+														fill: 'rgb(166, 206, 227)',
+													},
+													{
+														name: 'score',
+														value: score.value * 100,
+														fill: 'rgb(32, 119, 180)',
+													},
+												]}
+												dataKey="value"
+												nameKey="name"
+												cx="50%"
+												cy="50%"
+												innerRadius={25}
+												outerRadius={40}
+											>
+												<Label value={score.value} position="center" />
+											</Pie>
+										</PieChart>
+									</div>
+								)}
+							</div>
+							<hr />
+							<div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+								<ThumbDownOffAltIcon style={{ marginRight: '5px' }} />
+								<ThumbUpOffAltIcon style={{ marginRight: '5px' }} />
+							</div>
+						</div>
+					);
+				})}
+			</div>
+		</StyledLeftContainer>
 	);
 };
 
@@ -595,4 +666,5 @@ export {
 	Metadata,
 	ProjectDescription,
 	SideNav,
+	ClassificationScoreCard,
 };

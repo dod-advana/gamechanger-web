@@ -12,6 +12,7 @@ const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
+const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -50,6 +51,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK_JBOOK,
+			jbook_classification = JBOOK_CLASSIFICATION,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
@@ -77,6 +79,7 @@ class JBookDataHandler extends DataHandler {
 		this.portfolio = portfolio;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
+		this.jbook_classification = jbook_classification;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -156,6 +159,58 @@ class JBookDataHandler extends DataHandler {
 			if (!data.currentYearAmount) {
 			}
 
+			// classification
+			try {
+				let classification;
+
+				switch (type) {
+					case 'Procurement':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								'P40-01_LI_Number': budgetLineItem,
+								budgetYear,
+								docType: 'pdoc',
+							},
+						});
+						break;
+					case 'RDT&E':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								PE_Num: programElement,
+								Proj_Number: projectNum,
+								budgetYear,
+								docType: 'rdoc',
+							},
+						});
+						break;
+					case 'O&M':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								line_number: budgetLineItem,
+								sag_bli: programElement,
+								budgetYear,
+								docType: 'om',
+							},
+						});
+						break;
+					default:
+						break;
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
+					}
+				}
+			} catch (e) {
+				console.log('error getting classification');
+				console.log(e);
+			}
+
 			data.reviews = await this.getReviewData(
 				{
 					budgetYear,
@@ -184,6 +239,7 @@ class JBookDataHandler extends DataHandler {
 			const { type, id, portfolioName } = req.body;
 			let docType = type;
 			let data;
+			let classification;
 			let totalBudget = 0;
 
 			switch (docType) {
@@ -193,6 +249,13 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							'P40-01_LI_Number': budgetLineItem,
+							budgetYear,
+							docType: 'pdoc',
+						},
+					});
 					break;
 				case 'RDT&E':
 					data = await this.rdocs.findOne({
@@ -200,11 +263,29 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							PE_Num: programElement,
+							Proj_Number: projectNum,
+							budgetYear,
+							docType: 'rdoc',
+						},
+					});
 					break;
 				case 'O&M':
 					data = await this.om.findOne({
 						where: {
 							id,
+						},
+					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							line_number: budgetLineItem,
+							sag_bli: programElement,
+							account: appropriationNumber,
+							budgetYear,
+							foreignID: id,
+							docType: 'om',
 						},
 					});
 					break;
@@ -248,6 +329,16 @@ class JBookDataHandler extends DataHandler {
 
 					if (maxVal && maxVal.dataValues) {
 						data.currentYearAmountMax = maxVal.dataValues.currentYearAmountMax;
+					}
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
 					}
 				}
 
