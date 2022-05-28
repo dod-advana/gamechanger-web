@@ -65,7 +65,6 @@ class ESSearchLib {
 
 	async updateDocument(clientName, index, updatedDocument, documentId, user) {
 		try {
-			console.log(updatedDocument);
 			const resp = await this._clients[clientName].update({
 				index,
 				id: documentId,
