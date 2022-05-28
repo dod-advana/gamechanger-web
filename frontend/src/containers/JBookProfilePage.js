@@ -30,6 +30,7 @@ import {
 	Metadata,
 	ProjectDescription,
 	SideNav,
+	ClassificationScoreCard,
 } from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
 	CloseButton,
@@ -885,6 +886,43 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
+	const scorecardData = (classification, reviewData) => {
+		let data = [];
+
+		if (classification && classification.modelPredictionProbability && classification.modelPrediction) {
+			let num = classification.modelPredictionProbability;
+			num = num.toString(); //If it's not already a String
+			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
+			Number(num); //If you need it back as a Number
+
+			data.push({
+				name: 'Predicted Tag',
+				description:
+					'The AI tool classified the BLI as "' +
+					classification.modelPrediction +
+					'" with a confidence score of ' +
+					num,
+				value: num,
+			});
+		} else {
+			data.push({
+				name: 'No Prediction',
+				description: 'Classification data is not yet available for this exhibit',
+			});
+		}
+		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			data.push({
+				name: 'Reviewer Tag',
+				description:
+					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
+				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
+			});
+		}
+
+		return data;
+	};
+
 	return (
 		<div>
 			<Notifications context={context} />
@@ -892,17 +930,9 @@ const JBookProfilePage = (props) => {
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<StyledLeftContainer>
-					<BasicData
-						budgetType={budgetType}
-						admin={Permissions.hasPermission('JBOOK Admin')}
-						loading={profileLoading}
-						programElement={programElement}
-						projectNum={projectNum}
-						budgetYear={budgetYear}
-						budgetLineItem={budgetLineItem}
-						id={id}
-						appropriationNumber={appropriationNumber}
-					/>
+					{scorecardData(projectData.classification, reviewData).length > 0 ? (
+						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					) : null}
 					<PortfolioSelector
 						selectedPortfolio={selectedPortfolio}
 						portfolios={state.portfolios}
