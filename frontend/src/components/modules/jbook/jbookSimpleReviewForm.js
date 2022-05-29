@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import SimpleTable from '../../common/SimpleTable';
-import { Typography } from '@material-ui/core';
 
 import { JBookContext } from './jbookContext';
 import {
