@@ -230,10 +230,10 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={state.jbookSearchSettings.budgetTypeSpecificSelected}
-					header={<b>BUDGET TYPE</b>}
+					header={'BUDGET TYPE'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
-					headerTextWeight={'normal'}
+					headerTextWeight={'bold'}
 				>
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
