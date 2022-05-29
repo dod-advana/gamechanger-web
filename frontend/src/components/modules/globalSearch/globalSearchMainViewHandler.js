@@ -188,6 +188,11 @@ const getCardViewPanel = (props) => {
 		databasesPage,
 		databasesLoading,
 		databasesPagination,
+		modelsSearchResults,
+		modelsPage,
+		modelsLoading,
+		modelsPagination,
+		modelsTotalCount,
 		loading,
 	} = state;
 
@@ -195,6 +200,7 @@ const getCardViewPanel = (props) => {
 	const dashboards = dashboardsSearchResults;
 	const dataSources = dataSourcesSearchResults;
 	const databases = databasesSearchResults;
+	const models = modelsSearchResults;
 
 	let sideScroll = {
 		height: '72vh',
@@ -366,6 +372,47 @@ const getCardViewPanel = (props) => {
 							</SearchSection>
 						</div>
 					)}
+
+				{models?.length > 0 &&
+					(activeCategoryTab === 'Models' || activeCategoryTab === 'all') &&
+					selectedCategories['Models'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Models'} color={'rgb(233, 105, 29)'} icon={DatabasesIcon}>
+								{!modelsLoading && !modelsPagination ? (
+									getSearchResults(models, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={gcOrange} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={modelsPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={modelsTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												modelsLoading: true,
+												modelsPage: page,
+												modelsPagination: true,
+											});
+										}}
+									/>
+								</div>
+							</SearchSection>
+						</div>
+					)}
+
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />

@@ -12,7 +12,7 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
 import moment from 'moment';
-import { parseOwnerName } from './search';
+import { parseOwnerName } from './globalSearchUtility';
 import { primary } from '../../common/gc-colors';
 import { getDefaultComponent, styles } from '../default/defaultCardHandler';
 

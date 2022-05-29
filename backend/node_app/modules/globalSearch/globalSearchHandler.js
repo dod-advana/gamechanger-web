@@ -100,6 +100,15 @@ class GlobalSearchHandler extends SearchHandler {
 						userId
 					);
 					break;
+				case 'models':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						'AI/ML Model',
+						userId
+					);
+					break;
 				default:
 					break;
 			}
@@ -236,6 +245,8 @@ class GlobalSearchHandler extends SearchHandler {
 				'FE656U9Time',
 				userId
 			);
+
+			console.log(response.data);
 
 			return response.data || { total: 0, results: [] };
 		} catch (err) {
