@@ -11,13 +11,7 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import {
-	getClassLabel,
-	getConvertedName,
-	getConvertedType,
-	getDocTypeStyles,
-	getTotalCost,
-} from '../../../utils/jbookUtilities';
+import { getClassLabel, getConvertedType, getTotalCost } from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -199,7 +193,7 @@ const types = {
 	odoc: 'O&M',
 };
 
-export const clickFn = (cloneName, searchText, item, portfolioName) => {
+const clickFn = (cloneName, searchText, item, portfolioName) => {
 	const { budgetType, appropriationNumber, id, budgetYear } = item;
 
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'LineItemOpen');
@@ -214,16 +208,15 @@ const cardHandler = {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
 
-			let displayTitle = '';
+			let displayTitleTop = '';
+			let displayTitleBot = ''; // item.projectTitle;
 			switch (item.budgetType) {
+				case 'odoc':
 				case 'pdoc':
-					displayTitle = `BA Num: ${item.budgetActivityNumber} BA Title: ${item.budgetActivityTitle}`;
+					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				case 'rdoc':
-					displayTitle = `PE Num: ${item.programElement} Proj Num: ${item.projectNum}`;
-					break;
-				case 'odoc':
-					displayTitle = `BLI: ${item.budgetLineItem} App Num: ${item.appropriationNumber} BA Num: ${item.budgetActivityNumber}`;
+					displayTitleTop = `PE Num: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				default:
 					break;
@@ -239,10 +232,10 @@ const cardHandler = {
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
 					<div className={'title-text-selected-favorite-div'}>
-						<GCTooltip title={displayTitle} placement="top" arrow>
+						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								//  onClick={(docListView) ? () => clickFn(item.filename, 0) : () => {}}
+								onClick={docListView ? () => clickFn(cloneName, searchText, item, selectedPortfolio) : () => {}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -251,7 +244,7 @@ const cardHandler = {
 								}}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{item.budgetYear} | {displayTitle} <br /> {item.projectTitle}
+									{displayTitleTop} <br /> {displayTitleBot}
 								</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
@@ -282,26 +275,33 @@ const cardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			const cardType = item.budgetType ? getConvertedType(item.budgetType) : '';
-			const agency = item.serviceAgency;
-			const iconSrc = getTypeIcon('PDF');
-			const typeTextColor = getTypeTextColor('PDF');
+			let appropriationTitle, budgetPrefix, budgetAmount;
+			try {
+				appropriationTitle = item.appropriationTitle
+					? item.appropriationTitle.replace('Procurement', 'Proc')
+					: '';
 
-			let { docOrgColor } = getDocTypeStyles(agency);
+				budgetPrefix = '';
+				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
+				let cycle = item.budgetCycle ?? '';
+				budgetPrefix = cycle + year + ': ';
+
+				budgetAmount = item.by1BaseYear ? item.by1BaseYear + ' $M' : '';
+			} catch (e) {
+				console.log('Error setting card subheader');
+				console.log(e);
+			}
 
 			return (
 				<>
 					{!state.listView && !toggledMore && (
 						<StyledFrontCardSubHeader
-							typeTextColor={typeTextColor}
+							typeTextColor={'white'}
 							docTypeColor={'#386F94'}
-							docOrgColor={docOrgColor}
+							docOrgColor={'#636363'}
 						>
-							<div className={'sub-header-one'}>
-								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
-								{cardType}
-							</div>
-							<div className={'sub-header-two'}>{getConvertedName(agency)}</div>
+							<div className={'sub-header-one'}>{appropriationTitle}</div>
+							<div className={'sub-header-two'}>{budgetPrefix + budgetAmount}</div>
 						</StyledFrontCardSubHeader>
 					)}
 				</>
@@ -787,8 +787,6 @@ const cardHandler = {
 				setToggledMore = () => {},
 				closeGraphCard = () => {},
 			} = props;
-
-			console.log(state);
 
 			const { searchText, selectedPortfolio } = state;
 
