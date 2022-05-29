@@ -205,6 +205,19 @@ const JBookSearchHandler = {
 						});
 					}
 
+					// temporarily add review data
+					// docs.map((doc) => {
+					// 	doc.reviews = {
+					// 		General: {
+					// 			tags: ['Generic Tag'],
+					// 		},
+					// 		'AI Inventory': {
+					// 			tags: ['AI Enabled', 'AI Enabling', 'Not AI', 'AI', 'Very Cool AI'],
+					// 		},
+					// 	};
+					// 	return doc;
+					// });
+
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						activeCategoryTab: 'jbook',

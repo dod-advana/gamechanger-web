@@ -12,6 +12,7 @@ const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
+const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize } = require('sequelize');
@@ -50,6 +51,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK_JBOOK,
+			jbook_classification = JBOOK_CLASSIFICATION,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
@@ -77,6 +79,7 @@ class JBookDataHandler extends DataHandler {
 		this.portfolio = portfolio;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
+		this.jbook_classification = jbook_classification;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -107,12 +110,10 @@ class JBookDataHandler extends DataHandler {
 
 			let budgetYear;
 			const budgetType = keys[0];
-			let budgetCycle;
 			let budgetActivityNumber;
 			let budgetLineItem;
 			let programElement;
 			let serviceAgency;
-			let projectNum;
 			let appropriationNumber;
 
 			switch (budgetType) {
@@ -158,7 +159,59 @@ class JBookDataHandler extends DataHandler {
 			if (!data.currentYearAmount) {
 			}
 
-			data.review = await this.getReviewData(
+			// classification
+			try {
+				let classification;
+
+				switch (type) {
+					case 'Procurement':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								'P40-01_LI_Number': budgetLineItem,
+								budgetYear,
+								docType: 'pdoc',
+							},
+						});
+						break;
+					case 'RDT&E':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								PE_Num: programElement,
+								Proj_Number: projectNum,
+								budgetYear,
+								docType: 'rdoc',
+							},
+						});
+						break;
+					case 'O&M':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								line_number: budgetLineItem,
+								sag_bli: programElement,
+								budgetYear,
+								docType: 'om',
+							},
+						});
+						break;
+					default:
+						break;
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
+					}
+				}
+			} catch (e) {
+				console.log('error getting classification');
+				console.log(e);
+			}
+
+			data.reviews = await this.getReviewData(
 				{
 					budgetYear,
 					appropriationNumber,
@@ -183,9 +236,10 @@ class JBookDataHandler extends DataHandler {
 	async getPGProjectData(req, userId) {
 		// projectNum here is also budgetLineItem (from list view)
 		try {
-			const { type, id } = req.body;
+			const { type, id, portfolioName } = req.body;
 			let docType = type;
 			let data;
+			let classification;
 			let totalBudget = 0;
 
 			switch (docType) {
@@ -195,6 +249,13 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							'P40-01_LI_Number': budgetLineItem,
+							budgetYear,
+							docType: 'pdoc',
+						},
+					});
 					break;
 				case 'RDT&E':
 					data = await this.rdocs.findOne({
@@ -202,11 +263,29 @@ class JBookDataHandler extends DataHandler {
 							id,
 						},
 					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							PE_Num: programElement,
+							Proj_Number: projectNum,
+							budgetYear,
+							docType: 'rdoc',
+						},
+					});
 					break;
 				case 'O&M':
 					data = await this.om.findOne({
 						where: {
 							id,
+						},
+					});
+					classification = await this.jbook_classification.findOne({
+						where: {
+							line_number: budgetLineItem,
+							sag_bli: programElement,
+							account: appropriationNumber,
+							budgetYear,
+							foreignID: id,
+							docType: 'om',
 						},
 					});
 					break;
@@ -250,6 +329,16 @@ class JBookDataHandler extends DataHandler {
 
 					if (maxVal && maxVal.dataValues) {
 						data.currentYearAmountMax = maxVal.dataValues.currentYearAmountMax;
+					}
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						data.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
 					}
 				}
 
@@ -403,7 +492,7 @@ class JBookDataHandler extends DataHandler {
 				data.keywords = keywords;
 
 				// REVIEW
-				data.review = await this.getReviewData(data, type, totalBudget);
+				data.reviews = await this.getReviewData(data, type, totalBudget, portfolioName);
 
 				// VENDORS
 				let vendorData = [];
@@ -440,7 +529,7 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async getReviewData(data, type, totalBudget) {
-		let review = {};
+		let reviews = {};
 		try {
 			const query = {
 				budget_type: types[type],
@@ -468,74 +557,83 @@ class JBookDataHandler extends DataHandler {
 					break;
 			}
 
-			review = await this.rev.findOne({
+			let reviewData = await this.rev.findAll({
 				where: query,
 			});
 
-			// console.log(review)
-			if (review && review.dataValues) {
-				// parse mission partners
-				if (review.service_mp_list && typeof review.service_mp_list === 'string') {
-					review.service_mp_list = review.service_mp_list
-						.replace(/\[|\]|\\/g, '')
-						.split(';')
-						.join('|');
-				}
+			if (reviewData && reviewData.length > 0) {
+				reviewData.map(async (review) => {
+					try {
+						// parse mission partners
+						if (review.service_mp_list && typeof review.service_mp_list === 'string') {
+							review.service_mp_list = review.service_mp_list
+								.replace(/\[|\]|\\/g, '')
+								.split(';')
+								.join('|');
+						}
 
-				review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
-				review.totalBudget = totalBudget;
-			}
+						review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
+						review.totalBudget = totalBudget;
+					} catch (err) {
+						console.log('Error parsing review mission partners');
+						console.log(err);
+					}
 
-			try {
-				// Add reviewer emails for primary secondary and service
-				let primaryReviewer;
+					try {
+						// Add reviewer emails for primary secondary and service
+						let primaryReviewer;
 
-				if (review.primaryReviewer) {
-					primaryReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'primary',
-							name: review.primaryReviewer.trim(),
-						},
-						raw: true,
-					});
-				}
-				review.primaryReviewerEmail = primaryReviewer?.email || null;
+						if (review.primaryReviewer) {
+							primaryReviewer = await this.reviewer.findOne({
+								where: {
+									type: 'primary',
+									name: review.primaryReviewer.trim(),
+								},
+								raw: true,
+							});
+						}
+						review.primaryReviewerEmail = primaryReviewer?.email || null;
 
-				let serviceReviewer;
-				if (review.serviceReviewer) {
-					serviceReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'service',
-							name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : '',
-						},
-						raw: true,
-					});
-				}
-				review.serviceReviewerEmail = serviceReviewer?.email || null;
+						let serviceReviewer;
+						if (review.serviceReviewer) {
+							serviceReviewer = await this.reviewer.findOne({
+								where: {
+									type: 'service',
+									name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : '',
+								},
+								raw: true,
+							});
+						}
+						review.serviceReviewerEmail = serviceReviewer?.email || null;
 
-				let secondaryReviewer;
-				const secName = review.serviceSecondaryReviewer
-					? review.serviceSecondaryReviewer.split('(')[0].trim()
-					: '';
-				if (review.serviceSecondaryReviewer) {
-					secondaryReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'secondary',
-							name: secName,
-						},
-						raw: true,
-					});
-				}
-				review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
-			} catch (err) {
-				console.log('Error fetching reviewer emails');
-				console.log(err);
+						let secondaryReviewer;
+						const secName = review.serviceSecondaryReviewer
+							? review.serviceSecondaryReviewer.split('(')[0].trim()
+							: '';
+						if (review.serviceSecondaryReviewer) {
+							secondaryReviewer = await this.reviewer.findOne({
+								where: {
+									type: 'secondary',
+									name: secName,
+								},
+								raw: true,
+							});
+						}
+						review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
+					} catch (err) {
+						console.log('Error fetching reviewer emails');
+						console.log(err);
+					}
+
+					reviews[review.portfolioName ?? 'General'] = review;
+					return review;
+				});
 			}
 		} catch (err) {
 			console.log('Error fetching for review');
 			console.log(err);
 		}
-		return review;
+		return reviews;
 	}
 
 	async getBudgetDropdownData(req, userId) {
@@ -683,9 +781,11 @@ class JBookDataHandler extends DataHandler {
 
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, projectNum, appropriationNumber } = req.body;
+			const { frontendReviewData, isSubmit, reviewType, projectNum, portfolioName } = req.body;
+
 			const permissions = req.permissions;
 
+			// check permissions
 			if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
 				if (reviewType === 'jaic' && !permissions.includes('JBOOK Primary Reviewer')) {
 					throw 'Unauthorized';
@@ -696,12 +796,12 @@ class JBookDataHandler extends DataHandler {
 				}
 			}
 
+			// Review Status Update logic
 			if (!isSubmit) {
 				frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
 			} else {
 				frontendReviewData[reviewType + 'ReviewStatus'] = 'Finished Review';
 			}
-			// Review Status Update logic
 			const { primaryReviewStatus, serviceReviewStatus, pocReviewStatus } = frontendReviewData;
 			let status = '';
 			if (primaryReviewStatus === 'Finished Review') {
@@ -719,6 +819,11 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				status = 'Needs Review';
 			}
+
+			if (isSubmit && portfolioName !== 'AI Inventory') {
+				status = 'Finished Review';
+			}
+
 			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
@@ -726,6 +831,7 @@ class JBookDataHandler extends DataHandler {
 			const query = {
 				budget_type: types[reviewData.budget_type],
 				budget_year: reviewData.budget_year,
+				portfolio_name: portfolioName === 'General' ? null : portfolioName,
 			};
 
 			if (reviewData.budget_type === 'RDT&E') {
@@ -1107,6 +1213,9 @@ class JBookDataHandler extends DataHandler {
 					deleted: false,
 				},
 			});
+
+			console.log(portfolios);
+
 			return portfolios;
 		} catch (e) {
 			const { message } = e;
