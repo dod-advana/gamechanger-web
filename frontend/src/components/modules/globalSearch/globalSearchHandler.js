@@ -260,6 +260,7 @@ const GlobalSearchHandler = {
 						},
 					})
 					.then((data) => {
+						console.log(data.data);
 						setState(dispatch, {
 							modelsSearchResults: data.data.models.results.map((hit) => ({
 								...hit,

@@ -10,7 +10,8 @@ const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
-const { getQlikApps } = require('./globalSearchUtils');
+const { getQlikApps, getElasticSearchQueryForQlikApps, cleanQlikESResults } = require('./globalSearchUtils');
+const { DataLibrary } = require('../../lib/dataLibrary');
 
 const redisAsyncClientDB = 7;
 
@@ -21,6 +22,7 @@ class GlobalSearchHandler extends SearchHandler {
 			constants = constantsFile,
 			database = databaseFile,
 			dcUtils = dataCatalogUtils,
+			dataLibrary = new DataLibrary(opts),
 		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
@@ -28,6 +30,7 @@ class GlobalSearchHandler extends SearchHandler {
 		this.constants = constants;
 		this.database = database;
 		this.dcUtils = dcUtils;
+		this.dataLibrary = dataLibrary;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -175,33 +178,29 @@ class GlobalSearchHandler extends SearchHandler {
 	async getDashboardResults(searchText, offset, limit, userId) {
 		try {
 			const t0 = new Date().getTime();
-			await this.redisDB.select(this.constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
-			let redisAppResults = await this.redisDB.get('qlik-full-app-list');
-			let userResults;
-			if (!redisAppResults) {
-				console.log('Doing FULL Search');
-				let results = await Promise.all([
-					getQlikApps(undefined, undefined, this.logger, false, true),
-					getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false),
-				]);
-				redisAppResults = results[0].data;
-				userResults = results[1].data;
-				this.redisDB.set('qlik-full-app-list', JSON.stringify(redisAppResults));
-			} else {
-				console.log('Not Doing FULL Search');
-				redisAppResults = JSON.parse(redisAppResults || '[]');
-				userResults = await getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false);
-				userResults = userResults.data;
-			}
+			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX };
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms({ searchText });
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+			const body = { searchText, parsedQuery, searchTerms, plainQuery, limit, offset };
+			const esQuery = getElasticSearchQueryForQlikApps(body, userId, this.logger);
 
-			const [apps, searchResults] = this.performSearch(
-				this.mergeUserApps(redisAppResults || [], userResults || []),
-				lunrSearchUtils.parse(searchText)
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
 			);
-			const tmpReturn = this.generateRespData(apps, searchResults, offset, limit);
+
+			const returnData = cleanQlikESResults(esResults, userId, this.logger);
+
+			const userApps = await getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false);
+
+			returnData.hits = this.mergeUserApps(returnData.hits, userApps.data || []);
+
 			const t1 = new Date().getTime();
 			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
-			return tmpReturn;
+			return returnData;
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
@@ -212,6 +211,7 @@ class GlobalSearchHandler extends SearchHandler {
 		const t0 = new Date().getTime();
 		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
 		const qStatus = await this.dcUtils.getQueryableStatuses();
+
 		try {
 			const defaultSearchOptions = {
 				keywords: this.dcUtils.cleanSearchText(searchText),
@@ -226,18 +226,55 @@ class GlobalSearchHandler extends SearchHandler {
 					},
 				],
 				highlights: {
-					preTag: '<highlight>',
-					postTag: '</highlight>',
+					preTag: '<em>',
+					postTag: '</em>',
 				},
 				limit,
 				offset,
 			};
+
+			console.log(JSON.stringify(defaultSearchOptions));
 
 			if (!searchText) throw new Error('keywords is required in the request body');
 
 			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
+
+			let cleanedData = { total: 0, results: [] };
+
+			if (response.data.results) {
+				// Get all the user ids
+				const userIds = new Set(response.data.results.map((result) => result.resource.createdBy));
+
+				// Get all assets
+				const assetCalls = response.data.results.map((result) => {
+					const tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
+					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				});
+
+				const assetsResults = await Promise.all(assetCalls);
+				const combinedAssetResults = {};
+				assetsResults.forEach((assetResult) => {
+					const data = assetResult.data;
+					combinedAssetResults[data.id] = data;
+					userIds.add(data['lastModifiedBy']);
+				});
+
+				let tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
+				userIds.forEach((userId) => (tempUrl += '&userId=' + userId));
+				const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				const combinedUserData = {};
+				userData.results.forEach((data) => {
+					combinedUserData[data.id] = data;
+				});
+				cleanedData = await this.cleanDataCatalogResults(
+					response.data,
+					combinedAssetResults,
+					combinedUserData,
+					userId
+				);
+			}
 
 			const t1 = new Date().getTime();
 			this.logger.info(
@@ -246,13 +283,53 @@ class GlobalSearchHandler extends SearchHandler {
 				userId
 			);
 
-			console.log(response.data);
-
-			return response.data || { total: 0, results: [] };
+			return cleanedData;
 		} catch (err) {
 			this.logger.error(err, 'FE656U9', userId);
 			return { total: 0, results: [] };
 		}
+	}
+
+	async cleanDataCatalogResults(data, fullAssetDetails, fullUserData, userId) {
+		const attributeTypes = await this.dcUtils.getAttributeTypes();
+
+		try {
+			data.results.forEach((result) => {
+				result.resource['domain'] = fullAssetDetails[result.resource.id]['domain'];
+				result.resource['lastModifiedBy'] = fullAssetDetails[result.resource.id]['lastModifiedBy'];
+
+				Object.keys(result.resource).forEach((resourceKey) => {
+					if (resourceKey === 'createdOn' || resourceKey === 'lastModifiedOn') {
+						const newDate = new Date(result.resource[resourceKey]);
+						result.resource[resourceKey] = newDate.toLocaleString();
+					}
+
+					if (resourceKey === 'status' || resourceKey === 'type' || resourceKey === 'domain') {
+						result.resource[resourceKey] = result.resource[resourceKey]['name'];
+					}
+
+					if (resourceKey === 'createdBy' || resourceKey === 'lastModifiedBy') {
+						const tempUser = fullUserData[result.resource[resourceKey]];
+						result.resource[resourceKey] = {
+							firstName: tempUser['firstName'],
+							lastName: tempUser['lastName'],
+							emailAddress: tempUser['emailAddress'],
+						};
+					}
+				});
+
+				result.highlights.forEach((highlight) => {
+					if (highlight.field.includes('attribute:')) {
+						const attributeID = highlight.field.split(':')[1];
+						highlight.field = attributeTypes[attributeID];
+					}
+				});
+			});
+		} catch (e) {
+			this.logger.error(e, 'YCD2HPY', userId);
+		}
+
+		return data;
 	}
 
 	performApplicationSearch(allApps, searchText) {
