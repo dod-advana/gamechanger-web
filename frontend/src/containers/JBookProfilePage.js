@@ -143,8 +143,6 @@ const JBookProfilePage = (props) => {
 				},
 			});
 
-			console.log(projectData.data);
-
 			if (projectData.data) {
 				setBudgetLineItem(projectData.data.budgetLineItem || '');
 				setProgramElement(projectData.data.programElement || '');
@@ -829,7 +827,6 @@ const JBookProfilePage = (props) => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		console.log(reviewData);
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
