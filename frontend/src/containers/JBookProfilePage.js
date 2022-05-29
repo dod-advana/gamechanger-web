@@ -27,7 +27,6 @@ import {
 	aggregateProjectDescriptions,
 	Contracts,
 	formatNum,
-	BasicData,
 	Metadata,
 	ProjectDescription,
 	SideNav,

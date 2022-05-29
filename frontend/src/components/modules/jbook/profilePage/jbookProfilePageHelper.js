@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { PieChart, Pie, Legend, Cell, Label } from 'recharts';
+import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -127,8 +127,6 @@ const BasicData = (props) => {
 
 const ClassificationScoreCard = (props) => {
 	const { scores } = props;
-	const context = useContext(JBookContext);
-	const { state } = context;
 
 	return (
 		<StyledLeftContainer>
