@@ -68,9 +68,9 @@ class ESSearchLib {
 			const resp = await this._clients[clientName].update({
 				index,
 				id: documentId,
-				body: { doc: updatedDocument },
+				body: { doc: updatedDocument, detect_noop: false },
 			});
-			return resp.body?.result === 'updated';
+			return true;
 		} catch (e) {
 			this.logger.error(e.message, 'N67SIIJ', user);
 			return false;

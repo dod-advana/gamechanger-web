@@ -813,12 +813,12 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		program_element_s: {
-			newName: 'revProgramElement', // these mainly act as foreign keys
+			newName: 'programElement', // these mainly act as foreign keys
 			defaultValue: '',
 			processValue: (value) => value,
 		},
 		budget_line_item_s: {
-			newName: 'revBudgetLineItems',
+			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
