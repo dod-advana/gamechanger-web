@@ -1,12 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	CARD_FONT_SIZE,
-	encode,
-	getTrackingNameForFactory,
-	getTypeIcon,
-	getTypeTextColor,
-} from '../../../utils/gamechangerUtils';
+import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -208,6 +202,8 @@ const cardHandler = {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
 
+			const { cloneData, searchText, selectedPortfolio } = state;
+
 			let displayTitleTop = '';
 			let displayTitleBot = ''; // item.projectTitle;
 			switch (item.budgetType) {
@@ -235,7 +231,14 @@ const cardHandler = {
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? () => clickFn(cloneName, searchText, item, selectedPortfolio) : () => {}}
+								onClick={
+									docListView
+										? (e) => {
+												e.preventDefault();
+												clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
+										  }
+										: () => {}
+								}
 								style={{
 									width: '100%',
 									display: 'flex',
