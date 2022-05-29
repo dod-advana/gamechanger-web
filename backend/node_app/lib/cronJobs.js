@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { CacheController } = require('../controllers/cacheController');
+const { ElasticSearchController } = require('../controllers/elasticSearchController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
@@ -11,6 +12,7 @@ class CronJobs {
 		const {
 			constants = constantsFile,
 			cacheController = new CacheController(),
+			elasticSearchController = new ElasticSearchController(opts),
 			favoritesController = new FavoritesController(),
 			userController = new UserController(),
 			logger = LOGGER,
@@ -18,6 +20,7 @@ class CronJobs {
 
 		this.constants = constants;
 		this.cacheController = cacheController;
+		this.elasticSearchController = elasticSearchController;
 		this.favoritesController = favoritesController;
 		this.userController = userController;
 		this.logger = logger;
@@ -29,6 +32,7 @@ class CronJobs {
 	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
 		this.cacheController.setStartupQlikFullAppCacheKeys();
+		this.cacheController.setStartupCollibraCacheKeys();
 	}
 
 	getReloadJob() {
@@ -124,9 +128,9 @@ class CronJobs {
 				);
 				if (!this.constants.GAME_CHANGER_OPTS.isDecoupled && qlikAppsFullPollInterval > 0) {
 					this.logger.info(`Polling for qlik app full list updates every ${qlikAppsFullPollInterval}ms.`);
-					this.cacheController.cacheQlikAppFullList();
+					this.elasticSearchController.cacheStoreQlikApps();
 					distributedPoll(
-						this.cacheController.cacheQlikAppFullList,
+						this.elasticSearchController.cacheStoreQlikApps,
 						qlikAppsFullPollInterval,
 						'locks.qlikFullAppsPollList'
 					);
@@ -135,23 +139,28 @@ class CronJobs {
 				}
 			},
 		};
-		// return cron.schedule(
-		// 	this.constants.GLOBAL_SEARCH_OPTS.CACHE_CRON_TIMING,
-		// 	async () => {
-		// 		try {
-		// 			await this.cacheController.cacheQlikAppFullList();
-		// 		} catch (e) {
-		// 			this.logger.error(
-		// 				`Cron job error in caching Qlik App Full List: ${e.message}`,
-		// 				'OV3A1SB',
-		// 				'api-request-reset-cron'
-		// 			);
-		// 		}
-		// 	},
-		// 	{
-		// 		scheduled: false,
-		// 	}
-		// );
+	}
+
+	cacheCollibraInfoJob() {
+		return {
+			start: () => {
+				const collibraCachePollInterval = parseInt(
+					this.constants.GLOBAL_SEARCH_OPTS.COLLIBRA_CACHE_POLL_INTERVAL,
+					10
+				);
+				if (!this.constants.GAME_CHANGER_OPTS.isDecoupled && collibraCachePollInterval > 0) {
+					this.logger.info(`Polling for collibra cache updates every ${collibraCachePollInterval}ms.`);
+					this.cacheController.cacheCollibraData();
+					distributedPoll(
+						this.cacheController.cacheCollibraData,
+						collibraCachePollInterval,
+						'locks.collibraCachePollList'
+					);
+				} else {
+					this.logger.info('Polling for collibra cache updates disabled.');
+				}
+			},
+		};
 	}
 }
 
