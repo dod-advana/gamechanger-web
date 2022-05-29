@@ -130,8 +130,6 @@ class JBookDataHandler extends DataHandler {
 
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
-			console.log(doc);
-
 			// classification
 			try {
 				let classification;
@@ -189,21 +187,22 @@ class JBookDataHandler extends DataHandler {
 
 			let updateESReview_n = false;
 			if (doc.review_n && Array.isArray(doc.review_n)) {
-				doc.review_n = [];
+				const tmpReview_n = [];
 				doc.review_n.forEach((review) => {
 					if (
 						review['portfolio_name_s'] === portfolioName ||
-						review['portfolio_id_s'] === portfolio?.id.toString()
+						(portfolio && portfolio !== null && review['portfolio_id_s'] === portfolio?.id.toString())
 					) {
 						tmpReview = review;
 					} else {
-						doc.review_n.push(review);
+						tmpReview_n.push(review);
 					}
 				});
+				doc.review_n = tmpReview_n;
 			} else if (doc.review_n && doc.review_n.constructor === Object) {
 				if (
 					doc.review_n?.portfolio_name_s === portfolioName ||
-					doc.review_n?.portfolio_id_s === portfolio?.id.toString()
+					(portfolio && portfolio !== null && doc.review_n?.portfolio_id_s === portfolio?.id.toString())
 				) {
 					tmpReview = doc.review_n;
 					doc.review_n = [];
@@ -356,7 +355,6 @@ class JBookDataHandler extends DataHandler {
 					console.log('Error fetching reviewer emails');
 					console.log(err);
 				}
-				console.log(tmp);
 				doc.reviews[tmp.portfolioName] = tmp;
 			}
 
@@ -596,52 +594,34 @@ class JBookDataHandler extends DataHandler {
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
-			console.log(reviewData);
+			const tmpId = reviewData.id;
 
 			const query = {
-				budget_type: reviewData.budget_type,
-				budget_year: reviewData.budget_year,
-				appn_num: { [Op.iLike]: `${reviewData.appn_num}%` },
-				budget_activity: reviewData.budget_activity,
-				agency: reviewData.agency,
+				id: tmpId,
 				portfolio_name: portfolioName,
 			};
+
+			delete reviewData.id;
 
 			// in review table, budget_line_item is also projectNum
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
-					query.budget_line_item = reviewData.budget_line_item;
 					break;
 				case 'rdoc':
-					query.program_element = reviewData.program_element;
-					query.budget_line_item = reviewData.projectNum;
 					reviewData.budget_line_item = reviewData.projectNum;
 					break;
 				case 'om':
-					query.budget_line_item = reviewData.budgetLineItem;
-					query.program_element = reviewData.programElement;
 					break;
 				default:
 					break;
 			}
 
-			delete reviewData.id;
-
-			const [review, created] = await this.rev
-				.findOrCreate({
-					where: query,
-					defaults: {
-						...reviewData,
-						budget_type: types[reviewData.budget_type],
-					},
-				})
-				.catch((err) => {
-					console.log('Error finding / creating review');
-					console.log(err);
-				});
-
-			// if an existing row, update
-			if (!created) {
+			let newOrUpdatedReview;
+			if (!tmpId) {
+				const newReview = await this.rev.create(reviewData);
+				wasUpdated = true;
+				newOrUpdatedReview = newReview.dataValues;
+			} else {
 				const result = await this.rev
 					.update(
 						{
@@ -658,12 +638,12 @@ class JBookDataHandler extends DataHandler {
 					});
 
 				wasUpdated = result && result.length && result[0] === 1;
-			} else {
-				wasUpdated = true;
+				newOrUpdatedReview = { ...reviewData, budget_type: types[reviewData.budget_type] };
+				newOrUpdatedReview.id = tmpId;
 			}
 
 			// Now update ES
-			let tmpPGToES = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
+			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
@@ -680,7 +660,7 @@ class JBookDataHandler extends DataHandler {
 			// Find if there already is a review in esReviews for this portfolio if so then replace if not add
 			const newReviews = [];
 			esReviews.forEach((review) => {
-				if (review.portfolio_name_s !== portfolioName && review.portfolio_id_s !== portfolio?.id.toString()) {
+				if (review.portfolio_name_s !== portfolioName) {
 					newReviews.push(review);
 				}
 			});

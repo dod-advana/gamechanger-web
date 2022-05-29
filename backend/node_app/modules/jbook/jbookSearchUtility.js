@@ -1102,7 +1102,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
