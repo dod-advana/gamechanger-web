@@ -73,6 +73,7 @@ const GlobalSearchHandler = {
 			dashboardsSearchResults: [],
 			dataSourcesSearchResults: [],
 			databasesSearchResults: [],
+			modelsSearchResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			resultsDownloadURL: '',
@@ -89,11 +90,13 @@ const GlobalSearchHandler = {
 			dashboardsLoading: true,
 			dataSourcesLoading: true,
 			databasesLoading: true,
+			modelsLoading: true,
 			categoryMetadata: {},
 			applicationsTotalCount: 0,
 			dashboardsTotalCount: 0,
 			dataSourcesTotalCount: 0,
 			databasesTotalCount: 0,
+			modelsTotalCount: 0,
 		});
 
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
@@ -236,6 +239,40 @@ const GlobalSearchHandler = {
 						setState(dispatch, {
 							databasesTotalCount: 0,
 							databasesLoading: false,
+						});
+					});
+			} catch (err) {
+				console.error(err);
+			}
+
+			try {
+				gameChangerAPI
+					.modularSearch({
+						cloneName: cloneData.clone_name,
+						searchText: searchText,
+						offset,
+						options: {
+							charsPadding,
+							showTutorial,
+							useGCCache,
+							tiny_url,
+							category: 'models',
+						},
+					})
+					.then((data) => {
+						setState(dispatch, {
+							modelsSearchResults: data.data.models.results.map((hit) => ({
+								...hit,
+								type: 'models',
+							})),
+							modelsTotalCount: data.data.models.total,
+							modelsLoading: false,
+						});
+					})
+					.catch(() => {
+						setState(dispatch, {
+							modelsTotalCount: 0,
+							modelsLoading: false,
 						});
 					});
 			} catch (err) {
@@ -401,6 +438,41 @@ const GlobalSearchHandler = {
 				}),
 				databasesLoading: false,
 				databasesPagination: false,
+			});
+		}
+	},
+
+	async handleModelsPagination(state, dispatch) {
+		const { searchText = '', dataSourcesPage, listView, showTutorial, cloneData } = state;
+
+		const offset = (dataSourcesPage - 1) * RESULTS_PER_PAGE;
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				category: 'models',
+				limit,
+			},
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				modelsSearchResults: resp.data.models.results.map((result) => {
+					result.type = 'models';
+					return result;
+				}),
+				modelsLoading: false,
+				modelsPagination: false,
 			});
 		}
 	},
