@@ -10,6 +10,7 @@ import {
 	StyledNavButton,
 	StyledNavBar,
 	StyledNavContainer,
+	StyledLeftContainer,
 	StyledSideNavContainer,
 } from './profilePageStyles';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
