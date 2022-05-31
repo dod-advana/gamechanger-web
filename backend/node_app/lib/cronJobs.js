@@ -11,10 +11,10 @@ class CronJobs {
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
-			cacheController = new CacheController(),
+			cacheController = new CacheController(opts),
 			elasticSearchController = new ElasticSearchController(opts),
-			favoritesController = new FavoritesController(),
-			userController = new UserController(),
+			favoritesController = new FavoritesController(opts),
+			userController = new UserController(opts),
 			logger = LOGGER,
 		} = opts;
 

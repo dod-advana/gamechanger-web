@@ -233,8 +233,6 @@ class GlobalSearchHandler extends SearchHandler {
 				offset,
 			};
 
-			console.log(JSON.stringify(defaultSearchOptions));
-
 			if (!searchText) throw new Error('keywords is required in the request body');
 
 			const url = this.dcUtils.getCollibraUrl() + '/search';
@@ -252,7 +250,6 @@ class GlobalSearchHandler extends SearchHandler {
 					const tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
 					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				});
-
 				const assetsResults = await Promise.all(assetCalls);
 				const combinedAssetResults = {};
 				assetsResults.forEach((assetResult) => {
@@ -261,6 +258,27 @@ class GlobalSearchHandler extends SearchHandler {
 					userIds.add(data['lastModifiedBy']);
 				});
 
+				// Get Attributes
+				const assetAttributeCalls = response.data.results.map((result) => {
+					//console.log(result);
+					const tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
+					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				});
+				const assetAttributesResults = await Promise.all(assetAttributeCalls);
+				const combinedAttributeResults = {};
+				assetAttributesResults.forEach((attributeResult, idx) => {
+					if (attributeResult.data.results.length > 0) {
+						combinedAttributeResults[attributeResult.data.results[0].asset.id] =
+							attributeResult.data.results.map((attrResult) => {
+								return {
+									field: attrResult.type.name,
+									value: attrResult.value,
+								};
+							});
+					}
+				});
+
+				// Get Users Info
 				let tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
 				userIds.forEach((userId) => (tempUrl += '&userId=' + userId));
 				const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
@@ -271,6 +289,7 @@ class GlobalSearchHandler extends SearchHandler {
 				cleanedData = await this.cleanDataCatalogResults(
 					response.data,
 					combinedAssetResults,
+					combinedAttributeResults,
 					combinedUserData,
 					userId
 				);
@@ -290,13 +309,14 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async cleanDataCatalogResults(data, fullAssetDetails, fullUserData, userId) {
+	async cleanDataCatalogResults(data, fullAssetDetails, combinedAttributeResults, fullUserData, userId) {
 		const attributeTypes = await this.dcUtils.getAttributeTypes();
 
 		try {
 			data.results.forEach((result) => {
 				result.resource['domain'] = fullAssetDetails[result.resource.id]['domain'];
 				result.resource['lastModifiedBy'] = fullAssetDetails[result.resource.id]['lastModifiedBy'];
+				result.attributes = combinedAttributeResults[result.resource.id];
 
 				Object.keys(result.resource).forEach((resourceKey) => {
 					if (resourceKey === 'createdOn' || resourceKey === 'lastModifiedOn') {
