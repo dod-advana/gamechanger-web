@@ -71,7 +71,6 @@ thes.waitForLoad().then(() => {
 });
 
 startupUtils.copyConfigToBuild();
-startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
@@ -371,6 +370,14 @@ try {
 	qlikAppFullList.start();
 } catch (e) {
 	logger.error(`Error initializing update qlik app full app cron job: ${e.message}`, 'ZY0KRIN', 'Startup Process');
+}
+
+try {
+	// start collibra cache
+	const collibraCacheList = cron.cacheCollibraInfoJob();
+	collibraCacheList.start();
+} catch (e) {
+	logger.error(`Error initializing collibra cron job: ${e.message}`, 'Y3MB8DA', 'Startup Process');
 }
 
 const options = {
