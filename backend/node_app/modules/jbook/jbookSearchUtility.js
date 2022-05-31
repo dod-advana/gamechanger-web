@@ -30,13 +30,13 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
+	parseFields(data, fromFrontend, docType, doMapping = true) {
 		try {
 			const newData = {};
 			const mapping = this.getMapping(docType, fromFrontend);
 
 			for (const field in data) {
-				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
+				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
 					const newKey = mapping[field].newName;
 					newData[newKey] = mapping[field].processValue(data[field]);
 				} else if (data[field] && data[field] !== null) {
@@ -1055,10 +1055,12 @@ class JBookSearchUtility {
 					Object.keys(hit.inner_hits).forEach((hitKey) => {
 						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0],
-								});
+								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+									result.pageHits.push({
+										title: esTopLevelFieldsNameMapping[hitKey],
+										snippet: innerHit.highlight[highlightKey][0],
+									});
+								}
 							});
 						});
 					});
@@ -1102,7 +1104,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1314,7 +1316,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},
@@ -1442,6 +1444,9 @@ class JBookSearchUtility {
 
 			// SORT
 			switch (jbookSearchSettings.sort[0].id) {
+				case 'relevance':
+					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;

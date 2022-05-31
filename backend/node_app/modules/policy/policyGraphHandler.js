@@ -511,16 +511,29 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getEntityDataDetailsPageHelper(req, userId) {
 		try {
-			const { entityName, isTest = false } = req.body;
+			let { entityName, isTest = false } = req.body;
 
 			const data = {};
 
-			const [entData, entQuery, entParams] = await this.getGraphData(
+			let [entData] = await this.getGraphData(
 				`MATCH (e:Entity) WHERE e.name = $name RETURN e;`,
 				{ name: entityName },
 				isTest,
 				userId
 			);
+
+			if (!entData?.nodes?.length > 0) {
+				// No match on name, attempt to match on alias
+				// This may have poor performance (needs investigation)
+				// This is a bandaid fix to cover up for data in neo4j not exactly matching elastic
+				[entData] = await this.getGraphData(
+					`MATCH (e:Entity) WHERE $name IN split(e.aliases, ';') RETURN e;`,
+					{ name: entityName },
+					isTest,
+					userId
+				);
+				entityName = entData?.nodes?.[0].name || entityName;
+			}
 
 			data.nodes = entData.nodes;
 

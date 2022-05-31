@@ -1,4 +1,4 @@
-import { orgColorMap, typeColorMap } from './gamechangerUtils';
+import { orgColorMap } from './gamechangerUtils';
 import _ from 'lodash';
 
 export const getClassLabel = (reviewData) => {
@@ -89,41 +89,48 @@ const convertPhraseToSequence = (phrase) => {
 	return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
 };
 
-export const getDocTypeStyles = (docType) => {
+export const jbookDocTypeColors = {
+	Procurement: 'red',
+	'RDT&E': 'blue',
+	'O&M': 'green',
+};
+
+export const getSubHeaderStyles = (docType = '', serviceAgency = '') => {
 	if (!docType) {
-		return { docTypeColor: '', docOrg: '', docOrgColor: '' };
+		return { docTypeColor: '', serviceAgencyColor: '' };
 	}
 
-	const docTypeColor = typeColorMap['document'];
+	const docTypeColor = jbookDocTypeColors[docType];
 
-	switch (docType) {
+	let serviceAgencyType = '';
+
+	switch (serviceAgency) {
 		case 'Air Force (AF)':
-			docType = 'Dept. of the Air Force';
+			serviceAgencyType = 'Dept. of the Air Force';
 			break;
 		case 'Army':
-			docType = 'US Army';
+			serviceAgencyType = 'US Army';
 			break;
 		case 'Navy':
-			docType = 'US Navy';
+			serviceAgencyType = 'US Navy';
 			break;
 		case 'The Joint Staff (TJS)':
-			docType = 'Joint Chiefs of Staff';
+			serviceAgencyType = 'Joint Chiefs of Staff';
 			break;
 		case 'United States Special Operations Command (SOCOM)':
-			docType = 'US Army';
+			serviceAgencyType = 'US Army';
 			break;
 		case 'US Marine Corp (USMC)':
-			docType = 'US Marine Corps';
+			serviceAgencyType = 'US Marine Corps';
 			break;
 		default:
-			//console.log(docType)
-			docType = 'Dept. of Defense';
+			serviceAgencyType = 'Dept. of Defense';
 			break;
 	}
 
-	const docOrgColor = orgColorMap[docType] ?? '#964B00'; // brown
+	const serviceAgencyColor = orgColorMap[serviceAgencyType] ?? '#964B00'; // brown
 
-	return { docTypeColor, docOrgColor };
+	return { docTypeColor, serviceAgencyColor };
 };
 
 export const getConvertedName = (orgName) => {
