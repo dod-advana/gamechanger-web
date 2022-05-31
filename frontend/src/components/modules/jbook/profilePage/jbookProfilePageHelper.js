@@ -10,6 +10,7 @@ import {
 	StyledNavButton,
 	StyledNavBar,
 	StyledNavContainer,
+	StyledLeftContainer,
 	StyledSideNavContainer,
 	StyledLeftContainer,
 } from './profilePageStyles';
