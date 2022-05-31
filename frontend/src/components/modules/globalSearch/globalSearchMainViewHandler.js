@@ -34,7 +34,8 @@ const getViewHeader = (state, dispatch) => {
 				(!state.applicationsLoading ||
 					!state.dashboardsLoading ||
 					!state.dataSourcesLoading ||
-					!state.databasesLoading) && (
+					!state.databasesLoading ||
+					!state.modelsLoading) && (
 					<>
 						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
 							Showing results for <b>{state.searchText}</b>
@@ -108,11 +109,16 @@ const getMainView = (props) => {
 		dashboardsTotalCount,
 		dataSourcesTotalCount,
 		databasesTotalCount,
+		modelsTotalCount,
 		pageDisplayed,
 	} = state;
 
 	const noResults = Boolean(
-		!applicationsTotalCount && !dashboardsTotalCount && !dataSourcesTotalCount && !databasesTotalCount
+		!applicationsTotalCount &&
+			!dashboardsTotalCount &&
+			!dataSourcesTotalCount &&
+			!databasesTotalCount &&
+			!modelsTotalCount
 	);
 	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
 
@@ -130,7 +136,8 @@ const getMainView = (props) => {
 									(applicationsTotalCount > 0 ||
 									dashboardsTotalCount > 0 ||
 									dataSourcesTotalCount > 0 ||
-									databasesTotalCount > 0 ? (
+									databasesTotalCount > 0 ||
+									modelsTotalCount > 0 ? (
 										<>
 											{getViewHeader(state, dispatch)}
 											<div style={{ margin: '0 15px 0 5px' }}>
@@ -380,7 +387,7 @@ const getCardViewPanel = (props) => {
 							className={'col-xs-12'}
 							style={state.listView ? styles.listViewContainer : styles.containerDiv}
 						>
-							<SearchSection section={'Models'} color={'rgb(233, 105, 29)'} icon={DatabasesIcon}>
+							<SearchSection section={'Models'} color={'#131E43'} icon={DatabasesIcon}>
 								{!modelsLoading && !modelsPagination ? (
 									getSearchResults(models, state, dispatch)
 								) : (
@@ -442,6 +449,9 @@ const GlobalSearchMainViewHandler = (props) => {
 		if (state.databasesPagination && searchHandler) {
 			searchHandler.handleDatabasesPagination(state, dispatch);
 		}
+		if (state.modelsPagination && searchHandler) {
+			searchHandler.handleModelsPagination(state, dispatch);
+		}
 	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
@@ -470,7 +480,8 @@ const GlobalSearchMainViewHandler = (props) => {
 			!state.applicationsLoading &&
 			!state.dashboardsLoading &&
 			!state.dataSourcesLoading &&
-			!state.databasesLoading
+			!state.databasesLoading &&
+			!state.modelsLoading
 		) {
 			setState(dispatch, {
 				categoryMetadata: {
@@ -478,6 +489,7 @@ const GlobalSearchMainViewHandler = (props) => {
 					Dashboards: { total: state.dashboardsTotalCount },
 					DataSources: { total: state.dataSourcesTotalCount },
 					Databases: { total: state.databasesTotalCount },
+					Models: { total: state.modelsTotalCount },
 					Documentation: { total: 0 },
 					Organizations: { total: 0 },
 					Services: { total: 0 },
@@ -492,10 +504,12 @@ const GlobalSearchMainViewHandler = (props) => {
 		state.dashboardsLoading,
 		state.dataSourcesLoading,
 		state.databasesLoading,
+		state.modelsLoading,
 		state.applicationsTotalCount,
 		state.dashboardsTotalCount,
 		state.dataSourcesTotalCount,
 		state.databasesTotalCount,
+		state.modelsTotalCount,
 		state.loading,
 		dispatch,
 	]);
