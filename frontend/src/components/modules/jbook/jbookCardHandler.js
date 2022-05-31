@@ -240,12 +240,16 @@ const cardHandler = {
 					? item.appropriationTitle.replace('Procurement', 'Proc')
 					: '';
 
+				if (item.docType === 'odoc') {
+					appropriationTitle = item.accountTitle;
+				}
+
 				budgetPrefix = '';
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
-				let cycle = item.budgetCycle ?? '';
+				let cycle = item.budgetCycle ?? 'PB';
 				budgetPrefix = cycle + year + ': ';
 
-				budgetAmount = item.by1BaseYear ? item.by1BaseYear + ' $M' : '';
+				budgetAmount = item.currentYearAmount ? item.currentYearAmount + ' $M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
@@ -564,7 +568,6 @@ const cardHandler = {
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
-			const projectNum = null;
 
 			const formatNum = (num) => {
 				const parsed = parseInt(num);
@@ -590,7 +593,7 @@ const cardHandler = {
 				},
 				{
 					Key: 'Project Number',
-					Value: projectNum || 'N/A',
+					Value: projectData.projectNum || 'N/A',
 					Hidden: budgetType === 'PDOC',
 				},
 				{
@@ -639,7 +642,7 @@ const cardHandler = {
 					Value: projectData.budgetCycle || 'N/A',
 				},
 				{
-					Key: 'Appropriation',
+					Key: 'Main Account',
 					Value: projectData.appropriationNumber || 'N/A',
 				},
 				{
@@ -651,8 +654,11 @@ const cardHandler = {
 					Value: projectData.budgetActivityNumber || 'N/A',
 				},
 				{
-					Key: 'Budget Activity Title',
-					Value: projectData.budgetActivityTitle || 'N/A',
+					Key: 'Budget Sub Activity',
+					Value:
+						projectData.budgetType === 'odoc'
+							? projectData.budgetActivityTitle ?? 'N/A'
+							: projectData.budgetSubActivity ?? 'N/A',
 				},
 				{
 					Key: 'Category',

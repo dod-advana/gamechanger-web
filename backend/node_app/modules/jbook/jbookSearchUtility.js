@@ -1471,6 +1471,8 @@ class JBookSearchUtility {
 					break;
 			}
 
+			console.log(JSON.stringify(query));
+
 			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
@@ -1485,6 +1487,89 @@ class JBookSearchUtility {
 		let filterQueries = [];
 		try {
 			if (jbookSearchSettings) {
+				// Budget Activity
+				if (jbookSearchSettings.budgetActivity) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetActivity}*`,
+							default_field: 'budgetActivityNumber_s',
+						},
+					});
+				}
+
+				// Budget Sub Activity
+				if (jbookSearchSettings.budgetSubActivity) {
+					let shouldQuery = {
+						bool: {
+							should: [],
+						},
+					};
+
+					shouldQuery.bool.should.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetSubActivity}*`,
+							default_field: 'P40-13_BSA_Title_t',
+						},
+					});
+
+					shouldQuery.bool.should.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetSubActivity}*`,
+							default_field: 'budgetActivityTitle_t',
+						},
+					});
+
+					filterQueries.push(shouldQuery);
+				}
+
+				// Main Account
+				if (jbookSearchSettings.appropriationNumber) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.appropriationNumber}*`,
+							default_field: 'appropriationNumber_s',
+						},
+					});
+				}
+
+				// Total Funding
+				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
+					const rangeQuery = {
+						range: {
+							totalCost_s: {},
+						},
+					};
+
+					if (jbookSearchSettings.minTotalCost) {
+						rangeQuery.range.totalCost_s.gte = jbookSearchSettings.minTotalCost;
+					}
+
+					if (jbookSearchSettings.maxTotalCost) {
+						rangeQuery.range.totalCost_s.lte = jbookSearchSettings.maxTotalCost;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
+				// BY1 Funding
+				if (jbookSearchSettings.minBY1Funding || jbookSearchSettings.maxBY1Funding) {
+					const rangeQuery = {
+						range: {
+							by1BaseYear_d: {},
+						},
+					};
+
+					if (jbookSearchSettings.minBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.gte = jbookSearchSettings.minBY1Funding;
+					}
+
+					if (jbookSearchSettings.maxBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.lte = jbookSearchSettings.maxBY1Funding;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
 				// Budget Type filter
 				if (jbookSearchSettings.budgetType) {
 					const budgetTypesTemp = [];
@@ -1525,7 +1610,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.programElement) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.programElement}`,
+							query: `*${jbookSearchSettings.programElement}*`,
 							default_field: 'budgetLineItem_s',
 						},
 					});
@@ -1535,7 +1620,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.projectNum) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.projectNum}`,
+							query: `*${jbookSearchSettings.projectNum}*`,
 							default_field: 'projectNum_s',
 						},
 					});
