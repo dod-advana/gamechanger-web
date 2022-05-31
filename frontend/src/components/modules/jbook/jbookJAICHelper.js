@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { TextField, Typography, CircularProgress } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCPrimaryButton from '../../common/GCButton';
@@ -7,6 +6,7 @@ import { setState } from '../../../utils/sharedFunctions';
 import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { StyledFooterDiv } from './profilePage/profilePageStyles';
 import { ButtonStyles } from './profilePage/profilePageStyles';
 
 const useStyles = makeStyles((theme) => ({
@@ -15,13 +15,6 @@ const useStyles = makeStyles((theme) => ({
 		padding: '15px 10px 15px 0',
 	},
 }));
-
-const StyledFooterDiv = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	margin-top: 10px;
-`;
 
 const ReviewersValue = React.memo((props) => {
 	const {
@@ -254,6 +247,37 @@ const CurrentMissionPartnersValue = React.memo((props) => {
 	);
 });
 
+const JustificationValue = React.memo((props) => {
+	const { setReviewData, finished, primaryReviewNotes } = props;
+
+	const [reviewerNotes, setReviewerNotes] = useState(primaryReviewNotes);
+
+	useEffect(() => {
+		setReviewerNotes(primaryReviewNotes);
+	}, [primaryReviewNotes]);
+
+	return (
+		<>
+			<TextField
+				placeholder="Provide justification for the tag selected above"
+				variant="outlined"
+				value={reviewerNotes}
+				style={{ backgroundColor: 'white', width: '100%', margin: '0 0 0 0' }}
+				onBlur={(event) => setReviewData('primaryReviewNotes', event.target.value)}
+				onChange={(event, value) => setReviewerNotes(value)}
+				inputProps={{
+					style: {
+						width: '100%',
+					},
+				}}
+				rows={10}
+				multiline
+				disabled={finished} //|| roleDisabled}
+			/>
+		</>
+	);
+});
+
 const ReviewStatus = React.memo((props) => {
 	const { reviewStatus, finished } = props;
 
@@ -318,6 +342,58 @@ const ButtonFooter = React.memo((props) => {
 	);
 });
 
+const SimpleButtonFooter = React.memo((props) => {
+	const { finished, roleDisabled, dispatch, setReviewData, submitReviewForm, primaryReviewLoading } = props;
+
+	return (
+		<StyledFooterDiv style={{ paddingTop: '10px' }}>
+			{finished && !roleDisabled && (
+				<GCPrimaryButton
+					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					onClick={() => setState(dispatch, { JAICModalOpen: true })}
+				>
+					Re-Enable (Partial Review)
+				</GCPrimaryButton>
+			)}
+			<GCPrimaryButton
+				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+				onClick={() => {
+					setReviewData('jaicForm');
+				}}
+				disabled={finished || roleDisabled}
+			>
+				{!primaryReviewLoading ? (
+					'Reset Form'
+				) : (
+					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+				)}
+			</GCPrimaryButton>
+			<GCPrimaryButton
+				style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+				onClick={() => submitReviewForm('primaryReviewLoading', false, 'primary')}
+				disabled={finished || roleDisabled}
+			>
+				{!primaryReviewLoading ? (
+					'Save (Partial Review)'
+				) : (
+					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+				)}
+			</GCPrimaryButton>
+			<GCPrimaryButton
+				style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+				onClick={() => submitReviewForm('primaryReviewLoading', true, 'primary')}
+				disabled={finished || roleDisabled}
+			>
+				{!primaryReviewLoading ? (
+					'Submit'
+				) : (
+					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+				)}
+			</GCPrimaryButton>
+		</StyledFooterDiv>
+	);
+});
+
 export {
 	ReviewersValue,
 	CoreAIAnalysisKey,
@@ -326,6 +402,8 @@ export {
 	PlannedTransitionPartnerKey,
 	PlannedTransitionPartnerValue,
 	CurrentMissionPartnersValue,
+	JustificationValue,
 	ReviewStatus,
 	ButtonFooter,
+	SimpleButtonFooter,
 };

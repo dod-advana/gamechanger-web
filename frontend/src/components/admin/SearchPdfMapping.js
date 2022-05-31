@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { Typography, Grid, Card, CardContent } from '@material-ui/core';
 import moment from 'moment';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
@@ -330,13 +331,13 @@ const getUserAggData = async (startDate, endDate, setUserAggData, setCardData) =
  * to download as a csv
  * @class SearchPdfMapping
  */
-export default () => {
+export default (props) => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
-	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0 });
+	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0, unique_searches: 0 });
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
 	const [daysBack, setDaysBack] = useState(3);
@@ -495,6 +496,27 @@ export default () => {
 			console.error(e);
 		}
 	};
+	/**
+	 * Takes in a set time to go back in the query
+	 * @param {string} back
+	 * @method timeBack
+	 */
+	const timeBack = async (back) => {
+		switch (back) {
+			case 'day':
+				setStartDate(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+			case 'week':
+				setStartDate(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+			case 'month':
+				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+		}
+	};
 
 	useEffect(() => {
 		switch (tabIndex) {
@@ -583,7 +605,7 @@ export default () => {
 							}}
 						>
 							<Grid container spacing={2}>
-								<Grid item xs={2}>
+								<Grid item lg={2} xs={3}>
 									<DatePickerWrapper>
 										<label>Start Date</label>
 										<DatePicker
@@ -594,7 +616,7 @@ export default () => {
 										/>
 									</DatePickerWrapper>
 								</Grid>
-								<Grid item xs={2}>
+								<Grid item lg={2} xs={3}>
 									<DatePickerWrapper>
 										<label>End Date</label>
 										<DatePicker
@@ -605,8 +627,33 @@ export default () => {
 										/>
 									</DatePickerWrapper>
 								</Grid>
-								<Grid item xs={5}></Grid>
-								<Grid item xs={3}>
+								<Grid item lg={4} xs={4}>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('day');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Day
+									</GCPrimaryButton>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('week');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Week
+									</GCPrimaryButton>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('month');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Month
+									</GCPrimaryButton>
+								</Grid>
+								<Grid item lg={4} xs={2}>
 									<GCPrimaryButton
 										onClick={() => {
 											trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
@@ -631,13 +678,23 @@ export default () => {
 									<Card>
 										<CardContent>
 											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+												Unique Searches
+											</p>
+											{cardData.unique_searches}
+										</CardContent>
+									</Card>
+								</Grid>
+								<Grid item xs={2}>
+									<Card>
+										<CardContent>
+											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
 												Unique Users
 											</p>
 											{cardData.unique_users}
 										</CardContent>
 									</Card>
 								</Grid>
-								<Grid item xs={8}></Grid>
+								<Grid item xs={6}></Grid>
 							</Grid>
 						</div>
 						<div
@@ -707,7 +764,7 @@ export default () => {
 							data={feedbackData}
 							columns={feedbackColumns}
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
-							defaultSorted={[{ id: 'event_name', desc: false }]}
+							defaultSorted={[{ id: 'createdAt', desc: true }]}
 						/>
 					</TabPanel>
 					<TabPanel>

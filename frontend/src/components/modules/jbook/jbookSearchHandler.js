@@ -21,13 +21,13 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
 
-const getAndSetDidYouMean = (index, searchText, dispatch) => {
-	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-	// 	setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
-	// }).catch(_ => {
-	// 	//do nothing
-	// })
-};
+// const getAndSetDidYouMean = (index, searchText, dispatch) => {
+// 	jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
+// 		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
+// 	}).catch(_ => {
+// 		//do nothing
+// 	})
+// };
 
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
@@ -155,6 +155,7 @@ const JBookSearchHandler = {
 				urlSearch: false,
 				initial: false,
 				expansionDict: {},
+				statsLoading: true,
 			});
 
 			try {
@@ -166,7 +167,20 @@ const JBookSearchHandler = {
 				}
 
 				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
-				const { contractTotals } = await this.getContractTotals(state, dispatch);
+				this.getContractTotals(state, dispatch)
+					.then(({ contractTotals }) => {
+						setState(dispatch, {
+							statsLoading: false,
+							contractTotals: contractTotals,
+						});
+					})
+					.catch(() => {
+						setState(dispatch, {
+							statsLoading: false,
+							contractTotals: {},
+						});
+					});
+
 				const t1 = new Date().getTime();
 
 				if (results === null || !results.docs || results.docs.length <= 0) {
@@ -191,6 +205,19 @@ const JBookSearchHandler = {
 						});
 					}
 
+					// temporarily add review data
+					// docs.map((doc) => {
+					// 	doc.reviews = {
+					// 		General: {
+					// 			tags: ['Generic Tag'],
+					// 		},
+					// 		'AI Inventory': {
+					// 			tags: ['AI Enabled', 'AI Enabling', 'Not AI', 'AI', 'Very Cool AI'],
+					// 		},
+					// 	};
+					// 	return doc;
+					// });
+
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
 						activeCategoryTab: 'jbook',
@@ -203,7 +230,6 @@ const JBookSearchHandler = {
 						hideTabs: false,
 						resetSettingsSwitch: false,
 						runningSearch: false,
-						contractTotals: contractTotals,
 						expansionDict,
 						hasExpansionTerms,
 						paginationSearch: false,

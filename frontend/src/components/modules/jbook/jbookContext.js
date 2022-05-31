@@ -398,6 +398,7 @@ const initState = {
 
 	// contract totals
 	contractTotals: {},
+	statsLoading: false,
 
 	paginationSearch: false,
 
@@ -407,7 +408,10 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
-	portfolio_name: 'AI Inventory',
+
+	// jbook portfolios
+	portfolios: [],
+	selectedPortfolio: 'General',
 };
 
 const init = (initialState) => {

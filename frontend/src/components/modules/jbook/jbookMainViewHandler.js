@@ -72,6 +72,20 @@ const handlePageLoad = async (props) => {
 	// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
 	// 	mainTabSelected = 1;
 	// }
+
+	// grab the portfolio data
+	let portfolios = [];
+	await gameChangerAPI
+		.callDataFunction({
+			functionName: 'getPortfolios',
+			cloneName: 'jbook',
+			options: {},
+		})
+		.then((data) => {
+			console.log(data);
+			portfolios = data.data !== undefined ? data.data : [];
+		});
+
 	// the main setstate that triggers the initial search
 	setState(dispatch, {
 		searchText,
@@ -82,6 +96,7 @@ const handlePageLoad = async (props) => {
 		jbookSearchSettings,
 		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
 		dropdownData,
+		portfolios,
 	});
 };
 
@@ -294,7 +309,6 @@ const getCardViewPanel = (props) => {
 																		totalItemsCount={count}
 																		pageRangeDisplayed={8}
 																		onChange={(page) => {
-																			console.log('jbook pagination search');
 																			trackEvent(
 																				getTrackingNameForFactory(
 																					state.cloneData.clone_name
@@ -403,6 +417,7 @@ const JBookMainViewHandler = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
 
+	// handle pagination being clicked
 	useEffect(() => {
 		if (state.docsPagination && searchHandler) {
 			setState(dispatch, {
@@ -412,6 +427,7 @@ const JBookMainViewHandler = (props) => {
 		}
 	}, [state, dispatch, searchHandler]);
 
+	// handle page load
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
@@ -433,7 +449,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
