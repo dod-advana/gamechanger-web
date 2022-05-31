@@ -184,22 +184,6 @@ const GamechangerLiteAdminPage = LoadableVisibility({
 	},
 });
 
-const GCFooter = LoadableVisibility({
-	loader: () => import('./components/navigation/GCFooter'),
-	loading: () => {
-		return (
-			<div
-				style={{
-					display: 'flex',
-					height: '90px',
-					width: '100%',
-					backgroundColor: 'black',
-				}}
-			/>
-		);
-	},
-});
-
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
 	siteId: Config.MATOMO_SITE_ID || 2,
@@ -304,13 +288,18 @@ const App = () => {
 						clone.available_at = []; // if there's nothing at all, set as empty array
 					}
 					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
-						cloneRoutes.push(
+						cloneRoutes.push((location) => (
 							<PrivateTrackedRoute
 								key={`${clone.url}-admin-lite`}
 								path={`/${clone.url}/admin`}
 								render={(props) => (
 									<GamechangerProvider>
-										<GamechangerLiteAdminPage {...props} cloneData={clone} jupiter={false} />
+										<GamechangerLiteAdminPage
+											{...props}
+											cloneData={clone}
+											jupiter={false}
+											location={location}
+										/>
 									</GamechangerProvider>
 								)}
 								pageName={clone.display_name}
@@ -318,9 +307,9 @@ const App = () => {
 									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
 								}}
 							/>
-						);
+						));
 						if (clone.permissions_required) {
-							cloneRoutes.push(
+							cloneRoutes.push((location) => (
 								<PrivateTrackedRoute
 									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
@@ -336,6 +325,7 @@ const App = () => {
 												history={history}
 												isClone={true}
 												cloneData={clone}
+												location={location}
 											/>
 										</GamechangerProvider>
 									)}
@@ -347,13 +337,13 @@ const App = () => {
 										);
 									}}
 								/>
-							);
+							));
 						} else {
 							// if clone name is jbook, then push jbook route + cloneData
 							if (clone.clone_name === 'jbook') {
-								cloneRoutes.push(getJBookProfileRoute(clone));
+								cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
 							}
-							cloneRoutes.push(
+							cloneRoutes.push((location) => (
 								<PrivateTrackedRoute
 									key={`${clone.url}-main`}
 									path={`/${clone.url}`}
@@ -369,6 +359,7 @@ const App = () => {
 												history={history}
 												isClone={true}
 												cloneData={clone}
+												location={location}
 											/>
 										</GamechangerProvider>
 									)}
@@ -377,7 +368,7 @@ const App = () => {
 										return true;
 									}}
 								/>
-							);
+							));
 						}
 					}
 				}
@@ -389,7 +380,7 @@ const App = () => {
 		}
 	};
 
-	const getJBookProfileRoute = (cloneData) => {
+	const getJBookProfileRoute = (cloneData, location) => {
 		const JBookProvider = getProvider('jbook');
 
 		return (
@@ -398,7 +389,7 @@ const App = () => {
 				path={`/jbook/profile`}
 				render={(props) => (
 					<JBookProvider>
-						<JBookProfilePage {...props} cloneData={cloneData} />
+						<JBookProfilePage {...props} cloneData={cloneData} location={location} />
 					</JBookProvider>
 				)}
 				pageName={'JBookProfilePage'}
@@ -467,10 +458,6 @@ const App = () => {
 		}
 	}
 
-	const setUserMatomo = (value) => {
-		localStorage.setItem('userMatomo', value);
-	};
-
 	return (
 		<Router>
 			<MatomoProvider value={instance}>
@@ -490,10 +477,7 @@ const App = () => {
 												<SlideOutMenu match={match} location={location} history={history} />
 											)}
 											<Switch>
-												{tokenLoaded &&
-													gameChangerCloneRoutes.map((route) => {
-														return route;
-													})}
+												{tokenLoaded && gameChangerCloneRoutes.map((route) => route(location))}
 												<Route
 													exact
 													path="/"
@@ -518,6 +502,7 @@ const App = () => {
 															true
 														);
 													}}
+													location={location}
 												/>
 												<PrivateTrackedRoute
 													key={`gamechanger-es`}
@@ -527,6 +512,7 @@ const App = () => {
 													allowFunction={() => {
 														return true;
 													}}
+													location={location}
 												/>
 												<TrackedPDFView
 													path="/pdfviewer/gamechanger"
@@ -544,7 +530,6 @@ const App = () => {
 										</ErrorBoundary>
 									</>
 								</SlideOutMenuContextHandler>
-								<GCFooter setUserMatomo={setUserMatomo} location={location} />
 							</div>
 						)}
 					/>

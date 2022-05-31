@@ -6,7 +6,7 @@ import {
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
-import { checkUserInfo, createTinyUrl, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -24,13 +24,8 @@ const GlobalSearchHandler = {
 			tabName,
 			cloneData,
 			showTutorial,
+			selectedCategories,
 		} = state;
-
-		if (userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
 
 		let favSearchUrls = [];
 		if (userData.favorite_searches) {
@@ -53,7 +48,6 @@ const GlobalSearchHandler = {
 			isDataTracker: false,
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();
@@ -80,6 +74,7 @@ const GlobalSearchHandler = {
 			dashboardsSearchResults: [],
 			dataSourcesSearchResults: [],
 			databasesSearchResults: [],
+			modelsSearchResults: [],
 			searchResultsCount: 0,
 			count: 0,
 			resultsDownloadURL: '',
@@ -92,15 +87,17 @@ const GlobalSearchHandler = {
 			runningEntitySearch: true,
 			runningTopicSearch: true,
 			hideTabs: true,
-			applicationsLoading: true,
-			dashboardsLoading: true,
-			dataSourcesLoading: true,
-			databasesLoading: true,
+			applicationsLoading: selectedCategories.Applications,
+			dashboardsLoading: selectedCategories.Dashboards,
+			dataSourcesLoading: selectedCategories.DataSources,
+			databasesLoading: selectedCategories.Databases,
+			modelsLoading: selectedCategories.Models,
 			categoryMetadata: {},
 			applicationsTotalCount: 0,
 			dashboardsTotalCount: 0,
 			dataSourcesTotalCount: 0,
 			databasesTotalCount: 0,
+			modelsTotalCount: 0,
 		});
 
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
@@ -113,140 +110,184 @@ const GlobalSearchHandler = {
 
 		try {
 			// Make the global search calls
-			try {
-				gameChangerAPI
-					.modularSearch({
-						cloneName: cloneData.clone_name,
-						searchText: searchText,
-						offset,
-						options: {
-							charsPadding,
-							showTutorial,
-							useGCCache,
-							tiny_url,
-							category: 'applications',
-						},
-					})
-					.then((data) => {
-						setState(dispatch, {
-							applicationsSearchResults: data.data.applications.hits.map((hit) => ({
-								...hit,
-								type: 'application',
-							})),
-							applicationsTotalCount: data.data.applications.totalCount,
-							applicationsLoading: false,
+			if (selectedCategories.Applications) {
+				try {
+					gameChangerAPI
+						.modularSearch({
+							cloneName: cloneData.clone_name,
+							searchText: searchText,
+							offset,
+							options: {
+								charsPadding,
+								showTutorial,
+								useGCCache,
+								tiny_url,
+								category: 'applications',
+							},
+						})
+						.then((data) => {
+							setState(dispatch, {
+								applicationsSearchResults: data.data.applications.hits.map((hit) => ({
+									...hit,
+									type: 'application',
+								})),
+								applicationsTotalCount: data.data.applications.totalCount,
+								applicationsLoading: false,
+							});
+						})
+						.catch(() => {
+							setState(dispatch, {
+								applicationsTotalCount: 0,
+								applicationsLoading: false,
+							});
 						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							applicationsTotalCount: 0,
-							applicationsLoading: false,
-						});
-					});
-			} catch (err) {
-				console.error(err);
+				} catch (err) {
+					console.error(err);
+				}
 			}
 
-			try {
-				gameChangerAPI
-					.modularSearch({
-						cloneName: cloneData.clone_name,
-						searchText: searchText,
-						offset,
-						options: {
-							charsPadding,
-							showTutorial,
-							useGCCache,
-							tiny_url,
-							category: 'dashboards',
-						},
-					})
-					.then((data) => {
-						setState(dispatch, {
-							dashboardsSearchResults: data.data.dashboards.hits.map((hit) => ({
-								...hit,
-								type: 'dashboard',
-							})),
-							dashboardsTotalCount: data.data.dashboards.totalCount,
-							dashboardsLoading: false,
+			if (selectedCategories.Dashboards) {
+				try {
+					gameChangerAPI
+						.modularSearch({
+							cloneName: cloneData.clone_name,
+							searchText: searchText,
+							offset,
+							options: {
+								charsPadding,
+								showTutorial,
+								useGCCache,
+								tiny_url,
+								category: 'dashboards',
+							},
+						})
+						.then((data) => {
+							setState(dispatch, {
+								dashboardsSearchResults: data.data.dashboards.hits.map((hit) => ({
+									...hit,
+									type: 'dashboard',
+								})),
+								dashboardsTotalCount: data.data.dashboards.totalCount,
+								dashboardsLoading: false,
+							});
+						})
+						.catch(() => {
+							setState(dispatch, {
+								dashboardsTotalCount: 0,
+								dashboardsLoading: false,
+							});
 						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							dashboardsTotalCount: 0,
-							dashboardsLoading: false,
-						});
-					});
-			} catch (err) {
-				console.error(err);
+				} catch (err) {
+					console.error(err);
+				}
 			}
 
-			try {
-				gameChangerAPI
-					.modularSearch({
-						cloneName: cloneData.clone_name,
-						searchText: searchText,
-						offset,
-						options: {
-							charsPadding,
-							showTutorial,
-							useGCCache,
-							tiny_url,
-							category: 'dataSources',
-						},
-					})
-					.then((data) => {
-						setState(dispatch, {
-							dataSourcesSearchResults: data.data.dataSources.results.map((hit) => ({
-								...hit,
-								type: 'dataSource',
-							})),
-							dataSourcesTotalCount: data.data.dataSources.total,
-							dataSourcesLoading: false,
+			if (selectedCategories.DataSources) {
+				try {
+					gameChangerAPI
+						.modularSearch({
+							cloneName: cloneData.clone_name,
+							searchText: searchText,
+							offset,
+							options: {
+								charsPadding,
+								showTutorial,
+								useGCCache,
+								tiny_url,
+								category: 'dataSources',
+							},
+						})
+						.then((data) => {
+							setState(dispatch, {
+								dataSourcesSearchResults: data.data.dataSources.results.map((hit) => ({
+									...hit,
+									type: 'dataSource',
+								})),
+								dataSourcesTotalCount: data.data.dataSources.total,
+								dataSourcesLoading: false,
+							});
+						})
+						.catch(() => {
+							setState(dispatch, {
+								dataSourcesTotalCount: 0,
+								dataSourcesLoading: false,
+							});
 						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							dataSourcesTotalCount: 0,
-							dataSourcesLoading: false,
-						});
-					});
-			} catch (err) {
-				console.error(err);
+				} catch (err) {
+					console.error(err);
+				}
 			}
 
-			try {
-				gameChangerAPI
-					.modularSearch({
-						cloneName: cloneData.clone_name,
-						searchText: searchText,
-						offset,
-						options: {
-							charsPadding,
-							showTutorial,
-							useGCCache,
-							tiny_url,
-							category: 'databases',
-						},
-					})
-					.then((data) => {
-						setState(dispatch, {
-							databasesSearchResults: data.data.databases.results.map((hit) => ({
-								...hit,
-								type: 'database',
-							})),
-							databasesTotalCount: data.data.databases.total,
-							databasesLoading: false,
+			if (selectedCategories.Databases) {
+				try {
+					gameChangerAPI
+						.modularSearch({
+							cloneName: cloneData.clone_name,
+							searchText: searchText,
+							offset,
+							options: {
+								charsPadding,
+								showTutorial,
+								useGCCache,
+								tiny_url,
+								category: 'databases',
+							},
+						})
+						.then((data) => {
+							setState(dispatch, {
+								databasesSearchResults: data.data.databases.results.map((hit) => ({
+									...hit,
+									type: 'database',
+								})),
+								databasesTotalCount: data.data.databases.total,
+								databasesLoading: false,
+							});
+						})
+						.catch(() => {
+							setState(dispatch, {
+								databasesTotalCount: 0,
+								databasesLoading: false,
+							});
 						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							databasesTotalCount: 0,
-							databasesLoading: false,
+				} catch (err) {
+					console.error(err);
+				}
+			}
+
+			if (selectedCategories.Models) {
+				try {
+					gameChangerAPI
+						.modularSearch({
+							cloneName: cloneData.clone_name,
+							searchText: searchText,
+							offset,
+							options: {
+								charsPadding,
+								showTutorial,
+								useGCCache,
+								tiny_url,
+								category: 'models',
+							},
+						})
+						.then((data) => {
+							setState(dispatch, {
+								modelsSearchResults: data.data.models.results.map((hit) => ({
+									...hit,
+									type: 'models',
+								})),
+								modelsTotalCount: data.data.models.total,
+								modelsLoading: false,
+							});
+						})
+						.catch(() => {
+							setState(dispatch, {
+								modelsTotalCount: 0,
+								modelsLoading: false,
+							});
 						});
-					});
-			} catch (err) {
-				console.error(err);
+				} catch (err) {
+					console.error(err);
+				}
 			}
 
 			this.setSearchURL({
@@ -408,6 +449,41 @@ const GlobalSearchHandler = {
 				}),
 				databasesLoading: false,
 				databasesPagination: false,
+			});
+		}
+	},
+
+	async handleModelsPagination(state, dispatch) {
+		const { searchText = '', dataSourcesPage, listView, showTutorial, cloneData } = state;
+
+		const offset = (dataSourcesPage - 1) * RESULTS_PER_PAGE;
+		const charsPadding = listView ? 750 : 90;
+		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
+		const limit = 18;
+		const tiny_url = await createTinyUrl(cloneData);
+
+		const resp = await gameChangerAPI.modularSearch({
+			cloneName: cloneData.clone_name,
+			searchText: searchText,
+			offset,
+			options: {
+				charsPadding,
+				showTutorial,
+				useGCCache,
+				tiny_url,
+				category: 'models',
+				limit,
+			},
+		});
+
+		if (resp.data) {
+			setState(dispatch, {
+				modelsSearchResults: resp.data.models.results.map((result) => {
+					result.type = 'models';
+					return result;
+				}),
+				modelsLoading: false,
+				modelsPagination: false,
 			});
 		}
 	},

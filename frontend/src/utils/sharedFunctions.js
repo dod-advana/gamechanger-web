@@ -233,31 +233,6 @@ export const getSearchObjectFromString = (searchString = '') => {
 	}
 };
 
-// return true if they need to fill out the form
-// open the form
-// DECOUPLED ONLY
-export const checkUserInfo = (state, dispatch) => {
-	const { userData } = state;
-	const userMatomoStatus = JSON.parse(localStorage.getItem('userMatomo'));
-	const infoPassed = JSON.parse(localStorage.getItem('userInfoPassed'));
-	const userFeedbackMode = JSON.parse(localStorage.getItem('userFeedbackMode'));
-	let didPass = false;
-	if (infoPassed && new Date(infoPassed.expires) > new Date()) {
-		didPass = infoPassed.passed;
-	}
-	try {
-		if (isDecoupled && !userData?.submitted_info && userMatomoStatus && !didPass && userFeedbackMode) {
-			// show pop up
-			setState(dispatch, { userInfoModalOpen: true });
-			console.log('Decoupled user needs to fill out form');
-			return true;
-		}
-	} catch (err) {
-		console.log(err);
-	}
-	return false;
-};
-
 export const setCurrentTime = (dispatch) => {
 	// const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -286,7 +261,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					minHeight: 'calc(100vh - 200px)',
 				}}
 			>
-				{state.pageDisplayed !== 'aboutUs' && (
+				{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 					<div
 						style={{
 							borderTop: '1px solid #B0BAC5',
@@ -297,7 +272,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					/>
 				)}
 				<React.Fragment>
-					{state.pageDisplayed !== 'aboutUs' && (
+					{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 						<Button
 							style={{
 								marginLeft: '10px',
@@ -362,7 +337,8 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 							backgroundColor:
 								state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
 								state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-								state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+								state.pageDisplayed === PAGE_DISPLAYED.aboutUs ||
+								state.pageDisplayed === PAGE_DISPLAYED.faq
 									? '#ffffff'
 									: '#DFE6EE',
 						}}
@@ -373,4 +349,8 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 			</div>
 		</div>
 	);
+};
+
+export const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
 };

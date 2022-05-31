@@ -10,7 +10,7 @@ import GCAnalystToolsSideBar from './GCAnalystToolsSideBar';
 import { setState } from '../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../common/gc-colors';
-import { handlePdfOnLoad, convertDCTScoreToText } from '../../utils/gamechangerUtils';
+import { handlePdfOnLoad } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import ExportIcon from '../../images/icon/Export.svg';
@@ -610,9 +610,9 @@ const GCDocumentsComparisonTool = ({
 																						paragraph.page_num_i + 1
 																				  }, Par: ${
 																						paragraph.id.split('_')[1]
-																				  }, Similarity Score: ${convertDCTScoreToText(
-																						paragraph.score
-																				  )}`
+																				  }, Similarity Score: ${
+																						paragraph.score_display
+																				  }`
 																				: paragraph.par_raw_text_t}
 																		</span>
 																	</div>
@@ -805,13 +805,7 @@ const GCDocumentsComparisonTool = ({
 																			}}
 																		>
 																			{isHighlighted
-																				? `Page: ${
-																						paragraph.pageNumber
-																				  }, Par: ${
-																						paragraph.id
-																				  }, Similarity Score: ${convertDCTScoreToText(
-																						paragraph.score
-																				  )}`
+																				? `Page: ${paragraph.pageNumber}, Par: ${paragraph.id}, Similarity Score: ${paragraph.score_display}`
 																				: paragraph.text}
 																		</span>
 																	</div>

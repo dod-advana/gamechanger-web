@@ -7,9 +7,12 @@ const Sequelize = require('sequelize');
 const abbreviations = require('./abbcounts.json');
 const constants = require('../config/constants');
 const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
+const { getCollibraUrl, getAuthConfig } = require('../utils/DataCatalogUtils');
+const axios = require('axios');
 
 const CACHE_RELOAD_KEY = 'gcCacheReloadingStatus';
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
+const CACHE_COLLIBRA_RELOAD_KEY = 'collibraCacheReloadingStatus';
 const ABB_RELOAD_KEY = 'gcAbbreviationsReloadingStatus';
 const ABB_ACTIVE_STATUS_KEY = 'gcAbbreviationsStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
@@ -68,7 +71,8 @@ class CacheController {
 		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
 		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
 		this.setStartupQlikFullAppCacheKeys = this.setStartupQlikFullAppCacheKeys.bind(this);
-		this.cacheQlikAppFullList = this.cacheQlikAppFullList.bind(this);
+		this.cacheCollibraData = this.cacheCollibraData.bind(this);
+		this.setStartupCollibraCacheKeys = this.setStartupCollibraCacheKeys.bind(this);
 	}
 
 	async setStartupSearchHistoryCacheKeys() {
@@ -77,6 +81,10 @@ class CacheController {
 
 	async setStartupQlikFullAppCacheKeys() {
 		this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+	}
+
+	async setStartupCollibraCacheKeys() {
+		this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 	}
 
 	async createSearchHistoryCache(req, res) {
@@ -554,43 +562,72 @@ class CacheController {
 		}
 	}
 
-	async cacheQlikAppFullList() {
+	async cacheCollibraData() {
 		try {
-			await this.redisAsyncClient.select(constants.REDIS_CONFIG.QLIK_APPS_CACHE_DB);
-			const isReloading = await this.redisAsyncClient.get(CACHE_QLIK_RELOAD_KEY);
-			if (isReloading === CACHE_GRAPH_IS_RELOADING) {
-				throw new Error('Will not create graph data cache - cache is already reloading');
+			await this.redisAsyncClient.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			const isReloading = await this.redisAsyncClient.get(CACHE_COLLIBRA_RELOAD_KEY);
+			if (isReloading === CACHE_IS_RELOADING) {
+				throw new Error('Will not create collibra data cache - cache is already reloading');
 			}
-			this.logger.info('START qlik full app cache');
+			this.logger.info('START collibra cache');
 
-			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_RELOADING);
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_RELOADING);
 
-			let redisAppResults = await this.redisAsyncClient.get('qlik-full-app-list');
-			let respData;
+			let url;
+			let data;
+			const assetTypes = {};
+			const queryableStatuses = [];
+			const attributeTypes = {};
 
-			if (!redisAppResults) {
-				respData = await getQlikApps(undefined, undefined, this.logger, false, true);
-				respData = JSON.stringify(respData.data);
-				await this.redisAsyncClient.set('qlik-full-app-list', respData);
-			} else {
-				let countResp = await getQlikApps(undefined, undefined, this.logger, true, false);
-				countResp = countResp.data['value'];
-
-				respData = JSON.parse(redisAppResults);
-
-				if (respData.length < countResp) {
-					console.log('DIF RESULTS');
-					respData = await getQlikApps(undefined, undefined, this.logger, false, true);
-					respData = JSON.stringify(respData.data);
-					await this.redisAsyncClient.set('qlik-full-app-list', respData);
+			try {
+				url =
+					getCollibraUrl() +
+					'/assetTypes?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((assetType) => {
+						assetTypes[assetType['name']] = assetType['id'];
+					});
 				}
+
+				url =
+					getCollibraUrl() +
+					'/statuses?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((status) => {
+						queryableStatuses.push(status.id);
+					});
+				}
+
+				url =
+					getCollibraUrl() +
+					'/attributeTypes?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((atrributeType) => {
+						attributeTypes[atrributeType['id']] = atrributeType['name'];
+					});
+				}
+			} catch (error) {
+				console.log(error);
 			}
 
-			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
-			this.logger.info('FINISHED qlik full app cache');
+			// Store in redis
+			await this.redisAsyncClient.set(
+				'dataCatalogSettings',
+				JSON.stringify({
+					assetTypes,
+					queryableStatuses,
+					attributeTypes,
+				})
+			);
+
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+			this.logger.info('FINISHED collibra cache');
 		} catch (e) {
-			this.logger.error(e, '6GE345P', 'Qlik Cache Function');
-			await this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
+			this.logger.error(e, '4N98V3A', 'Collibra Cache Function');
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 		}
 	}
 }

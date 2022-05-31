@@ -1,5 +1,7 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { GC_COLORS } from './jbookMainViewHandler';
 import SimpleTable from '../../common/SimpleTable';
 
 import _ from 'lodash';
@@ -70,7 +72,7 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => {
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
 	const endsInY = displayName[displayName.length - 1] === 'y';
 	const endsInS = displayName[displayName.length - 1] === 's';
 
@@ -82,7 +84,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 		endsInY ? 'ies' : endsInS ? 'es' : 's'
 	}`;
 	const specificSelected = `${type}SpecificSelected`;
-	const options = state.defaultOptions[type];
+
+	let optionType = useES ? type + 'ES' : type;
+	const options = state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -132,6 +136,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName) => 
 					</FormGroup>
 					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{state.jbookSearchSettings[specificSelected] &&
+							options &&
 							options.map((option) => {
 								return (
 									<FormControlLabel
@@ -225,10 +230,10 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={state.jbookSearchSettings.budgetTypeSpecificSelected}
-					header={<b>BUDGET TYPE</b>}
+					header={'BUDGET TYPE'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
-					headerTextWeight={'normal'}
+					headerTextWeight={'bold'}
 				>
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
@@ -242,7 +247,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
 				</GCAccordion>
 			</div>
 
@@ -296,7 +301,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
 				</GCAccordion>
 			</div>
 
@@ -428,7 +433,11 @@ const getSearchMatrixItems = (props) => {
 				headerTextColor={'white'}
 				headerTextWeight={'normal'}
 			>
-				{state.statsLoading && <div style={{ margin: '0 auto' }}>loading</div>}
+				{state.statsLoading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={GC_COLORS.primary} />
+					</div>
+				)}
 				{!state.statsLoading && (
 					<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 				)}
