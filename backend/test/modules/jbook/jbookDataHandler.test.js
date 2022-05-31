@@ -73,6 +73,9 @@ describe('JBookDataHandler', function () {
 				findAll() {
 					return Promise.resolve([{ dataValues: review }]);
 				},
+				create() {
+					return Promise.resolve({});
+				},
 			},
 			reviewer: {
 				findOne() {
@@ -92,6 +95,9 @@ describe('JBookDataHandler', function () {
 			dataLibrary: {
 				queryElasticSearch(name, index, query, userId) {
 					return Promise.resolve(esReturn);
+				},
+				updateDocument(clientName, index, updatedDoc, docId, userId) {
+					return Promise.resolve(true);
 				},
 			},
 			jbook_classification: {
@@ -120,6 +126,7 @@ describe('JBookDataHandler', function () {
 					useElasticSearch: true,
 					type: 'Procurement',
 					id: 'pdoc#000075#2022#3010#07#Air%20Force%20(AF)',
+					portfolioName: 'AI Inventory',
 				},
 			};
 
@@ -127,7 +134,7 @@ describe('JBookDataHandler', function () {
 
 			const expected = {
 				budgetType: 'pdoc',
-				key_s: 'pdoc#2022#PB#07#000075#57#N/A#3010',
+				id: 'pdoc#2022#PB#07#000075#57#N/A#3010',
 				currentYearAmount: '979.388',
 				priorYearAmount: '1372.337',
 				'P40-77_TOA_PY': '1173.314',
@@ -150,7 +157,7 @@ describe('JBookDataHandler', function () {
 				'P40-13_BSA_Title': 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
-				id: 'pdoc#000075#2022#3010#07#Air Force (AF)',
+				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
 				p40a_aggregated_items_n: [
 					{ 'P40a-16_Title_t': 'F-22A' },
 					{ 'P40a-16_Title_t': 'F-15E Squadrons' },
@@ -174,10 +181,12 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
+				classification: {},
 				reviews: {
-					General: {
+					'AI Inventory': {
+						portfolioName: 'AI Inventory',
 						id: 233170,
-						revBudgetLineItems: '000073',
+						budgetLineItem: '000073',
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: 'Not AI',
 						primaryPlannedTransitionPartner: 'Air Force',
@@ -204,17 +213,15 @@ describe('JBookDataHandler', function () {
 						pocClassLabel: 'Not AI',
 						pocPTPAgreeLabel: 'Yes',
 						pocMPAgreeLabel: 'Yes',
-						pocMissionPartnersChecklist: '{}',
-						serviceMissionPartnersChecklist: '{}',
+						poc_mp_checklist_S: '{}',
+						service_mp_checklist_S: '{}',
 						appropriationNumber: '3010F',
 						serviceAgency: 'Air Force (AF)',
-						totalBudget: 0,
 						primaryReviewerEmail: null,
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
-				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -229,6 +236,7 @@ describe('JBookDataHandler', function () {
 					useElasticSearch: true,
 					type: 'RDT&E',
 					id: 'rdoc#0101122F#674797#2022#3600#07#Air%20Force%20(AF)',
+					portfolioName: 'TesAI Inventoryt',
 				},
 			};
 
@@ -236,7 +244,7 @@ describe('JBookDataHandler', function () {
 
 			const expected = {
 				budgetType: 'pdoc',
-				key_s: 'pdoc#2022#PB#07#000075#57#N/A#3010',
+				id: 'pdoc#2022#PB#07#000075#57#N/A#3010',
 				currentYearAmount: '979.388',
 				priorYearAmount: '1372.337',
 				'P40-77_TOA_PY': '1173.314',
@@ -259,7 +267,7 @@ describe('JBookDataHandler', function () {
 				'P40-13_BSA_Title': 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
-				id: 'pdoc#000075#2022#3010#07#Air Force (AF)',
+				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
 				p40a_aggregated_items_n: [
 					{ 'P40a-16_Title_t': 'F-22A' },
 					{ 'P40a-16_Title_t': 'F-15E Squadrons' },
@@ -283,44 +291,53 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
+				classification: {},
 				reviews: {
-					General: {
-						id: 239868,
-						revProgramElement: '0101122F',
-						revBudgetLineItems: '674797',
-						serviceAgreeLabel: 'No',
-						primaryClassLabel: 'Core AI',
-						primaryPlannedTransitionPartner: 'Army',
+					'AI Inventory': {
+						portfolioName: 'AI Inventory',
+						id: 233170,
+						budgetLineItem: '000073',
+						serviceAgreeLabel: 'Yes',
+						primaryClassLabel: 'Not AI',
+						primaryPlannedTransitionPartner: 'Air Force',
 						servicePTPAgreeLabel: 'Yes',
-						reviewStatus: 'Partial Review (Service)',
-						servicePOCTitle: 'John',
-						servicePOCName: 'Doe',
-						servicePOCEmail: 'jdoe@yahoo.com',
+						serviceAdditionalMissionPartners: 'Unknown',
+						reviewStatus: 'Partial Review (POC)',
+						servicePOCTitle: 'Superwoman',
+						servicePOCName: 'Elizabeth',
+						servicePOCEmail: 'hedrick_elizabeth@bah.com',
+						primaryReviewNotes: 'Test Automation Primary Reviewer Notes',
 						budgetYear: '2022',
-						budgetType: 'rdoc',
+						budgetType: 'pdoc',
 						primaryReviewStatus: 'Finished Review',
 						serviceReviewStatus: 'Partial Review',
+						pocReviewStatus: 'Partial Review',
 						primaryReviewer: 'Allen, Gregory',
 						serviceReviewer: 'Chapa, Joseph (Air Force)',
-						pocDollarsAttributed: '0.54',
-						servicePOCOrg: 'TIAA',
-						servicePOCPhoneNumber: '8888675309',
-						serviceClassLabel: 'AI Enabled',
-						createdAt: '2021-11-10T13:59:28.506Z',
-						updatedAt: '2021-12-22T15:45:08.507Z',
+						servicePOCOrg: 'Advana',
+						servicePOCPhoneNumber: '867-5309',
+						createdAt: '2021-11-10T13:59:27.983Z',
+						updatedAt: '2022-03-08T03:33:44.950Z',
 						budgetActivityNumber: '07',
-						pocAgreeLabel: 'Yes',
+						pocAgreeLabel: 'No',
+						pocClassLabel: 'Not AI',
 						pocPTPAgreeLabel: 'Yes',
 						pocMPAgreeLabel: 'Yes',
-						appropriationNumber: '3600',
+						poc_mp_checklist_S: '{}',
+						service_mp_checklist_S: '{}',
+						appropriationNumber: '3010F',
 						serviceAgency: 'Air Force (AF)',
-						totalBudget: 0,
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
+					'TesAI Inventoryt': {
+						portfolioName: 'TesAI Inventoryt',
 						primaryReviewerEmail: null,
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
-				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -335,6 +352,7 @@ describe('JBookDataHandler', function () {
 					useElasticSearch: true,
 					type: 'O&M',
 					id: 'odoc#120#132#2022#2020A#01Army',
+					portfolioName: 'AI Inventory',
 				},
 			};
 
@@ -342,7 +360,7 @@ describe('JBookDataHandler', function () {
 
 			const expected = {
 				budgetType: 'pdoc',
-				key_s: 'pdoc#2022#PB#07#000075#57#N/A#3010',
+				id: 'pdoc#2022#PB#07#000075#57#N/A#3010',
 				currentYearAmount: '979.388',
 				priorYearAmount: '1372.337',
 				'P40-77_TOA_PY': '1173.314',
@@ -365,7 +383,7 @@ describe('JBookDataHandler', function () {
 				'P40-13_BSA_Title': 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
-				id: 'pdoc#000075#2022#3010#07#Air Force (AF)',
+				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
 				p40a_aggregated_items_n: [
 					{ 'P40a-16_Title_t': 'F-22A' },
 					{ 'P40a-16_Title_t': 'F-15E Squadrons' },
@@ -389,33 +407,47 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
+				classification: {},
 				reviews: {
-					General: {
-						id: 259162,
-						revProgramElement: '011A',
-						revBudgetLineItems: '010',
-						primaryClassLabel: 'Unknown',
-						primaryPlannedTransitionPartner: 'Unknown',
+					'AI Inventory': {
+						portfolioName: 'AI Inventory',
+						id: 233170,
+						budgetLineItem: '000073',
+						serviceAgreeLabel: 'Yes',
+						primaryClassLabel: 'Not AI',
+						primaryPlannedTransitionPartner: 'Air Force',
+						servicePTPAgreeLabel: 'Yes',
 						serviceAdditionalMissionPartners: 'Unknown',
-						reviewStatus: 'Partial Review (Service)',
+						reviewStatus: 'Partial Review (POC)',
+						servicePOCTitle: 'Superwoman',
+						servicePOCName: 'Elizabeth',
+						servicePOCEmail: 'hedrick_elizabeth@bah.com',
+						primaryReviewNotes: 'Test Automation Primary Reviewer Notes',
 						budgetYear: '2022',
-						budgetType: 'odoc',
+						budgetType: 'pdoc',
 						primaryReviewStatus: 'Finished Review',
 						serviceReviewStatus: 'Partial Review',
-						primaryReviewer: 'Srinivasan, Sridhar',
+						pocReviewStatus: 'Partial Review',
+						primaryReviewer: 'Allen, Gregory',
 						serviceReviewer: 'Chapa, Joseph (Air Force)',
-						createdAt: '2021-11-10T13:59:29.065Z',
-						updatedAt: '2021-11-10T13:59:29.065Z',
-						budgetActivityNumber: '01',
-						appropriationNumber: '3400F',
+						servicePOCOrg: 'Advana',
+						servicePOCPhoneNumber: '867-5309',
+						createdAt: '2021-11-10T13:59:27.983Z',
+						updatedAt: '2022-03-08T03:33:44.950Z',
+						budgetActivityNumber: '07',
+						pocAgreeLabel: 'No',
+						pocClassLabel: 'Not AI',
+						pocPTPAgreeLabel: 'Yes',
+						pocMPAgreeLabel: 'Yes',
+						poc_mp_checklist_S: '{}',
+						service_mp_checklist_S: '{}',
+						appropriationNumber: '3010F',
 						serviceAgency: 'Air Force (AF)',
-						totalBudget: 0,
 						primaryReviewerEmail: null,
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
-				classification: {},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
