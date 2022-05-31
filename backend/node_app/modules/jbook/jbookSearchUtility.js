@@ -30,20 +30,25 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
-		const newData = {};
-		const mapping = this.getMapping(docType, fromFrontend);
+	parseFields(data, fromFrontend, docType, doMapping = true) {
+		try {
+			const newData = {};
+			const mapping = this.getMapping(docType, fromFrontend);
 
-		for (const field in data) {
-			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
-				const newKey = mapping[field].newName;
-				newData[newKey] = mapping[field].processValue(data[field]);
-			} else if (data[field] && data[field] !== null) {
-				newData[field] = data[field];
+			for (const field in data) {
+				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
+					const newKey = mapping[field].newName;
+					newData[newKey] = mapping[field].processValue(data[field]);
+				} else if (data[field] && data[field] !== null) {
+					newData[field] = data[field];
+				}
 			}
+			return newData;
+		} catch (e) {
+			console.log('Error parsing jbook fields');
+			this.logger.error(e.message, 'IEPGRA00');
+			throw e;
 		}
-
-		return newData;
 	}
 
 	// map just the name of a field between frontend/db
@@ -211,10 +216,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQuery() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(
 			', '
 		)}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
@@ -229,10 +230,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQueryForFullPDF() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(
 			', '
 		)}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
@@ -1107,7 +1104,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1319,7 +1316,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},

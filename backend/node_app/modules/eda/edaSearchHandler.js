@@ -134,7 +134,13 @@ class EdaSearchHandler extends SearchHandler {
 
 	async documentSearch(req, body, clientObj, userId) {
 		try {
-			const permissions = req.permissions ? req.permissions : [];
+			let permissions = req.permissions
+				? typeof req.permissions === 'string'
+					? [req.permissions]
+					: req.permissions
+				: [];
+			permissions = permissions.map((permission) => permission.toLowerCase());
+
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, forStats = false } = body;
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
@@ -142,7 +148,11 @@ class EdaSearchHandler extends SearchHandler {
 
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+			if (
+				permissions.includes('view eda') ||
+				permissions.includes('eda admin') ||
+				permissions.includes('view gamechanger')
+			) {
 				const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
@@ -197,13 +207,13 @@ class EdaSearchHandler extends SearchHandler {
 	async queryContractMods(req, userId) {
 		try {
 			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
-			const permissions = req.permissions ? req.permissions : [];
+			const permissions = req.permissions ? req.permissions.map((permission) => permission.toLowerCase()) : [];
 			const { esClientName, esIndex } = clientObj;
 			const { awardID, isSearch } = req.body;
 			const { id, idv } = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
 			} else {
 				throw 'Unauthorized';
@@ -264,14 +274,14 @@ class EdaSearchHandler extends SearchHandler {
 	async queryBaseAwardContract(req, userId) {
 		try {
 			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
-			const permissions = req.permissions ? req.permissions : [];
+			const permissions = req.permissions ? req.permissions.map((permission) => permission.toLowerCase()) : [];
 			const { esClientName, esIndex } = clientObj;
 			const { awardID } = req.body;
 
 			const { id, idv } = this.edaSearchUtility.splitAwardID(awardID);
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
 				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
 			} else {
 				throw 'Unauthorized';
@@ -312,13 +322,13 @@ class EdaSearchHandler extends SearchHandler {
 	async querySimilarDocs(req, userId) {
 		try {
 			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
-			const permissions = req.permissions ? req.permissions : [];
+			const permissions = req.permissions ? req.permissions.map((permission) => permission.toLowerCase()) : [];
 			const { esClientName, esIndex } = clientObj;
 			const { body } = req;
 			const { issueOfficeDoDAAC, issueOfficeName } = body;
 
 			let esQuery = '';
-			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
 				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(
 					{ ...body, limit: 5, edaSearchSettings: { issueOfficeDoDAAC, issueOfficeName } },
 					userId
@@ -350,8 +360,9 @@ class EdaSearchHandler extends SearchHandler {
 				return [];
 			}
 		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'T5VRV7K', userId);
+			console.log('Error with query similar docs');
+			console.log(err);
+			this.logger.error(err.message, 'T5VRV7K', userId);
 			throw err;
 		}
 	}
@@ -360,8 +371,8 @@ class EdaSearchHandler extends SearchHandler {
 		const { functionName } = req.body;
 
 		try {
-			const permissions = req.permissions ? req.permissions : [];
-			if (permissions.includes('View EDA') || permissions.includes('eda Admin')) {
+			const permissions = req.permissions ? req.permissions.map((permission) => permission.toLowerCase()) : [];
+			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
 				switch (functionName) {
 					case 'queryContractMods':
 						return await this.queryContractMods(req, userId);
@@ -382,7 +393,6 @@ class EdaSearchHandler extends SearchHandler {
 			console.log(err);
 			const { message } = err;
 			this.logger.error(message, 'V2L9KW5', userId);
-			throw err;
 		}
 	}
 }

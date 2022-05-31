@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
 import GCAccordion from '../../common/GCAccordion';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { GC_COLORS } from './jbookMainViewHandler';
 import SimpleTable from '../../common/SimpleTable';
 
 import _ from 'lodash';
@@ -243,7 +245,7 @@ const getSearchMatrixItems = (props) => {
 					header={<b>PL TITLE</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
-					headerTextWeight={'normal'}
+					headerTextWeight={'bold'}
 				>
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
@@ -490,7 +492,11 @@ const getSearchMatrixItems = (props) => {
 				headerTextColor={'white'}
 				headerTextWeight={'normal'}
 			>
-				{state.statsLoading && <div style={{ margin: '0 auto' }}>loading</div>}
+				{state.statsLoading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={GC_COLORS.primary} />
+					</div>
+				)}
 				{!state.statsLoading && (
 					<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 				)}

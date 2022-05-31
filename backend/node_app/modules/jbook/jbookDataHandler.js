@@ -12,16 +12,17 @@ const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
+const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
-const { Sequelize } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 const DB = require('../../models/index');
-const Op = Sequelize.Op;
 const EmailUtility = require('../../utils/emailUtility');
 const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
+const _ = require('underscore');
 
 const types = {
 	'RDT&E': 'rdoc',
@@ -50,6 +51,7 @@ class JBookDataHandler extends DataHandler {
 			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK_JBOOK,
+			jbook_classification = JBOOK_CLASSIFICATION,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 		} = opts;
@@ -77,6 +79,7 @@ class JBookDataHandler extends DataHandler {
 		this.portfolio = portfolio;
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
+		this.jbook_classification = jbook_classification;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -95,53 +98,9 @@ class JBookDataHandler extends DataHandler {
 		});
 	}
 
-	async getESProjectData(req, userId) {
+	async getPortfolioAndDocument(id, portfolioName, userId) {
 		try {
-			const { id, type } = req.body;
-
-			const keys = id.split('#');
-
-			// pdoc#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
-			// rdoc#${review.program_element}#${review.budget_line_item}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
-			// odoc#${review.budget_line_item}#${review.program_element}#${review.budget_year}#${review.appn_num}#0${review.budget_activity}#${review.agency}
-
-			let budgetYear;
-			const budgetType = keys[0];
-			let budgetCycle;
-			let budgetActivityNumber;
-			let budgetLineItem;
-			let programElement;
-			let serviceAgency;
-			let projectNum;
-			let appropriationNumber;
-
-			switch (budgetType) {
-				case 'pdoc':
-					budgetLineItem = keys[1];
-					budgetYear = keys[2];
-					appropriationNumber = keys[3];
-					budgetActivityNumber = keys[4];
-					serviceAgency = keys[5];
-					break;
-				case 'rdoc':
-					programElement = keys[1];
-					budgetLineItem = keys[2];
-					budgetYear = keys[3];
-					appropriationNumber = keys[4];
-					budgetActivityNumber = keys[5];
-					serviceAgency = keys[6];
-					break;
-				case 'odoc':
-					budgetLineItem = keys[1];
-					programElement = keys[2];
-					budgetYear = keys[3];
-					appropriationNumber = keys[4];
-					budgetActivityNumber = keys[5];
-					serviceAgency = keys[6];
-					break;
-				default:
-					break;
-			}
+			const portfolio = await this.getPortfolio({ body: { name: portfolioName } }, userId);
 
 			// Get ES Data
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
@@ -155,295 +114,264 @@ class JBookDataHandler extends DataHandler {
 			const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			const data = docs[0];
-			if (!data.currentYearAmount) {
+
+			return { doc: data, portfolio };
+		} catch (err) {
+			this.logger.error(err, '8NG85TR', userId);
+			return { doc: {}, portfolio: {} };
+		}
+	}
+
+	async getESProjectData(req, userId) {
+		try {
+			const { id, portfolioName } = req.body;
+
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+
+			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+
+			// classification
+			try {
+				let classification;
+
+				switch (doc.budgetType) {
+					case 'pdoc':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								'P40-01_LI_Number': doc.budgetLineItem,
+								budgetYear: doc.budgetYear,
+								docType: 'pdoc',
+							},
+						});
+						break;
+					case 'rdoc':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								PE_Num: doc.programElement,
+								Proj_Number: doc.projectNum,
+								budgetYear: doc.budgetYear,
+								docType: 'rdoc',
+							},
+						});
+						break;
+					case 'om':
+						classification = await this.jbook_classification.findOne({
+							where: {
+								line_number: doc.budgetLineItem,
+								sag_bli: doc.programElement,
+								budgetYear: doc.budgetYear,
+								docType: 'om',
+							},
+						});
+						break;
+					default:
+						break;
+				}
+
+				// CLASSIFICATION
+				if (classification && classification.dataValues) {
+					try {
+						doc.classification = classification.dataValues;
+					} catch (e) {
+						console.log('Error fetching classification');
+						console.log(e);
+					}
+				}
+			} catch (e) {
+				console.log('error getting classification');
+				console.log(e);
 			}
 
-			data.review = await this.getReviewData(
-				{
-					budgetYear,
-					appropriationNumber,
-					budgetActivityNumber,
-					serviceAgency,
-					budgetLineItem,
-					programElement,
-					projectNum: budgetLineItem,
-				},
-				type,
-				0
-			);
+			// Only return a review for the current portfolio
+			let tmpReview;
 
-			return data;
+			let updateESReview_n = false;
+			if (doc.review_n && Array.isArray(doc.review_n)) {
+				const tmpReview_n = [];
+				doc.review_n.forEach((review) => {
+					if (
+						review['portfolio_name_s'] === portfolioName ||
+						(portfolio && portfolio !== null && review['portfolio_id_s'] === portfolio?.id.toString())
+					) {
+						tmpReview = review;
+					} else {
+						tmpReview_n.push(review);
+					}
+				});
+				doc.review_n = tmpReview_n;
+			} else if (doc.review_n && doc.review_n.constructor === Object) {
+				if (
+					doc.review_n?.portfolio_name_s === portfolioName ||
+					(portfolio && portfolio !== null && doc.review_n?.portfolio_id_s === portfolio?.id.toString())
+				) {
+					tmpReview = doc.review_n;
+					doc.review_n = [];
+				} else {
+					doc.review_n = [doc.review_n];
+				}
+				updateESReview_n = true;
+			} else if (!doc.review_n || doc.review_n === null) {
+				doc.review_n = [];
+				updateESReview_n = true;
+			} else {
+				doc.review_n = [];
+				updateESReview_n = true;
+			}
+
+			if (portfolio && portfolio !== null) {
+				// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
+				if (!tmpReview) {
+					updateESReview_n = true;
+					const tmpData = _.clone(doc);
+					tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
+					const oldReview = await this.getReviewData(tmpData);
+					if (!oldReview) {
+						tmpReview = {
+							budget_line_item: tmpData.budgetLineItem,
+							budget_type: tmpData.budgetType,
+							budget_year: doc.budgetYear,
+							budget_activity: tmpData.budgetActivityNumber,
+							appn_num: tmpData.appropriationNumber,
+							agency: tmpData.agency,
+							portfolio_name: portfolioName,
+							program_element: tmpData.programElement,
+							review_status: 'Needs Review',
+							primary_review_status: 'Needs Review',
+							service_review_status: 'Needs Review',
+							poc_review_status: 'Needs Review',
+						};
+					} else {
+						oldReview.budget_year = doc.budgetYear;
+						oldReview.review_status = 'Needs Review';
+						oldReview.primary_review_status = 'Needs Review';
+						oldReview.service_review_status = 'Needs Review';
+						oldReview.poc_review_status = 'Needs Review';
+						oldReview.portfolio_name = portfolioName;
+						tmpReview = oldReview;
+						delete tmpReview.id;
+						delete tmpReview.primary_reviewer;
+						delete tmpReview.service_reviewer;
+						delete tmpReview.service_secondary_reviewer;
+						delete tmpReview.service_secondary_reviewer;
+						delete tmpReview.service_poc_email;
+						delete tmpReview.service_poc_name;
+						delete tmpReview.service_poc_org;
+						delete tmpReview.service_poc_title;
+						delete tmpReview.service_poc_phone_number;
+						delete tmpReview.alternate_poc_email;
+						delete tmpReview.alternate_poc_name;
+						delete tmpReview.alternate_poc_org;
+						delete tmpReview.alternate_poc_title;
+						delete tmpReview.alternate_poc_phone_number;
+						delete tmpReview.createdAt;
+						delete tmpReview.updatedAt;
+					}
+
+					// Now create the entry in PG
+					const newReview = await this.rev.create(tmpReview);
+					tmpReview = newReview['dataValues'];
+					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
+				} else {
+					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
+				}
+
+				if (!tmpReview.portfolio_name_s) {
+					tmpReview.portfolio_name_s = portfolioName;
+					updateESReview_n = true;
+				}
+
+				doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
+
+				if (updateESReview_n) {
+					const updated = await this.dataLibrary.updateDocument(
+						clientObj.esClientName,
+						clientObj.esIndex,
+						{ review_n: doc.review_n },
+						id,
+						userId
+					);
+					if (!updated) {
+						console.log('ES NOT UPDATED for REVIEW');
+					}
+				}
+			}
+
+			doc.reviews = {};
+			for (let idx in doc.review_n) {
+				const tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
+
+				// If this only has portfolio id look up the portfolio and add the name
+				if (!tmp.portfolioName && tmp.portfolio_id_s) {
+					const tmpPortfolio = await this.getPortfolio(
+						{ body: { id: parseInt(tmp.portfolio_id_s) } },
+						userId
+					);
+					tmp.portfolioName = tmpPortfolio?.name || '';
+				}
+
+				// Get emails if they exist
+				try {
+					// Add reviewer emails for primary secondary and service
+					let primaryReviewer;
+
+					if (tmp.primaryReviewer) {
+						primaryReviewer = await this.reviewer.findOne({
+							where: {
+								type: 'primary',
+								name: tmp.primaryReviewer.trim(),
+							},
+							raw: true,
+						});
+					}
+					tmp.primaryReviewerEmail = primaryReviewer?.email || null;
+
+					let serviceReviewer;
+					if (tmp.serviceReviewer) {
+						serviceReviewer = await this.reviewer.findOne({
+							where: {
+								type: 'service',
+								name: tmp.serviceReviewer ? tmp.serviceReviewer.split('(')[0].trim() : '',
+							},
+							raw: true,
+						});
+					}
+					tmp.serviceReviewerEmail = serviceReviewer?.email || null;
+
+					let secondaryReviewer;
+					const secName = tmp.serviceSecondaryReviewer
+						? tmp.serviceSecondaryReviewer.split('(')[0].trim()
+						: '';
+					if (tmp.serviceSecondaryReviewer) {
+						secondaryReviewer = await this.reviewer.findOne({
+							where: {
+								type: 'secondary',
+								name: secName,
+							},
+							raw: true,
+						});
+					}
+					tmp.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
+				} catch (err) {
+					console.log('Error fetching reviewer emails');
+					console.log(err);
+				}
+				doc.reviews[tmp.portfolioName] = tmp;
+			}
+
+			delete doc.review_n;
+
+			return doc;
 		} catch (err) {
 			this.logger.error(err, '6T0ILGP', userId);
 			return [];
 		}
 	}
 
-	// REMOVE WHEN WE GOOD
-	async getPGProjectData(req, userId) {
-		// projectNum here is also budgetLineItem (from list view)
-		try {
-			const { type, id } = req.body;
-			let docType = type;
-			let data;
-			let totalBudget = 0;
-
-			switch (docType) {
-				case 'Procurement':
-					data = await this.pdocs.findOne({
-						where: {
-							id,
-						},
-					});
-					break;
-				case 'RDT&E':
-					data = await this.rdocs.findOne({
-						where: {
-							id,
-						},
-					});
-					break;
-				case 'O&M':
-					data = await this.om.findOne({
-						where: {
-							id,
-						},
-					});
-					break;
-				default:
-					break;
-			}
-
-			docType = types[docType];
-
-			if (data && data.dataValues) {
-				data = this.jbookSearchUtility.parseFields(data.dataValues, false, docType);
-
-				if (!data.currentYearAmount) {
-					let maxVal = null;
-					try {
-						if (docType === 'pdoc') {
-							maxVal = await this.pdocs.findAll({
-								attributes: [
-									Sequelize.fn('MAX', Sequelize.col('P40-79_TOA_BY1Base')),
-									'currentYearAmountMax',
-								],
-							});
-						} else if (docType === 'rdoc') {
-							maxVal = await this.rdocs.findAll({
-								attributes: [
-									Sequelize.fn('MAX', Sequelize.col('Proj_Fund_BY1')),
-									'currentYearAmountMax',
-								],
-							});
-						} else if (docType === 'odoc') {
-							// om doesn't have a currentYearAmount currently
-							// maxVal = this.om.findAll({
-							// 	attributes: [
-							// 		sequelize.fn('MAX', sequelize.col(''))
-							// 	]
-							// });
-						}
-					} catch {
-						console.log('Error fetching max values');
-					}
-
-					if (maxVal && maxVal.dataValues) {
-						data.currentYearAmountMax = maxVal.dataValues.currentYearAmountMax;
-					}
-				}
-
-				// CONTRACTS
-				let contracts = [];
-				try {
-					if (docType === 'pdoc') {
-						contracts = await this.gl_contracts.findAll({
-							where: {
-								bli: data.budgetLineItem,
-								ba_number: data.budgetActivityNumber,
-								appn_num: data.appropriationNumber,
-								service_agency: data.serviceAgency,
-								budget_type: 'pdoc',
-							},
-						});
-					} else if (docType === 'rdoc') {
-						let query = {
-							bli: data.programElement,
-							ba_number: data.budgetActivityNumber,
-							appn_num: data.appropriationNumber,
-							service_agency: data.serviceAgency,
-							budget_type: 'rdoc',
-							// projnumber: projectNum
-						};
-
-						contracts = await this.gl_contracts.findAll({
-							where: query,
-						});
-
-						// if (contracts.length === 0) {
-						// 	delete query.projnumber;
-
-						// 	contracts = await this.gl_contracts.findAll({
-						// 		where: query
-						// 	});
-						// }
-					}
-
-					const parsedContracts = [];
-					for (let contract of contracts) {
-						parsedContracts.push(
-							this.jbookSearchUtility.parseFields(contract.dataValues, false, 'glContract')
-						);
-					}
-
-					data.contracts = parsedContracts;
-				} catch (err) {
-					console.log('Error fetching for contracts');
-					console.log(err);
-				}
-
-				// OBLIGATIONS AND EXPENDITURES
-				let obligations = [];
-				try {
-					if (docType === 'pdoc') {
-						obligations = await this.obligations.findAll({
-							where: {
-								doc_type: 'pdoc',
-								bli: data.budgetLineItem,
-								ba_num: data.budgetActivityNumber,
-								appn_num: data.appropriationNumber,
-								begfy: data.budgetYear,
-							},
-							order: [['yearmonth', 'DESC']],
-						});
-					} else if (docType === 'rdoc') {
-						obligations = await this.obligations.findAll({
-							where: {
-								doc_type: 'rdoc',
-								bli: data.programElement,
-								ba_num:
-									data.budgetActivityNumber.length < 2
-										? data.budgetActivityNumber.padStart(2, '0')
-										: data.budgetActivityNumber,
-								appn_num: data.appropriationNumber,
-								begfy: data.budgetYear,
-							},
-							order: [['yearmonth', 'DESC']],
-						});
-					}
-
-					const parsedObligations = [];
-					for (let obligation of obligations) {
-						parsedObligations.push(
-							this.jbookSearchUtility.parseFields(obligation.dataValues, false, 'obligation')
-						);
-					}
-					data.obligations = parsedObligations;
-				} catch (err) {
-					console.log('Error fetching for obligations');
-					console.log(err);
-				}
-
-				// ACCOMPLISHMENTS
-				let accomplishments = [];
-				try {
-					accomplishments = await this.accomp.findAll({
-						where: {
-							PE_Num: data.programElement || '',
-							Proj_Number: data.projectNum || '',
-							BudgetYear: data.budgetYear,
-						},
-					});
-					if (accomplishments && accomplishments.length && accomplishments.length > 0) {
-						for (let accomp in accomplishments) {
-							accomp = this.jbookSearchUtility.parseFields(accomp, false, 'accomplishment');
-						}
-						data.accomplishments = accomplishments;
-					}
-				} catch (err) {
-					console.log('Error fetching for accomplishments:');
-					console.log(err);
-				}
-
-				// KEYWORDS
-				let keywords;
-				try {
-					let keywordAssocWhere;
-					switch (type) {
-						case 'Procurement':
-							keywordAssocWhere = 'pdoc_id';
-							break;
-						case 'RDT&E':
-							keywordAssocWhere = 'rdoc_id';
-							break;
-						case 'O&M':
-							keywordAssocWhere = 'om_id';
-							break;
-						default:
-							break;
-					}
-
-					const query = `SELECT ARRAY_AGG(distinct keyword_id) as keyword_ids FROM keyword_assoc WHERE ${keywordAssocWhere} = :keywordAssocId;`;
-					const keyWordIdData = await this.db.jbook.query(query, { replacements: { keywordAssocId: id } });
-					const keywordIDs = keyWordIdData[0][0].keyword_ids
-						? keyWordIdData[0][0].keyword_ids.map((i) => Number(i))
-						: [];
-
-					const keywordsData = await this.keyword.findAll({
-						where: { id: { [Op.in]: keywordIDs } },
-						raw: true,
-					});
-					keywords = keywordsData.map((data) => {
-						return data.name.replace(/\*/g, '');
-					});
-				} catch (err) {
-					console.log('Error fetching for keywords:');
-					console.log(err);
-				}
-				data.keywords = keywords;
-
-				// REVIEW
-				data.review = await this.getReviewData(data, type, totalBudget);
-
-				// VENDORS
-				let vendorData = [];
-				try {
-					if (type === 'RDT&E') {
-						vendorData = await this.vendors.findAll({
-							attributes: [Sequelize.fn('DISTINCT', Sequelize.col('vendor_name')), 'vendor_name'],
-							where: { pe_num: data.programElement },
-							raw: true,
-						});
-					}
-					if (vendorData.length <= 0) {
-						vendorData = await this.vendors.findAll({
-							attributes: [Sequelize.fn('DISTINCT', Sequelize.col('vendor_name')), 'vendor_name'],
-							raw: true,
-						});
-					}
-					data.vendors = vendorData
-						? vendorData.map((vendor) => {
-								return vendor.vendor_name;
-						  })
-						: undefined;
-				} catch (err) {
-					console.log('Error fetching for vendor data');
-					console.log(err);
-				}
-			}
-
-			return data;
-		} catch (err) {
-			this.logger.error(err, 'N49863Q', userId);
-			return [];
-		}
-	}
-
-	async getReviewData(data, type, totalBudget) {
+	async getReviewData(data) {
 		let review = {};
 		try {
 			const query = {
-				budget_type: types[type],
+				budget_type: data.budgetType,
 				budget_year: data.budgetYear,
 				appn_num: { [Op.iLike]: `${data.appropriationNumber}%` },
 				budget_activity: data.budgetActivityNumber,
@@ -452,15 +380,15 @@ class JBookDataHandler extends DataHandler {
 
 			// in review table, budget_line_item is also projectNum
 
-			switch (type) {
-				case 'Procurement':
+			switch (data.budgetType) {
+				case 'pdoc':
 					query.budget_line_item = data.budgetLineItem;
 					break;
-				case 'RDT&E':
+				case 'rdoc':
 					query.program_element = data.programElement;
 					query.budget_line_item = data.projectNum;
 					break;
-				case 'O&M':
+				case 'om':
 					query.budget_line_item = data.budgetLineItem;
 					query.program_element = data.programElement;
 					break;
@@ -468,68 +396,21 @@ class JBookDataHandler extends DataHandler {
 					break;
 			}
 
-			review = await this.rev.findOne({
+			let reviewData = await this.rev.findAll({
 				where: query,
 			});
 
 			// console.log(review)
-			if (review && review.dataValues) {
+			if (reviewData && reviewData.dataValues) {
 				// parse mission partners
-				if (review.service_mp_list && typeof review.service_mp_list === 'string') {
-					review.service_mp_list = review.service_mp_list
+				if (reviewData.service_mp_list && typeof reviewData.service_mp_list === 'string') {
+					reviewData.service_mp_list = reviewData.service_mp_list
 						.replace(/\[|\]|\\/g, '')
 						.split(';')
 						.join('|');
 				}
 
-				review = this.jbookSearchUtility.parseFields(review.dataValues, false, 'review');
-				review.totalBudget = totalBudget;
-			}
-
-			try {
-				// Add reviewer emails for primary secondary and service
-				let primaryReviewer;
-
-				if (review.primaryReviewer) {
-					primaryReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'primary',
-							name: review.primaryReviewer.trim(),
-						},
-						raw: true,
-					});
-				}
-				review.primaryReviewerEmail = primaryReviewer?.email || null;
-
-				let serviceReviewer;
-				if (review.serviceReviewer) {
-					serviceReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'service',
-							name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : '',
-						},
-						raw: true,
-					});
-				}
-				review.serviceReviewerEmail = serviceReviewer?.email || null;
-
-				let secondaryReviewer;
-				const secName = review.serviceSecondaryReviewer
-					? review.serviceSecondaryReviewer.split('(')[0].trim()
-					: '';
-				if (review.serviceSecondaryReviewer) {
-					secondaryReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'secondary',
-							name: secName,
-						},
-						raw: true,
-					});
-				}
-				review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
-			} catch (err) {
-				console.log('Error fetching reviewer emails');
-				console.log(err);
+				review = this.jbookSearchUtility.parseFields(reviewData.dataValues, false, 'review', false);
 			}
 		} catch (err) {
 			console.log('Error fetching for review');
@@ -661,33 +542,16 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async getBudgetReview(req, userId) {
-		const { btype, programElement, bli } = req.body;
-		try {
-			this.rev
-				.findAll({
-					where: {
-						budget_type: btype,
-						program_element: programElement,
-						budget_line_item: bli,
-					},
-				})
-				.then((results) => {
-					return { review: results, timeStamp: new Date().toISOString() };
-				});
-		} catch (err) {
-			this.logger.error(err, '9BN7UGJ', userId);
-			return {};
-		}
-	}
-
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, projectNum, appropriationNumber } = req.body;
-			const permissions = req.permissions;
+			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
 
+			const permissions = req.permissions;
+			let wasUpdated = false;
+
+			// check permissions
 			if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
-				if (reviewType === 'jaic' && !permissions.includes('JBOOK Primary Reviewer')) {
+				if (reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) {
 					throw 'Unauthorized';
 				} else if (reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) {
 					throw 'Unauthorized';
@@ -696,11 +560,13 @@ class JBookDataHandler extends DataHandler {
 				}
 			}
 
+			// Review Status Update logic
 			if (!isSubmit) {
 				frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
 			} else {
 				frontendReviewData[reviewType + 'ReviewStatus'] = 'Finished Review';
 			}
+
 			// Review Status Update logic
 			const { primaryReviewStatus, serviceReviewStatus, pocReviewStatus } = frontendReviewData;
 			let status = '';
@@ -719,87 +585,43 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				status = 'Needs Review';
 			}
+
+			if (isSubmit && portfolioName !== 'AI Inventory') {
+				status = 'Finished Review';
+			}
+
 			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
+			const tmpId = reviewData.id;
+
 			const query = {
-				budget_type: types[reviewData.budget_type],
-				budget_year: reviewData.budget_year,
+				id: tmpId,
+				portfolio_name: portfolioName,
 			};
 
-			if (reviewData.budget_type === 'RDT&E') {
-				query.program_element = reviewData.program_element;
-				query.budget_line_item = projectNum;
-				reviewData.budget_line_item = projectNum;
-			} else if (reviewData.budget_type === 'Procurement') {
-				query.budget_line_item = reviewData.budget_line_item;
+			delete reviewData.id;
+
+			// in review table, budget_line_item is also projectNum
+			switch (types[reviewData.budget_type]) {
+				case 'pdoc':
+					break;
+				case 'rdoc':
+					reviewData.budget_line_item = reviewData.projectNum;
+					break;
+				case 'om':
+					break;
+				default:
+					break;
+			}
+
+			let newOrUpdatedReview;
+			if (!tmpId) {
+				const newReview = await this.rev.create(reviewData);
+				wasUpdated = true;
+				newOrUpdatedReview = newReview.dataValues;
 			} else {
-				query.budget_line_item = reviewData.budget_line_item;
-				query.program_element = reviewData.program_element;
-				query.budget_activity = reviewData.budget_activity;
-			}
-
-			const [review, created] = await this.rev
-				.findOrCreate({
-					where: query,
-					defaults: {
-						...reviewData,
-						budget_type: types[reviewData.budget_type],
-					},
-				})
-				.catch((err) => {
-					console.log('Error finding / creating review');
-					console.log(err);
-				});
-
-			// If Submitting and POC info added email them letting them know.
-			if (isSubmit && reviewType === 'service') {
-				const info = await this.sendPOCEmail(
-					userId,
-					reviewData.service_poc_name,
-					reviewData.service_poc_email,
-					reviewData.service_poc_org,
-					reviewData.poc_phone_number,
-					false
-				);
-			}
-
-			if (!isSubmit && reviewType === 'service') {
-				if (reviewData.service_secondary_reviewer && reviewData.service_secondary_reviewer !== null) {
-					const secondaryReviewer = await this.reviewer.findOne({
-						where: {
-							type: 'secondary',
-							name: reviewData.service_secondary_reviewer.split('(')[0].trim(),
-						},
-						raw: true,
-					});
-
-					if (secondaryReviewer) {
-						const serviceInfo = await this.sendServiceEmail(
-							userId,
-							reviewData.service_secondary_reviewer,
-							secondaryReviewer.email,
-							secondaryReviewer.organization,
-							secondaryReviewer.phone_number
-						);
-					}
-				}
-			}
-
-			if (!isSubmit && reviewType === 'poc') {
-				const info = await this.sendPOCEmail(
-					userId,
-					reviewData.alternate_poc_name,
-					reviewData.alternate_poc_email,
-					reviewData.alternate_poc_org,
-					reviewData.alternate_poc_phone_number,
-					true
-				);
-			}
-
-			// if an existing row, update
-			if (!created) {
 				const result = await this.rev
 					.update(
 						{
@@ -815,10 +637,93 @@ class JBookDataHandler extends DataHandler {
 						console.log(err);
 					});
 
-				return { created: result && result.length && result[0] === 1 };
+				wasUpdated = result && result.length && result[0] === 1;
+				newOrUpdatedReview = { ...reviewData, budget_type: types[reviewData.budget_type] };
+				newOrUpdatedReview.id = tmpId;
 			}
 
-			return { created };
+			// Now update ES
+			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
+			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+
+			let esReviews = [];
+			if (doc.review_n && Array.isArray(doc.review_n)) {
+				esReviews = doc.review_n;
+			} else if (doc.review_n && doc.review_n !== null) {
+				esReviews = [doc.review_n];
+			} else {
+				esReviews = [];
+			}
+
+			// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+			const newReviews = [];
+			esReviews.forEach((review) => {
+				if (review.portfolio_name_s !== portfolioName) {
+					newReviews.push(review);
+				}
+			});
+			newReviews.push(tmpPGToES);
+
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+			const updated = this.dataLibrary.updateDocument(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				{ review_n: newReviews },
+				id,
+				userId
+			);
+			if (!updated) {
+				console.log('ES NOT UPDATED for REVIEW');
+			}
+
+			// If Submitting and POC info added email them letting them know.
+			// if (isSubmit && reviewType === 'service') {
+			// 	const info = await this.sendPOCEmail(
+			// 		userId,
+			// 		reviewData.service_poc_name,
+			// 		reviewData.service_poc_email,
+			// 		reviewData.service_poc_org,
+			// 		reviewData.poc_phone_number,
+			// 		false
+			// 	);
+			// }
+
+			// if (!isSubmit && reviewType === 'service') {
+			// 	if (reviewData.service_secondary_reviewer && reviewData.service_secondary_reviewer !== null) {
+			// 		const secondaryReviewer = await this.reviewer.findOne({
+			// 			where: {
+			// 				type: 'secondary',
+			// 				name: reviewData.service_secondary_reviewer.split('(')[0].trim(),
+			// 			},
+			// 			raw: true,
+			// 		});
+			//
+			// 		if (secondaryReviewer) {
+			// 			const serviceInfo = await this.sendServiceEmail(
+			// 				userId,
+			// 				reviewData.service_secondary_reviewer,
+			// 				secondaryReviewer.email,
+			// 				secondaryReviewer.organization,
+			// 				secondaryReviewer.phone_number
+			// 			);
+			// 		}
+			// 	}
+			// }
+
+			// if (!isSubmit && reviewType === 'poc') {
+			// 	const info = await this.sendPOCEmail(
+			// 		userId,
+			// 		reviewData.alternate_poc_name,
+			// 		reviewData.alternate_poc_email,
+			// 		reviewData.alternate_poc_org,
+			// 		reviewData.alternate_poc_phone_number,
+			// 		true
+			// 	);
+			// }
+
+			return { created: wasUpdated && updated };
 		} catch (err) {
 			this.logger.error(err, 'GZ3D0DR', userId);
 			return {};
@@ -1102,12 +1007,11 @@ class JBookDataHandler extends DataHandler {
 
 	async getPortfolios(req, userId) {
 		try {
-			const portfolios = await this.portfolio.findAll({
+			return await this.portfolio.findAll({
 				where: {
 					deleted: false,
 				},
 			});
-			return portfolios;
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, '6QJASKC', userId);
@@ -1128,6 +1032,7 @@ class JBookDataHandler extends DataHandler {
 
 			portfolio = await this.portfolio.findOne({
 				where,
+				raw: true,
 			});
 
 			return portfolio;
@@ -1245,8 +1150,6 @@ class JBookDataHandler extends DataHandler {
 					return await this.getESProjectData(req, userId);
 				case 'getBudgetDropdownData':
 					return await this.getBudgetDropdownData(req, userId);
-				case 'getBudgetReview':
-					return await this.getBudgetReview(req, userId);
 				case 'storeBudgetReview':
 					return await this.storeBudgetReview(req, userId);
 				case 'reenableForm':

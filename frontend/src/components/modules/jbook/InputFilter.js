@@ -15,22 +15,21 @@ const InputFilter = (props) => {
 	const { state, dispatch } = context;
 
 	const [searchText, setSearchText] = useState(state.jbookSearchSettings[field]);
-	const [debouncedText, setDebouncedText] = useState('');
 
 	const handleChange = (event) => {
 		setSearchText(event.target.value);
 		debounce(event.target.value);
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const debounce = useCallback(
 		_.debounce((_searchVal) => {
-			setDebouncedText(_searchVal);
 			// send the server request here
 			if (!state.initial) {
 				setJBookSetting(field, _searchVal.trim(), state, dispatch);
 				setState(dispatch, { runSearch: true, loading: true });
 			}
-		}, 500),
+		}, 1500),
 		[]
 	);
 	// useEffect(() => {

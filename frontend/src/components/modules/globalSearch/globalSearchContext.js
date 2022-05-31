@@ -112,6 +112,7 @@ const initState = {
 		Dashboards: true,
 		DataSources: true,
 		Databases: true,
+		Models: true,
 		Documentation: false,
 		Organizations: false,
 		Services: false,
@@ -146,6 +147,10 @@ const initState = {
 	databasesLoading: false,
 	databasesPage: 1,
 	databasesPagination: false,
+
+	modelsLoading: false,
+	modelsPage: 1,
+	modelsPagination: false,
 
 	documentationLoading: false,
 	documentationPage: 1,

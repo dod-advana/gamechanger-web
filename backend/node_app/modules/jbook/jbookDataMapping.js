@@ -421,12 +421,12 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		program_element: {
-			newName: 'revProgramElement', // these mainly act as foreign keys
+			newName: 'programElement', // these mainly act as foreign keys
 			defaultValue: '',
 			processValue: (value) => value,
 		},
 		budget_line_item: {
-			newName: 'revBudgetLineItems',
+			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -780,6 +780,398 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		budget_activity: {
+			newName: 'budgetActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		portfolio_name: {
+			newName: 'portfolioName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+	},
+
+	reviewESMapping: {
+		portfolio_name_s: {
+			newName: 'portfolioName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		id_s: {
+			newName: 'id',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		doc_id_s: {
+			newName: 'docID',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		source_tag_s: {
+			newName: 'sourceTag',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		program_element_s: {
+			newName: 'programElement', // these mainly act as foreign keys
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_line_item_s: {
+			newName: 'budgetLineItem',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_year_s: {
+			newName: 'budgetYear',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_type_s: {
+			newName: 'budgetType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_agree_label_s: {
+			newName: 'serviceAgreeLabel', //'aiLabelAgreement',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_ptp_agree_label_s: {
+			newName: 'servicePTPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_class_label_s: {
+			newName: 'serviceClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_trans_known_s: {
+			newName: 'serviceTransKnown', //'transitionPartnerKnown',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_trans_type_s: {
+			newName: 'serviceTransType', //'transitionType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_ptp_s: {
+			newName: 'servicePlannedTransitionPartner', //'plannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_mp_list_n: {
+			newName: 'serviceMissionPartnersList', //'missionPartnersList',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					value = value.filter((partner) => {
+						return partner !== null && partner !== 'null';
+					});
+					return value.join(', ');
+				} else {
+					if (value === null || value === 'null') value = '';
+					return value;
+				}
+			},
+		},
+		service_mp_checklist_s: {
+			newName: 'serviceMissionPartnersChecklist', //'missionPartnersList',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_mp_add_s: {
+			newName: 'serviceAdditionalMissionPartners', //'additionalMissionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		review_status_s: {
+			newName: 'reviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_title_s: {
+			newName: 'servicePOCTitle', //'pocTitle',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_name_s: {
+			newName: 'servicePOCName', //'pocName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_email_s: {
+			newName: 'servicePOCEmail', //'pocEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_org_s: {
+			newName: 'servicePOCOrg', //'pocOrg',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_phone_number_s: {
+			newName: 'servicePOCPhoneNumber', //'pocPhoneNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_review_notes_s: {
+			newName: 'pocReviewNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_review_status_s: {
+			newName: 'primaryReviewStatus', //'jaicReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_review_notes_s: {
+			newName: 'primaryReviewNotes', //'reviewNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_review_status_s: {
+			newName: 'serviceReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_review_status_s: {
+			newName: 'pocReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_reviewer_s: {
+			newName: 'primaryReviewer', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_s: {
+			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_reviewer_s: {
+			newName: 'pocReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		other_mission_partners_s: {
+			newName: 'otherMissionPartners',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_review_notes_s: {
+			newName: 'serviceReviewerNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_dollars_attributed_category_s: {
+			newName: 'pocDollarsAttributedCategory', //'dollarsAttributedCategory',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_dollars_attributed_s: {
+			newName: 'pocDollarsAttributed', //'dollarsAttributed',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_percentage_attributed_category_s: {
+			newName: 'pocPercentageAttributedCategory', //'percentageAttributedCategory',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_percentage_attributed_s: {
+			newName: 'pocPercentageAttributed', //'percentageAttributed',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ai_type_s: {
+			newName: 'pocAIType', //'aiType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_joint_capability_area_s: {
+			newName: 'pocJointCapabilityArea', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_joint_capability_area2_n: {
+			newName: 'pocJointCapabilityArea2', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		poc_joint_capability_area3_n: {
+			newName: 'pocJointCapabilityArea3', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		poc_ai_role_description_s: {
+			newName: 'pocAIRoleDescription', //'aiRoleDescription',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ai_type_description_s: {
+			newName: 'pocAITypeDescription', //'aiTypeDescription',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		createdAt_s: {
+			newName: 'createdAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		updatedAt_s: {
+			newName: 'updatedAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		deletedAt_s: {
+			newName: 'deletedAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_service_reviewer_s: {
+			newName: 'primaryServiceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		// reviewer: {
+		// 	newName: 'reviewer',
+		// 	defaultValue: '',
+		// 	processValue: (value) => value
+		// },
+		primary_class_label_s: {
+			newName: 'primaryClassLabel', //'coreAILabel'
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_secondary_reviewer_s: {
+			newName: 'serviceSecondaryReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_ptp_s: {
+			newName: 'primaryPlannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		domain_task_s: {
+			newName: 'domainTask',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		domain_task_secondary_n: {
+			newName: 'domainTaskSecondary',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		robotics_system_agree_s: {
+			newName: 'roboticsSystemAgree',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_title_s: {
+			newName: 'altPOCTitle',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_name_s: {
+			newName: 'altPOCName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_email_s: {
+			newName: 'altPOCEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_org_s: {
+			newName: 'altPOCOrg',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_phone_number_s: {
+			newName: 'altPOCPhoneNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_agree_label_s: {
+			newName: 'pocAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_class_label_s: {
+			newName: 'pocClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ptp_agree_label_s: {
+			newName: 'pocPTPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ptp_s: {
+			newName: 'pocPlannedTransitionPartner', //'plannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_mp_agree_label_s: {
+			newName: 'pocMPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_mp_list_n: {
+			newName: 'pocMissionPartnersList',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value;
+				}
+			},
+		},
+		poc_mp_checklist_s: {
+			newName: 'pocMissionPartnersChecklist',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		intelligent_systems_agree_s: {
+			newName: 'intelligentSystemsAgree',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		appn_num_s: {
+			newName: 'appropriationNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		agency_s: {
+			newName: 'serviceAgency',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_activity_s: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1692,7 +2084,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		key_review_s: {
+		key_s: {
 			newName: 'id',
 			defaultValue: '',
 			processValue: (value) => value,

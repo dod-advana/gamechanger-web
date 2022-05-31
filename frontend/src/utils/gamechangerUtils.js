@@ -39,6 +39,7 @@ export const PAGE_DISPLAYED = {
 	dataTracker: 'dataTracker',
 	analystTools: 'analystTools',
 	aboutUs: 'aboutUs',
+	faq: 'faq',
 };
 
 export const SEARCH_TYPES = {
