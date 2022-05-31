@@ -9,7 +9,7 @@ const StyledInput = styled.input`
 `;
 
 const InputFilter = (props) => {
-	const { setJBookSetting, field } = props;
+	const { setJBookSetting, field, style } = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
@@ -47,7 +47,7 @@ const InputFilter = (props) => {
 		} // eslint-disable-next-line
 	}, [state.jbookSearchSettings[field]]);
 
-	return <StyledInput onChange={handleChange} value={searchText} />;
+	return <StyledInput style={style} onChange={handleChange} value={searchText} />;
 };
 
 export default InputFilter;
