@@ -492,7 +492,7 @@ const cardHandler = {
 			return (
 				<StyledFrontCardContent isWideCard={true}>
 					{description && (
-						<div className={'body-container'}>
+						<div className={'body-container'} style={{ margin: 10 }}>
 							<div className={'body-text'}>{description}</div>
 						</div>
 					)}
@@ -526,7 +526,11 @@ const cardHandler = {
 					{!permission ? (
 						RestrictedLink
 					) : (
-						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={url}>
+						<CardButton
+							target={'_blank'}
+							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
+							href={url}
+						>
 							Open
 						</CardButton>
 					)}
@@ -740,7 +744,7 @@ const cardHandler = {
 							getUrl(id, restricted)
 						);
 					}}
-					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
 					target="_blank"
 				>
 					{restricted ? 'Request Access' : 'Launch'}
@@ -751,7 +755,7 @@ const cardHandler = {
 				<>
 					{PreparedLink}
 					<div
-						style={{ ...styles.viewMoreButton, color: primary }}
+						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -764,7 +768,7 @@ const cardHandler = {
 					>
 						{toggledMore ? 'Overview' : 'More'}
 						<i
-							style={{ ...styles.viewMoreChevron, color: primary }}
+							style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
 							className="fa fa-chevron-right"
 							aria-hidden="true"
 						/>
@@ -1428,7 +1432,7 @@ const cardHandler = {
 									e.preventDefault();
 									clickFn(state.cloneData.clone_name, url, item.type);
 								}}
-								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
 								target="_blank"
 							>
 								Open
