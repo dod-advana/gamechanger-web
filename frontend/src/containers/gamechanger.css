@@ -101,7 +101,9 @@
 
 .main-container { 
     background-color: white;
-    min-height: calc(100vh - 120px);
+    min-height: calc(100vh - 30px);
+    display: flex;
+    flex-direction: column;
 }
 
 #gc-user-dash .row > * { 

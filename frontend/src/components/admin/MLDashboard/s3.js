@@ -187,9 +187,10 @@ export default (props) => {
 			props.updateLogs('Error downloading corpus: ' + e.toString(), 2);
 		}
 	};
-	const checkCorpusDownloading = () => {
-		return checkFlag('corpus:');
-	};
+
+	// const checkCorpusDownloading = () => {
+	// 	return checkFlag('corpus:');
+	// };
 
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
@@ -204,34 +205,37 @@ export default (props) => {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 			};
-			const { data = {} } = await gameChangerAPI.getUserAggregations(params);
+			const userData = await gameChangerAPI.getUserAggregations(params);
+			const searchData = await gameChangerAPI.getSearchPdfMapping(params);
 			const mlParams = {
-				data: data.users,
+				searchData: searchData.data.data,
+				userData: userData.data.users,
 			};
 			gameChangerAPI.sendUserAggregations(mlParams);
 		} catch (e) {
 			console.error(e);
 		}
 	};
-	/**
-	 * Takes a String and checks if it is in any of the flag keys and checks
-	 * those values. If any of them are true it returns true
-	 * @method checkFlag
-	 * @param {String} flag
-	 * @returns boolean
-	 */
-	const checkFlag = (flag) => {
-		let flagged = false;
-		if (props.processes.process_status && props.processes.process_status.flags) {
-			const flags = props.processes.process_status.flags;
-			for (const key in flags) {
-				if (key.includes(flag) && flags[key]) {
-					flagged = true;
-				}
-			}
-		}
-		return flagged;
-	};
+
+	// /**
+	//  * Takes a String and checks if it is in any of the flag keys and checks
+	//  * those values. If any of them are true it returns true
+	//  * @method checkFlag
+	//  * @param {String} flag
+	//  * @returns boolean
+	//  */
+	// const checkFlag = (flag) => {
+	// 	let flagged = false;
+	// 	if (props.processes.process_status && props.processes.process_status.flags) {
+	// 		const flags = props.processes.process_status.flags;
+	// 		for (const key in flags) {
+	// 			if (key.includes(flag) && flags[key]) {
+	// 				flagged = true;
+	// 			}
+	// 		}
+	// 	}
+	// 	return flagged;
+	// };
 
 	useEffect(() => {
 		getS3List();

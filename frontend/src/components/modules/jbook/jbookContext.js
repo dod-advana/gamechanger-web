@@ -3,7 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
 	runSearch: false,
 	runningSearch: false,
-	useElasticSearch: false,
+	useElasticSearch: true,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
 	feedbackText: '',
@@ -348,6 +348,7 @@ const initState = {
 	resetSettingsSwitch: false,
 	categorySorting: {
 		jbook: [
+			'Relevance',
 			'Budget Year',
 			'Program Element',
 			'Budget Line Item',
@@ -360,7 +361,7 @@ const initState = {
 			'Source',
 		],
 	},
-	currentSort: 'Budget Year',
+	currentSort: 'Relevance',
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
@@ -385,6 +386,7 @@ const initState = {
 
 	// contract totals
 	contractTotals: {},
+	statsLoading: false,
 
 	paginationSearch: false,
 
@@ -394,6 +396,10 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
+
+	// jbook portfolios
+	portfolios: [],
+	selectedPortfolio: 'General',
 };
 
 const init = (initialState) => {

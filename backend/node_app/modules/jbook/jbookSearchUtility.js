@@ -30,20 +30,25 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
-		const newData = {};
-		const mapping = this.getMapping(docType, fromFrontend);
+	parseFields(data, fromFrontend, docType, doMapping = true) {
+		try {
+			const newData = {};
+			const mapping = this.getMapping(docType, fromFrontend);
 
-		for (const field in data) {
-			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
-				const newKey = mapping[field].newName;
-				newData[newKey] = mapping[field].processValue(data[field]);
-			} else if (data[field] && data[field] !== null) {
-				newData[field] = data[field];
+			for (const field in data) {
+				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
+					const newKey = mapping[field].newName;
+					newData[newKey] = mapping[field].processValue(data[field]);
+				} else if (data[field] && data[field] !== null) {
+					newData[field] = data[field];
+				}
 			}
+			return newData;
+		} catch (e) {
+			console.log('Error parsing jbook fields');
+			this.logger.error(e.message, 'IEPGRA00');
+			throw e;
 		}
-
-		return newData;
 	}
 
 	// map just the name of a field between frontend/db
@@ -53,33 +58,38 @@ class JBookSearchUtility {
 	}
 
 	getMapping(docType, fromFrontend) {
-		let mapping;
-		if (Mappings[`${docType}Mapping`]) {
-			mapping = _.clone(Mappings[`${docType}Mapping`]);
-		} else {
-			console.log(`${docType} mapping not found`);
-			return {};
-		}
-
-		if (fromFrontend) {
-			let frontEndMapping = {};
-			for (const field in mapping) {
-				const newName = mapping[field].newName;
-
-				if (!frontEndMapping[newName]) {
-					frontEndMapping[newName] = _.clone(mapping[field]);
-					frontEndMapping[newName].newName = field;
-				}
+		try {
+			let mapping;
+			if (Mappings[`${docType}Mapping`]) {
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
+			} else {
+				console.log(`${docType} mapping not found`);
+				return {};
 			}
-			return frontEndMapping;
-		} else if (docType !== 'review' || docType !== 'gl') {
-			mapping = {
-				...mapping,
-				...reviewMapping,
-			};
-		}
 
-		return mapping;
+			if (fromFrontend) {
+				let frontEndMapping = {};
+				for (const field in mapping) {
+					const newName = mapping[field].newName;
+
+					if (!frontEndMapping[newName]) {
+						frontEndMapping[newName] = _.clone(mapping[field]);
+						frontEndMapping[newName].newName = field;
+					}
+				}
+				return frontEndMapping;
+			} else if (docType !== 'review' || docType !== 'gl') {
+				mapping = {
+					...mapping,
+					...reviewMapping,
+				};
+			}
+
+			return mapping;
+		} catch (err) {
+			console.log('Error retrieving jbook mapping');
+			this.logger.error(err.message, 'AJTKSKQ');
+		}
 	}
 
 	getDocCols(docType, totals = false, fullPDFExport = false) {
@@ -206,10 +216,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQuery() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(
 			', '
 		)}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
@@ -224,10 +230,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQueryForFullPDF() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(
 			', '
 		)}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
@@ -1053,10 +1055,12 @@ class JBookSearchUtility {
 					Object.keys(hit.inner_hits).forEach((hitKey) => {
 						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0],
-								});
+								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+									result.pageHits.push({
+										title: esTopLevelFieldsNameMapping[hitKey],
+										snippet: innerHit.highlight[highlightKey][0],
+									});
+								}
 							});
 						});
 					});
@@ -1100,7 +1104,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1312,7 +1316,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},
@@ -1320,6 +1324,365 @@ class JBookSearchUtility {
 		} catch (err) {
 			this.logger.error(err, '1F07MYM', userId);
 		}
+	}
+
+	// creates the ES query for jbook search
+	getElasticSearchQueryForJBook(
+		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
+		userId,
+		serviceAgencyMappings
+	) {
+		let query = {};
+		try {
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+
+			query = {
+				track_total_hits: true,
+				from: offset,
+				size: limit,
+				aggregations: {
+					service_agency_aggs: {
+						terms: {
+							field: 'serviceAgency_s',
+							size: 10000,
+						},
+					},
+				},
+				query: {
+					bool: {
+						must: [],
+						should: [
+							{
+								multi_match: {
+									query: `${parsedQuery}`,
+									fields: esTopLevelFields,
+									type: 'best_fields',
+									operator: `${operator}`,
+								},
+							},
+						],
+					},
+				},
+				highlight: {
+					fields: {},
+				},
+			};
+
+			esTopLevelFields.forEach((field) => {
+				query.highlight.fields[field] = {};
+			});
+
+			esInnerHitFields.forEach((innerField) => {
+				const nested = {
+					nested: {
+						path: innerField.path,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {},
+							},
+						},
+						query: {
+							bool: {
+								should: [
+									{
+										multi_match: {
+											query: `${parsedQuery}`,
+											fields: innerField.fields,
+											type: 'best_fields',
+											operator: `${operator}`,
+										},
+									},
+								],
+							},
+						},
+					},
+				};
+
+				innerField.fields.forEach((field) => {
+					nested.nested.inner_hits.highlight.fields[field] = {};
+				});
+				query.query.bool.should.push(nested);
+			});
+
+			const wildcardList = {
+				type_s: 1,
+				key_s: 1,
+				projectTitle_t: 1,
+				projectNum_s: 6,
+				programElementTitle_t: 1,
+				serviceAgency_s: 2,
+				appropriationTitle_t: 1,
+				appropriationNumber_s: 6,
+				budgetActivityTitle_t: 6,
+				budgetActivityTitle_s: 6,
+				programElement_s: 6,
+				accountTitle_s: 1,
+				budgetLineItemTitle_s: 1,
+				budgetLineItem_s: 6,
+			};
+
+			Object.keys(wildcardList).forEach((wildCardKey) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[wildCardKey]: {
+							value: `*${plainQuery}*`,
+							boost: wildcardList[wildCardKey],
+						},
+					},
+				});
+			});
+
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
+
+			// SORT
+			switch (jbookSearchSettings.sort[0].id) {
+				case 'relevance':
+					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'budgetYear':
+					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'programElement':
+					query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectNum':
+					query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'projectTitle':
+					query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'serviceAgency':
+					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				default:
+					break;
+			}
+
+			return query;
+		} catch (e) {
+			console.log('Error making ES query for jbook');
+			this.logger.error(e.message, 'IEPGRAZ91', userId);
+			return query;
+		}
+	}
+
+	// creates the portions of the ES query for filtering based on jbookSearchSettings
+	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
+	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
+		let filterQueries = [];
+		try {
+			if (jbookSearchSettings) {
+				// Budget Type filter
+				if (jbookSearchSettings.budgetType) {
+					const budgetTypesTemp = [];
+
+					jbookSearchSettings.budgetType.forEach((budgetType) => {
+						switch (budgetType) {
+							case 'RDT&E':
+								budgetTypesTemp.push('rdte');
+								break;
+							case 'O&M':
+								budgetTypesTemp.push('om');
+								break;
+							case 'Procurement':
+								budgetTypesTemp.push('procurement');
+								break;
+							default:
+								break;
+						}
+					});
+
+					filterQueries.push({
+						terms: {
+							type_s: budgetTypesTemp,
+						},
+					});
+				}
+
+				// Budget Year filter
+				if (jbookSearchSettings.budgetYear) {
+					filterQueries.push({
+						terms: {
+							budgetYear_s: jbookSearchSettings.budgetYear,
+						},
+					});
+				}
+
+				// Program Element / BLI filter
+				if (jbookSearchSettings.programElement) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.programElement}`,
+							default_field: 'budgetLineItem_s',
+						},
+					});
+				}
+
+				// Project Number filter (doesn't appear in kibana)
+				if (jbookSearchSettings.projectNum) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.projectNum}`,
+							default_field: 'projectNum_s',
+						},
+					});
+				}
+
+				// Service Agency filter
+				if (jbookSearchSettings.serviceAgency) {
+					const convertedAgencies = [];
+
+					jbookSearchSettings.serviceAgency.forEach((agency) => {
+						console.log(agency);
+						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
+							if (serviceAgencyMappings[agencyKey] === agency) {
+								convertedAgencies.push(agencyKey);
+							}
+						});
+					});
+
+					filterQueries.push({
+						terms: {
+							serviceAgency_s: convertedAgencies,
+						},
+					});
+				}
+			}
+		} catch (e) {
+			console.log('Error applying Jbook ES filters');
+			this.logger.error(e.message, 'IEPGRAZ9');
+			return filterQueries;
+		}
+
+		return filterQueries;
+	}
+
+	getJBookESReviewFilters(jbookSearchSettings) {
+		const nestedMustObjects = [];
+		// Review Status
+		if (jbookSearchSettings.reviewStatus) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Reviewer
+		if (jbookSearchSettings.primaryReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.primary_reviewer_s': jbookSearchSettings.primaryReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// Service Reviewer
+		if (jbookSearchSettings.serviceReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.service_reviewer_s': jbookSearchSettings.serviceReviewer,
+						},
+					},
+				},
+			});
+		}
+
+		// POC Reviewer
+		if (jbookSearchSettings.pocReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									wildcard: {
+										'review_n.service_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+								{
+									wildcard: {
+										'review_n.alternate_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Class Label
+		if (jbookSearchSettings.primaryClassLabel) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									terms: {
+										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Source Tag
+		if (jbookSearchSettings.sourceTag) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.source_tag_s': jbookSearchSettings.sourceTag,
+						},
+					},
+				},
+			});
+		}
+
+		return nestedMustObjects;
 	}
 }
 

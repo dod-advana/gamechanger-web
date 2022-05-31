@@ -12,15 +12,29 @@ import GameChangerAssist from '../components/crowdAssist/GameChangerAssist';
 import Tutorial from '../components/tutorial/Tutorial';
 import SearchBar from '../components/searchBar/SearchBar';
 import { Snackbar } from '@material-ui/core';
-import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
-
-const gameChangerUserAPI = new GamechangerUserManagementAPI();
+import { getUserData } from '../utils/sharedFunctions';
 
 const UserFeedback = LoadableVisibility({
 	loader: () => import('../components/user/UserFeedback'),
 	loading: () => {
 		return <></>;
+	},
+});
+
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
 	},
 });
 
@@ -36,9 +50,10 @@ export const scrollToContentTop = () => {
 };
 
 const GameChangerPage = (props) => {
-	const { cloneData, history, jupiter, tutorialData } = props;
+	const { cloneData, history, jupiter, tutorialData, location } = props;
 
 	const cloneName = cloneData.clone_name;
+
 	const context = useContext(getContext(cloneName));
 	const { state, dispatch } = context;
 
@@ -51,16 +66,16 @@ const GameChangerPage = (props) => {
 			setState(dispatch, { history: history, historySet: true });
 		}
 
-		if (!state.userDataSet) {
-			gameChangerUserAPI.getUserProfileData().then((data) => {
-				setState(dispatch, { userData: data.data, userDataSet: true });
-			});
-		}
-
 		if (state.cloneDataSet && state.cloneData?.display_name) {
 			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
 		}
 	}, [cloneData, state, dispatch, history]);
+
+	useEffect(() => {
+		if (!state.userDataSet) {
+			getUserData(dispatch);
+		}
+	}, [state.userDataSet, dispatch]);
 
 	return (
 		<div className="main-container">
@@ -93,7 +108,7 @@ const GameChangerPage = (props) => {
 					{state.cloneDataSet && <SearchBar context={context} jupiter={jupiter} />}
 
 					{/* Main View */}
-					{state.historySet && <MainView context={context} />}
+					<div style={{ flexGrow: 1 }}>{state.historySet && <MainView context={context} />}</div>
 
 					{/* Snack BAr Messages */}
 					<div>
@@ -112,6 +127,8 @@ const GameChangerPage = (props) => {
 						message={state.backendErrorMsg || ''}
 						onClose={() => setState(dispatch, { showBackendError: false })}
 					/>
+					{/* Footer */}
+					{<GCFooter location={location} cloneName={cloneName} />}
 				</>
 			)}
 		</div>

@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import TitleBar from '../components/searchBar/TitleBar';
 import HomepageEditor from '../components/admin/HomepageEditor';
@@ -80,6 +81,22 @@ const GeneralAdminButtons = LoadableVisibility({
 	},
 });
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
 const PAGES = {
 	general: 'General',
 	cloneList: 'CloneList',
@@ -134,10 +151,11 @@ const userListTableAdditions = [
  * @class GamechangerAdminPage
  */
 const GamechangerAdminPage = (props) => {
-	const { jupiter } = props;
+	const { jupiter, location } = props;
 
 	const [pageToView, setPageToView] = useState(PAGES.general);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
+	const { path } = useRouteMatch();
 
 	const renderSwitch = (page) => {
 		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
@@ -188,10 +206,9 @@ const GamechangerAdminPage = (props) => {
 	}, [unsetTool, setToolState, setPageToView]);
 
 	return (
-		<div style={{ minHeight: 'calc(100vh - 120px)' }}>
+		<div style={{ minHeight: 'calc(100vh - 30px)', display: 'flex', flexDirection: 'column' }}>
 			<SlideOutMenuContent type="closed">{ClosedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
 			<SlideOutMenuContent type="open">{OpenedAdminMenu({ setPageToView, PAGES })}</SlideOutMenuContent>
-
 			<TitleBar
 				onTitleClick={() => {
 					window.location.href = `#/gamechanger-admin`;
@@ -202,8 +219,13 @@ const GamechangerAdminPage = (props) => {
 				rawSearchResults={[]}
 				cloneData={{ clone_name: 'gamechanger' }}
 			/>
-
-			{renderSwitch(pageToView)}
+			<div style={{ flexGrow: 1 }}>
+				<Switch>
+					<Route exact path={`${path}/mldashboard`} component={MLDashboard} />
+					<Route path="*" component={() => renderSwitch(pageToView)} />
+				</Switch>
+			</div>
+			<GCFooter location={location} cloneName="gamechanger-admin" />
 		</div>
 	);
 };

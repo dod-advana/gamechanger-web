@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import SimpleTable from '../../common/SimpleTable';
 import GCPrimaryButton from '../../common/GCButton';
-import { StyledTableContainer, StyledFooterDiv } from './profilePage/profilePageStyles';
+import { StyledTableContainer, StyledFooterDiv, ButtonStyles } from './profilePage/profilePageStyles';
 import { JBookContext } from './jbookContext';
 import './jbook.css';
 import { setState } from '../../../utils/sharedFunctions';
@@ -126,14 +126,14 @@ const JBookPOCReviewForm = React.memo((props) => {
 				{!pocValidated && <span style={{ color: errorColor }}>Please fill out the highlighted fields</span>}
 				{finished && !roleDisabled && (
 					<GCPrimaryButton
-						style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+						style={ButtonStyles.main}
 						onClick={() => setState(dispatch, { POCModalOpen: true })}
 					>
 						Re-Enable (Partial Review)
 					</GCPrimaryButton>
 				)}
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => {
 						setReviewData('pocForm');
 					}}
@@ -146,7 +146,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => submitReviewForm('primaryReviewLoading', false, 'poc')}
 					disabled={finished || roleDisabled}
 				>
@@ -157,7 +157,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
-					style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+					style={ButtonStyles.submit}
 					onClick={() => submitReviewForm('primaryReviewLoading', true, 'poc')}
 					disabled={finished || roleDisabled}
 				>
