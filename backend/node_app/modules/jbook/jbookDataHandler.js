@@ -223,12 +223,12 @@ class JBookDataHandler extends DataHandler {
 				if (!tmpReview) {
 					updateESReview_n = true;
 					const tmpData = _.clone(doc);
-					tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
+					const currentYear = new Date().getFullYear();
+					tmpData.budgetYear = (parseInt(currentYear) - 1).toString();
 					const oldReview = await this.getReviewData(tmpData);
 					if (Object.keys(oldReview).length === 0) {
-						console.log('TEMPDATA');
-
-						console.log(tmpData);
+						// console.log('TEMPDATA');
+						// console.log(tmpData);
 					} else {
 						oldReview.budget_year = doc.budgetYear;
 						oldReview.review_status = 'Needs Review';
@@ -583,10 +583,7 @@ class JBookDataHandler extends DataHandler {
 			frontendReviewData['reviewStatus'] = status;
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
-
 			const tmpId = reviewData.id;
-			console.log(tmpId);
-
 			const query = {
 				id: tmpId,
 				portfolio_name: portfolioName,
@@ -611,9 +608,8 @@ class JBookDataHandler extends DataHandler {
 			let newOrUpdatedReview;
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
-				console.log(reviewData);
+				// console.log(reviewData);
 				const newReview = await this.rev.create(reviewData);
-				console.log(newReview);
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
 			} else {
@@ -662,7 +658,7 @@ class JBookDataHandler extends DataHandler {
 			newReviews.push(tmpPGToES);
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
-			const updated = this.dataLibrary.updateDocument(
+			const updated = await this.dataLibrary.updateDocument(
 				clientObj.esClientName,
 				clientObj.esIndex,
 				{ review_n: newReviews },
