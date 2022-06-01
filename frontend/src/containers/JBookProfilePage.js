@@ -222,6 +222,10 @@ const JBookProfilePage = (props) => {
 		}
 	};
 
+	// useEffect(() => {
+	// 	getProjectData(id, selectedPortfolio);
+	// }, [selectedPortfolio, id]);
+
 	useEffect(() => {
 		try {
 			const url = window.location.href;
