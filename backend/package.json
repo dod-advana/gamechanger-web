@@ -23,13 +23,14 @@
 	"resolutions": {
 		"node-forge": "1.2.1",
 		"types/node": "12.20.13",
-		"ansi-regex": "5.0.1"
+		"ansi-regex": "5.0.1",
+		"async": "2.6.4"
 	},
 	"dependencies": {
 		"@dod-advana/advana-api-auth": "0.0.45",
 		"@dod-advana/advana-logger": "0.0.4",
 		"@elastic/elasticsearch": "7.10.0",
-		"async": "2.6.3",
+		"async": "2.6.4",
 		"async-redis": "2.0.0",
 		"aws-sdk": "2.976.0",
 		"axios": "0.24.0",
