@@ -1328,7 +1328,7 @@ class JBookSearchUtility {
 
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
+		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
 		userId,
 		serviceAgencyMappings
 	) {
@@ -1444,8 +1444,13 @@ class JBookSearchUtility {
 				query.query.bool.filter = filterQueries;
 			}
 
+			let sortText = jbookSearchSettings.sort[0].id;
+			if (!sortSelected && searchText && searchText !== '') {
+				sortText = 'Relevance';
+			}
+
 			// SORT
-			switch (jbookSearchSettings.sort[0].id) {
+			switch (sortText) {
 				case 'relevance':
 					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
@@ -1463,6 +1468,9 @@ class JBookSearchUtility {
 					break;
 				case 'serviceAgency':
 					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
+				case 'budgetLineItem':
+					query.sort = [{ budgetLineItem_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
 				default:
 					break;

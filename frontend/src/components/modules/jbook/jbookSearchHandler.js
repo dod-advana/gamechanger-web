@@ -90,6 +90,7 @@ const JBookSearchHandler = {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
 						portfolio: state.portfolio || 'AI Inventory',
+						sortSelected: state.sortSelected,
 					},
 				},
 				cancelToken
@@ -387,7 +388,7 @@ const JBookSearchHandler = {
 				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
 			case 'Budget Line Item':
-				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
+				searchSettings.sort = [{ id: 'budgetLineItem', desc: sortDesc }];
 				break;
 			case 'Project #':
 				searchSettings.sort = [{ id: 'projectNum', desc: sortDesc }];

@@ -373,7 +373,8 @@ const initState = {
 			'Source',
 		],
 	},
-	currentSort: 'Relevance',
+	currentSort: 'Budget Year',
+	sortSelected: false,
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
