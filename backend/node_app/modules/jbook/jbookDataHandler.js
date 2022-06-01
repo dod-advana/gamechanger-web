@@ -225,21 +225,10 @@ class JBookDataHandler extends DataHandler {
 					const tmpData = _.clone(doc);
 					tmpData.budgetYear = (parseInt(tmpData.budgetYear) - 1).toString();
 					const oldReview = await this.getReviewData(tmpData);
-					if (!oldReview) {
-						tmpReview = {
-							budget_line_item: tmpData.budgetLineItem,
-							budget_type: tmpData.budgetType,
-							budget_year: doc.budgetYear,
-							budget_activity: tmpData.budgetActivityNumber,
-							appn_num: tmpData.appropriationNumber,
-							agency: tmpData.agency,
-							portfolio_name: portfolioName,
-							program_element: tmpData.programElement,
-							review_status: 'Needs Review',
-							primary_review_status: 'Needs Review',
-							service_review_status: 'Needs Review',
-							poc_review_status: 'Needs Review',
-						};
+					if (Object.keys(oldReview).length === 0) {
+						console.log('TEMPDATA');
+
+						console.log(tmpData);
 					} else {
 						oldReview.budget_year = doc.budgetYear;
 						oldReview.review_status = 'Needs Review';
@@ -265,22 +254,23 @@ class JBookDataHandler extends DataHandler {
 						delete tmpReview.alternate_poc_phone_number;
 						delete tmpReview.createdAt;
 						delete tmpReview.updatedAt;
-					}
 
-					// Now create the entry in PG
-					const newReview = await this.rev.create(tmpReview);
-					tmpReview = newReview['dataValues'];
-					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
+						// Now create the entry in PG
+						const newReview = await this.rev.create(tmpReview);
+						tmpReview = newReview['dataValues'];
+						tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
+					}
 				} else {
 					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
 				}
 
-				if (!tmpReview.portfolio_name_s) {
+				if (tmpReview && !tmpReview.portfolio_name_s) {
 					tmpReview.portfolio_name_s = portfolioName;
 					updateESReview_n = true;
 				}
-
-				doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
+				if (tmpReview) {
+					doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
+				}
 
 				if (updateESReview_n) {
 					const updated = await this.dataLibrary.updateDocument(
@@ -595,6 +585,7 @@ class JBookDataHandler extends DataHandler {
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 
 			const tmpId = reviewData.id;
+			console.log(tmpId);
 
 			const query = {
 				id: tmpId,
@@ -609,6 +600,7 @@ class JBookDataHandler extends DataHandler {
 					break;
 				case 'rdoc':
 					reviewData.budget_line_item = reviewData.projectNum;
+					delete reviewData.projectNum;
 					break;
 				case 'om':
 					break;
@@ -618,7 +610,10 @@ class JBookDataHandler extends DataHandler {
 
 			let newOrUpdatedReview;
 			if (!tmpId) {
+				reviewData.budget_type = types[reviewData.budget_type];
+				console.log(reviewData);
 				const newReview = await this.rev.create(reviewData);
+				console.log(newReview);
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
 			} else {
