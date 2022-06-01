@@ -52,7 +52,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title': {
-			newName: 'P40-13_BSA_Title',
+			newName: 'budgetSubActivity',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -1975,7 +1975,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title_t': {
-			newName: 'P40-13_BSA_Title',
+			newName: 'budgetSubActivity',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
