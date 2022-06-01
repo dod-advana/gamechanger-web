@@ -50,7 +50,7 @@ const handleSelectSpecificOrgs = (state, dispatch) => {
 	});
 };
 
-const handleSelectAllOrgs = (state, dispatch) => {
+const handleSelectAllOrgs = (state, dispatch, isPreSearch) => {
 	if (state.searchSettings.specificOrgsSelected) {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificOrgsSelected = false;
@@ -59,8 +59,10 @@ const handleSelectAllOrgs = (state, dispatch) => {
 		let runGraphSearch = false;
 		Object.keys(state.searchSettings.orgFilter).forEach((org) => {
 			if (newSearchSettings.orgFilter[org]) {
-				newSearchSettings.isFilterUpdate = true;
-				newSearchSettings.orgUpdate = true;
+				if (!isPreSearch) {
+					newSearchSettings.isFilterUpdate = true;
+					newSearchSettings.orgUpdate = true;
+				}
 				runSearch = true;
 				runGraphSearch = true;
 			}
@@ -136,7 +138,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllOrgs(state, dispatch)}
+									onClick={() => handleSelectAllOrgs(state, dispatch, true)}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allOrgsSelected}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
@@ -226,7 +228,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllOrgs(state, dispatch)}
+									onClick={() => handleSelectAllOrgs(state, dispatch, false)}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allOrgsSelected}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
@@ -307,7 +309,7 @@ const handleSelectSpecificTypes = (state, dispatch) => {
 	});
 };
 
-const handleSelectAllTypes = (state, dispatch) => {
+const handleSelectAllTypes = (state, dispatch, isPreSearch) => {
 	if (state.searchSettings.specificTypesSelected) {
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.specificTypesSelected = false;
@@ -316,8 +318,10 @@ const handleSelectAllTypes = (state, dispatch) => {
 		let runSearch = false;
 		Object.keys(state.searchSettings.typeFilter).forEach((type) => {
 			if (newSearchSettings.typeFilter[type]) {
-				newSearchSettings.isFilterUpdate = true;
-				newSearchSettings.typeUpdate = true;
+				if (!isPreSearch) {
+					newSearchSettings.isFilterUpdate = true;
+					newSearchSettings.typeUpdate = true;
+				}
 				runSearch = true;
 				runGraphSearch = true;
 			}
@@ -397,7 +401,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllTypes(state, dispatch)}
+									onClick={() => handleSelectAllTypes(state, dispatch, true)}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allTypesSelected}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
@@ -471,7 +475,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 													name={`${typeString}`}
 													checked={state.searchSettings.typeFilter[type]}
 													onClick={(event) =>
-														handleTypeFilterChangeLocal(event, type, state, dispatch)
+														handleTypeFilterChangeLocal(event, type, state, dispatch, true)
 													}
 												/>
 											}
@@ -506,7 +510,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllTypes(state, dispatch)}
+									onClick={() => handleSelectAllTypes(state, dispatch, false)}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.searchSettings.allTypesSelected}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
