@@ -245,7 +245,7 @@ const getSearchMatrixItems = (props) => {
 					header={<b>PL TITLE</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
-					headerTextWeight={'bold'}
+					headerTextWeight={'normal'}
 				>
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
