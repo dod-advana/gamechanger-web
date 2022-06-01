@@ -878,6 +878,7 @@ const JBookProfilePage = (props) => {
 				projectNum,
 				appropriationNumber,
 				portfolioName: selectedPortfolio,
+				id,
 			},
 		});
 		await getProjectData(id, selectedPortfolio);

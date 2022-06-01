@@ -723,11 +723,20 @@ class JBookDataHandler extends DataHandler {
 
 	async reenableForm(req, userId) {
 		try {
-			const { programElement, budgetType, reviewType, budgetLineItem, projectNum, appropriationNumber } =
-				req.body;
+			const {
+				programElement,
+				budgetType,
+				reviewType,
+				budgetLineItem,
+				projectNum,
+				appropriationNumber,
+				portfolioName,
+				id,
+			} = req.body;
 
 			const query = {
 				budget_type: types[budgetType],
+				portfolio_name: portfolioName,
 			};
 
 			if (budgetType === 'RDT&E') {
@@ -761,9 +770,51 @@ class JBookDataHandler extends DataHandler {
 				};
 			}
 
-			const review = await this.rev.update(update, {
+			let review = await this.rev.update(update, {
 				where: query,
+				returning: true,
+				plain: true,
 			});
+
+			review = review[1].dataValues;
+
+			// Now update ES
+			let tmpPGToES = this.jbookSearchUtility.parseFields(review, false, 'review');
+			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+
+			let esReviews = [];
+			if (doc.review_n && Array.isArray(doc.review_n)) {
+				esReviews = doc.review_n;
+			} else if (doc.review_n && doc.review_n !== null) {
+				esReviews = [doc.review_n];
+			} else {
+				esReviews = [];
+			}
+
+			// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+			const newReviews = [];
+			esReviews.forEach((review) => {
+				if (review.portfolio_name_s !== portfolioName) {
+					newReviews.push(review);
+				}
+			});
+			newReviews.push(tmpPGToES);
+
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+			const updated = await this.dataLibrary.updateDocument(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				{ review_n: newReviews },
+				id,
+				userId
+			);
+			console.log(updated);
+
+			if (!updated) {
+				console.log('ES NOT UPDATED for REVIEW');
+			}
 
 			return review;
 		} catch (err) {
