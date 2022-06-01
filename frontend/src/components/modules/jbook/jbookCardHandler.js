@@ -284,14 +284,14 @@ const cardHandler = {
 					? item.appropriationTitle.replace('Procurement', 'Proc')
 					: '';
 
-				if (item.docType === 'odoc') {
+				if (item.budgetType === 'odoc') {
 					appropriationTitle = item.accountTitle;
 				}
 
 				budgetPrefix = '';
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
 				let cycle = item.budgetCycle ?? 'PB';
-				budgetPrefix = cycle + year + ': ';
+				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
 
 				budgetAmount = item.currentYearAmount ? item.currentYearAmount + ' $M' : '';
 			} catch (e) {
@@ -333,7 +333,6 @@ const cardHandler = {
 			const review =
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
-			console.log(item);
 			try {
 				const renderContracts = (contracts) => {
 					let contractElements = `<b>Contracts: ${contracts.length}</b>`;
