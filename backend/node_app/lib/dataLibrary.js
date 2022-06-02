@@ -341,7 +341,15 @@ class DataLibrary {
 							while (SCRIPT_REGEX.test(cleanHtml)) {
 								cleanHtml = cleanHtml.replace(SCRIPT_REGEX, '');
 							}
-							pdf.create(cleanHtml, {}).toStream(function (err, stream) {
+							pdf.create(cleanHtml, {
+								border: {
+									top: '0.25in',
+									right: '0.25in',
+									bottom: '0.25in',
+									left: '0.25in',
+								},
+								orientation: 'landscape',
+							}).toStream(function (err, stream) {
 								if (err) throw err;
 								stream.pipe(res);
 							});
