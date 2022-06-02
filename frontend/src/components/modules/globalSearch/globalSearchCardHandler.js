@@ -376,50 +376,71 @@ const getMetadataForPropertyTable = (item, type) => {
 				Key: 'Created At',
 				Value: `${item.resource.createdOn}`,
 			});
-			data.push({
-				Key: 'Created By Name',
-				Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
-			});
-			if (item.resource.createdBy['emailAddress']) {
+			if (item.resource.createdBy) {
+				if (item.resource.createdBy['firstName'] && item.resource.createdBy['lastName']) {
+					data.push({
+						Key: 'Created By Name',
+						Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
+					});
+				}
+				if (item.resource.createdBy['emailAddress']) {
+					data.push({
+						Key: 'Created By Email',
+						Value: `${item.resource.createdBy['emailAddress']}`,
+					});
+				}
+			}
+			if (item.resource.lastModifiedOn) {
 				data.push({
-					Key: 'Created By Email',
-					Value: `${item.resource.createdBy['emailAddress']}`,
+					Key: 'Modified At',
+					Value: `${item.resource.lastModifiedOn}`,
 				});
 			}
-			data.push({
-				Key: 'Modified At',
-				Value: `${item.resource.lastModifiedOn}`,
-			});
-			data.push({
-				Key: 'Modified By Name',
-				Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
-			});
-			if (item.resource.lastModifiedBy['emailAddress']) {
+			if (item.resource.lastModifiedBy) {
+				if (item.resource.lastModifiedBy['firstName'] && item.resource.lastModifiedBy['lastName']) {
+					data.push({
+						Key: 'Modified By Name',
+						Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
+					});
+				}
+				if (item.resource.lastModifiedBy['emailAddress']) {
+					data.push({
+						Key: 'Modified By Email',
+						Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+					});
+				}
+			}
+
+			if (item.resource.domain) {
 				data.push({
-					Key: 'Modified By Email',
-					Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+					Key: 'Domain',
+					Value: `${item.resource.domain}`,
 				});
 			}
-			data.push({
-				Key: 'Domain',
-				Value: `${item.resource.domain}`,
-			});
-			data.push({
-				Key: 'Name',
-				Value: `${item.resource.name}`,
-			});
-			data.push({
-				Key: 'Status',
-				Value: `${item.resource.status}`,
-			});
-			data.push({
-				Key: 'Type',
-				Value: `${item.resource.type}`,
-			});
-			data.push({
-				Key: 'Tags',
-				Value: item.resource.tags.join(', '),
-			});
+			if (item.resource.name) {
+				data.push({
+					Key: 'Name',
+					Value: `${item.resource.name}`,
+				});
+			}
+			if (item.resource.status) {
+				data.push({
+					Key: 'Status',
+					Value: `${item.resource.status}`,
+				});
+			}
+			if (item.resource.type) {
+				data.push({
+					Key: 'Type',
+					Value: `${item.resource.type}`,
+				});
+			}
+			if (item.resource.tags) {
+				data.push({
+					Key: 'Tags',
+					Value: item.resource.tags.join(', '),
+				});
+			}
 			if (item.attributes) {
 				item.attributes.forEach((attr) => {
 					data.push({
