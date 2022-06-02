@@ -13,7 +13,7 @@ const gameChangerAPI = new GameChangerAPI();
 
 const GlobalSearchHandler = {
 	async handleSearch(state, dispatch) {
-		setState(dispatch, { runSearch: false });
+		setState(dispatch, { runSearch: false, activeCategoryTab: 'all' });
 
 		const {
 			searchText = '',
