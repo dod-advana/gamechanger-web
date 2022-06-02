@@ -8,8 +8,10 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
+const pdf = require('html-pdf');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
+const fs = require('fs');
 
 const SAMPLING_BYTES = 4096;
 
@@ -330,7 +332,19 @@ class DataLibrary {
 
 				try {
 					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
-					this.awsS3Client.getObject(params).createReadStream().pipe(res);
+					if (filekey.toLowerCase().endsWith('html')) {
+						this.awsS3Client.getObject(params, function (err, data) {
+							if (err) throw err;
+							let html = data.Body.toString('utf-8');
+							console.log('html: ', html);
+							pdf.create(html, {}).toStream(function (err, stream) {
+								if (err) throw err;
+								stream.pipe(res);
+							});
+						});
+					} else {
+						this.awsS3Client.getObject(params).createReadStream().pipe(res);
+					}
 				} catch (err) {
 					this.logger.error(err, 'IPOQHZS', userId);
 					throw err;
