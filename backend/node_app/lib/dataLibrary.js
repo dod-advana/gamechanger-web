@@ -336,8 +336,12 @@ class DataLibrary {
 						this.awsS3Client.getObject(params, function (err, data) {
 							if (err) throw err;
 							let html = data.Body.toString('utf-8');
-							console.log('html: ', html);
-							pdf.create(html, {}).toStream(function (err, stream) {
+							const SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+							let cleanHtml = html;
+							while (SCRIPT_REGEX.test(cleanHtml)) {
+								cleanHtml = cleanHtml.replace(SCRIPT_REGEX, '');
+							}
+							pdf.create(cleanHtml, {}).toStream(function (err, stream) {
 								if (err) throw err;
 								stream.pipe(res);
 							});
