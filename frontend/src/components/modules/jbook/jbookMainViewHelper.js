@@ -210,8 +210,6 @@ export const populateDropDowns = async (state, dispatch) => {
 		console.log(err);
 	}
 
-	console.log(defaultOptions);
-
 	return { defaultOptions, jbookSearchSettings, dropdownData };
 };
 

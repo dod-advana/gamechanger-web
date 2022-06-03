@@ -73,6 +73,18 @@ const initState = {
 		],
 		hasKeywords: ['Yes', 'No'],
 
+		minBY1Funding: '',
+		maxBY1Funding: '',
+
+		budgetActivity: '',
+
+		minTotalCost: '',
+		maxTotalCost: '',
+
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+
+		budgetSubActivity: '',
+
 		// v --- all and selected --- v
 		budgetTypeSpecificSelected: false,
 		budgetTypeAllSelected: true,
@@ -361,7 +373,8 @@ const initState = {
 			'Source',
 		],
 	},
-	currentSort: 'Relevance',
+	currentSort: 'Budget Year',
+	sortSelected: false,
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
