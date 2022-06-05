@@ -970,8 +970,13 @@ describe('AppStatsController', function () {
 				],
 				[
 					{
-						unique_users: 5,
+						unique_searches: 5,
 						total_searches: 20,
+					},
+				],
+				[
+					{
+						unique_users: 5,
 					},
 				],
 			];
@@ -992,6 +997,7 @@ describe('AppStatsController', function () {
 				],
 				cards: {
 					unique_users: 5,
+					unique_searches: 5,
 					total_searches: 20,
 				},
 			};

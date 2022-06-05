@@ -7,7 +7,7 @@ const asyncRedisLib = require('async-redis');
 // config helper
 const getDataCatalogSettings = async () => {
 	const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
-	await redisAsyncClient.select(13);
+	await redisAsyncClient.select(10);
 	const dcSettings = await redisAsyncClient.get('dataCatalogSettings');
 	if (dcSettings) {
 		return JSON.parse(dcSettings);
@@ -73,7 +73,7 @@ const generateAcronymSearchInFields = (acronymAttributeId, datasourceAssetId) =>
 
 const cleanSearchText = (text) => {
 	if (text.includes(`"`)) return text;
-	else return `${text}*`;
+	else return `*${text}*`;
 };
 
 const getSearchTypeId = async (searchType) => {
@@ -94,6 +94,11 @@ const getQueryableStatuses = async () => {
 	return dcSettings.queryableStatuses;
 };
 
+const getAttributeTypes = async () => {
+	const dcSettings = await getDataCatalogSettings();
+	return dcSettings.attributeTypes;
+};
+
 module.exports = {
 	getCollibraUrl,
 	getAuthConfig,
@@ -103,4 +108,5 @@ module.exports = {
 	generateAcronymSearchInFields,
 	cleanSearchText,
 	getSearchTypeId,
+	getAttributeTypes,
 };

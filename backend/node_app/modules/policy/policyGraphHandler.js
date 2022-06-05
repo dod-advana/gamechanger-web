@@ -212,6 +212,10 @@ class PolicyGraphHandler extends GraphHandler {
 				return await this.getEntityDataDetailsPageHelper(req, userId);
 			case 'getTopicDataDetailsPage':
 				return await this.getTopicDataDetailsPageHelper(req, userId);
+			case 'getHeadDataDetailsPage':
+				return await this.getHeadDataDetailsPageHelper(req, userId);
+			case 'getTypeDataDetailsPage':
+				return await this.getTypeDataDetailsPageHelper(req, userId);
 			case 'getTopicDataPolicyGraph':
 				return await this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
@@ -457,18 +461,79 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-	async getEntityDataDetailsPageHelper(req, userId) {
+	async getHeadDataDetailsPageHelper(req, userId) {
 		try {
-			const { entityName, isTest = false } = req.body;
+			const { headName, isTest = false } = req.body;
 
 			const data = {};
 
-			const [entData, entQuery, entParams] = await this.getGraphData(
+			const [headData] = await this.getGraphData(
+				'MATCH (e:Entity) WHERE e.name = $name ' +
+					'WITH e MATCH (e)-[:HAS_HEAD]->(h:Entity) ' +
+					'RETURN h.name as head;',
+				{ name: headName },
+				isTest,
+				userId
+			);
+
+			data.headData = headData;
+
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'XADLO60', userId);
+			return message;
+		}
+	}
+
+	async getTypeDataDetailsPageHelper(req, userId) {
+		try {
+			const { typeName, isTest = false } = req.body;
+			const data = {};
+			const [typeData] = await this.getGraphData(
+				'MATCH (e:Entity) WHERE e.name = $name ' +
+					'WITH e MATCH (e)-[:TYPE_OF]->(t:Entity) ' +
+					'RETURN t as type;',
+				{ name: typeName },
+				isTest,
+				userId
+			);
+
+			data.typeData = typeData;
+
+			return data;
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'BALLO93', userId);
+			return message;
+		}
+	}
+
+	async getEntityDataDetailsPageHelper(req, userId) {
+		try {
+			let { entityName, isTest = false } = req.body;
+
+			const data = {};
+
+			let [entData] = await this.getGraphData(
 				`MATCH (e:Entity) WHERE e.name = $name RETURN e;`,
 				{ name: entityName },
 				isTest,
 				userId
 			);
+
+			if (!entData?.nodes?.length > 0) {
+				// No match on name, attempt to match on alias
+				// This may have poor performance (needs investigation)
+				// This is a bandaid fix to cover up for data in neo4j not exactly matching elastic
+				[entData] = await this.getGraphData(
+					`MATCH (e:Entity) WHERE $name IN split(e.aliases, ';') RETURN e;`,
+					{ name: entityName },
+					isTest,
+					userId
+				);
+				entityName = entData?.nodes?.[0].name || entityName;
+			}
 
 			data.nodes = entData.nodes;
 
