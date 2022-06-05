@@ -30,20 +30,25 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
-		const newData = {};
-		const mapping = this.getMapping(docType, fromFrontend);
+	parseFields(data, fromFrontend, docType, doMapping = true) {
+		try {
+			const newData = {};
+			const mapping = this.getMapping(docType, fromFrontend);
 
-		for (const field in data) {
-			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
-				const newKey = mapping[field].newName;
-				newData[newKey] = mapping[field].processValue(data[field]);
-			} else if (data[field] && data[field] !== null) {
-				newData[field] = data[field];
+			for (const field in data) {
+				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
+					const newKey = mapping[field].newName;
+					newData[newKey] = mapping[field].processValue(data[field]);
+				} else if (data[field] && data[field] !== null) {
+					newData[field] = data[field];
+				}
 			}
+			return newData;
+		} catch (e) {
+			console.log('Error parsing jbook fields');
+			this.logger.error(e.message, 'IEPGRA00');
+			throw e;
 		}
-
-		return newData;
 	}
 
 	// map just the name of a field between frontend/db
@@ -211,10 +216,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQuery() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(
 			', '
 		)}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
@@ -229,10 +230,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQueryForFullPDF() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(
 			', '
 		)}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
@@ -1058,10 +1055,12 @@ class JBookSearchUtility {
 					Object.keys(hit.inner_hits).forEach((hitKey) => {
 						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0],
-								});
+								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+									result.pageHits.push({
+										title: esTopLevelFieldsNameMapping[hitKey],
+										snippet: innerHit.highlight[highlightKey][0],
+									});
+								}
 							});
 						});
 					});
@@ -1105,7 +1104,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1317,7 +1316,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},
@@ -1329,7 +1328,7 @@ class JBookSearchUtility {
 
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
+		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
 		userId,
 		serviceAgencyMappings
 	) {
@@ -1353,22 +1352,24 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: [],
-						should: [
-							{
-								multi_match: {
-									query: `${parsedQuery}`,
-									fields: esTopLevelFields,
-									type: 'best_fields',
-									operator: `${operator}`,
-								},
-							},
-						],
+						should: [],
 					},
 				},
 				highlight: {
 					fields: {},
 				},
 			};
+
+			if (searchText !== '') {
+				query.query.bool.must.push({
+					multi_match: {
+						query: `${parsedQuery}`,
+						fields: esTopLevelFields,
+						type: 'best_fields',
+						operator: `${operator}`,
+					},
+				});
+			}
 
 			esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
@@ -1443,8 +1444,16 @@ class JBookSearchUtility {
 				query.query.bool.filter = filterQueries;
 			}
 
+			let sortText = jbookSearchSettings.sort[0].id;
+			if (!sortSelected && searchText && searchText !== '') {
+				sortText = 'Relevance';
+			}
+
 			// SORT
-			switch (jbookSearchSettings.sort[0].id) {
+			switch (sortText) {
+				case 'relevance':
+					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
@@ -1460,9 +1469,14 @@ class JBookSearchUtility {
 				case 'serviceAgency':
 					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
+				case 'budgetLineItem':
+					query.sort = [{ budgetLineItem_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				default:
 					break;
 			}
+
+			console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
@@ -1478,6 +1492,89 @@ class JBookSearchUtility {
 		let filterQueries = [];
 		try {
 			if (jbookSearchSettings) {
+				// Budget Activity
+				if (jbookSearchSettings.budgetActivity) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetActivity}*`,
+							default_field: 'budgetActivityNumber_s',
+						},
+					});
+				}
+
+				// Budget Sub Activity
+				if (jbookSearchSettings.budgetSubActivity) {
+					let shouldQuery = {
+						bool: {
+							should: [],
+						},
+					};
+
+					shouldQuery.bool.should.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetSubActivity}*`,
+							default_field: 'P40-13_BSA_Title_t',
+						},
+					});
+
+					shouldQuery.bool.should.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetSubActivity}*`,
+							default_field: 'budgetActivityTitle_t',
+						},
+					});
+
+					filterQueries.push(shouldQuery);
+				}
+
+				// Main Account
+				if (jbookSearchSettings.appropriationNumber) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.appropriationNumber}*`,
+							default_field: 'appropriationNumber_s',
+						},
+					});
+				}
+
+				// Total Funding
+				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
+					const rangeQuery = {
+						range: {
+							totalCost_s: {},
+						},
+					};
+
+					if (jbookSearchSettings.minTotalCost) {
+						rangeQuery.range.totalCost_s.gte = jbookSearchSettings.minTotalCost;
+					}
+
+					if (jbookSearchSettings.maxTotalCost) {
+						rangeQuery.range.totalCost_s.lte = jbookSearchSettings.maxTotalCost;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
+				// BY1 Funding
+				if (jbookSearchSettings.minBY1Funding || jbookSearchSettings.maxBY1Funding) {
+					const rangeQuery = {
+						range: {
+							by1BaseYear_d: {},
+						},
+					};
+
+					if (jbookSearchSettings.minBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.gte = jbookSearchSettings.minBY1Funding;
+					}
+
+					if (jbookSearchSettings.maxBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.lte = jbookSearchSettings.maxBY1Funding;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
 				// Budget Type filter
 				if (jbookSearchSettings.budgetType) {
 					const budgetTypesTemp = [];
@@ -1518,7 +1615,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.programElement) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.programElement}`,
+							query: `*${jbookSearchSettings.programElement}*`,
 							default_field: 'budgetLineItem_s',
 						},
 					});
@@ -1528,7 +1625,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.projectNum) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.projectNum}`,
+							query: `*${jbookSearchSettings.projectNum}*`,
 							default_field: 'projectNum_s',
 						},
 					});

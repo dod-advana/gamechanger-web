@@ -73,6 +73,18 @@ const initState = {
 		],
 		hasKeywords: ['Yes', 'No'],
 
+		minBY1Funding: '',
+		maxBY1Funding: '',
+
+		budgetActivity: '',
+
+		minTotalCost: '',
+		maxTotalCost: '',
+
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+
+		budgetSubActivity: '',
+
 		// v --- all and selected --- v
 		budgetTypeSpecificSelected: false,
 		budgetTypeAllSelected: true,
@@ -348,6 +360,7 @@ const initState = {
 	resetSettingsSwitch: false,
 	categorySorting: {
 		jbook: [
+			'Relevance',
 			'Budget Year',
 			'Program Element',
 			'Budget Line Item',
@@ -361,6 +374,7 @@ const initState = {
 		],
 	},
 	currentSort: 'Budget Year',
+	sortSelected: false,
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
@@ -385,6 +399,7 @@ const initState = {
 
 	// contract totals
 	contractTotals: {},
+	statsLoading: false,
 
 	paginationSearch: false,
 
@@ -394,7 +409,10 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
-	portfolio_name: 'AI Inventory',
+
+	// jbook portfolios
+	portfolios: [],
+	selectedPortfolio: 'General',
 };
 
 const init = (initialState) => {

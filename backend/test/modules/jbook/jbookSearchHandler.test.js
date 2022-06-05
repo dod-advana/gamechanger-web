@@ -976,7 +976,7 @@ describe('JBookSearchHandler', function () {
 			let setHeader = 0;
 			let resEnd = false;
 
-			const req = { test: true, portfolio_name: 'AI ' };
+			const req = { test: true, portfolioName: 'AI ' };
 			const res = {
 				status() {
 					resStatus = true;
