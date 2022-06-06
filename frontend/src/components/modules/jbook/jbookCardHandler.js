@@ -709,7 +709,11 @@ const cardHandler = {
 				},
 				{
 					Key: 'Total Cost',
-					Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+					Value: projectData.totalCost
+						? isNaN(projectData.totalCost)
+							? projectData.totalCost
+							: `${formatNum(projectData.totalCost)}`
+						: 'N/A',
 				},
 				{
 					Key: 'Budget Year (FY)',

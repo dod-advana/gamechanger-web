@@ -11,7 +11,6 @@ import CONFIG from '../../../config/config';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
-import { primary } from '../../common/gc-colors';
 import { colWidth, getDefaultComponent, styles } from '../default/defaultCardHandler';
 import GCTooltip from '../../common/GCToolTip';
 import sanitizeHtml from 'sanitize-html';
@@ -376,50 +375,71 @@ const getMetadataForPropertyTable = (item, type) => {
 				Key: 'Created At',
 				Value: `${item.resource.createdOn}`,
 			});
-			data.push({
-				Key: 'Created By Name',
-				Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
-			});
-			if (item.resource.createdBy['emailAddress']) {
+			if (item.resource.createdBy) {
+				if (item.resource.createdBy['firstName'] && item.resource.createdBy['lastName']) {
+					data.push({
+						Key: 'Created By Name',
+						Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
+					});
+				}
+				if (item.resource.createdBy['emailAddress']) {
+					data.push({
+						Key: 'Created By Email',
+						Value: `${item.resource.createdBy['emailAddress']}`,
+					});
+				}
+			}
+			if (item.resource.lastModifiedOn) {
 				data.push({
-					Key: 'Created By Email',
-					Value: `${item.resource.createdBy['emailAddress']}`,
+					Key: 'Modified At',
+					Value: `${item.resource.lastModifiedOn}`,
 				});
 			}
-			data.push({
-				Key: 'Modified At',
-				Value: `${item.resource.lastModifiedOn}`,
-			});
-			data.push({
-				Key: 'Modified By Name',
-				Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
-			});
-			if (item.resource.lastModifiedBy['emailAddress']) {
+			if (item.resource.lastModifiedBy) {
+				if (item.resource.lastModifiedBy['firstName'] && item.resource.lastModifiedBy['lastName']) {
+					data.push({
+						Key: 'Modified By Name',
+						Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
+					});
+				}
+				if (item.resource.lastModifiedBy['emailAddress']) {
+					data.push({
+						Key: 'Modified By Email',
+						Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+					});
+				}
+			}
+
+			if (item.resource.domain) {
 				data.push({
-					Key: 'Modified By Email',
-					Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+					Key: 'Domain',
+					Value: `${item.resource.domain}`,
 				});
 			}
-			data.push({
-				Key: 'Domain',
-				Value: `${item.resource.domain}`,
-			});
-			data.push({
-				Key: 'Name',
-				Value: `${item.resource.name}`,
-			});
-			data.push({
-				Key: 'Status',
-				Value: `${item.resource.status}`,
-			});
-			data.push({
-				Key: 'Type',
-				Value: `${item.resource.type}`,
-			});
-			data.push({
-				Key: 'Tags',
-				Value: item.resource.tags.join(', '),
-			});
+			if (item.resource.name) {
+				data.push({
+					Key: 'Name',
+					Value: `${item.resource.name}`,
+				});
+			}
+			if (item.resource.status) {
+				data.push({
+					Key: 'Status',
+					Value: `${item.resource.status}`,
+				});
+			}
+			if (item.resource.type) {
+				data.push({
+					Key: 'Type',
+					Value: `${item.resource.type}`,
+				});
+			}
+			if (item.resource.tags) {
+				data.push({
+					Key: 'Tags',
+					Value: item.resource.tags.join(', '),
+				});
+			}
 			if (item.attributes) {
 				item.attributes.forEach((attr) => {
 					data.push({
@@ -428,6 +448,8 @@ const getMetadataForPropertyTable = (item, type) => {
 					});
 				});
 			}
+			break;
+		default:
 			break;
 	}
 
@@ -439,7 +461,7 @@ const cardSubHeaderHandler = (props) => {
 };
 
 const getCardHeaderHandler = (props) => {
-	const { item, state, favoriteComponent, type, graphView } = props;
+	const { item, state, type, graphView } = props;
 
 	const docListView = state.listView && !graphView;
 	const restricted = getRestricted(item, type);
@@ -465,9 +487,9 @@ const getCardHeaderHandler = (props) => {
 							<p> {getType(item, type)} </p>
 						</div>
 					)}
-					<div className={'selected-favorite'}>
-						<div style={{ display: 'flex' }}>{favoriteComponent()}</div>
-					</div>
+					{/*<div className={'selected-favorite'}>*/}
+					{/*	<div style={{ display: 'flex' }}>{favoriteComponent()}</div>*/}
+					{/*</div>*/}
 				</div>
 			</div>
 		</StyledFrontCardHeader>

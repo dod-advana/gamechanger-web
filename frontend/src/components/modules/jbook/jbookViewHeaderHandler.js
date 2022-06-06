@@ -81,6 +81,8 @@ const JbookViewHeaderHandler = (props) => {
 	useEffect(() => {
 		if (searchText && searchText !== '' && !sortSelected && currentSort !== 'Relevance') {
 			setState(dispatch, { currentSort: 'Relevance' });
+		} else if (!searchText || (searchText === '' && !sortSelected)) {
+			setState(dispatch, { currentSort: 'Budget Year' });
 		}
 	}, [dispatch, currentSort, searchText, sortSelected]);
 

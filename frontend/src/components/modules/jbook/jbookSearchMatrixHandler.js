@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { GC_COLORS } from './jbookMainViewHandler';
@@ -245,7 +245,7 @@ const getSearchMatrixItems = (props) => {
 					header={<b>PL TITLE</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
-					headerTextWeight={'bold'}
+					headerTextWeight={'normal'}
 				>
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
