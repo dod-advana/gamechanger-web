@@ -1,16 +1,20 @@
-image: "${IRONBANK_NODEJS}"
+image: node:14 # "${IRONBANK_NODEJS}"
 
 stages:          # List of stages for jobs, and their order of execution
   - test
   - deploy
 
-lint-frontend-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+lint-frontend-test-job:   # This job also runs in the test stage
+  stage: test    # It can run at the same time as unit-test-job (in parallel)
   only:
     - merge_requests
   script:
     - |
-      cd frontend && npm install && npx eslint --ext .js src
+      cd frontend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npx eslint --ext .js src
 
 lint-backend-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).
@@ -18,7 +22,11 @@ lint-backend-test-job:   # This job also runs in the test stage.
     - merge_requests
   script:
     - |
-      cd backend && npm install && npx eslint --ext .js src
+      cd backend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npx eslint --ext .js node_app
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
