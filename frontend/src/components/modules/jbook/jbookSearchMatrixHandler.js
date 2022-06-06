@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { GC_COLORS } from './jbookMainViewHandler';
@@ -7,6 +7,7 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import Pluralize from 'pluralize';
 import { setState } from '../../../utils/sharedFunctions';
 
 import { trackEvent } from '../../telemetry/Matomo';
@@ -72,21 +73,14 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
-	const endsInY = displayName[displayName.length - 1] === 'y';
-	const endsInS = displayName[displayName.length - 1] === 's';
-
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false, customOptions) => {
 	const allSelected = `${type}AllSelected`;
-	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
-		endsInY ? 'ies' : endsInS ? 'es' : 's'
-	}`;
-	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
-		endsInY ? 'ies' : endsInS ? 'es' : 's'
-	}`;
+	const allText = `All ${Pluralize(displayName)}`;
+	const specificText = `Specific ${Pluralize(displayName)}`;
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
-	const options = state.defaultOptions[optionType];
+	const options = customOptions || state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -220,10 +214,12 @@ const renderStats = (contractTotals) => {
 	);
 };
 
+const generalStatusOptions = ['Finished Review', 'Needs Review'];
+
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
 
-	const { contractTotals, jbookSearchSettings } = state;
+	const { contractTotals, jbookSearchSettings, selectedPortfolio } = state;
 
 	return (
 		<div style={{ marginLeft: 15 }}>
@@ -364,45 +360,51 @@ const getSearchMatrixItems = (props) => {
 				</div>
 			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
-					header={<b>PRIMARY REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
+						header={<b>PRIMARY REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
-					header={<b>SERVICE REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
+						header={<b>SERVICE REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
-					header={<b>POC REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					<InputFilter
-						setJBookSetting={handleFilterInputChange}
-						field={'pocReviewer'}
-						name={'POC Reviewer'}
-					/>
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
+						header={<b>POC REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<InputFilter
+							setJBookSetting={handleFilterInputChange}
+							field={'pocReviewer'}
+							name={'POC Reviewer'}
+						/>
+					</GCAccordion>
+				</div>
+			)}
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
@@ -412,45 +414,62 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
+					{selectedPortfolio === 'General' &&
+						renderFilterCheckboxes(
+							state,
+							dispatch,
+							classes,
+							'reviewStatus',
+							'review status',
+							false,
+							generalStatusOptions
+						)}
+					{selectedPortfolio === 'AI Inventory' &&
+						renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
-					header={<b>HAS KEYWORDS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'hasKeywords', 'has keyword')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio !== 'General' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
+						header={<b>HAS KEYWORDS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'hasKeywords', 'has keyword')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
-					header={<b>LABELS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'primaryClassLabel', 'primary class label')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+						header={<b>TAGS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'primaryClassLabel', 'primary class tag')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.sourceSpecificSelected}
-					header={<b>SOURCE</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'sourceTag', 'source tag')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.sourceSpecificSelected}
+						header={<b>SOURCE</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'sourceTag', 'source tag')}
+					</GCAccordion>
+				</div>
+			)}
 
 			<button
 				type="button"
