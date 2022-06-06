@@ -11,8 +11,9 @@ lint-frontend-test-job:   # This job also runs in the test stage
   script:
     - |
       cd frontend
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+      touch .npmrc
+      echo -e "//npm.pkg.github.com/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc
+      echo -e "@dod-advana:registry=https://npm.pkg.github.com" >> .npmrc
       npm ci && npx eslint --ext .js src
 
 lint-backend-test-job:   # This job also runs in the test stage.
@@ -22,8 +23,9 @@ lint-backend-test-job:   # This job also runs in the test stage.
   script:
     - |
       cd backend
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+      touch .npmrc
+      echo -e "//npm.pkg.github.com/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc
+      echo -e "@dod-advana:registry=https://npm.pkg.github.com" >> .npmrc
       npm ci && npx eslint --ext .js src
 
 deploy-job:       # This job runs the build for dev.
