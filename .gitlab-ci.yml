@@ -1,4 +1,4 @@
-image: "${IRONBANK_NODEJS}"
+image: node:14 # "${IRONBANK_NODEJS}"
 
 stages:          # List of stages for jobs, and their order of execution
   - test
