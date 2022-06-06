@@ -69,6 +69,7 @@ class ESSearchLib {
 				index,
 				id: documentId,
 				body: { doc: updatedDocument, detect_noop: false },
+				refresh: 'wait_for',
 			});
 			return true;
 		} catch (e) {

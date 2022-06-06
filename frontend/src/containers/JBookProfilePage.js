@@ -222,6 +222,10 @@ const JBookProfilePage = (props) => {
 		}
 	};
 
+	// useEffect(() => {
+	// 	getProjectData(id, selectedPortfolio);
+	// }, [selectedPortfolio, id]);
+
 	useEffect(() => {
 		try {
 			const url = window.location.href;
@@ -856,7 +860,7 @@ const JBookProfilePage = (props) => {
 				},
 			});
 
-			getProjectData(id, selectedPortfolio);
+			await getProjectData(id, selectedPortfolio);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -874,6 +878,7 @@ const JBookProfilePage = (props) => {
 				projectNum,
 				appropriationNumber,
 				portfolioName: selectedPortfolio,
+				id,
 			},
 		});
 		await getProjectData(id, selectedPortfolio);
@@ -900,7 +905,12 @@ const JBookProfilePage = (props) => {
 	const scorecardData = (classification, reviewData) => {
 		let data = [];
 
-		if (classification && classification.modelPredictionProbability && classification.modelPrediction) {
+		if (
+			selectedPortfolio === 'AI Inventory' &&
+			classification &&
+			classification.modelPredictionProbability &&
+			classification.modelPrediction
+		) {
 			let num = classification.modelPredictionProbability;
 			num = num.toString(); //If it's not already a String
 			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
@@ -952,7 +962,9 @@ const JBookProfilePage = (props) => {
 							projectData={projectData}
 						/>
 					</div>
-					<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					{selectedPortfolio !== 'General' && (
+						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					)}
 				</StyledLeftContainer>
 				<StyledMainContainer>
 					<ProjectDescription
