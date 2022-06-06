@@ -339,7 +339,7 @@ class GlobalSearchHandler extends SearchHandler {
 				});
 
 				result.highlights.forEach((highlight) => {
-					if (highlight.field.includes('attribute:')) {
+					if (highlight.field.toLowerCase().includes('attribute:')) {
 						const attributeID = highlight.field.split(':')[1];
 						highlight.field = attributeTypes[attributeID];
 					}
