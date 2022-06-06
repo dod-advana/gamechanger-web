@@ -4,8 +4,8 @@ stages:          # List of stages for jobs, and their order of execution
   - test
   - deploy
 
-lint-frontend-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+lint-frontend-test-job:   # This job also runs in the test stage
+  stage: test    # It can run at the same time as unit-test-job (in parallel)
   only:
     - merge_requests
   script:
