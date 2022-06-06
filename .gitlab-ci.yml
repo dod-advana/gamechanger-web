@@ -17,8 +17,8 @@ lint-frontend-test-job:   # This job also runs in the test stage
     - cat .npmrc
     - npm ci && npx eslint --ext .js src
 
-lint-backend-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+lint-backend-test-job:   # This job also runs in the test stage
+  stage: test    # It can run at the same time as unit-test-job (in parallel)
   only:
     - merge_requests
   script:
