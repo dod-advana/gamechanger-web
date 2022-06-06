@@ -73,14 +73,49 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false, customOptions) => {
+const generalReviewStatusOpts = ['Finished Review', 'Needs Review'];
+const keywordsOpts = ['Yes', 'No'];
+
+const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
+	return (
+		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+			{options.map((option) => {
+				return (
+					<FormControlLabel
+						key={`${option}`}
+						value={`${option}`}
+						classes={{
+							root: classes.rootLabel,
+							label: classes.checkboxPill,
+						}}
+						control={
+							<Checkbox
+								classes={{
+									root: classes.rootButton,
+									checked: classes.checkedButton,
+								}}
+								name={`${option}`}
+								checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
+								onClick={(event) => handleFilterChange(event, state, dispatch, type)}
+							/>
+						}
+						label={`${option}`}
+						labelPlacement="end"
+					/>
+				);
+			})}
+		</FormGroup>
+	);
+};
+
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
 	const allSelected = `${type}AllSelected`;
 	const allText = `All ${Pluralize(displayName)}`;
 	const specificText = `Specific ${Pluralize(displayName)}`;
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
-	const options = customOptions || state.defaultOptions[optionType];
+	const options = state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -128,35 +163,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, use
 							style={styles.titleText}
 						/>
 					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.jbookSearchSettings[specificSelected] &&
-							options &&
-							options.map((option) => {
-								return (
-									<FormControlLabel
-										key={`${option}`}
-										value={`${option}`}
-										classes={{
-											root: classes.rootLabel,
-											label: classes.checkboxPill,
-										}}
-										control={
-											<Checkbox
-												classes={{
-													root: classes.rootButton,
-													checked: classes.checkedButton,
-												}}
-												name={`${option}`}
-												checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
-												onClick={(event) => handleFilterChange(event, state, dispatch, type)}
-											/>
-										}
-										label={`${option}`}
-										labelPlacement="end"
-									/>
-								);
-							})}
-					</FormGroup>
+					{state.jbookSearchSettings[specificSelected] &&
+						options &&
+						renderFilterCheckboxesOptions(state, dispatch, classes, type, options)}
 				</>
 			}
 		</FormControl>
@@ -213,8 +222,6 @@ const renderStats = (contractTotals) => {
 		/>
 	);
 };
-
-const generalStatusOptions = ['Finished Review', 'Needs Review'];
 
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
@@ -406,28 +413,40 @@ const getSearchMatrixItems = (props) => {
 				</div>
 			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.reviewStatusSpecificSelected}
-					header={<b>REVIEW STATUS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{selectedPortfolio === 'General' &&
-						renderFilterCheckboxes(
-							state,
-							dispatch,
-							classes,
-							'reviewStatus',
-							'review status',
-							false,
-							generalStatusOptions
-						)}
-					{selectedPortfolio === 'AI Inventory' &&
-						renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
+						header={<b>REVIEW STATUS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
+					</GCAccordion>
+				</div>
+			)}
+			{selectedPortfolio === 'General' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
+						header={<b>REVIEW STATUS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+							{renderFilterCheckboxesOptions(
+								state,
+								dispatch,
+								classes,
+								'reviewStatus',
+								generalReviewStatusOpts
+							)}
+						</FormControl>
+					</GCAccordion>
+				</div>
+			)}
 
 			{selectedPortfolio !== 'General' && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
@@ -438,7 +457,9 @@ const getSearchMatrixItems = (props) => {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterCheckboxes(state, dispatch, classes, 'hasKeywords', 'has keyword')}
+						<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+							{renderFilterCheckboxesOptions(state, dispatch, classes, 'hasKeywords', keywordsOpts)}
+						</FormControl>
 					</GCAccordion>
 				</div>
 			)}
