@@ -1,4 +1,3 @@
 UPDATE review
-SET portfolio_id = subquery.id
-FROM 
-  (SELECT id FROM portfolio where name = 'jaic') AS subquery;
+SET portfolio_name = 'AI Inventory'
+WHERE budget_year = '2022' AND review.portfolio_name IS NULL;

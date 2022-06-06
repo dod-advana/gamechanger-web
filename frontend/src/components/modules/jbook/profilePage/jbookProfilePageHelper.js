@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { PieChart, Pie, Legend, Cell, Label } from 'recharts';
+import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -10,6 +10,7 @@ import {
 	StyledNavButton,
 	StyledNavBar,
 	StyledNavContainer,
+	StyledLeftContainer,
 	StyledSideNavContainer,
 } from './profilePageStyles';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -126,12 +127,10 @@ const BasicData = (props) => {
 
 const ClassificationScoreCard = (props) => {
 	const { scores } = props;
-	const context = useContext(JBookContext);
-	const { state } = context;
 
 	return (
 		<StyledLeftContainer>
-			<div style={{ backgroundColor: 'rgb(239, 241, 246)' }}>
+			<div style={{ backgroundColor: 'rgb(239, 241, 246)', marginLeft: -6, marginRight: -8 }}>
 				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
 					{`Classification Scorecard`}
 				</Typography>
@@ -375,8 +374,6 @@ const aggregateProjectDescriptions = (projectData) => {
 			tmpProjectDescriptions.push({ ...titleMapping[key], value: projectData[key] });
 		}
 	});
-
-	console.log(tmpProjectDescriptions);
 
 	return tmpProjectDescriptions;
 };

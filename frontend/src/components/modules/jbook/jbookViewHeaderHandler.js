@@ -69,11 +69,22 @@ const JbookViewHeaderHandler = (props) => {
 		activeCategoryTab,
 		currentSort,
 		currentOrder,
+		sortSelected,
+		searchText,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
 	const [portfolios, setPortfolios] = useState([]);
+
+	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
+	useEffect(() => {
+		if (searchText && searchText !== '' && !sortSelected && currentSort !== 'Relevance') {
+			setState(dispatch, { currentSort: 'Relevance' });
+		} else if (!searchText || (searchText === '' && !sortSelected)) {
+			setState(dispatch, { currentSort: 'Budget Year' });
+		}
+	}, [dispatch, currentSort, searchText, sortSelected]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -159,6 +170,7 @@ const JbookViewHeaderHandler = (props) => {
 			runSearch: true,
 			infiniteScrollPage: 1,
 			searchSettings: newSearchSettings,
+			sortSelected: true,
 		});
 	};
 
@@ -201,17 +213,19 @@ const JbookViewHeaderHandler = (props) => {
 								className="MuiInputBase-root"
 								autoWidth
 							>
-								{categorySorting[activeCategoryTab].map((sort) => {
-									return (
-										<MenuItem
-											key={`${sort}-key`}
-											value={sort}
-											style={{ display: 'flex', padding: '3px 6px' }}
-										>
-											{sort}
-										</MenuItem>
-									);
-								})}
+								{categorySorting[activeCategoryTab]
+									.filter((sort) => !((!searchText || searchText === '') && sort === 'Relevance'))
+									.map((sort) => {
+										return (
+											<MenuItem
+												key={`${sort}-key`}
+												value={sort}
+												style={{ display: 'flex', padding: '3px 6px' }}
+											>
+												{sort}
+											</MenuItem>
+										);
+									})}
 							</Select>
 						</FormControl>
 						{currentSort !== 'Alphabetical' ? (

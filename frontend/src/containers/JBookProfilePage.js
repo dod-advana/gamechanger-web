@@ -27,7 +27,6 @@ import {
 	aggregateProjectDescriptions,
 	Contracts,
 	formatNum,
-	BasicData,
 	Metadata,
 	ProjectDescription,
 	SideNav,
@@ -120,7 +119,6 @@ const JBookProfilePage = (props) => {
 				newMap[user.id] = user;
 			});
 			setUserMap(newMap);
-			console.log(newMap);
 		};
 
 		if (!init) {
@@ -129,8 +127,9 @@ const JBookProfilePage = (props) => {
 		}
 	}, [init, setInit]);
 
-	const getProjectData = async (type, id, useElasticSearch) => {
+	const getProjectData = async (id, portfolioName) => {
 		setProfileLoading(true);
+		const tempMapping = {};
 
 		let projectData;
 		try {
@@ -138,16 +137,20 @@ const JBookProfilePage = (props) => {
 				functionName: 'getProjectData',
 				cloneName: cloneData.clone_name,
 				options: {
-					type,
 					id,
-					useElasticSearch,
-					portfolioName: selectedPortfolio,
+					portfolioName,
 				},
 			});
 
+			if (projectData.data) {
+				setBudgetLineItem(projectData.data.budgetLineItem || '');
+				setProgramElement(projectData.data.programElement || '');
+				setProjectNum(projectData.data.projectNum || '');
+				setAppropriationNumber(projectData.data.appropriationNumber || '');
+			}
+
 			if (projectData.data && projectData.data.contracts) {
 				setContracts(projectData.data.contracts);
-				const tempMapping = {};
 				for (let i = 0; i < projectData.data.contracts.length; i++) {
 					const currentContract = projectData.data.contracts[i];
 					if (tempMapping[currentContract.vendorName] === undefined) {
@@ -155,28 +158,6 @@ const JBookProfilePage = (props) => {
 					}
 				}
 				setContractMapping(tempMapping);
-
-				try {
-					let reviewKeys = Object.keys(projectData.data.reviews);
-					for (let i = 0; i < Object.keys(projectData.data.reviews).length; i++) {
-						let review = projectData.data.reviews[reviewKeys[i]];
-						if (
-							review.serviceMissionPartnersChecklist === null ||
-							review.serviceMissionPartnersChecklist === undefined
-						) {
-							review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-						}
-						if (
-							review.pocMissionPartnersChecklist === null ||
-							review.pocMissionPartnersChecklist === undefined
-						) {
-							review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
-						}
-					}
-				} catch (err) {
-					console.log('Error setting mission partners checklist');
-					console.log(err);
-				}
 			}
 		} catch (err) {
 			console.log('Error fetching project and review data');
@@ -201,11 +182,21 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
 		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			let review = projectData.data.reviews[state.selectedPortfolio] ?? {};
+			let review = projectData.data.reviews[portfolioName] ?? {};
 
 			if (review) {
 				if (review.domainTask && review.domainTaskSecondary) {
 					domainTasks[review.domainTask] = review.domainTaskSecondary;
+				}
+
+				if (
+					review.serviceMissionPartnersChecklist === null ||
+					review.serviceMissionPartnersChecklist === undefined
+				) {
+					review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+				}
+				if (review.pocMissionPartnersChecklist === null || review.pocMissionPartnersChecklist === undefined) {
+					review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
 				}
 
 				// Review changes to make things behave properly
@@ -231,29 +222,27 @@ const JBookProfilePage = (props) => {
 		}
 	};
 
+	// useEffect(() => {
+	// 	getProjectData(id, selectedPortfolio);
+	// }, [selectedPortfolio, id]);
+
 	useEffect(() => {
 		try {
 			const url = window.location.href;
-			const programElement = getQueryVariable('programElement', url);
-			const projectNum = getQueryVariable('projectNum', url);
 			const type = getQueryVariable('type', url);
-			const budgetLineItem = getQueryVariable('budgetLineItem', url);
 			const budgetYear = getQueryVariable('budgetYear', url);
 			const searchText = getQueryVariable('searchText', url);
 			const id = getQueryVariable('id', url);
-			const appropriationNumber = getQueryVariable('appropriationNumber', url);
-			const useElasticSearch = getQueryVariable('useElasticSearch', url) === 'true';
+			const tmpPortfolioName = getQueryVariable('portfolioName', url);
 
-			setProgramElement(programElement);
-			setProjectNum(projectNum);
 			setBudgetType(type);
-			setBudgetLineItem(budgetLineItem);
 			setBudgetYear(budgetYear);
 			setSearchText(searchText);
 			setID(id);
-			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(type, id, useElasticSearch);
+			getProjectData(id, tmpPortfolioName).then(() => {
+				setSelectedPortfolio(tmpPortfolioName);
+			});
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
@@ -301,7 +290,6 @@ const JBookProfilePage = (props) => {
 	}, []);
 
 	useEffect(() => {
-		console.log(projectData);
 		if (projectData.id) {
 			if (!isCheckboxSet) {
 				setIsCheckboxSet(true);
@@ -855,24 +843,24 @@ const JBookProfilePage = (props) => {
 				options: {
 					frontendReviewData: {
 						...reviewData,
-						budgetType: budgetType,
-						revProgramElement: programElement,
-						id: undefined,
-						revBudgetLineItems: budgetLineItem,
-						budgetYear: budgetYear,
+						budgetType,
+						programElement,
+						budgetLineItem,
+						budgetYear,
 						appropriationNumber,
 						budgetActivityNumber: projectData.budgetActivityNumber,
 						serviceAgency: projectData.serviceAgency,
+						portfolioName: selectedPortfolio,
+						projectNum,
 					},
 					isSubmit,
 					reviewType,
-					projectNum,
-					appropriationNumber,
-					portfolioName: state.selectedPortfolio,
+					portfolioName: selectedPortfolio,
+					id,
 				},
 			});
 
-			getProjectData(budgetType, id, state.useElasticSearch);
+			await getProjectData(id, selectedPortfolio);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -889,9 +877,11 @@ const JBookProfilePage = (props) => {
 				budgetLineItem,
 				projectNum,
 				appropriationNumber,
+				portfolioName: selectedPortfolio,
+				id,
 			},
 		});
-		await getProjectData(budgetType, id, state.useElasticSearch);
+		await getProjectData(id, selectedPortfolio);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -915,7 +905,12 @@ const JBookProfilePage = (props) => {
 	const scorecardData = (classification, reviewData) => {
 		let data = [];
 
-		if (classification && classification.modelPredictionProbability && classification.modelPrediction) {
+		if (
+			selectedPortfolio === 'AI Inventory' &&
+			classification &&
+			classification.modelPredictionProbability &&
+			classification.modelPrediction
+		) {
 			let num = classification.modelPredictionProbability;
 			num = num.toString(); //If it's not already a String
 			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
@@ -956,18 +951,20 @@ const JBookProfilePage = (props) => {
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<StyledLeftContainer>
-					{scorecardData(projectData.classification, reviewData).length > 0 ? (
+					<div style={{ paddingLeft: 20 }}>
+						<PortfolioSelector
+							selectedPortfolio={selectedPortfolio}
+							portfolios={state.portfolios}
+							setPortfolio={setSelectedPortfolio}
+							dispatch={dispatch}
+							formControlStyle={{ margin: '10px 0', width: '100%' }}
+							width={'100%'}
+							projectData={projectData}
+						/>
+					</div>
+					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
-					) : null}
-					<PortfolioSelector
-						selectedPortfolio={selectedPortfolio}
-						portfolios={state.portfolios}
-						setPortfolio={setSelectedPortfolio}
-						dispatch={dispatch}
-						formControlStyle={{ margin: '10px 0' }}
-						width={'100%'}
-						projectData={projectData}
-					/>
+					)}
 				</StyledLeftContainer>
 				<StyledMainContainer>
 					<ProjectDescription
@@ -1213,7 +1210,7 @@ const JBookProfilePage = (props) => {
 										}}
 										reviewerProp={projectData.reviewer}
 										serviceReviewerProp={projectData.serviceReview}
-									></JBookSimpleReviewForm>
+									/>
 								</GCAccordion>
 							</StyledAccordionContainer>
 						)

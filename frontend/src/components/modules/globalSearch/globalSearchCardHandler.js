@@ -4,17 +4,23 @@ import styled from 'styled-components';
 import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import { Link, Typography } from '@material-ui/core';
+import { Link } from '@material-ui/core';
 import _ from 'underscore';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import CONFIG from '../../../config/config';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
-import moment from 'moment';
-import { parseOwnerName } from './search';
-import { primary } from '../../common/gc-colors';
-import { getDefaultComponent, styles } from '../default/defaultCardHandler';
+import { colWidth, getDefaultComponent, styles } from '../default/defaultCardHandler';
+import GCTooltip from '../../common/GCToolTip';
+import sanitizeHtml from 'sanitize-html';
+import GCAccordion from '../../common/GCAccordion';
+import SimpleTable from '../../common/SimpleTable';
+import PropTypes from 'prop-types';
+
+const MAX_KEYS = 8;
+
+const MODELS_HITS_KEY_NOT_ALLOWED = ['Hyperparameter Selection', 'Metrics'];
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
@@ -24,13 +30,13 @@ const StyledFrontCardHeader = styled.div`
 	background-color: ${({ restricted }) => (!restricted ? 'white' : 'rgba(223,230,238,0.5)')};
 	font-weight: bold;
 	font-family: Montserrat;
-	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
-	padding: ${({ listView }) => (listView ? '0px' : '5px')};
+	height: ${({ listView }) => (listView ? 'fit-content' : '70px')};
+	padding: ${({ listView }) => (listView ? '0px' : '15px')};
 	margin-left: ${({ listView }) => (listView ? '4px' : '0px')};
 	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
 
 	.title-text-selected-favorite-div {
-		max-height: ${({ listView }) => (listView ? '' : '50px')};
+		max-height: ${({ listView }) => (listView ? '35px' : '50px')};
 		height: ${({ listView }) => (listView ? '35px' : '')};
 		overflow: hidden;
 		display: flex;
@@ -41,6 +47,7 @@ const StyledFrontCardHeader = styled.div`
 			display: ${({ listView }) => (listView ? 'flex' : '')};
 			alignitems: ${({ listView }) => (listView ? 'top' : '')};
 			height: ${({ listView }) => (listView ? 'fit-content' : '')};
+			max-width: ${({ listView }) => (listView ? '60%' : '')};
 			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
 
 			.text {
@@ -67,7 +74,8 @@ const StyledFrontCardHeader = styled.div`
 		display: flex;
 		color: black;
 		margin-bottom: 0px;
-		margin-top: 0px;
+		margin-top: 4px;
+		margin-right: 20px;
 		background-color: 'white';
 		font-family: Montserrat;
 		height: 24px;
@@ -86,8 +94,7 @@ const StyledFrontCardContent = styled.div`
 	}
 
 	img {
-		height: 175px;
-		width: 300px;
+		height: 150px;
 		margin-right: auto;
 		margin-left: auto;
 		margin-bottom: 10px;
@@ -106,6 +113,146 @@ const StyledFrontCardContent = styled.div`
 			font-size: ${CARD_FONT_SIZE}px;
 		}
 	}
+
+	.hits-container {
+		display: grid;
+		grid-template-columns: 170px auto auto;
+		height: 100%;
+
+		.page-hits {
+			min-width: 100px;
+			height: fit-content;
+			border: 1px solid rgb(189, 189, 189);
+			border-top: 0px;
+
+			.page-hit {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding-right: 5px;
+				padding-left: 5px;
+				border-top: 1px solid rgb(189, 189, 189);
+				cursor: pointer;
+				color: #386f94;
+
+				span {
+					font-size: ${CARD_FONT_SIZE}px;
+				}
+
+				i {
+					font-size: ${CARD_FONT_SIZE}px;
+					margin-left: 10px;
+				}
+			}
+		}
+
+		> .expanded-metadata {
+			overflow-wrap: anywhere;
+			grid-column: 2 / 4;
+
+			> .searchdemo-blockquote {
+				height: 260px;
+			}
+		}
+	}
+`;
+
+const StyledListViewFrontCardContent = styled.div`
+	.list-view-button {
+		width: 100%;
+		height: fit-content;
+		margin-top: 10px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		i {
+			font-size: ${CARD_FONT_SIZE}px;
+			color: rgb(0, 131, 143);
+			font-weight: normal;
+			margin-left: 5px;
+			margin-right: 20px;
+		}
+	}
+
+	.expanded-hits {
+		display: flex;
+		height: 100%;
+		width: 100%;
+
+		.page-hits {
+			min-width: 160px;
+			height: 100%;
+			border: 1px solid rgb(189, 189, 189);
+			border-top: 0px;
+
+			.page-hit {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding-right: 5px;
+				padding-left: 5px;
+				border-top: 1px solid rgb(189, 189, 189);
+				cursor: pointer;
+				color: #386f94;
+
+				span {
+					font-size: ${CARD_FONT_SIZE}px;
+				}
+
+				i {
+					font-size: ${CARD_FONT_SIZE}px;
+					margin-left: 10px;
+				}
+			}
+		}
+
+		> .expanded-metadata {
+			border: 1px solid rgb(189, 189, 189);
+			border-left: 0px;
+			min-height: 126px;
+			width: 100%;
+
+			> blockquote {
+				font-size: ${CARD_FONT_SIZE}px;
+				line-height: 20px;
+
+				background: ${({ expandedDataBackground }) =>
+					expandedDataBackground ? expandedDataBackground : '#dde1e0'};
+				margin-bottom: 0;
+				height: 165px;
+				border-left: 0;
+				overflow: hidden;
+				font-family: Noto Sans, Arial, Helvetica, sans-serif;
+				padding: 0.5em 10px;
+				margin-left: 0;
+				quotes: '\\201C''\\201D''\\2018''\\2019';
+
+				> em {
+					color: white;
+					background-color: #e9691d;
+					margin-right: 5px;
+					padding: 4px;
+					font-style: normal;
+				}
+			}
+		}
+	}
+
+	.metadata {
+		display: flex;
+		height: 100%;
+		flex-direction: column;
+		border-radius: 5px;
+		overflow: auto;
+
+		.inner-scroll-container {
+			background-color: rgb(238, 241, 242);
+			display: block;
+			overflow: auto;
+			height: 100%;
+		}
+	}
 `;
 
 const clickFn = (cloneName, href, type) => {
@@ -113,48 +260,246 @@ const clickFn = (cloneName, href, type) => {
 	window.open(href);
 };
 
-const getUrl = (id, restricted) => {
+const getUrl = (item, restricted, type) => {
 	if (restricted) return `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
-	return `${CONFIG.QLIK_URL}/sense/app/${id}`;
+	else {
+		switch (type) {
+			case 'application':
+				return item.href;
+			case 'dataSource':
+			case 'database':
+			case 'models':
+				return `${CONFIG.DATA_CATALOG_LINK}/asset/${item.resource.id}`;
+			case 'dashboard':
+				return `${CONFIG.QLIK_URL}/sense/app/${item.id}`;
+			default:
+				return '';
+		}
+	}
+};
+
+const getRestricted = (item, type) => {
+	switch (type) {
+		case 'application':
+			if (!_.isNull(item.permission)) {
+				return !Permissions?.[item.permission]?.();
+			} else {
+				return false;
+			}
+		case 'dataSource':
+		case 'database':
+		case 'models':
+			return false;
+		case 'dashboard':
+			return item.restricted;
+		default:
+			return false;
+	}
+};
+
+const getDisplayTitle = (item, type) => {
+	switch (type) {
+		case 'application':
+			return item.link_label;
+		case 'dataSource':
+		case 'database':
+		case 'models':
+			return item.resource.name;
+		case 'dashboard':
+			return item.name;
+		default:
+			return 'UKN';
+	}
+};
+
+const cleanHighlightFieldName = (field) => {
+	switch (field) {
+		case 'displayName':
+			return 'Display Name';
+		default:
+			return field.charAt(0).toUpperCase() + field.slice(1);
+	}
+};
+
+const getType = (item, type) => {
+	switch (type) {
+		case 'dataSource':
+			return item.resource?.type || capitalizeFirst(type);
+		default:
+			return capitalizeFirst(type);
+	}
+};
+
+const getMetadataForPropertyTable = (item, type) => {
+	const data = [];
+
+	switch (type) {
+		case 'dashboard':
+			data.push({
+				Key: 'Name',
+				Value: `${item.name}`,
+			});
+			data.push({
+				Key: 'Stream Name',
+				Value: `${item.streamName}`,
+			});
+			data.push({
+				Key: 'Description',
+				Value: `${item.description}`,
+			});
+			data.push({
+				Key: 'id',
+				Value: `${item.id}`,
+			});
+			data.push({
+				Key: 'Created At',
+				Value: `${item.createdDate}`,
+			});
+			data.push({
+				Key: 'Modified At',
+				Value: `${item.modifiedDate}`,
+			});
+			data.push({
+				Key: 'Publish Time',
+				Value: `${item.publishTime}`,
+			});
+			data.push({
+				Key: 'Tags',
+				Value: `${item.tags}`,
+			});
+			break;
+		case 'dataSource':
+		case 'models':
+		case 'database':
+			data.push({
+				Key: 'Created At',
+				Value: `${item.resource.createdOn}`,
+			});
+			if (item.resource.createdBy) {
+				if (item.resource.createdBy['firstName'] && item.resource.createdBy['lastName']) {
+					data.push({
+						Key: 'Created By Name',
+						Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
+					});
+				}
+				if (item.resource.createdBy['emailAddress']) {
+					data.push({
+						Key: 'Created By Email',
+						Value: `${item.resource.createdBy['emailAddress']}`,
+					});
+				}
+			}
+			if (item.resource.lastModifiedOn) {
+				data.push({
+					Key: 'Modified At',
+					Value: `${item.resource.lastModifiedOn}`,
+				});
+			}
+			if (item.resource.lastModifiedBy) {
+				if (item.resource.lastModifiedBy['firstName'] && item.resource.lastModifiedBy['lastName']) {
+					data.push({
+						Key: 'Modified By Name',
+						Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
+					});
+				}
+				if (item.resource.lastModifiedBy['emailAddress']) {
+					data.push({
+						Key: 'Modified By Email',
+						Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+					});
+				}
+			}
+
+			if (item.resource.domain) {
+				data.push({
+					Key: 'Domain',
+					Value: `${item.resource.domain}`,
+				});
+			}
+			if (item.resource.name) {
+				data.push({
+					Key: 'Name',
+					Value: `${item.resource.name}`,
+				});
+			}
+			if (item.resource.status) {
+				data.push({
+					Key: 'Status',
+					Value: `${item.resource.status}`,
+				});
+			}
+			if (item.resource.type) {
+				data.push({
+					Key: 'Type',
+					Value: `${item.resource.type}`,
+				});
+			}
+			if (item.resource.tags) {
+				data.push({
+					Key: 'Tags',
+					Value: item.resource.tags.join(', '),
+				});
+			}
+			if (item.attributes) {
+				item.attributes.forEach((attr) => {
+					data.push({
+						Key: attr.field,
+						Value: attr.value,
+					});
+				});
+			}
+			break;
+		default:
+			break;
+	}
+
+	return data;
 };
 
 const cardSubHeaderHandler = (props) => {
 	return <></>;
 };
 
+const getCardHeaderHandler = (props) => {
+	const { item, state, type, graphView } = props;
+
+	const docListView = state.listView && !graphView;
+	const restricted = getRestricted(item, type);
+	const href = getUrl(item, restricted, type);
+	const displayTitle = getDisplayTitle(item, type);
+
+	return (
+		<StyledFrontCardHeader listView={state.listView} restricted={restricted}>
+			<div className={'title-text-selected-favorite-div'}>
+				<GCTooltip title={displayTitle} placement="top" arrow>
+					<div className={'title-text'} onClick={() => clickFn(state.cloneData.clone_name, href, type)}>
+						<div className={'text'}>{displayTitle}</div>
+						{docListView && (
+							<div className={'list-view-arrow'}>
+								<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
+							</div>
+						)}
+					</div>
+				</GCTooltip>
+				<div style={{ display: 'flex' }}>
+					{docListView && (
+						<div className={'list-view-sub-header'}>
+							<p> {getType(item, type)} </p>
+						</div>
+					)}
+					{/*<div className={'selected-favorite'}>*/}
+					{/*	<div style={{ display: 'flex' }}>{favoriteComponent()}</div>*/}
+					{/*</div>*/}
+				</div>
+			</div>
+		</StyledFrontCardHeader>
+	);
+};
+
 const cardHandler = {
 	application: {
 		getCardHeader: (props) => {
-			const { item, state, graphView } = props;
-
-			const docListView = state.listView && !graphView;
-
-			let { link_label, permission, type, href } = item;
-			if (!_.isNull(permission)) {
-				permission = Permissions?.[permission]?.();
-			} else permission = true;
-
-			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={!permission}>
-					<div className={'title-text-selected-favorite-div'}>
-						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-						<div className={'title-text'} onClick={() => clickFn(state.cloneData.clone_name, href, type)}>
-							<div className={'text'}>{link_label}</div>
-							{docListView && (
-								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
-								</div>
-							)}
-						</div>
-						{docListView && (
-							<div className={'list-view-sub-header'}>
-								<p> {capitalizeFirst(type)} </p>
-							</div>
-						)}
-						{/*</GCTooltip>*/}
-					</div>
-				</StyledFrontCardHeader>
-			);
+			return getCardHeaderHandler({ ...props, type: 'application' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -169,7 +514,7 @@ const cardHandler = {
 			return (
 				<StyledFrontCardContent isWideCard={true}>
 					{description && (
-						<div className={'body-container'}>
+						<div className={'body-container'} style={{ margin: 10 }}>
 							<div className={'body-text'}>{description}</div>
 						</div>
 					)}
@@ -203,7 +548,11 @@ const cardHandler = {
 					{!permission ? (
 						RestrictedLink
 					) : (
-						<CardButton target={'_blank'} style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }} href={url}>
+						<CardButton
+							target={'_blank'}
+							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
+							href={url}
+						>
 							Open
 						</CardButton>
 					)}
@@ -226,36 +575,7 @@ const cardHandler = {
 
 	dashboard: {
 		getCardHeader: (props) => {
-			const { item, state, graphView } = props;
-
-			const docListView = state.listView && !graphView;
-
-			let { name, id, restricted, type } = item;
-
-			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={restricted}>
-					<div className={'title-text-selected-favorite-div'}>
-						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-						<div
-							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, getUrl(id, restricted), type)}
-						>
-							<div className={'text'}>{name}</div>
-							{docListView && (
-								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
-								</div>
-							)}
-						</div>
-						{docListView && (
-							<div className={'list-view-sub-header'}>
-								<p> {capitalizeFirst(type)} </p>
-							</div>
-						)}
-						{/*</GCTooltip>*/}
-					</div>
-				</StyledFrontCardHeader>
-			);
+			return getCardHeaderHandler({ ...props, type: 'dashboard' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -263,51 +583,165 @@ const cardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+			const { highlights, thumbnail, name } = item;
 
-			const { name, description, thumbnail } = item;
+			let hoveredSnippet = '';
+			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
+				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			}
+			const contextHtml = hoveredSnippet;
 
-			return (
-				<StyledFrontCardContent isWideCard={true}>
-					<div className={'image-container'}>
-						<img
-							src={
-								thumbnail
-									? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` +
-									  new URLSearchParams({ location: thumbnail }).toString()
-									: undefined
-							}
-							style={styles.image}
-							alt={thumbnail ? name : undefined}
-						/>
-					</div>
-
-					{description && (
-						<div className={'body-container'}>
-							<div className={'body-text'}>{description}</div>
+			if (state.listView) {
+				return (
+					<StyledListViewFrontCardContent>
+						<GCAccordion
+							header={'KEYWORD HITS'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'expanded-hits'}>
+								<div className={'page-hits'}>
+									{_.chain(highlights)
+										.map((highlight, key) => {
+											if (highlight.title || key < MAX_KEYS) {
+												return (
+													<div
+														className={'page-hit'}
+														key={key}
+														style={{
+															...(hoveredHit === key && {
+																backgroundColor: '#E9691D',
+																color: 'white',
+															}),
+														}}
+														onMouseEnter={() => setHoveredHit(key)}
+														onClick={(e) => {
+															e.preventDefault();
+														}}
+													>
+														{highlight.title && (
+															<span>{cleanHighlightFieldName(highlight.title)}</span>
+														)}
+														<i
+															className="fa fa-chevron-right"
+															style={{
+																color:
+																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															}}
+														/>
+													</div>
+												);
+											}
+											return '';
+										})
+										.value()}
+								</div>
+								<div className={'expanded-metadata'}>
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+								</div>
+							</div>
+						</GCAccordion>
+						<GCAccordion
+							header={'METADATA'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'metadata'}>
+								<div className={'inner-scroll-container'}>{backBody}</div>
+							</div>
+						</GCAccordion>
+					</StyledListViewFrontCardContent>
+				);
+			} else {
+				return (
+					<StyledFrontCardContent
+						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					>
+						<div className={'image-container'}>
+							<img
+								src={
+									thumbnail
+										? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` +
+										  new URLSearchParams({ location: thumbnail }).toString()
+										: QLIKICON
+								}
+								style={styles.image}
+								alt={name}
+							/>
 						</div>
-					)}
-				</StyledFrontCardContent>
-			);
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(highlights)
+									.map((highlight, key) => {
+										if (highlight.title || key < MAX_KEYS) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
+													style={{
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
+													}}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+													}}
+												>
+													{highlight.title && (
+														<span>{cleanHighlightFieldName(highlight.title)}</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									style={{ maxHeight: 90 }}
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
+						</div>
+					</StyledFrontCardContent>
+				);
+			}
 		},
 
 		getCardBack: (props) => {
-			const { item } = props;
+			const { item, state } = props;
 
-			const { lastReloadTime, modifiedDate, publishTime, restricted, owner } = item;
+			const metaData = getMetadataForPropertyTable(item, 'dashboard');
 
 			return (
-				<div style={styles.body(restricted)}>
-					<Typography variant="body2">
-						Data last reloaded: {new moment(lastReloadTime).format('MM-DD-YYYY').toString()}
-					</Typography>
-					<Typography variant="body2">
-						Last modified date: {new moment(modifiedDate).format('MM-DD-YYYY').toString()}
-					</Typography>
-					<Typography variant="body2">
-						Published date: {new moment(publishTime).format('MM-DD-YYYY').toString()}
-					</Typography>
-					<Typography variant="body2">Lead Developer: {parseOwnerName(owner?.name)}</Typography>
+				<div>
+					<SimpleTable
+						tableClass={'magellan-table'}
+						zoom={1}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={metaData}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidth}
+						disableWrap={true}
+						title={'Metadata'}
+						hideHeader={!!state.listView}
+					/>
 				</div>
 			);
 		},
@@ -332,7 +766,7 @@ const cardHandler = {
 							getUrl(id, restricted)
 						);
 					}}
-					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
 					target="_blank"
 				>
 					{restricted ? 'Request Access' : 'Launch'}
@@ -343,7 +777,7 @@ const cardHandler = {
 				<>
 					{PreparedLink}
 					<div
-						style={{ ...styles.viewMoreButton, color: primary }}
+						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -356,7 +790,7 @@ const cardHandler = {
 					>
 						{toggledMore ? 'Overview' : 'More'}
 						<i
-							style={{ ...styles.viewMoreChevron, color: primary }}
+							style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
 							className="fa fa-chevron-right"
 							aria-hidden="true"
 						/>
@@ -403,38 +837,7 @@ const cardHandler = {
 
 	dataSource: {
 		getCardHeader: (props) => {
-			const { item, state, graphView } = props;
-
-			const docListView = state.listView && !graphView;
-
-			let { name, id } = item.resource;
-
-			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-
-			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={false}>
-					<div className={'title-text-selected-favorite-div'}>
-						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-						<div
-							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
-						>
-							<div className={'text'}>{name}</div>
-							{docListView && (
-								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
-								</div>
-							)}
-						</div>
-						{docListView && (
-							<div className={'list-view-sub-header'}>
-								<p> {capitalizeFirst(item.type)} </p>
-							</div>
-						)}
-						{/*</GCTooltip>*/}
-					</div>
-				</StyledFrontCardHeader>
-			);
+			return getCardHeaderHandler({ ...props, type: 'dataSource' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -442,53 +845,197 @@ const cardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+			const { highlights } = item;
 
-			let { name, lastModifiedOn, status } = item.resource;
+			let hoveredSnippet = '';
+			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
+				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			}
+			const contextHtml = hoveredSnippet;
 
-			return (
-				<StyledFrontCardContent isWideCard={true}>
-					<div className={'body-container'}>
-						<div className={'body-text'}>
-							<Typography variant="body1" style={styles.metadata}>
-								Name: {name}
-							</Typography>
-							<Typography variant="body1" style={styles.metadata}>
-								Last Updated: {new moment(lastModifiedOn).toString()}
-							</Typography>
-							<Typography variant="body1" style={styles.metadata}>
-								Status: {status?.name}
-							</Typography>
+			if (state.listView) {
+				return (
+					<StyledListViewFrontCardContent>
+						<GCAccordion
+							header={'KEYWORD HITS'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'expanded-hits'}>
+								<div className={'page-hits'}>
+									{_.chain(highlights)
+										.map((highlight, key) => {
+											if (highlight.field || key < MAX_KEYS) {
+												return (
+													<div
+														className={'page-hit'}
+														key={key}
+														style={{
+															...(hoveredHit === key && {
+																backgroundColor: '#E9691D',
+																color: 'white',
+															}),
+														}}
+														onMouseEnter={() => setHoveredHit(key)}
+														onClick={(e) => {
+															e.preventDefault();
+														}}
+													>
+														{highlight.field && (
+															<span>{cleanHighlightFieldName(highlight.field)}</span>
+														)}
+														<i
+															className="fa fa-chevron-right"
+															style={{
+																color:
+																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															}}
+														/>
+													</div>
+												);
+											}
+											return '';
+										})
+										.value()}
+								</div>
+								<div className={'expanded-metadata'}>
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+								</div>
+							</div>
+						</GCAccordion>
+						<GCAccordion
+							header={'METADATA'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'metadata'}>
+								<div className={'inner-scroll-container'}>{backBody}</div>
+							</div>
+						</GCAccordion>
+					</StyledListViewFrontCardContent>
+				);
+			} else {
+				return (
+					<StyledFrontCardContent
+						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					>
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(highlights)
+									.map((highlight, key) => {
+										if (highlight.field || key < MAX_KEYS) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
+													style={{
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
+													}}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+													}}
+												>
+													{highlight.field && (
+														<span>{cleanHighlightFieldName(highlight.field)}</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
 						</div>
-					</div>
-				</StyledFrontCardContent>
-			);
+					</StyledFrontCardContent>
+				);
+			}
 		},
 
 		getCardBack: (props) => {
-			return <></>;
+			const { item, state } = props;
+
+			const metaData = getMetadataForPropertyTable(item, 'dataSource');
+
+			return (
+				<div>
+					<SimpleTable
+						tableClass={'magellan-table'}
+						zoom={1}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={metaData}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidth}
+						disableWrap={true}
+						title={'Metadata'}
+						hideHeader={!!state.listView}
+					/>
+				</div>
+			);
 		},
 
 		getFooter: (props) => {
-			const { item, state } = props;
+			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			let { id } = item.resource;
-
-			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = getUrl(item, getRestricted(item, 'dataSource'), 'dataSource');
 
 			return (
 				<>
-					<CardButton
-						href={'#'}
-						onClick={(e) => {
-							e.preventDefault();
-							clickFn(state.cloneData.clone_name, url, item.type);
-						}}
-						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-						target="_blank"
-					>
-						Open
-					</CardButton>
+					{!state.listView && (
+						<>
+							<CardButton
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									clickFn(state.cloneData.clone_name, url, item.type);
+								}}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								target="_blank"
+							>
+								Open
+							</CardButton>
+							<div
+								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								onClick={() => {
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'CardInteraction',
+										'flipCard',
+										toggledMore ? 'Overview' : 'More'
+									);
+									setToggledMore(!toggledMore);
+								}}
+							>
+								{toggledMore ? 'Overview' : 'More'}
+								<i
+									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									className="fa fa-chevron-right"
+									aria-hidden="true"
+								/>
+							</div>
+						</>
+					)}
 				</>
 			);
 		},
@@ -497,49 +1044,18 @@ const cardHandler = {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (props) => {
 			return '';
 		},
 
 		getDisplayTitle: (item) => {
-			return '';
+			return getDisplayTitle(item, 'dataSource');
 		},
 	},
 
 	database: {
 		getCardHeader: (props) => {
-			const { item, state, graphView } = props;
-
-			const docListView = state.listView && !graphView;
-
-			let { name, id } = item.resource;
-
-			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
-
-			return (
-				<StyledFrontCardHeader listView={state.listView} restricted={false}>
-					<div className={'title-text-selected-favorite-div'}>
-						{/*<GCTooltip title={'Test'} placement='top' arrow>*/}
-						<div
-							className={'title-text'}
-							onClick={() => clickFn(state.cloneData.clone_name, url, item.type)}
-						>
-							<div className={'text'}>{name}</div>
-							{docListView && (
-								<div className={'list-view-arrow'}>
-									<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
-								</div>
-							)}
-						</div>
-						{docListView && (
-							<div className={'list-view-sub-header'}>
-								<p> {capitalizeFirst(item.type)} </p>
-							</div>
-						)}
-						{/*</GCTooltip>*/}
-					</div>
-				</StyledFrontCardHeader>
-			);
+			return getCardHeaderHandler({ ...props, type: 'database' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -547,53 +1063,197 @@ const cardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+			const { highlights } = item;
 
-			let { name, lastModifiedOn, status } = item.resource;
+			let hoveredSnippet = '';
+			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
+				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			}
+			const contextHtml = hoveredSnippet;
 
-			return (
-				<StyledFrontCardContent isWideCard={true}>
-					<div className={'body-container'}>
-						<div className={'body-text'}>
-							<Typography variant="body1" style={styles.metadata}>
-								Name: {name}
-							</Typography>
-							<Typography variant="body1" style={styles.metadata}>
-								Last Updated: {new moment(lastModifiedOn).toString()}
-							</Typography>
-							<Typography variant="body1" style={styles.metadata}>
-								Status: {status?.name}
-							</Typography>
+			if (state.listView) {
+				return (
+					<StyledListViewFrontCardContent>
+						<GCAccordion
+							header={'KEYWORD HITS'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'expanded-hits'}>
+								<div className={'page-hits'}>
+									{_.chain(highlights)
+										.map((highlight, key) => {
+											if (highlight.field || key < MAX_KEYS) {
+												return (
+													<div
+														className={'page-hit'}
+														key={key}
+														style={{
+															...(hoveredHit === key && {
+																backgroundColor: '#E9691D',
+																color: 'white',
+															}),
+														}}
+														onMouseEnter={() => setHoveredHit(key)}
+														onClick={(e) => {
+															e.preventDefault();
+														}}
+													>
+														{highlight.field && (
+															<span>{cleanHighlightFieldName(highlight.field)}</span>
+														)}
+														<i
+															className="fa fa-chevron-right"
+															style={{
+																color:
+																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															}}
+														/>
+													</div>
+												);
+											}
+											return '';
+										})
+										.value()}
+								</div>
+								<div className={'expanded-metadata'}>
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+								</div>
+							</div>
+						</GCAccordion>
+						<GCAccordion
+							header={'METADATA'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'metadata'}>
+								<div className={'inner-scroll-container'}>{backBody}</div>
+							</div>
+						</GCAccordion>
+					</StyledListViewFrontCardContent>
+				);
+			} else {
+				return (
+					<StyledFrontCardContent
+						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					>
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(highlights)
+									.map((highlight, key) => {
+										if (highlight.field || key < MAX_KEYS) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
+													style={{
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
+													}}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+													}}
+												>
+													{highlight.field && (
+														<span>{cleanHighlightFieldName(highlight.field)}</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
 						</div>
-					</div>
-				</StyledFrontCardContent>
-			);
+					</StyledFrontCardContent>
+				);
+			}
 		},
 
 		getCardBack: (props) => {
-			return <></>;
+			const { item, state } = props;
+
+			const metaData = getMetadataForPropertyTable(item, 'database');
+
+			return (
+				<div>
+					<SimpleTable
+						tableClass={'magellan-table'}
+						zoom={1}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={metaData}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidth}
+						disableWrap={true}
+						title={'Metadata'}
+						hideHeader={!!state.listView}
+					/>
+				</div>
+			);
 		},
 
 		getFooter: (props) => {
-			const { item, state } = props;
+			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			let { id } = item.resource;
-
-			const url = `${CONFIG.DATA_CATALOG_LINK}/asset/${id}`;
+			const url = getUrl(item, getRestricted(item, 'models'), 'database');
 
 			return (
 				<>
-					<CardButton
-						href={'#'}
-						onClick={(e) => {
-							e.preventDefault();
-							clickFn(state.cloneData.clone_name, url, item.type);
-						}}
-						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-						target="_blank"
-					>
-						Open
-					</CardButton>
+					{!state.listView && (
+						<>
+							<CardButton
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									clickFn(state.cloneData.clone_name, url, item.type);
+								}}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								target="_blank"
+							>
+								Open
+							</CardButton>
+							<div
+								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								onClick={() => {
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'CardInteraction',
+										'flipCard',
+										toggledMore ? 'Overview' : 'More'
+									);
+									setToggledMore(!toggledMore);
+								}}
+							>
+								{toggledMore ? 'Overview' : 'More'}
+								<i
+									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									className="fa fa-chevron-right"
+									aria-hidden="true"
+								/>
+							</div>
+						</>
+					)}
 				</>
 			);
 		},
@@ -602,12 +1262,238 @@ const cardHandler = {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (props) => {
 			return '';
 		},
 
 		getDisplayTitle: (item) => {
+			return getDisplayTitle(item, 'database');
+		},
+	},
+
+	models: {
+		getCardHeader: (props) => {
+			return getCardHeaderHandler({ ...props, type: 'models' });
+		},
+
+		getCardSubHeader: (props) => {
+			return cardSubHeaderHandler(props);
+		},
+
+		getCardFront: (props) => {
+			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+			const { highlights } = item;
+
+			let hoveredSnippet = '';
+			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
+				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			}
+			const contextHtml = hoveredSnippet;
+
+			if (state.listView) {
+				return (
+					<StyledListViewFrontCardContent>
+						<GCAccordion
+							header={'KEYWORD HITS'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'expanded-hits'}>
+								<div className={'page-hits'}>
+									{_.chain(highlights)
+										.map((highlight, key) => {
+											if (
+												highlight.field &&
+												key < MAX_KEYS &&
+												!MODELS_HITS_KEY_NOT_ALLOWED.includes(highlight.field)
+											) {
+												return (
+													<div
+														className={'page-hit'}
+														key={key}
+														style={{
+															...(hoveredHit === key && {
+																backgroundColor: '#E9691D',
+																color: 'white',
+															}),
+														}}
+														onMouseEnter={() => setHoveredHit(key)}
+														onClick={(e) => {
+															e.preventDefault();
+														}}
+													>
+														{highlight.field && (
+															<span>{cleanHighlightFieldName(highlight.field)}</span>
+														)}
+														<i
+															className="fa fa-chevron-right"
+															style={{
+																color:
+																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+															}}
+														/>
+													</div>
+												);
+											}
+											return '';
+										})
+										.value()}
+								</div>
+								<div className={'expanded-metadata'}>
+									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+								</div>
+							</div>
+						</GCAccordion>
+						<GCAccordion
+							header={'METADATA'}
+							headerBackground={'rgb(238,241,242)'}
+							headerTextColor={'black'}
+							headerTextWeight={'normal'}
+						>
+							<div className={'metadata'}>
+								<div className={'inner-scroll-container'}>{backBody}</div>
+							</div>
+						</GCAccordion>
+					</StyledListViewFrontCardContent>
+				);
+			} else {
+				return (
+					<StyledFrontCardContent
+						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					>
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(highlights)
+									.map((highlight, key) => {
+										if (
+											highlight.field &&
+											key < MAX_KEYS &&
+											!MODELS_HITS_KEY_NOT_ALLOWED.includes(highlight.field)
+										) {
+											return (
+												<div
+													className={'page-hit'}
+													key={key}
+													style={{
+														...(hoveredHit === key && {
+															backgroundColor: '#E9691D',
+															color: 'white',
+														}),
+													}}
+													onMouseEnter={() => setHoveredHit(key)}
+													onClick={(e) => {
+														e.preventDefault();
+													}}
+												>
+													{highlight.field && (
+														<span>{cleanHighlightFieldName(highlight.field)}</span>
+													)}
+													<i
+														className="fa fa-chevron-right"
+														style={{
+															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+														}}
+													/>
+												</div>
+											);
+										}
+										return '';
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
+						</div>
+					</StyledFrontCardContent>
+				);
+			}
+		},
+
+		getCardBack: (props) => {
+			const { item, state } = props;
+
+			const metaData = getMetadataForPropertyTable(item, 'models');
+
+			return (
+				<div>
+					<SimpleTable
+						tableClass={'magellan-table'}
+						zoom={1}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						rows={metaData}
+						height={'auto'}
+						dontScroll={true}
+						colWidth={colWidth}
+						disableWrap={true}
+						title={'Metadata'}
+						hideHeader={!!state.listView}
+					/>
+				</div>
+			);
+		},
+
+		getFooter: (props) => {
+			const { cloneName, toggledMore, setToggledMore, item, state } = props;
+
+			const url = getUrl(item, getRestricted(item, 'models'), 'models');
+
+			return (
+				<>
+					{!state.listView && (
+						<>
+							<CardButton
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									clickFn(state.cloneData.clone_name, url, item.type);
+								}}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
+								target="_blank"
+							>
+								Open
+							</CardButton>
+							<div
+								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								onClick={() => {
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										'CardInteraction',
+										'flipCard',
+										toggledMore ? 'Overview' : 'More'
+									);
+									setToggledMore(!toggledMore);
+								}}
+							>
+								{toggledMore ? 'Overview' : 'More'}
+								<i
+									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									className="fa fa-chevron-right"
+									aria-hidden="true"
+								/>
+							</div>
+						</>
+					)}
+				</>
+			);
+		},
+
+		getCardExtras: (props) => {
+			return <></>;
+		},
+
+		getFilename: (props) => {
 			return '';
+		},
+
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item, 'models');
 		},
 	},
 };
@@ -621,6 +1507,10 @@ const GlobalSearchCardHandler = (props) => {
 	}, [cardType, item, setDisplayTitle, setFilename]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
+};
+
+GlobalSearchCardHandler.propTypes = {
+	setFileName: PropTypes.func,
 };
 
 export default GlobalSearchCardHandler;

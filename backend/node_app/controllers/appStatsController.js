@@ -897,18 +897,46 @@ class AppStatsController {
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
 	 */
-	async getCardAggregationQuery(startDate, endDate, connection) {
+	async getCardUsersAggregationQuery(startDate, endDate, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
 				select
-					count( distinct a.idvisitor) as unique_users,
-					count(a.idvisit) as total_searches
+					count(distinct c.user_id) as unique_users
+				from
+					matomo_log_visit c
+				where
+					c.visit_last_action_time >= ?
+					AND c.visit_last_action_time <= ?
+				`,
+				[startDate, endDate],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method gets aggregations for the cards
+	 * @returns an array of data from Matomo.
+	 */
+	async getCardSearchAggregationQuery(startDate, endDate, connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(
+				`
+				select
+					count(b.name) as total_searches,
+					count(distinct b.name) as unique_searches
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger'))
+					(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
 					AND b.idaction = a.idaction_name
 					AND server_time >= ?
 					AND server_time <= ?
@@ -994,7 +1022,6 @@ class AppStatsController {
 	async queryUserAggregations(opts, connection) {
 		const documentMap = {};
 		const vistitIDMap = {};
-
 		const users = await this.user.findAll();
 		const visitorIDs = await this.getUserVisitorID(
 			users.map((x) => this.sparkMD5.hash(x.user_id)),
@@ -1023,7 +1050,9 @@ class AppStatsController {
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		const cards = await this.getCardAggregationQuery(opts.startDate, opts.endDate, connection);
+		const cards = await this.getCardSearchAggregationQuery(opts.startDate, opts.endDate, connection);
+		const userCards = await this.getCardUsersAggregationQuery(opts.startDate, opts.endDate, connection);
+		cards[0]['unique_users'] = userCards[0]['unique_users'];
 
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
@@ -1058,8 +1087,8 @@ class AppStatsController {
 				) {
 					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
 				} else {
-					documentMap[vistitIDMap[open.idvisitor]][['opened']].push(open.document);
-					documentMap[vistitIDMap[open.idvisitor]][['opened']].shift();
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].shift();
 				}
 			}
 		}

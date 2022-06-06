@@ -181,29 +181,19 @@ const StyledPill = styled.div`
 	}
 `;
 
-const openDocument = (event, item, state) => {
-	const types = {
-		pdoc: 'Procurement',
-		rdoc: 'RDT&E',
-		odoc: 'O&M',
-	};
+const types = {
+	pdoc: 'Procurement',
+	rdoc: 'RDT&E',
+	odoc: 'O&M',
+};
 
-	event.preventDefault();
-	const {
-		projectTitle,
-		programElement,
-		projectNum,
-		budgetType,
-		budgetLineItem,
-		budgetYear,
-		id,
-		appropriationNumber,
-	} = item;
+const clickFn = (cloneName, searchText, item, portfolioName) => {
+	const { budgetType, appropriationNumber, id, budgetYear } = item;
 
-	const { searchText, useElasticSearch } = state;
-	let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'LineItemOpen');
+	let url = `#/jbook/profile?type=${encodeURIComponent(
 		types[budgetType]
-	)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&useElasticSearch=${useElasticSearch}`;
+	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
 };
 
@@ -211,6 +201,8 @@ const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
 			const { item, state, graphView } = props;
+
+			const { cloneData, searchText, selectedPortfolio } = state;
 
 			let displayTitleTop = '';
 			let displayTitleBot = ''; // item.projectTitle;
@@ -239,7 +231,14 @@ const cardHandler = {
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={docListView ? (e) => openDocument(e, item, state) : () => {}}
+								onClick={
+									docListView
+										? (e) => {
+												e.preventDefault();
+												clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
+										  }
+										: () => {}
+								}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -285,12 +284,16 @@ const cardHandler = {
 					? item.appropriationTitle.replace('Procurement', 'Proc')
 					: '';
 
+				if (item.budgetType === 'odoc') {
+					appropriationTitle = item.accountTitle;
+				}
+
 				budgetPrefix = '';
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
-				let cycle = item.budgetCycle ?? '';
-				budgetPrefix = cycle + year + ': ';
+				let cycle = item.budgetCycle ?? 'PB';
+				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
 
-				budgetAmount = item.by1BaseYear ? item.by1BaseYear + ' $M' : '';
+				budgetAmount = item.currentYearAmount ? item.currentYearAmount + ' $M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
@@ -330,7 +333,6 @@ const cardHandler = {
 			const review =
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
-			console.log(item);
 			try {
 				const renderContracts = (contracts) => {
 					let contractElements = `<b>Contracts: ${contracts.length}</b>`;
@@ -644,7 +646,6 @@ const cardHandler = {
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
-			const projectNum = null;
 
 			const formatNum = (num) => {
 				const parsed = parseInt(num);
@@ -670,7 +671,7 @@ const cardHandler = {
 				},
 				{
 					Key: 'Project Number',
-					Value: projectNum || 'N/A',
+					Value: projectData.projectNum || 'N/A',
 					Hidden: budgetType === 'PDOC',
 				},
 				{
@@ -708,7 +709,11 @@ const cardHandler = {
 				},
 				{
 					Key: 'Total Cost',
-					Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+					Value: projectData.totalCost
+						? isNaN(projectData.totalCost)
+							? projectData.totalCost
+							: `${formatNum(projectData.totalCost)}`
+						: 'N/A',
 				},
 				{
 					Key: 'Budget Year (FY)',
@@ -719,7 +724,7 @@ const cardHandler = {
 					Value: projectData.budgetCycle || 'N/A',
 				},
 				{
-					Key: 'Appropriation',
+					Key: 'Main Account',
 					Value: projectData.appropriationNumber || 'N/A',
 				},
 				{
@@ -731,8 +736,11 @@ const cardHandler = {
 					Value: projectData.budgetActivityNumber || 'N/A',
 				},
 				{
-					Key: 'Budget Activity Title',
-					Value: projectData.budgetActivityTitle || 'N/A',
+					Key: 'Budget Sub Activity',
+					Value:
+						projectData.budgetType === 'odoc'
+							? projectData.budgetActivityTitle ?? 'N/A'
+							: projectData.budgetSubActivity ?? 'N/A',
 				},
 				{
 					Key: 'Category',
@@ -792,6 +800,8 @@ const cardHandler = {
 				closeGraphCard = () => {},
 			} = props;
 
+			const { searchText, selectedPortfolio } = state;
+
 			return (
 				<>
 					<>
@@ -799,7 +809,10 @@ const cardHandler = {
 							target={'_blank'}
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 							href={'#'}
-							onClick={(e) => openDocument(e, item, state)}
+							onClick={(e) => {
+								e.preventDefault();
+								clickFn(cloneName, searchText, item, selectedPortfolio);
+							}}
 						>
 							Open
 						</CardButton>
