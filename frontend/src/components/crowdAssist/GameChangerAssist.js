@@ -15,7 +15,7 @@ import {
 	tertiaryGreen,
 	backgroundGreyDark,
 	primaryRedDark,
-} from '../../components/common/gc-colors';
+} from '../common/gc-colors';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -219,7 +219,6 @@ class GameChangerAssist extends Component {
 		const paragraphsWithEntities = data.paragraphs.filter((paragraph) => {
 			return paragraph.entities ? this.countEntities(paragraph.entities) > 0 : false;
 		});
-
 
 		const paragraphEntities = [];
 		const paragraphEntityAnswers = [];

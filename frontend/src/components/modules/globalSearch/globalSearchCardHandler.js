@@ -11,7 +11,6 @@ import CONFIG from '../../../config/config';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
-import { primary } from '../../common/gc-colors';
 import { colWidth, getDefaultComponent, styles } from '../default/defaultCardHandler';
 import GCTooltip from '../../common/GCToolTip';
 import sanitizeHtml from 'sanitize-html';
@@ -450,6 +449,8 @@ const getMetadataForPropertyTable = (item, type) => {
 				});
 			}
 			break;
+		default:
+			break;
 	}
 
 	return data;
@@ -460,7 +461,7 @@ const cardSubHeaderHandler = (props) => {
 };
 
 const getCardHeaderHandler = (props) => {
-	const { item, state, favoriteComponent, type, graphView } = props;
+	const { item, state, type, graphView } = props;
 
 	const docListView = state.listView && !graphView;
 	const restricted = getRestricted(item, type);
@@ -486,9 +487,9 @@ const getCardHeaderHandler = (props) => {
 							<p> {getType(item, type)} </p>
 						</div>
 					)}
-					<div className={'selected-favorite'}>
-						<div style={{ display: 'flex' }}>{favoriteComponent()}</div>
-					</div>
+					{/*<div className={'selected-favorite'}>*/}
+					{/*	<div style={{ display: 'flex' }}>{favoriteComponent()}</div>*/}
+					{/*</div>*/}
 				</div>
 			</div>
 		</StyledFrontCardHeader>
