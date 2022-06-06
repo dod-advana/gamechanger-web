@@ -1,11 +1,13 @@
 image: node:14 # "${IRONBANK_NODEJS}"
 
 stages:          # List of stages for jobs, and their order of execution
-  - test
+  - lint
+  - unit-test
+  - integration-test
   - deploy
 
 lint-frontend-test-job:   # This job also runs in the test stage
-  stage: test    # It can run at the same time as unit-test-job (in parallel)
+  stage: lint    # It can run at the same time as unit-test-job (in parallel)
   only:
     - merge_requests
   script:
@@ -17,7 +19,7 @@ lint-frontend-test-job:   # This job also runs in the test stage
     - npx eslint --ext .js src
 
 lint-backend-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+  stage: lint    # It can run at the same time as unit-test-job (in parallel).
   only:
     - merge_requests
   script:
