@@ -11,24 +11,20 @@ lint-frontend-test-job:   # This job also runs in the test stage
   script:
     - |
       cd frontend
-      touch .npmrc
-      echo -e "//npm.pkg.github.com/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc
-      echo -e "@dod-advana:registry=https://npm.pkg.github.com" >> .npmrc
-    - cat .npmrc
-    - npm ci && npx eslint --ext .js src
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+      npm ci && npx eslint --ext .js src
 
-lint-backend-test-job:   # This job also runs in the test stage
-  stage: test    # It can run at the same time as unit-test-job (in parallel)
+lint-backend-test-job:   # This job also runs in the test stage.
+  stage: test    # It can run at the same time as unit-test-job (in parallel).
   only:
     - merge_requests
   script:
     - |
       cd backend
-      touch .npmrc
-      echo -e "//npm.pkg.github.com/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc
-      echo -e "@dod-advana:registry=https://npm.pkg.github.com" >> .npmrc
-    - cat .npmrc
-    - npm ci && npx eslint --ext .js src
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+      npm ci && npx eslint --ext .js node_app
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
