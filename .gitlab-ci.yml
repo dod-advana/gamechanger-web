@@ -18,7 +18,7 @@ lint-frontend-test-job:   # This job also runs in the test stage
       cd frontend
       npm set "@dod-advana:registry" "https://npm.pkg.github.com"
       npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-    - npm ci
+    - npm install -g eslint
     - npx eslint --ext .js src
 
 lint-backend-test-job:   # This job also runs in the test stage
@@ -28,7 +28,7 @@ lint-backend-test-job:   # This job also runs in the test stage
       cd backend
       npm set "@dod-advana:registry" "https://npm.pkg.github.com"
       npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-    - npm ci
+    - npm install -g eslint
     - npx eslint --ext .js node_app
 
 unit-backend-test-job:   # This job also runs in the test stage.
