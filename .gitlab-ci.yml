@@ -46,7 +46,7 @@ unit-backend-test-job:
     - cd backend && npm ci --cache ../.npm --prefer-offline
     - npm run test
 
-integration-testing:
+integration-testing-job:
   stage: integration-test
   rules:
     - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -62,5 +62,10 @@ deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
       - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-  script:
-  - "curl -X POST --fail -F token=${PIPELINE_TOKEN} -F ref=master -F variables[BRANCH_TO_BUILD]=${CI_COMMIT_BRANCH} https://gitlab.advana.boozallencsn.com/api/v4/projects/12/trigger/pipeline"
+  variables:
+    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
+    CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-web"
+    branch: "main"
