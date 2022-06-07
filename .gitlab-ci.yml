@@ -13,8 +13,6 @@ cache:
 
 lint-frontend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - |
       cd frontend
@@ -25,8 +23,6 @@ lint-frontend-test-job:   # This job also runs in the test stage
 
 lint-backend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - |
       cd backend
@@ -37,8 +33,6 @@ lint-backend-test-job:   # This job also runs in the test stage
 
 unit-backend-test-job:   # This job also runs in the test stage.
   stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - |
       cd backend
@@ -50,7 +44,7 @@ unit-backend-test-job:   # This job also runs in the test stage.
 integration-testing:
   stage: integration-test
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
