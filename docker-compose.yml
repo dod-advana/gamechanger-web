@@ -34,6 +34,7 @@ services:
             - "9229:9229"
         volumes:
             - ./backend/:/usr/src/app/
+            - /usr/src/app/node_modules
         depends_on:
             - web-postgres
             - redis
@@ -51,6 +52,7 @@ services:
             - CHOKIDAR_USEPOLLING=true
         volumes:
             - ./frontend/:/usr/src/app/
+            - /usr/src/app/node_modules
         depends_on:
             - gamechanger-web-node
         networks:

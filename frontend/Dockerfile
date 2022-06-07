@@ -1,7 +1,7 @@
 FROM node:14
 # RUN apt-get update && apt-get install -y vim
 WORKDIR /usr/src/app
-COPY package.json .npmrc package-lock.json* ./
+COPY package.json .npmrc package-lock.json* /usr/src/app/
 RUN npm ci && npm cache clean --force
 COPY . /usr/src/app
 EXPOSE 8080

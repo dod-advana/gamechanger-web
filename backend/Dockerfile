@@ -1,6 +1,6 @@
 FROM node:14
 WORKDIR /usr/src/app
-COPY package.json .npmrc package-lock.json* ./
+COPY package.json .npmrc package-lock.json* /usr/src/app/
 RUN npm ci && npm cache clean --force
 RUN apt-get update && apt-get install -y vim && apt-get install -y postgresql
 RUN npm install -g nodemon \
