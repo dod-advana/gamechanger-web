@@ -84,6 +84,7 @@ const endpoints = {
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
+	getClonesMatomo: '/api/gameChanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
@@ -761,6 +762,11 @@ export default class GameChangerAPI {
 
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
+	getClonesMatomo = async (body) => {
+		const url = endpoints.getClonesMatomo;
 		return axiosGET(this.axios, url, { params: body });
 	};
 
