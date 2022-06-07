@@ -19,7 +19,7 @@ lint-frontend-test-job:
     paths:
     - .npm/
   script:
-    - cd frontend && npm ci --cache .npm --prefer-offline
+    - cd frontend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js src
 
 lint-backend-test-job:   
@@ -31,7 +31,7 @@ lint-backend-test-job:
     paths:
     - .npm/
   script:
-    - cd backend && npm ci --cache .npm --prefer-offline
+    - cd backend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js node_app
 
 unit-backend-test-job:  
@@ -43,7 +43,7 @@ unit-backend-test-job:
     paths:
     - .npm/
   script:
-    - cd backend && npm ci --cache .npm --prefer-offline
+    - cd backend && npm ci --cache ../.npm --prefer-offline
     - npm run test
 
 integration-testing:
