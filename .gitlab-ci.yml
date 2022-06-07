@@ -30,6 +30,18 @@ lint-backend-test-job:   # This job also runs in the test stage.
     - npm ci
     - npx eslint --ext .js node_app
 
+unit-backend-test-job:   # This job also runs in the test stage.
+  stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
+  only:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - |
+      cd backend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npm run test
+
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
