@@ -6,7 +6,7 @@ stages:          # List of stages for jobs, and their order of execution
   - integration-test
   - deploy
 
-lint-frontend-test-job:   # This job also runs in the test stage
+.lint-frontend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -18,7 +18,7 @@ lint-frontend-test-job:   # This job also runs in the test stage
     - npm ci
     - npx eslint --ext .js src
 
-lint-backend-test-job:   # This job also runs in the test stage.
+.lint-backend-test-job:   # This job also runs in the test stage.
   stage: lint    # It can run at the same time as unit-test-job (in parallel).
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -30,7 +30,7 @@ lint-backend-test-job:   # This job also runs in the test stage.
     - npm ci
     - npx eslint --ext .js node_app
 
-unit-backend-test-job:   # This job also runs in the test stage.
+.unit-backend-test-job:   # This job also runs in the test stage.
   stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -42,7 +42,19 @@ unit-backend-test-job:   # This job also runs in the test stage.
     - npm ci
     - npm run test
 
-deploy-job:       # This job runs the build for dev.
+.integration-testing:
+  stage: integration-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-test"
+    branch: "main"
+
+
+.deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
       - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
