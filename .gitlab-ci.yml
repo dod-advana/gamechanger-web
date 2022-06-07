@@ -6,10 +6,15 @@ stages:          # List of stages for jobs, and their order of execution
   - integration-test
   - deploy
 
-lint-frontend-test-job:   # This job also runs in the test stage
+cache:
+  paths:
+  - frontend/node_modules/
+  - backend/node_modules/
+
+.lint-frontend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
-  only:
-    - merge_requests
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - |
       cd frontend
@@ -18,10 +23,10 @@ lint-frontend-test-job:   # This job also runs in the test stage
     - npm ci
     - npx eslint --ext .js src
 
-lint-backend-test-job:   # This job also runs in the test stage.
+.lint-backend-test-job:   # This job also runs in the test stage.
   stage: lint    # It can run at the same time as unit-test-job (in parallel).
-  only:
-    - merge_requests
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - |
       cd backend
@@ -29,6 +34,30 @@ lint-backend-test-job:   # This job also runs in the test stage.
       npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
     - npm ci
     - npx eslint --ext .js node_app
+
+.unit-backend-test-job:   # This job also runs in the test stage.
+  stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - |
+      cd backend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npm run test
+
+.integration-testing:
+  stage: integration-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-test"
+    branch: "main"
+
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
