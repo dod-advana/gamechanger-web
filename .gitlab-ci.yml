@@ -14,24 +14,24 @@ cache:
 before_script:
   - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
   - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-  - cd frontend && npm install
-  - cd ../backend && npm install
-  - cd ../
 
 lint-frontend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
   script:
-    - cd frontend && npx eslint --ext .js src
+    - cd frontend && npm install
+    - npx eslint --ext .js src
 
 lint-backend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
   script:
-    - cd backend && npx eslint --ext .js node_app
+    - cd backend && npm install
+    - npx eslint --ext .js node_app
 
 unit-backend-test-job:   # This job also runs in the test stage.
   stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
   script:
-    - cd backend && npm run test
+    - cd backend && npm install
+    - npm run test
 
 integration-testing:
   stage: integration-test
