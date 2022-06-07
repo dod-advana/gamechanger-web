@@ -168,19 +168,19 @@ const JBookSearchHandler = {
 				}
 
 				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
-				this.getContractTotals(state, dispatch)
-					.then(({ contractTotals }) => {
-						setState(dispatch, {
-							statsLoading: false,
-							contractTotals: contractTotals,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							statsLoading: false,
-							contractTotals: {},
-						});
-					});
+				// this.getContractTotals(state, dispatch)
+				// 	.then(({ contractTotals }) => {
+				// 		setState(dispatch, {
+				// 			statsLoading: false,
+				// 			contractTotals: contractTotals,
+				// 		});
+				// 	})
+				// 	.catch(() => {
+				// 		setState(dispatch, {
+				// 			statsLoading: false,
+				// 			contractTotals: {},
+				// 		});
+				// 	});
 
 				const t1 = new Date().getTime();
 
@@ -197,8 +197,7 @@ const JBookSearchHandler = {
 						paginationSearch: false,
 					});
 				} else {
-					let { docs, totalCount, query, expansionDict } = results;
-
+					let { docs, totalCount, query, expansionDict, contractTotalCounts = {} } = results;
 					let hasExpansionTerms = false;
 					if (expansionDict) {
 						Object.keys(expansionDict).forEach((key) => {
@@ -234,6 +233,7 @@ const JBookSearchHandler = {
 						expansionDict,
 						hasExpansionTerms,
 						paginationSearch: false,
+						contractTotals: contractTotalCounts,
 					});
 				}
 
