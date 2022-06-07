@@ -6,6 +6,11 @@ stages:          # List of stages for jobs, and their order of execution
   - integration-test
   - deploy
 
+cache:
+  paths:
+  - frontend/node_modules/
+  - backend/node_modules/
+
 .lint-frontend-test-job:   # This job also runs in the test stage
   stage: lint    # It can run at the same time as unit-test-job (in parallel)
   rules:
@@ -54,7 +59,7 @@ stages:          # List of stages for jobs, and their order of execution
     branch: "main"
 
 
-.deploy-job:       # This job runs the build for dev.
+deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
       - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
