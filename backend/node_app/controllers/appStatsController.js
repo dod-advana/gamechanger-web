@@ -459,7 +459,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async queryClones( connection) {
+	async queryClones(connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -472,14 +472,14 @@ class AppStatsController {
 			where a.idaction = b.idaction_event_category
 			and a.name LIKE 'GAMECHANGER_%'
 			`,
-			(error, results, fields) => {
-				if (error) {
-					this.logger.error(error, 'BAP9ZIP');
-					resolve([]);
-				} else {
-					resolve(results);
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
 				}
-			}
 			);
 		});
 	}
@@ -1097,7 +1097,7 @@ class AppStatsController {
 	 */
 	async getUserAggregations(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate,cloneName, offset = 0, filters, sorting, pageSize } = req.query;
+		const { startDate, endDate, cloneName, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, cloneName, offset, filters, sorting, pageSize };
 		let connection;
 		try {
