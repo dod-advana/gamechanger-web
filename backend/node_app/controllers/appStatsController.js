@@ -355,7 +355,7 @@ class AppStatsController {
 	 *
 	 */
 	async getUserVisitorID(userID, cloneName, connection) {
-		if (cloneName){
+		if (cloneName) {
 			return new Promise((resolve, reject) => {
 				connection.query(
 					`
@@ -381,9 +381,7 @@ class AppStatsController {
 					}
 				);
 			});
-
-		}
-		else{
+		} else {
 			return new Promise((resolve, reject) => {
 				connection.query(
 					`
@@ -456,7 +454,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async queryClones( connection) {
+	async queryClones(connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -469,14 +467,14 @@ class AppStatsController {
 			where a.idaction = b.idaction_event_category
 			and a.name LIKE 'GAMECHANGER_%'
 			`,
-			(error, results, fields) => {
-				if (error) {
-					this.logger.error(error, 'BAP9ZIP');
-					resolve([]);
-				} else {
-					resolve(results);
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
 				}
-			}
 			);
 		});
 	}
@@ -589,7 +587,7 @@ class AppStatsController {
 	 * @param {*} req
 	 * @param {*} res
 	 */
-	 async getClones(req, res) {
+	async getClones(req, res) {
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -608,7 +606,6 @@ class AppStatsController {
 			connection.end();
 		}
 	}
-
 
 	/**
 	 * This method is called to export Matomo data into an excel document.
@@ -1095,7 +1092,7 @@ class AppStatsController {
 	 */
 	async getUserAggregations(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate,cloneName, offset = 0, filters, sorting, pageSize } = req.query;
+		const { startDate, endDate, cloneName, offset = 0, filters, sorting, pageSize } = req.query;
 		const opts = { startDate, endDate, cloneName, offset, filters, sorting, pageSize };
 		let connection;
 		try {
@@ -1147,8 +1144,18 @@ class AppStatsController {
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const cards = await this.getCardSearchAggregationQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const userCards = await this.getCardUsersAggregationQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const cards = await this.getCardSearchAggregationQuery(
+			opts.startDate,
+			opts.endDate,
+			opts.cloneName,
+			connection
+		);
+		const userCards = await this.getCardUsersAggregationQuery(
+			opts.startDate,
+			opts.endDate,
+			opts.cloneName,
+			connection
+		);
 		cards[0]['unique_users'] = userCards[0]['unique_users'];
 
 		for (let search of searches) {
