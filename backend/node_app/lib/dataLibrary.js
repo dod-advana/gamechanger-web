@@ -8,10 +8,8 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
-const pdf = require('html-pdf');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
-const fs = require('fs');
 
 const SAMPLING_BYTES = 4096;
 
@@ -332,31 +330,7 @@ class DataLibrary {
 
 				try {
 					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
-					if (filekey.toLowerCase().endsWith('html')) {
-						this.awsS3Client.getObject(params, function (err, data) {
-							if (err) throw err;
-							let html = data.Body.toString('utf-8');
-							const SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-							let cleanHtml = html;
-							while (SCRIPT_REGEX.test(cleanHtml)) {
-								cleanHtml = cleanHtml.replace(SCRIPT_REGEX, '');
-							}
-							pdf.create(cleanHtml, {
-								border: {
-									top: '0.25in',
-									right: '0.25in',
-									bottom: '0.25in',
-									left: '0.25in',
-								},
-								orientation: 'landscape',
-							}).toStream(function (err, stream) {
-								if (err) throw err;
-								stream.pipe(res);
-							});
-						});
-					} else {
-						this.awsS3Client.getObject(params).createReadStream().pipe(res);
-					}
+					this.awsS3Client.getObject(params).createReadStream().pipe(res);
 				} catch (err) {
 					this.logger.error(err, 'IPOQHZS', userId);
 					throw err;
