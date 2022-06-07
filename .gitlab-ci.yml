@@ -1,0 +1,38 @@
+image: node:14 # "${IRONBANK_NODEJS}"
+
+stages:          # List of stages for jobs, and their order of execution
+  - lint
+  - unit-test
+  - integration-test
+  - deploy
+
+lint-frontend-test-job:   # This job also runs in the test stage
+  stage: lint    # It can run at the same time as unit-test-job (in parallel)
+  only:
+    - merge_requests
+  script:
+    - |
+      cd frontend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npx eslint --ext .js src
+
+lint-backend-test-job:   # This job also runs in the test stage.
+  stage: lint    # It can run at the same time as unit-test-job (in parallel).
+  only:
+    - merge_requests
+  script:
+    - |
+      cd backend
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm ci
+    - npx eslint --ext .js node_app
+
+deploy-job:       # This job runs the build for dev.
+  stage: deploy
+  rules:
+      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+  - "curl -X POST --fail -F token=${PIPELINE_TOKEN} -F ref=master -F variables[BRANCH_TO_BUILD]=${CI_COMMIT_BRANCH} https://gitlab.advana.boozallencsn.com/api/v4/projects/12/trigger/pipeline"
