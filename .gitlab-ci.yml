@@ -23,8 +23,8 @@ cache:
     - npm ci
     - npx eslint --ext .js src
 
-.lint-backend-test-job:   # This job also runs in the test stage.
-  stage: lint    # It can run at the same time as unit-test-job (in parallel).
+.lint-backend-test-job:   # This job also runs in the test stage
+  stage: lint    # It can run at the same time as unit-test-job (in parallel)
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
