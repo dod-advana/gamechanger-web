@@ -2,7 +2,7 @@ FROM node:14
 # RUN apt-get update && apt-get install -y vim
 WORKDIR /usr/src/app
 COPY package.json .npmrc package-lock.json* /usr/src/app/
-RUN npm ci
+RUN npm install
 COPY . /usr/src/app
 EXPOSE 8080
 # EXPOSE 5860
