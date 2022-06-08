@@ -143,6 +143,8 @@ deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
       - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main")
+      - if: $TESTING == "true"
+        when: never
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
