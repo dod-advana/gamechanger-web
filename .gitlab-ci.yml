@@ -62,7 +62,9 @@ sonar_scan-job:
       EOF
 
 lint-frontend-test-job:  
-  stage: lint   
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     key: 
       files:
@@ -74,7 +76,9 @@ lint-frontend-test-job:
     - npx eslint --ext .js src
 
 lint-backend-test-job:   
-  stage: lint    
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     key: 
       files:
@@ -87,6 +91,8 @@ lint-backend-test-job:
 
 unit-backend-test-job:  
   stage: unit-test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     key: 
       files:
@@ -108,7 +114,7 @@ unit-backend-test-job:
 integration-testing-job:
   stage: integration-test
   rules:
-    - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: ($CI_TARGET_BRANCH_NAME == "dev" || $CI_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
@@ -120,7 +126,7 @@ integration-testing-job:
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: ($CI_TARGET_BRANCH_NAME == "dev" || $CI_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
