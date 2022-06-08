@@ -266,10 +266,12 @@ class GlobalSearchHandler extends SearchHandler {
 				});
 				const assetAttributesResults = await Promise.all(assetAttributeCalls);
 				const combinedAttributeResults = {};
+				const attributeIdMap = {};
 				assetAttributesResults.forEach((attributeResult, idx) => {
 					if (attributeResult.data.results.length > 0) {
 						combinedAttributeResults[attributeResult.data.results[0].asset.id] =
 							attributeResult.data.results.map((attrResult) => {
+								attributeIdMap[attrResult.id] = attrResult.type.name;
 								return {
 									field: attrResult.type.name,
 									value: attrResult.value,
@@ -290,6 +292,7 @@ class GlobalSearchHandler extends SearchHandler {
 					response.data,
 					combinedAssetResults,
 					combinedAttributeResults,
+					attributeIdMap,
 					combinedUserData,
 					userId
 				);
@@ -309,8 +312,15 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async cleanDataCatalogResults(data, fullAssetDetails, combinedAttributeResults, fullUserData, userId) {
-		const attributeTypes = await this.dcUtils.getAttributeTypes();
+	async cleanDataCatalogResults(
+		data,
+		fullAssetDetails,
+		combinedAttributeResults,
+		attributeIdMap,
+		fullUserData,
+		userId
+	) {
+		const attributeTypes = attributeIdMap; // await this.dcUtils.getAttributeTypes();
 
 		try {
 			data.results.forEach((result) => {
@@ -339,9 +349,11 @@ class GlobalSearchHandler extends SearchHandler {
 				});
 
 				result.highlights.forEach((highlight) => {
-					if (highlight.field.toLowerCase().includes('attribute:')) {
-						const attributeID = highlight.field.split(':')[1];
-						highlight.field = attributeTypes[attributeID];
+					if (highlight.id) {
+						highlight.field = attributeTypes[highlight.id];
+					} else if (highlight.field.indexOf('attribute') !== -1) {
+						const attId = highlight.field.split(':')[1];
+						highlight.field = attributeTypes[attId];
 					}
 				});
 			});
