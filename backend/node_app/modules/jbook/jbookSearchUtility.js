@@ -1373,6 +1373,14 @@ class JBookSearchUtility {
 				},
 			};
 
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
+
 			if (searchText !== '') {
 				query.query.bool.must.push({
 					multi_match: {
@@ -1448,14 +1456,6 @@ class JBookSearchUtility {
 					},
 				});
 			});
-
-			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
-			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
-
-			if (filterQueries.length > 0) {
-				query.query.bool.filter = filterQueries;
-			}
 
 			let sortText = jbookSearchSettings.sort[0].id;
 			if (!sortSelected && searchText && searchText !== '') {
