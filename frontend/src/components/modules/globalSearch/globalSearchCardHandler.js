@@ -846,11 +846,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -865,7 +871,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -924,7 +930,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -1064,11 +1070,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1083,7 +1095,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -1142,7 +1154,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -1282,11 +1294,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1301,7 +1319,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (
 												highlight.field &&
@@ -1364,7 +1382,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (
 											highlight.field &&
