@@ -32,11 +32,7 @@ sonar_scan-job:
     SONAR_TOKEN: "${SONAR_TOKEN}"
     PROJECTURL: "${CI_REPOSITORY_URL}"
     PROJECTNAME: "${CI_PROJECT_PATH}"
-    PROJECTKEY: "advana-gamechanger-gamechanger-web"
-    GITLAB_PROJECT_ID: "advana-gamechanger-gamechanger-web"
-    GITLAB_COMMIT_SHA: "${CI_COMMIT_SHA}"
-    GITLAB_REF_NAME: "${CI_COMMIT_REF_NAME}"
-    GITLAB_BRANCH_NAME: "master"
+    PROJECTKEY: "${SONAR_PROJECT_KEY}"
     CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
     GIT_DEPTH: "0"
   script:
@@ -48,9 +44,8 @@ sonar_scan-job:
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
         -Dsonar.links.issue="${PROJECTURL}/issues" \
         -Dsonar.analysis.mode="publish" \
-        -Dsonar.gitlab.project_id="${GITLAB_PROJECT_ID}" \
-        -Dsonar.gitlab.commit_sha="${GITLAB_COMMIT_SHA}" \
-        -Dsonar.gitlab.ref_name="${GITLAB_REF_NAME}"
+        -Dsonar.projectBaseDir=. \
+        -Dsonar.sources=./frontend,./backend
       mkdir -p public
       <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
       <html>
