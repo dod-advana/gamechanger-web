@@ -1,8 +1,9 @@
 
 stages:          # List of stages for jobs, and their order of execution
+  - unit-test
   - security-test
   - lint
-  - unit-test
+
   - integration-test
   - deploy
 
@@ -41,13 +42,16 @@ sonar_scan-job:
     - |
       sonar-scanner \
         -Dsonar.qualitygate.wait=true \
+        -Dsonar.javascript.lcov.reportPaths=./backend/coverage/lcov.info \
+        -Dsonar.language=js \
+        -Dsonar.exclusions=./backend/node_app/sql/* \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
         -Dsonar.links.issue="${PROJECTURL}/issues" \
         -Dsonar.analysis.mode="publish" \
         -Dsonar.projectBaseDir=. \
-        -Dsonar.sources=./frontend,./backend
+        -Dsonar.sources=./frontend/src,./backend/node_app
       mkdir -p public
       <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
       <html>
