@@ -347,15 +347,49 @@ class AppStatsController {
 		});
 	}
 
+
 	/**
-	 * This method gets the visitorID tied to a userid
+	 * This method gets the visitorID tied to one userid
 	 * @method getUserVisitorID
 	 * @param {String} userID
 	 * @returns
 	 *
 	 */
-	async getUserVisitorID(userID, cloneName, connection) {
+	 async getOneUserVisitorID(userID, connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(
+				`
+				select 
+					distinct hex(a.idvisitor) as idvisitor,
+					a.user_id as user_id
+				from matomo_log_visit a
+				where
+					a.user_id = ?
+				`,
+				[userID],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
+			);
+		});
+		
+	}
+
+	/**
+	 * This method gets the visitorID tied all userid
+	 * @method getUserVisitorID
+	 * @param {String} userID
+	 * @returns
+	 *
+	 */
+	async getUserVisitorID(cloneName, connection) {
 		if (cloneName) {
+			console.log(cloneName);
 			return new Promise((resolve, reject) => {
 				connection.query(
 					`
@@ -368,9 +402,8 @@ class AppStatsController {
 						from matomo_log_link_visit_action
 						where idaction_event_category=?
 					)
-					and a.user_id in (?)
 					`,
-					[cloneName, userID],
+					[cloneName],
 					(error, results, fields) => {
 						if (error) {
 							this.logger.error(error, 'BAP9ZIP');
@@ -1118,10 +1151,12 @@ class AppStatsController {
 		const vistitIDMap = {};
 		const users = await this.user.findAll();
 		const visitorIDs = await this.getUserVisitorID(
-			users.map((x) => this.sparkMD5.hash(x.user_id)),
 			opts.cloneName,
 			connection
 		);
+		for (let visit of visitorIDs) {
+			vistitIDMap[visit.idvisitor] = visit.user_id;
+		}
 
 		for (let user of users) {
 			documentMap[this.sparkMD5.hash(user.user_id)] = {
@@ -1138,9 +1173,7 @@ class AppStatsController {
 				last_search_formatted: '',
 			};
 		}
-		for (let visit of visitorIDs) {
-			vistitIDMap[visit.idvisitor] = visit.user_id;
-		}
+
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
@@ -1157,16 +1190,29 @@ class AppStatsController {
 			connection
 		);
 		cards[0]['unique_users'] = userCards[0]['unique_users'];
-
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
-				documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
-					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
-				documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
-					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
-				if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
-					documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-					documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
+				if(documentMap[vistitIDMap[search.idvisitor]]){
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
+					}
+				}
+				else{
+					documentMap[vistitIDMap[search.idvisitor]]= {
+						user_id: vistitIDMap[search.idvisitor],
+						'docs_opened':search.docs_opened,
+						'searches_made':search.searches_made,
+						'last_search':search.last_search,
+						'last_search_formatted':search.last_search_formatted,
+						'Favorite':[],
+						'ExportDocument':[],
+						'opened':[]
+					}
 				}
 			}
 		}
@@ -1212,7 +1258,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const visitorID = await this.getUserVisitorID([userdID], null, connection);
+			const visitorID = await this.getOneUserVisitorID(userdID, connection);
 			const opened = await this.queryPDFOpenedByUserId(
 				visitorID.map((x) => x.idvisitor),
 				connection
