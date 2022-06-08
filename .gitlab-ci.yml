@@ -1,4 +1,3 @@
-image: node:14 # "${IRONBANK_NODEJS}"
 
 stages:          # List of stages for jobs, and their order of execution
   - security-test
@@ -61,7 +60,8 @@ sonar_scan-job:
       </html>
       EOF
 
-lint-frontend-test-job:  
+lint-frontend-test-job:
+  image: node:14
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -75,7 +75,8 @@ lint-frontend-test-job:
     - cd frontend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js src
 
-lint-backend-test-job:   
+lint-backend-test-job:
+  image: node:14
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -89,7 +90,8 @@ lint-backend-test-job:
     - cd backend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js node_app
 
-unit-backend-test-job:  
+unit-backend-test-job:
+  image: node:14
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
