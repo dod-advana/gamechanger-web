@@ -18,15 +18,31 @@ sonar_scan-job:
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
-    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
+  artifacts:
+    paths:
+      - "public"
+  variables:
+    REPOSITORY: "${UPSTREAM_PROJECT_PATH}"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    SONAR_HOST_EXTERNAL_URL: "${SONAR_HOST_EXTERNAL_URL}"
+    SONAR_HOST_URL: "${SONAR_HOST_URL}"
+    SONAR_TOKEN: "${SONAR_TOKEN}"
+    PROJECTURL: "${UPSTREAM_PROJECT_URL}"
+    PROJECTNAME: "${UPSTREAM_PROJECT_PATH}"
+    PROJECTKEY: "${UPSTREAM_PROJECT_PATH_SLUG}"
+    GITLAB_PROJECT_ID: "${UPSTREAM_PROJECT_ID}"
+    GITLAB_COMMIT_SHA: "${UPSTREAM_COMMIT_SHA}"
+    GITLAB_REF_NAME: "${UPSTREAM_COMMIT_REF_NAME}"
+    GITLAB_BRANCH_NAME: "${UPSTREAM_COMMIT_BRANCH}"
+    CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
+    GIT_DEPTH: "0"
   script:
-    - sonar-scanner \
+    - |
+      sonar-scanner \
         -Dsonar.qualitygate.wait=true \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
@@ -37,6 +53,14 @@ sonar_scan-job:
         -Dsonar.gitlab.project_id="${GITLAB_PROJECT_ID}" \
         -Dsonar.gitlab.commit_sha="${GITLAB_COMMIT_SHA}" \
         -Dsonar.gitlab.ref_name="${GITLAB_REF_NAME}"
+      mkdir -p public
+      <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
+      <html>
+      <head>
+      <meta http-equiv="refresh" content="0; url=${SONAR_HOST_EXTERNAL_URL}/dashboard?id=${PROJECTKEY}" />
+      </head>
+      </html>
+      EOF
   allow_failure: true
 
 lint-frontend-test-job:  
@@ -78,10 +102,10 @@ unit-backend-test-job:
     when: always
     reports:
       junit:
-        - junit.xml
+        - backend/junit.xml
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
+        path: backend/coverage/cobertura-coverage.xml
 
 integration-testing-job:
   stage: integration-test
