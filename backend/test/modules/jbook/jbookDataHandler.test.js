@@ -331,8 +331,8 @@ describe('JBookDataHandler', function () {
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
-					'TesAI Inventoryt': {
-						portfolioName: 'TesAI Inventoryt',
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
 						primaryReviewerEmail: null,
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
