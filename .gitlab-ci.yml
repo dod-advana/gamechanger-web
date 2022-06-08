@@ -33,10 +33,10 @@ sonar_scan-job:
     PROJECTURL: "${CI_REPOSITORY_URL}"
     PROJECTNAME: "${CI_PROJECT_PATH}"
     PROJECTKEY: "${CI_PROJECT_PATH_SLUG}"
-    GITLAB_PROJECT_ID: "${CI_PROJECT_ID}"
+    GITLAB_PROJECT_ID: "advana-gamechanger-gamechanger-web"
     GITLAB_COMMIT_SHA: "${CI_COMMIT_SHA}"
     GITLAB_REF_NAME: "${CI_COMMIT_REF_NAME}"
-    GITLAB_BRANCH_NAME: "${CI_COMMIT_BRANCH}"
+    GITLAB_BRANCH_NAME: "master"
     CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
     GIT_DEPTH: "0"
   script:
