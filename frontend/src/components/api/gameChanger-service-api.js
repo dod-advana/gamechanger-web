@@ -346,6 +346,7 @@ export default class GameChangerAPI {
 			const htmlString = await response.data.text();
 			const opt = {
 				margin: 10,
+				enableLinks: false,
 			};
 			const blobUri = await html2pdf().set(opt).from(htmlString).outputPdf('bloburi');
 			generatedUrl = blobUri;
