@@ -15,6 +15,7 @@ unit-backend-test-job:
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   cache:
     key:
       files:
@@ -43,6 +44,7 @@ sonar_scan-job:
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -89,6 +91,7 @@ lint-frontend-test-job:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   cache:
     key: 
       files:
@@ -103,6 +106,7 @@ lint-backend-test-job:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   cache:
     key: 
       files:
@@ -117,6 +121,7 @@ integration-testing-job:
   stage: integration-test
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
