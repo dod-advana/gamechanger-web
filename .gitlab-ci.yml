@@ -32,7 +32,7 @@ sonar_scan-job:
     SONAR_HOST_URL: "${SONAR_HOST_URL}"
     SONAR_TOKEN: "${SONAR_TOKEN}"
     PROJECTURL: "${CI_REPOSITORY_URL}"
-    PROJECTNAME: "${CI_PROJECT_NAME}"
+    PROJECTNAME: "${CI_PROJECT_PATH}"
     PROJECTKEY: "${CI_PROJECT_PATH_SLUG}"
     GITLAB_PROJECT_ID: "${CI_PROJECT_ID}"
     GITLAB_COMMIT_SHA: "${CI_COMMIT_SHA}"
@@ -60,7 +60,6 @@ sonar_scan-job:
       </head>
       </html>
       EOF
-  allow_failure: true
 
 lint-frontend-test-job:  
   stage: lint   
