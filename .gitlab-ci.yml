@@ -32,7 +32,7 @@ sonar_scan-job:
     SONAR_TOKEN: "${SONAR_TOKEN}"
     PROJECTURL: "${CI_REPOSITORY_URL}"
     PROJECTNAME: "${CI_PROJECT_PATH}"
-    PROJECTKEY: "${CI_PROJECT_PATH_SLUG}"
+    PROJECTKEY: "advana-gamechanger-gamechanger-web"
     GITLAB_PROJECT_ID: "advana-gamechanger-gamechanger-web"
     GITLAB_COMMIT_SHA: "${CI_COMMIT_SHA}"
     GITLAB_REF_NAME: "${CI_COMMIT_REF_NAME}"
