@@ -130,6 +130,7 @@ integration-testing-job:
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
+    - if: $TESTING == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
