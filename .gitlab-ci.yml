@@ -46,7 +46,6 @@ sonar_scan-job:
         -Dsonar.qualitygate.wait=true \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
-        -Dsonar.branch.name="${GITLAB_BRANCH_NAME}" \
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
         -Dsonar.links.issue="${PROJECTURL}/issues" \
         -Dsonar.analysis.mode="publish" \
