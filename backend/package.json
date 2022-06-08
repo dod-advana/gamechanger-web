@@ -16,7 +16,7 @@
 		"gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
 		"orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
 		"orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo",
-		"eslint": "eslint --fix --debug -c .eslintrc.json ./node_app/"
+		"eslint": "eslint --fix --debug -c .eslintrc.json -f json -o eslintReport.json ./node_app/"
 	},
 	"author": "",
 	"license": "ISC",
