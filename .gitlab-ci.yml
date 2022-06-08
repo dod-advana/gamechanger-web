@@ -1,56 +1,127 @@
-image: node:14 # "${IRONBANK_NODEJS}"
+image: node:14
 
-stages:          # List of stages for jobs, and their order of execution
-  - lint
+stages:          # List of stages for jobs, and their order of execution.
   - unit-test
+  - security-test
+  - lint
   - integration-test
   - deploy
 
-cache:
-  paths:
-  - frontend/node_modules/
-  - backend/node_modules/
+before_script:
+  - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+  - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-lint-frontend-test-job:   # This job also runs in the test stage
-  stage: lint    # It can run at the same time as unit-test-job (in parallel)
+unit-backend-test-job:
+  stage: unit-test
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key:
+      files:
+        - backend/package-lock.json
+    paths:
+    - .npm/
+  script:
+    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - npm run test:gitlab
+  artifacts:
+    paths:
+      - backend/coverage/lcov.info
+      - backend/junit.xml
+#    when: always
+#    reports:
+#      junit:
+#        - backend/junit.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: backend/coverage/cobertura-coverage.xml
+
+sonar_scan-job:
+  stage: security-test
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  artifacts:
+    paths:
+      - "public"
+  variables:
+    REPOSITORY: "${CI_PROJECT_PATH}"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    SONAR_HOST_EXTERNAL_URL: "${SONAR_HOST_EXTERNAL_URL}"
+    SONAR_HOST_URL: "${SONAR_HOST_URL}"
+    SONAR_TOKEN: "${SONAR_TOKEN}"
+    PROJECTURL: "${CI_REPOSITORY_URL}"
+    PROJECTNAME: "advana/gamechanger/gamechanger-web-source"
+    PROJECTKEY: "${SONAR_PROJECT_KEY}"
+    CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
+    GIT_DEPTH: "0"
   script:
     - |
-      cd frontend
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-    - npm ci
+      sonar-scanner \
+        -Dsonar.qualitygate.wait=true \
+        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+        -Dsonar.junit.reportPaths=backend/junit.xml \
+        -Dsonar.language=js \
+        -Dsonar.exclusions=backend/node_app/sql/* \
+        -Dsonar.projectName="${PROJECTNAME}" \
+        -Dsonar.projectKey="${PROJECTKEY}" \
+        -Dsonar.links.ci="${PROJECTURL}/pipelines" \
+        -Dsonar.links.issue="${PROJECTURL}/issues" \
+        -Dsonar.analysis.mode="publish" \
+        -Dsonar.projectBaseDir=. \
+        -Dsonar.sources=frontend/src,backend/node_app
+      mkdir -p public
+      <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
+      <html>
+      <head>
+      <meta http-equiv="refresh" content="0; url=${SONAR_HOST_EXTERNAL_URL}/dashboard?id=${PROJECTKEY}" />
+      </head>
+      </html>
+      EOF
+
+lint-frontend-test-job:
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key: 
+      files:
+        - frontend/package-lock.json
+    paths:
+    - .npm/
+  script:
+    - cd frontend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js src
 
-lint-backend-test-job:   # This job also runs in the test stage
-  stage: lint    # It can run at the same time as unit-test-job (in parallel)
+lint-backend-test-job:
+  stage: lint
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key: 
+      files:
+        - backend/package-lock.json
+    paths:
+    - .npm/
   script:
-    - |
-      cd backend
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-    - npm ci
+    - cd backend && npm ci --cache ../.npm --prefer-offline
     - npx eslint --ext .js node_app
 
-unit-backend-test-job:   # This job also runs in the test stage.
-  stage: unit-test    # It can run at the same time as unit-test-job (in parallel).
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
-  script:
-    - |
-      cd backend
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-    - npm ci
-    - npm run test
-
-integration-testing:
+integration-testing-job:
   stage: integration-test
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
@@ -62,6 +133,11 @@ integration-testing:
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-  script:
-  - "curl -X POST --fail -F token=${PIPELINE_TOKEN} -F ref=master -F variables[BRANCH_TO_BUILD]=${CI_COMMIT_BRANCH} https://gitlab.advana.boozallencsn.com/api/v4/projects/12/trigger/pipeline"
+      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main")
+  variables:
+    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
+    CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-web"
+    branch: "main"
