@@ -951,7 +951,6 @@ class JBookDataHandler extends DataHandler {
 
 	async getContractTotals(req, userId) {
 		const { useElasticSearch = false } = req.body;
-
 		if (useElasticSearch) {
 			return this.getESContractTotals(req, userId);
 		} else {
