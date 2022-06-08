@@ -6,6 +6,7 @@
 	"scripts": {
 		"preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
 		"test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
+		"test:gitlab": "jest --coverage --coverageDirectory=cobertura/coverage/jest --ci --reporters=default --reporters=jest-junit",
 		"watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
 		"prestart": "npm install",
 		"start": "node index.js",
@@ -77,6 +78,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"jest": "^25.1.0",
+		"jest-junit": "^13.2.0",
 		"prettier": "^2.6.1",
 		"sonarqube-scanner": "^2.5.0"
 	},
@@ -87,6 +89,7 @@
 			"cobertura",
 			"lcov"
 		],
+		"reporters": [ "default", "jest-junit" ],
 		"testTimeout": 10000
 	}
 }

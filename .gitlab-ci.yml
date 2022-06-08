@@ -44,7 +44,12 @@ unit-backend-test-job:
     - .npm/
   script:
     - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npm run test
+    - npm run test:gitlab
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
 
 integration-testing-job:
   stage: integration-test
