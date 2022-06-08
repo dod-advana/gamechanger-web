@@ -221,6 +221,12 @@ describe('JBookDataHandler', function () {
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
 				},
 			};
 			const actual = await target.getESProjectData(req, 'Test');
@@ -443,6 +449,12 @@ describe('JBookDataHandler', function () {
 						service_mp_checklist_S: '{}',
 						appropriationNumber: '3010F',
 						serviceAgency: 'Air Force (AF)',
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
 						primaryReviewerEmail: null,
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,

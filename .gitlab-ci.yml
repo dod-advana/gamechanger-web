@@ -18,8 +18,6 @@ sonar_scan-job:
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -65,8 +63,6 @@ lint-frontend-test-job:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
   cache:
     key: 
       files:
@@ -81,8 +77,6 @@ lint-backend-test-job:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
   cache:
     key: 
       files:
@@ -97,8 +91,6 @@ unit-backend-test-job:
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
   cache:
     key: 
       files:
