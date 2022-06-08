@@ -114,7 +114,7 @@ unit-backend-test-job:
 integration-testing-job:
   stage: integration-test
   rules:
-    - if: ($CI_TARGET_BRANCH_NAME == "dev" || $CI_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
@@ -126,7 +126,7 @@ integration-testing-job:
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_TARGET_BRANCH_NAME == "dev" || $CI_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: ($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
