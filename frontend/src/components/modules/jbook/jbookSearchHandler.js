@@ -168,20 +168,6 @@ const JBookSearchHandler = {
 				}
 
 				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
-				// this.getContractTotals(state, dispatch)
-				// 	.then(({ contractTotals }) => {
-				// 		setState(dispatch, {
-				// 			statsLoading: false,
-				// 			contractTotals: contractTotals,
-				// 		});
-				// 	})
-				// 	.catch(() => {
-				// 		setState(dispatch, {
-				// 			statsLoading: false,
-				// 			contractTotals: {},
-				// 		});
-				// 	});
-
 				const t1 = new Date().getTime();
 
 				if (results === null || !results.docs || results.docs.length <= 0) {
