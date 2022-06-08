@@ -1,9 +1,9 @@
+image: node:14
 
 stages:          # List of stages for jobs, and their order of execution
   - unit-test
   - security-test
   - lint
-
   - integration-test
   - deploy
 
@@ -62,7 +62,6 @@ sonar_scan-job:
       EOF
 
 lint-frontend-test-job:
-  image: node:14
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -79,7 +78,6 @@ lint-frontend-test-job:
     - npx eslint --ext .js src
 
 lint-backend-test-job:
-  image: node:14
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -96,7 +94,6 @@ lint-backend-test-job:
     - npx eslint --ext .js node_app
 
 unit-backend-test-job:
-  image: node:14
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -111,14 +108,14 @@ unit-backend-test-job:
   script:
     - cd backend && npm ci --cache ../.npm --prefer-offline
     - npm run test:gitlab
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - backend/junit.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: backend/coverage/cobertura-coverage.xml
+#  artifacts:
+#    when: always
+#    reports:
+#      junit:
+#        - backend/junit.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: backend/coverage/cobertura-coverage.xml
 
 integration-testing-job:
   stage: integration-test
