@@ -4,6 +4,7 @@ stages:          # List of stages for jobs, and their order of execution.
   - unit-test
   - lint
   - security-test
+  - setup-test-server
   - integration-test
   - deploy
 
@@ -125,18 +126,37 @@ sonar_scan-job:
       EOF
 
 
-integration-testing-job:
-  stage: integration-test
+setup-server:
+  stage: setup-test-server
+  variables:
+    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
+    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
+    APP_NAME: "gamechanger"
+    AWS_SERVER: "88"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
     strategy: "depend"
-    project: "advana/gamechanger/gamechanger-test"
+    project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
+integration-testing-job:
+  image: "${ECR_REGISTRY}/advana/gamechanger/gamechanger-test:latest"
+  stage: integration-test
+  variables:
+    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-test"
+    INTERNAL_REPO: "https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/${GITLAB_PROJECT_REPO}"
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  before_script:
+    - git clone $INTERNAL_REPO test-repo
+    - cd test-repo
+    - google-chrome -version
+    - Xvfb :99 -ac &
+  script:
+    - mvn clean -f gamechanger/pom.xml -Dtestprops.useFile=false -Dtest=GameChangerTest test surefire-report:report
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
@@ -145,7 +165,4 @@ deploy-job:       # This job runs the build for dev.
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-web"
-    branch: "main"
+  trigger: "advana/gamechanger/gamechanger-web"
