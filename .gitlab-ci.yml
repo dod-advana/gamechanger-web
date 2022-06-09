@@ -13,10 +13,6 @@ stages:          # List of stages for jobs, and their order of execution.
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-code_quality:
-  variables:
-    CODE_QUALITY_IMAGE: "codequality-fork:latest"
-
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: test
