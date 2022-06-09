@@ -118,7 +118,7 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"eslint": "eslint --fix --debug -c .eslintrc.json ./src/"
+		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/"
 	},
 	"jest": {
 		"moduleDirectories": [

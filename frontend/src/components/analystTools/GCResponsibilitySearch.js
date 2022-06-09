@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { TextField, MenuItem } from '@material-ui/core';
+import React from 'react';
+import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import GCButton from '../common/GCButton';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -31,13 +31,13 @@ export default function GCResponsibilitySearch({
 }) {
 	const classes = useStyles();
 
-	const handleDocChange = (event) => {
-		setDocTitle(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
-	};
+	// const handleDocChange = (event) => {
+	// 	setDocTitle(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
+	// };
 
-	const handleOrgChange = (event) => {
-		setOrganization(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
-	};
+	// const handleOrgChange = (event) => {
+	// 	setOrganization(event.target.type === 'checkbox' ? event.target.checked : event.target.value);
+	// };
 	const top100Films = [
 		{ title: 'DoDD 1000.20', year: 1994 },
 		{ title: 'DoDD 1000.21E', year: 1972 },
