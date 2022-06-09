@@ -30,10 +30,10 @@ unit-backend-test-job:    # Job for the unit tests
     paths:
       - backend/coverage/lcov.info
       - backend/junit.xml
-#    when: always
-#    reports:
-#      junit:
-#        - backend/junit.xml
+    when: always
+    reports:
+      junit:
+        - backend/junit.xml
 #      coverage_report:
 #        coverage_format: cobertura
 #        path: backend/coverage/cobertura-coverage.xml
