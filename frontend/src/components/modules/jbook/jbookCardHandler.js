@@ -5,7 +5,7 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import { getClassLabel, getConvertedType, getTotalCost } from '../../../utils/jbookUtilities';
+import { getClassLabel, getConvertedType } from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';

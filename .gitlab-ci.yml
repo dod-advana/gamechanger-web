@@ -50,7 +50,7 @@ lint-frontend-test-job:
     - .npm/
   script:
     - cd frontend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint -c .eslintrc.json --ext .js -f json -o eslintReport.json src
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
   artifacts:
     paths:
       - frontend/eslintReport.json
@@ -68,7 +68,7 @@ lint-backend-test-job:
     - .npm/
   script:
     - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
   artifacts:
     paths:
       - backend/eslintReport.json
