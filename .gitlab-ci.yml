@@ -146,36 +146,16 @@ integration-testing-job:
   image: "${ECR_REGISTRY}/advana/gamechanger/gamechanger-test:latest"
   stage: integration-test
   variables:
-    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-test"
-    INTERNAL_REPO: "https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/${GITLAB_PROJECT_REPO}"
     AWS_SERVER: "88"
-    SPECIFIC_TEST: '#basicSingleWordSearch'
-    DISPLAY: ":99"
-    TEST_URL: "http://${TEST_IP}${AWS_SERVER}:8080/#/gamechanger"
-    API_URL: "http://${TEST_IP}${AWS_SERVER}:8990/"
-    TEST_USER_CN: "${TEST_USER_CN}"
-    TEST_USER_CN_CERT: "${TEST_USER_CN_CERT}"
-    TEST_USER_ID: "${TEST_USER_ID}"
-    TEST_USER_ID_CERT: "${TEST_USER_ID_CERT}"
-    ES_URL: "${ES_URL}"
-    MATOMO_URL: "${MATOMO_URL}"
-    MATOMO_USER: "${MATOMO_USER}"
-    MATOMO_PASS: "${MATOMO_PASS}"
-    POSTGRES_USER: "${POSTGRES_USER}"
-    POSTGRES_PASS: "${POSTGRES_PASS}"
-    POSTGRES_HOST: "${POSTGRES_HOST}"
-    POSTGRES_PORT: "5432"
+    DO_INTEGRATION_TEST: "true"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
     - if: $TESTING == "true"
-  before_script:
-    - git clone $INTERNAL_REPO test-repo
-    - cd test-repo
-    - google-chrome -version
-    - Xvfb :99 -ac &
-  script:
-    - mvn clean -f gamechanger/pom.xml -Dtestprops.useFile=false -Dtest=GameChangerTest test surefire-report:report
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-ci-cd"
+    branch: "main"
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
