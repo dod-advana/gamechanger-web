@@ -40,8 +40,12 @@ import {
 
 const gameChangerAPI = new GameChangerAPI();
 
+// fields that are numbers that require commas
+const EDA_NUMBER_FIELDS = ['Total Obligated Amounts'];
+
 // the fields that will show in the back of the card
 export const EDA_FIELDS = [
+	'sow_pws_text_eda_ext_t',
 	'award_id_eda_ext',
 	'modification_eda_ext',
 	'reference_idv_eda_ext',
@@ -128,6 +132,8 @@ export const EDA_FIELD_JSON_MAP = {
 	fpds_funding_agency_name_eda_ext: 'FPDS Funding Agency',
 	fpds_naics_code_eda_ext: 'FPDS NAICS Code',
 	fpds_duns_eda_ext: 'FPDS DUNS',
+
+	sow_pws_text_eda_ext_t: 'Contract SOW',
 };
 
 const styles = {
@@ -670,7 +676,7 @@ const cardHandler = {
 
 			let tooltipText = 'No metadata available';
 			let fields = EDA_FIELDS;
-			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP);
+			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP, EDA_NUMBER_FIELDS);
 
 			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
 				if (item.metadata_type_eda_ext === 'pds') {
