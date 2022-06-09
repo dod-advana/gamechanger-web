@@ -77,7 +77,7 @@ class ElasticSearchController {
 			}
 			this.logger.info('START qlik full app cache and ES storage');
 
-			const { data } = await getQlikApps(undefined, this.logger, false, true, undefined);
+			const data = await getQlikApps(undefined, this.logger, false, undefined);
 
 			await Promise.all([this.storeUpdateQlikAppsInES(data), this.cacheQlikApps(data)]);
 
@@ -121,17 +121,23 @@ class ElasticSearchController {
 					tags_n: app['tags'],
 					description_t: app['description'],
 					streamName_s: app['stream']['name'],
+					streamCustomProperties_o: app['stream']['customProperties'], // TODO: change to Nested type
 					fileSize_i: app['fileSize'],
 					lastReloadTime_dt: app['lastReloadTime'],
 					thumbnail_s: app['thumbnail'],
 					dynamicColor_s: app['dynamicColor'],
+					appCustomProperties_o: app['customProperties'],
+					businessDomains_s: app['businessDomains']
 				};
 			});
 
 			// Insert / Update Qlik Documents
 			await this.esSearchLib.bulkInsert(clientObj.esClientName, clientObj.esIndex, dataset, 'QlikAppCaching');
 
-			this.logger.info('Finished Storing Full Qlik Apps in ES');
+			this.logger.info(`Finished Storing Full Qlik Apps in ES
+			dataset:
+			${JSON.stringify(dataset)}
+			`);
 		} catch (e) {
 			this.logger.error(e, 'GTT7PKO', 'Qlik ES Store Function');
 		}

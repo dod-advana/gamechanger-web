@@ -234,11 +234,12 @@ class GlobalSearchHandler extends SearchHandler {
 				userId
 			);
 
+			console.log('esResults', esResults.body.hits)
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
 			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, false, {});
 
-			returnData.results = this.mergeUserApps(returnData.hits, userApps.data || []);
+			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
 			const t1 = new Date().getTime();
 			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
