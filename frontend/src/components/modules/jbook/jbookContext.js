@@ -41,6 +41,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		programElement: '',
@@ -112,6 +113,9 @@ const initState = {
 
 		reviewStatusSpecificSelected: false,
 		reviewStatusAllSelected: true,
+
+		primaryReviewStatusSpecificSelected: false,
+		primaryReviewStatusAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -123,6 +127,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],

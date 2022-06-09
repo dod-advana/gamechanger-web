@@ -1676,6 +1676,23 @@ class JBookSearchUtility {
 			});
 		}
 
+		// Primary Review Status
+		if (jbookSearchSettings.primaryReviewStatus) {
+			if (jbookSearchSettings.primaryReviewStatus.includes('Not Reviewed')) {
+				jbookSearchSettings.primaryReviewStatus.push('Needs Review', 'Blank');
+			}
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.primary_review_status_s': jbookSearchSettings.primaryReviewStatus,
+						},
+					},
+				},
+			});
+		}
+
 		// Primary Reviewer
 		if (jbookSearchSettings.primaryReviewer) {
 			nestedMustObjects.push({

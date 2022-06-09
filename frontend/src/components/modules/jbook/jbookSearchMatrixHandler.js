@@ -73,7 +73,6 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const generalReviewStatusOpts = ['Finished Review', 'Needs Review'];
 const keywordsOpts = ['Yes', 'No'];
 
 const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
@@ -413,7 +412,7 @@ const getSearchMatrixItems = (props) => {
 				</div>
 			)}
 
-			{selectedPortfolio === 'AI Inventory' && (
+			{selectedPortfolio !== 'General' && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
@@ -422,33 +421,14 @@ const getSearchMatrixItems = (props) => {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
-					</GCAccordion>
-				</div>
-			)}
-			{selectedPortfolio === 'General' && (
-				<div style={{ width: '100%', marginBottom: 10 }}>
-					<GCAccordion
-						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
-						header={<b>REVIEW STATUS</b>}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-					>
-						<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-							{renderFilterCheckboxesOptions(
-								state,
-								dispatch,
-								classes,
-								'reviewStatus',
-								generalReviewStatusOpts
-							)}
-						</FormControl>
+						{selectedPortfolio === 'AI Inventory'
+							? renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')
+							: renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewStatus', 'review status')}
 					</GCAccordion>
 				</div>
 			)}
 
-			{selectedPortfolio !== 'General' && (
+			{selectedPortfolio === 'AI Inventory' && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
