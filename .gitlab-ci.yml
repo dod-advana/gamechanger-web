@@ -1,8 +1,5 @@
-include:
-  - template: Code-Quality.gitlab-ci.yml
-
 stages:          # List of stages for jobs, and their order of execution.
-  - test
+  - static-test
   - security-test
   - setup-test-server
   - integration-test
@@ -13,16 +10,9 @@ stages:          # List of stages for jobs, and their order of execution.
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-code_quality:
-  rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  artifacts:
-    paths: [ gl-code-quality-report.json ]
-
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
-  stage: test
+  stage: static-test
   extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -48,7 +38,7 @@ unit-backend-test-job:    # Job for the unit tests
 
 lint-frontend-test-job:  # front end lint job
   image: node:14
-  stage: test
+  stage: static-test
   extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -68,7 +58,7 @@ lint-frontend-test-job:  # front end lint job
 
 lint-backend-test-job:  # backend lint job
   image: node:14
-  stage: test
+  stage: static-test
   extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
