@@ -136,6 +136,7 @@ setup-server:
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
+    - if: $TESTING == "true"
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
@@ -150,6 +151,7 @@ integration-testing-job:
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
+    - if: $TESTING == "true"
   before_script:
     - git clone $INTERNAL_REPO test-repo
     - cd test-repo
