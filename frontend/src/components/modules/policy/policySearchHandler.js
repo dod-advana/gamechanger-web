@@ -323,7 +323,6 @@ const PolicySearchHandler = {
 					const newSearchSettings = _.cloneDeep(searchSettings);
 
 					if (doc_types && doc_orgs) {
-						// get doc types (memorandum, issuance, etc.). also get top org.
 						let orgCountMap = new Map();
 						let docTypeMap = new Map();
 
@@ -332,15 +331,6 @@ const PolicySearchHandler = {
 							docTypeMap[docTypeName] = docTypeMap[docTypeName]
 								? docTypeMap[docTypeName] + element.doc_count
 								: element.doc_count;
-
-							// const { docOrg } = getDocTypeStyles(element.key);
-							// let docName = getTypeDisplay(docOrg);
-
-							// if (docName === "" || docName === " ") {
-							// 	docName = "Uncategorized ";
-							// }
-
-							// orgCountMap[docName] = orgCountMap[docName] ? orgCountMap[docName] + element.doc_count : element.doc_count;
 						});
 
 						doc_orgs.forEach((element) => {
@@ -413,10 +403,7 @@ const PolicySearchHandler = {
 						}
 						if (searchSettings.orgUpdate) {
 							const typeFilterObject = {};
-							Object.keys(newSearchSettings.originalTypeFilters).forEach(
-								(type) => (typeFilterObject[type] = 0)
-							);
-
+							newSearchSettings.originalTypeFilters.forEach((type) => (typeFilterObject[type[0]] = 0));
 							sidebarTypes.forEach((type) => {
 								typeFilterObject[type[0]] = type[1];
 							});
@@ -428,9 +415,7 @@ const PolicySearchHandler = {
 							newSearchSettings.originalTypeFilters.sort((a, b) => b[1] - a[1]);
 						} else if (searchSettings.typeUpdate) {
 							const orgFilterObject = {};
-							Object.keys(newSearchSettings.originalOrgFilters).forEach(
-								(org) => (orgFilterObject[org] = 0)
-							);
+							newSearchSettings.originalOrgFilters.forEach((org) => (orgFilterObject[org[0]] = 0));
 
 							sidebarOrgData.forEach((org) => {
 								orgFilterObject[org[0]] = org[1];
@@ -446,7 +431,6 @@ const PolicySearchHandler = {
 						newSearchSettings.orgUpdate = false;
 						newSearchSettings.typeUpdate = false;
 						newSearchSettings.isFilterUpdate = false;
-
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
 							sidebarOrgs: sidebarOrgData,
@@ -724,6 +708,13 @@ const PolicySearchHandler = {
 			const newSearchSettings = _.cloneDeep(state.searchSettings);
 			newSearchSettings.orgFilter = orgFilters;
 			newSearchSettings.typeFilter = typeFilters;
+
+			//initiallize original org and type filters to revert counts to.
+			if (!newSearchSettings.originalOrgFilters)
+				newSearchSettings.originalOrgFilters = Object.keys(orgFilters).map((org) => [org, 0]);
+			if (!newSearchSettings.originalTypeFilters)
+				newSearchSettings.originalTypeFilters = Object.keys(typeFilters).map((type) => [type, 0]);
+
 			if (_.isEmpty(state.presearchSources)) {
 				setState(dispatch, { presearchSources: orgFilters });
 			}
