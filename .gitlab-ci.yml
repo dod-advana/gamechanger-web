@@ -1,8 +1,10 @@
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 image: node:14
 
 stages:          # List of stages for jobs, and their order of execution.
-  - unit-test
-  - lint
+  - test
   - security-test
   - setup-test-server
   - integration-test
@@ -12,8 +14,12 @@ before_script:   # Setups the npm vars
   - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
   - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
+code_quality:
+  variables:
+    CODE_QUALITY_IMAGE: "registry.example.com/codequality-fork:latest"
+
 unit-backend-test-job:    # Job for the unit tests
-  stage: unit-test
+  stage: test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -37,7 +43,7 @@ unit-backend-test-job:    # Job for the unit tests
       cobertura: backend/coverage/cobertura-coverage.xml
 
 lint-frontend-test-job:  # front end lint job
-  stage: lint
+  stage: test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -55,7 +61,7 @@ lint-frontend-test-job:  # front end lint job
       - frontend/eslintReport.json
 
 lint-backend-test-job:  # backend lint job
-  stage: lint
+  stage: test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
