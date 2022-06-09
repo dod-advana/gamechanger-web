@@ -8,11 +8,11 @@ stages:          # List of stages for jobs, and their order of execution.
   - integration-test
   - deploy
 
-before_script:
+before_script:   # Setups the npm vars
   - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
   - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-unit-backend-test-job:
+unit-backend-test-job:    # Job for the unit tests
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -38,7 +38,7 @@ unit-backend-test-job:
 #        coverage_format: cobertura
 #        path: backend/coverage/cobertura-coverage.xml
 
-lint-frontend-test-job:
+lint-frontend-test-job:  # front end lint job
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -56,7 +56,7 @@ lint-frontend-test-job:
     paths:
       - frontend/eslintReport.json
 
-lint-backend-test-job:
+lint-backend-test-job:  # backend lint job
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -74,7 +74,7 @@ lint-backend-test-job:
     paths:
       - backend/eslintReport.json
 
-sonar_scan-job:
+sonar_scan-job:  # Run code through sonar scanner
   stage: security-test
   image:
     name: sonarsource/sonar-scanner-cli:latest
@@ -126,7 +126,7 @@ sonar_scan-job:
       EOF
 
 
-setup-server:
+setup-server:  # build dev server with the commit branch
   stage: setup-test-server
   variables:
     BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
@@ -142,8 +142,7 @@ setup-server:
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
-integration-testing-job:
-  image: "${ECR_REGISTRY}/advana/gamechanger/gamechanger-test:latest"
+integration-testing-job:  # Start the integration testing
   stage: integration-test
   variables:
     AWS_SERVER: "88"
