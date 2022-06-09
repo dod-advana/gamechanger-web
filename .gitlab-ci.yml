@@ -52,6 +52,11 @@ lint-frontend-test-job:  # front end lint job
   script:
     - cd frontend && npm ci --cache ../.npm --prefer-offline
     - npx eslint -c .eslintrc.json --ext .js -f json -o eslintReport.json src
+    - |
+      if [ $CI_PIPELINE_SOURCE == "merge_request_event" ]; then
+        npx eslint -c .eslintrc.json --ext .js src > eslint.txt
+        curl --request POST -d "body=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes?private_token=${CI_CD_TOKEN}"
+      fi
   artifacts:
     paths:
       - frontend/eslintReport.json
@@ -72,6 +77,11 @@ lint-backend-test-job:  # backend lint job
   script:
     - cd backend && npm ci --cache ../.npm --prefer-offline
     - npx eslint -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - |
+      if [ $CI_PIPELINE_SOURCE == "merge_request_event" ]; then
+        npx eslint -c .eslintrc.json --ext .js node_app > eslint.txt
+        curl --request POST -d "body=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes?private_token=${CI_CD_TOKEN}"
+      fi
   artifacts:
     paths:
       - backend/eslintReport.json
