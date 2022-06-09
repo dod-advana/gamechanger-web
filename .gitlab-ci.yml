@@ -158,6 +158,7 @@ integration-testing-job:  # Start the integration testing
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
+  allow_failure: true
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
