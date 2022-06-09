@@ -160,6 +160,7 @@ integration-testing-job:  # Start the integration testing
   variables:
     AWS_SERVER: "88"
     DO_INTEGRATION_TEST: "true"
+    DO_DEPLOY: "true"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -171,7 +172,8 @@ integration-testing-job:  # Start the integration testing
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main")
+      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
+      - if: $DO_DEPLOY == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
