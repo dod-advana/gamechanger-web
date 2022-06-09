@@ -55,7 +55,7 @@ lint-frontend-test-job:  # front end lint job
     - |
       if [ $CI_PIPELINE_SOURCE == "merge_request_event" ]; then
         npx eslint -c .eslintrc.json --ext .js src > eslint.txt
-        curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" -d "data=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"
+        curl --request POST -d "data=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes?private_token=${CI_CD_TOKEN}"
       fi
   artifacts:
     paths:
@@ -80,7 +80,7 @@ lint-backend-test-job:  # backend lint job
     - |
       if [ $CI_PIPELINE_SOURCE == "merge_request_event" ]; then
         npx eslint -c .eslintrc.json --ext .js node_app > eslint.txt
-        curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" -d "data=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"
+        curl --request POST -d "data=@eslint.text" "https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes?private_token=${CI_CD_TOKEN}"
       fi
   artifacts:
     paths:
