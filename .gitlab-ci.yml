@@ -135,8 +135,9 @@ setup-server:  # build dev server with the commit branch
     AWS_SERVER: "88"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
     - if: $DAILY_SCAN == "true"
-    - if: $TESTING == "true"
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
@@ -150,7 +151,6 @@ integration-testing-job:  # Start the integration testing
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-    - if: $TESTING == "true"
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
