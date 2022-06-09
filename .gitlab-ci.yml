@@ -4,14 +4,15 @@ stages:          # List of stages for jobs, and their order of execution.
   - unit-test
   - lint
   - security-test
+  - setup-test-server
   - integration-test
   - deploy
 
-before_script:
+before_script:   # Setups the npm vars
   - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
   - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-unit-backend-test-job:
+unit-backend-test-job:    # Job for the unit tests
   stage: unit-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -29,15 +30,13 @@ unit-backend-test-job:
     paths:
       - backend/coverage/lcov.info
       - backend/junit.xml
-#    when: always
-#    reports:
-#      junit:
-#        - backend/junit.xml
-#      coverage_report:
-#        coverage_format: cobertura
-#        path: backend/coverage/cobertura-coverage.xml
+    when: always
+    reports:
+      junit:
+        - backend/junit.xml
+      cobertura: backend/coverage/cobertura-coverage.xml
 
-lint-frontend-test-job:
+lint-frontend-test-job:  # front end lint job
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -55,7 +54,7 @@ lint-frontend-test-job:
     paths:
       - frontend/eslintReport.json
 
-lint-backend-test-job:
+lint-backend-test-job:  # backend lint job
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -73,7 +72,7 @@ lint-backend-test-job:
     paths:
       - backend/eslintReport.json
 
-sonar_scan-job:
+sonar_scan-job:  # Run code through sonar scanner
   stage: security-test
   image:
     name: sonarsource/sonar-scanner-cli:latest
@@ -125,18 +124,35 @@ sonar_scan-job:
       EOF
 
 
-integration-testing-job:
+setup-server:  # build dev server with the commit branch
+  stage: setup-test-server
+  variables:
+    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
+    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
+    APP_NAME: "gamechanger"
+    AWS_SERVER: "88"
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    - if: $DAILY_SCAN == "true"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-ci-cd"
+    branch: "main"
+
+integration-testing-job:  # Start the integration testing
   stage: integration-test
+  variables:
+    AWS_SERVER: "88"
+    DO_INTEGRATION_TEST: "true"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
   trigger:
     strategy: "depend"
-    project: "advana/gamechanger/gamechanger-test"
+    project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
-
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
@@ -145,7 +161,4 @@ deploy-job:       # This job runs the build for dev.
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-web"
-    branch: "main"
+  trigger: "advana/gamechanger/gamechanger-web"
