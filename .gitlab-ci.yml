@@ -13,6 +13,13 @@ stages:          # List of stages for jobs, and their order of execution.
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
+code_quality:
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  artifacts:
+    paths: [ gl-code-quality-report.json ]
+
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: test
