@@ -749,13 +749,11 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
 
-			let { betaAvailable } = item;
-
-			const restricted = getRestricted(item, 'dashboard');
+			let { restricted, betaAvailable, id } = item;
 
 			const PreparedLink = (
 				<CardButton
-					href={getUrl(item, restricted, 'dashboard')}
+					href={getUrl(id, restricted)}
 					onClick={(e) => {
 						if (!restricted && betaAvailable) {
 							e.preventDefault();
@@ -765,7 +763,7 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
-							getUrl(item, restricted, 'dashboard')
+							getUrl(id, restricted)
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -848,11 +846,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -867,7 +871,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -926,7 +930,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -1066,11 +1070,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1085,7 +1095,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -1144,7 +1154,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -1284,11 +1294,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1303,7 +1319,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (
 												highlight.field &&
@@ -1366,7 +1382,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (
 											highlight.field &&

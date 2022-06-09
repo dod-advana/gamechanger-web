@@ -1,23 +1,89 @@
-
-stages:          # List of stages for jobs, and their order of execution
+stages:          # List of stages for jobs, and their order of execution.
+  - static-test
   - security-test
-  - lint
-  - unit-test
+  - setup-test-server
   - integration-test
   - deploy
 
-before_script:
-  - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-  - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+.setup-github-npm:
+  before_script:   # Setups the npm vars
+    - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+    - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-sonar_scan-job:
+unit-backend-test-job:    # Job for the unit tests
+  image: node:14
+  stage: static-test
+  extends: .setup-github-npm
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key:
+      files:
+        - backend/package-lock.json
+    paths:
+    - .npm/
+  script:
+    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - npm run test:gitlab
+  artifacts:
+    paths:
+      - backend/coverage/lcov.info
+      - backend/junit.xml
+    when: always
+    reports:
+      junit:
+        - backend/junit.xml
+      cobertura: backend/coverage/cobertura-coverage.xml
+
+lint-frontend-test-job:  # front end lint job
+  image: node:14
+  stage: static-test
+  extends: .setup-github-npm
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+    - .npm/
+  script:
+    - cd frontend && npm ci --cache ../.npm --prefer-offline
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
+  artifacts:
+    paths:
+      - frontend/eslintReport.json
+
+lint-backend-test-job:  # backend lint job
+  image: node:14
+  stage: static-test
+  extends: .setup-github-npm
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  cache:
+    key:
+      files:
+        - backend/package-lock.json
+    paths:
+    - .npm/
+  script:
+    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+  artifacts:
+    paths:
+      - backend/eslintReport.json
+
+sonar_scan-job:  # Run code through sonar scanner
   stage: security-test
   image:
     name: sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - when: manual
+    - if: $DAILY_SCAN == "true"
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -40,13 +106,18 @@ sonar_scan-job:
     - |
       sonar-scanner \
         -Dsonar.qualitygate.wait=true \
+        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+        -Dsonar.junit.reportPaths=backend/junit.xml \
+        -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
+        -Dsonar.language=js \
+        -Dsonar.exclusions=backend/node_app/sql/* \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
         -Dsonar.links.issue="${PROJECTURL}/issues" \
         -Dsonar.analysis.mode="publish" \
         -Dsonar.projectBaseDir=. \
-        -Dsonar.sources=./frontend,./backend
+        -Dsonar.sources=frontend/src,backend/node_app
       mkdir -p public
       <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
       <html>
@@ -56,83 +127,45 @@ sonar_scan-job:
       </html>
       EOF
 
-lint-frontend-test-job:
-  image: node:14
-  stage: lint
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - when: manual
-  cache:
-    key: 
-      files:
-        - frontend/package-lock.json
-    paths:
-    - .npm/
-  script:
-    - cd frontend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint --ext .js src
 
-lint-backend-test-job:
-  image: node:14
-  stage: lint
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - when: manual
-  cache:
-    key: 
-      files:
-        - backend/package-lock.json
-    paths:
-    - .npm/
-  script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint --ext .js node_app
-
-unit-backend-test-job:
-  image: node:14
-  stage: unit-test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
-  cache:
-    key: 
-      files:
-        - backend/package-lock.json
-    paths:
-    - .npm/
-  script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npm run test:gitlab
-  artifacts:
-    when: always
-    reports:
-      junit:
-        - backend/junit.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: backend/coverage/cobertura-coverage.xml
-
-integration-testing-job:
-  stage: integration-test
+setup-server:  # build dev server with the commit branch
+  stage: setup-test-server
+  variables:
+    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
+    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
+    APP_NAME: "gamechanger"
+    AWS_SERVER: "88"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
+      variables:
+        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    - if: $DAILY_SCAN == "true"
   trigger:
     strategy: "depend"
-    project: "advana/gamechanger/gamechanger-test"
+    project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
+integration-testing-job:  # Start the integration testing
+  stage: integration-test
+  variables:
+    AWS_SERVER: "88"
+    DO_INTEGRATION_TEST: "true"
+    DO_DEPLOY: "true"
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-ci-cd"
+    branch: "main"
+  allow_failure: true
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main")
+      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
+      - if: $DO_DEPLOY == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-web"
-    branch: "main"
+  trigger: "advana/gamechanger/gamechanger-web"

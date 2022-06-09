@@ -91,12 +91,16 @@ const handlePageLoad = async (props) => {
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 	const parsedURL = searchHandler.parseSearchURL(state);
+
 	if (parsedURL.searchText) {
 		const newState = { ...state, ...parsedURL, runSearch: true };
 		setState(dispatch, newState);
 
 		searchHandler.setSearchURL(newState);
 	}
+
+	// Get User Favorites from home App
+	const { data } = gameChangerAPI.getUserFavoriteHomeApps();
 };
 
 const getMainView = (props) => {
