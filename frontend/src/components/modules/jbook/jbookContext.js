@@ -444,6 +444,43 @@ function reducer(state, action) {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
 			};
+		case 'RESET_PORTFOLIO_FILTERS':
+			return {
+				...state,
+				jbookSearchSettings: {
+					...state.jbookSearchSettings,
+
+					primaryReviewerSpecificSelected: false,
+					primaryReviewerAllSelected: true,
+
+					serviceReviewerSpecificSelected: false,
+					serviceReviewerAllSelected: true,
+
+					hasKeywordsSpecificSelected: false,
+					hasKeywordsAllSelected: true,
+
+					primaryClassLabelSpecificSelected: false,
+					primaryClassLabelAllSelected: true,
+
+					sourceTagSpecificSelected: false,
+					sourceTagAllSelected: true,
+
+					reviewStatusSpecificSelected: false,
+					reviewStatusAllSelected: true,
+
+					primaryReviewStatusSpecificSelected: false,
+					primaryReviewStatusAllSelected: true,
+
+					reviewStatus: state.defaultOptions.reviewStatus,
+					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
+					primaryReviewer: state.defaultOptions.primaryReviewer,
+					serviceReviewer: state.defaultOptions.serviceReviewer,
+					pocReviewer: state.defaultOptions.pocReviewer,
+					sourceTag: state.defaultOptions.sourceTag,
+					hasKeyword: state.defaultOptions.hasKeyword,
+					primaryClassLabel: state.defaultOptions.primaryClassLabel,
+				},
+			};
 		default:
 			return state;
 	}

@@ -87,6 +87,11 @@ const JbookViewHeaderHandler = (props) => {
 	}, [dispatch, currentSort, searchText, sortSelected]);
 
 	useEffect(() => {
+		dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+		setState(dispatch, { runSearch: true });
+	}, [selectedPortfolio, dispatch]);
+
+	useEffect(() => {
 		if (IS_EDGE) {
 			setDropdownValue('List');
 			setState(dispatch, { currentViewName: 'Card', listView: true });
