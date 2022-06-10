@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TitleBar from '../components/searchBar/TitleBar';
 import { trackEvent, trackPageView } from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
@@ -201,7 +201,7 @@ const GameChangerDetailsPage = (props) => {
 		}
 	}
 
-	const getEntityData = async (name, cloneName) => {
+	const getEntityData = useCallback(async (name, cloneName) => {
 		const data = {};
 
 		const resp = await gameChangerAPI.callGraphFunction({
@@ -252,7 +252,7 @@ const GameChangerDetailsPage = (props) => {
 
 		data.graph = resp.data.graph;
 		return data;
-	};
+	}, []);
 
 	const getTopicData = async (name, cloneName) => {
 		const data = { topic: {}, graph: { nodes: [], edges: [] }, isNeo4j: true };
@@ -535,7 +535,7 @@ const GameChangerDetailsPage = (props) => {
 			default:
 				break;
 		}
-	}, [query, favoriteTopics]);
+	}, [query, favoriteTopics, getEntityData]);
 
 	useEffect(() => {
 		if (!entity || !cloneData) return;

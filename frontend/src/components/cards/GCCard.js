@@ -391,6 +391,7 @@ function GCCard(props) {
 
 	let isFavorite = false;
 	let favorite_id = null;
+	let favApps;
 	switch (cardType) {
 		case 'document':
 			const faveDocs = state.userData ? state.userData.favorite_documents : [];
@@ -416,6 +417,19 @@ function GCCard(props) {
 				_.find(faveOrganizations, (organization) => {
 					return organization.organization_name.toLowerCase() === item.name.toLowerCase();
 				}) !== undefined;
+			break;
+		case 'application':
+		case 'dashboard':
+			favApps = state.favoriteApps || [];
+			isFavorite = favApps?.includes(item.id.toString()) || false;
+			favorite_id = item.id.toString();
+			break;
+		case 'dataSource':
+		case 'database':
+		case 'models':
+			favApps = state.favoriteApps || [];
+			isFavorite = favApps?.includes(item.resource.id.toString()) || false;
+			favorite_id = item.resource.id.toString();
 			break;
 		default:
 			break;
@@ -490,6 +504,20 @@ function GCCard(props) {
 			case 'topic':
 				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
 				break;
+			case 'application':
+			case 'dashboard':
+			case 'dataSource':
+			case 'database':
+			case 'models':
+				let favApps = state.favoriteApps || [];
+				if (favorite) {
+					favApps.push(favorite_id);
+				} else {
+					favApps = favApps.filter((app) => app !== favorite_id);
+				}
+				gameChangerAPI.putUserFavoriteHomeApps({ favorite_apps: favApps });
+				setState(dispatch, { favoriteApps: favApps });
+				break;
 			default:
 				break;
 		}
@@ -509,7 +537,18 @@ function GCCard(props) {
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
 				<i
 					onClick={(event) => {
-						openFavoritePopper(event.target);
+						switch (cardType) {
+							case 'application':
+							case 'dashboard':
+							case 'dataSource':
+							case 'database':
+							case 'models':
+								handleSaveFavorite(!favorite);
+								break;
+							default:
+								openFavoritePopper(event.target);
+								break;
+						}
 					}}
 					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
 					style={{
