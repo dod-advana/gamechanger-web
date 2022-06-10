@@ -541,9 +541,9 @@ const cardHandler = {
 		},
 
 		getFooter: (props) => {
-			const { item, state, cloneName } = props;
+			const { item, cloneName } = props;
 
-			let { permission, href, type } = item;
+			let { permission, href } = item;
 			if (!_.isNull(permission)) {
 				permission = Permissions?.[permission]?.();
 			} else permission = true;
