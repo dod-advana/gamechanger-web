@@ -1106,7 +1106,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n', 'review_n'];
+		const arrayFields = ['keyword_n', 'review_n', 'r3_contract_data_n', 'r_2a_accomp_pp_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1649,7 +1649,6 @@ class JBookSearchUtility {
 					const convertedAgencies = [];
 
 					jbookSearchSettings.serviceAgency.forEach((agency) => {
-						console.log(agency);
 						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
 							if (serviceAgencyMappings[agencyKey] === agency) {
 								convertedAgencies.push(agencyKey);
