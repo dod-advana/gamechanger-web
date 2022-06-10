@@ -342,11 +342,7 @@ const cardHandler = {
 					for (let i = 0; i < contracts.length && i < 5; i++) {
 						const contract = contracts[i];
 						if (contractElements.length < length) {
-							contractElements += `<br/><p>${
-								contract.submissionDate_year_month_only
-									? `- Submission Date: ${contract.submissionDate_year_month_only}`
-									: ''
-							}</p>`;
+							contractElements += `<br/><p>${contract.bli_s ? `- ${contract.bli_s}` : ''}</p>`;
 						} else {
 							lengthOver = true;
 						}

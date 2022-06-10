@@ -2094,7 +2094,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		r3_contract_data_n: {
+		gl_contract_n: {
 			newName: 'contracts',
 			defaultValue: '',
 			processValue: (value) => value,
