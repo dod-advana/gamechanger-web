@@ -8,10 +8,8 @@ const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT, QLIK_
 const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
 const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
-// TODO: add app custom properties' values and stream custom properties' values
-const QLIK_ES_FIELDS = ['name_s', 'description_t', 'streamName_s'];
+const QLIK_ES_FIELDS = ['name_s', 'description_t', 'streamName_s', 'streamCustomProperties_s', 'appCustomProperties_s', 'businessDomains_s'];
 
-// TODO: update mapping with custom props of signatureFromApp
 const QLIK_ES_MAPPING = {
 	created_dt: { newName: 'createdDate' },
 	modified_dt: { newName: 'modifiedDate' },
@@ -25,6 +23,9 @@ const QLIK_ES_MAPPING = {
 	lastReloadTime_dt: { newName: 'lastReloadTime' },
 	thumbnail_s: { newName: 'thumbnail' },
 	dynamicColor_s: { newName: 'dynamicColor' },
+	streamCustomProperties_s: { newName: 'streamCustomProperties' },
+	appCustomProperties_s: { newName: 'appCustomProperties' },
+	businessDomains_s: { newName: 'businessDomains' },
 };
 
 const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
@@ -71,16 +72,20 @@ const processQlikApps = (apps, streams) => {
 				if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
 					businessDomains.push(customProp.value);
 				} else {
-					app.stream.customProperties.push(customProp);
+					app.stream.customProperties.push(customProp.value);
 				}
 			}
+
+			const appCustomProperties = []
 
 			for (const customProp of app.customProperties) {
 				if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
 					businessDomains.push(customProp.value);
+				} else {
+					appCustomProperties.push(customProp.value)
 				}
 			}
-
+			app.customProperties = appCustomProperties;
 			app.businessDomains = businessDomains;
 		}
 	}
