@@ -1502,27 +1502,67 @@ class JBookSearchUtility {
 					});
 				}
 
+				let shouldQuery = {
+					bool: {
+						should: [],
+					},
+				};
+
 				// Budget Sub Activity
-				if (jbookSearchSettings.budgetSubActivity) {
-					let shouldQuery = {
-						bool: {
-							should: [],
-						},
-					};
+				if (jbookSearchSettings.budgetSubActivity || jbookSearchSettings.primaryReviewStatus) {
+					if (jbookSearchSettings.budgetSubActivity) {
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'P40-13_BSA_Title_t',
+							},
+						});
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'P40-13_BSA_Title_t',
-						},
-					});
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'budgetActivityTitle_t',
+							},
+						});
+					}
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'budgetActivityTitle_t',
-						},
-					});
+					if (jbookSearchSettings.primaryReviewStatus) {
+						const index = jbookSearchSettings.primaryReviewStatus.indexOf('Not Reviewed');
+						if (index > -1) {
+							jbookSearchSettings.primaryReviewStatus.splice(index, 1);
+							shouldQuery.bool.should.push({
+								bool: {
+									must_not: [
+										{
+											nested: {
+												path: 'review_n',
+												query: {
+													terms: {
+														'review_n.primary_review_status_s': [
+															'Finished Review',
+															'Partial Review',
+														],
+													},
+												},
+											},
+										},
+									],
+								},
+							});
+						}
+						if (jbookSearchSettings.primaryReviewStatus.length > 0) {
+							shouldQuery.bool.should.push({
+								nested: {
+									path: 'review_n',
+									query: {
+										terms: {
+											'review_n.primary_review_status_s': jbookSearchSettings.primaryReviewStatus,
+										},
+									},
+								},
+							});
+						}
+					}
 
 					filterQueries.push(shouldQuery);
 				}
@@ -1670,23 +1710,6 @@ class JBookSearchUtility {
 					query: {
 						terms: {
 							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
-						},
-					},
-				},
-			});
-		}
-
-		// Primary Review Status
-		if (jbookSearchSettings.primaryReviewStatus) {
-			if (jbookSearchSettings.primaryReviewStatus.includes('Not Reviewed')) {
-				jbookSearchSettings.primaryReviewStatus.push('Needs Review', 'Blank');
-			}
-			nestedMustObjects.push({
-				nested: {
-					path: 'review_n',
-					query: {
-						terms: {
-							'review_n.primary_review_status_s': jbookSearchSettings.primaryReviewStatus,
 						},
 					},
 				},
