@@ -555,7 +555,7 @@ const cardHandler = {
 			return (
 				<CardButton
 					href={url}
-					onClick={(e) => {
+					onClick={() => {
 						trackEvent(
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
