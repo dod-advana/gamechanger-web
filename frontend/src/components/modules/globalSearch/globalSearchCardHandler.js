@@ -760,7 +760,7 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
 
-			let { restricted, betaAvailable, id } = item;
+			let { restricted, betaAvailable } = item;
 
 			const PreparedLink = (
 				<CardButton
