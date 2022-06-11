@@ -5,7 +5,7 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import { getClassLabel, getConvertedType, getTotalCost } from '../../../utils/jbookUtilities';
+import { getClassLabel, getConvertedType } from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -334,24 +334,42 @@ const cardHandler = {
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
 			try {
-				const renderContracts = (contracts) => {
+				const renderContracts = (contracts, length) => {
 					let contractElements = `<b>Contracts: ${contracts.length}</b>`;
+
+					let lengthOver = false;
 
 					for (let i = 0; i < contracts.length && i < 5; i++) {
 						const contract = contracts[i];
-						contractElements += `<br/><p>- ${contract}</p>`;
+						if (contractElements.length < length) {
+							contractElements += `<br/><p>${contract.piin_s ? `- ${contract.piin_s}` : ''}</p>`;
+						} else {
+							lengthOver = true;
+						}
 					}
+
+					contractElements += lengthOver ? '...' : '';
 
 					return contractElements;
 				};
 
-				const renderAccomplishments = (accomplishments) => {
+				const renderAccomplishments = (accomplishments, length) => {
 					let accomplishmentElements = `<b>Accomplishments: ${accomplishments.length}</b>`;
+
+					let lengthOver = false;
 
 					for (let i = 0; i < accomplishments.length && i < 5; i++) {
 						const accomplishment = accomplishments[i];
-						accomplishmentElements += `<br/><p>- ${accomplishment}</p>`;
+						if (accomplishmentElements.length < length) {
+							accomplishmentElements += `<br/><p>${
+								accomplishment.Accomp_Title_text_t ? `- ${accomplishment.Accomp_Title_text_t}` : ''
+							}</p>`;
+						} else {
+							lengthOver = true;
+						}
 					}
+
+					accomplishmentElements += lengthOver ? '...' : '';
 
 					return accomplishmentElements;
 				};
@@ -386,22 +404,21 @@ const cardHandler = {
 							title: 'Project Description',
 							snippet: _.truncate(item.projectMissionDescription, { length: 150 }),
 						},
-						{
-							title: 'Contracts',
-							snippet: _.truncate(item.contracts ? renderContracts(item.contracts) : 'No Contracts', {
-								length: 180,
-							}),
-						},
-						{
-							title: 'Accomplishments',
-							snippet: _.truncate(
-								item.accomplishments
-									? renderAccomplishments(item.accomplishments)
-									: 'No Accomplishments',
-								{ length: 200 }
-							),
-						},
 					];
+
+					if (item.contracts) {
+						item.pageHits.push({
+							title: 'Contracts',
+							snippet: renderContracts(item.contracts, 180),
+						});
+					}
+
+					if (item.accomplishments) {
+						item.pageHits.push({
+							title: 'Accomplishments',
+							snippet: renderAccomplishments(item.accomplishments, 200),
+						});
+					}
 				}
 
 				let hoveredSnippet = '';
