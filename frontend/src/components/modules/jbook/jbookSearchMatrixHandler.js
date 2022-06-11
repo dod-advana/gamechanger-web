@@ -184,7 +184,6 @@ const resetAdvancedSettings = (dispatch) => {
 };
 
 const renderStats = (contractTotals) => {
-	console.log(contractTotals);
 	contractTotals.sort((a, b) => b.sum_agg.value - a.sum_agg.value);
 	let data = contractTotals.map((item) => {
 		return {
