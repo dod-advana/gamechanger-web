@@ -189,3 +189,15 @@ export const processSearchSettings = (state, dispatch) => {
 
 	return searchSettings;
 };
+
+export const formatNum = (num) => {
+	const parsed = parseInt(num);
+	if (parsed > 999) {
+		return `$${(parsed / 1000).toFixed(2)} B`;
+	}
+
+	if (parsed > 999999) {
+		return `$${(parsed / 1000000).toFixed(2)} T`;
+	}
+	return `$${parsed} M`;
+};

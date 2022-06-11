@@ -199,7 +199,7 @@ const getIssuingOrgData = (issuingOrgs) => {
 			type: org,
 			count: orgData.count,
 			obligatedAmount: !isNaN(orgData.obligatedAmount)
-				? numberWithCommas((orgData.obligatedAmount / 1000000).toFixed(2)) + '$M'
+				? '$' + numberWithCommas((orgData.obligatedAmount / 1000000).toFixed(2)) + ' M'
 				: '',
 			color: COLORS[index],
 		};

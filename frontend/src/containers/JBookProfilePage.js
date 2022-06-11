@@ -18,7 +18,7 @@ import './jbook.css';
 import './jbook-styles.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
-import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
+import { getClassLabel, getSearchTerms, formatNum } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
 
@@ -26,7 +26,6 @@ import {
 	Accomplishments,
 	aggregateProjectDescriptions,
 	Contracts,
-	formatNum,
 	Metadata,
 	ProjectDescription,
 	SideNav,

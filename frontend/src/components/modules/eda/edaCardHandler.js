@@ -45,7 +45,6 @@ const EDA_NUMBER_FIELDS = ['Total Obligated Amounts'];
 
 // the fields that will show in the back of the card
 export const EDA_FIELDS = [
-	'sow_pws_text_eda_ext_t',
 	'award_id_eda_ext',
 	'modification_eda_ext',
 	'reference_idv_eda_ext',
@@ -71,6 +70,7 @@ export const EDA_FIELDS = [
 	'fpds_description_of_requirement_eda_ext',
 	'fpds_psc_eda_ext',
 	'fpds_psc_desc_eda_ext',
+	// 'sow_pws_text_eda_ext_t',
 	// 'fpds_closed_date_eda_ext'
 ];
 
@@ -132,7 +132,6 @@ export const EDA_FIELD_JSON_MAP = {
 	fpds_funding_agency_name_eda_ext: 'FPDS Funding Agency',
 	fpds_naics_code_eda_ext: 'FPDS NAICS Code',
 	fpds_duns_eda_ext: 'FPDS DUNS',
-
 	sow_pws_text_eda_ext_t: 'Contract SOW',
 };
 
