@@ -764,7 +764,7 @@ const cardHandler = {
 
 			const PreparedLink = (
 				<CardButton
-					href={getUrl(id, restricted)}
+					href={getUrl(item, restricted, 'dashboard')}
 					onClick={(e) => {
 						if (!restricted && betaAvailable) {
 							e.preventDefault();
@@ -774,7 +774,7 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
-							getUrl(id, restricted)
+							getUrl(item, restricted, 'dashboard')
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
