@@ -172,6 +172,7 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 		case 'naicsCode':
 		case 'duns':
 		case 'contractSOW':
+		case 'clinText':
 			edaSettings[field] = value;
 			break;
 		case 'majcoms':

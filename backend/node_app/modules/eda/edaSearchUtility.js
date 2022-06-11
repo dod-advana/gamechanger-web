@@ -744,6 +744,8 @@ class EDASearchUtility {
 				});
 			}
 
+			console.log(settings);
+
 			// CLIN TEXT
 			if (settings.clinText && settings.clinText.length > 0) {
 				filterQueries.push({
