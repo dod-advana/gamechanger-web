@@ -534,6 +534,8 @@ export default (props) => {
 				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
 				setEndDate(moment()._d);
 				break;
+			default:
+				break;
 		}
 	};
 
