@@ -12,6 +12,11 @@ export const axiosPOST = async (axios, url, data, options = {}) => {
 	return axios.post(url, data, options);
 };
 
+export const axiosPUT = async (axios, url, data, options = {}) => {
+	getSignature(options, url);
+	return axios.put(url, data, options);
+};
+
 export const axiosGET = async (axios, url, options = {}) => {
 	getSignature(options, url.split('?')[0]);
 	return axios.get(url, options);
