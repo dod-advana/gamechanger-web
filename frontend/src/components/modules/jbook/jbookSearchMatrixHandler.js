@@ -519,7 +519,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={min}
 					/>
-					$M
+					M
 				</div>
 			</div>
 			<div style={{ display: 'flex', margin: '10px 0' }}>
@@ -532,7 +532,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={max}
 					/>
-					$M
+					M
 				</div>
 			</div>
 		</div>
