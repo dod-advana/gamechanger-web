@@ -6,7 +6,7 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { backgroundWhite, gcOrange } from '../../common/gc-colors';
+import { backgroundWhite } from '../../common/gc-colors';
 import { Card } from '../../cards/GCCard';
 import Pagination from 'react-js-pagination';
 import {
@@ -16,7 +16,7 @@ import {
 	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
 import { Typography } from '@material-ui/core';
-import '../../../containers/gamechanger.css';
+import './globalSearch.css';
 import ResultView from '../../mainView/ResultView';
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
@@ -26,6 +26,8 @@ import DashboardsIcon from '../../../images/icon/slideout-menu/dashboard icon.pn
 import DatabasesIcon from '../../../images/icon/slideout-menu/database icon.png';
 import DataSourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
+
+const PRIMARY_COLOR = '#13A792';
 
 const getViewHeader = (state, dispatch) => {
 	return (
@@ -49,10 +51,10 @@ const getViewHeader = (state, dispatch) => {
 										...(!state.listView ? styles.unselectedButton : {}),
 									}}
 									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-									buttonColor={!state.listView ? gcOrange : backgroundWhite}
-									borderColor={!state.listView ? gcOrange : '#B0B9BE'}
+									buttonColor={!state.listView ? PRIMARY_COLOR : backgroundWhite}
+									borderColor={!state.listView ? PRIMARY_COLOR : '#B0B9BE'}
 								>
-									<div style={{ marginTop: 5 }}>
+									<div>
 										<AppsIcon style={styles.icon} />
 									</div>
 								</GCButton>
@@ -64,10 +66,10 @@ const getViewHeader = (state, dispatch) => {
 										...(!state.listView ? {} : styles.unselectedButton),
 									}}
 									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-									buttonColor={!state.listView ? backgroundWhite : gcOrange}
-									borderColor={!state.listView ? '#B0B9BE' : gcOrange}
+									buttonColor={!state.listView ? backgroundWhite : PRIMARY_COLOR}
+									borderColor={!state.listView ? '#B0B9BE' : PRIMARY_COLOR}
 								>
-									<div style={{ marginTop: 5 }}>
+									<div>
 										<ListIcon style={styles.icon} />
 									</div>
 								</GCButton>
@@ -91,12 +93,17 @@ const handlePageLoad = async (props) => {
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 	const parsedURL = searchHandler.parseSearchURL(state);
+
 	if (parsedURL.searchText) {
 		const newState = { ...state, ...parsedURL, runSearch: true };
 		setState(dispatch, newState);
 
 		searchHandler.setSearchURL(newState);
 	}
+
+	// Get User Favorites from home App
+	const { data } = await gameChangerAPI.getUserFavoriteHomeApps();
+	setState(dispatch, { favoriteApps: data.favorite_apps || [] });
 };
 
 const getMainView = (props) => {
@@ -151,7 +158,7 @@ const getMainView = (props) => {
 										</>
 									) : (
 										<div className="col-xs-12">
-											<LoadingIndicator customColor={gcOrange} />
+											<LoadingIndicator customColor={PRIMARY_COLOR} />
 										</div>
 									))}
 							</div>
@@ -232,7 +239,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(applications, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -272,7 +279,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(dashboards, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -312,7 +319,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(dataSources, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -352,7 +359,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(databases, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -392,7 +399,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(models, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -422,7 +429,7 @@ const getCardViewPanel = (props) => {
 
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
+						<LoadingIndicator customColor={PRIMARY_COLOR} containerStyle={{ paddingTop: 100 }} />
 					</div>
 				)}
 			</div>

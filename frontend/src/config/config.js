@@ -1,4 +1,7 @@
 export default {
+	HOME_APP_BASE_URL: window?.__env__?.REACT_APP_HOME_APP_BASE_URL
+		? window?.__env__?.REACT_APP_HOME_APP_BASE_URL
+		: process.env.REACT_APP_HOME_APP_BASE_URL,
 	DASHBOARD_DEFAULT_SYSTEM: 'GFEBS',
 	API_URL: window?.__env__?.REACT_APP_BACKEND_URL
 		? window?.__env__?.REACT_APP_BACKEND_URL

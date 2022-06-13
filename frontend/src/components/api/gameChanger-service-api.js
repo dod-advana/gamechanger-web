@@ -1,7 +1,7 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
+import { axiosGET, axiosDELETE, axiosPOST, axiosPUT } from '../../utils/axiosUtils';
 
 const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
@@ -144,6 +144,7 @@ const endpoints = {
 	exportChecklist: '/api/gameChanger/modular/exportChecklist',
 	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
+	getUserFavoriteHomeApps: '/api/um/profile/current-user',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -1148,5 +1149,15 @@ export default class GameChangerAPI {
 		const url = endpoints.exportProfilePage;
 		const options = {}; //{responseType: 'blob'};
 		return axiosPOST(this.axios, url, body, options);
+	};
+
+	getUserFavoriteHomeApps = async () => {
+		const url = `${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		return axiosGET(this.axios, url);
+	};
+
+	putUserFavoriteHomeApps = async (data) => {
+		const url = `${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		return axiosPUT(this.axios, url, data);
 	};
 }
