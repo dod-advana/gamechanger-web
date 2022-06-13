@@ -95,7 +95,6 @@
 			"default",
 			"jest-junit"
 		],
-		"reporters": [ "default", "jest-junit" ],
 		"testTimeout": 10000
 	}
 }
