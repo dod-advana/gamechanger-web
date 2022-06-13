@@ -389,37 +389,6 @@ function GCCard(props) {
 	const cardType = item.type;
 	const selected = state.selectedDocuments.has(item.filename);
 
-	let isFavorite = false;
-	let favorite_id = null;
-	switch (cardType) {
-		case 'document':
-			const faveDocs = state.userData ? state.userData.favorite_documents : [];
-			const favDocInfo = _.find(faveDocs, (doc) => {
-				return doc.id === item.id;
-			});
-			favorite_id = favDocInfo?.favorite_id;
-			isFavorite =
-				_.find(faveDocs, (doc) => {
-					return doc.id === item.id;
-				}) !== undefined;
-			break;
-		case 'topic':
-			const faveTopics = state.userData ? state.userData.favorite_topics : [];
-			isFavorite =
-				_.find(faveTopics, (topic) => {
-					return topic.topic_name.toLowerCase() === item.name.toLowerCase();
-				}) !== undefined;
-			break;
-		case 'organization':
-			const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
-			isFavorite =
-				_.find(faveOrganizations, (organization) => {
-					return organization.organization_name.toLowerCase() === item.name.toLowerCase();
-				}) !== undefined;
-			break;
-		default:
-			break;
-	}
 	const isRevoked = item.is_revoked_b;
 	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
 	const allowScroll = true;
@@ -430,7 +399,7 @@ function GCCard(props) {
 	const [metadataExpanded, setMetadataExpanded] = useState(false);
 	const [hitsExpanded, setHitsExpanded] = useState(false);
 	const [hoveredHit, setHoveredHit] = useState(0);
-	const [favorite, setFavorite] = useState(isFavorite);
+	const [favorite, setFavorite] = useState(false);
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
 	const [favoriteSummary, setFavoriteSummary] = useState('');
@@ -439,6 +408,60 @@ function GCCard(props) {
 	const [filename, setFilename] = useState('');
 	const [displayTitle, setDisplayTitle] = useState('');
 	const [modalOpen, setModalOpen] = useState(false);
+	const [favorite_id, setFavoriteId] = useState(null);
+
+	useEffect(() => {
+		let isFavorite = false;
+		let favorite_id = null;
+		let favApps;
+		switch (cardType) {
+			case 'document':
+				const faveDocs = state.userData ? state.userData.favorite_documents : [];
+				const favDocInfo = _.find(faveDocs, (doc) => {
+					return doc.id === item.id;
+				});
+				favorite_id = favDocInfo?.favorite_id;
+				isFavorite =
+					_.find(faveDocs, (doc) => {
+						return doc.id === item.id;
+					}) !== undefined;
+				break;
+			case 'topic':
+				const faveTopics = state.userData ? state.userData.favorite_topics : [];
+				isFavorite =
+					_.find(faveTopics, (topic) => {
+						return topic.topic_name.toLowerCase() === item.name.toLowerCase();
+					}) !== undefined;
+				break;
+			case 'organization':
+				const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
+				isFavorite =
+					_.find(faveOrganizations, (organization) => {
+						return organization.organization_name.toLowerCase() === item.name.toLowerCase();
+					}) !== undefined;
+				break;
+			case 'application':
+			case 'dashboard':
+				favApps = state.favoriteApps || [];
+				isFavorite = favApps?.includes(item.id.toString()) || false;
+				favorite_id = item.id.toString();
+				break;
+			case 'dataSource':
+			case 'database':
+			case 'models':
+				favApps = state.favoriteApps || [];
+				isFavorite = favApps?.includes(item.resource.id.toString()) || false;
+				favorite_id = item.resource.id.toString();
+				break;
+			default:
+				break;
+		}
+
+		setFavoriteId(favorite_id);
+		setFavorite(isFavorite);
+
+		// eslint-disable-next-line
+	}, []);
 
 	useEffect(() => {
 		// Create the factory
@@ -490,6 +513,20 @@ function GCCard(props) {
 			case 'topic':
 				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
 				break;
+			case 'application':
+			case 'dashboard':
+			case 'dataSource':
+			case 'database':
+			case 'models':
+				let favApps = state.favoriteApps || [];
+				if (favorite) {
+					favApps.push(favorite_id);
+				} else {
+					favApps = favApps.filter((app) => app !== favorite_id);
+				}
+				gameChangerAPI.putUserFavoriteHomeApps({ favorite_apps: favApps });
+				setState(dispatch, { favoriteApps: favApps });
+				break;
 			default:
 				break;
 		}
@@ -509,7 +546,18 @@ function GCCard(props) {
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
 				<i
 					onClick={(event) => {
-						openFavoritePopper(event.target);
+						switch (cardType) {
+							case 'application':
+							case 'dashboard':
+							case 'dataSource':
+							case 'database':
+							case 'models':
+								handleSaveFavorite(!favorite);
+								break;
+							default:
+								openFavoritePopper(event.target);
+								break;
+						}
 					}}
 					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
 					style={{
@@ -676,7 +724,7 @@ function GCCard(props) {
 					horizontal: 'right',
 				}}
 			>
-				{isFavorite ? (
+				{favorite ? (
 					<div style={{ padding: '0px 15px 10px' }}>
 						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 							<CloseButton onClick={() => handleCancelFavorite()}>
