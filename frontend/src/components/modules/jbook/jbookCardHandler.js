@@ -5,7 +5,7 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import { getClassLabel, getConvertedType, getTotalCost, formatNum } from '../../../utils/jbookUtilities';
+import { getClassLabel, getConvertedType, formatNum } from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -697,7 +697,11 @@ const cardHandler = {
 				},
 				{
 					Key: 'Total Cost',
-					Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+					Value: projectData.totalCost
+						? isNaN(projectData.totalCost)
+							? projectData.totalCost
+							: `${formatNum(projectData.totalCost)}`
+						: 'N/A',
 				},
 				{
 					Key: 'Budget Year (FY)',
