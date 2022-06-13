@@ -144,7 +144,8 @@ const endpoints = {
 	exportChecklist: '/api/gameChanger/modular/exportChecklist',
 	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
-	getUserFavoriteHomeApps: '/api/um/profile/current-user',
+	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
+	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -1152,12 +1153,12 @@ export default class GameChangerAPI {
 	};
 
 	getUserFavoriteHomeApps = async () => {
-		const url = `${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
 		return axiosGET(this.axios, url);
 	};
 
 	putUserFavoriteHomeApps = async (data) => {
-		const url = `${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
 		return axiosPUT(this.axios, url, data);
 	};
 }

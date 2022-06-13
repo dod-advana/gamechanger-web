@@ -2,6 +2,7 @@ const INTERNAL_USER_TRACKING = require('../models').internal_user_tracking;
 const GC_USER = require('../models').gc_user;
 const USER = require('../models').user;
 const JBOOK_USER = require('../models').jbook_user;
+const UOT_USER = require('../models').uot_user;
 const FAVORITE_DOCUMENT = require('../models').favorite_documents;
 const FAVORITE_SEARCH = require('../models').favorite_searches;
 const FAVORITE_TOPIC = require('../models').favorite_topics;
@@ -58,6 +59,7 @@ class UserController {
 			gcAssists = GC_ASSISTS,
 			user = USER,
 			jbook_user = JBOOK_USER,
+			uot_user = UOT_USER,
 			user_app_versions = USER_APP_VERSIONS,
 		} = opts;
 
@@ -86,6 +88,7 @@ class UserController {
 		this.gcAssists = gcAssists;
 		this.user = user;
 		this.jbookUser = jbook_user;
+		this.uotUser = uot_user;
 		this.user_app_versions = user_app_versions;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
@@ -126,6 +129,8 @@ class UserController {
 		this.setupUserProfile = this.setupUserProfile.bind(this);
 		this.postUserAppVersion = this.postUserAppVersion.bind(this);
 		this.deleteUserData = this.deleteUserData.bind(this);
+		this.getCurrentUserAdvana = this.getCurrentUserAdvana.bind(this);
+		this.putCurrentUserAdvana = this.putCurrentUserAdvana.bind(this);
 	}
 
 	async getUserProfileData(req, res) {
@@ -1577,6 +1582,51 @@ class UserController {
 					reject(err);
 				});
 		});
+	}
+
+	async getCurrentUserAdvana(req, res) {
+		let userId = 'unknown_webapp';
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			const user = await this.uotUser.findOne({
+				where: { username: userId },
+				attributes: ['id', 'displayname', 'email', 'subAgency', 'favorite_apps'],
+				raw: true,
+			});
+
+			res.status(200).send(user);
+		} catch (e) {
+			this.logger.error(e, 'I5LQCPF', userId);
+			res.status(400).send();
+		}
+	}
+
+	async putCurrentUserAdvana(req, res) {
+		let userId = 'unknown_webapp';
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			const body = req.body;
+			const fields = [body.favorite_apps, body.displayname, body.subAgency, body.email];
+			if (fields.every((field) => field === undefined)) {
+				return res.status(400).send({
+					status: 400,
+					message: 'no properties to be changed were specified',
+				});
+			}
+			const result = await this.uotUser.update(
+				{
+					displayname: body.displayname,
+					email: body.email,
+					subAgency: body.subAgency,
+					favorite_apps: body.favorite_apps,
+				},
+				{ where: { username: userId } }
+			);
+			res.status(200).send(result);
+		} catch (e) {
+			this.logger.error(e, 'TN50878', userId);
+			res.status(400).send();
+		}
 	}
 }
 

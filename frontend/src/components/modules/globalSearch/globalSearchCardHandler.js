@@ -860,7 +860,7 @@ const cardHandler = {
 
 			const tmpHighlights = [];
 			item.highlights.forEach((highlight) => {
-				if (highlight.field.indexOf('attribute') < 0) {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
 					tmpHighlights.push(highlight);
 				}
 			});
@@ -1084,7 +1084,7 @@ const cardHandler = {
 
 			const tmpHighlights = [];
 			item.highlights.forEach((highlight) => {
-				if (highlight.field.indexOf('attribute') < 0) {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
 					tmpHighlights.push(highlight);
 				}
 			});
@@ -1308,7 +1308,7 @@ const cardHandler = {
 
 			const tmpHighlights = [];
 			item.highlights.forEach((highlight) => {
-				if (highlight.field.indexOf('attribute') < 0) {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
 					tmpHighlights.push(highlight);
 				}
 			});
