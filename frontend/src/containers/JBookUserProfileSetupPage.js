@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import './jbook.css';
 import { setState } from '../utils/sharedFunctions';
 import SideNavigation from '../components/navigation/SideNavigation';
@@ -38,16 +38,20 @@ const JBookUserProfileSetupPage = (props) => {
 		}
 	}, [cloneData, state, dispatch, history]);
 
+	const hasSetUpUserProfile = useRef(false);
 	useEffect(() => {
-		const url = window.location.href;
-		const email = getQueryVariable('email', url);
-		const permissions = getQueryVariable('permissions', url).split(',');
+		if (!hasSetUpUserProfile.current) {
+			const url = window.location.href;
+			const email = getQueryVariable('email', url);
+			const permissions = getQueryVariable('permissions', url).split(',');
 
-		gameChangerUserAPI.setupUserProfile({ email, permissions }).then((data) => {
-			setProfileLoading(false);
-			history.push('/summary');
-		});
-	}, []);
+			gameChangerUserAPI.setupUserProfile({ email, permissions }).then((data) => {
+				setProfileLoading(false);
+				history.push('/summary');
+			});
+			hasSetUpUserProfile.current = true;
+		}
+	}, [history]);
 
 	return (
 		<div className="main-container">
