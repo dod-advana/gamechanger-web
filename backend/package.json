@@ -69,6 +69,7 @@
 		"jest": "^25.1.0",
 		"jest-junit": "^13.2.0",
 		"prettier": "^2.6.1",
+		"rewire": "^6.0.0",
 		"sonarqube-scanner": "^2.5.0"
 	},
 	"jest": {
