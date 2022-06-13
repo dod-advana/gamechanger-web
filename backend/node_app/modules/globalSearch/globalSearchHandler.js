@@ -234,7 +234,6 @@ class GlobalSearchHandler extends SearchHandler {
 				userId
 			);
 
-			console.log('esResults', esResults.body.hits)
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
 			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, false, {});
