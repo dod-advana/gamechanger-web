@@ -1774,12 +1774,22 @@ class JBookSearchUtility {
 
 		// Primary Reviewer
 		if (jbookSearchSettings.primaryReviewer) {
+			const reviewerTerms = jbookSearchSettings.primaryReviewer.map((reviewer) => {
+				return { term: { 'review_n.primary_reviewer_s': reviewer } };
+			});
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
 					query: {
-						terms: {
-							'review_n.primary_reviewer_s': jbookSearchSettings.primaryReviewer,
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
 						},
 					},
 				},
@@ -1788,12 +1798,22 @@ class JBookSearchUtility {
 
 		// Service Reviewer
 		if (jbookSearchSettings.serviceReviewer) {
+			const reviewerTerms = jbookSearchSettings.serviceReviewer.map((reviewer) => {
+				return { term: { 'review_n.service_reviewer_s': reviewer } };
+			});
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
 					query: {
-						terms: {
-							'review_n.service_reviewer_s': jbookSearchSettings.serviceReviewer,
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
 						},
 					},
 				},
