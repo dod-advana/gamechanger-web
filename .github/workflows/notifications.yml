@@ -32,7 +32,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request."
+                      "text": "{{env.GITHUB_ACTOR}} Made a GitHub Pull Request."
                     }
                   },
                   {
@@ -40,7 +40,7 @@ jobs:
                     "elements": [
                       {
                         "type": "mrkdwn",
-                        "text": ":git-pull-request: PR <https://github.com/${{GITHUB_REPOSITORY}}/pull/${PR}|Pull Request Link>"
+                        "text": ":git-pull-request: PR <https://github.com/${{env.GITHUB_REPOSITORY}}/pull/${PR}|Pull Request Link>"
                       }
                     ]
                   }
