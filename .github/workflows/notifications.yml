@@ -33,7 +33,7 @@ jobs:
                       },
                       {
                         \"type\": \"mrkdwn\",
-                        \"text\": \"${GITHUB_ACTOR} Made a GitHub Pull Request.\"
+                        \"text\": \"<@gc-web> ${GITHUB_ACTOR} Made a GitHub Pull Request.\"
                       }
                     ]
                   },
