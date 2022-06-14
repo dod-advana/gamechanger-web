@@ -35,22 +35,13 @@ jobs:
                   }
                 },
                 {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "View PR"
-                  },
-                  "accessory": {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View PR",
-                      "emoji": true
-                    },
-                    "value": "click_me_123",
-                    "url": "{{ steps.pr-url.outputs.url }}",
-                    "action_id": "button-action"
-                  }
-                }
+                   "type": "context",
+                   "elements": [
+                       {
+                           "type": "mrkdwn",
+                           "text": ":git-pull-request: commit <{{steps.pr-url.outputs.url}}|{{steps.pr-url.outputs.url}}>"
+                       }
+                   ]
+               }
               ]
             }'
