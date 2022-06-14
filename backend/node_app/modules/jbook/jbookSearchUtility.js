@@ -1515,27 +1515,111 @@ class JBookSearchUtility {
 					});
 				}
 
+				let shouldQuery = {
+					bool: {
+						should: [],
+					},
+				};
+
 				// Budget Sub Activity
-				if (jbookSearchSettings.budgetSubActivity) {
-					let shouldQuery = {
-						bool: {
-							should: [],
-						},
-					};
+				if (jbookSearchSettings.budgetSubActivity || jbookSearchSettings.primaryReviewStatus) {
+					if (jbookSearchSettings.budgetSubActivity) {
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'P40-13_BSA_Title_t',
+							},
+						});
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'P40-13_BSA_Title_t',
-						},
-					});
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'budgetActivityTitle_t',
+							},
+						});
+					}
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'budgetActivityTitle_t',
-						},
-					});
+					if (jbookSearchSettings.primaryReviewStatus) {
+						jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+							if (status === 'Not Reviewed') {
+								shouldQuery.bool.should.push({
+									bool: {
+										must_not: [
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Finished Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Partial Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+										],
+									},
+								});
+							} else {
+								shouldQuery.bool.should.push({
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														match: {
+															'review_n.primary_review_status_s': status,
+														},
+													},
+													{
+														match: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								});
+							}
+						});
+					}
 
 					filterQueries.push(shouldQuery);
 				}

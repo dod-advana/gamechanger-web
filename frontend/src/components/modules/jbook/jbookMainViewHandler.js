@@ -82,7 +82,6 @@ const handlePageLoad = async (props) => {
 			options: {},
 		})
 		.then((data) => {
-			console.log(data);
 			portfolios = data.data !== undefined ? data.data : [];
 		});
 
