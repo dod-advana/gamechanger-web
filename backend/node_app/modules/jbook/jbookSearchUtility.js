@@ -1025,8 +1025,9 @@ class JBookSearchUtility {
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
-			const { service_agency_aggs = {} } = aggregations;
+			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
 			const service_buckets = service_agency_aggs.buckets ? service_agency_aggs.buckets : [];
+			const contract_buckets = contract_totals.buckets ? contract_totals.buckets : [];
 			const { hits: esHits = {} } = body;
 			const {
 				hits = [],
@@ -1035,6 +1036,7 @@ class JBookSearchUtility {
 
 			searchResults.totalCount = value;
 			searchResults.serviceAgencyCounts = service_buckets;
+			searchResults.contractTotalCounts = contract_buckets;
 
 			const agencyMapping = this.getMapping('esServiceAgency', false);
 
@@ -1104,7 +1106,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n', 'review_n'];
+		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1348,6 +1350,17 @@ class JBookSearchUtility {
 							size: 10000,
 						},
 					},
+					contract_totals: {
+						aggs: {
+							sum_agg: {
+								sum: { field: 'by1BaseYear_d' },
+							},
+						},
+						terms: {
+							field: 'org_jbook_desc_s',
+							size: 10000,
+						},
+					},
 				},
 				query: {
 					bool: {
@@ -1359,6 +1372,14 @@ class JBookSearchUtility {
 					fields: {},
 				},
 			};
+
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
 
 			if (searchText !== '') {
 				query.query.bool.must.push({
@@ -1436,14 +1457,6 @@ class JBookSearchUtility {
 				});
 			});
 
-			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
-			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
-
-			if (filterQueries.length > 0) {
-				query.query.bool.filter = filterQueries;
-			}
-
 			let sortText = jbookSearchSettings.sort[0].id;
 			if (!sortSelected && searchText && searchText !== '') {
 				sortText = 'Relevance';
@@ -1476,7 +1489,7 @@ class JBookSearchUtility {
 					break;
 			}
 
-			console.log(JSON.stringify(query));
+			// console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
@@ -1720,7 +1733,6 @@ class JBookSearchUtility {
 					const convertedAgencies = [];
 
 					jbookSearchSettings.serviceAgency.forEach((agency) => {
-						console.log(agency);
 						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
 							if (serviceAgencyMappings[agencyKey] === agency) {
 								convertedAgencies.push(agencyKey);

@@ -2094,6 +2094,16 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		gl_contract_n: {
+			newName: 'contracts',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		r_2a_accomp_pp_n: {
+			newName: 'accomplishments',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	esTopLevelFields: [

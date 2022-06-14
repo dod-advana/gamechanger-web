@@ -23,6 +23,7 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { gcOrange } from '../../common/gc-colors';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { numberWithCommas } from '../../../utils/gamechangerUtils';
 
 const _ = require('lodash');
 
@@ -198,7 +199,7 @@ const getCardViewPanel = (props) => {
 							}}
 						>
 							<Typography variant="h3" display="inline">{`${
-								searchResults ? count : '0'
+								searchResults ? numberWithCommas(count) : '0'
 							} results found in ${timeFound} seconds`}</Typography>
 
 							{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}

@@ -4,11 +4,9 @@ import styled from 'styled-components';
 import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import { Link } from '@material-ui/core';
 import _ from 'underscore';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import CONFIG from '../../../config/config';
-import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
 import { colWidth, getDefaultComponent, styles } from '../default/defaultCardHandler';
@@ -21,6 +19,8 @@ import PropTypes from 'prop-types';
 const MAX_KEYS = 8;
 
 const MODELS_HITS_KEY_NOT_ALLOWED = ['Hyperparameter Selection', 'Metrics'];
+
+const PRIMARY_COLOR = '#13A792';
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
@@ -90,7 +90,6 @@ const StyledFrontCardContent = styled.div`
 
 	.image-container {
 		text-align: center;
-		margin-top: 5px;
 	}
 
 	img {
@@ -304,7 +303,7 @@ const getDisplayTitle = (item, type) => {
 		case 'dataSource':
 		case 'database':
 		case 'models':
-			return item.resource.name;
+			return item.resource.displayName;
 		case 'dashboard':
 			return item.name;
 		default:
@@ -461,7 +460,7 @@ const cardSubHeaderHandler = (props) => {
 };
 
 const getCardHeaderHandler = (props) => {
-	const { item, state, type, graphView } = props;
+	const { item, state, type, graphView, favoriteComponent } = props;
 
 	const docListView = state.listView && !graphView;
 	const restricted = getRestricted(item, type);
@@ -487,9 +486,9 @@ const getCardHeaderHandler = (props) => {
 							<p> {getType(item, type)} </p>
 						</div>
 					)}
-					{/*<div className={'selected-favorite'}>*/}
-					{/*	<div style={{ display: 'flex' }}>{favoriteComponent()}</div>*/}
-					{/*</div>*/}
+					<div className={'selected-favorite'}>
+						<div style={{ display: 'flex' }}>{favoriteComponent()}</div>
+					</div>
 				</div>
 			</div>
 		</StyledFrontCardHeader>
@@ -507,19 +506,34 @@ const cardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, state } = props;
 
 			let { description } = item;
 
-			return (
-				<StyledFrontCardContent isWideCard={true}>
-					{description && (
-						<div className={'body-container'} style={{ margin: 10 }}>
-							<div className={'body-text'}>{description}</div>
+			if (state.listView) {
+				return <StyledListViewFrontCardContent>{item.description}</StyledListViewFrontCardContent>;
+			} else {
+				return (
+					<StyledFrontCardContent>
+						<div className={'image-container'}>
+							<img src={QLIKICON} style={styles.image} alt={item.link_label} />
+							<div className={'body-container'}>
+								<div className={'body-text'}>{description}</div>
+							</div>
 						</div>
-					)}
-				</StyledFrontCardContent>
-			);
+					</StyledFrontCardContent>
+				);
+			}
+
+			// return (
+			// 	<StyledFrontCardContent isWideCard={true}>
+			// 		{description && (
+			// 			<div className={'body-container'} style={{ margin: 10 }}>
+			// 				<div className={'body-text'}>{description}</div>
+			// 			</div>
+			// 		)}
+			// 	</StyledFrontCardContent>
+			// );
 		},
 
 		getCardBack: (props) => {
@@ -527,36 +541,33 @@ const cardHandler = {
 		},
 
 		getFooter: (props) => {
-			const { item, state } = props;
+			const { item, cloneName } = props;
 
-			let { permission, href, type } = item;
+			let { permission, href } = item;
 			if (!_.isNull(permission)) {
 				permission = Permissions?.[permission]?.();
 			} else permission = true;
 
-			const url = !permission ? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
+			const restricted = !permission;
 
-			const RestrictedLink = (
-				<Link href={url} onClick={() => clickFn(state.cloneData.clone_name, url, type)} style={styles.link}>
-					Request Access
-					<KeyboardArrowRightIcon style={styles.linkIcon} />
-				</Link>
-			);
+			const url = restricted ? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
 
 			return (
-				<>
-					{!permission ? (
-						RestrictedLink
-					) : (
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
-							href={url}
-						>
-							Open
-						</CardButton>
-					)}
-				</>
+				<CardButton
+					href={url}
+					onClick={() => {
+						trackEvent(
+							getTrackingNameForFactory(cloneName),
+							'CardInteraction',
+							restricted ? 'Application Card Request Access' : 'Application Card Launch',
+							url
+						);
+					}}
+					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
+					target="_blank"
+				>
+					{restricted ? 'Request Access' : 'Launch'}
+				</CardButton>
 			);
 		},
 
@@ -612,7 +623,7 @@ const cardHandler = {
 														key={key}
 														style={{
 															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
+																backgroundColor: PRIMARY_COLOR,
 																color: 'white',
 															}),
 														}}
@@ -683,7 +694,7 @@ const cardHandler = {
 													key={key}
 													style={{
 														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
+															backgroundColor: PRIMARY_COLOR,
 															color: 'white',
 														}),
 													}}
@@ -749,11 +760,11 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
 
-			let { restricted, betaAvailable, id } = item;
+			let { restricted, betaAvailable } = item;
 
 			const PreparedLink = (
 				<CardButton
-					href={getUrl(id, restricted)}
+					href={getUrl(item, restricted, 'dashboard')}
 					onClick={(e) => {
 						if (!restricted && betaAvailable) {
 							e.preventDefault();
@@ -763,7 +774,7 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
-							getUrl(id, restricted)
+							getUrl(item, restricted, 'dashboard')
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -777,7 +788,7 @@ const cardHandler = {
 				<>
 					{PreparedLink}
 					<div
-						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+						style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -790,7 +801,7 @@ const cardHandler = {
 					>
 						{toggledMore ? 'Overview' : 'More'}
 						<i
-							style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+							style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 							className="fa fa-chevron-right"
 							aria-hidden="true"
 						/>
@@ -846,11 +857,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -865,7 +882,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -874,7 +891,7 @@ const cardHandler = {
 														key={key}
 														style={{
 															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
+																backgroundColor: PRIMARY_COLOR,
 																color: 'white',
 															}),
 														}}
@@ -924,7 +941,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -933,7 +950,7 @@ const cardHandler = {
 													key={key}
 													style={{
 														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
+															backgroundColor: PRIMARY_COLOR,
 															color: 'white',
 														}),
 													}}
@@ -1016,7 +1033,7 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
@@ -1029,7 +1046,7 @@ const cardHandler = {
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>
@@ -1064,11 +1081,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1083,7 +1106,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (highlight.field || key < MAX_KEYS) {
 												return (
@@ -1092,7 +1115,7 @@ const cardHandler = {
 														key={key}
 														style={{
 															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
+																backgroundColor: PRIMARY_COLOR,
 																color: 'white',
 															}),
 														}}
@@ -1142,7 +1165,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (highlight.field || key < MAX_KEYS) {
 											return (
@@ -1151,7 +1174,7 @@ const cardHandler = {
 													key={key}
 													style={{
 														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
+															backgroundColor: PRIMARY_COLOR,
 															color: 'white',
 														}),
 													}}
@@ -1234,7 +1257,7 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
@@ -1247,7 +1270,7 @@ const cardHandler = {
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>
@@ -1282,11 +1305,17 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
+
+			const tmpHighlights = [];
+			item.highlights.forEach((highlight) => {
+				if (highlight.field && highlight.field.indexOf('attribute') < 0) {
+					tmpHighlights.push(highlight);
+				}
+			});
 
 			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
+			if (Array.isArray(tmpHighlights) && tmpHighlights.length > 0 && tmpHighlights[hoveredHit]) {
+				hoveredSnippet = tmpHighlights[hoveredHit]?.fragment ?? '';
 			}
 			const contextHtml = hoveredSnippet;
 
@@ -1301,7 +1330,7 @@ const cardHandler = {
 						>
 							<div className={'expanded-hits'}>
 								<div className={'page-hits'}>
-									{_.chain(highlights)
+									{_.chain(tmpHighlights)
 										.map((highlight, key) => {
 											if (
 												highlight.field &&
@@ -1314,7 +1343,7 @@ const cardHandler = {
 														key={key}
 														style={{
 															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
+																backgroundColor: PRIMARY_COLOR,
 																color: 'white',
 															}),
 														}}
@@ -1364,7 +1393,7 @@ const cardHandler = {
 					>
 						<div className={'hits-container'}>
 							<div className={'page-hits'}>
-								{_.chain(highlights)
+								{_.chain(tmpHighlights)
 									.map((highlight, key) => {
 										if (
 											highlight.field &&
@@ -1377,7 +1406,7 @@ const cardHandler = {
 													key={key}
 													style={{
 														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
+															backgroundColor: PRIMARY_COLOR,
 															color: 'white',
 														}),
 													}}
@@ -1460,7 +1489,7 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
@@ -1473,7 +1502,7 @@ const cardHandler = {
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>

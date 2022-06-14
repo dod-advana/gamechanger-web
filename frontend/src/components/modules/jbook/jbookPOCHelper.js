@@ -1440,11 +1440,11 @@ const SliderValue = React.memo((props) => {
 	const marks = [
 		{
 			value: attributionUnits === '$' ? Math.round(totalBudgetValue / 2) : 50,
-			label: `${Math.round(totalBudgetValue / 2)} $M`,
+			label: `$${Math.round(totalBudgetValue / 2)} M`,
 		},
 		{
 			value: attributionUnits === '$' ? totalBudgetValue : 100,
-			label: `${parseFloat(totalBudgetValue).toFixed(2)} $M`,
+			label: `$${parseFloat(totalBudgetValue).toFixed(2)} M`,
 		},
 	];
 

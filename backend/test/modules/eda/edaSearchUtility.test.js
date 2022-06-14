@@ -58,7 +58,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -242,7 +252,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -435,7 +455,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -626,7 +656,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -770,7 +810,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -942,7 +992,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -1130,7 +1190,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -1331,7 +1401,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
@@ -1491,7 +1571,17 @@ describe('EDASearchUtility', function () {
 			try {
 				const actual = await target.getElasticsearchPagesQuery(mockBody, 'test user');
 				const expected = {
-					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'] },
+					_source: {
+						includes: [
+							'pagerank_r',
+							'kw_doc_score_r',
+							'orgs_rs',
+							'*_eda_n*',
+							'fpds*',
+							'sow_pws_text_eda_ext_t',
+							'clins_text_n',
+						],
+					},
 					stored_fields: [
 						'filename',
 						'title',
