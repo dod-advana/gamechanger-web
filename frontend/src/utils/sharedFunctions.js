@@ -371,7 +371,7 @@ export function withPropsChecker(WrappedComponent) {
 				.filter((key) => {
 					return nextProps[key] !== this.props[key];
 				})
-				.map((key) => {
+				.forEach((key) => {
 					console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
 				});
 		}
