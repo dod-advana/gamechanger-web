@@ -27,6 +27,16 @@ class JBookSearchUtility {
 		this.mlApi = mlApi;
 		this.redisDB = redisDB;
 		this.thesaurus = thesaurus;
+		this.PORTFOLIO_FILTERS = [
+			'reviewStatus',
+			'primaryReviewStatus',
+			'primaryReviewer',
+			'serviceReviewer',
+			'pocReviewer',
+			'sourceTag',
+			'hasKeyword',
+			'primaryClassLabel',
+		];
 	}
 
 	// parse list of key : value to their frontend/db counterpart
@@ -1527,41 +1537,85 @@ class JBookSearchUtility {
 					}
 
 					if (jbookSearchSettings.primaryReviewStatus) {
-						const index = jbookSearchSettings.primaryReviewStatus.indexOf('Not Reviewed');
-						if (index > -1) {
-							jbookSearchSettings.primaryReviewStatus.splice(index, 1);
-							shouldQuery.bool.should.push({
-								bool: {
-									must_not: [
-										{
-											nested: {
-												path: 'review_n',
-												query: {
-													terms: {
-														'review_n.primary_review_status_s': [
-															'Finished Review',
-															'Partial Review',
-														],
+						jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+							if (status === 'Not Reviewed') {
+								shouldQuery.bool.should.push({
+									bool: {
+										must_not: [
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Finished Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
 													},
 												},
 											},
-										},
-									],
-								},
-							});
-						}
-						if (jbookSearchSettings.primaryReviewStatus.length > 0) {
-							shouldQuery.bool.should.push({
-								nested: {
-									path: 'review_n',
-									query: {
-										terms: {
-											'review_n.primary_review_status_s': jbookSearchSettings.primaryReviewStatus,
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Partial Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+										],
+									},
+								});
+							} else {
+								shouldQuery.bool.should.push({
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														match: {
+															'review_n.primary_review_status_s': status,
+														},
+													},
+													{
+														match: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
 										},
 									},
-								},
-							});
-						}
+								});
+							}
+						});
 					}
 
 					filterQueries.push(shouldQuery);

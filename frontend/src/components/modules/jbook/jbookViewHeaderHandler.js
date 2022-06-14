@@ -62,6 +62,7 @@ const JbookViewHeaderHandler = (props) => {
 		cloneData,
 		componentStepNumbers,
 		currentViewName,
+		jbookSearchSettings,
 		listView,
 		viewNames,
 		projectData,
@@ -74,7 +75,6 @@ const JbookViewHeaderHandler = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
 	const [portfolios, setPortfolios] = useState([]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
@@ -88,8 +88,21 @@ const JbookViewHeaderHandler = (props) => {
 
 	useEffect(() => {
 		dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+	}, [state.selectedPortfolio, dispatch]);
+
+	useEffect(() => {
 		setState(dispatch, { runSearch: true });
-	}, [selectedPortfolio, dispatch]);
+	}, [
+		dispatch,
+		jbookSearchSettings.reviewStatus,
+		jbookSearchSettings.primaryReviewStatus,
+		jbookSearchSettings.primaryReviewer,
+		jbookSearchSettings.serviceReviewer,
+		jbookSearchSettings.pocReviewer,
+		jbookSearchSettings.sourceTag,
+		jbookSearchSettings.hasKeyword,
+		jbookSearchSettings.primaryClassLabel,
+	]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -196,9 +209,8 @@ const JbookViewHeaderHandler = (props) => {
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
 				<PortfolioSelector
-					setPortfolio={setSelectedPortfolio}
 					portfolios={portfolios}
-					selectedPortfolio={selectedPortfolio}
+					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
 				/>
