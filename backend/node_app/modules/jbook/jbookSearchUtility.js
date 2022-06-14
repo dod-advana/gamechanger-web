@@ -27,16 +27,6 @@ class JBookSearchUtility {
 		this.mlApi = mlApi;
 		this.redisDB = redisDB;
 		this.thesaurus = thesaurus;
-		this.PORTFOLIO_FILTERS = [
-			'reviewStatus',
-			'primaryReviewStatus',
-			'primaryReviewer',
-			'serviceReviewer',
-			'pocReviewer',
-			'sourceTag',
-			'hasKeyword',
-			'primaryClassLabel',
-		];
 	}
 
 	// parse list of key : value to their frontend/db counterpart

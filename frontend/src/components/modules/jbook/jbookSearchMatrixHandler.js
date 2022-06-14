@@ -107,14 +107,14 @@ const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) 
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false, customOptions) => {
 	const allSelected = `${type}AllSelected`;
 	const allText = `All ${Pluralize(displayName)}`;
 	const specificText = `Specific ${Pluralize(displayName)}`;
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
-	const options = state.defaultOptions[optionType];
+	const options = customOptions || state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -225,7 +225,11 @@ const renderStats = (contractTotals) => {
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
 
-	const { contractTotals, jbookSearchSettings, selectedPortfolio } = state;
+	const { contractTotals, jbookSearchSettings, selectedPortfolio, portfolios } = state;
+	const portfolioMap = {};
+	for (let item of portfolios) {
+		portfolioMap[item.name] = item;
+	}
 
 	return (
 		<div style={{ marginLeft: 15 }}>
@@ -444,7 +448,7 @@ const getSearchMatrixItems = (props) => {
 				</div>
 			)}
 
-			{selectedPortfolio === 'AI Inventory' && (
+			{selectedPortfolio !== 'General' && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
@@ -453,7 +457,15 @@ const getSearchMatrixItems = (props) => {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterCheckboxes(state, dispatch, classes, 'primaryClassLabel', 'primary class tag')}
+						{renderFilterCheckboxes(
+							state,
+							dispatch,
+							classes,
+							'primaryClassLabel',
+							'primary class tag',
+							false,
+							portfolioMap[selectedPortfolio].tags
+						)}
 					</GCAccordion>
 				</div>
 			)}
