@@ -5,7 +5,7 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import { getClassLabel, getConvertedType } from '../../../utils/jbookUtilities';
+import { getClassLabel, getConvertedType, formatNum } from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -293,7 +293,7 @@ const cardHandler = {
 				let cycle = item.budgetCycle ?? 'PB';
 				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
 
-				budgetAmount = item.currentYearAmount ? item.currentYearAmount + ' $M' : '';
+				budgetAmount = item.currentYearAmount ? '$' + item.currentYearAmount + ' M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
@@ -646,18 +646,6 @@ const cardHandler = {
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
-
-			const formatNum = (num) => {
-				const parsed = parseInt(num);
-				if (parsed > 999) {
-					return `${(parsed / 1000).toFixed(2)} $B`;
-				}
-
-				if (parsed > 999999) {
-					return `${(parsed / 1000000).toFixed(2)} $T`;
-				}
-				return `${parsed} $M`;
-			};
 
 			const metadata = [
 				{
