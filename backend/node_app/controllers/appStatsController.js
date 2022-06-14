@@ -347,7 +347,6 @@ class AppStatsController {
 		});
 	}
 
-
 	/**
 	 * This method gets the visitorID tied to one userid
 	 * @method getOneUserVisitorID
@@ -355,7 +354,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	 async getOneUserVisitorID(userID, connection) {
+	async getOneUserVisitorID(userID, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -377,7 +376,6 @@ class AppStatsController {
 				}
 			);
 		});
-		
 	}
 
 	/**
@@ -387,7 +385,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async getUserVisitorID(cloneName,  connection) {
+	async getUserVisitorID(cloneName, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -1125,10 +1123,7 @@ class AppStatsController {
 		const documentMap = {};
 		const vistitIDMap = {};
 		const users = await this.user.findAll();
-		const visitorIDs = await this.getUserVisitorID(
-			opts.cloneName,
-			connection
-		);
+		const visitorIDs = await this.getUserVisitorID(opts.cloneName, connection);
 		for (let visit of visitorIDs) {
 			vistitIDMap[visit.idvisitor] = visit.user_id;
 		}
@@ -1167,27 +1162,27 @@ class AppStatsController {
 		cards[0]['unique_users'] = userCards[0]['unique_users'];
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
-				if(documentMap[vistitIDMap[search.idvisitor]]){
+				if (documentMap[vistitIDMap[search.idvisitor]]) {
 					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
 						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
 					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
 						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
 					}
-				}
-				else{
-					documentMap[vistitIDMap[search.idvisitor]]= {
+				} else {
+					documentMap[vistitIDMap[search.idvisitor]] = {
 						user_id: vistitIDMap[search.idvisitor],
-						'docs_opened':search.docs_opened,
-						'searches_made':search.searches_made,
-						'last_search':search.last_search,
-						'last_search_formatted':search.last_search_formatted,
-						'Favorite':[],
-						'ExportDocument':[],
-						'opened':[]
-					}
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
 				}
 			}
 		}
