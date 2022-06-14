@@ -10,8 +10,8 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository (only needed for slack_mention_mapping_file)
-        uses: actions/checkout@v2
+      - uses: kceb/pull-request-url-action@v1
+        id: pr-url
       - name: Slack notification
         uses: tiloio/slack-webhook-action@v1.1.2
         with:
@@ -31,17 +31,8 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_"
+                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ \n :git-pull-request: <{{ steps.pr-url.outputs.url }}> "
                   }
-                },
-                {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": ":git-pull-request: commit <{{CUSTOM_COMMIT_URL}}>"
-                    }
-                  ]
                 }
               ]
             }'
