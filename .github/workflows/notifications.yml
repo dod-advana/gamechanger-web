@@ -10,38 +10,13 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - uses: kceb/pull-request-url-action@v1
-        id: pr-url
-      - name: Slack notification
-        uses: tiloio/slack-webhook-action@v1.1.2
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
         with:
-          slack_web_hook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          slack_json: '{
-            "username": "{{GITHUB_ACTOR}}",
-            "text": "{{GITHUB_ACTOR}} made a pull request",
-            "icon_url": "{{CUSTOM_AUTHOR_PICTURE}}",
-            "channel": "#gamechanger-notifications",
-            "blocks": [
-                {
-                  "accessory": {
-                    "type": "image",
-                    "image_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                    "alt_text": "GitHub Icon"
-                  },
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ "
-                  }
-                },
-                {
-                   "type": "context",
-                   "elements": [
-                       {
-                           "type": "mrkdwn",
-                           "text": ":git-pull-request: PR <https://github.com/${repositoryName}/commit/${commitSHA}|Pull Request Link>"
-                       }
-                   ]
-               }
-              ]
-            }'
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
+      # This will echo "Your PR is 7", or be skipped if there is no current PR.
+      - run: echo "Your PR is ${PR}"
+        if: success() && steps.findPr.outputs.number
+        env:
+          PR: ${{ steps.findPr.outputs.pr }}
