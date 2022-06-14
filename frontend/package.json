@@ -48,6 +48,7 @@
 		"history": "4.10.1",
 		"html-react-parser": "1.2.4",
 		"html2canvas": "1.1.4",
+		"html2pdf.js": "0.10.1",
 		"js-file-download": "0.4.12",
 		"jws": "3.1.4",
 		"lodash": "4.17.21",
