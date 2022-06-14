@@ -39,7 +39,7 @@ jobs:
                    "elements": [
                        {
                            "type": "mrkdwn",
-                           "text": ":git-pull-request: PR <${{steps.pr-url.outputs.url}}|${{steps.pr-url.outputs.url}}>"
+                           "text": ":git-pull-request: PR <https://github.com/${repositoryName}/commit/${commitSHA}|Pull Request Link>"
                        }
                    ]
                }
