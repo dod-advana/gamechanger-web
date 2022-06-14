@@ -3,6 +3,7 @@
 on:
   # Triggers the workflow on push or pull request events but only for the "dev" branch
   pull_request:
+    types: [opened, reopened]
     branches: ["dev", "main"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -33,7 +34,7 @@ jobs:
                       },
                       {
                         \"type\": \"mrkdwn\",
-                        \"text\": \"<<!subteam^S0179NL6066|gc-web> ${GITHUB_ACTOR} Made a GitHub Pull Request.\"
+                        \"text\": \"<!subteam^S0179NL6066|gc-web> ${GITHUB_ACTOR} Made a GitHub Pull Request.\"
                       }
                     ]
                   },
