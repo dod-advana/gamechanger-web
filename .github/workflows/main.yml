@@ -31,7 +31,25 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ \n :git-pull-request: <{{ steps.pr-url.outputs.url }}|{{ steps.pr-url.outputs.url }}> "
+                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ "
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "View PR"
+                  },
+                  "accessory": {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View PR",
+                      "emoji": true
+                    },
+                    "value": "click_me_123",
+                    "url": "{{ steps.pr-url.outputs.url }}",
+                    "action_id": "button-action"
                   }
                 }
               ]
