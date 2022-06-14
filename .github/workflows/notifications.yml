@@ -32,7 +32,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ "
+                      "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request."
                     }
                   },
                   {
@@ -40,13 +40,13 @@ jobs:
                     "elements": [
                       {
                         "type": "mrkdwn",
-                        "text": ":git-pull-request: PR <${https://github.com/${GITHUB_REPOSITORY}/pull/${PR}}|Pull Request Link>"
+                        "text": ":git-pull-request: PR <https://github.com/${{GITHUB_REPOSITORY}}/pull/${PR}|Pull Request Link>"
                       }
                     ]
                   }
                 ]
               }' \
-              ${secrets.SLACK_WEBHOOK_URL}
+              ${{secrets.SLACK_WEBHOOK_URL}}
         if: success() && steps.findPr.outputs.number
         env:
           PR: ${{ steps.findPr.outputs.pr }}
