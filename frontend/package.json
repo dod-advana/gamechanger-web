@@ -25,7 +25,7 @@
 		"@dod-advana/advana-tutorial-overlay": "0.0.5",
 		"@emotion/react": "11.7.0",
 		"@emotion/styled": "11.6.0",
-		"@material-ui/core": "4.11.0",
+		"@material-ui/core": "4.12.3",
 		"@material-ui/icons": "4.9.1",
 		"@material-ui/lab": "4.0.0-alpha.55",
 		"@mui/core": "5.0.0-alpha.54",
