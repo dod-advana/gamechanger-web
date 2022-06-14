@@ -16,7 +16,15 @@ jobs:
           # Can be "open", "closed", or "all".  Defaults to "open".
           state: open
       # This will echo "Your PR is 7", or be skipped if there is no current PR.
-      - run: echo "Your PR is ${PR}"
+      - run: |
+              echo ${PR}
+              curl -v \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                "text": "My PR is ${PR}"
+               }' \
+              ${secrets.SLACK_WEBHOOK_URL}
         if: success() && steps.findPr.outputs.number
         env:
           PR: ${{ steps.findPr.outputs.pr }}
