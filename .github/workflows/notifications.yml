@@ -24,16 +24,18 @@ jobs:
                -d "{
                 \"blocks\": [
                   {
-                    \"accessory\": {
-                      \"type\": \"image\",
-                      \"image_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
-                      \"alt_text\": \"GitHub Icon\"
-                    },
-                    \"type\": \"section\",
-                    \"text\": {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"${GITHUB_ACTOR} Made a GitHub Pull Request.\"
-                    }
+                    \"type\": \"context\",
+                    \"elements\": [
+                      {
+                        \"type\": \"image\",
+                        \"image_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+                        \"alt_text\": \"GitHub Icon\"
+                      },
+                      {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \"{{GITHUB_ACTOR}} Made a GitHub Pull Request.\"
+                      }
+                    ]
                   },
                   {
                     \"type\": \"context\",
