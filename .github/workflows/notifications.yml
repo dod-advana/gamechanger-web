@@ -21,31 +21,31 @@ jobs:
               curl -v \
                -H "Content-Type: application/json" \
                -X POST \
-               -d '{
-                "blocks": [
+               -d "{
+                \"blocks\": [
                   {
-                    "accessory": {
-                      "type": "image",
-                      "image_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                      "alt_text": "GitHub Icon"
+                    \"accessory\": {
+                      \"type\": \"image\",
+                      \"image_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+                      \"alt_text\": \"GitHub Icon\"
                     },
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": "${GITHUB_ACTOR} Made a GitHub Pull Request."
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"${GITHUB_ACTOR} Made a GitHub Pull Request.\"
                     }
                   },
                   {
-                    "type": "context",
-                    "elements": [
+                    \"type\": \"context\",
+                    \"elements\": [
                       {
-                        "type": "mrkdwn",
-                        "text": ":git-pull-request: PR <https://github.com/${GITHUB_REPOSITORY}/pull/${PR}|Pull Request Link>"
+                        \"type\": \"mrkdwn\",
+                        \"text\": \":git-pull-request: PR <https://github.com/${GITHUB_REPOSITORY}/pull/${PR}|Pull Request Link>\"
                       }
                     ]
                   }
                 ]
-              }' \
+              }" \
               ${{secrets.SLACK_WEBHOOK_URL}}
         if: success() && steps.findPr.outputs.number
         env:
