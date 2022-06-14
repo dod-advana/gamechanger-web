@@ -350,7 +350,7 @@ class AppStatsController {
 
 	/**
 	 * This method gets the visitorID tied to one userid
-	 * @method getUserVisitorID
+	 * @method getOneUserVisitorID
 	 * @param {String} userID
 	 * @returns
 	 *
@@ -387,56 +387,31 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async getUserVisitorID(cloneName, connection) {
-		if (cloneName) {
-			console.log(cloneName);
-			return new Promise((resolve, reject) => {
-				connection.query(
-					`
-					select 
-						distinct hex(a.idvisitor) as idvisitor,
-						a.user_id as user_id
-					from matomo_log_visit a
-					where a.idvisitor in (
-						select distinct idvisitor
-						from matomo_log_link_visit_action
-						where idaction_event_category=?
-					)
-					`,
-					[cloneName],
-					(error, results, fields) => {
-						if (error) {
-							this.logger.error(error, 'BAP9ZIP');
-							resolve([]);
-						} else {
-							resolve(results);
-						}
+	async getUserVisitorID(cloneName,  connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(
+				`
+				select 
+					distinct hex(a.idvisitor) as idvisitor,
+					a.user_id as user_id
+				from matomo_log_visit a
+				where a.idvisitor in (
+					select distinct idvisitor
+					from matomo_log_link_visit_action
+					where idaction_event_category=?
+				)
+				`,
+				[cloneName],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
 					}
-				);
-			});
-		} else {
-			return new Promise((resolve, reject) => {
-				connection.query(
-					`
-					select 
-						distinct hex(a.idvisitor) as idvisitor,
-						a.user_id as user_id
-					from matomo_log_visit a
-					where
-						a.user_id in (?)
-					`,
-					[userID],
-					(error, results, fields) => {
-						if (error) {
-							this.logger.error(error, 'BAP9ZIP');
-							resolve([]);
-						} else {
-							resolve(results);
-						}
-					}
-				);
-			});
-		}
+				}
+			);
+		});
 	}
 
 	/**
@@ -1157,7 +1132,7 @@ class AppStatsController {
 		for (let visit of visitorIDs) {
 			vistitIDMap[visit.idvisitor] = visit.user_id;
 		}
-
+		console.log(vistitIDMap);
 		for (let user of users) {
 			documentMap[this.sparkMD5.hash(user.user_id)] = {
 				opened: [],
