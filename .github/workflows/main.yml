@@ -3,7 +3,7 @@
 on:
   # Triggers the workflow on push or pull request events but only for the "dev" branch
   pull_request:
-    branches: "*"
+    branches: ["dev", "main"]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -22,21 +22,26 @@ jobs:
             "icon_url": "{{CUSTOM_AUTHOR_PICTURE}}",
             "channel": "#gamechanger-notifications",
             "blocks": [
-            {
-            "type": "section",
-            "text": {
-            "type": "mrkdwn",
-            "text": "{{GITHUB_ACTOR}} made a pull request.\n_{{CUSTOM_COMMIT_MSG}}_"
-            }
-            },
-            {
-            "type": "context",
-            "elements": [
-            {
-            "type": "mrkdwn",
-            "text": ":speech_balloon: commit <{{CUSTOM_COMMIT_URL}}|{{CUSTOM_SHORT_GITHUB_SHA}}>"
-            }
-            ]
-            }
-            ]
+                {
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+                    "alt_text": "GitHub Icon"
+                  },
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": ":git-pull-request: commit <{{CUSTOM_COMMIT_URL}}>"
+                    }
+                  ]
+                }
+              ]
             }'
