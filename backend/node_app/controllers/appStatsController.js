@@ -47,6 +47,7 @@ class AppStatsController {
 		this.getDateNDaysAgo = this.getDateNDaysAgo.bind(this);
 		this.getDocumentUsageData = this.getDocumentUsageData.bind(this);
 		this.getUserAggregations = this.getUserAggregations.bind(this);
+		this.getDashboardData = this.getDashboardData.bind(this);
 		this.getUserLastOpened = this.getUserLastOpened.bind(this);
 	}
 	/**
@@ -230,7 +231,7 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	async queryPdfOpend(startDate, endDate, cloneName, connection) {
+	async queryPdfOpend(startDate, endDate, connection) {
 		return new Promise((resolve, reject) => {
 			const self = this;
 			connection.query(
@@ -328,14 +329,14 @@ class AppStatsController {
 				matomo_log_action b
 			where
 				a.idaction_name = b.idaction
-				and a.idaction_event_category = ?
+				and (search_cat = ? or search_cat = ?)
 				and a.server_time > ?
 				and a.server_time <= ?
 			order by
 				idvisit,
 				searchtime desc
 			`,
-				[cloneName, startDate, endDate],
+				[cloneName+'_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -491,9 +492,8 @@ class AppStatsController {
 	async querySearchPdfMapping(opts, connection) {
 		const { userId } = opts;
 		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneName, connection);
-
+		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
+		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, connection);
 		const searchMap = {};
 		const eventMap = {};
 		const searchPdfMapping = [];
@@ -716,9 +716,9 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, cloneName, offset = 0, filters, sorting, pageSize } = req.query;
+		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
 
-		const opts = { startDate, endDate, cloneName, offset, filters, sorting, pageSize, userId };
+		const opts = { startDate, endDate, cloneName, cloneID, offset, filters, sorting, pageSize, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -961,20 +961,20 @@ class AppStatsController {
 				select
 					hex(a.idvisitor) as idvisitor,
 					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
-					SUM(IF(idaction_event_category = ?, 1, 0)) as searches_made,
+					SUM(IF((search_cat = ? or search_cat = ?), 1, 0)) as searches_made,
 					max(server_time) as last_search,
 					date_format(max(server_time),'%Y-%m-%d %H:%i') as last_search_formatted
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					(b.name LIKE 'PDFViewer%gamechanger' OR idaction_event_category = ?)
+					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = ? or search_cat = ?))
 					AND b.idaction = a.idaction_name
 					AND server_time >= ?
 					AND server_time <= ?
 				group by
 					a.idvisitor;`,
-				[cloneName, cloneName, startDate, endDate],
+				[cloneName+'_combined', cloneName, cloneName+'_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -1010,7 +1010,7 @@ class AppStatsController {
 				[cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, '1FGM91B');
 						throw error;
 					}
 					resolve(results);
@@ -1035,14 +1035,14 @@ class AppStatsController {
 					matomo_log_action b
 				where 
 					b.idaction = a.idaction_name
-					AND a.idaction_event_category = ?
+					AND (search_cat = ? or search_cat = ?)
 					AND server_time >= ?
 					AND server_time <= ?
 				`,
-				[cloneName, startDate, endDate],
+				[cloneName+'_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, '1FGM91B');
 						throw error;
 					}
 					resolve(results);
@@ -1050,6 +1050,7 @@ class AppStatsController {
 			);
 		});
 	}
+
 	/**
 	 * This method takes gets user aggregated data
 	 * @returns an array of data from Matomo.
@@ -1097,8 +1098,8 @@ class AppStatsController {
 	 */
 	async getUserAggregations(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, cloneName, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { startDate, endDate, cloneName, offset, filters, sorting, pageSize };
+		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
+		const opts = { startDate, endDate, cloneName, cloneID, offset, filters, sorting, pageSize };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -1118,6 +1119,12 @@ class AppStatsController {
 		}
 	}
 
+	/**
+	 * This method gets the user aggregation table for the frontend 
+	 * by a user
+	 * @param {*} opts
+	 * @param {*} connection
+	 */
 	async queryUserAggregations(opts, connection) {
 		const documentMap = {};
 		const vistitIDMap = {};
@@ -1143,44 +1150,32 @@ class AppStatsController {
 		}
 
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const cards = await this.getCardSearchAggregationQuery(
-			opts.startDate,
-			opts.endDate,
-			opts.cloneName,
-			connection
-		);
-		const userCards = await this.getCardUsersAggregationQuery(
-			opts.startDate,
-			opts.endDate,
-			opts.cloneName,
-			connection
-		);
-		cards[0]['unique_users'] = userCards[0]['unique_users'];
+		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneID, connection);
+		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
+
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
-				if (documentMap[vistitIDMap[search.idvisitor]]) {
+				if(documentMap[vistitIDMap[search.idvisitor]]){
 					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
 						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
 					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
 						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
-							search.last_search_formatted;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
 					}
-				} else {
-					documentMap[vistitIDMap[search.idvisitor]] = {
+				}
+				else{
+					documentMap[vistitIDMap[search.idvisitor]]= {
 						user_id: vistitIDMap[search.idvisitor],
-						docs_opened: search.docs_opened,
-						searches_made: search.searches_made,
-						last_search: search.last_search,
-						last_search_formatted: search.last_search_formatted,
-						Favorite: [],
-						ExportDocument: [],
-						opened: [],
-					};
+						'docs_opened':search.docs_opened,
+						'searches_made':search.searches_made,
+						'last_search':search.last_search,
+						'last_search_formatted':search.last_search_formatted,
+						'Favorite':[],
+						'ExportDocument':[],
+						'opened':[]
+					}
 				}
 			}
 		}
@@ -1210,8 +1205,106 @@ class AppStatsController {
 				}
 			}
 		}
-		return { users: Object.values(documentMap), cards: cards[0] };
+		return { users: Object.values(documentMap)};
 	}
+
+
+	/**
+	 * This method gets graph data for searches by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getSearchGraphData( cloneName, connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(
+				`
+				select
+					DATE_FORMAT(server_time, '%Y-%m') as date,
+					COUNT(search_cat) as count
+				from 
+					matomo_log_link_visit_action a
+				where 
+					search_cat = ? or search_cat = ?
+				group by
+					DATE_FORMAT(server_time, '%Y-%m')
+				`,
+				[cloneName+'_combined', cloneName],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method gets graph data for users by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getUserGraphData( cloneID, connection) {
+		return new Promise((resolve, reject) => {
+			connection.query(
+				`
+				select
+					COUNT(distinct user_id) as count,
+					DATE_FORMAT(visit_last_action_time, '%Y-%m') as date
+				from matomo_log_visit a
+				where a.idvisitor in (
+					select distinct idvisitor
+					from matomo_log_link_visit_action
+					where idaction_event_category=?
+				)
+				GROUP BY
+					DATE_FORMAT(visit_last_action_time, '%Y-%m')
+
+				`,
+				[cloneID],
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method is called by an endpoint to get the card and graph data
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	 async getDashboardData(req, res) {
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database,
+			});
+			connection.connect();
+			const cards = await this.getCardSearchAggregationQuery(startDate,endDate,cloneName,connection);
+			const userCards = await this.getCardUsersAggregationQuery(startDate,endDate,cloneID,connection);
+			cards[0]['unique_users'] = userCards[0]['unique_users'];
+
+			const  searchBar = await this.getSearchGraphData(cloneName, connection);
+			const userBar = await this.getUserGraphData(cloneID, connection);
+			
+			res.status(200).send({ cards:cards[0], userBar: userBar, searchBar:searchBar });
+		} catch (err) {
+			this.logger.error(err, '1FGM91B', userId);
+			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
 	/**
 	 *
 	 * @param {*} userdID
