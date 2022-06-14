@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { MemoizedNodeCluster2D, StyledLegendClickable } from './GraphNodeCluster2D';
 import {
 	generateRandomColors,
@@ -22,6 +22,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { Card } from '../cards/GCCard';
 import { backgroundWhite } from '../common/gc-colors';
 import { Warning } from '@material-ui/icons';
+
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
@@ -359,22 +360,26 @@ const filterGraphData = (nodes, edges) => {
 	return { filteredGraph, docOrgNumbers };
 };
 
-export default function PolicyGraphView(props) {
+const defaultDispatch = {};
+const defaultSelectedDocuments = [];
+
+function PolicyGraphView(props) {
+	const defaultFunction = useCallback(() => {}, []);
 	const {
 		width,
 		height,
 		graphData,
 		runningSearchProp,
-		setDocumentsFound = (docs) => {},
-		setTimeFound = (time) => {},
+		setDocumentsFound = defaultFunction,
+		setTimeFound = defaultFunction,
 		cloneData,
-		setNumOfEdges = (num) => {},
-		dispatch = () => {},
+		setNumOfEdges = defaultFunction,
+		dispatch = defaultDispatch,
 		searchText = '',
 		showBasic = false,
 		hierarchyView = false,
 		detailsView = false,
-		selectedDocuments = [],
+		selectedDocuments = defaultSelectedDocuments,
 		loadAll,
 		nodeLimit,
 		mockedFromES,
@@ -408,7 +413,7 @@ export default function PolicyGraphView(props) {
 	});
 	const [graphCardData, setGraphCardData] = React.useState({});
 	const [selectedItem, setSelectedItem] = React.useState({});
-	const [runningSearch, setRunningSearch] = React.useState({});
+	// const [runningSearch, setRunningSearch] = React.useState(runningSearchProp);
 	const [zoom, setZoom] = React.useState(1);
 
 	const [nodeRelSize, setNodeRelSize] = React.useState(5);
@@ -416,7 +421,7 @@ export default function PolicyGraphView(props) {
 
 	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('');
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
-
+	useEffect(() => console.log('did mount'), []);
 	useEffect(() => {
 		if (!graphData || graphData.nodes?.length <= 0) return;
 		setContextOpen(false);
@@ -435,14 +440,6 @@ export default function PolicyGraphView(props) {
 			setNodeGroupMenuOpen(false);
 		}
 	}, [orgTypesSelected]);
-
-	useEffect(() => {
-		if (runningSearch !== runningSearchProp) {
-			setRunningSearch(runningSearchProp);
-			setContextOpen(false);
-			//setRunSimulation(true);
-		}
-	}, [runningSearchProp, runningSearch]);
 
 	useEffect(() => {
 		if (!graph || !graph.nodes) return;
@@ -1359,7 +1356,7 @@ export default function PolicyGraphView(props) {
 
 	const renderNodeLegendItems = () => {
 		return (
-			!runningSearch && (
+			!runningSearchProp && (
 				<>
 					{(Object.keys(legendData).includes('Topic') || Object.keys(legendData).includes('Entity')) && ( // Don't display All Documents filter if filters are only documents
 						<StyledLegendClickable
@@ -1721,7 +1718,7 @@ export default function PolicyGraphView(props) {
 			{show2DView && (
 				<MemoizedNodeCluster2D
 					renderContextMenu={showNodeContextMenu}
-					runningQuery={runningSearch}
+					runningQuery={runningSearchProp}
 					cloneData={cloneData}
 					graph={filteredGraph}
 					graphRefProp={graph2DRef}
@@ -1739,7 +1736,7 @@ export default function PolicyGraphView(props) {
 					reloadGraphProp={reloadGraph}
 					resetGraph={() => resetGraph()}
 					runSimulationProp={runSimulation}
-					runningSearch={runningSearch}
+					runningSearch={runningSearchProp}
 					nodeRelativeSizeProp={nodeRelSize}
 					graphWidth={document.getElementById('graph2dContainer')?.offsetWidth || width}
 					graphHeight={height}
@@ -1761,7 +1758,7 @@ export default function PolicyGraphView(props) {
 				/>
 			)}
 			{showGraphCard && <div style={styles.graphCard}>{displayGraphCard()}</div>}
-			{graphData.nodes.length === 0 && !runningSearch && (
+			{graphData.nodes.length === 0 && !runningSearchProp && (
 				<div style={styles.centeredContent}>
 					<div style={styles.noResultsMessage}>
 						{detailsView ? DETAILS_NO_RESULTS_MESSAGE : NO_RESULTS_MESSAGE}
@@ -1771,6 +1768,8 @@ export default function PolicyGraphView(props) {
 		</div>
 	);
 }
+
+export default PolicyGraphView;
 
 const styles = {
 	centeredContent: {
