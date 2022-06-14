@@ -31,7 +31,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ \n :git-pull-request: <{{ steps.pr-url.outputs.url }}> "
+                    "text": "{{GITHUB_ACTOR}} Made a GitHub Pull Request.\n_{{CUSTOM_COMMIT_MSG}}_ \n :git-pull-request: <{{ steps.pr-url.outputs.url }}|{{ steps.pr-url.outputs.url }}> "
                   }
                 }
               ]
