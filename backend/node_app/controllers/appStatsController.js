@@ -1127,7 +1127,6 @@ class AppStatsController {
 		for (let visit of visitorIDs) {
 			vistitIDMap[visit.idvisitor] = visit.user_id;
 		}
-		console.log(vistitIDMap);
 		for (let user of users) {
 			documentMap[this.sparkMD5.hash(user.user_id)] = {
 				opened: [],
