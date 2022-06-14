@@ -660,7 +660,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.sentence).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -682,7 +682,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.qexp).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -703,7 +703,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -724,7 +724,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.topic_models).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -745,7 +745,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -768,7 +768,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.sentence).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
