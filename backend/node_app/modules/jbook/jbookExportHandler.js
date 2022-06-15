@@ -69,7 +69,6 @@ class JBookExportHandler extends ExportHandler {
 							? this.jbookSearchUtility.parseFields(findReview, false, 'reviewES')
 							: {};
 						docs[i] = { ...doc, ...cleanedReview };
-						console.log(Object.keys(docs[i]));
 					}
 				}
 
@@ -102,7 +101,6 @@ class JBookExportHandler extends ExportHandler {
 					searchResults.docs.forEach((doc) => {
 						if (doc.review_n) {
 							doc.review_n.forEach((rev) => {
-								console.log(rev);
 								if (rev.portfolio_name_s === portfolio) {
 									reviews.push(rev);
 								}
