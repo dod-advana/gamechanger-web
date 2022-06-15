@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="308" failures="0" errors="0" time="38.902">
+  <testsuite name="Thesaurus" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:50" time="1.341" tests="5">
+    <testcase classname="Thesaurus #waitForLoad should indicate when it is done loading the thesaurus into memory" name="Thesaurus #waitForLoad should indicate when it is done loading the thesaurus into memory" time="1.006">
+    </testcase>
+    <testcase classname="Thesaurus #lookUp() should produce synonyms for a word in the thesaurus" name="Thesaurus #lookUp() should produce synonyms for a word in the thesaurus" time="0.001">
+    </testcase>
+    <testcase classname="Thesaurus #lookUp() should produce synonyms for a word with a space in the thesaurus" name="Thesaurus #lookUp() should produce synonyms for a word with a space in the thesaurus" time="0">
+    </testcase>
+    <testcase classname="Thesaurus #lookUp() should produce undefined for a word not in the thesaurus" name="Thesaurus #lookUp() should produce undefined for a word not in the thesaurus" time="0">
+    </testcase>
+    <testcase classname="Thesaurus #lookUp() should remove synonyms that are just different case" name="Thesaurus #lookUp() should remove synonyms that are just different case" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="AppStatsController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:51" time="3.694" tests="10">
+    <testcase classname="AppStatsController #getAppStats should get application stats" name="AppStatsController #getAppStats should get application stats" time="0.005">
+    </testcase>
+    <testcase classname="AppStatsController #getAppStats should get application stats with clone data" name="AppStatsController #getAppStats should get application stats with clone data" time="0.001">
+    </testcase>
+    <testcase classname="AppStatsController #getAppStats should get application stats with internal users to exclude" name="AppStatsController #getAppStats should get application stats with internal users to exclude" time="0.001">
+    </testcase>
+    <testcase classname="AppStatsController #getAppStats should get application stats with queries to exclude for top queries" name="AppStatsController #getAppStats should get application stats with queries to exclude for top queries" time="0.001">
+    </testcase>
+    <testcase classname="AppStatsController #getSearchPdfMapping should get users searches" name="AppStatsController #getSearchPdfMapping should get users searches" time="0.002">
+    </testcase>
+    <testcase classname="AppStatsController #getRecentlyOpenedDocs should get recently opened documents" name="AppStatsController #getRecentlyOpenedDocs should get recently opened documents" time="0.002">
+    </testcase>
+    <testcase classname="AppStatsController #getDocumentUsageData should get Document Usage Data stats" name="AppStatsController #getDocumentUsageData should get Document Usage Data stats" time="0.001">
+    </testcase>
+    <testcase classname="AppStatsController #getUserAggregations should get users aggregated searches" name="AppStatsController #getUserAggregations should get users aggregated searches" time="0.037">
+    </testcase>
+    <testcase classname="AppStatsController #getUserLastOpened should return documents for users" name="AppStatsController #getUserLastOpened should return documents for users" time="0.001">
+    </testcase>
+    <testcase classname="AppStatsController #getDashboardData should get users dashboard data" name="AppStatsController #getDashboardData should get users dashboard data" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="JBookDataHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:55" time="1.608" tests="5">
+    <testcase classname="JBookDataHandler #getProjectData should get the pdoc project data for ES" name="JBookDataHandler #getProjectData should get the pdoc project data for ES" time="0.007">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should get the rdoc project data for ES" name="JBookDataHandler #getProjectData should get the rdoc project data for ES" time="0.002">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should get the odoc project data for ES" name="JBookDataHandler #getProjectData should get the odoc project data for ES" time="0.002">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" name="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" time="0.003">
+    </testcase>
+    <testcase classname="JBookDataHandler #getPortfolios should get all portfolios" name="JBookDataHandler #getPortfolios should get all portfolios" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="UserController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:57" time="1.443" tests="11">
+    <testcase classname="UserController #getInternalUsers return all internal users" name="UserController #getInternalUsers return all internal users" time="0.003">
+    </testcase>
+    <testcase classname="UserController #deleteInternalUser return all internal users" name="UserController #deleteInternalUser return all internal users" time="0.002">
+    </testcase>
+    <testcase classname="UserController #getUserData should return fake user data for a new user" name="UserController #getUserData should return fake user data for a new user" time="0.001">
+    </testcase>
+    <testcase classname="UserController #getUserData should return fake user data for a user" name="UserController #getUserData should return fake user data for a user" time="0.003">
+    </testcase>
+    <testcase classname="UserController #getUserSettings creates or returns a user settings" name="UserController #getUserSettings creates or returns a user settings" time="0.001">
+    </testcase>
+    <testcase classname="UserController #clearDashboardNotification clear dashboard notifications" name="UserController #clearDashboardNotification clear dashboard notifications" time="0.001">
+    </testcase>
+    <testcase classname="UserController #clearDashboardNotification clear dashboard notifications is a no-op on empty notifications" name="UserController #clearDashboardNotification clear dashboard notifications is a no-op on empty notifications" time="0.002">
+    </testcase>
+    <testcase classname="UserController #updateUserAPIRequestLimit should decrement the users API request limit by one" name="UserController #updateUserAPIRequestLimit should decrement the users API request limit by one" time="0.001">
+    </testcase>
+    <testcase classname="UserController #submitUserInfo saves a users response to user info form" name="UserController #submitUserInfo saves a users response to user info form" time="0.001">
+    </testcase>
+    <testcase classname="UserController #resetAPIRequestLimit should reset all API request limits to 3" name="UserController #resetAPIRequestLimit should reset all API request limits to 3" time="0.001">
+    </testcase>
+    <testcase classname="UserController #getRecentSearches should get recent searches" name="UserController #getRecentSearches should get recent searches" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="TrendingSearchesController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:58" time="0.81" tests="10">
+    <testcase classname="TrendingSearchesController #trendingSearchesPOST should return trending searches with clone name undefined if not a clone" name="TrendingSearchesController #trendingSearchesPOST should return trending searches with clone name undefined if not a clone" time="0.084">
+    </testcase>
+    <testcase classname="TrendingSearchesController #trendingSearchesPOST should return trending searches with clone name specified if clone" name="TrendingSearchesController #trendingSearchesPOST should return trending searches with clone name specified if clone" time="0.016">
+    </testcase>
+    <testcase classname="TrendingSearchesController #getTrendingBlacklist should get the trending blacklist" name="TrendingSearchesController #getTrendingBlacklist should get the trending blacklist" time="0.001">
+    </testcase>
+    <testcase classname="TrendingSearchesController #getTrendingBlacklist should throw an error" name="TrendingSearchesController #getTrendingBlacklist should throw an error" time="0.021">
+    </testcase>
+    <testcase classname="TrendingSearchesController #setTrendingBlacklist should set the trending blacklist" name="TrendingSearchesController #setTrendingBlacklist should set the trending blacklist" time="0.002">
+    </testcase>
+    <testcase classname="TrendingSearchesController #setTrendingBlacklist should return an error" name="TrendingSearchesController #setTrendingBlacklist should return an error" time="0.014">
+    </testcase>
+    <testcase classname="TrendingSearchesController #deleteTrendingBlacklist should delete the trending blacklist" name="TrendingSearchesController #deleteTrendingBlacklist should delete the trending blacklist" time="0">
+    </testcase>
+    <testcase classname="TrendingSearchesController #deleteTrendingBlacklist should return an error" name="TrendingSearchesController #deleteTrendingBlacklist should return an error" time="0.001">
+    </testcase>
+    <testcase classname="TrendingSearchesController #getWeeklySearchCount should get the weekly search count" name="TrendingSearchesController #getWeeklySearchCount should get the weekly search count" time="0.001">
+    </testcase>
+    <testcase classname="TrendingSearchesController should return an error" name="TrendingSearchesController should return an error" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="CacheController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:41:59" time="0.908" tests="1">
+    <testcase classname="CacheController #clearGraphDataCache should not throw an error and clear out redis store" name="CacheController #clearGraphDataCache should not throw an error and clear out redis store" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="JBookSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:00" time="1.135" tests="3">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for an ES search" name="JBookSearchHandler #searchHelper should return data for an ES search" time="0.002">
+    </testcase>
+    <testcase classname="JBookSearchHandler #searchHelper should return data for filters" name="JBookSearchHandler #searchHelper should return data for filters" time="0.024">
+    </testcase>
+    <testcase classname="JBookSearchHandler #searchHelper should return excel data for review status" name="JBookSearchHandler #searchHelper should return excel data for review status" time="0.009">
+    </testcase>
+  </testsuite>
+  <testsuite name="EDAExportHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:02" time="1.228" tests="1">
+    <testcase classname="EDAExportHandler #exportHandler should export a file based on search data" name="EDAExportHandler #exportHandler should export a file based on search data" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="PolicyGraphHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:03" time="0.806" tests="4">
+    <testcase classname="PolicyGraphHandler #searchHelper it should return graphData for a search" name="PolicyGraphHandler #searchHelper it should return graphData for a search" time="0.009">
+    </testcase>
+    <testcase classname="PolicyGraphHandler #queryHelper it should return graphData for a query" name="PolicyGraphHandler #queryHelper it should return graphData for a query" time="0.001">
+    </testcase>
+    <testcase classname="PolicyGraphHandler #getDataForSearchHelper it should return sidebar data for a query" name="PolicyGraphHandler #getDataForSearchHelper it should return sidebar data for a query" time="0.005">
+    </testcase>
+    <testcase classname="PolicyGraphHandler #getSingleDocumentHelper it should return document given a doc id" name="PolicyGraphHandler #getSingleDocumentHelper it should return document given a doc id" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="searchController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:04" time="0.909" tests="2">
+    <testcase classname="searchController #convertTinyURL returns a url for the provided id" name="searchController #convertTinyURL returns a url for the provided id" time="0.002">
+    </testcase>
+    <testcase classname="searchController #shortenSearchURL save a tiny url" name="searchController #shortenSearchURL save a tiny url" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="FavoritesController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:05" time="0.957" tests="13">
+    <testcase classname="FavoritesController #favoriteTopicPOST should create a favorite topic" name="FavoritesController #favoriteTopicPOST should create a favorite topic" time="0.002">
+    </testcase>
+    <testcase classname="FavoritesController #favoriteOrganizationPOST should create a favorite organization" name="FavoritesController #favoriteOrganizationPOST should create a favorite organization" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #favoriteDocumentPOST should create a favorite document" name="FavoritesController #favoriteDocumentPOST should create a favorite document" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #favoriteGroupPOST should create a new group for favorites" name="FavoritesController #favoriteGroupPOST should create a new group for favorites" time="0.012">
+    </testcase>
+    <testcase classname="FavoritesController #addToFavoriteGroupPOST should add a favorite to a group" name="FavoritesController #addToFavoriteGroupPOST should add a favorite to a group" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #deleteFavoriteFromGroupPOST should delete a favorite from a group" name="FavoritesController #deleteFavoriteFromGroupPOST should delete a favorite from a group" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #clearFavoriteSearchUpdate should clear a favorite search update flag" name="FavoritesController #clearFavoriteSearchUpdate should clear a favorite search update flag" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should check the least recent favorited search and increment existing notifications" name="FavoritesController #checkLeastRecentFavoritedSearch should check the least recent favorited search and increment existing notifications" time="0.006">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should check the least recent favorited search and create new notifications if none exist" name="FavoritesController #checkLeastRecentFavoritedSearch should check the least recent favorited search and create new notifications if none exist" time="0.003">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should only update the last checked timestamp if the number of search results has not changed" name="FavoritesController #checkLeastRecentFavoritedSearch should only update the last checked timestamp if the number of search results has not changed" time="0.002">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should not update user notifications if the favorite update is already flagged" name="FavoritesController #checkLeastRecentFavoritedSearch should not update user notifications if the favorite update is already flagged" time="0.002">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should not update user notifications if the document count decreases" name="FavoritesController #checkLeastRecentFavoritedSearch should not update user notifications if the document count decreases" time="0.001">
+    </testcase>
+    <testcase classname="FavoritesController #checkLeastRecentFavoritedSearch should do nothing if there are no favorite searches to check" name="FavoritesController #checkLeastRecentFavoritedSearch should do nothing if there are no favorite searches to check" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Reports" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:06" time="0.858" tests="1">
+    <testcase classname="Reports #createCsvStream() should generate csv stream from data" name="Reports #createCsvStream() should generate csv stream from data" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="GlobalSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:07" time="0.759" tests="5">
+    <testcase classname="GlobalSearchHandler #searchHelper should return applications" name="GlobalSearchHandler #searchHelper should return applications" time="0.003">
+    </testcase>
+    <testcase classname="GlobalSearchHandler #searchHelper should return dashboards" name="GlobalSearchHandler #searchHelper should return dashboards" time="0.003">
+    </testcase>
+    <testcase classname="GlobalSearchHandler #searchHelper should return data sources" name="GlobalSearchHandler #searchHelper should return data sources" time="0.001">
+    </testcase>
+    <testcase classname="GlobalSearchHandler #searchHelper should return databases" name="GlobalSearchHandler #searchHelper should return databases" time="0.001">
+    </testcase>
+    <testcase classname="GlobalSearchHandler #searchHelper should not store history when requested" name="GlobalSearchHandler #searchHelper should not store history when requested" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="GraphHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:08" time="0.742" tests="6">
+    <testcase classname="GraphHandler #search it should return the body passed to it sense it is the base and doesnt do a search" name="GraphHandler #search it should return the body passed to it sense it is the base and doesnt do a search" time="0.002">
+    </testcase>
+    <testcase classname="GraphHandler #query it should return the body passed to it sense it is the base and doesnt do a query" name="GraphHandler #query it should return the body passed to it sense it is the base and doesnt do a query" time="0.001">
+    </testcase>
+    <testcase classname="GraphHandler #callFunction it should return the body passed to it sense it is the base and doesnt do a callFunction" name="GraphHandler #callFunction it should return the body passed to it sense it is the base and doesnt do a callFunction" time="0">
+    </testcase>
+    <testcase classname="GraphHandler #getGraphData it should return graph data for a query" name="GraphHandler #getGraphData it should return graph data for a query" time="0.004">
+    </testcase>
+    <testcase classname="GraphHandler #getCachedResults it should return fake cached results based off the request info" name="GraphHandler #getCachedResults it should return fake cached results based off the request info" time="0.001">
+    </testcase>
+    <testcase classname="GraphHandler #storeCachedResults it should store fake cached results based off the request info" name="GraphHandler #storeCachedResults it should store fake cached results based off the request info" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="EDASearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:09" time="0.76" tests="9">
+    <testcase classname="EDASearchHandler #searchHelper should return data for a search" name="EDASearchHandler #searchHelper should return data for a search" time="0.004">
+    </testcase>
+    <testcase classname="EDASearchHandler #searchHelper should not store history when requested" name="EDASearchHandler #searchHelper should not store history when requested" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" name="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" name="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return ES error" name="EDASearchHandler queryContractMods should return ES error" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" name="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" name="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler callFunctionHelper should not find the function" name="EDASearchHandler callFunctionHelper should not find the function" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" name="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" time="0.008">
+    </testcase>
+  </testsuite>
+  <testsuite name="PolicySearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:09" time="0.855" tests="12">
+    <testcase classname="PolicySearchHandler #searchHelper should return single document from ES search" name="PolicySearchHandler #searchHelper should return single document from ES search" time="0.004">
+    </testcase>
+    <testcase classname="PolicySearchHandler #searchHelper should not store history when requested" name="PolicySearchHandler #searchHelper should not store history when requested" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #createRecObject it should return rec objects for search" name="PolicySearchHandler #createRecObject it should return rec objects for search" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #mlApiExpansion it should give expansion" name="PolicySearchHandler #mlApiExpansion it should give expansion" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #thesaurusExpansion should return synonyms and text" name="PolicySearchHandler #thesaurusExpansion should return synonyms and text" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #abbreviationCleaner should return abbreviations" name="PolicySearchHandler #abbreviationCleaner should return abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #doSearch should do the search and return SearchResults" name="PolicySearchHandler #doSearch should do the search and return SearchResults" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #enrichSearchResults should return enriched SearchResults" name="PolicySearchHandler #enrichSearchResults should return enriched SearchResults" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #qaEnrichment should return QA results" name="PolicySearchHandler #qaEnrichment should return QA results" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #entitySearch should return entity search results" name="PolicySearchHandler #entitySearch should return entity search results" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #topicSearch should return topic search results" name="PolicySearchHandler #topicSearch should return topic search results" time="0.001">
+    </testcase>
+    <testcase classname="PolicySearchHandler #getSingleDocumentFromESHelper should return single document from ES search" name="PolicySearchHandler #getSingleDocumentFromESHelper should return single document from ES search" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="SearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:10" time="0.646" tests="3">
+    <testcase classname="SearchHandler #search it should return the body passed to it sense it is the base and doesnt do a search" name="SearchHandler #search it should return the body passed to it sense it is the base and doesnt do a search" time="0.003">
+    </testcase>
+    <testcase classname="SearchHandler #getCachedResults it should return fake cached results based off the request info" name="SearchHandler #getCachedResults it should return fake cached results based off the request info" time="0.002">
+    </testcase>
+    <testcase classname="SearchHandler #storeCachedResults it should store fake cached results based off the request info" name="SearchHandler #storeCachedResults it should store fake cached results based off the request info" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="AnalystToolsController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:11" time="0.723" tests="2">
+    <testcase classname="AnalystToolsController #compareDocument should compare documents" name="AnalystToolsController #compareDocument should compare documents" time="0.004">
+    </testcase>
+    <testcase classname="AnalystToolsController #compareFeedback should create a row in the compare_feedback table" name="AnalystToolsController #compareFeedback should create a row in the compare_feedback table" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="DataTrackerController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:12" time="0.74" tests="8">
+    <testcase classname="DataTrackerController #getTrackedData should get the first page of the document corpus history" name="DataTrackerController #getTrackedData should get the first page of the document corpus history" time="0.003">
+    </testcase>
+    <testcase classname="DataTrackerController #getTrackedData should get a different page of the document corpus history" name="DataTrackerController #getTrackedData should get a different page of the document corpus history" time="0.001">
+    </testcase>
+    <testcase classname="DataTrackerController #getTrackedData should handle the database throwing an error" name="DataTrackerController #getTrackedData should handle the database throwing an error" time="0.001">
+    </testcase>
+    <testcase classname="DataTrackerController #crawlerMetadata should get data from gc-orchestration.crawler_metadata" name="DataTrackerController #crawlerMetadata should get data from gc-orchestration.crawler_metadata" time="0.001">
+    </testcase>
+    <testcase classname="DataTrackerController #crawlerMetadata should get crawler data for data status tracker table" name="DataTrackerController #crawlerMetadata should get crawler data for data status tracker table" time="0.001">
+    </testcase>
+    <testcase classname="DataTrackerController #crawlerMetadata should get crawler data sorted by name for data status tracker table" name="DataTrackerController #crawlerMetadata should get crawler data sorted by name for data status tracker table" time="0.001">
+    </testcase>
+    <testcase classname="DataTrackerController #getOrgSealData should get organization seal data" name="DataTrackerController #getOrgSealData should get organization seal data" time="0">
+    </testcase>
+    <testcase classname="DataTrackerController #getDocIngestionStats should get doc ingestion stats" name="DataTrackerController #getDocIngestionStats should get doc ingestion stats" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="ResponsibilityController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:13" time="0.65" tests="14">
+    <testcase classname="ResponsibilityController #getOtherEntResponsibilityFilterList should get the other ent responsibilities filter list" name="ResponsibilityController #getOtherEntResponsibilityFilterList should get the other ent responsibilities filter list" time="0.002">
+    </testcase>
+    <testcase classname="ResponsibilityController #getResponsibilityData should get the responsibilities" name="ResponsibilityController #getResponsibilityData should get the responsibilities" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #getResponsibilityData should get the responsibilities with offsets and limits set for document view" name="ResponsibilityController #getResponsibilityData should get the responsibilities with offsets and limits set for document view" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #storeResponsibilityReports should create a report successfully" name="ResponsibilityController #storeResponsibilityReports should create a report successfully" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #storeResponsibilityReports should return 400 since a var is missing" name="ResponsibilityController #storeResponsibilityReports should return 400 since a var is missing" time="0">
+    </testcase>
+    <testcase classname="ResponsibilityController #queryOneDocES should get back a list of paragraphs for a document and the paragraph number for the string" name="ResponsibilityController #queryOneDocES should get back a list of paragraphs for a document and the paragraph number for the string" time="0.002">
+    </testcase>
+    <testcase classname="ResponsibilityController #rejectResponsibility should update a resposibilities status to &quot;rejected&quot; and return a 200 status code" name="ResponsibilityController #rejectResponsibility should update a resposibilities status to &quot;rejected&quot; and return a 200 status code" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #updateResponsibility should update a resposibility and return a 200 status code given an accepted update status" name="ResponsibilityController #updateResponsibility should update a resposibility and return a 200 status code given an accepted update status" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #updateResponsibility should update a resposibility and return a 200 status code given a Reject updateCollumn" name="ResponsibilityController #updateResponsibility should update a resposibility and return a 200 status code given a Reject updateCollumn" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #updateResponsibility should remove a report and return a 200 status code given a rejected update status" name="ResponsibilityController #updateResponsibility should remove a report and return a 200 status code given a rejected update status" time="0">
+    </testcase>
+    <testcase classname="ResponsibilityController #getFileLink should return source URL and the page number the text is found on" name="ResponsibilityController #getFileLink should return source URL and the page number the text is found on" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #getResponsibilityDocTitles should return a list of all responsibility document titles" name="ResponsibilityController #getResponsibilityDocTitles should return a list of all responsibility document titles" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #updateResponsibilityReport should update a responsiblity report and return a status code 200" name="ResponsibilityController #updateResponsibilityReport should update a responsiblity report and return a status code 200" time="0.001">
+    </testcase>
+    <testcase classname="ResponsibilityController #getResponsibilityUpdates should return all responsibility updates" name="ResponsibilityController #getResponsibilityUpdates should return all responsibility updates" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="SearchUtility" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:13" time="0.769" tests="80">
+    <testcase classname="SearchUtility #createCacheKeyFromOptions() should have the same cache key for the same options passed in any order" name="SearchUtility #createCacheKeyFromOptions() should have the same cache key for the same options passed in any order" time="0.002">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should return empty list for key if none of the sources are detected" name="SearchUtility #combineExpansionTerms should return empty list for key if none of the sources are detected" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should return empty list for key if none of the sources are defined" name="SearchUtility #combineExpansionTerms should return empty list for key if none of the sources are defined" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use ML terms if no synonyms are detected" name="SearchUtility #combineExpansionTerms should just use ML terms if no synonyms are detected" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use ML terms if synonyms are undefined" name="SearchUtility #combineExpansionTerms should just use ML terms if synonyms are undefined" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use ML terms if related searches are undefined" name="SearchUtility #combineExpansionTerms should just use ML terms if related searches are undefined" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use related searches if no synonyms or ML expansions are detected" name="SearchUtility #combineExpansionTerms should just use related searches if no synonyms or ML expansions are detected" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use related searches if no synonyms or ML expansions undefined" name="SearchUtility #combineExpansionTerms should just use related searches if no synonyms or ML expansions undefined" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use synonyms if no ML terms are detected" name="SearchUtility #combineExpansionTerms should just use synonyms if no ML terms are detected" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use synonyms if ML terms are undefined" name="SearchUtility #combineExpansionTerms should just use synonyms if ML terms are undefined" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use abbreviations if no synonyms + ML terms are detected" name="SearchUtility #combineExpansionTerms should just use abbreviations if no synonyms + ML terms are detected" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should just use abbs if synonyms + ML terms are undefined and no related search" name="SearchUtility #combineExpansionTerms should just use abbs if synonyms + ML terms are undefined and no related search" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 3 of each, and no abbreviations and no related search" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 3 of each, and no abbreviations and no related search" time="0.002">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms, synonyms, and related search if there are 3 of each, and no abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms, synonyms, and related search if there are 3 of each, and no abbreviations" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are 3 of each, and no synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are 3 of each, and no synonyms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 3 of each, and no ML terms" name="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 3 of each, and no ML terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are &gt; 3 of each, and no abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are &gt; 3 of each, and no abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are &gt; 3 of each, and no synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are &gt; 3 of each, and no synonyms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are &gt; 3 of each, and no ML terms" name="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are &gt; 3 of each, and no ML terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are &gt; 3 of each with a space, and no abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are &gt; 3 of each with a space, and no abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are &gt; 3 of each with a space, and no synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and abbreviations if there are &gt; 3 of each with a space, and no synonyms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine all if there are &gt; 3 of each with a space, and no synonyms" name="SearchUtility #combineExpansionTerms should combine all if there are &gt; 3 of each with a space, and no synonyms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are &gt; 3 of each with a space, and no ML terms" name="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are &gt; 3 of each with a space, and no ML terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine all if there are &gt; 3 of each with a space, and no ML terms" name="SearchUtility #combineExpansionTerms should combine all if there are &gt; 3 of each with a space, and no ML terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 ML terms and 2 synonyms, no abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 ML terms and 2 synonyms, no abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 synonyms and 2 ML terms, no abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 synonyms and 2 ML terms, no abbreviations" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 ML terms and 2 abbreviations, no synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 ML terms and 2 abbreviations, no synonyms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 synonyms and 3 ML terms, no synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms if there are 4 synonyms and 3 ML terms, no synonyms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 4 ML terms and 2 synonyms, no ML terms" name="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 4 ML terms and 2 synonyms, no ML terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 4 synonyms and 2 ML terms, no ML terms" name="SearchUtility #combineExpansionTerms should combine abbreviations and synonyms if there are 4 synonyms and 2 ML terms, no ML terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 ML terms and no synonyms or abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 ML terms and no synonyms or abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 ML terms and undefined synonyms and abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 ML terms and undefined synonyms and abbreviations" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 synonyms and no ML terms or abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 synonyms and no ML terms or abbreviations" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 synonyms and undefined ML terms and abbreviations" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 synonyms and undefined ML terms and abbreviations" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 abbreivations and no ML terms or synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 abbreivations and no ML terms or synonyms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 abbreviations and undefined ML terms and synonyms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are 6 abbreviations and undefined ML terms and synonyms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are &gt; 2 of each and checking for removal of search term in ML terms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are &gt; 2 of each and checking for removal of search term in ML terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are &gt; 2 of two categories and 1 of the other and checking for removal of search term in ML terms" name="SearchUtility #combineExpansionTerms should combine ML terms and synonyms and abbreviations if there are &gt; 2 of two categories and 1 of the other and checking for removal of search term in ML terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine all if there are &gt; 2 of two categories and 1 of the other and checking for removal of search term in ML terms" name="SearchUtility #combineExpansionTerms should combine all if there are &gt; 2 of two categories and 1 of the other and checking for removal of search term in ML terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms should combine all if and remove duplicates" name="SearchUtility #combineExpansionTerms should combine all if and remove duplicates" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #combineExpansionTerms ML Exp has empty lists and combines others" name="SearchUtility #combineExpansionTerms ML Exp has empty lists and combines others" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #cleanExpansions() should clean expansions by removing duplciates and punctuations" name="SearchUtility #cleanExpansions() should clean expansions by removing duplciates and punctuations" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #cleanExpansions() should clean expansions by getting rid of duplicates even if one is capitalized" name="SearchUtility #cleanExpansions() should clean expansions by getting rid of duplicates even if one is capitalized" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryVariable() should return back the value for a query variable" name="SearchUtility #getQueryVariable() should return back the value for a query variable" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getESSuggesterQuery() should create the ElasticSearch suggester query from searchText" name="SearchUtility #getESSuggesterQuery() should create the ElasticSearch suggester query from searchText" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getESSuggesterPresearchQuery() should create the ElasticSearch suggester query from searchText" name="SearchUtility #getESSuggesterPresearchQuery() should create the ElasticSearch suggester query from searchText" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getSearchCount should get search count query" name="SearchUtility #getSearchCount should get search count query" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getEsSearchTerms() should get ES search terms from searchText" name="SearchUtility #getEsSearchTerms() should get ES search terms from searchText" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getPopularQuery() should get popular documents query" name="SearchUtility #getPopularQuery() should get popular documents query" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchQuery should return an es query given parsedQuery and defaults" name="SearchUtility #getElasticsearchQuery should return an es query given parsedQuery and defaults" time="0.002">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchQuery should return sorted ES query (pub date)" name="SearchUtility #getElasticsearchQuery should return sorted ES query (pub date)" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchQuery should return sorted ES query (alpha)" name="SearchUtility #getElasticsearchQuery should return sorted ES query (alpha)" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchQuery should return sorted ES query (References)" name="SearchUtility #getElasticsearchQuery should return sorted ES query (References)" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchQueryForGraphCache should return an es query given parsedQuery and defaults" name="SearchUtility #getElasticsearchQueryForGraphCache should return an es query given parsedQuery and defaults" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #cleanUpIdEsResults should return with searchData and pageHits when a search is done" name="SearchUtility #cleanUpIdEsResults should return with searchData and pageHits when a search is done" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #cleanUpEsResults should flatten results and add pageHits when a search is done" name="SearchUtility #cleanUpEsResults should flatten results and add pageHits when a search is done" time="0.002">
+    </testcase>
+    <testcase classname="SearchUtility #cleanUpIdEsResultsForGraphCache should return with searchData and pageHits when a search is done" name="SearchUtility #cleanUpIdEsResultsForGraphCache should return with searchData and pageHits when a search is done" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getElasticsearchDocDataFromId should return the right ES query" name="SearchUtility #getElasticsearchDocDataFromId should return the right ES query" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should parse a single word search" name="SearchUtility #getQueryAndSearchTerms() should parse a single word search" time="0.002">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should parse an AND search" name="SearchUtility #getQueryAndSearchTerms() should parse an AND search" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should parse an OR search" name="SearchUtility #getQueryAndSearchTerms() should parse an OR search" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should parse double quoted phrases" name="SearchUtility #getQueryAndSearchTerms() should parse double quoted phrases" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should parse single quoted phrases into double quoted" name="SearchUtility #getQueryAndSearchTerms() should parse single quoted phrases into double quoted" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow apostrophes within double quoted phrases" name="SearchUtility #getQueryAndSearchTerms() should allow apostrophes within double quoted phrases" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow acronyms" name="SearchUtility #getQueryAndSearchTerms() should allow acronyms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow AND statements between phrases and terms" name="SearchUtility #getQueryAndSearchTerms() should allow AND statements between phrases and terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow OR statements between single quoted phrases and terms" name="SearchUtility #getQueryAndSearchTerms() should allow OR statements between single quoted phrases and terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow OR statements between double quoted phrases and terms" name="SearchUtility #getQueryAndSearchTerms() should allow OR statements between double quoted phrases and terms" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getQueryAndSearchTerms() should allow OR statements between phrases and acronym terms" name="SearchUtility #getQueryAndSearchTerms() should allow OR statements between phrases and acronym terms" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #getTitle should return partial, lowercase matches on display_title field" name="SearchUtility #getTitle should return partial, lowercase matches on display_title field" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #reorderFirst should reorder a result with matching display_title to the top of the results" name="SearchUtility #reorderFirst should reorder a result with matching display_title to the top of the results" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #makeAliasesQuery should take in the query searchtextlist and create an ES query for aliases" name="SearchUtility #makeAliasesQuery should take in the query searchtextlist and create an ES query for aliases" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #findAliases should return an alias match for an entity in the query" name="SearchUtility #findAliases should return an alias match for an entity in the query" time="0.007">
+    </testcase>
+    <testcase classname="SearchUtility #findAliases should return no alias if no alias is matched in the query" name="SearchUtility #findAliases should return no alias if no alias is matched in the query" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #getDocumentParagraphsByParIDs should return an es query paragraph ids for compare" name="SearchUtility #getDocumentParagraphsByParIDs should return an es query paragraph ids for compare" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #highlightKeywords it should return a list of highlighted keys given a list of words and one to be highlighted" name="SearchUtility #highlightKeywords it should return a list of highlighted keys given a list of words and one to be highlighted" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #highlightKeywords it should return a list of highlighted keys given a list of words and multiple words to be highlighted" name="SearchUtility #highlightKeywords it should return a list of highlighted keys given a list of words and multiple words to be highlighted" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #autocorrect it should give a correct spelled word" name="SearchUtility #autocorrect it should give a correct spelled word" time="0">
+    </testcase>
+    <testcase classname="SearchUtility #autocorrect it should choose the the highest score option" name="SearchUtility #autocorrect it should choose the the highest score option" time="0.001">
+    </testcase>
+    <testcase classname="SearchUtility #autocorrect it should return correctly spelled words for multiple words" name="SearchUtility #autocorrect it should return correctly spelled words for multiple words" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="AdminController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:14" time="0.659" tests="8">
+    <testcase classname="AdminController #getGCAdminData it should return the admin list" name="AdminController #getGCAdminData it should return the admin list" time="0.002">
+    </testcase>
+    <testcase classname="AdminController #deleteGCAdminData it should delete a user admin" name="AdminController #deleteGCAdminData it should delete a user admin" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #storeGCAdminData should create a clone" name="AdminController #storeGCAdminData should create a clone" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #storeGCAdminData should update a admin" name="AdminController #storeGCAdminData should update a admin" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #getHomepageEditorData should return editor data" name="AdminController #getHomepageEditorData should return editor data" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #getHomepageUserData should return homepage user data with just favorite docs" name="AdminController #getHomepageUserData should return homepage user data with just favorite docs" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #getHomepageUserData should return homepage user data with just export history" name="AdminController #getHomepageUserData should return homepage user data with just export history" time="0.001">
+    </testcase>
+    <testcase classname="AdminController #setHomepageEditorData should update homepage_topics key with new data" name="AdminController #setHomepageEditorData should update homepage_topics key with new data" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="MLSearchUtility" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:15" time="0.62" tests="18">
+    <testcase classname="MLSearchUtility #getBigramQueries should take in the query broken into a list, the found alias, and create bigram queries for QA" name="MLSearchUtility #getBigramQueries should take in the query broken into a list, the found alias, and create bigram queries for QA" time="0.003">
+    </testcase>
+    <testcase classname="MLSearchUtility #getPhraseQAQuery should take in the bigram queries and return an ES query for QA context (documents)" name="MLSearchUtility #getPhraseQAQuery should take in the bigram queries and return an ES query for QA context (documents)" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #getPhraseQAQuery should take in the bigram queries and return an ES query for QA context (entities)" name="MLSearchUtility #getPhraseQAQuery should take in the bigram queries and return an ES query for QA context (entities)" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #filterEmptyDocs should remove results (one and two) that have no text/short text in the paragraphs field" name="MLSearchUtility #filterEmptyDocs should remove results (one and two) that have no text/short text in the paragraphs field" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #expandParagraphs should take a full doc, par id, and min length, and return the target paragraph expanded to include text before/after" name="MLSearchUtility #expandParagraphs should take a full doc, par id, and min length, and return the target paragraph expanded to include text before/after" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #queryOneDocQA should take in the filename of an ES result, re-query ES to get the entire doc, and return the result" name="MLSearchUtility #queryOneDocQA should take in the filename of an ES result, re-query ES to get the entire doc, and return the result" time="0.005">
+    </testcase>
+    <testcase classname="MLSearchUtility #cleanParagraph should remove repeated table of contents-style periods from text" name="MLSearchUtility #cleanParagraph should remove repeated table of contents-style periods from text" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #cleanParagraph should remove repeated table of contents-style Xs from text" name="MLSearchUtility #cleanParagraph should remove repeated table of contents-style Xs from text" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #cleanParagraph should remove weird characters" name="MLSearchUtility #cleanParagraph should remove weird characters" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #formatQAquery should take in the query and produce a set of QA query objects including matching aliases" name="MLSearchUtility #formatQAquery should take in the query and produce a set of QA query objects including matching aliases" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #getQAEntities should return the top matching entity (if an alias is found in the query)" name="MLSearchUtility #getQAEntities should return the top matching entity (if an alias is found in the query)" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #getQAEntities should return the top matching entity (even if there is no alias in the query)" name="MLSearchUtility #getQAEntities should return the top matching entity (even if there is no alias in the query)" time="0">
+    </testcase>
+    <testcase classname="MLSearchUtility #cleanQAResults should format the results of QA" name="MLSearchUtility #cleanQAResults should format the results of QA" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #getQAContext wrapper function that should take in doc, sentence, and entity results and return QA context" name="MLSearchUtility #getQAContext wrapper function that should take in doc, sentence, and entity results and return QA context" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #recommend given one filename it should recommend docs" name="MLSearchUtility #recommend given one filename it should recommend docs" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #filterRecommendations it should return most common documents first in order" name="MLSearchUtility #filterRecommendations it should return most common documents first in order" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #getGraphRecs given a doc, return similar docs from Neo4j" name="MLSearchUtility #getGraphRecs given a doc, return similar docs from Neo4j" time="0.001">
+    </testcase>
+    <testcase classname="MLSearchUtility #recommendGraph given no results from mlapi for recommendations, query Neo4j" name="MLSearchUtility #recommendGraph given no results from mlapi for recommendations, query Neo4j" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="DocumentController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:16" time="0.692" tests="5">
+    <testcase classname="DocumentController #cleanDocumentForCrowdAssist should clean up the document pulled and format for crowd assist use" name="DocumentController #cleanDocumentForCrowdAssist should clean up the document pulled and format for crowd assist use" time="0.003">
+    </testcase>
+    <testcase classname="DocumentController #getDocumentsToAnnotate should get documents to annotate" name="DocumentController #getDocumentsToAnnotate should get documents to annotate" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getDocumentProperties should test document properties" name="DocumentController #getDocumentProperties should test document properties" time="0">
+    </testcase>
+    <testcase classname="DocumentController #getOrgImageOverrideURLs should get image override URLs" name="DocumentController #getOrgImageOverrideURLs should get image override URLs" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getHomepageThumbnail should get array of thumbnails" name="DocumentController #getHomepageThumbnail should get array of thumbnails" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="EDASearchUtility" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:16" time="0.712" tests="14">
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included" time="0.028">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Fiscal Year and EDA Contract Data filters" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Fiscal Year and EDA Contract Data filters" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Issue Office DoDAAC and Obligated Amount filters" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Issue Office DoDAAC and Obligated Amount filters" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the contract filter" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the contract filter" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue org and majcom filter" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue org and majcom filter" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue office dodaac and issue office name" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue office dodaac and issue office name" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with just majcoms and not their org included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with just majcoms and not their org included" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with exclude terms included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with exclude terms included" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with vendor name, funding office code, idv piid, mod num, psc description, piid, desc of req, psc, funding agency name, naics, and duns" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with vendor name, funding office code, idv piid, mod num, psc description, piid, desc of req, psc, funding agency name, naics, and duns" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility getElasticsearchStatsQuery should return an ES query for a search with filters included" name="EDASearchUtility getElasticsearchStatsQuery should return an ES query for a search with filters included" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility cleanUpEsResults should return cleaned up ES results to frontend" name="EDASearchUtility cleanUpEsResults should return cleaned up ES results to frontend" time="0.003">
+    </testcase>
+    <testcase classname="EDASearchUtility getEDAContractQuery should return a query just to retrieve related contract mods" name="EDASearchUtility getEDAContractQuery should return a query just to retrieve related contract mods" time="0">
+    </testcase>
+    <testcase classname="EDASearchUtility getEDAContractQuery should return a query just to retrieve a base award and its data" name="EDASearchUtility getEDAContractQuery should return a query just to retrieve a base award and its data" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchUtility splitAwardID should return an id and idv" name="EDASearchUtility splitAwardID should return an id and idv" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="pollUtility" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:17" time="5.543" tests="10">
+    <testcase classname="pollUtility #poll() should run a function" name="pollUtility #poll() should run a function" time="0.267">
+    </testcase>
+    <testcase classname="pollUtility #poll() should run an async function" name="pollUtility #poll() should run an async function" time="0.256">
+    </testcase>
+    <testcase classname="pollUtility #poll() should log errors and continue" name="pollUtility #poll() should log errors and continue" time="0.241">
+    </testcase>
+    <testcase classname="pollUtility #poll() should not run a function again until the previous call completes" name="pollUtility #poll() should not run a function again until the previous call completes" time="1.225">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should run a function" name="pollUtility #distributedPoll() should run a function" time="0.307">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should run an async function" name="pollUtility #distributedPoll() should run an async function" time="0.309">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should log errors and continue" name="pollUtility #distributedPoll() should log errors and continue" time="0.242">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should not run a function again until the previous call completes" name="pollUtility #distributedPoll() should not run a function again until the previous call completes" time="1.036">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should recheck lock if already locked" name="pollUtility #distributedPoll() should recheck lock if already locked" time="0.147">
+    </testcase>
+    <testcase classname="pollUtility #distributedPoll() should refresh lock in background" name="pollUtility #distributedPoll() should refresh lock in background" time="1.316">
+    </testcase>
+  </testsuite>
+  <testsuite name="TextSuggestionController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:23" time="0.546" tests="1">
+    <testcase classname="TextSuggestionController #getTextSuggestion should return parsed data" name="TextSuggestionController #getTextSuggestion should return parsed data" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="AppSettingsController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:23" time="0.457" tests="3">
+    <testcase classname="AppSettingsController #getMode should get application setting" name="AppSettingsController #getMode should get application setting" time="0.001">
+    </testcase>
+    <testcase classname="AppSettingsController #setMode should set an application setting to false" name="AppSettingsController #setMode should set an application setting to false" time="0.002">
+    </testcase>
+    <testcase classname="AppSettingsController #toggleMode should toggle an application setting from true to false" name="AppSettingsController #toggleMode should toggle an application setting from true to false" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="NotificationController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:24" time="0.422" tests="4">
+    <testcase classname="NotificationController #getNotifications should return all notifications" name="NotificationController #getNotifications should return all notifications" time="0.001">
+    </testcase>
+    <testcase classname="NotificationController #createNotification should return create a notification" name="NotificationController #createNotification should return create a notification" time="0.002">
+    </testcase>
+    <testcase classname="NotificationController #deleteNotification should delete a notification" name="NotificationController #deleteNotification should delete a notification" time="0.001">
+    </testcase>
+    <testcase classname="NotificationController #editNotificationActive should delete a notification" name="NotificationController #editNotificationActive should delete a notification" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ExternalAPIController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:24" time="0.475" tests="11">
+    <testcase classname="ExternalAPIController #getAPIKeyRequests() should return all api requests that are not rejected" name="ExternalAPIController #getAPIKeyRequests() should return all api requests that are not rejected" time="0.002">
+    </testcase>
+    <testcase classname="ExternalAPIController #approveRejectAPIKeyRequest() should approve the request" name="ExternalAPIController #approveRejectAPIKeyRequest() should approve the request" time="0.001">
+    </testcase>
+    <testcase classname="ExternalAPIController #approveRejectAPIKeyRequest() should reject the request" name="ExternalAPIController #approveRejectAPIKeyRequest() should reject the request" time="0.001">
+    </testcase>
+    <testcase classname="ExternalAPIController #revokeAPIKeyRequest() should revoke the request" name="ExternalAPIController #revokeAPIKeyRequest() should revoke the request" time="0">
+    </testcase>
+    <testcase classname="ExternalAPIController #createAPIKeyRequest() should successfully create an api request" name="ExternalAPIController #createAPIKeyRequest() should successfully create an api request" time="0">
+    </testcase>
+    <testcase classname="ExternalAPIController #createAPIKeyRequest() should not create an api request as one already exists" name="ExternalAPIController #createAPIKeyRequest() should not create an api request as one already exists" time="0.001">
+    </testcase>
+    <testcase classname="ExternalAPIController #getAPIKey() should return API key if user exists and active is true" name="ExternalAPIController #getAPIKey() should return API key if user exists and active is true" time="0">
+    </testcase>
+    <testcase classname="ExternalAPIController #getAPIKey() should return an empty string if user does not exist" name="ExternalAPIController #getAPIKey() should return an empty string if user does not exist" time="0">
+    </testcase>
+    <testcase classname="ExternalAPIController #getAPIKey() should return an empty string if user exists but active is false" name="ExternalAPIController #getAPIKey() should return an empty string if user exists but active is false" time="0">
+    </testcase>
+    <testcase classname="ExternalAPIController #updateAPIKeyDescription() should update the description of an API key" name="ExternalAPIController #updateAPIKeyDescription() should update the description of an API key" time="0.001">
+    </testcase>
+    <testcase classname="ExternalAPIController sendApprovalEmail() Should not throw" name="ExternalAPIController sendApprovalEmail() Should not throw" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="feedbackController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:25" time="0.384" tests="4">
+    <testcase classname="feedbackController #sendIntelligentSearchFeedback should send feedback from intelligent search" name="feedbackController #sendIntelligentSearchFeedback should send feedback from intelligent search" time="0.001">
+    </testcase>
+    <testcase classname="feedbackController #sendQAFeedback should send feedback from qa" name="feedbackController #sendQAFeedback should send feedback from qa" time="0.001">
+    </testcase>
+    <testcase classname="feedbackController #getFeedback should get feedback from postgres" name="feedbackController #getFeedback should get feedback from postgres" time="0.001">
+    </testcase>
+    <testcase classname="feedbackController #requestDocIngest should post a request for a document to be ingested" name="feedbackController #requestDocIngest should post a request for a document to be ingested" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ExportHistoryController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:25" time="0.771" tests="3">
+    <testcase classname="ExportHistoryController #getExportHistory it should return the export history for a user" name="ExportHistoryController #getExportHistory it should return the export history for a user" time="0.001">
+    </testcase>
+    <testcase classname="ExportHistoryController #deleteExportHistory it should delete a export history for a user" name="ExportHistoryController #deleteExportHistory it should delete a export history for a user" time="0.001">
+    </testcase>
+    <testcase classname="ExportHistoryController #updateExportHistoryDate it should update export history date" name="ExportHistoryController #updateExportHistoryDate it should update export history date" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="ModularGameChangerController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:26" time="0.433" tests="5">
+    <testcase classname="ModularGameChangerController #getCloneMeta it should return a specified clone" name="ModularGameChangerController #getCloneMeta it should return a specified clone" time="0.003">
+    </testcase>
+    <testcase classname="ModularGameChangerController #getAllCloneMeta it should return a list of clones" name="ModularGameChangerController #getAllCloneMeta it should return a list of clones" time="0.002">
+    </testcase>
+    <testcase classname="ModularGameChangerController #storeCloneMeta should take in clonedata, and update the db" name="ModularGameChangerController #storeCloneMeta should take in clonedata, and update the db" time="0.001">
+    </testcase>
+    <testcase classname="ModularGameChangerController #search should create a dummy handler and make a dummy search" name="ModularGameChangerController #search should create a dummy handler and make a dummy search" time="0.001">
+    </testcase>
+    <testcase classname="ModularGameChangerController #export should create a dummy handler and make a dummy export" name="ModularGameChangerController #export should create a dummy handler and make a dummy export" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="ExternalSearchController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:27" time="0.415" tests="2">
+    <testcase classname="ExternalSearchController #createOrgFilter() should have the same object pair orgFilter, orgFilterQuery" name="ExternalSearchController #createOrgFilter() should have the same object pair orgFilter, orgFilterQuery" time="0.001">
+    </testcase>
+    <testcase classname="ExternalSearchController #externalSearch() should run a keyword search" name="ExternalSearchController #externalSearch() should run a keyword search" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="DocumentController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:27" time="0.152" tests="8">
+    <testcase classname="DocumentController #getModelsList should return a model list" name="DocumentController #getModelsList should return a model list" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getLoadedModels should return a fake transformer" name="DocumentController #getLoadedModels should return a fake transformer" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getS3List should get a fake list of models in s3" name="DocumentController #getS3List should get a fake list of models in s3" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getAPIInformation should have fake information on the API" name="DocumentController #getAPIInformation should have fake information on the API" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #getData should query the ML API" name="DocumentController #getData should query the ML API" time="0">
+    </testcase>
+    <testcase classname="DocumentController #getData should throw an error" name="DocumentController #getData should throw an error" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #postData should post to the ML API" name="DocumentController #postData should post to the ML API" time="0.001">
+    </testcase>
+    <testcase classname="DocumentController #postData should throw an error" name="DocumentController #postData should throw an error" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="RedisLock" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:27" time="0.134" tests="6">
+    <testcase classname="RedisLock #unlock should unlock using its key and value" name="RedisLock #unlock should unlock using its key and value" time="0.005">
+    </testcase>
+    <testcase classname="RedisLock #unlock should throw an error if the key cannot be deleted" name="RedisLock #unlock should throw an error if the key cannot be deleted" time="0.01">
+    </testcase>
+    <testcase classname="RedisLock #extend should extend using its key and value and the provided ttl" name="RedisLock #extend should extend using its key and value and the provided ttl" time="0.001">
+    </testcase>
+    <testcase classname="RedisLock #extend should throw an error if the key cannot be extended" name="RedisLock #extend should throw an error if the key cannot be extended" time="0.001">
+    </testcase>
+    <testcase classname="RedisLockManager #lock should lock using its key, value, and ttl" name="RedisLockManager #lock should lock using its key, value, and ttl" time="0.002">
+    </testcase>
+    <testcase classname="RedisLockManager #lock should throw an error if the key is already locked" name="RedisLockManager #lock should throw an error if the key is already locked" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="ExternalGraphController" errors="0" failures="0" skipped="0" timestamp="2022-06-15T16:42:27" time="0.127" tests="1">
+    <testcase classname="ExternalGraphController queryGraph() should return todo as its not fully built out yet" name="ExternalGraphController queryGraph() should return todo as its not fully built out yet" time="0.001">
+    </testcase>
+  </testsuite>
+</testsuites>
