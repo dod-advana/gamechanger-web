@@ -1129,7 +1129,7 @@ class AppStatsController {
 		const documentMap = {};
 		const vistitIDMap = {};
 		const users = await this.user.findAll();
-		const visitorIDs = await this.getUserVisitorID(opts.cloneName, connection);
+		const visitorIDs = await this.getUserVisitorID(opts.cloneID, connection);
 		for (let visit of visitorIDs) {
 			vistitIDMap[visit.idvisitor] = visit.user_id;
 		}
@@ -1152,7 +1152,7 @@ class AppStatsController {
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneID, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-
+		console.log(searches);
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
 				if(documentMap[vistitIDMap[search.idvisitor]]){
