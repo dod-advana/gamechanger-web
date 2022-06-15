@@ -792,7 +792,7 @@ export default (props) => {
 									<GCPrimaryButton
 										onClick={() => {
 											trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-											exportData('UserData', userAggData);
+											exportData('UserData');
 										}}
 										style={{ minWidth: 'unset' }}
 									>
@@ -890,7 +890,7 @@ export default (props) => {
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
-									exportData('SearchPdfMapping', mappingData);
+									exportData('SearchPdfMapping');
 								}}
 								style={{ minWidth: 'unset' }}
 							>
@@ -917,7 +917,7 @@ export default (props) => {
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-									exportData('Feedback', feedbackData);
+									exportData('Feedback');
 								}}
 								style={{ minWidth: 'unset' }}
 							>
@@ -951,7 +951,7 @@ export default (props) => {
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
-									exportData('DocumentUsage', documentData);
+									exportData('DocumentUsage');
 								}}
 								style={{ minWidth: 'unset' }}
 							>
