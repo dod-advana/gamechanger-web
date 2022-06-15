@@ -56,7 +56,7 @@ const useStyles = makeStyles({
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
-	const { context = {}, extraStyle = {}, gameChangerAPI, searchHandler } = props;
+	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
 
 	const { state, dispatch } = context;
 	const {
