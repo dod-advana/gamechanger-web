@@ -72,7 +72,7 @@ const JBookProfilePage = (props) => {
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { projectData, reviewData, keywordsChecked } = state;
+	const { projectData, reviewData, keywordsChecked, selectedPortfolio } = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
@@ -105,7 +105,6 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? '');
 	const [pMap, setMap] = useState({});
 	const [userMap, setUserMap] = useState({});
 	let [init, setInit] = useState(false);
@@ -240,7 +239,7 @@ const JBookProfilePage = (props) => {
 			setID(id);
 
 			getProjectData(id, tmpPortfolioName).then(() => {
-				setSelectedPortfolio(tmpPortfolioName);
+				setState(dispatch, { selectedPortfolio: tmpPortfolioName });
 			});
 
 			if (searchText && searchText !== 'undefined') {
@@ -954,7 +953,6 @@ const JBookProfilePage = (props) => {
 						<PortfolioSelector
 							selectedPortfolio={selectedPortfolio}
 							portfolios={state.portfolios}
-							setPortfolio={setSelectedPortfolio}
 							dispatch={dispatch}
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}
