@@ -43,6 +43,22 @@ class Reports {
 		}
 	}
 
+	jbookCreateCsvStream(data, userId) {
+		try {
+			const stringifier = this.csvStringify({ delimiter: ',' });
+			stringifier.on('error', (err) => {
+				this.logger.error(err.message, 'NL71UTC', userId);
+				throw new Error(err);
+			});
+			this.jbookWriteCSV(stringifier, data);
+			stringifier.end();
+			return stringifier;
+		} catch (e) {
+			this.logger.error(e.message, '79XRPNA', userId);
+			throw e;
+		}
+	}
+
 	writeCsvData(stringifier, data) {
 		if (data && data.docs && data.docs.length > 0 && data.docs[0].esIndex === 'gc_eda') {
 			const header = ['ID', 'Filename', 'Title', 'Document Type', 'Page Count', 'Match Count'];
@@ -89,8 +105,27 @@ class Reports {
 		}
 	}
 
+	jbookWriteCSV(stringifier, data) {
+		if (data && data.docs && data.docs.length > 0) {
+			const sample = data.docs[0].dataValues ?? data.docs[0];
+			const header = Object.keys(sample).map((field) =>
+				field
+					.split('_')
+					.map((word) => word[0].toUpperCase() + word.slice(1))
+					.join(' ')
+			);
+			stringifier.write(header);
+			data.docs.forEach((doc) => {
+				const docData = doc.dataValues ?? doc;
+				const item = Object.values(docData);
+				stringifier.write(item);
+			});
+		}
+	}
+
 	createPdfBuffer(data, userId, settings, callback = () => {}) {
 		try {
+			console.log('fonts');
 			const fonts = {
 				Roboto: {
 					normal: path.join(__dirname, '../../static/fonts/Roboto/Roboto-Regular.ttf'),
@@ -167,7 +202,8 @@ class Reports {
 	}
 
 	constructCoverPage(data, settings) {
-		const filters = Object.keys(settings.orgFilter);
+		const filters =
+			settings.orgFilter !== undefined ? Object.keys(settings.orgFilter) : settings.orfFilterString ?? [];
 		const orgFilter = filters.filter(function (key) {
 			return settings.orgFilter[key];
 		});
@@ -371,6 +407,7 @@ class Reports {
 		const date = timeZone ? moment.tz(timeZone) : moment();
 		const dateString = `${date.format('MM/DD/YYYY')}`;
 		const img = path.resolve(__dirname, './ProfilePagePDFImages/JAIC_blk.png');
+		let currentYear = new Date().getFullYear();
 
 		// Define base document
 		let doc = {
@@ -379,19 +416,7 @@ class Reports {
 				return {
 					stack: [
 						{
-							image: img,
-							width: 50,
-							absolutePosition: { x: 30, y: 10 },
-						},
-						{
-							text: 'Joint Artificial Intelligence Center',
-							alignment: 'center',
-							marginTop: 15,
-							marginBottom: 5,
-							fontSize: 11,
-						},
-						{
-							text: 'Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) 2022',
+							text: `Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
 							alignment: 'center',
 							marginBottom: 5,
 							fontSize: 11,
@@ -442,11 +467,6 @@ class Reports {
 								widths: ['*', 120, '*', 120, 130],
 								body: [
 									[
-										{
-											image: img,
-											width: 50,
-											marginLeft: 30,
-										},
 										{
 											text: 'Go To: R&D Activities',
 											linkToDestination: 'rdActivities',
@@ -590,7 +610,7 @@ class Reports {
 			const rdocContent = [];
 
 			for (const docData of fullData) {
-				switch (docData.revBudgetType) {
+				switch (docData.budgetType) {
 					case 'pdoc':
 						procToc[1].table.body.push(
 							await this.constructPdocContent(docData, pdocContent, userId, showPOC)
@@ -901,6 +921,8 @@ class Reports {
 			} else {
 				tmpJCAData.push('N/A');
 			}
+			let currentYear = new Date().getFullYear();
+
 			rdocContent.push({
 				pageBreak: 'after',
 				style: 'table',
@@ -918,14 +940,39 @@ class Reports {
 						[
 							{
 								stack: [
-									{ text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5 },
-									{ text: 'FY21 (previous year):', marginBottom: 5 },
-									{ text: 'FY22:', marginBottom: 5 },
-									{ text: 'FY23:', marginBottom: 5 },
-									{ text: 'FY24:', marginBottom: 5 },
-									{ text: 'FY25:', marginBottom: 5 },
+									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
+									{
+										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
+											docData.priorYearAmount
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${currentYear.toString().substring(2)}: ${
+											docData.currentYearAmount
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by2_d
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by3_d
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by4_d
+										} M`,
+										marginBottom: 5,
+									},
 									{ text: 'To Complete:', marginBottom: 5 },
-									{ text: 'Total Cost:', marginBottom: 5 },
+									{ text: `Total Cost: ${docData.totalCost}`, marginBottom: 5 },
 								],
 							},
 							{
@@ -1001,8 +1048,18 @@ class Reports {
 			partnerList = [...new Set(partnerList)];
 
 			let accomplishments = [];
-			if (docData.accomp && docData.accomp !== null && docData.accomp.length > 0) {
-				accomplishments = docData.accomp;
+			if (docData.r_2a_accomp_pp_n && docData.r_2a_accomp_pp_n !== null && docData.r_2a_accomp_pp_n.length > 0) {
+				accomplishments = docData.r_2a_accomp_pp_n;
+			}
+
+			let accomplishmentTexts = [];
+			for (let accomp of accomplishments) {
+				if (accomp.PlanPrgrm_Fund_BY1Base_Text_t) {
+					accomplishmentTexts.push({ text: accomp.PlanPrgrm_Fund_BY1Base_Text_t, margin: [2, 5, 0, 5] });
+				}
+				if (accomp.PlanPrgrm_Fund_CY_Text_t) {
+					accomplishmentTexts.push({ text: accomp.PlanPrgrm_Fund_CY_Text_t, margin: [2, 5, 0, 5] });
+				}
 			}
 
 			rdocContent.push({
@@ -1027,11 +1084,7 @@ class Reports {
 								],
 							},
 							{
-								stack: [
-									...accomplishments.map((accompText) => {
-										return { text: accompText, margin: [2, 5, 0, 5] };
-									}),
-								],
+								stack: accomplishmentTexts,
 							},
 						],
 					],
@@ -1334,14 +1387,39 @@ class Reports {
 						[
 							{
 								stack: [
-									{ text: 'Total ____ % or $ attributed to AI: ', marginBottom: 5 },
-									{ text: 'FY21 (previous year):', marginBottom: 5 },
-									{ text: 'FY22:', marginBottom: 5 },
-									{ text: 'FY23:', marginBottom: 5 },
-									{ text: 'FY24:', marginBottom: 5 },
-									{ text: 'FY25:', marginBottom: 5 },
+									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
+									{
+										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
+											docData.priorYearAmount
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${currentYear.toString().substring(2)}: ${
+											docData.currentYearAmount
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by2_d
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by3_d
+										} M`,
+										marginBottom: 5,
+									},
+									{
+										text: `FY${(currentYear + 1).toString().substring(2)}: ${
+											docData.proj_fund_by4_d
+										} M`,
+										marginBottom: 5,
+									},
 									{ text: 'To Complete:', marginBottom: 5 },
-									{ text: 'Total Cost:', marginBottom: 5 },
+									{ text: `Total Cost: ${docData.totalCost}`, marginBottom: 5 },
 								],
 							},
 							{

@@ -6,10 +6,11 @@ import _ from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from '../../common/gc-colors';
 import PortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
+import ExportIcon from '../../../images/icon/Export.svg';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
@@ -55,7 +56,7 @@ const useStyles = makeStyles({
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
-	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
+	const { context = {}, extraStyle = {}, gameChangerAPI, searchHandler } = props;
 
 	const { state, dispatch } = context;
 	const {
@@ -71,6 +72,7 @@ const JbookViewHeaderHandler = (props) => {
 		currentOrder,
 		sortSelected,
 		searchText,
+		exportLoading,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -343,6 +345,33 @@ const JbookViewHeaderHandler = (props) => {
 					<GCTooltip title="Share" placement="bottom" arrow>
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCTooltip>
+				</GCButton>
+
+				<GCButton
+					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
+					onClick={async () => {
+						try {
+							setState(dispatch, {
+								exportDialogVisible: true,
+							});
+						} catch (e) {
+							console.log(e);
+						}
+					}}
+				>
+					{!exportLoading ? (
+						<img
+							src={ExportIcon}
+							style={{
+								margin: '0 0 3px 3px',
+								width: 15,
+							}}
+							alt="export"
+						/>
+					) : (
+						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
+					)}
+					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
 			</div>
 		</div>
