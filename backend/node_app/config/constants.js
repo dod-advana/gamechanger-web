@@ -187,7 +187,7 @@ module.exports = Object.freeze({
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
 		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
 		QLIK_EXCLUDE_CUST_PROP_VAL: process.env.QLIK_EXCLUDE_CUST_PROP_VAL || 'ExcludeSearch',
-		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain'
+		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain',
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,

@@ -127,15 +127,14 @@ class ElasticSearchController {
 					thumbnail_s: app['thumbnail'],
 					dynamicColor_s: app['dynamicColor'],
 					appCustomProperties_s: app['customProperties'],
-					businessDomains_s: app['businessDomains']
+					businessDomains_s: app['businessDomains'],
 				};
 			});
 
 			// Insert / Update Qlik Documents
 			await this.esSearchLib.bulkInsert(clientObj.esClientName, clientObj.esIndex, dataset, 'QlikAppCaching');
 
-			this.logger.info('Finished Storing Full Qlik Apps in ES')
-
+			this.logger.info('Finished Storing Full Qlik Apps in ES');
 		} catch (e) {
 			this.logger.error(e, 'GTT7PKO', 'Qlik ES Store Function');
 		}
