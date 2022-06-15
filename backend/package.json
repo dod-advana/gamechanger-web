@@ -6,6 +6,7 @@
 	"scripts": {
 		"preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
 		"test": "jest --coverage --coverageDirectory=cobertura/coverage/jest --detectOpenHandles --forceExit",
+		"test:gitlab": "jest --coverage --ci --reporters=default --reporters=jest-junit",
 		"watchtest": "jest --watch --coverage=false --forceExit --onlyChanged",
 		"prestart": "npm install",
 		"start": "node index.js",
@@ -16,7 +17,7 @@
 		"gc:migrate:undo": "sequelize --options-path ./.sequelize-game_changer --env game_changer db:migrate:undo",
 		"orch:migrate": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate",
 		"orch:migrate:undo": "sequelize --options-path ./.sequelize-gc-orchestration --env gc-orchestration db:migrate:undo",
-		"eslint": "eslint --fix --debug -c .eslintrc.json ./node_app/"
+		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./node_app/"
 	},
 	"author": "",
 	"license": "ISC",
@@ -24,7 +25,8 @@
 		"node-forge": "1.2.1",
 		"types/node": "12.20.13",
 		"ansi-regex": "5.0.1",
-		"async": "2.6.4"
+		"async": "2.6.4",
+		"moment": "2.29.2"
 	},
 	"dependencies": {
 		"@dod-advana/advana-api-auth": "0.0.45",
@@ -48,7 +50,7 @@
 		"jsonwebtoken": "8.5.1",
 		"lodash": "4.17.21",
 		"lunr": "2.3.9",
-		"moment": "2.20.1",
+		"moment": "2.29.2",
 		"moment-timezone": "0.5.31",
 		"mysql": "2.18.1",
 		"neo4j-driver": "4.2.3",
@@ -77,6 +79,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"jest": "^25.1.0",
+		"jest-junit": "^13.2.0",
 		"prettier": "^2.6.1",
 		"sonarqube-scanner": "^2.5.0"
 	},
@@ -85,7 +88,12 @@
 		"coverageReporters": [
 			"text",
 			"cobertura",
-			"lcov"
+			"lcov",
+			"text-summary"
+		],
+		"reporters": [
+			"default",
+			"jest-junit"
 		],
 		"testTimeout": 10000
 	}
