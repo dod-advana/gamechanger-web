@@ -184,23 +184,18 @@ const resetAdvancedSettings = (dispatch) => {
 };
 
 const renderStats = (contractTotals) => {
-	let data = Object.keys(contractTotals).map((key) => {
+	contractTotals.sort((a, b) => b.sum_agg.value - a.sum_agg.value);
+	let data = contractTotals.map((item) => {
 		return {
-			Key: key,
+			Key: item.key,
 			Value:
-				contractTotals[key] > 1000
-					? (contractTotals[key] / 1000).toFixed(2) + ' B'
-					: parseFloat(contractTotals[key]).toFixed(2) + ' M',
+				item.sum_agg.value > 1000
+					? (item.sum_agg.value / 1000).toFixed(2) + ' B'
+					: parseFloat(item.sum_agg.value).toFixed(2) + ' M',
 		};
 	});
-	data = data.filter((row) => row.Key !== '');
-	data.sort((a, b) => {
-		if (a.Key === 'Total Obligated Amt.') {
-			return 1;
-		} else {
-			return a.Key > b.Key ? 1 : -1;
-		}
-	});
+
+	data = data.filter((item) => item.Value !== '0.00 M');
 
 	return (
 		<SimpleTable
@@ -213,6 +208,7 @@ const renderStats = (contractTotals) => {
 			colWidth={{
 				whiteSpace: 'nowrap',
 				maxWidth: '200px',
+				minWidth: '100px',
 			}}
 			disableWrap={true}
 			hideHeader={true}
@@ -487,17 +483,17 @@ const getSearchMatrixItems = (props) => {
 			<GCAccordion
 				contentPadding={0}
 				expanded={true}
-				header={<b>ESTIMATED BUDGET TOTALS</b>}
+				header={<b>Search Results: Budget Request Totals by Org</b>}
 				headerBackground={'rgb(28, 45, 101)'}
 				headerTextColor={'white'}
 				headerTextWeight={'normal'}
 			>
-				{state.statsLoading && (
+				{state.runningSearch && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
-				{!state.statsLoading && (
+				{!state.runningSearch && (
 					<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 				)}
 			</GCAccordion>
@@ -519,7 +515,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={min}
 					/>
-					$M
+					M
 				</div>
 			</div>
 			<div style={{ display: 'flex', margin: '10px 0' }}>
@@ -532,7 +528,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={max}
 					/>
-					$M
+					M
 				</div>
 			</div>
 		</div>
