@@ -16,9 +16,16 @@ import {
 	PAGE_DISPLAYED,
 	scrollToContentTop,
 	StyledCenterContainer,
+	getOrgToOrgQuery,
+	getTypeQuery,
 } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
+import {
+	getNonMainPageOuterContainer,
+	getSearchObjectFromString,
+	getUserData,
+	setState,
+} from '../../../utils/sharedFunctions';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
@@ -30,6 +37,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
+import ExportResultsDialog from '../../export/ExportResultsDialog';
 
 const _ = require('lodash');
 
@@ -105,15 +113,54 @@ const renderHideTabs = (props) => {
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, getViewPanels, pageLoaded } = props;
+	const { state, dispatch, getViewPanels, pageLoaded, setCurrentTime, searchHandler } = props;
 
-	const { loading, rawSearchResults, viewNames, currentViewName } = state;
+	const {
+		exportDialogVisible,
+		searchSettings,
+		prevSearchText,
+		selectedDocuments,
+		loading,
+		rawSearchResults,
+		viewNames,
+		edaSearchSettings,
+		currentSort,
+		currentOrder,
+		currentViewName,
+	} = state;
+	const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
 
 	const noResults = Boolean(!rawSearchResults || rawSearchResults?.length === 0);
 	const hideSearchResults = noResults && loading;
+	const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 	return (
 		<>
+			{exportDialogVisible && (
+				<ExportResultsDialog
+					state={state}
+					dispatch={dispatch}
+					searchHandler={searchHandler}
+					open={exportDialogVisible}
+					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
+					searchObject={getSearchObjectFromString(prevSearchText)}
+					setCurrentTime={setCurrentTime}
+					selectedDocuments={selectedDocuments}
+					isSelectedDocs={isSelectedDocs}
+					orgFilterString={getOrgToOrgQuery(allOrgsSelected, orgFilter)}
+					typeFilterString={getTypeQuery(allTypesSelected, typeFilter)}
+					orgFilter={orgFilter}
+					typeFilter={typeFilter}
+					getUserData={() => getUserData(dispatch)}
+					isClone={true}
+					cloneData={state.cloneData}
+					searchType={searchType}
+					searchFields={searchFields}
+					edaSearchSettings={edaSearchSettings}
+					sort={currentSort}
+					order={currentOrder}
+				/>
+			)}
 			<FeedbackModal state={state} dispatch={dispatch} />
 			<JBookWelcome dispatch={dispatch} state={state} />
 			{loading &&
@@ -449,7 +496,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -464,7 +511,8 @@ const JBookMainViewHandler = (props) => {
 			return getNonMainPageOuterContainer(
 				getUserProfilePage(displayUserRelatedItems(), gameChangerUserAPI),
 				state,
-				dispatch
+				dispatch,
+				searchHandler
 			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
@@ -477,6 +525,7 @@ const JBookMainViewHandler = (props) => {
 				renderHideTabs,
 				pageLoaded,
 				getViewPanels,
+				searchHandler,
 			});
 	}
 };
