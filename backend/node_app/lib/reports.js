@@ -125,7 +125,6 @@ class Reports {
 
 	createPdfBuffer(data, userId, settings, callback = () => {}) {
 		try {
-			console.log('fonts');
 			const fonts = {
 				Roboto: {
 					normal: path.join(__dirname, '../../static/fonts/Roboto/Roboto-Regular.ttf'),
