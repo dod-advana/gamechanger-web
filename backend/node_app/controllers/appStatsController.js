@@ -336,7 +336,7 @@ class AppStatsController {
 				idvisit,
 				searchtime desc
 			`,
-				[cloneName+'_combined', cloneName, startDate, endDate],
+				[cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -374,7 +374,8 @@ class AppStatsController {
 					} else {
 						resolve(results);
 					}
-			});
+				}
+			);
 		});
 	}
 
@@ -974,7 +975,7 @@ class AppStatsController {
 					AND server_time <= ?
 				group by
 					a.idvisitor;`,
-				[cloneName+'_combined', cloneName, cloneName+'_combined', cloneName, startDate, endDate],
+				[cloneName + '_combined', cloneName, cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
@@ -1039,7 +1040,7 @@ class AppStatsController {
 					AND server_time >= ?
 					AND server_time <= ?
 				`,
-				[cloneName+'_combined', cloneName, startDate, endDate],
+				[cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, '1FGM91B');
@@ -1120,7 +1121,7 @@ class AppStatsController {
 	}
 
 	/**
-	 * This method gets the user aggregation table for the frontend 
+	 * This method gets the user aggregation table for the frontend
 	 * by a user
 	 * @param {*} opts
 	 * @param {*} connection
@@ -1155,27 +1156,27 @@ class AppStatsController {
 		console.log(searches);
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
-				if(documentMap[vistitIDMap[search.idvisitor]]){
+				if (documentMap[vistitIDMap[search.idvisitor]]) {
 					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
 						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
 					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
 						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
 					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
 						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
 					}
-				}
-				else{
-					documentMap[vistitIDMap[search.idvisitor]]= {
+				} else {
+					documentMap[vistitIDMap[search.idvisitor]] = {
 						user_id: vistitIDMap[search.idvisitor],
-						'docs_opened':search.docs_opened,
-						'searches_made':search.searches_made,
-						'last_search':search.last_search,
-						'last_search_formatted':search.last_search_formatted,
-						'Favorite':[],
-						'ExportDocument':[],
-						'opened':[]
-					}
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
 				}
 			}
 		}
@@ -1205,15 +1206,14 @@ class AppStatsController {
 				}
 			}
 		}
-		return { users: Object.values(documentMap)};
+		return { users: Object.values(documentMap) };
 	}
-
 
 	/**
 	 * This method gets graph data for searches by month
 	 * @returns an array of data from Matomo.
 	 */
-	async getSearchGraphData( cloneName, connection) {
+	async getSearchGraphData(cloneName, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -1227,7 +1227,7 @@ class AppStatsController {
 				group by
 					DATE_FORMAT(server_time, '%Y-%m')
 				`,
-				[cloneName+'_combined', cloneName],
+				[cloneName + '_combined', cloneName],
 				(error, results, fields) => {
 					if (error) {
 						this.logger.error(error, '1FGM91B');
@@ -1243,7 +1243,7 @@ class AppStatsController {
 	 * This method gets graph data for users by month
 	 * @returns an array of data from Matomo.
 	 */
-	async getUserGraphData( cloneID, connection) {
+	async getUserGraphData(cloneID, connection) {
 		return new Promise((resolve, reject) => {
 			connection.query(
 				`
@@ -1277,7 +1277,7 @@ class AppStatsController {
 	 * @param {*} req
 	 * @param {*} res
 	 */
-	 async getDashboardData(req, res) {
+	async getDashboardData(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
 		let connection;
@@ -1289,14 +1289,14 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const cards = await this.getCardSearchAggregationQuery(startDate,endDate,cloneName,connection);
-			const userCards = await this.getCardUsersAggregationQuery(startDate,endDate,cloneID,connection);
+			const cards = await this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
+			const userCards = await this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 
-			const  searchBar = await this.getSearchGraphData(cloneName, connection);
+			const searchBar = await this.getSearchGraphData(cloneName, connection);
 			const userBar = await this.getUserGraphData(cloneID, connection);
-			
-			res.status(200).send({ cards:cards[0], userBar: userBar, searchBar:searchBar });
+
+			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
 		} catch (err) {
 			this.logger.error(err, '1FGM91B', userId);
 			res.status(500).send(err);
