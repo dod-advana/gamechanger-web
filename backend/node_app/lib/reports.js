@@ -43,22 +43,6 @@ class Reports {
 		}
 	}
 
-	jbookCreateCsvStream(data, userId) {
-		try {
-			const stringifier = this.csvStringify({ delimiter: ',' });
-			stringifier.on('error', (err) => {
-				this.logger.error(err.message, 'NL71UTC', userId);
-				throw new Error(err);
-			});
-			this.jbookWriteCSV(stringifier, data);
-			stringifier.end();
-			return stringifier;
-		} catch (e) {
-			this.logger.error(e.message, '79XRPNA', userId);
-			throw e;
-		}
-	}
-
 	writeCsvData(stringifier, data) {
 		if (data && data.docs && data.docs.length > 0 && data.docs[0].esIndex === 'gc_eda') {
 			const header = ['ID', 'Filename', 'Title', 'Document Type', 'Page Count', 'Match Count'];
@@ -105,19 +89,69 @@ class Reports {
 		}
 	}
 
+	jbookCreateCsvStream(data, userId) {
+		try {
+			const stringifier = this.csvStringify({ delimiter: ',' });
+			stringifier.on('error', (err) => {
+				this.logger.error(err.message, 'NL71UTC', userId);
+				throw new Error(err);
+			});
+			this.jbookWriteCSV(stringifier, data);
+			stringifier.end();
+			return stringifier;
+		} catch (e) {
+			this.logger.error(e.message, '79XRPNA', userId);
+			throw e;
+		}
+	}
+
 	jbookWriteCSV(stringifier, data) {
 		if (data && data.docs && data.docs.length > 0) {
 			const sample = data.docs[0].dataValues ?? data.docs[0];
-			const header = Object.keys(sample).map((field) =>
-				field
-					.split('_')
-					.map((word) => word[0].toUpperCase() + word.slice(1))
-					.join(' ')
-			);
+			const header = [
+				'Budget Year',
+				'PL Title',
+				'Service / Agency',
+				'Main Account',
+				'Budget Activity',
+				'Budget Sub Activity',
+				'Program Element / BLI',
+				'Project #',
+				'BY1 Funding',
+				'Total Funding',
+				'Primary Reviewer',
+				'Service Reviewer',
+				'POC Reviewer',
+				'Review Status',
+				'Has Keywords',
+				'Labels',
+				'Source',
+				'Portfolio',
+			];
 			stringifier.write(header);
+
 			data.docs.forEach((doc) => {
 				const docData = doc.dataValues ?? doc;
-				const item = Object.values(docData);
+				const item = [
+					docData.budgetYear,
+					docData.budgetType,
+					docData.serviceAgency,
+					docData.appropriationNumber,
+					docData.budgetActivityNumber,
+					docData.budgetActivityTitle ?? docData['P40-13_BSA_Title_t'],
+					docData.programElement,
+					docData.projectNum,
+					docData.currentYearAmount,
+					docData.totalCost,
+					docData.primary_reviewer_s,
+					docData.service_reviewer_s,
+					docData.service_poc_name_s,
+					docData.review_status_s,
+					docData.hasKeywords,
+					docData.primary_class_label_s,
+					docData.source_tag_s,
+					docData.portfolio_name_s,
+				];
 				stringifier.write(item);
 			});
 		}
@@ -741,7 +775,8 @@ class Reports {
 					  }`
 					: 'N/A';
 
-			const referenceName = `rdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.programElement}#${docData.serviceAgency}#${docData.appropriationNumber}#${docData.projectNum}`;
+			// const referenceName = `rdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.programElement}#${docData.serviceAgency}#${docData.appropriationNumber}#${docData.projectNum}`;
+			const referenceName = docData.id;
 
 			// General Data
 			rdocContent.push(
@@ -930,32 +965,34 @@ class Reports {
 									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
 									{
 										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
-											docData.priorYearAmount
-										} M`,
+											docData.priorYearAmount !== undefined ? docData.priorYearAmount + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${currentYear.toString().substring(2)}: ${
-											docData.currentYearAmount
-										} M`,
+											docData.currentYearAmount !== undefined
+												? docData.currentYearAmount + ' M'
+												: ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by2_d
-										} M`,
+											docData.proj_fund_by2_d !== undefined ? docData.proj_fund_by2_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by3_d
-										} M`,
+											docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by4_d
-										} M`,
+											docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{ text: 'To Complete:', marginBottom: 5 },
@@ -1194,8 +1231,8 @@ class Reports {
 					  }`
 					: 'N/A';
 
-			const referenceName = `pdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.budgetLineItem}#${docData.serviceAgency}#${docData.appropriationNumber}`;
-
+			// const referenceName = `pdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.budgetLineItem}#${docData.serviceAgency}#${docData.appropriationNumber}`;
+			const referenceName = docData.id;
 			// General Data
 			pdocContent.push(
 				{
@@ -1357,6 +1394,9 @@ class Reports {
 			} else {
 				tmpJCAData.push('N/A');
 			}
+
+			let currentYear = new Date().getFullYear();
+
 			pdocContent.push({
 				pageBreak: 'after',
 				style: 'table',
@@ -1377,32 +1417,34 @@ class Reports {
 									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
 									{
 										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
-											docData.priorYearAmount
-										} M`,
+											docData.priorYearAmount !== undefined ? docData.priorYearAmount + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${currentYear.toString().substring(2)}: ${
-											docData.currentYearAmount
-										} M`,
+											docData.currentYearAmount !== undefined
+												? docData.currentYearAmount + ' M'
+												: ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by2_d
-										} M`,
+											docData.proj_fund_by2_d !== undefined ? docData.proj_fund_by2_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by3_d
-										} M`,
+											docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{
 										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by4_d
-										} M`,
+											docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
+										}`,
 										marginBottom: 5,
 									},
 									{ text: 'To Complete:', marginBottom: 5 },

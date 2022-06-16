@@ -102,8 +102,24 @@ class JBookExportHandler extends ExportHandler {
 						if (doc.review_n) {
 							doc.review_n.forEach((rev) => {
 								if (rev.portfolio_name_s === portfolio) {
-									reviews.push(rev);
+									let combined = { ...doc, ...rev };
+									reviews.push(combined);
 								}
+							});
+						} else {
+							reviews.push({ ...doc });
+						}
+					});
+					const csvStream = await this.reports.jbookCreateCsvStream({ docs: reviews }, userId);
+					res.status(200);
+					csvStream.pipe(res);
+				} else if (format === 'csv-reviews') {
+					let reviews = [];
+					searchResults.docs.forEach((doc) => {
+						if (doc.review_n) {
+							doc.review_n.forEach((rev) => {
+								let combined = { ...doc, ...rev };
+								reviews.push(combined);
 							});
 						}
 					});
