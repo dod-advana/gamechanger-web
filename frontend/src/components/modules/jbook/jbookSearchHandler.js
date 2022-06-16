@@ -366,6 +366,7 @@ const JBookSearchHandler = {
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+		searchSettings.selectedPortfolio = state.selectedPortfolio;
 		const sortDesc = state.currentOrder === 'desc';
 
 		switch (state.currentSort) {
