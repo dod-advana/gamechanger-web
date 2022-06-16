@@ -114,6 +114,7 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, use
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
+	console.log(customOptions);
 	const options = customOptions || state.defaultOptions[optionType];
 
 	return (
@@ -249,7 +250,17 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
+					{renderFilterCheckboxes(
+						state,
+						dispatch,
+						classes,
+						'budgetType',
+						'budget type',
+						false,
+						selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
+							: undefined
+					)}
 				</GCAccordion>
 			</div>
 

@@ -26,6 +26,7 @@ const PORTFOLIO_FILTERS = [
 	'sourceTag',
 	'hasKeyword',
 	'primaryClassLabel',
+	'budgetType',
 ];
 
 const useStyles = makeStyles({
