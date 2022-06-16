@@ -18,6 +18,17 @@ const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
+const PORTFOLIO_FILTERS = [
+	'reviewStatus',
+	'primaryReviewStatus',
+	'primaryReviewer',
+	'serviceReviewer',
+	'pocReviewer',
+	'sourceTag',
+	'hasKeyword',
+	'primaryClassLabel',
+];
+
 const useStyles = makeStyles({
 	root: {
 		paddingTop: '16px',
@@ -63,6 +74,8 @@ const JbookViewHeaderHandler = (props) => {
 		cloneData,
 		componentStepNumbers,
 		currentViewName,
+		jbookSearchSettings,
+		defaultOptions,
 		listView,
 		viewNames,
 		projectData,
@@ -76,7 +89,6 @@ const JbookViewHeaderHandler = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
 	const [portfolios, setPortfolios] = useState([]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
@@ -87,6 +99,21 @@ const JbookViewHeaderHandler = (props) => {
 			setState(dispatch, { currentSort: 'Budget Year' });
 		}
 	}, [dispatch, currentSort, searchText, sortSelected]);
+
+	//If portfolio filters are present when selecting a different portfolio, resets those filters and runs updates search
+	useEffect(() => {
+		let search = false;
+		PORTFOLIO_FILTERS.forEach((filter) => {
+			if (jbookSearchSettings[filter] !== defaultOptions[filter]) {
+				search = true;
+			}
+		});
+		if (search) {
+			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+			setState(dispatch, { runSearch: true });
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [state.selectedPortfolio, dispatch]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -193,9 +220,8 @@ const JbookViewHeaderHandler = (props) => {
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
 				<PortfolioSelector
-					setPortfolio={setSelectedPortfolio}
 					portfolios={portfolios}
-					selectedPortfolio={selectedPortfolio}
+					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
 				/>

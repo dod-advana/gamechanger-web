@@ -41,6 +41,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		programElement: '',
@@ -112,6 +113,9 @@ const initState = {
 
 		reviewStatusSpecificSelected: false,
 		reviewStatusAllSelected: true,
+
+		primaryReviewStatusSpecificSelected: false,
+		primaryReviewStatusAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -123,6 +127,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
@@ -438,6 +443,43 @@ function reducer(state, action) {
 			return {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
+			};
+		case 'RESET_PORTFOLIO_FILTERS':
+			return {
+				...state,
+				jbookSearchSettings: {
+					...state.jbookSearchSettings,
+
+					primaryReviewerSpecificSelected: false,
+					primaryReviewerAllSelected: true,
+
+					serviceReviewerSpecificSelected: false,
+					serviceReviewerAllSelected: true,
+
+					hasKeywordsSpecificSelected: false,
+					hasKeywordsAllSelected: true,
+
+					primaryClassLabelSpecificSelected: false,
+					primaryClassLabelAllSelected: true,
+
+					sourceTagSpecificSelected: false,
+					sourceTagAllSelected: true,
+
+					reviewStatusSpecificSelected: false,
+					reviewStatusAllSelected: true,
+
+					primaryReviewStatusSpecificSelected: false,
+					primaryReviewStatusAllSelected: true,
+
+					reviewStatus: state.defaultOptions.reviewStatus,
+					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
+					primaryReviewer: state.defaultOptions.primaryReviewer,
+					serviceReviewer: state.defaultOptions.serviceReviewer,
+					pocReviewer: state.defaultOptions.pocReviewer,
+					sourceTag: state.defaultOptions.sourceTag,
+					hasKeyword: state.defaultOptions.hasKeyword,
+					primaryClassLabel: state.defaultOptions.primaryClassLabel,
+				},
 			};
 		default:
 			return state;
