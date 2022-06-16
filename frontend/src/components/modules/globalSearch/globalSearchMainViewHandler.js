@@ -117,7 +117,7 @@ const getMainView = (props) => {
 		dataSourcesTotalCount,
 		databasesTotalCount,
 		modelsTotalCount,
-		pageDisplayed,
+		searchText,
 	} = state;
 
 	const noResults = Boolean(
@@ -127,7 +127,9 @@ const getMainView = (props) => {
 			!databasesTotalCount &&
 			!modelsTotalCount
 	);
-	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
+
+	const hideSearchResults = noResults && !loading && !searchText;
+	const noSearchResults = noResults && !loading && searchText;
 
 	return (
 		<div style={styles.tabButtonContainer}>
@@ -138,7 +140,18 @@ const getMainView = (props) => {
 						<StyledCenterContainer showSideFilters={false}>
 							<div className={'right-container'}>
 								{hideSearchResults && renderHideTabs(props)}
-								{!hideSearchResults &&
+								{noSearchResults && (
+									<>
+										<div style={{ margin: '40px auto', width: '67%' }}>
+											<Typography>
+												No results found for: <strong>{searchText}</strong>. Try refining your
+												search terms.
+											</Typography>
+										</div>
+										{renderHideTabs(props)}
+									</>
+								)}
+								{!(hideSearchResults || noSearchResults) &&
 									pageLoaded &&
 									(applicationsTotalCount > 0 ||
 									dashboardsTotalCount > 0 ||
