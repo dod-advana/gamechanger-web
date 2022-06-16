@@ -17,7 +17,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
+import { getClassLabel, getTotalCost, formatNum } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
@@ -32,18 +32,6 @@ const boldKeys = (data) => {
 		pair.Key = <strong>{pair.Key}</strong>;
 		return pair;
 	});
-};
-
-const formatNum = (num) => {
-	const parsed = parseInt(num);
-	if (parsed > 999) {
-		return `${(parsed / 1000).toFixed(2)} $B`;
-	}
-
-	if (parsed > 999999) {
-		return `${(parsed / 1000000).toFixed(2)} $T`;
-	}
-	return `${parsed} $M`;
 };
 
 const SideNav = (props) => {
@@ -617,7 +605,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 		{
@@ -631,7 +619,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 	];
