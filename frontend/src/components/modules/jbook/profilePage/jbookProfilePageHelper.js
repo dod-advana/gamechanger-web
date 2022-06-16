@@ -370,8 +370,6 @@ const Contracts = (props) => {
 	const { contracts } = props;
 	const contractTables = [];
 
-	console.log(contracts);
-
 	for (const contract of contracts) {
 		const contractCols = [
 			{
@@ -410,8 +408,8 @@ const Contracts = (props) => {
 				disableWrap={true}
 				title={
 					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-						<div>Vendor: {contract.vendorName}</div>
-						<div>Fiscal Year: {contract.fiscalYear ?? 'N/A'}</div>
+						<div>Vendor: {contract.vendor_name_s}</div>
+						<div>Fiscal Year: {contract.fiscal_year_s ?? 'N/A'}</div>
 					</div>
 				}
 				headerExtraStyle={{
