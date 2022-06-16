@@ -643,7 +643,7 @@ class JBookSearchHandler extends SearchHandler {
 
 	async getExcelDataForReviewStatus(req, userId, res) {
 		try {
-			const { test = false, portfolio_name } = req;
+			const { test = false } = req;
 			const workbook = new ExcelJS.Workbook();
 
 			const sheet = workbook.addWorksheet('Review Status', { properties: { tabColor: { argb: 'FFC0000' } } });
@@ -822,9 +822,25 @@ class JBookSearchHandler extends SearchHandler {
 				{
 					body: {
 						offset: 0,
+						limit: 10000,
 						searchText: '',
 						jbookSearchSettings: {
 							budgetYear: ['2022', '2021'],
+							sort: [
+								{
+									id: 'budgetYear',
+									desc: true,
+								},
+							],
+							budgetTypeAllSelected: true,
+							budgetYearAllSelected: true,
+							serviceAgencyAllSelected: true,
+							primaryReviewerAllSelected: true,
+							serviceReviewerAllSelected: true,
+							hasKeywordsAllSelected: true,
+							primaryClassLabelAllSelected: true,
+							sourceTagAllSelected: true,
+							reviewStatusAllSelected: true,
 						},
 						exportSearch: false,
 					},
@@ -1096,18 +1112,14 @@ class JBookSearchHandler extends SearchHandler {
 						serviceReviewStatus: 'Needs Review',
 						pocReviewStatus: 'Needs Review',
 					};
-					if (Array.isArray(result.review_n)) {
+					if (Array.isArray(result.review_n) && result.review_n.length > 0) {
 						result.review_n.forEach((review) => {
-							if (review['portfolio_name'] === portfolio_name) {
+							if (review['portfolio_name_s'] === 'AI Inventory') {
 								review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
 								review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
 								review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
 							}
 						});
-					} else {
-						review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
-						review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
-						review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
 					}
 
 					if (review.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
