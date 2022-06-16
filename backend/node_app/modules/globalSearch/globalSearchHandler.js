@@ -320,7 +320,7 @@ class GlobalSearchHandler extends SearchHandler {
 		fullUserData,
 		userId
 	) {
-		const attributeTypes = attributeIdMap; // await this.dcUtils.getAttributeTypes();
+		const attributeTypes = attributeIdMap;
 
 		try {
 			data.results.forEach((result) => {
@@ -329,22 +329,28 @@ class GlobalSearchHandler extends SearchHandler {
 				result.attributes = combinedAttributeResults[result.resource.id];
 
 				Object.keys(result.resource).forEach((resourceKey) => {
-					if (resourceKey === 'createdOn' || resourceKey === 'lastModifiedOn') {
-						const newDate = new Date(result.resource[resourceKey]);
-						result.resource[resourceKey] = newDate.toLocaleString();
-					}
-
-					if (resourceKey === 'status' || resourceKey === 'type' || resourceKey === 'domain') {
-						result.resource[resourceKey] = result.resource[resourceKey]['name'];
-					}
-
-					if (resourceKey === 'createdBy' || resourceKey === 'lastModifiedBy') {
-						const tempUser = fullUserData[result.resource[resourceKey]];
-						result.resource[resourceKey] = {
-							firstName: tempUser['firstName'],
-							lastName: tempUser['lastName'],
-							emailAddress: tempUser['emailAddress'],
-						};
+					switch (resourceKey) {
+						case 'createdOn':
+						case 'lastModifiedOn':
+							const newDate = new Date(result.resource[resourceKey]);
+							result.resource[resourceKey] = newDate.toLocaleString();
+							break;
+						case 'status':
+						case 'type':
+						case 'domain':
+							result.resource[resourceKey] = result.resource[resourceKey]['name'];
+							break;
+						case 'createdBy':
+						case 'lastModifiedBy':
+							const tempUser = fullUserData[result.resource[resourceKey]];
+							result.resource[resourceKey] = {
+								firstName: tempUser['firstName'],
+								lastName: tempUser['lastName'],
+								emailAddress: tempUser['emailAddress'],
+							};
+							break;
+						default:
+							break;
 					}
 				});
 

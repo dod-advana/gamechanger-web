@@ -4,7 +4,7 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Typography, Grid, Card, CardContent } from '@material-ui/core';
+import { Select, MenuItem, Typography, Grid, Card, CardContent } from '@material-ui/core';
 import moment from 'moment';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
@@ -262,12 +262,13 @@ const documentUsageColumns = [
  * The query is handled in gamechanger-api.
  * @method getSearchPdfMapping
  */
-const getSearchPdfMapping = async (startDate, endDate, setMappingData) => {
+const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData) => {
 	try {
 		// daysBack, offset, filters, sorting, pageSize
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName,
 		};
 		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
 		setMappingData(data.data);
@@ -311,11 +312,12 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
-const getUserAggData = async (startDate, endDate, setUserAggData, setCardData) => {
+const getUserAggData = async (startDate, endDate, cloneName, setUserAggData, setCardData) => {
 	try {
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName,
 		};
 		const { data = {} } = await gameChangerAPI.getUserAggregations(params);
 		setUserAggData(data.users);
@@ -342,6 +344,8 @@ export default (props) => {
 	const [endDate, setEndDate] = useState(moment()._d);
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
+	const [cloneName, setCloneName] = useState('');
+	const [cloneList, setCloneList] = useState([]);
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -364,6 +368,21 @@ export default (props) => {
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
+
+	/**
+	 * This method queries postgres for clone data.
+	 * The query is handled in gamechanger-api.
+	 * @method getCloneData
+	 */
+	const getCloneData = async () => {
+		try {
+			const data = await gameChangerAPI.getClonesMatomo();
+			setCloneList(data.data);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
 	/**
 	 * When an input is deselected check if the inputs are valid and a
 	 * change was made. If so then query the data with new values.
@@ -379,15 +398,15 @@ export default (props) => {
 			setShouldUpdate(false);
 			switch (tabIndex) {
 				case 'pdfMapping':
-					getSearchPdfMapping(startDate, endDate, setMappingData);
-					getUserAggData(daysBack, setUserAggData);
+					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+					getUserAggData(startDate, endDate, cloneName, setUserAggData);
 					break;
 				case 'userTracking':
 					getDocumentData(daysBack, setDocumentData);
 					break;
 				default:
-					getSearchPdfMapping(startDate, endDate, setMappingData);
-					getUserAggData(daysBack, setUserAggData);
+					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+					getUserAggData(startDate, endDate, cloneName, setUserAggData);
 					getDocumentData(daysBack, setDocumentData);
 			}
 		}
@@ -515,25 +534,31 @@ export default (props) => {
 				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
 				setEndDate(moment()._d);
 				break;
+			default:
+				break;
 		}
 	};
 
 	useEffect(() => {
 		switch (tabIndex) {
 			case 'pdfMapping':
-				getSearchPdfMapping(startDate, endDate, setMappingData);
-				getUserAggData(startDate, endDate, setUserAggData, setCardData);
+				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
 				break;
 			case 'userTracking':
 				getDocumentData(daysBack, setDocumentData);
 				break;
 			default:
-				getSearchPdfMapping(startDate, endDate, setMappingData);
+				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
 				getFeedbackData(setFeedbackData);
-				getUserAggData(startDate, endDate, setUserAggData, setCardData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
 				getDocumentData(daysBack, setDocumentData);
 		}
-	}, [daysBack, tabIndex, startDate, endDate]);
+	}, [daysBack, tabIndex, startDate, endDate, cloneName]);
+
+	useEffect(() => {
+		getCloneData();
+	}, []);
 
 	return (
 		<div style={{ ...TabStyles.tabContainer, minHeight: 'calc(100vh-100px)' }}>
@@ -653,7 +678,31 @@ export default (props) => {
 										Last Month
 									</GCPrimaryButton>
 								</Grid>
-								<Grid item lg={4} xs={2}>
+								<Grid item lg={2} xs={2}>
+									<div style={{ width: '120px', display: 'inline-block' }}>Clones:</div>
+									<Select
+										value={cloneName}
+										onChange={(e) => setCloneName(e.target.value)}
+										name="labels"
+										style={{
+											fontSize: 'small',
+											minWidth: '200px',
+											margin: '10px',
+										}}
+									>
+										{cloneList.map((clone) => {
+											return (
+												<MenuItem
+													style={{ fontSize: 'small', display: 'flex' }}
+													value={clone.category_id}
+												>
+													{clone.name}
+												</MenuItem>
+											);
+										})}
+									</Select>
+								</Grid>
+								<Grid item lg={2} xs={2}>
 									<GCPrimaryButton
 										onClick={() => {
 											trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
