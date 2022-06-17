@@ -43,7 +43,6 @@ const useStyles = makeStyles({
 const PortfolioSelector = ({
 	portfolios,
 	selectedPortfolio,
-	setPortfolio,
 	dispatch,
 	formControlStyle,
 	width,
@@ -56,7 +55,6 @@ const PortfolioSelector = ({
 		(event) => {
 			try {
 				const name = event.target.value;
-				setPortfolio(name);
 				setState(dispatch, {
 					selectedPortfolio: name,
 					reviewData:
@@ -69,7 +67,7 @@ const PortfolioSelector = ({
 				console.log(err);
 			}
 		},
-		[dispatch, setPortfolio, projectData]
+		[dispatch, projectData]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {

@@ -1005,6 +1005,12 @@ const esData = {
 									appn_num_s: '3010F',
 									agency_s: 'Air Force (AF)',
 								},
+								{
+									portfolio_name_s: 'Test AI Inventory',
+									primary_reviewer_email_s: null,
+									service_reviewer_email_s: null,
+									service_secondary_reviewer_email_s: null,
+								},
 							],
 						},
 					},
