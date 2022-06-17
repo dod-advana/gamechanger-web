@@ -9,6 +9,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { Typography } from '@material-ui/core';
 import Pagination from 'react-js-pagination';
+import '../../../containers/jbook.css';
 import {
 	getQueryVariable,
 	getTrackingNameForFactory,
@@ -23,7 +24,8 @@ import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
 import { handleTabClicked, populateDropDowns } from './jbookMainViewHelper';
 import ResultView from '../../mainView/ResultView';
-import GCToggle from '../../common/GCToggleSwitch';
+import GCButton from '../../common/GCButton';
+import GCTooltip from '../../common/GCToolTip';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
@@ -70,6 +72,19 @@ const handlePageLoad = async (props) => {
 	// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
 	// 	mainTabSelected = 1;
 	// }
+
+	// grab the portfolio data
+	let portfolios = [];
+	await gameChangerAPI
+		.callDataFunction({
+			functionName: 'getPortfolios',
+			cloneName: 'jbook',
+			options: {},
+		})
+		.then((data) => {
+			portfolios = data.data !== undefined ? data.data : [];
+		});
+
 	// the main setstate that triggers the initial search
 	setState(dispatch, {
 		searchText,
@@ -80,6 +95,7 @@ const handlePageLoad = async (props) => {
 		jbookSearchSettings,
 		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
 		dropdownData,
+		portfolios,
 	});
 };
 
@@ -157,33 +173,32 @@ const getCardViewPanel = (props) => {
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
 						<div className={'top-container'}>
-							<div style={{ paddingTop: 20, zIndex: 99, paddingRight: 30 }}>
-								<a href="https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis">
-									View JBOOK Search Summary Analytics: Qlik Dashboard
-								</a>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
-
-							<div style={{ padding: 10, zIndex: 99 }}>
-								{Permissions.permissionValidator(`Gamechanger Super Admin`, true) && (
-									<GCToggle
-										onClick={() => {
-											setState(dispatch, {
-												useElasticSearch: !state.useElasticSearch,
-												runSearch: true,
-											});
-										}}
-										rightActive={state.useElasticSearch}
-										leftLabel={'Use PG'}
-										rightLabel={'Use ES'}
-										customColor={GC_COLORS.primary}
-									/>
-								)}
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<div style={{ paddingTop: 0, zIndex: 99, marginRight: '20px' }}>
+									<GCTooltip
+										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
+										placement="bottom"
+										arrow
+									>
+										<GCButton
+											buttonColor={'rgb(28, 45, 101)'}
+											onClick={() => {
+												window.open(
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+												);
+											}}
+										>
+											Qlik Dashboard
+										</GCButton>
+									</GCTooltip>
+								</div>
 							</div>
-
-							{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 						</div>
 						{showSideFilters && (
-							<div className={'left-container'} style={{ marginTop: -65 }}>
+							<div className={'left-container'} style={{ marginTop: -130 }}>
 								<div className={'side-bar-container'}>
 									<GameChangerSearchMatrix context={context} />
 									{state.expansionDict && Object.keys(state.expansionDict).length > 0 && (
@@ -198,7 +213,7 @@ const getCardViewPanel = (props) => {
 							</div>
 						)}
 
-						<div className={'right-container'} style={{ marginTop: 0 }}>
+						<div className={'right-container'} style={{ marginTop: '-50px' }}>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
@@ -283,14 +298,16 @@ const getCardViewPanel = (props) => {
 																	state,
 																	dispatch
 																)}
-																<div className="jbookPagination col-xs-12 text-center">
+																<div
+																	className="jbookPagination col-xs-12 text-center"
+																	style={{ marginTop: 10 }}
+																>
 																	<Pagination
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
 																		totalItemsCount={count}
 																		pageRangeDisplayed={8}
 																		onChange={(page) => {
-																			console.log('jbook pagination search');
 																			trackEvent(
 																				getTrackingNameForFactory(
 																					state.cloneData.clone_name
@@ -399,6 +416,7 @@ const JBookMainViewHandler = (props) => {
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
 
+	// handle pagination being clicked
 	useEffect(() => {
 		if (state.docsPagination && searchHandler) {
 			setState(dispatch, {
@@ -408,6 +426,7 @@ const JBookMainViewHandler = (props) => {
 		}
 	}, [state, dispatch, searchHandler]);
 
+	// handle page load
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
@@ -429,7 +448,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {

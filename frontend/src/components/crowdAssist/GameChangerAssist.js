@@ -15,7 +15,7 @@ import {
 	tertiaryGreen,
 	backgroundGreyDark,
 	primaryRedDark,
-} from '../../components/common/gc-colors';
+} from '../common/gc-colors';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -220,11 +220,6 @@ class GameChangerAssist extends Component {
 			return paragraph.entities ? this.countEntities(paragraph.entities) > 0 : false;
 		});
 
-		if (paragraphsWithEntities.length <= 0) {
-			this.getAnnotationData();
-			return;
-		}
-
 		const paragraphEntities = [];
 		const paragraphEntityAnswers = [];
 
@@ -232,6 +227,26 @@ class GameChangerAssist extends Component {
 			acc.set(tag, highlightColors[i]);
 			return acc;
 		}, new Map());
+
+		if (paragraphsWithEntities.length <= 0) {
+			this.setState({
+				tagsList: data.tagsList,
+				tagDescriptions: data.tagDescriptions,
+				colorMap: tagmap,
+				loading: false,
+				paragraphs: paragraphsWithEntities,
+				currentParagraphIndex: 0,
+				paragraphEntities: paragraphEntities,
+				paragraphEntityAnswers: paragraphEntityAnswers,
+				progressText: '',
+				progressValue: 0,
+				doc_id: data.doc_id,
+				doc_num: data.doc_num,
+				doc_type: data.doc_type,
+				type: data.type,
+			});
+			return;
+		}
 
 		paragraphsWithEntities.forEach((paragraph) => {
 			const tmpEntities = [];
@@ -559,7 +574,7 @@ class GameChangerAssist extends Component {
 						colorMap={colorMap}
 					/>
 				)}
-				{!isPowerUser && (
+				{!isPowerUser && paragraphs.length > 0 && (
 					<GeneralUserAnnotationCard
 						// uses template string for text to read newlines correctly
 						paragraph={paragraphs[currentParagraphIndex]}
@@ -589,6 +604,7 @@ class GameChangerAssist extends Component {
 						docId={doc_id}
 					/>
 				)}
+				{!isPowerUser && paragraphs.length === 0 && <div>Sorry, this feature is currently unavailable.</div>}
 			</>
 		);
 	};

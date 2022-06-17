@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import DatePicker from 'react-datepicker';
-import { Typography, Grid, Card, CardContent } from '@material-ui/core';
+import 'react-datepicker/dist/react-datepicker.css';
+import { Select, MenuItem, Typography, Grid, Card, CardContent } from '@material-ui/core';
 import moment from 'moment';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import TabStyles from '../common/TabStyles';
@@ -261,12 +262,13 @@ const documentUsageColumns = [
  * The query is handled in gamechanger-api.
  * @method getSearchPdfMapping
  */
-const getSearchPdfMapping = async (startDate, endDate, setMappingData) => {
+const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData) => {
 	try {
 		// daysBack, offset, filters, sorting, pageSize
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName,
 		};
 		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
 		setMappingData(data.data);
@@ -310,11 +312,12 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
-const getUserAggData = async (startDate, endDate, setUserAggData, setCardData) => {
+const getUserAggData = async (startDate, endDate, cloneName, setUserAggData, setCardData) => {
 	try {
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName,
 		};
 		const { data = {} } = await gameChangerAPI.getUserAggregations(params);
 		setUserAggData(data.users);
@@ -330,17 +333,19 @@ const getUserAggData = async (startDate, endDate, setUserAggData, setCardData) =
  * to download as a csv
  * @class SearchPdfMapping
  */
-export default () => {
+export default (props) => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
-	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0 });
+	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0, unique_searches: 0 });
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
 	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('pdfMapping');
+	const [cloneName, setCloneName] = useState('');
+	const [cloneList, setCloneList] = useState([]);
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -363,6 +368,21 @@ export default () => {
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
+
+	/**
+	 * This method queries postgres for clone data.
+	 * The query is handled in gamechanger-api.
+	 * @method getCloneData
+	 */
+	const getCloneData = async () => {
+		try {
+			const data = await gameChangerAPI.getClonesMatomo();
+			setCloneList(data.data);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
 	/**
 	 * When an input is deselected check if the inputs are valid and a
 	 * change was made. If so then query the data with new values.
@@ -378,15 +398,15 @@ export default () => {
 			setShouldUpdate(false);
 			switch (tabIndex) {
 				case 'pdfMapping':
-					getSearchPdfMapping(startDate, endDate, setMappingData);
-					getUserAggData(daysBack, setUserAggData);
+					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+					getUserAggData(startDate, endDate, cloneName, setUserAggData);
 					break;
 				case 'userTracking':
 					getDocumentData(daysBack, setDocumentData);
 					break;
 				default:
-					getSearchPdfMapping(startDate, endDate, setMappingData);
-					getUserAggData(daysBack, setUserAggData);
+					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+					getUserAggData(startDate, endDate, cloneName, setUserAggData);
 					getDocumentData(daysBack, setDocumentData);
 			}
 		}
@@ -495,23 +515,50 @@ export default () => {
 			console.error(e);
 		}
 	};
+	/**
+	 * Takes in a set time to go back in the query
+	 * @param {string} back
+	 * @method timeBack
+	 */
+	const timeBack = async (back) => {
+		switch (back) {
+			case 'day':
+				setStartDate(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+			case 'week':
+				setStartDate(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+			case 'month':
+				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
+				setEndDate(moment()._d);
+				break;
+			default:
+				break;
+		}
+	};
 
 	useEffect(() => {
 		switch (tabIndex) {
 			case 'pdfMapping':
-				getSearchPdfMapping(startDate, endDate, setMappingData);
-				getUserAggData(startDate, endDate, setUserAggData, setCardData);
+				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
 				break;
 			case 'userTracking':
 				getDocumentData(daysBack, setDocumentData);
 				break;
 			default:
-				getSearchPdfMapping(startDate, endDate, setMappingData);
+				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
 				getFeedbackData(setFeedbackData);
-				getUserAggData(startDate, endDate, setUserAggData, setCardData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
 				getDocumentData(daysBack, setDocumentData);
 		}
-	}, [daysBack, tabIndex, startDate, endDate]);
+	}, [daysBack, tabIndex, startDate, endDate, cloneName]);
+
+	useEffect(() => {
+		getCloneData();
+	}, []);
 
 	return (
 		<div style={{ ...TabStyles.tabContainer, minHeight: 'calc(100vh-100px)' }}>
@@ -583,7 +630,7 @@ export default () => {
 							}}
 						>
 							<Grid container spacing={2}>
-								<Grid item xs={2}>
+								<Grid item lg={2} xs={3}>
 									<DatePickerWrapper>
 										<label>Start Date</label>
 										<DatePicker
@@ -594,7 +641,7 @@ export default () => {
 										/>
 									</DatePickerWrapper>
 								</Grid>
-								<Grid item xs={2}>
+								<Grid item lg={2} xs={3}>
 									<DatePickerWrapper>
 										<label>End Date</label>
 										<DatePicker
@@ -605,8 +652,57 @@ export default () => {
 										/>
 									</DatePickerWrapper>
 								</Grid>
-								<Grid item xs={5}></Grid>
-								<Grid item xs={3}>
+								<Grid item lg={4} xs={4}>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('day');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Day
+									</GCPrimaryButton>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('week');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Week
+									</GCPrimaryButton>
+									<GCPrimaryButton
+										onClick={() => {
+											timeBack('month');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Last Month
+									</GCPrimaryButton>
+								</Grid>
+								<Grid item lg={2} xs={2}>
+									<div style={{ width: '120px', display: 'inline-block' }}>Clones:</div>
+									<Select
+										value={cloneName}
+										onChange={(e) => setCloneName(e.target.value)}
+										name="labels"
+										style={{
+											fontSize: 'small',
+											minWidth: '200px',
+											margin: '10px',
+										}}
+									>
+										{cloneList.map((clone) => {
+											return (
+												<MenuItem
+													style={{ fontSize: 'small', display: 'flex' }}
+													value={clone.category_id}
+												>
+													{clone.name}
+												</MenuItem>
+											);
+										})}
+									</Select>
+								</Grid>
+								<Grid item lg={2} xs={2}>
 									<GCPrimaryButton
 										onClick={() => {
 											trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
@@ -631,13 +727,23 @@ export default () => {
 									<Card>
 										<CardContent>
 											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+												Unique Searches
+											</p>
+											{cardData.unique_searches}
+										</CardContent>
+									</Card>
+								</Grid>
+								<Grid item xs={2}>
+									<Card>
+										<CardContent>
+											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
 												Unique Users
 											</p>
 											{cardData.unique_users}
 										</CardContent>
 									</Card>
 								</Grid>
-								<Grid item xs={8}></Grid>
+								<Grid item xs={6}></Grid>
 							</Grid>
 						</div>
 						<div
@@ -707,7 +813,7 @@ export default () => {
 							data={feedbackData}
 							columns={feedbackColumns}
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
-							defaultSorted={[{ id: 'event_name', desc: false }]}
+							defaultSorted={[{ id: 'createdAt', desc: true }]}
 						/>
 					</TabPanel>
 					<TabPanel>

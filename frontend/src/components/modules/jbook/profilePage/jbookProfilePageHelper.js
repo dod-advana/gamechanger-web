@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -9,18 +10,18 @@ import {
 	StyledNavButton,
 	StyledNavBar,
 	StyledNavContainer,
-	StyledSideNavContainer,
 	StyledLeftContainer,
-	StyledRightContainer,
-	StyledMainContainer,
+	StyledSideNavContainer,
 } from './profilePageStyles';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
+import { getClassLabel, getTotalCost, formatNum } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
-	maxWidth: 100,
+	maxWidth: 150,
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
@@ -31,18 +32,6 @@ const boldKeys = (data) => {
 		pair.Key = <strong>{pair.Key}</strong>;
 		return pair;
 	});
-};
-
-const formatNum = (num) => {
-	const parsed = parseInt(num);
-	if (parsed > 999) {
-		return `${(parsed / 1000).toFixed(2)} $B`;
-	}
-
-	if (parsed > 999999) {
-		return `${(parsed / 1000000).toFixed(2)} $T`;
-	}
-	return `${parsed} $M`;
 };
 
 const SideNav = (props) => {
@@ -76,7 +65,7 @@ const BasicData = (props) => {
 	const { projectData, reviewData } = state;
 
 	return (
-		<StyledLeftContainer>
+		<>
 			<SimpleTable
 				tableClass={'magellan-table'}
 				zoom={1}
@@ -120,6 +109,72 @@ const BasicData = (props) => {
 				hideSubheader={true}
 				firstColWidth={firstColWidth}
 			/>
+		</>
+	);
+};
+
+const ClassificationScoreCard = (props) => {
+	const { scores } = props;
+
+	return (
+		<StyledLeftContainer>
+			<div style={{ backgroundColor: 'rgb(239, 241, 246)', marginLeft: -6, marginRight: -8 }}>
+				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
+					{`Classification Scorecard`}
+				</Typography>
+				{scores.map((score) => {
+					return (
+						<div style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}>
+							<Typography
+								variant="h5"
+								style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
+							>
+								{score.name}
+							</Typography>
+							<div style={{ display: 'flex' }}>
+								<div style={{ flexGrow: 2 }}>
+									<div>{score.description}</div>
+									{score.timestamp && <div>Timestamp: {score.timestamp}</div>}
+									{score.justification && <div>{score.justification}</div>}{' '}
+								</div>
+								{score.value !== undefined && (
+									<div style={{ flexGrow: 1, padding: '10px' }}>
+										<PieChart width={100} height={100}>
+											<Pie
+												data={[
+													{
+														name: 'score',
+														value: 100 - score.value * 100,
+														fill: 'rgb(166, 206, 227)',
+													},
+													{
+														name: 'score',
+														value: score.value * 100,
+														fill: 'rgb(32, 119, 180)',
+													},
+												]}
+												dataKey="value"
+												nameKey="name"
+												cx="50%"
+												cy="50%"
+												innerRadius={25}
+												outerRadius={40}
+											>
+												<Label value={score.value} position="center" />
+											</Pie>
+										</PieChart>
+									</div>
+								)}
+							</div>
+							<hr />
+							<div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
+								<ThumbDownOffAltIcon style={{ marginRight: '5px' }} />
+								<ThumbUpOffAltIcon style={{ marginRight: '5px' }} />
+							</div>
+						</div>
+					);
+				})}
+			</div>
 		</StyledLeftContainer>
 	);
 };
@@ -132,42 +187,40 @@ const Metadata = (props) => {
 	const { projectData, reviewData, keywordsChecked } = state;
 
 	return (
-		<StyledRightContainer>
-			<SimpleTable
-				tableClass={'magellan-table'}
-				zoom={1}
-				rows={
-					projectData
-						? getMetadataTableData(
-								projectData,
-								budgetType,
-								projectNum,
-								reviewData,
-								keywordsChecked,
-								keywordCheckboxes,
-								setKeywordCheck
-						  )
-						: []
-				}
-				height={'auto'}
-				dontScroll={true}
-				disableWrap={true}
-				title={'Metadata'}
-				headerExtraStyle={{
-					backgroundColor: '#313541',
-					color: 'white',
-				}}
-				hideSubheader={true}
-				firstColWidth={firstColWidth}
-			/>
-		</StyledRightContainer>
+		<SimpleTable
+			tableClass={'magellan-table'}
+			zoom={1}
+			rows={
+				projectData
+					? getMetadataTableData(
+							projectData,
+							budgetType,
+							projectNum,
+							reviewData,
+							keywordsChecked,
+							keywordCheckboxes,
+							setKeywordCheck
+					  )
+					: []
+			}
+			height={'auto'}
+			dontScroll={true}
+			disableWrap={true}
+			title={'Metadata'}
+			headerExtraStyle={{
+				backgroundColor: '#313541',
+				color: 'white',
+			}}
+			hideSubheader={true}
+			firstColWidth={firstColWidth}
+		/>
 	);
 };
 
 const ProjectDescription = (props) => {
 	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
 	return (
-		<StyledMainContainer>
+		<>
 			{profileLoading ? (
 				<LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />
 			) : (
@@ -181,7 +234,7 @@ const ProjectDescription = (props) => {
 							? 'Project Description'
 							: 'Program Description'}
 					</Typography>
-					<div style={{ maxHeight: '860px', overflow: 'auto' }}>
+					<div style={{ overflow: 'auto' }}>
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions.map((pd) => {
 								return (
@@ -208,7 +261,7 @@ const ProjectDescription = (props) => {
 					</div>
 				</>
 			)}
-		</StyledMainContainer>
+		</>
 	);
 };
 
@@ -310,8 +363,6 @@ const aggregateProjectDescriptions = (projectData) => {
 		}
 	});
 
-	console.log(tmpProjectDescriptions);
-
 	return tmpProjectDescriptions;
 };
 
@@ -323,27 +374,27 @@ const Contracts = (props) => {
 		const contractCols = [
 			{
 				Key: 'Parent Award',
-				Value: contract.parentAward,
+				Value: contract.parent_award_s,
 			},
 			{
 				Key: 'PIIN',
-				Value: contract.piin,
+				Value: contract.piin_s,
 			},
 			{
 				Key: 'Award Description',
-				Value: contract.awardDesc,
+				Value: contract.award_desc_s,
 			},
 			{
 				Key: 'Product or Service Description',
-				Value: contract.productDesc,
+				Value: contract.product_desc_s,
 			},
 			{
 				Key: 'Total Base and All Options Value',
-				Value: contract.totalObligatedAmount,
+				Value: contract.total_oblig_amount_s,
 			},
 			{
 				Key: 'Mod Number',
-				Value: contract.modNumber,
+				Value: contract.modification_number_s,
 			},
 		];
 
@@ -357,8 +408,8 @@ const Contracts = (props) => {
 				disableWrap={true}
 				title={
 					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-						<div>Vendor: {contract.vendorName}</div>
-						<div>Fiscal Year: {contract.fiscalYear ?? 'N/A'}</div>
+						<div>Vendor: {contract.vendor_name_s}</div>
+						<div>Fiscal Year: {contract.fiscal_year_s ?? 'N/A'}</div>
 					</div>
 				}
 				headerExtraStyle={{
@@ -554,7 +605,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 		{
@@ -568,7 +619,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 	];
@@ -600,4 +651,5 @@ export {
 	Metadata,
 	ProjectDescription,
 	SideNav,
+	ClassificationScoreCard,
 };

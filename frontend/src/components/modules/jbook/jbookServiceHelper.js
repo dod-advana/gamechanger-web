@@ -4,6 +4,7 @@ import {
 	StyledTableValueContainer,
 	StyledInlineContainer,
 	StyledFooterDiv,
+	ButtonStyles,
 } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
@@ -148,7 +149,7 @@ const LabelingValidationKey = React.memo(() => {
 	return (
 		<StyledTableKeyContainer>
 			<strong>
-				Labeling Validation
+				Tagging Validation
 				<Tooltip
 					classes={{ tooltip: classes.customWidth }}
 					placement="right"
@@ -187,10 +188,10 @@ const LabelingValidationKey = React.memo(() => {
 				</Tooltip>
 			</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Select whether you agree or disagree with the JAIC’s determination of the label for this Program/Project
-				as Core AI, AI Enabled, AI Enabling or Not AI. If you disagree with the JAIC’s labelling, simply select
-				No from the Agree/Disagree dropdown and enter your assessment of the correct label based on the
-				definitions above in the “How would you label this effort” dropdown.
+				Select whether you agree or disagree with the JAIC’s determination of the tag for this Program/Project
+				as Core AI, AI Enabled, AI Enabling or Not AI. If you disagree with the JAIC’s tagging, simply select No
+				from the Agree/Disagree dropdown and enter your assessment of the correct tag based on the definitions
+				above in the “How would you tag this effort” dropdown.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -214,7 +215,7 @@ const LabelingValidationValue = React.memo((props) => {
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Do you agree with the labeling validation for this effort?
+					Do you agree with the tagging validation for this effort?
 				</Typography>
 				<Autocomplete
 					size="small"
@@ -229,7 +230,7 @@ const LabelingValidationValue = React.memo((props) => {
 			</StyledInlineContainer>
 			<StyledInlineContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					If not, how would you label this effort?{' '}
+					If not, how would you tag this effort?{' '}
 				</Typography>
 				<Autocomplete
 					size="small"
@@ -731,7 +732,7 @@ const ButtonFooter = React.memo((props) => {
 					title={'This button will re-enable the service level review for editing'}
 				>
 					<GCPrimaryButton
-						style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+						style={ButtonStyles.main}
 						onClick={() => setState(dispatch, { ServiceModalOpen: true })}
 					>
 						Re-Enable (Partial Service Review)
@@ -740,7 +741,7 @@ const ButtonFooter = React.memo((props) => {
 			)}
 			<Tooltip placement="top" arrow title={'This button will reset the service level review with blank values'}>
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => {
 						setReviewData('serviceForm');
 					}}
@@ -755,7 +756,7 @@ const ButtonFooter = React.memo((props) => {
 			</Tooltip>
 			<Tooltip placement="top" arrow title={'This will save a partial review to finish later'}>
 				<GCPrimaryButton
-					style={{ color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px' }}
+					style={ButtonStyles.main}
 					onClick={() => submitReviewForm('primaryReviewLoading', false, 'service')}
 					disabled={finished || roleDisabled}
 				>
@@ -772,7 +773,7 @@ const ButtonFooter = React.memo((props) => {
 				title={'Once the review is complete, this button will submit the finished service level review'}
 			>
 				<GCPrimaryButton
-					style={{ color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px' }}
+					style={ButtonStyles.submit}
 					onClick={() => submitReviewForm('primaryReviewLoading', true, 'service')}
 					disabled={finished || roleDisabled}
 				>

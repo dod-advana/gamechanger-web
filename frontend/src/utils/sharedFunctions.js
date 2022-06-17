@@ -4,7 +4,7 @@ import { getTrackingNameForFactory, PAGE_DISPLAYED, SEARCH_TYPES } from './gamec
 import { trackEvent } from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
-import React from 'react';
+import React, { Component } from 'react';
 import { Button } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
@@ -261,7 +261,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					minHeight: 'calc(100vh - 200px)',
 				}}
 			>
-				{state.pageDisplayed !== 'aboutUs' && (
+				{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 					<div
 						style={{
 							borderTop: '1px solid #B0BAC5',
@@ -272,7 +272,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					/>
 				)}
 				<React.Fragment>
-					{state.pageDisplayed !== 'aboutUs' && (
+					{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
 						<Button
 							style={{
 								marginLeft: '10px',
@@ -337,7 +337,8 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 							backgroundColor:
 								state.pageDisplayed === PAGE_DISPLAYED.dataTracker ||
 								state.pageDisplayed === PAGE_DISPLAYED.analystTools ||
-								state.pageDisplayed === PAGE_DISPLAYED.aboutUs
+								state.pageDisplayed === PAGE_DISPLAYED.aboutUs ||
+								state.pageDisplayed === PAGE_DISPLAYED.faq
 									? '#ffffff'
 									: '#DFE6EE',
 						}}
@@ -349,3 +350,33 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 		</div>
 	);
 };
+
+export const setUserMatomo = (value) => {
+	localStorage.setItem('userMatomo', value);
+};
+
+/* 
+	Wrapper to assist with debugging why components are rendering
+	Usage:
+		import { withPropsChecker } from './sharedFunctions.js';
+
+		const myComponent = props => {...}
+
+		export default withPropsChecker(myComponent);
+*/
+export function withPropsChecker(WrappedComponent) {
+	return class PropsChecker extends Component {
+		componentWillReceiveProps(nextProps) {
+			Object.keys(nextProps)
+				.filter((key) => {
+					return nextProps[key] !== this.props[key];
+				})
+				.forEach((key) => {
+					console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
+				});
+		}
+		render() {
+			return <WrappedComponent {...this.props} />;
+		}
+	};
+}

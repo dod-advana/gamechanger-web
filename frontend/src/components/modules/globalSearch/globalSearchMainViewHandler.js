@@ -6,7 +6,7 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { backgroundWhite, gcOrange } from '../../common/gc-colors';
+import { backgroundWhite } from '../../common/gc-colors';
 import { Card } from '../../cards/GCCard';
 import Pagination from 'react-js-pagination';
 import {
@@ -16,7 +16,7 @@ import {
 	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
 import { Typography } from '@material-ui/core';
-import '../../../containers/gamechanger.css';
+import './globalSearch.css';
 import ResultView from '../../mainView/ResultView';
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
@@ -27,6 +27,8 @@ import DatabasesIcon from '../../../images/icon/slideout-menu/database icon.png'
 import DataSourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 
+const PRIMARY_COLOR = '#13A792';
+
 const getViewHeader = (state, dispatch) => {
 	return (
 		<div style={styles.showingResultsRow}>
@@ -34,7 +36,8 @@ const getViewHeader = (state, dispatch) => {
 				(!state.applicationsLoading ||
 					!state.dashboardsLoading ||
 					!state.dataSourcesLoading ||
-					!state.databasesLoading) && (
+					!state.databasesLoading ||
+					!state.modelsLoading) && (
 					<>
 						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
 							Showing results for <b>{state.searchText}</b>
@@ -48,10 +51,10 @@ const getViewHeader = (state, dispatch) => {
 										...(!state.listView ? styles.unselectedButton : {}),
 									}}
 									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-									buttonColor={!state.listView ? gcOrange : backgroundWhite}
-									borderColor={!state.listView ? gcOrange : '#B0B9BE'}
+									buttonColor={!state.listView ? PRIMARY_COLOR : backgroundWhite}
+									borderColor={!state.listView ? PRIMARY_COLOR : '#B0B9BE'}
 								>
-									<div style={{ marginTop: 5 }}>
+									<div>
 										<AppsIcon style={styles.icon} />
 									</div>
 								</GCButton>
@@ -63,10 +66,10 @@ const getViewHeader = (state, dispatch) => {
 										...(!state.listView ? {} : styles.unselectedButton),
 									}}
 									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-									buttonColor={!state.listView ? backgroundWhite : gcOrange}
-									borderColor={!state.listView ? '#B0B9BE' : gcOrange}
+									buttonColor={!state.listView ? backgroundWhite : PRIMARY_COLOR}
+									borderColor={!state.listView ? '#B0B9BE' : PRIMARY_COLOR}
 								>
-									<div style={{ marginTop: 5 }}>
+									<div>
 										<ListIcon style={styles.icon} />
 									</div>
 								</GCButton>
@@ -90,12 +93,17 @@ const handlePageLoad = async (props) => {
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 	const parsedURL = searchHandler.parseSearchURL(state);
+
 	if (parsedURL.searchText) {
 		const newState = { ...state, ...parsedURL, runSearch: true };
 		setState(dispatch, newState);
 
 		searchHandler.setSearchURL(newState);
 	}
+
+	// Get User Favorites from home App
+	const { data } = await gameChangerAPI.getUserFavoriteHomeApps();
+	setState(dispatch, { favoriteApps: data.favorite_apps || [] });
 };
 
 const getMainView = (props) => {
@@ -108,11 +116,16 @@ const getMainView = (props) => {
 		dashboardsTotalCount,
 		dataSourcesTotalCount,
 		databasesTotalCount,
+		modelsTotalCount,
 		pageDisplayed,
 	} = state;
 
 	const noResults = Boolean(
-		!applicationsTotalCount && !dashboardsTotalCount && !dataSourcesTotalCount && !databasesTotalCount
+		!applicationsTotalCount &&
+			!dashboardsTotalCount &&
+			!dataSourcesTotalCount &&
+			!databasesTotalCount &&
+			!modelsTotalCount
 	);
 	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
 
@@ -130,7 +143,8 @@ const getMainView = (props) => {
 									(applicationsTotalCount > 0 ||
 									dashboardsTotalCount > 0 ||
 									dataSourcesTotalCount > 0 ||
-									databasesTotalCount > 0 ? (
+									databasesTotalCount > 0 ||
+									modelsTotalCount > 0 ? (
 										<>
 											{getViewHeader(state, dispatch)}
 											<div style={{ margin: '0 15px 0 5px' }}>
@@ -144,7 +158,7 @@ const getMainView = (props) => {
 										</>
 									) : (
 										<div className="col-xs-12">
-											<LoadingIndicator customColor={gcOrange} />
+											<LoadingIndicator customColor={PRIMARY_COLOR} />
 										</div>
 									))}
 							</div>
@@ -188,6 +202,11 @@ const getCardViewPanel = (props) => {
 		databasesPage,
 		databasesLoading,
 		databasesPagination,
+		modelsSearchResults,
+		modelsPage,
+		modelsLoading,
+		modelsPagination,
+		modelsTotalCount,
 		loading,
 	} = state;
 
@@ -195,6 +214,7 @@ const getCardViewPanel = (props) => {
 	const dashboards = dashboardsSearchResults;
 	const dataSources = dataSourcesSearchResults;
 	const databases = databasesSearchResults;
+	const models = modelsSearchResults;
 
 	let sideScroll = {
 		height: '72vh',
@@ -219,7 +239,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(applications, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -259,7 +279,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(dashboards, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -299,7 +319,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(dataSources, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -339,7 +359,7 @@ const getCardViewPanel = (props) => {
 									getSearchResults(databases, state, dispatch)
 								) : (
 									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
 									</div>
 								)}
 								<div className="gcPagination col-xs-12 text-center">
@@ -366,9 +386,50 @@ const getCardViewPanel = (props) => {
 							</SearchSection>
 						</div>
 					)}
+
+				{models?.length > 0 &&
+					(activeCategoryTab === 'Models' || activeCategoryTab === 'all') &&
+					selectedCategories['Models'] && (
+						<div
+							className={'col-xs-12'}
+							style={state.listView ? styles.listViewContainer : styles.containerDiv}
+						>
+							<SearchSection section={'Models'} color={'#131E43'} icon={DatabasesIcon}>
+								{!modelsLoading && !modelsPagination ? (
+									getSearchResults(models, state, dispatch)
+								) : (
+									<div className="col-xs-12">
+										<LoadingIndicator customColor={PRIMARY_COLOR} />
+									</div>
+								)}
+								<div className="gcPagination col-xs-12 text-center">
+									<Pagination
+										activePage={modelsPage}
+										itemsCountPerPage={RESULTS_PER_PAGE}
+										totalItemsCount={modelsTotalCount}
+										pageRangeDisplayed={8}
+										onChange={async (page) => {
+											trackEvent(
+												getTrackingNameForFactory(state.cloneData.clone_name),
+												'PaginationChanged',
+												'page',
+												page
+											);
+											setState(dispatch, {
+												modelsLoading: true,
+												modelsPage: page,
+												modelsPagination: true,
+											});
+										}}
+									/>
+								</div>
+							</SearchSection>
+						</div>
+					)}
+
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
+						<LoadingIndicator customColor={PRIMARY_COLOR} containerStyle={{ paddingTop: 100 }} />
 					</div>
 				)}
 			</div>
@@ -394,6 +455,9 @@ const GlobalSearchMainViewHandler = (props) => {
 		}
 		if (state.databasesPagination && searchHandler) {
 			searchHandler.handleDatabasesPagination(state, dispatch);
+		}
+		if (state.modelsPagination && searchHandler) {
+			searchHandler.handleModelsPagination(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);
 
@@ -423,7 +487,8 @@ const GlobalSearchMainViewHandler = (props) => {
 			!state.applicationsLoading &&
 			!state.dashboardsLoading &&
 			!state.dataSourcesLoading &&
-			!state.databasesLoading
+			!state.databasesLoading &&
+			!state.modelsLoading
 		) {
 			setState(dispatch, {
 				categoryMetadata: {
@@ -431,6 +496,7 @@ const GlobalSearchMainViewHandler = (props) => {
 					Dashboards: { total: state.dashboardsTotalCount },
 					DataSources: { total: state.dataSourcesTotalCount },
 					Databases: { total: state.databasesTotalCount },
+					Models: { total: state.modelsTotalCount },
 					Documentation: { total: 0 },
 					Organizations: { total: 0 },
 					Services: { total: 0 },
@@ -445,10 +511,12 @@ const GlobalSearchMainViewHandler = (props) => {
 		state.dashboardsLoading,
 		state.dataSourcesLoading,
 		state.databasesLoading,
+		state.modelsLoading,
 		state.applicationsTotalCount,
 		state.dashboardsTotalCount,
 		state.dataSourcesTotalCount,
 		state.databasesTotalCount,
+		state.modelsTotalCount,
 		state.loading,
 		dispatch,
 	]);

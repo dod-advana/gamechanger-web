@@ -5,8 +5,6 @@
 	"resolutions": {
 		"bezier-js": "4.0.3",
 		"immer": "9.0.6",
-		"node-fetch": "2.6.1",
-		"node-forge": "^1.2.1",
 		"browserslist": "4.17.3",
 		"set-value": "4.0.1",
 		"nth-check": "2.0.1",
@@ -19,8 +17,7 @@
 	},
 	"dependencies": {
 		"@datapunt/matomo-tracker-react": "0.3.1",
-		"@date-io/date-fns": "2.11.0",
-		"@dod-advana/advana-platform-ui": "1.4.9",
+		"@dod-advana/advana-platform-ui": "1.4.10",
 		"@dod-advana/advana-side-nav": "0.1.4",
 		"@dod-advana/advana-tutorial-overlay": "0.0.5",
 		"@emotion/react": "11.7.0",
@@ -28,10 +25,8 @@
 		"@material-ui/core": "4.11.0",
 		"@material-ui/icons": "4.9.1",
 		"@material-ui/lab": "4.0.0-alpha.55",
-		"@mui/core": "5.0.0-alpha.54",
 		"@mui/icons-material": "5.3.1",
 		"@mui/material": "5.5.2",
-		"@mui/utils": "5.3.0",
 		"anchorme": "2.1.2",
 		"axios": "0.24.0",
 		"babel-plugin-import": "1.13.5",
@@ -41,19 +36,17 @@
 		"color": "3.2.1",
 		"compress-create-react-app": "1.2.1",
 		"crypto-js": "4.1.1",
-		"date-fns": "2.28.0",
 		"email-validator": "2.0.4",
 		"flexboxgrid": "6.3.1",
 		"font-awesome": "4.7.0",
 		"history": "4.10.1",
 		"html-react-parser": "1.2.4",
 		"html2canvas": "1.1.4",
+		"html2pdf.js": "0.10.1",
 		"js-file-download": "0.4.12",
 		"jws": "3.1.4",
 		"lodash": "4.17.21",
-		"moment": "2.20.1",
-		"node-fetch": "2.6.1",
-		"node-forge": "1.2.1",
+		"moment": "2.29.3",
 		"node-sass": "6.0.1",
 		"npm-force-resolutions": "0.0.10",
 		"piwik-react-router": "0.12.1",
@@ -83,10 +76,11 @@
 		"styled-components": "4.3.2",
 		"typeface-montserrat": "0.0.54",
 		"typeface-noto-sans": "0.0.54",
-		"underscore": "1.13.2",
+		"underscore": "1.13.1",
 		"uuid": "3.3.3"
 	},
 	"devDependencies": {
+		"babel-plugin-import": "1.13.5",
 		"chai": "^4.3.4",
 		"decompress-tar": "^4.0.0",
 		"decompress-tarbz2": "^4.0.0",
@@ -118,7 +112,7 @@
 		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
-		"eslint": "eslint --fix --debug -c .eslintrc.json ./src/"
+		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/"
 	},
 	"jest": {
 		"moduleDirectories": [

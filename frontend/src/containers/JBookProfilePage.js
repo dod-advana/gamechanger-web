@@ -6,15 +6,19 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import JBookJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
 import JBookServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
 import JBookPOCReviewForm from '../components/modules/jbook/jbookPOCReviewForm';
+import JBookSimpleReviewForm from '../components/modules/jbook/jbookSimpleReviewForm';
 import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { getQueryVariable } from '../utils/gamechangerUtils';
+import './gamechanger.css';
 import './jbook.css';
+import './jbook-styles.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
-import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
+import { getClassLabel, getSearchTerms, formatNum } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
 
@@ -22,11 +26,10 @@ import {
 	Accomplishments,
 	aggregateProjectDescriptions,
 	Contracts,
-	formatNum,
-	BasicData,
 	Metadata,
 	ProjectDescription,
 	SideNav,
+	ClassificationScoreCard,
 } from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
 	CloseButton,
@@ -36,19 +39,40 @@ import {
 	StyledReviewRightContainer,
 	StyledAccordionContainer,
 	StyledAccordionHeader,
+	StyledLeftContainer,
+	StyledRightContainer,
+	StyledMainContainer,
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import PortfolioSelector from '../components/modules/jbook/portfolioBuilder/jbookPortfolioSelector';
+
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
 const JBookProfilePage = (props) => {
-	const { cloneData } = props;
+	const { cloneData, location } = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { projectData, reviewData, keywordsChecked } = state;
+	const { projectData, reviewData, keywordsChecked, selectedPortfolio } = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
@@ -81,17 +105,29 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const getProjectData = async (
-		programElement,
-		projectNum,
-		type,
-		budgetYear,
-		budgetLineItem,
-		id,
-		appropriationNumber,
-		useElasticSearch
-	) => {
+	const [pMap, setMap] = useState({});
+	const [userMap, setUserMap] = useState({});
+	let [init, setInit] = useState(false);
+
+	useEffect(() => {
+		const getUserData = async () => {
+			const data = await gameChangerAPI.getUserData('jbook');
+			const newMap = {};
+			data.data.users.forEach((user) => {
+				newMap[user.id] = user;
+			});
+			setUserMap(newMap);
+		};
+
+		if (!init) {
+			getUserData();
+			setInit(true);
+		}
+	}, [init, setInit]);
+
+	const getProjectData = async (id, portfolioName) => {
 		setProfileLoading(true);
+		const tempMapping = {};
 
 		let projectData;
 		try {
@@ -99,41 +135,27 @@ const JBookProfilePage = (props) => {
 				functionName: 'getProjectData',
 				cloneName: cloneData.clone_name,
 				options: {
-					programElement,
-					projectNum,
-					type,
-					budgetYear,
-					budgetLineItem,
 					id,
-					appropriationNumber,
-					useElasticSearch,
+					portfolioName,
 				},
 			});
 
 			if (projectData.data) {
-				if (projectData.data.contracts) {
-					setContracts(projectData.data.contracts);
-					const tempMapping = {};
-					for (let i = 0; i < projectData.data.contracts.length; i++) {
-						const currentContract = projectData.data.contracts[i];
-						if (tempMapping[currentContract.vendorName] === undefined) {
-							tempMapping[currentContract.vendorName] = true;
-						}
-					}
-					setContractMapping(tempMapping);
-					if (
-						projectData.data.review.serviceMissionPartnersChecklist === null ||
-						projectData.data.review.serviceMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
-					}
-					if (
-						projectData.data.review.pocMissionPartnersChecklist === null ||
-						projectData.data.review.pocMissionPartnersChecklist === undefined
-					) {
-						projectData.data.review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
+				setBudgetLineItem(projectData.data.budgetLineItem || '');
+				setProgramElement(projectData.data.programElement || '');
+				setProjectNum(projectData.data.projectNum || '');
+				setAppropriationNumber(projectData.data.appropriationNumber || '');
+			}
+
+			if (projectData.data && projectData.data.contracts) {
+				setContracts(projectData.data.contracts);
+				for (let i = 0; i < projectData.data.contracts.length; i++) {
+					const currentContract = projectData.data.contracts[i];
+					if (tempMapping[currentContract.vendorName] === undefined) {
+						tempMapping[currentContract.vendorName] = true;
 					}
 				}
+				setContractMapping(tempMapping);
 			}
 		} catch (err) {
 			console.log('Error fetching project and review data');
@@ -156,69 +178,69 @@ const JBookProfilePage = (props) => {
 		setProfileLoading(false);
 
 		setState(dispatch, { projectData: projectData ? projectData.data : {} });
-		if (projectData && projectData.data && projectData.data.review) {
+		if (projectData && projectData.data && projectData.data.reviews) {
 			let domainTasks = _.cloneDeep(state.domainTasks);
-			if (projectData.data.review.domainTask && projectData.data.review.domainTaskSecondary) {
-				domainTasks[projectData.data.review.domainTask] = projectData.data.review.domainTaskSecondary;
+			let review = projectData.data.reviews[portfolioName] ?? {};
+
+			if (review) {
+				if (review.domainTask && review.domainTaskSecondary) {
+					domainTasks[review.domainTask] = review.domainTaskSecondary;
+				}
+
+				if (
+					review.serviceMissionPartnersChecklist === null ||
+					review.serviceMissionPartnersChecklist === undefined
+				) {
+					review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
+				}
+				if (review.pocMissionPartnersChecklist === null || review.pocMissionPartnersChecklist === undefined) {
+					review.pocMissionPartnersChecklist = JSON.stringify(tempMapping);
+				}
+
+				// Review changes to make things behave properly
+				if (!review.serviceAgreeLabel || review.serviceAgreeLabel === null) {
+					review.serviceAgreeLabel = 'Yes';
+				}
+				if (!review.servicePTPAgreeLabel || review.servicePTPAgreeLabel === null) {
+					review.servicePTPAgreeLabel = 'Yes';
+				}
+				// Review changes to make things behave properly
+				if (!review.pocAgreeLabel || review.pocAgreeLabel === null) {
+					review.pocAgreeLabel = 'Yes';
+				}
+				if (!review.pocPTPAgreeLabel || review.pocPTPAgreeLabel === null) {
+					review.pocPTPAgreeLabel = 'Yes';
+				}
+				if (!review.pocMPAgreeLabel || review.pocMPAgreeLabel === null) {
+					review.pocMPAgreeLabel = 'Yes';
+				}
 			}
 
-			// Review changes to make things behave properly
-			if (!projectData.data.review.serviceAgreeLabel || projectData.data.review.serviceAgreeLabel === null) {
-				projectData.data.review.serviceAgreeLabel = 'Yes';
-			}
-			if (
-				!projectData.data.review.servicePTPAgreeLabel ||
-				projectData.data.review.servicePTPAgreeLabel === null
-			) {
-				projectData.data.review.servicePTPAgreeLabel = 'Yes';
-			}
-			// Review changes to make things behave properly
-			if (!projectData.data.review.pocAgreeLabel || projectData.data.review.pocAgreeLabel === null) {
-				projectData.data.review.pocAgreeLabel = 'Yes';
-			}
-			if (!projectData.data.review.pocPTPAgreeLabel || projectData.data.review.pocPTPAgreeLabel === null) {
-				projectData.data.review.pocPTPAgreeLabel = 'Yes';
-			}
-			if (!projectData.data.review.pocMPAgreeLabel || projectData.data.review.pocMPAgreeLabel === null) {
-				projectData.data.review.pocMPAgreeLabel = 'Yes';
-			}
-
-			setState(dispatch, { reviewData: { ...projectData.data.review }, domainTasks });
+			setState(dispatch, { reviewData: review, domainTasks });
 		}
 	};
+
+	// useEffect(() => {
+	// 	getProjectData(id, selectedPortfolio);
+	// }, [selectedPortfolio, id]);
 
 	useEffect(() => {
 		try {
 			const url = window.location.href;
-			const programElement = getQueryVariable('programElement', url);
-			const projectNum = getQueryVariable('projectNum', url);
 			const type = getQueryVariable('type', url);
-			const budgetLineItem = getQueryVariable('budgetLineItem', url);
 			const budgetYear = getQueryVariable('budgetYear', url);
 			const searchText = getQueryVariable('searchText', url);
 			const id = getQueryVariable('id', url);
-			const appropriationNumber = getQueryVariable('appropriationNumber', url);
-			const useElasticSearch = getQueryVariable('useElasticSearch', url) === 'true';
+			const tmpPortfolioName = getQueryVariable('portfolioName', url);
 
-			setProgramElement(programElement);
-			setProjectNum(projectNum);
 			setBudgetType(type);
-			setBudgetLineItem(budgetLineItem);
 			setBudgetYear(budgetYear);
 			setSearchText(searchText);
 			setID(id);
-			setAppropriationNumber(appropriationNumber);
 
-			getProjectData(
-				programElement,
-				projectNum,
-				type,
-				budgetYear,
-				budgetLineItem,
-				id,
-				appropriationNumber,
-				useElasticSearch
-			);
+			getProjectData(id, tmpPortfolioName).then(() => {
+				setState(dispatch, { selectedPortfolio: tmpPortfolioName });
+			});
 
 			if (searchText && searchText !== 'undefined') {
 				setState(dispatch, { searchText });
@@ -242,11 +264,30 @@ const JBookProfilePage = (props) => {
 			setPermissions(tmpPermissions);
 		}
 
+		const getPortfolioData = async () => {
+			// grab the portfolio data
+			await gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {},
+				})
+				.then((data) => {
+					let portfolios = data.data !== undefined ? data.data : [];
+					let map = {};
+					for (let item of portfolios) {
+						map[item.name] = item;
+					}
+					setMap(map);
+					setState(dispatch, { portfolios });
+				});
+		};
+		getPortfolioData();
+
 		// eslint-disable-next-line
 	}, []);
 
 	useEffect(() => {
-		console.log(projectData);
 		if (projectData.id) {
 			if (!isCheckboxSet) {
 				setIsCheckboxSet(true);
@@ -254,31 +295,32 @@ const JBookProfilePage = (props) => {
 				setKeywordCheckboxes(projectData.keywords);
 			} else {
 				let accomp = [];
-
 				if (projectData.accomplishments) {
 					projectData.accomplishments.forEach((accom) => {
 						accomp.push({
-							title: accom.Accomp_Title_text,
+							title: accom.Accomp_Title_text_t,
 							data: [
 								{
 									Key: 'Description',
-									Value: accom.Accomp_Desc_text ?? '',
+									Value: accom.Accomp_Desc_text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Plans',
-									Value: accom.PlanPrgrm_Fund_CY_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_CY_Text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Amount',
-									Value: accom.PlanPrgrm_Fund_CY ? formatNum(accom.PlanPrgrm_Fund_CY) : '',
+									Value: accom.PlanPrgrm_Fund_CY_d ? formatNum(accom.PlanPrgrm_Fund_CY_d) : '',
 								},
 								{
 									Key: 'Current Year Plans',
-									Value: accom.PlanPrgrm_Fund_BY1Base_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_Text_t ?? '',
 								},
 								{
 									Key: 'Current Year Amount',
-									Value: accom.PlanPrgrm_Fund_BY1Base ? formatNum(accom.PlanPrgrm_Fund_BY1Base) : '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_d
+										? formatNum(accom.PlanPrgrm_Fund_BY1Base_d)
+										: '',
 								},
 							],
 						});
@@ -302,8 +344,6 @@ const JBookProfilePage = (props) => {
 							}
 						});
 					});
-
-					console.log(accomp);
 				}
 
 				try {
@@ -800,20 +840,24 @@ const JBookProfilePage = (props) => {
 				options: {
 					frontendReviewData: {
 						...reviewData,
-						budgetType: budgetType,
-						revProgramElement: programElement,
-						id: undefined,
-						revBudgetLineItems: budgetLineItem,
-						budgetYear: budgetYear,
+						budgetType,
+						programElement,
+						budgetLineItem,
+						budgetYear,
+						appropriationNumber,
+						budgetActivityNumber: projectData.budgetActivityNumber,
+						serviceAgency: projectData.serviceAgency,
+						portfolioName: selectedPortfolio,
+						projectNum,
 					},
 					isSubmit,
 					reviewType,
-					projectNum,
-					appropriationNumber,
+					portfolioName: selectedPortfolio,
+					id,
 				},
 			});
 
-			getProjectData(programElement, projectNum, budgetType, budgetYear, budgetLineItem, id, appropriationNumber);
+			await getProjectData(id, selectedPortfolio);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -830,17 +874,11 @@ const JBookProfilePage = (props) => {
 				budgetLineItem,
 				projectNum,
 				appropriationNumber,
+				portfolioName: selectedPortfolio,
+				id,
 			},
 		});
-		await getProjectData(
-			programElement,
-			projectNum,
-			budgetType,
-			budgetYear,
-			budgetLineItem,
-			id,
-			appropriationNumber
-		);
+		await getProjectData(id, selectedPortfolio);
 		setState(dispatch, { [loading]: false });
 	};
 
@@ -861,36 +899,86 @@ const JBookProfilePage = (props) => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
+	const scorecardData = (classification, reviewData) => {
+		let data = [];
+
+		if (
+			selectedPortfolio === 'AI Inventory' &&
+			classification &&
+			classification.modelPredictionProbability &&
+			classification.modelPrediction
+		) {
+			let num = classification.modelPredictionProbability;
+			num = num.toString(); //If it's not already a String
+			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
+			Number(num); //If you need it back as a Number
+
+			data.push({
+				name: 'Predicted Tag',
+				description:
+					'The AI tool classified the BLI as "' +
+					classification.modelPrediction +
+					'" with a confidence score of ' +
+					num,
+				value: num,
+			});
+		} else {
+			data.push({
+				name: 'No Prediction',
+				description: 'Classification data is not yet available for this exhibit',
+			});
+		}
+		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			data.push({
+				name: 'Reviewer Tag',
+				description:
+					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
+				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
+			});
+		}
+
+		return data;
+	};
+
 	return (
 		<div>
 			<Notifications context={context} />
 			<SearchBar context={context} />
 			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
-				<BasicData
-					budgetType={budgetType}
-					admin={Permissions.hasPermission('JBOOK Admin')}
-					loading={profileLoading}
-					programElement={programElement}
-					projectNum={projectNum}
-					budgetYear={budgetYear}
-					budgetLineItem={budgetLineItem}
-					id={id}
-					appropriationNumber={appropriationNumber}
-				/>
-				<ProjectDescription
-					profileLoading={profileLoading}
-					projectData={projectData}
-					programElement={programElement}
-					projectNum={projectNum}
-					projectDescriptions={projectDescriptions}
-				/>
-				<Metadata
-					budgetType={budgetType}
-					projectNum={projectNum}
-					keywordCheckboxes={keywordCheckboxes}
-					setKeywordCheck={setKeywordCheck}
-				/>
+				<StyledLeftContainer>
+					<div style={{ paddingLeft: 20 }}>
+						<PortfolioSelector
+							selectedPortfolio={selectedPortfolio}
+							portfolios={state.portfolios}
+							dispatch={dispatch}
+							formControlStyle={{ margin: '10px 0', width: '100%' }}
+							width={'100%'}
+							projectData={projectData}
+						/>
+					</div>
+					{selectedPortfolio !== 'General' && (
+						<ClassificationScoreCard scores={scorecardData(projectData.classification, reviewData)} />
+					)}
+				</StyledLeftContainer>
+				<StyledMainContainer>
+					<ProjectDescription
+						profileLoading={profileLoading}
+						projectData={projectData}
+						programElement={programElement}
+						projectNum={projectNum}
+						projectDescriptions={projectDescriptions}
+					/>
+				</StyledMainContainer>
+				<StyledRightContainer>
+					<Metadata
+						budgetType={budgetType}
+						projectNum={projectNum}
+						keywordCheckboxes={keywordCheckboxes}
+						setKeywordCheck={setKeywordCheck}
+					/>
+				</StyledRightContainer>
 			</StyledContainer>
 			<StyledReviewContainer>
 				<StyledReviewLeftContainer>
@@ -926,143 +1014,208 @@ const JBookProfilePage = (props) => {
 							</GCAccordion>
 						</StyledAccordionContainer>
 					)}
-					<StyledAccordionContainer id={'Primary Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader headerWidth="100%">
-									<strong>PRIMARY REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.primaryReviewStatus === 'Finished Review'
-													? 'green'
-													: '#F9B32D',
-										}}
-									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookJAICReviewForm
-								renderReenableModal={renderReenableModal}
-								reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												permissions.is_primary_reviewer &&
-												Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
-										  )
-								}
-								finished={reviewData.primaryReviewStatus === 'Finished Review'}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								dropdownData={dropdownData}
-								reviewerProp={projectData.reviewer}
-								serviceReviewerProp={projectData.serviceReview}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
 
-					<StyledAccordionContainer id={'Service / DoD Component Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader>
-									<strong>SERVICE REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.serviceReviewStatus === 'Finished Review'
-													? 'green'
-													: '#F9B32D',
-										}}
-									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookServiceReviewForm
-								renderReenableModal={renderReenableModal}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												permissions.is_service_reviewer &&
-												(Auth.getTokenPayload().email === reviewData.serviceReviewerEmail ||
-													Auth.getTokenPayload().email ===
-														reviewData.serviceSecondaryReviewerEmail)
-										  )
-								}
-								reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
-								finished={reviewData.serviceReviewStatus === 'Finished Review'}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								vendorData={projectData.vendors}
-								dropdownData={dropdownData}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
+					{selectedPortfolio !== 'General' ? (
+						selectedPortfolio === 'AI Inventory' ? (
+							<>
+								<StyledAccordionContainer id={'Primary Reviewer Section'}>
+									<GCAccordion
+										contentPadding={0}
+										expanded={true}
+										headerWidth="100%"
+										header={
+											<StyledAccordionHeader headerWidth="100%">
+												<strong>PRIMARY REVIEWER</strong>
+												<FiberManualRecordIcon
+													style={{
+														color:
+															reviewData.primaryReviewStatus === 'Finished Review'
+																? 'green'
+																: '#F9B32D',
+													}}
+												/>
+											</StyledAccordionHeader>
+										}
+										headerBackground={'rgb(238,241,242)'}
+										headerTextColor={'black'}
+										headerTextWeight={'600'}
+									>
+										<JBookJAICReviewForm
+											renderReenableModal={renderReenableModal}
+											reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
+											roleDisabled={
+												Permissions.hasPermission('JBOOK Admin')
+													? false
+													: !(
+															permissions.is_primary_reviewer &&
+															Auth.getTokenPayload().email ===
+																reviewData.primaryReviewerEmail
+													  )
+											}
+											finished={reviewData.primaryReviewStatus === 'Finished Review'}
+											submitReviewForm={submitReviewForm}
+											setReviewData={setReviewData}
+											dropdownData={dropdownData}
+											reviewerProp={projectData.reviewer}
+											serviceReviewerProp={projectData.serviceReview}
+										/>
+									</GCAccordion>
+								</StyledAccordionContainer>
 
-					<StyledAccordionContainer id={'POC Reviewer Section'}>
-						<GCAccordion
-							contentPadding={0}
-							expanded={true}
-							headerWidth="100%"
-							header={
-								<StyledAccordionHeader>
-									<strong>POC REVIEWER</strong>
-									<FiberManualRecordIcon
-										style={{
-											color:
-												reviewData.pocReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
+								<StyledAccordionContainer id={'Service / DoD Component Reviewer Section'}>
+									<GCAccordion
+										contentPadding={0}
+										expanded={true}
+										headerWidth="100%"
+										header={
+											<StyledAccordionHeader>
+												<strong>SERVICE REVIEWER</strong>
+												<FiberManualRecordIcon
+													style={{
+														color:
+															reviewData.serviceReviewStatus === 'Finished Review'
+																? 'green'
+																: '#F9B32D',
+													}}
+												/>
+											</StyledAccordionHeader>
+										}
+										headerBackground={'rgb(238,241,242)'}
+										headerTextColor={'black'}
+										headerTextWeight={'600'}
+									>
+										<JBookServiceReviewForm
+											renderReenableModal={renderReenableModal}
+											roleDisabled={
+												Permissions.hasPermission('JBOOK Admin')
+													? false
+													: !(
+															permissions.is_service_reviewer &&
+															(Auth.getTokenPayload().email ===
+																reviewData.serviceReviewerEmail ||
+																Auth.getTokenPayload().email ===
+																	reviewData.serviceSecondaryReviewerEmail)
+													  )
+											}
+											reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
+											finished={reviewData.serviceReviewStatus === 'Finished Review'}
+											submitReviewForm={submitReviewForm}
+											setReviewData={setReviewData}
+											vendorData={projectData.vendors}
+											dropdownData={dropdownData}
+										/>
+									</GCAccordion>
+								</StyledAccordionContainer>
+
+								<StyledAccordionContainer id={'POC Reviewer Section'}>
+									<GCAccordion
+										contentPadding={0}
+										expanded={true}
+										headerWidth="100%"
+										header={
+											<StyledAccordionHeader>
+												<strong>POC REVIEWER</strong>
+												<FiberManualRecordIcon
+													style={{
+														color:
+															reviewData.pocReviewStatus === 'Finished Review'
+																? 'green'
+																: '#F9B32D',
+													}}
+												/>
+											</StyledAccordionHeader>
+										}
+										headerBackground={'rgb(238,241,242)'}
+										headerTextColor={'black'}
+										headerTextWeight={'600'}
+									>
+										<JBookPOCReviewForm
+											renderReenableModal={renderReenableModal}
+											finished={reviewData.pocReviewStatus === 'Finished Review'}
+											roleDisabled={
+												Permissions.hasPermission('JBOOK Admin')
+													? false
+													: !(
+															Permissions.hasPermission('JBOOK POC Reviewer') &&
+															(Auth.getTokenPayload().email ===
+																reviewData.servicePOCEmail ||
+																Auth.getTokenPayload().email === reviewData.altPOCEmail)
+													  )
+											}
+											reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
+											dropdownData={dropdownData}
+											vendorData={projectData.vendors}
+											submitReviewForm={submitReviewForm}
+											setReviewData={setReviewData}
+											totalBudget={
+												projectData.currentYearAmount && projectData.currentYearAmount > 0
+													? projectData.currentYearAmount
+													: projectData.currentYearAmountMax &&
+													  projectData.currentYearAmountMax > 0
+													? projectData.currentYearAmountMax
+													: 3000
+											}
+										/>
+									</GCAccordion>
+								</StyledAccordionContainer>
+							</>
+						) : (
+							<StyledAccordionContainer id={'Simplified Reviewer Section'}>
+								<GCAccordion
+									contentPadding={0}
+									expanded={true}
+									headerWidth="100%"
+									header={
+										<StyledAccordionHeader>
+											<strong>REVIEW</strong>
+											<FiberManualRecordIcon
+												style={{
+													color:
+														reviewData.primaryReviewStatus === 'Finished Review'
+															? 'green'
+															: '#F9B32D',
+												}}
+											/>
+										</StyledAccordionHeader>
+									}
+									headerBackground={'rgb(238,241,242)'}
+									headerTextColor={'black'}
+									headerTextWeight={'600'}
+								>
+									<JBookSimpleReviewForm
+										renderReenableModal={renderReenableModal}
+										reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
+										roleDisabled={
+											Permissions.hasPermission('JBOOK Admin')
+												? false
+												: !(
+														permissions.is_primary_reviewer &&
+														Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
+												  )
+										}
+										finished={reviewData.primaryReviewStatus === 'Finished Review'}
+										submitReviewForm={submitReviewForm}
+										setReviewData={setReviewData}
+										dropdownData={{
+											reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
+												name: userMap[item].last_name + ', ' + userMap[item].first_name,
+											})),
+											primaryClassLabel: pMap[selectedPortfolio].tags.map((item) => ({
+												primary_class_label: item,
+											})),
 										}}
+										reviewerProp={projectData.reviewer}
+										serviceReviewerProp={projectData.serviceReview}
 									/>
-								</StyledAccordionHeader>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'600'}
-						>
-							<JBookPOCReviewForm
-								renderReenableModal={renderReenableModal}
-								finished={reviewData.pocReviewStatus === 'Finished Review'}
-								roleDisabled={
-									Permissions.hasPermission('JBOOK Admin')
-										? false
-										: !(
-												Permissions.hasPermission('JBOOK POC Reviewer') &&
-												(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-													Auth.getTokenPayload().email === reviewData.altPOCEmail)
-										  )
-								}
-								reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
-								dropdownData={dropdownData}
-								vendorData={projectData.vendors}
-								submitReviewForm={submitReviewForm}
-								setReviewData={setReviewData}
-								totalBudget={
-									projectData.currentYearAmount && projectData.currentYearAmount > 0
-										? projectData.currentYearAmount
-										: projectData.currentYearAmountMax && projectData.currentYearAmountMax > 0
-										? projectData.currentYearAmountMax
-										: 3000
-								}
-							/>
-						</GCAccordion>
-					</StyledAccordionContainer>
+								</GCAccordion>
+							</StyledAccordionContainer>
+						)
+					) : null}
 				</StyledReviewLeftContainer>
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
+			{/* Footer */}
+			{<GCFooter location={location} cloneName="jbook" />}
 		</div>
 	);
 };

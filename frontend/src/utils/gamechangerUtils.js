@@ -39,6 +39,7 @@ export const PAGE_DISPLAYED = {
 	dataTracker: 'dataTracker',
 	analystTools: 'analystTools',
 	aboutUs: 'aboutUs',
+	faq: 'faq',
 };
 
 export const SEARCH_TYPES = {
@@ -144,7 +145,8 @@ export const StyledCenterContainer = styled.div`
     
     .top-container {
     	display: flex;
-    	justify-content: flex-end;
+			flex-direction: column;
+			justify-content: flex-end;
     	margin: 0 0 0 15px;
     }
     

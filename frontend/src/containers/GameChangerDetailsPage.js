@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TitleBar from '../components/searchBar/TitleBar';
 import { trackEvent, trackPageView } from '../components/telemetry/Matomo';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
@@ -31,6 +31,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import EditEntityDialog from '../components/admin/EditEntityDialog';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
+import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -135,6 +136,22 @@ const FavoriteTopic = styled.button`
 	}
 `;
 
+const GCFooter = LoadableVisibility({
+	loader: () => import('../components/navigation/GCFooter'),
+	loading: () => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					height: '90px',
+					width: '100%',
+					backgroundColor: 'black',
+				}}
+			/>
+		);
+	},
+});
+
 const GameChangerDetailsPage = (props) => {
 	const { location } = props;
 
@@ -184,7 +201,7 @@ const GameChangerDetailsPage = (props) => {
 		}
 	}
 
-	const getEntityData = async (name, cloneName) => {
+	const getEntityData = useCallback(async (name, cloneName) => {
 		const data = {};
 
 		const resp = await gameChangerAPI.callGraphFunction({
@@ -222,14 +239,20 @@ const GameChangerDetailsPage = (props) => {
 					}
 				}
 			});
-
+			tmpEntity.details.push({
+				name: 'Org Head',
+				value: await getHeadData(name, cloneName),
+			});
+			tmpEntity.details.push({
+				name: 'Org Type(s)',
+				value: await getTypeData(name, cloneName),
+			});
 			data.entity = tmpEntity;
 		}
 
 		data.graph = resp.data.graph;
-
 		return data;
-	};
+	}, []);
 
 	const getTopicData = async (name, cloneName) => {
 		const data = { topic: {}, graph: { nodes: [], edges: [] }, isNeo4j: true };
@@ -260,6 +283,30 @@ const GameChangerDetailsPage = (props) => {
 		}
 
 		return data;
+	};
+
+	const getHeadData = async (name, cloneName) => {
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getHeadDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				headName: name,
+			},
+		});
+		const head = resp?.data?.headData?.head || '';
+		return head;
+	};
+
+	const getTypeData = async (name, cloneName) => {
+		const resp = await gameChangerAPI.callGraphFunction({
+			functionName: 'getTypeDataDetailsPage',
+			cloneName: cloneName,
+			options: {
+				typeName: name,
+			},
+		});
+		const types = resp?.data?.typeData?.nodes?.map((node) => node.name).join(', ') || '';
+		return types;
 	};
 
 	const getSourceData = async (searchText, cloneName) => {
@@ -488,7 +535,7 @@ const GameChangerDetailsPage = (props) => {
 			default:
 				break;
 		}
-	}, [query, favoriteTopics]);
+	}, [query, favoriteTopics, getEntityData]);
 
 	useEffect(() => {
 		if (!entity || !cloneData) return;
@@ -916,41 +963,43 @@ const GameChangerDetailsPage = (props) => {
 	};
 
 	return (
-		<div style={{ minHeight: 'calc(100% - 89px)', background: 'white' }}>
+		<div style={{ minHeight: 'calc(100vh - 30px)', background: 'white', display: 'flex', flexDirection: 'column' }}>
 			<TitleBar
 				detailsType={detailsType}
 				titleBarModule={'details/detailsTitleBarHandler'}
 				rawSearchResults={[]}
 			></TitleBar>
+			<div style={{ flexGrow: 1 }}>
+				{showEntityContainer && renderEntityContainer()}
 
-			{showEntityContainer && renderEntityContainer()}
+				{showTopicContainer && renderTopicContainer()}
 
-			{showTopicContainer && renderTopicContainer()}
+				{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) && (
+					<SourceDetailsPage
+						source={source}
+						cloneData={cloneData}
+						initialSourceData={initialSourceData}
+						userData={userData}
+						rawSearchResults={docResults}
+					/>
+				)}
 
-			{showSourceContainer && !_.isEmpty(cloneData) && !_.isEmpty(initialSourceData) && (
-				<SourceDetailsPage
-					source={source}
-					cloneData={cloneData}
-					initialSourceData={initialSourceData}
-					userData={userData}
-					rawSearchResults={docResults}
-				/>
-			)}
+				{showDocumentContainer && (
+					<DocumentDetailsPage
+						document={document}
+						cloneData={cloneData}
+						runningQuery={runningQuery}
+						graphData={graph}
+						userData={userData}
+						rawSearchResults={docResults}
+					/>
+				)}
 
-			{showDocumentContainer && (
-				<DocumentDetailsPage
-					document={document}
-					cloneData={cloneData}
-					runningQuery={runningQuery}
-					graphData={graph}
-					userData={userData}
-					rawSearchResults={docResults}
-				/>
-			)}
-
-			{showContractContainer && edaPermissions && (
-				<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
-			)}
+				{showContractContainer && edaPermissions && (
+					<EDAContractDetailsPage awardID={contractAwardID} cloneData={cloneData} />
+				)}
+			</div>
+			<GCFooter location={location} cloneName="gamechanger-details" />
 		</div>
 	);
 };

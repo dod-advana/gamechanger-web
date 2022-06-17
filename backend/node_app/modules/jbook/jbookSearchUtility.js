@@ -30,20 +30,25 @@ class JBookSearchUtility {
 	}
 
 	// parse list of key : value to their frontend/db counterpart
-	parseFields(data, fromFrontend, docType) {
-		const newData = {};
-		const mapping = this.getMapping(docType, fromFrontend);
+	parseFields(data, fromFrontend, docType, doMapping = true) {
+		try {
+			const newData = {};
+			const mapping = this.getMapping(docType, fromFrontend);
 
-		for (const field in data) {
-			if (data[field] && data[field] !== null && Object.keys(mapping).includes(field)) {
-				const newKey = mapping[field].newName;
-				newData[newKey] = mapping[field].processValue(data[field]);
-			} else if (data[field] && data[field] !== null) {
-				newData[field] = data[field];
+			for (const field in data) {
+				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
+					const newKey = mapping[field].newName;
+					newData[newKey] = mapping[field].processValue(data[field]);
+				} else if (data[field] && data[field] !== null) {
+					newData[field] = data[field];
+				}
 			}
+			return newData;
+		} catch (e) {
+			console.log('Error parsing jbook fields');
+			this.logger.error(e.message, 'IEPGRA00');
+			throw e;
 		}
-
-		return newData;
 	}
 
 	// map just the name of a field between frontend/db
@@ -53,33 +58,38 @@ class JBookSearchUtility {
 	}
 
 	getMapping(docType, fromFrontend) {
-		let mapping;
-		if (Mappings[`${docType}Mapping`]) {
-			mapping = _.clone(Mappings[`${docType}Mapping`]);
-		} else {
-			console.log(`${docType} mapping not found`);
-			return {};
-		}
-
-		if (fromFrontend) {
-			let frontEndMapping = {};
-			for (const field in mapping) {
-				const newName = mapping[field].newName;
-
-				if (!frontEndMapping[newName]) {
-					frontEndMapping[newName] = _.clone(mapping[field]);
-					frontEndMapping[newName].newName = field;
-				}
+		try {
+			let mapping;
+			if (Mappings[`${docType}Mapping`]) {
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
+			} else {
+				console.log(`${docType} mapping not found`);
+				return {};
 			}
-			return frontEndMapping;
-		} else if (docType !== 'review' || docType !== 'gl') {
-			mapping = {
-				...mapping,
-				...reviewMapping,
-			};
-		}
 
-		return mapping;
+			if (fromFrontend) {
+				let frontEndMapping = {};
+				for (const field in mapping) {
+					const newName = mapping[field].newName;
+
+					if (!frontEndMapping[newName]) {
+						frontEndMapping[newName] = _.clone(mapping[field]);
+						frontEndMapping[newName].newName = field;
+					}
+				}
+				return frontEndMapping;
+			} else if (docType !== 'review' || docType !== 'gl') {
+				mapping = {
+					...mapping,
+					...reviewMapping,
+				};
+			}
+
+			return mapping;
+		} catch (err) {
+			console.log('Error retrieving jbook mapping');
+			this.logger.error(err.message, 'AJTKSKQ');
+		}
 	}
 
 	getDocCols(docType, totals = false, fullPDFExport = false) {
@@ -206,10 +216,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQuery() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(
 			', '
 		)}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
@@ -224,10 +230,6 @@ class JBookSearchUtility {
 	}
 
 	buildSelectQueryForFullPDF() {
-		// console.log(this.getDocCols('pdoc').join(', '));
-		// console.log(this.getDocCols('rdoc').join(', '));
-		// console.log(this.getDocCols('odoc').join(', '));
-
 		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(
 			', '
 		)}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
@@ -1023,8 +1025,9 @@ class JBookSearchUtility {
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
-			const { service_agency_aggs = {} } = aggregations;
+			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
 			const service_buckets = service_agency_aggs.buckets ? service_agency_aggs.buckets : [];
+			const contract_buckets = contract_totals.buckets ? contract_totals.buckets : [];
 			const { hits: esHits = {} } = body;
 			const {
 				hits = [],
@@ -1033,6 +1036,7 @@ class JBookSearchUtility {
 
 			searchResults.totalCount = value;
 			searchResults.serviceAgencyCounts = service_buckets;
+			searchResults.contractTotalCounts = contract_buckets;
 
 			const agencyMapping = this.getMapping('esServiceAgency', false);
 
@@ -1053,10 +1057,12 @@ class JBookSearchUtility {
 					Object.keys(hit.inner_hits).forEach((hitKey) => {
 						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								result.pageHits.push({
-									title: esTopLevelFieldsNameMapping[hitKey],
-									snippet: innerHit.highlight[highlightKey][0],
-								});
+								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+									result.pageHits.push({
+										title: esTopLevelFieldsNameMapping[hitKey],
+										snippet: innerHit.highlight[highlightKey][0],
+									});
+								}
 							});
 						});
 					});
@@ -1100,7 +1106,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n'];
+		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1312,7 +1318,7 @@ class JBookSearchUtility {
 				query: {
 					bool: {
 						must: {
-							terms: { key_review_s: docIds },
+							terms: { key_s: docIds },
 						},
 					},
 				},
@@ -1324,15 +1330,16 @@ class JBookSearchUtility {
 
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and' },
+		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
 		userId,
 		serviceAgencyMappings
 	) {
+		let query = {};
 		try {
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 
-			let query = {
+			query = {
 				track_total_hits: true,
 				from: offset,
 				size: limit,
@@ -1343,20 +1350,22 @@ class JBookSearchUtility {
 							size: 10000,
 						},
 					},
+					contract_totals: {
+						aggs: {
+							sum_agg: {
+								sum: { field: 'by1BaseYear_d' },
+							},
+						},
+						terms: {
+							field: 'org_jbook_desc_s',
+							size: 10000,
+						},
+					},
 				},
 				query: {
 					bool: {
 						must: [],
-						should: [
-							{
-								multi_match: {
-									query: `${parsedQuery}`,
-									fields: esTopLevelFields,
-									type: 'best_fields',
-									operator: `${operator}`,
-								},
-							},
-						],
+						should: [],
 					},
 				},
 				highlight: {
@@ -1364,8 +1373,23 @@ class JBookSearchUtility {
 				},
 			};
 
-			if (jbookSearchSettings.pgKeys !== undefined) {
-				query.query.must.push({ terms: { key_review_s: jbookSearchSettings.pgKeys } });
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
+
+			if (searchText !== '') {
+				query.query.bool.must.push({
+					multi_match: {
+						query: `${parsedQuery}`,
+						fields: esTopLevelFields,
+						type: 'best_fields',
+						operator: `${operator}`,
+					},
+				});
 			}
 
 			esTopLevelFields.forEach((field) => {
@@ -1433,15 +1457,16 @@ class JBookSearchUtility {
 				});
 			});
 
-			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings);
-
-			if (filterQueries.length > 0) {
-				query.query.bool.filter = filterQueries;
+			let sortText = jbookSearchSettings.sort[0].id;
+			if (!sortSelected && searchText && searchText !== '') {
+				sortText = 'Relevance';
 			}
 
 			// SORT
-			switch (jbookSearchSettings.sort[0].id) {
+			switch (sortText) {
+				case 'relevance':
+					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
@@ -1457,24 +1482,196 @@ class JBookSearchUtility {
 				case 'serviceAgency':
 					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
 					break;
+				case 'budgetLineItem':
+					query.sort = [{ budgetLineItem_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					break;
 				default:
 					break;
 			}
+
+			// console.log(JSON.stringify(query));
+
+			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
-			this.logger.error(e.message, 'IEPGRAZ91');
+			this.logger.error(e.message, 'IEPGRAZ91', userId);
 			return query;
 		}
-
-		return query;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
-	getJbookESFilters(jbookSearchSettings) {
+	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
 		let filterQueries = [];
 		try {
 			if (jbookSearchSettings) {
+				// Budget Activity
+				if (jbookSearchSettings.budgetActivity) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.budgetActivity}*`,
+							default_field: 'budgetActivityNumber_s',
+						},
+					});
+				}
+
+				let shouldQuery = {
+					bool: {
+						should: [],
+					},
+				};
+
+				// Budget Sub Activity
+				if (jbookSearchSettings.budgetSubActivity || jbookSearchSettings.primaryReviewStatus) {
+					if (jbookSearchSettings.budgetSubActivity) {
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'P40-13_BSA_Title_t',
+							},
+						});
+
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'budgetActivityTitle_t',
+							},
+						});
+					}
+
+					if (jbookSearchSettings.primaryReviewStatus) {
+						jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+							if (status === 'Not Reviewed') {
+								shouldQuery.bool.should.push({
+									bool: {
+										must_not: [
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Finished Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Partial Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+										],
+									},
+								});
+							} else {
+								shouldQuery.bool.should.push({
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														match: {
+															'review_n.primary_review_status_s': status,
+														},
+													},
+													{
+														match: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								});
+							}
+						});
+					}
+
+					filterQueries.push(shouldQuery);
+				}
+
+				// Main Account
+				if (jbookSearchSettings.appropriationNumber) {
+					filterQueries.push({
+						query_string: {
+							query: `*${jbookSearchSettings.appropriationNumber}*`,
+							default_field: 'appropriationNumber_s',
+						},
+					});
+				}
+
+				// Total Funding
+				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
+					const rangeQuery = {
+						range: {
+							totalCost_d: {},
+						},
+					};
+
+					if (jbookSearchSettings.minTotalCost) {
+						rangeQuery.range.totalCost_d.gte = jbookSearchSettings.minTotalCost;
+					}
+
+					if (jbookSearchSettings.maxTotalCost) {
+						rangeQuery.range.totalCost_d.lte = jbookSearchSettings.maxTotalCost;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
+				// BY1 Funding
+				if (jbookSearchSettings.minBY1Funding || jbookSearchSettings.maxBY1Funding) {
+					const rangeQuery = {
+						range: {
+							by1BaseYear_d: {},
+						},
+					};
+
+					if (jbookSearchSettings.minBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.gte = jbookSearchSettings.minBY1Funding;
+					}
+
+					if (jbookSearchSettings.maxBY1Funding) {
+						rangeQuery.range.by1BaseYear_d.lte = jbookSearchSettings.maxBY1Funding;
+					}
+
+					filterQueries.push(rangeQuery);
+				}
+
 				// Budget Type filter
 				if (jbookSearchSettings.budgetType) {
 					const budgetTypesTemp = [];
@@ -1515,7 +1712,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.programElement) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.programElement}`,
+							query: `*${jbookSearchSettings.programElement}*`,
 							default_field: 'budgetLineItem_s',
 						},
 					});
@@ -1525,7 +1722,7 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.projectNum) {
 					filterQueries.push({
 						query_string: {
-							query: `*${jbookSearchSettings.projectNum}`,
+							query: `*${jbookSearchSettings.projectNum}*`,
 							default_field: 'projectNum_s',
 						},
 					});
@@ -1544,7 +1741,7 @@ class JBookSearchUtility {
 					});
 
 					filterQueries.push({
-						match: {
+						terms: {
 							serviceAgency_s: convertedAgencies,
 						},
 					});
@@ -1557,6 +1754,146 @@ class JBookSearchUtility {
 		}
 
 		return filterQueries;
+	}
+
+	getJBookESReviewFilters(jbookSearchSettings) {
+		const nestedMustObjects = [];
+		// Review Status
+		if (jbookSearchSettings.reviewStatus) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Reviewer
+		if (jbookSearchSettings.primaryReviewer) {
+			const reviewerTerms = jbookSearchSettings.primaryReviewer.map((reviewer) => {
+				return { term: { 'review_n.primary_reviewer_s': reviewer } };
+			});
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Service Reviewer
+		if (jbookSearchSettings.serviceReviewer) {
+			const reviewerTerms = jbookSearchSettings.serviceReviewer.map((reviewer) => {
+				return { term: { 'review_n.service_reviewer_s': reviewer } };
+			});
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// POC Reviewer
+		if (jbookSearchSettings.pocReviewer) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									wildcard: {
+										'review_n.service_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+								{
+									wildcard: {
+										'review_n.alternate_poc_name_s': {
+											value: `*${jbookSearchSettings.pocReviewer}*`,
+										},
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Primary Class Label
+		if (jbookSearchSettings.primaryClassLabel) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						bool: {
+							should: [
+								{
+									terms: {
+										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+								{
+									terms: {
+										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+									},
+								},
+							],
+						},
+					},
+				},
+			});
+		}
+
+		// Source Tag
+		if (jbookSearchSettings.sourceTag) {
+			nestedMustObjects.push({
+				nested: {
+					path: 'review_n',
+					query: {
+						terms: {
+							'review_n.source_tag_s': jbookSearchSettings.sourceTag,
+						},
+					},
+				},
+			});
+		}
+
+		return nestedMustObjects;
 	}
 }
 

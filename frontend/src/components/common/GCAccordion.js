@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { withStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
-import { gcBlue } from '../../components/common/gc-colors';
+import { gcBlue } from './gc-colors';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import { Typography } from '@material-ui/core';
@@ -25,7 +25,6 @@ const StyledAccordionSummary = withStyles({
 			borderBottomLeftRadius: '0px !important',
 			borderBottomRightRadius: '0px !important',
 		},
-		width: '100%',
 	},
 	content: {
 		'&$expanded': {
@@ -135,7 +134,7 @@ const GCAccordion = (props) => {
 			onClick={onClick}
 		>
 			<StyledAccordionSummary
-				style={{ backgroundColor: headerBackground }}
+				style={{ backgroundColor: headerBackground, height: 'fit-content' }}
 				aria-controls="accordion-content"
 				id="accordion-header"
 				expandIcon={

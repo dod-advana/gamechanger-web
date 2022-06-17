@@ -21,13 +21,13 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
 
-const getAndSetDidYouMean = (index, searchText, dispatch) => {
-	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-	// 	setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
-	// }).catch(_ => {
-	// 	//do nothing
-	// })
-};
+// const getAndSetDidYouMean = (index, searchText, dispatch) => {
+// 	jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
+// 		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
+// 	}).catch(_ => {
+// 		//do nothing
+// 	})
+// };
 
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
@@ -89,7 +89,8 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						useElasticSearch: state.useElasticSearch,
+						portfolio: state.portfolio || 'AI Inventory',
+						sortSelected: state.sortSelected,
 					},
 				},
 				cancelToken
@@ -116,7 +117,7 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
-				useElasticSearch: state.useElasticSearch,
+				portfolio: state.portfolio || 'AI Inventory',
 			},
 		});
 		return data;
@@ -155,6 +156,7 @@ const JBookSearchHandler = {
 				urlSearch: false,
 				initial: false,
 				expansionDict: {},
+				statsLoading: true,
 			});
 
 			try {
@@ -166,7 +168,6 @@ const JBookSearchHandler = {
 				}
 
 				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
-				const { contractTotals } = await this.getContractTotals(state, dispatch);
 				const t1 = new Date().getTime();
 
 				if (results === null || !results.docs || results.docs.length <= 0) {
@@ -182,14 +183,26 @@ const JBookSearchHandler = {
 						paginationSearch: false,
 					});
 				} else {
-					let { docs, totalCount, query, expansionDict } = results;
-
+					let { docs, totalCount, query, expansionDict, contractTotalCounts = {} } = results;
 					let hasExpansionTerms = false;
 					if (expansionDict) {
 						Object.keys(expansionDict).forEach((key) => {
 							if (expansionDict[key].length > 0) hasExpansionTerms = true;
 						});
 					}
+
+					// temporarily add review data
+					// docs.map((doc) => {
+					// 	doc.reviews = {
+					// 		General: {
+					// 			tags: ['Generic Tag'],
+					// 		},
+					// 		'AI Inventory': {
+					// 			tags: ['AI Enabled', 'AI Enabling', 'Not AI', 'AI', 'Very Cool AI'],
+					// 		},
+					// 	};
+					// 	return doc;
+					// });
 
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
@@ -203,10 +216,10 @@ const JBookSearchHandler = {
 						hideTabs: false,
 						resetSettingsSwitch: false,
 						runningSearch: false,
-						contractTotals: contractTotals,
 						expansionDict,
 						hasExpansionTerms,
 						paginationSearch: false,
+						contractTotals: contractTotalCounts,
 					});
 				}
 
@@ -351,14 +364,18 @@ const JBookSearchHandler = {
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+		searchSettings.selectedPortfolio = state.selectedPortfolio;
 		const sortDesc = state.currentOrder === 'desc';
 
 		switch (state.currentSort) {
+			case 'Relevance':
+				searchSettings.sort = [{ id: 'relevance', desc: sortDesc }];
+				break;
 			case 'Program Element':
 				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
 			case 'Budget Line Item':
-				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
+				searchSettings.sort = [{ id: 'budgetLineItem', desc: sortDesc }];
 				break;
 			case 'Project #':
 				searchSettings.sort = [{ id: 'projectNum', desc: sortDesc }];

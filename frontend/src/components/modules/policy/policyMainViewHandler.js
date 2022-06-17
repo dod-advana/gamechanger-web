@@ -1112,8 +1112,13 @@ const getCardViewPanel = (props) => {
 };
 
 const getAboutUs = (props) => {
-	const { state } = props;
-	return <GCAboutUs state={state} />;
+	const { state, dispatch } = props;
+	return <GCAboutUs state={state} dispatch={dispatch} initialTab="about" />;
+};
+
+const getFAQ = (props) => {
+	const { state, dispatch } = props;
+	return <GCAboutUs state={state} dispatch={dispatch} initialTab="faq" />;
 };
 
 const getAnalystTools = (context) => {
@@ -1219,7 +1224,9 @@ const PolicyMainViewHandler = (props) => {
 				dispatch
 			);
 		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs({ state }), state, dispatch);
+			return getNonMainPageOuterContainer(getAboutUs({ state, dispatch }), state, dispatch);
+		case PAGE_DISPLAYED.faq:
+			return getNonMainPageOuterContainer(getFAQ({ state, dispatch }), state, dispatch);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({
