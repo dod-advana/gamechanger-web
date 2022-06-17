@@ -1025,8 +1025,9 @@ class JBookSearchUtility {
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
-			const { service_agency_aggs = {} } = aggregations;
+			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
 			const service_buckets = service_agency_aggs.buckets ? service_agency_aggs.buckets : [];
+			const contract_buckets = contract_totals.buckets ? contract_totals.buckets : [];
 			const { hits: esHits = {} } = body;
 			const {
 				hits = [],
@@ -1035,6 +1036,7 @@ class JBookSearchUtility {
 
 			searchResults.totalCount = value;
 			searchResults.serviceAgencyCounts = service_buckets;
+			searchResults.contractTotalCounts = contract_buckets;
 
 			const agencyMapping = this.getMapping('esServiceAgency', false);
 
@@ -1104,7 +1106,7 @@ class JBookSearchUtility {
 
 	transformEsFields(raw) {
 		let result = {};
-		const arrayFields = ['keyword_n', 'review_n'];
+		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
 
 		esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
@@ -1348,6 +1350,17 @@ class JBookSearchUtility {
 							size: 10000,
 						},
 					},
+					contract_totals: {
+						aggs: {
+							sum_agg: {
+								sum: { field: 'by1BaseYear_d' },
+							},
+						},
+						terms: {
+							field: 'org_jbook_desc_s',
+							size: 10000,
+						},
+					},
 				},
 				query: {
 					bool: {
@@ -1359,6 +1372,14 @@ class JBookSearchUtility {
 					fields: {},
 				},
 			};
+
+			// ES FILTERS
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
+
+			if (filterQueries.length > 0) {
+				query.query.bool.filter = filterQueries;
+			}
 
 			if (searchText !== '') {
 				query.query.bool.must.push({
@@ -1436,14 +1457,6 @@ class JBookSearchUtility {
 				});
 			});
 
-			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
-			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
-
-			if (filterQueries.length > 0) {
-				query.query.bool.filter = filterQueries;
-			}
-
 			let sortText = jbookSearchSettings.sort[0].id;
 			if (!sortSelected && searchText && searchText !== '') {
 				sortText = 'Relevance';
@@ -1476,7 +1489,7 @@ class JBookSearchUtility {
 					break;
 			}
 
-			console.log(JSON.stringify(query));
+			// console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
@@ -1502,27 +1515,111 @@ class JBookSearchUtility {
 					});
 				}
 
+				let shouldQuery = {
+					bool: {
+						should: [],
+					},
+				};
+
 				// Budget Sub Activity
-				if (jbookSearchSettings.budgetSubActivity) {
-					let shouldQuery = {
-						bool: {
-							should: [],
-						},
-					};
+				if (jbookSearchSettings.budgetSubActivity || jbookSearchSettings.primaryReviewStatus) {
+					if (jbookSearchSettings.budgetSubActivity) {
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'P40-13_BSA_Title_t',
+							},
+						});
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'P40-13_BSA_Title_t',
-						},
-					});
+						shouldQuery.bool.should.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetSubActivity}*`,
+								default_field: 'budgetActivityTitle_t',
+							},
+						});
+					}
 
-					shouldQuery.bool.should.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetSubActivity}*`,
-							default_field: 'budgetActivityTitle_t',
-						},
-					});
+					if (jbookSearchSettings.primaryReviewStatus) {
+						jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+							if (status === 'Not Reviewed') {
+								shouldQuery.bool.should.push({
+									bool: {
+										must_not: [
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Finished Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												nested: {
+													path: 'review_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	term: {
+																		'review_n.primary_review_status_s':
+																			'Partial Review',
+																	},
+																},
+																{
+																	term: {
+																		'review_n.portfolio_name_s':
+																			jbookSearchSettings.selectedPortfolio,
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+										],
+									},
+								});
+							} else {
+								shouldQuery.bool.should.push({
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														match: {
+															'review_n.primary_review_status_s': status,
+														},
+													},
+													{
+														match: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								});
+							}
+						});
+					}
 
 					filterQueries.push(shouldQuery);
 				}
@@ -1541,16 +1638,16 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
 					const rangeQuery = {
 						range: {
-							totalCost_s: {},
+							totalCost_d: {},
 						},
 					};
 
 					if (jbookSearchSettings.minTotalCost) {
-						rangeQuery.range.totalCost_s.gte = jbookSearchSettings.minTotalCost;
+						rangeQuery.range.totalCost_d.gte = jbookSearchSettings.minTotalCost;
 					}
 
 					if (jbookSearchSettings.maxTotalCost) {
-						rangeQuery.range.totalCost_s.lte = jbookSearchSettings.maxTotalCost;
+						rangeQuery.range.totalCost_d.lte = jbookSearchSettings.maxTotalCost;
 					}
 
 					filterQueries.push(rangeQuery);
@@ -1636,7 +1733,6 @@ class JBookSearchUtility {
 					const convertedAgencies = [];
 
 					jbookSearchSettings.serviceAgency.forEach((agency) => {
-						console.log(agency);
 						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
 							if (serviceAgencyMappings[agencyKey] === agency) {
 								convertedAgencies.push(agencyKey);
@@ -1678,12 +1774,22 @@ class JBookSearchUtility {
 
 		// Primary Reviewer
 		if (jbookSearchSettings.primaryReviewer) {
+			const reviewerTerms = jbookSearchSettings.primaryReviewer.map((reviewer) => {
+				return { term: { 'review_n.primary_reviewer_s': reviewer } };
+			});
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
 					query: {
-						terms: {
-							'review_n.primary_reviewer_s': jbookSearchSettings.primaryReviewer,
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
 						},
 					},
 				},
@@ -1692,12 +1798,22 @@ class JBookSearchUtility {
 
 		// Service Reviewer
 		if (jbookSearchSettings.serviceReviewer) {
+			const reviewerTerms = jbookSearchSettings.serviceReviewer.map((reviewer) => {
+				return { term: { 'review_n.service_reviewer_s': reviewer } };
+			});
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
 					query: {
-						terms: {
-							'review_n.service_reviewer_s': jbookSearchSettings.serviceReviewer,
+						bool: {
+							must: [
+								{
+									bool: {
+										should: reviewerTerms,
+									},
+								},
+								{ term: { 'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio } },
+							],
 						},
 					},
 				},

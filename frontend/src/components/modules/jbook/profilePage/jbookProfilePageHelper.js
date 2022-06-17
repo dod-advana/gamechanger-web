@@ -17,7 +17,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
+import { getClassLabel, getTotalCost, formatNum } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
@@ -32,18 +32,6 @@ const boldKeys = (data) => {
 		pair.Key = <strong>{pair.Key}</strong>;
 		return pair;
 	});
-};
-
-const formatNum = (num) => {
-	const parsed = parseInt(num);
-	if (parsed > 999) {
-		return `${(parsed / 1000).toFixed(2)} $B`;
-	}
-
-	if (parsed > 999999) {
-		return `${(parsed / 1000000).toFixed(2)} $T`;
-	}
-	return `${parsed} $M`;
 };
 
 const SideNav = (props) => {
@@ -386,27 +374,27 @@ const Contracts = (props) => {
 		const contractCols = [
 			{
 				Key: 'Parent Award',
-				Value: contract.parentAward,
+				Value: contract.parent_award_s,
 			},
 			{
 				Key: 'PIIN',
-				Value: contract.piin,
+				Value: contract.piin_s,
 			},
 			{
 				Key: 'Award Description',
-				Value: contract.awardDesc,
+				Value: contract.award_desc_s,
 			},
 			{
 				Key: 'Product or Service Description',
-				Value: contract.productDesc,
+				Value: contract.product_desc_s,
 			},
 			{
 				Key: 'Total Base and All Options Value',
-				Value: contract.totalObligatedAmount,
+				Value: contract.total_oblig_amount_s,
 			},
 			{
 				Key: 'Mod Number',
-				Value: contract.modNumber,
+				Value: contract.modification_number_s,
 			},
 		];
 
@@ -420,8 +408,8 @@ const Contracts = (props) => {
 				disableWrap={true}
 				title={
 					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-						<div>Vendor: {contract.vendorName}</div>
-						<div>Fiscal Year: {contract.fiscalYear ?? 'N/A'}</div>
+						<div>Vendor: {contract.vendor_name_s}</div>
+						<div>Fiscal Year: {contract.fiscal_year_s ?? 'N/A'}</div>
 					</div>
 				}
 				headerExtraStyle={{
@@ -617,7 +605,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 		{
@@ -631,7 +619,7 @@ const getMetadataTableData = (
 			),
 			Value:
 				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M`
+					? `$${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} M`
 					: 'N/A',
 		},
 	];
