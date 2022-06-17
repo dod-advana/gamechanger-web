@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -24,15 +24,40 @@ const StyledContainer = styled.div`
 `;
 
 // component for dragging and dropping files for upload/input
-const DragAndDrop = ({ text }) => {
-	const { acceptedFiles, getRootProps, getInputProps } = useDropzone();
+// text = the description that goes in the drag and drop
+// acceptedFileTypes = list of string, expects the file MIME type
+// handleFileDrop = function for handling when files are uploaded
+const DragAndDrop = ({ text = '', acceptedFileTypes = null, handleFileDrop = () => {} }) => {
+	// file validator function
+	const validateFile = useCallback(
+		(file) => {
+			if (!acceptedFileTypes || acceptedFileTypes.includes(file.type)) {
+				return null;
+			} else {
+				return {
+					code: 'unaccepted-file-type',
+					message: 'File type not accepted',
+				};
+			}
+		},
+		[acceptedFileTypes]
+	);
+
+	// create dropzone component props
+	const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+		multiple: false,
+		validator: validateFile,
+		onDrop: handleFileDrop,
+	});
+
+	// console.log(acceptedFiles);
 
 	return (
 		<StyledContainer>
 			<StyledDropArea {...getRootProps({ className: 'dropzone' })}>
 				<input {...getInputProps()} />
 				<UploadFileIcon style={{ height: 65, width: 65, color: '#121F44' }} />
-				<p>{text ?? 'Drag and drop a file here, or click to select a file'}</p>
+				<p>{text}</p>
 			</StyledDropArea>
 		</StyledContainer>
 	);

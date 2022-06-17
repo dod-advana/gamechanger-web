@@ -15,6 +15,8 @@ import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import ExportIcon from '../../../images/icon/Export.svg';
 import DragAndDrop from '../../common/DragAndDrop';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 const EDADocumentsComparisonTool = ({
 	context,
@@ -420,6 +422,62 @@ const EDADocumentsComparisonTool = ({
 		setSelectedParagraph(paragraph);
 	};
 
+	// handle an uploaded file to drag and drop
+	const handleFileDrop = useCallback(async (acceptedFile = [{}]) => {
+		let [file] = acceptedFile;
+
+		switch (file.type) {
+			case 'text/plain':
+			case 'application/json':
+				let text = await file.text();
+				setParagraphText(text);
+				break;
+			case 'application/pdf':
+				pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+				let fileReader = new FileReader();
+
+				fileReader.onload = (event) => {
+					let typedarray = new Uint8Array(event.target.result);
+
+					const loadingTask = pdfjsLib.getDocument(typedarray);
+					loadingTask.promise.then((pdf) => {
+						let maxPages = pdf._pdfInfo.numPages;
+						let countPromises = [];
+						for (let i = 1; i <= maxPages; i++) {
+							let page = pdf.getPage(i);
+
+							countPromises.push(
+								page.then((page) => {
+									let textContent = page.getTextContent();
+									return textContent.then((text) => {
+										return text.items
+											.map((s) => {
+												return s.str;
+											})
+											.join('');
+									});
+								})
+							);
+						}
+
+						return Promise.all(countPromises).then((texts) => {
+							setParagraphText(texts.join(''));
+						});
+					});
+				};
+
+				fileReader.readAsArrayBuffer(file);
+
+				break;
+			case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+				break;
+			default:
+				break;
+		}
+		return;
+	}, []);
+
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
 			<Grid item xs={12}>
@@ -562,7 +620,16 @@ const EDADocumentsComparisonTool = ({
 										<div className={'instruction-box'}>
 											To search for similar documents, upload a document:
 										</div>
-										<DragAndDrop />
+										<DragAndDrop
+											text="Drag and drop a file here, or click to select a file (pdf, txt, json or docx only)"
+											acceptedFileTypes={[
+												'application/pdf',
+												'text/plain',
+												'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+												'application/json',
+											]}
+											handleFileDrop={handleFileDrop}
+										/>
 									</Grid>
 
 									<Grid container style={{ display: 'flex' }}>
