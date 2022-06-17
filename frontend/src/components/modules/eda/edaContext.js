@@ -41,6 +41,8 @@ const initState = {
 		fundingAgencyName: null,
 		naicsCode: null,
 		duns: null,
+		contractSOW: null,
+		clinText: null,
 	},
 	contractAwards: {},
 	showDialog: false,

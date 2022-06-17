@@ -1,8 +1,8 @@
-## Description of this Release
+## Description of this Feature
 
 <!--- Describe your changes in detail, must use a list if more than 2-3 distinct items -->
 
-## Issues/Tickets Contained in this Release
+## Issues/Tickets Contained in this Feature
 
 <!--- Please link to the issues/tickets here: -->
 
@@ -11,7 +11,7 @@
 <!--- Describe details on testing the ticket - endpoints to call, cURL requests, data objects, frontend pages, etc. -->
 <!--- If there are multiple test cases, please list the expected input and output for each. -->
 
-## Link to Server with this Release Branch
+## Link to Server with this Feature Branch
 
 <!--- Add the URL to the server this branch is on so the Success Team can easily get to it for review --->
 
