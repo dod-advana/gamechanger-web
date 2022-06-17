@@ -295,31 +295,32 @@ const JBookProfilePage = (props) => {
 				setKeywordCheckboxes(projectData.keywords);
 			} else {
 				let accomp = [];
-
 				if (projectData.accomplishments) {
 					projectData.accomplishments.forEach((accom) => {
 						accomp.push({
-							title: accom.Accomp_Title_text,
+							title: accom.Accomp_Title_text_t,
 							data: [
 								{
 									Key: 'Description',
-									Value: accom.Accomp_Desc_text ?? '',
+									Value: accom.Accomp_Desc_text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Plans',
-									Value: accom.PlanPrgrm_Fund_CY_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_CY_Text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Amount',
-									Value: accom.PlanPrgrm_Fund_CY ? formatNum(accom.PlanPrgrm_Fund_CY) : '',
+									Value: accom.PlanPrgrm_Fund_CY_d ? formatNum(accom.PlanPrgrm_Fund_CY_d) : '',
 								},
 								{
 									Key: 'Current Year Plans',
-									Value: accom.PlanPrgrm_Fund_BY1Base_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_Text_t ?? '',
 								},
 								{
 									Key: 'Current Year Amount',
-									Value: accom.PlanPrgrm_Fund_BY1Base ? formatNum(accom.PlanPrgrm_Fund_BY1Base) : '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_d
+										? formatNum(accom.PlanPrgrm_Fund_BY1Base_d)
+										: '',
 								},
 							],
 						});
@@ -343,8 +344,6 @@ const JBookProfilePage = (props) => {
 							}
 						});
 					});
-
-					console.log(accomp);
 				}
 
 				try {
