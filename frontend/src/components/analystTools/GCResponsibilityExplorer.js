@@ -98,6 +98,15 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	};
 
 	useEffect(() => {
+		if (stepIndex === 5) {
+			setReView('Document');
+		}
+		if (stepIndex === 6) {
+			setReView('Chart');
+		}
+	}, [stepIndex]);
+
+	useEffect(() => {
 		if (reloadResponsibilities) {
 			handleFetchData({ page: 1, filtered: filters });
 			setReloadResponsibilities(false);
@@ -363,7 +372,6 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				setStepIndex={setStepIndex}
 			/>
 
-			<GCButton style={{ display: 'none' }} id="set-re-view" onClick={() => setReView('Chart')}></GCButton>
 			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
 		</div>
 	);

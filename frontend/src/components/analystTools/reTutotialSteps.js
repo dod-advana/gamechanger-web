@@ -47,6 +47,7 @@ const reTutorialSteps = [
 		...tutorialObject,
 		target: '.re-tutorial-step-4',
 		title: 'Document Viewer',
+		disableScrolling: true,
 		content:
 			"The document for the currently selected responsibility can be viewed in the center of the screen. The selected responsiblity's text and corresponding entity will be highlighted in the document.",
 	},
@@ -54,17 +55,16 @@ const reTutorialSteps = [
 		...tutorialObject,
 		target: '.re-tutorial-step-5',
 		title: 'Export Results',
+		disableScrolling: true,
 		content: 'Export results to CSV by selecting the export icon.',
 	},
 	{
 		...tutorialObject,
 		target: '.re-tutorial-step-6',
 		title: 'Change the View',
+		disableScrolling: true,
 		content:
 			'The view dropdown allows users to switch from the default "Document View" to a table format in the "Chart View"',
-
-		clickButton: true,
-		buttonID: 'set-re-view',
 	},
 	{
 		...tutorialObject,
