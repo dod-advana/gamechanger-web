@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@datapunt/matomo-tracker-react": "0.3.1",
 		"@dod-advana/advana-platform-ui": "1.4.10",
-		"@dod-advana/advana-side-nav": "0.1.4",
+		"@dod-advana/advana-side-nav": "0.1.5",
 		"@dod-advana/advana-tutorial-overlay": "0.0.5",
 		"@emotion/react": "11.7.0",
 		"@emotion/styled": "11.6.0",
