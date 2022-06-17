@@ -7,6 +7,7 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import Pluralize from 'pluralize';
 import { setState } from '../../../utils/sharedFunctions';
 
 import { trackEvent } from '../../telemetry/Matomo';
@@ -72,21 +73,48 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	);
 };
 
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false) => {
-	const endsInY = displayName[displayName.length - 1] === 'y';
-	const endsInS = displayName[displayName.length - 1] === 's';
+const keywordsOpts = ['Yes', 'No'];
 
+const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
+	return (
+		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+			{options.map((option) => {
+				return (
+					<FormControlLabel
+						key={`${option}`}
+						value={`${option}`}
+						classes={{
+							root: classes.rootLabel,
+							label: classes.checkboxPill,
+						}}
+						control={
+							<Checkbox
+								classes={{
+									root: classes.rootButton,
+									checked: classes.checkedButton,
+								}}
+								name={`${option}`}
+								checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
+								onClick={(event) => handleFilterChange(event, state, dispatch, type)}
+							/>
+						}
+						label={`${option}`}
+						labelPlacement="end"
+					/>
+				);
+			})}
+		</FormGroup>
+	);
+};
+
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, useES = false, customOptions) => {
 	const allSelected = `${type}AllSelected`;
-	const allText = `All ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
-		endsInY ? 'ies' : endsInS ? 'es' : 's'
-	}`;
-	const specificText = `Specific ${endsInY ? displayName.slice(0, displayName.length - 1) : displayName}${
-		endsInY ? 'ies' : endsInS ? 'es' : 's'
-	}`;
+	const allText = `All ${Pluralize(displayName)}`;
+	const specificText = `Specific ${Pluralize(displayName)}`;
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
-	const options = state.defaultOptions[optionType];
+	const options = customOptions || state.defaultOptions[optionType];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -134,35 +162,9 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, use
 							style={styles.titleText}
 						/>
 					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.jbookSearchSettings[specificSelected] &&
-							options &&
-							options.map((option) => {
-								return (
-									<FormControlLabel
-										key={`${option}`}
-										value={`${option}`}
-										classes={{
-											root: classes.rootLabel,
-											label: classes.checkboxPill,
-										}}
-										control={
-											<Checkbox
-												classes={{
-													root: classes.rootButton,
-													checked: classes.checkedButton,
-												}}
-												name={`${option}`}
-												checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
-												onClick={(event) => handleFilterChange(event, state, dispatch, type)}
-											/>
-										}
-										label={`${option}`}
-										labelPlacement="end"
-									/>
-								);
-							})}
-					</FormGroup>
+					{state.jbookSearchSettings[specificSelected] &&
+						options &&
+						renderFilterCheckboxesOptions(state, dispatch, classes, type, options)}
 				</>
 			}
 		</FormControl>
@@ -184,23 +186,18 @@ const resetAdvancedSettings = (dispatch) => {
 };
 
 const renderStats = (contractTotals) => {
-	let data = Object.keys(contractTotals).map((key) => {
+	contractTotals.sort((a, b) => b.sum_agg.value - a.sum_agg.value);
+	let data = contractTotals.map((item) => {
 		return {
-			Key: key,
+			Key: item.key,
 			Value:
-				contractTotals[key] > 1000
-					? (contractTotals[key] / 1000).toFixed(2) + ' B'
-					: parseFloat(contractTotals[key]).toFixed(2) + ' M',
+				item.sum_agg.value > 1000
+					? (item.sum_agg.value / 1000).toFixed(2) + ' B'
+					: parseFloat(item.sum_agg.value).toFixed(2) + ' M',
 		};
 	});
-	data = data.filter((row) => row.Key !== '');
-	data.sort((a, b) => {
-		if (a.Key === 'Total Obligated Amt.') {
-			return 1;
-		} else {
-			return a.Key > b.Key ? 1 : -1;
-		}
-	});
+
+	data = data.filter((item) => item.Value !== '0.00 M');
 
 	return (
 		<SimpleTable
@@ -213,6 +210,7 @@ const renderStats = (contractTotals) => {
 			colWidth={{
 				whiteSpace: 'nowrap',
 				maxWidth: '200px',
+				minWidth: '100px',
 			}}
 			disableWrap={true}
 			hideHeader={true}
@@ -223,7 +221,11 @@ const renderStats = (contractTotals) => {
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
 
-	const { contractTotals, jbookSearchSettings } = state;
+	const { contractTotals, jbookSearchSettings, selectedPortfolio, portfolios } = state;
+	const portfolioMap = {};
+	for (let item of portfolios) {
+		portfolioMap[item.name] = item;
+	}
 
 	return (
 		<div style={{ marginLeft: 15 }}>
@@ -364,93 +366,119 @@ const getSearchMatrixItems = (props) => {
 				</div>
 			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
-					header={<b>PRIMARY REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
+						header={<b>PRIMARY REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
-					header={<b>SERVICE REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
+						header={<b>SERVICE REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
-					header={<b>POC REVIEWER</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					<InputFilter
-						setJBookSetting={handleFilterInputChange}
-						field={'pocReviewer'}
-						name={'POC Reviewer'}
-					/>
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
+						header={<b>POC REVIEWER</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<InputFilter
+							setJBookSetting={handleFilterInputChange}
+							field={'pocReviewer'}
+							name={'POC Reviewer'}
+						/>
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.reviewStatusSpecificSelected}
-					header={<b>REVIEW STATUS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio !== 'General' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
+						header={<b>REVIEW STATUS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{selectedPortfolio === 'AI Inventory'
+							? renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')
+							: renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewStatus', 'review status')}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
-					header={<b>HAS KEYWORDS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'hasKeywords', 'has keyword')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
+						header={<b>HAS KEYWORDS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+							{renderFilterCheckboxesOptions(state, dispatch, classes, 'hasKeywords', keywordsOpts)}
+						</FormControl>
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
-					header={<b>LABELS</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'primaryClassLabel', 'primary class label')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio !== 'General' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+						header={<b>TAGS</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(
+							state,
+							dispatch,
+							classes,
+							'primaryClassLabel',
+							'primary class tag',
+							false,
+							portfolioMap[selectedPortfolio].tags
+						)}
+					</GCAccordion>
+				</div>
+			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
-				<GCAccordion
-					expanded={jbookSearchSettings.sourceSpecificSelected}
-					header={<b>SOURCE</b>}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'sourceTag', 'source tag')}
-				</GCAccordion>
-			</div>
+			{selectedPortfolio === 'AI Inventory' && (
+				<div style={{ width: '100%', marginBottom: 10 }}>
+					<GCAccordion
+						expanded={jbookSearchSettings.sourceSpecificSelected}
+						header={<b>SOURCE</b>}
+						headerBackground={'rgb(238,241,242)'}
+						headerTextColor={'black'}
+						headerTextWeight={'normal'}
+					>
+						{renderFilterCheckboxes(state, dispatch, classes, 'sourceTag', 'source tag')}
+					</GCAccordion>
+				</div>
+			)}
 
 			<button
 				type="button"
@@ -487,17 +515,17 @@ const getSearchMatrixItems = (props) => {
 			<GCAccordion
 				contentPadding={0}
 				expanded={true}
-				header={<b>ESTIMATED BUDGET TOTALS</b>}
+				header={<b>Search Results: Budget Request Totals by Org</b>}
 				headerBackground={'rgb(28, 45, 101)'}
 				headerTextColor={'white'}
 				headerTextWeight={'normal'}
 			>
-				{state.statsLoading && (
+				{state.runningSearch && (
 					<div style={{ margin: '0 auto' }}>
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
-				{!state.statsLoading && (
+				{!state.runningSearch && (
 					<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 				)}
 			</GCAccordion>
@@ -519,7 +547,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={min}
 					/>
-					$M
+					M
 				</div>
 			</div>
 			<div style={{ display: 'flex', margin: '10px 0' }}>
@@ -532,7 +560,7 @@ const renderFundingMinMaxInput = (min, max) => {
 						setJBookSetting={handleFilterInputChange}
 						field={max}
 					/>
-					$M
+					M
 				</div>
 			</div>
 		</div>

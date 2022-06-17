@@ -50,30 +50,16 @@ export default function PDFViewer({ location }) {
 		setCloneIndex(query.get('cloneIndex'));
 	}, [query, filename]);
 
-	if (filename && filename.toLowerCase().endsWith('pdf')) {
-		return (
-			<iframe
-				title={'PDFViewer'}
-				className="aref"
-				id={'pdfViewer'}
-				ref={measuredRef}
-				onLoad={() =>
-					handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer', cloneIndex, gameChangerAPI)
-				}
-				style={{ width: '100%', height: '100%' }}
-			/>
-		);
-	} else {
-		return (
-			//           <div>
-			<iframe
-				title={'PDFViewer'}
-				className="aref"
-				id={'pdfViewer'}
-				src={fileUrl}
-				style={{ width: '100%', height: '100%', padding: '32px' }}
-			/>
-			//            </div>
-		);
-	}
+	return (
+		<iframe
+			title={'PDFViewer'}
+			className="aref"
+			id={'pdfViewer'}
+			ref={measuredRef}
+			onLoad={() =>
+				handlePdfOnLoad('pdfViewer', 'viewerContainer', filename, 'PDF Viewer', cloneIndex, gameChangerAPI)
+			}
+			style={{ width: '100%', height: '100%' }}
+		/>
+	);
 }
