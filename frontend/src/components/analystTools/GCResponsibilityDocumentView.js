@@ -17,7 +17,7 @@ import PDFHighlighter from './PDFHighlighter';
 import GCButton from '../common/GCButton';
 import UOTAlert from '../common/GCAlert';
 import GCResponsiblityEditModal from './GCResponsiblityEditModal';
-import { styles as adminStyles } from '../../components/admin/util/GCAdminStyles';
+import { styles as adminStyles } from '../admin/util/GCAdminStyles';
 import styled from 'styled-components';
 
 const gameChangerAPI = new GameChangerAPI();
