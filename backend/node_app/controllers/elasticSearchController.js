@@ -120,6 +120,7 @@ class ElasticSearchController {
 					published_b: app['published'],
 					tags_n: app['tags'],
 					description_t: app['description'],
+					streamId_s: app['stream']['id'],
 					streamName_s: app['stream']['name'],
 					streamCustomProperties_s: app['stream']['customProperties'],
 					fileSize_i: app['fileSize'],
@@ -128,6 +129,7 @@ class ElasticSearchController {
 					dynamicColor_s: app['dynamicColor'],
 					appCustomProperties_s: app['customProperties'],
 					businessDomains_s: app['businessDomains'],
+					owner_s: app['owner']['name']
 				};
 			});
 
