@@ -2074,7 +2074,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		totalCost_s: {
+		totalCost_d: {
 			newName: 'totalCost',
 			defaultValue: '',
 			processValue: (value) => value,
