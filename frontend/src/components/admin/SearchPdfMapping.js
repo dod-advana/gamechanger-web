@@ -43,15 +43,6 @@ const DatePickerWrapper = styled.div`
 		}
 	}
 `;
-const CreateWrapper = styled.div`
-	display: flex;
-	align-items: center;
-	float: right;
-`;
-const LabelStack = styled.div`
-    display: flex
-	margin-left: 24px;
-`;
 
 const TableRow = styled.div`
 	text-align: center;
@@ -266,7 +257,6 @@ const documentUsageColumns = [
  */
 const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData) => {
 	try {
-		// daysBack, offset, filters, sorting, pageSize
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
@@ -287,7 +277,6 @@ const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData
  */
 const getFeedbackData = async (setFeedbackData) => {
 	try {
-		// daysBack, offset, filters, sorting, pageSize
 		const data = await gameChangerAPI.getFeedbackData();
 		setFeedbackData(data.data.results);
 	} catch (e) {
@@ -300,9 +289,9 @@ const getFeedbackData = async (setFeedbackData) => {
  * The query is handled in gamechanger-api.
  * @method getDocumentData
  */
-const getDocumentData = async (daysBack, setDocumentData) => {
+const getDocumentData = async (startDate, endDate, setDocumentData) => {
 	try {
-		const params = { daysBack };
+		const params = { startDate, endDate };
 		const { data = {} } = await gameChangerAPI.getDocumentUsage(params);
 		setDocumentData(data.data);
 	} catch (e) {
@@ -359,7 +348,7 @@ const getUserGraphData = async (startDate, endDate, cloneName, setGraphData, set
  * to download as a csv
  * @class SearchPdfMapping
  */
-export default (props) => {
+export default () => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
 	const [feedbackData, setFeedbackData] = useState([]);
@@ -369,29 +358,10 @@ export default (props) => {
 	const [graphData, setGraphData] = useState({ userBar: [], searchBar: [] });
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
-	const [daysBack, setDaysBack] = useState(3);
 	const [tabIndex, setTabIndex] = useState('userAgg');
 	const [cloneName, setCloneName] = useState({ name: '', id: 0 });
 	const [cloneList, setCloneList] = useState([]);
 
-	// flags that parameters have been changed and on
-	// blur or enter press we should update the query
-	const [shouldUpdate, setShouldUpdate] = useState(false);
-	/**
-	 * Handles text change in input
-	 * @method handleDaysBackChange
-	 * @param {*} event
-	 */
-	const handleDaysBackChange = (event) => {
-		const value = event.target.value;
-		const parsed = parseInt(value);
-		if (!isNaN(parsed) && parsed > 0) {
-			setShouldUpdate(true);
-			setDaysBack(parsed);
-		} else if (parsed === 0 || value === '') {
-			setDaysBack(value);
-		}
-	};
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
@@ -407,47 +377,6 @@ export default (props) => {
 			setCloneList(data.data);
 		} catch (e) {
 			console.error(e);
-		}
-	};
-
-	/**
-	 * When an input is deselected check if the inputs are valid and a
-	 * change was made. If so then query the data with new values.
-	 * @method handleBlur
-	 * @param {*} event
-	 */
-	const handleBlur = (event) => {
-		if (!daysBack) {
-			setShouldUpdate(false);
-			setDaysBack(3);
-		}
-		if (shouldUpdate) {
-			setShouldUpdate(false);
-			switch (tabIndex) {
-				case 'pdfMapping':
-					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-					getUserAggData(startDate, endDate, cloneName, setUserAggData);
-					getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
-					break;
-				case 'userTracking':
-					getDocumentData(daysBack, setDocumentData);
-					break;
-				default:
-					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-					getUserAggData(startDate, endDate, cloneName, setUserAggData);
-					getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
-					getDocumentData(daysBack, setDocumentData);
-			}
-		}
-	};
-	/**
-	 * If the enter key is pressed while in an input trigger handleBlur
-	 * @method handlePositionEnter
-	 * @param {*} event
-	 */
-	const handlePositionEnter = (event) => {
-		if (event.key === 'Enter') {
-			handleBlur();
 		}
 	};
 
@@ -523,15 +452,12 @@ export default (props) => {
 	 */
 	const exportData = async (name) => {
 		try {
-			// daysBack, offset, filters, sorting, pageSize
 			const params = {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 				table: name,
-				daysBack: daysBack,
 			};
 			const data = await gameChangerAPI.exportUserData(params);
-			console.log(data);
 			const url = window.URL.createObjectURL(
 				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
 			);
@@ -576,16 +502,16 @@ export default (props) => {
 				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
 				break;
 			case 'userTracking':
-				getDocumentData(daysBack, setDocumentData);
+				getDocumentData(startDate, endDate, setDocumentData);
 				break;
 			default:
 				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
 				getFeedbackData(setFeedbackData);
 				getUserAggData(startDate, endDate, cloneName, setUserAggData);
 				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
-				getDocumentData(daysBack, setDocumentData);
+				getDocumentData(startDate, endDate, setDocumentData);
 		}
-	}, [daysBack, tabIndex, startDate, endDate, cloneName]);
+	}, [tabIndex, startDate, endDate, cloneName]);
 
 	useEffect(() => {
 		getCloneData();
@@ -934,20 +860,6 @@ export default (props) => {
 					<TabPanel>
 						<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Document Usage Data</p>
-							<CreateWrapper>
-								<LabelStack>
-									<label htmlFor="daysBack" style={{ marginRight: '10px', marginTop: '4px' }}>
-										Days Back:
-									</label>
-									<input
-										name="daysBack"
-										value={daysBack}
-										onChange={handleDaysBackChange}
-										onBlur={handleBlur}
-										onKeyPress={handlePositionEnter}
-									/>
-								</LabelStack>
-							</CreateWrapper>
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
