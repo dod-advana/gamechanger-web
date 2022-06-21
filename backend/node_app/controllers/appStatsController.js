@@ -347,15 +347,6 @@ class AppStatsController {
 		});
 	}
 
-	resolveQuery(error, results) {
-		if (error) {
-			this.logger.error(error, 'BAP9ZIP');
-			resolve([]);
-		} else {
-			resolve(results);
-		}
-	}
-
 	/**
 	 * This method gets the visitorID tied to one userid
 	 * @method getOneUserVisitorID
@@ -375,7 +366,14 @@ class AppStatsController {
 					a.user_id = ?
 				`,
 				[userID],
-				resolveQuery
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
 			);
 		});
 	}
@@ -402,7 +400,14 @@ class AppStatsController {
 				)
 				`,
 				[cloneName],
-				resolveQuery
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
 			);
 		});
 	}
@@ -468,7 +473,14 @@ class AppStatsController {
 			where a.idaction = b.idaction_event_category
 			and a.name LIKE 'GAMECHANGER_%'
 			`,
-				resolveQuery
+				(error, results, fields) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
 			);
 		});
 	}
