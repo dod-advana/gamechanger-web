@@ -70,7 +70,7 @@ class AppStatsController {
 	 * @returns
 	 */
 	async getAvgSearchesPerSession(daysAgo = 3, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			const startDate = this.getDateNDaysAgo(daysAgo);
 			connection.query(
 				`select SUM(search_count)/COUNT(search_count) as avg_search_count from (select distinct idvisit, 0 as search_count
@@ -81,7 +81,7 @@ class AppStatsController {
 					where a.idaction_name = b.idaction and a.idvisit = c.idvisit and c.visit_last_action_time > ? and a.search_cat like 'GAMECHANGER%' 
 					group by a.idvisit, c.user_id)x;`,
 				[`${startDate}`, `${startDate}`],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error(error, '5LR23WU');
 						throw error;
@@ -100,7 +100,7 @@ class AppStatsController {
 	 * @returns
 	 */
 	async getTopSearches(cloneData = {}, daysAgo = 3, excluding = [], blacklist = [], topN = 10, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			let cloneNameAdd = cloneData.clone_name.toLowerCase();
 
 			let excludeValues = ['totallyfakethisisnotrealyesiwanttomergethis'];
@@ -137,7 +137,7 @@ class AppStatsController {
 			queryValues.push(topN);
 
 			const query = `select trim(lower(b.name)) as search, count(b.name) as count from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c where a.idaction_name = b.idaction and a.idvisit = c.idvisit and lower(search_cat) like ? and a.server_time > ? and c.user_id not in (${excludingString}) and ${blacklistString} group by b.name order by count desc limit ?;`;
-			connection.query(query, queryValues, (error, results, fields) => {
+			connection.query(query, queryValues, (error, results) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
 					throw error;
@@ -230,8 +230,8 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	async queryPdfOpend(startDate, endDate, cloneName, connection) {
-		return new Promise((resolve, reject) => {
+	async queryPdfOpend(startDate, endDate, connection) {
+		return new Promise((resolve) => {
 			const self = this;
 			connection.query(
 				`
@@ -254,7 +254,7 @@ class AppStatsController {
 					documenttime desc,
 					idvisit;`,
 				[startDate, endDate],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
 						throw error;
@@ -273,7 +273,7 @@ class AppStatsController {
 	 *
 	 */
 	async queryPDFOpenedByUserId(userId, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			const self = this;
 			connection.query(
 				`
@@ -291,7 +291,7 @@ class AppStatsController {
 					documenttime desc
 				limit 10`,
 				[userId],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error('No userids found', 'B07IQHT');
 						resolve([]);
@@ -311,7 +311,7 @@ class AppStatsController {
 	 *
 	 */
 	async querySearches(startDate, endDate, cloneName, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 			select
@@ -347,6 +347,15 @@ class AppStatsController {
 		});
 	}
 
+	resolveQuery(error, results) {
+		if (error) {
+			this.logger.error(error, 'BAP9ZIP');
+			resolve([]);
+		} else {
+			resolve(results);
+		}
+	}
+
 	/**
 	 * This method gets the visitorID tied to one userid
 	 * @method getOneUserVisitorID
@@ -355,7 +364,7 @@ class AppStatsController {
 	 *
 	 */
 	async getOneUserVisitorID(userID, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select 
@@ -366,14 +375,7 @@ class AppStatsController {
 					a.user_id = ?
 				`,
 				[userID],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						resolve([]);
-					} else {
-						resolve(results);
-					}
-				}
+				resolveQuery
 			);
 		});
 	}
@@ -386,7 +388,7 @@ class AppStatsController {
 	 *
 	 */
 	async getUserVisitorID(cloneName, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select 
@@ -400,14 +402,7 @@ class AppStatsController {
 				)
 				`,
 				[cloneName],
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						resolve([]);
-					} else {
-						resolve(results);
-					}
-				}
+				resolveQuery
 			);
 		});
 	}
@@ -420,7 +415,7 @@ class AppStatsController {
 	 * @returns
 	 */
 	async queryEvents(startDate, endDate, cloneName, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				SELECT 
@@ -442,7 +437,7 @@ class AppStatsController {
 				AND server_time <= ?
 			`,
 				[cloneName, startDate, endDate],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP');
 						throw error;
@@ -461,7 +456,7 @@ class AppStatsController {
 	 *
 	 */
 	async queryClones(connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 			select
@@ -473,14 +468,7 @@ class AppStatsController {
 			where a.idaction = b.idaction_event_category
 			and a.name LIKE 'GAMECHANGER_%'
 			`,
-				(error, results, fields) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
-						resolve([]);
-					} else {
-						resolve(results);
-					}
-				}
+				resolveQuery
 			);
 		});
 	}
@@ -492,7 +480,7 @@ class AppStatsController {
 	async querySearchPdfMapping(opts, connection) {
 		const { userId } = opts;
 		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
 		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneName, connection);
 
 		const searchMap = {};
@@ -1145,7 +1133,7 @@ class AppStatsController {
 
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
 		const cards = await this.getCardSearchAggregationQuery(
 			opts.startDate,
 			opts.endDate,
