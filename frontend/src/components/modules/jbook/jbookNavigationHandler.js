@@ -11,7 +11,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import { setState } from '../../../utils/sharedFunctions';
-import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
+// import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 import UserIcon from '../../../images/icon/UserIcon.png';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
