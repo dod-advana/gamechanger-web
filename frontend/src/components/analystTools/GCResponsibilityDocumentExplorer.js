@@ -473,7 +473,6 @@ export default function ResponsibilityDocumentExplorer({
 										}}
 										renderInput={(params) => (
 											<TextField
-												id="this-is-a-test"
 												{...params}
 												classes={{ root: classes.root }}
 												variant="outlined"
@@ -681,6 +680,7 @@ export default function ResponsibilityDocumentExplorer({
 			</div>
 			<div
 				className={`col-xs-${RIGHT_PANEL_COL_WIDTH} re-tutorial-step-2`}
+				id={'re-results-col'}
 				style={{
 					display: rightPanelOpen ? 'block' : 'none',
 					paddingRight: 0,

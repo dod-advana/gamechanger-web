@@ -104,6 +104,11 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		if (stepIndex === 6) {
 			setReView('Chart');
 		}
+		if (stepIndex === 1 || stepIndex === 2) {
+			window.scrollTo(0, 0);
+			const resultsDiv = document.getElementById('re-results-col');
+			resultsDiv.scrollTop = 0;
+		}
 	}, [stepIndex]);
 
 	useEffect(() => {
@@ -370,6 +375,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				resetPage={resetPage}
 				stepIndex={stepIndex}
 				setStepIndex={setStepIndex}
+				showSkipButton={false}
 			/>
 
 			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
