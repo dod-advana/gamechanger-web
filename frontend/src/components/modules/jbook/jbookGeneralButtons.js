@@ -6,6 +6,7 @@ import EditEsIndexModal from '../../admin/GeneralAdminButtons/EditEsIndexModal';
 import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import fileDownload from 'js-file-download';
+import moment from 'moment';
 
 const gameChangerAPI = new GameChangerAPI();
 /**
@@ -79,16 +80,31 @@ const JBOOKGeneralAdminButtons = () => {
 								onClick={async () => {
 									try {
 										createAlert('Downloading Review Data', 'info', '');
-										const data = await gameChangerAPI.exportReview({
+										const cleanSearchSettings = {
+											sort: [{ id: 'budgetYear', desc: true }],
+											budgetTypeAllSelected: true,
+											budgetYearAllSelected: true,
+											serviceAgencyAllSelected: true,
+											primaryReviewerAllSelected: true,
+											serviceReviewerAllSelected: true,
+											hasKeywordsAllSelected: true,
+											primaryClassLabelAllSelected: true,
+											sourceTagAllSelected: true,
+											reviewStatusAllSelected: true,
+										};
+										const exportInput = {
 											cloneName: 'jbook',
-										});
-										const blob = new Blob([data.data], { type: 'text/csv;charset=utf-8' });
-										const d = new Date();
-										await autoDownloadFile({
-											data: blob,
-											extension: 'csv',
-											filename: 'review-data-' + d.toISOString(),
-										});
+											format: 'csv-reviews',
+											searchText: '',
+											options: {
+												limit: 10000,
+												jbookSearchSettings: cleanSearchSettings,
+											},
+										};
+										const { data } = await gameChangerAPI.modularExport(exportInput);
+										const filename = 'JBOOK-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+										autoDownloadFile({ data, extension: 'csv', filename });
+
 										createAlert('Download Complete', 'success', '');
 									} catch (e) {
 										createAlert('Download Failed', 'error', '');
