@@ -933,7 +933,7 @@ const esData = {
 							appropriationTitle_t: 'Aircraft Procurement, Air Force',
 							budgetActivityNumber_s: '07',
 							budgetActivityTitle_t: 'Aircraft Supt Equipment & Facilities',
-							budgetLineItem_s: '000075',
+							budgetLineItem_t: '000075',
 							projectTitle_s: 'Other Production Charges',
 							p1LineNumber_s: '85',
 							projectMissionDescription_t:
@@ -1261,7 +1261,7 @@ const esData = {
 							projectTitle_s: 'Operating Forces',
 							budgetActivityNumber_s: '13',
 							budgetActivityTitle_t: 'Land Forces Readiness Support',
-							budgetLineItem_s: '120',
+							budgetLineItem_t: '120',
 							projectNum_s: '132',
 							budgetLineItemTitle_s: 'Facilities Sustainment, Restoration & Modernization',
 							include_in_toa_s: 'Y',
