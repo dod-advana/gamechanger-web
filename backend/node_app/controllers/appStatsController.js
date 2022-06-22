@@ -849,7 +849,7 @@ class AppStatsController {
 	
 	mapDocumentsUsage(searchMap){
 		const docMap = {};
-		
+
 		for (const [visitID, arr] of Object.entries(searchMap)) {
 			let currentSearch = '';
 			for (const search_doc of arr) {
@@ -884,8 +884,7 @@ class AppStatsController {
 		}
 
 		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
-		const docMap = mapDocumentsUsage();
-		
+		const docMap = this.mapDocumentsUsage(searchMap);
 		// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
 		for (const doc of docData) {
 			const searches = docMap[doc.document];
