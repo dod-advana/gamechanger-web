@@ -86,7 +86,7 @@ const PolicyCardHandler = LoadableVisibility({
 const CARD_HEIGHT = 412;
 
 // Internet Explorer 6-11
-var IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+var IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
 var IS_EDGE = !IS_IE && !!window.StyleMedia;
@@ -94,8 +94,17 @@ var IS_EDGE = !IS_IE && !!window.StyleMedia;
 const gameChangerAPI = new GameChangerAPI();
 
 const StyledCardContainer = styled.div`
-	width: ${({ listView, showSideFilters, graphView }) =>
-		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.33% !important' : '25% !important'};
+	width: ${({ listView, showSideFilters, graphView }) => {
+		if (graphView) {
+			return listView ? '100%' : '414px';
+		} else {
+			if (showSideFilters) {
+				return listView ? '100%' : '33.33% !important';
+			} else {
+				return listView ? '100%' : '25% !important';
+			}
+		}
+	}};
 	min-width: ${({ listView }) => (listView ? '' : '351px')};
 	padding-right: 5px !important;
 	padding-left: 5px !important;
@@ -120,16 +129,24 @@ const StyledCardContainer = styled.div`
 			background-color: transparent;
 			border-radius: 5px;
 			display: flex;
-			border: ${({ listView, isRevoked, selected }) =>
-				listView
-					? 'none'
-					: selected
-					? '2px solid #386F94'
-					: isRevoked
-					? '2px solid #e50000'
-					: '2px solid rgb(224, 224, 224)'};
-			box-shadow: ${({ listView, selected }) =>
-				listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+			border: ${({ listView, isRevoked, selected }) => {
+				if (listView) {
+					return 'none';
+				} else {
+					if (isRevoked) {
+						return selected ? '2px solid #386F94' : '2px solid #e50000';
+					} else {
+						return selected ? '2px solid #386F94' : '2px solid rgb(224, 224, 224)';
+					}
+				}
+			}};
+			box-shadow: ${({ listView, selected }) => {
+				if (listView) {
+					return 'none';
+				} else {
+					return !selected ? 'none' : '#386F94 0px 0px 2px 2px';
+				}
+			}};
 			transition: ${({ listView }) =>
 				listView ? 'transform .5s !important;' : 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
@@ -155,8 +172,13 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView, intelligentSearch }) =>
-						listView ? (intelligentSearch ? '#9BB1C8' : 'white') : 'rgb(238,241,242)'};
+					background-color: ${({ listView, intelligentSearch }) => {
+						if (intelligentSearch) {
+							return listView ? '#9BB1C8' : 'rgb(238,241,242)';
+						} else {
+							return listView ? 'white' : 'rgb(238,241,242)';
+						}
+					}};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -380,7 +402,7 @@ function GCCard(props) {
 		dispatch,
 		item,
 		graphView = false,
-		closeGraphCard = () => {},
+		closeGraphCard,
 		collection = [],
 		detailPage = false,
 		card_module = null,
@@ -412,7 +434,7 @@ function GCCard(props) {
 
 	useEffect(() => {
 		let isFavorite = false;
-		let favorite_id = null;
+		let temp_id = null;
 		let favApps;
 		switch (cardType) {
 			case 'document':
@@ -420,7 +442,7 @@ function GCCard(props) {
 				const favDocInfo = _.find(faveDocs, (doc) => {
 					return doc.id === item.id;
 				});
-				favorite_id = favDocInfo?.favorite_id;
+				temp_id = favDocInfo?.favorite_id;
 				isFavorite =
 					_.find(faveDocs, (doc) => {
 						return doc.id === item.id;
@@ -444,24 +466,24 @@ function GCCard(props) {
 			case 'dashboard':
 				favApps = state.favoriteApps || [];
 				isFavorite = favApps?.includes(item.id.toString()) || false;
-				favorite_id = item.id.toString();
+				temp_id = item.id.toString();
 				break;
 			case 'dataSource':
 			case 'database':
 			case 'models':
 				favApps = state.favoriteApps || [];
 				isFavorite = favApps?.includes(item.resource.id.toString()) || false;
-				favorite_id = item.resource.id.toString();
+				temp_id = item.resource.id.toString();
 				break;
 			default:
 				break;
 		}
 
-		setFavoriteId(favorite_id);
+		setFavoriteId(temp_id);
 		setFavorite(isFavorite);
 
 		// eslint-disable-next-line
-	}, []);
+	}, [state.favoriteApps]);
 
 	useEffect(() => {
 		// Create the factory
@@ -475,7 +497,7 @@ function GCCard(props) {
 		}
 	}, [state, loaded, cardType, item, card_module]);
 
-	useEffect(() => {}, [popperIsOpen, popperAnchorEl, favorite]);
+	useEffect(() => Function.prototype, [popperIsOpen, popperAnchorEl, favorite]);
 
 	useEffect(() => {
 		if (state.listView) {
@@ -495,7 +517,7 @@ function GCCard(props) {
 		}
 	};
 
-	const handleSaveFavorite = (favorite = false) => {
+	const handleSaveFavorite = (isFavorite = false) => {
 		switch (cardType) {
 			case 'document':
 				const documentData = {
@@ -503,15 +525,15 @@ function GCCard(props) {
 					favorite_summary: favoriteSummary,
 					favorite_id: favorite_id,
 					favorite_name: '',
-					is_favorite: favorite,
+					is_favorite: isFavorite,
 				};
 				handleSaveFavoriteDocument(documentData, state, dispatch);
 				break;
 			case 'organization':
-				handleSaveFavoriteOrganization(item.name, favoriteSummary, favorite, dispatch);
+				handleSaveFavoriteOrganization(item.name, favoriteSummary, isFavorite, dispatch);
 				break;
 			case 'topic':
-				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
+				handleSaveFavoriteTopic(item.name, favoriteSummary, isFavorite, dispatch);
 				break;
 			case 'application':
 			case 'dashboard':
@@ -519,7 +541,7 @@ function GCCard(props) {
 			case 'database':
 			case 'models':
 				let favApps = state.favoriteApps || [];
-				if (favorite) {
+				if (isFavorite) {
 					favApps.push(favorite_id);
 				} else {
 					favApps = favApps.filter((app) => app !== favorite_id);
@@ -530,7 +552,7 @@ function GCCard(props) {
 			default:
 				break;
 		}
-		setFavorite(favorite);
+		setFavorite(isFavorite);
 		setPopperAnchorEl(null);
 		setPopperIsOpen(false);
 		setFavoriteSummary('');
@@ -572,12 +594,12 @@ function GCCard(props) {
 		);
 	};
 
-	const checkboxComponent = (key, value, id) => {
+	const checkboxComponent = (key, value, tmpId) => {
 		return (
 			<GCTooltip title={'Select a document for export'} placement="top" arrow>
 				<Checkbox
 					style={styles.checkbox}
-					onChange={() => handleCheckbox(key, value, id)}
+					onChange={() => handleCheckbox(key, value, tmpId)}
 					color="primary"
 					icon={
 						<CheckBoxOutlineBlankIcon
@@ -594,17 +616,17 @@ function GCCard(props) {
 		);
 	};
 
-	const handleCheckbox = (key, value, id) => {
+	const handleCheckbox = (key, value, tmpId) => {
 		const { selectedDocuments, selectedDocumentsForGraph = [] } = state;
 		let newDocArray = [...selectedDocumentsForGraph];
 
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
-			newDocArray = newDocArray.filter((item) => item !== id);
+			newDocArray = newDocArray.filter((tmpItem) => tmpItem !== tmpId);
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
 		} else {
 			selectedDocuments.set(key, value);
-			newDocArray.push(id);
+			newDocArray.push(tmpId);
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
 		}
 
@@ -676,26 +698,26 @@ function GCCard(props) {
 		</div>
 	);
 
-	const getCardComponent = (props) => {
+	const getCardComponent = (thisProps) => {
 		const module_name = card_module ?? state.cloneData.card_module;
 
 		switch (module_name) {
 			case 'policy/policyCardHandler':
-				return <PolicyCardHandler {...props} />;
+				return <PolicyCardHandler {...thisProps} />;
 			case 'hermes/hermesCardHandler':
-				return <HermesCardHandler {...props} />;
+				return <HermesCardHandler {...thisProps} />;
 			case 'cdo/cdoCardHandler':
-				return <CDOCardHandler {...props} />;
+				return <CDOCardHandler {...thisProps} />;
 			case 'globalSearch/globalSearchCardHandler':
-				return <GlobalSearchCardHandler {...props} />;
+				return <GlobalSearchCardHandler {...thisProps} />;
 			case 'eda/edaCardHandler':
-				return <EDACardHandler {...props} />;
+				return <EDACardHandler {...thisProps} />;
 			case 'jbook/jbookCardHandler':
-				return <JBookCardHandler {...props} />;
+				return <JBookCardHandler {...thisProps} />;
 			case 'jexnet/jexnetCardHandler':
-				return <JexnetCardHandler {...props} />;
+				return <JexnetCardHandler {...thisProps} />;
 			default:
-				return <DefaultCardHandler {...props} />;
+				return <DefaultCardHandler {...thisProps} />;
 		}
 	};
 

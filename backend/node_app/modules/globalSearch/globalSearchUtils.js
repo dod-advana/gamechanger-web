@@ -24,7 +24,7 @@ const QLIK_ES_MAPPING = {
 	dynamicColor_s: { newName: 'dynamicColor' },
 };
 
-const getQlikApps = async (params = {}, userId, logger, getCount = false, getFull = false) => {
+const getQlikApps = async (userId, logger, getCount = false, getFull = false, params = {}) => {
 	try {
 		let url = `${QLIK_URL}/qrs/app`;
 
@@ -69,7 +69,7 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ searchText = '', parsedQuery, plainQuery, offset, limit, operator = 'and' },
+	{ parsedQuery, plainQuery, offset, limit, operator = 'and' },
 	userId,
 	logger
 ) => {

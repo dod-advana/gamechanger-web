@@ -3,7 +3,6 @@ const constantsFile = require('../config/constants');
 const { ESSearchLib } = require('../lib/ESSearchLib');
 const asyncRedisLib = require('async-redis');
 const https = require('https');
-const constants = require('../config/constants');
 const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
@@ -40,7 +39,7 @@ class ElasticSearchController {
 		}
 	}
 
-	getESClientConfig({ user, password, ca, protocol, host, port, index, requestTimeout }) {
+	getESClientConfig({ user, password, ca, protocol, host, port, requestTimeout }) {
 		let config = {
 			node: {},
 		};
@@ -78,7 +77,7 @@ class ElasticSearchController {
 			}
 			this.logger.info('START qlik full app cache and ES storage');
 
-			const { data } = await getQlikApps(undefined, undefined, this.logger, false, true);
+			const { data } = await getQlikApps(undefined, this.logger, false, true, undefined);
 
 			await Promise.all([this.storeUpdateQlikAppsInES(data), this.cacheQlikApps(data)]);
 

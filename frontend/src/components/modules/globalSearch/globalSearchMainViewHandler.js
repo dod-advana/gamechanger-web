@@ -29,6 +29,24 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 
 const PRIMARY_COLOR = '#13A792';
 
+const dataLoading = (state) => {
+	return (
+		!state.applicationsLoading ||
+		!state.dashboardsLoading ||
+		!state.dataSourcesLoading ||
+		!state.databasesLoading ||
+		!state.modelsLoading
+	);
+};
+
+const getHeaderStyles = (view) => {
+	return {
+		textStyle: { color: view ? backgroundWhite : '#8091A5' },
+		buttonColor: view ? PRIMARY_COLOR : backgroundWhite,
+		borderColor: view ? PRIMARY_COLOR : '#B0B9BE',
+	};
+};
+
 const getViewHeader = (state, dispatch) => {
 	let gridView, listView, showFavorites;
 
@@ -48,85 +66,80 @@ const getViewHeader = (state, dispatch) => {
 
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText &&
-				(!state.applicationsLoading ||
-					!state.dashboardsLoading ||
-					!state.dataSourcesLoading ||
-					!state.databasesLoading ||
-					!state.modelsLoading) && (
-					<>
-						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
-							Showing results for <b>{state.searchText}</b>
-						</Typography>
-						<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
-							<div style={{ ...styles.container, margin: '0px 25px' }}>
-								<GCButton
-									onClick={() => setState(dispatch, { listView: false, showFavorites: false })}
-									style={{
-										...styles.buttons,
-										...(!gridView ? styles.unselectedButton : {}),
-									}}
-									textStyle={{ color: gridView ? backgroundWhite : '#8091A5' }}
-									buttonColor={gridView ? PRIMARY_COLOR : backgroundWhite}
-									borderColor={gridView ? PRIMARY_COLOR : '#B0B9BE'}
-								>
-									<div>
-										<AppsIcon style={styles.icon} />
-									</div>
-								</GCButton>
+			{state.searchText && dataLoading(state) && (
+				<>
+					<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
+						Showing results for <b>{state.searchText}</b>
+					</Typography>
+					<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
+						<div style={{ ...styles.container, margin: '0px 25px' }}>
+							<GCButton
+								onClick={() => setState(dispatch, { listView: false, showFavorites: false })}
+								style={{
+									...styles.buttons,
+									...(!gridView ? styles.unselectedButton : {}),
+								}}
+								textStyle={getHeaderStyles(gridView)['textStyle']}
+								buttonColor={getHeaderStyles(gridView)['buttonColor']}
+								borderColor={getHeaderStyles(gridView)['borderColor']}
+							>
+								<div>
+									<AppsIcon style={styles.icon} />
+								</div>
+							</GCButton>
 
-								<GCButton
-									onClick={() => setState(dispatch, { listView: true, showFavorites: false })}
-									style={{
-										...styles.buttons,
-										...(!listView ? styles.unselectedButton : {}),
-									}}
-									textStyle={{ color: listView ? backgroundWhite : '#8091A5' }}
-									buttonColor={listView ? PRIMARY_COLOR : backgroundWhite}
-									borderColor={listView ? PRIMARY_COLOR : '#B0B9BE'}
-								>
-									<div>
-										<ListIcon style={styles.icon} />
-									</div>
-								</GCButton>
+							<GCButton
+								onClick={() => setState(dispatch, { listView: true, showFavorites: false })}
+								style={{
+									...styles.buttons,
+									...(!listView ? styles.unselectedButton : {}),
+								}}
+								textStyle={getHeaderStyles(listView)['textStyle']}
+								buttonColor={getHeaderStyles(listView)['buttonColor']}
+								borderColor={getHeaderStyles(listView)['borderColor']}
+							>
+								<div>
+									<ListIcon style={styles.icon} />
+								</div>
+							</GCButton>
 
-								<GCButton
-									onClick={() => setState(dispatch, { showFavorites: true })}
-									style={{
-										...styles.buttons,
-										...(!showFavorites ? styles.unselectedButton : {}),
-										width: 170,
-									}}
-									textStyle={{ color: showFavorites ? backgroundWhite : '#8091A5' }}
-									buttonColor={showFavorites ? PRIMARY_COLOR : backgroundWhite}
-									borderColor={showFavorites ? PRIMARY_COLOR : '#B0B9BE'}
-								>
-									<div style={{ display: 'flex' }}>
-										<Typography
-											style={{
-												fontSize: 14,
-												fontWeight: showFavorites ? 'bold' : 500,
-												color: showFavorites ? backgroundWhite : '#8091A5',
-											}}
-										>
-											Show Favorites
-										</Typography>
-										<i
-											className={showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
-											style={{
-												color: showFavorites ? backgroundWhite : '#B0B9BE',
-												marginLeft: '5px',
-												cursor: 'pointer',
-												fontSize: 26,
-												alignSelf: 'center',
-											}}
-										/>
-									</div>
-								</GCButton>
-							</div>
+							<GCButton
+								onClick={() => setState(dispatch, { showFavorites: true })}
+								style={{
+									...styles.buttons,
+									...(!showFavorites ? styles.unselectedButton : {}),
+									width: 170,
+								}}
+								textStyle={getHeaderStyles(showFavorites)['textStyle']}
+								buttonColor={getHeaderStyles(showFavorites)['buttonColor']}
+								borderColor={getHeaderStyles(showFavorites)['borderColor']}
+							>
+								<div style={{ display: 'flex' }}>
+									<Typography
+										style={{
+											fontSize: 14,
+											fontWeight: showFavorites ? 'bold' : 500,
+											color: showFavorites ? backgroundWhite : '#8091A5',
+										}}
+									>
+										Show Favorites
+									</Typography>
+									<i
+										className={showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
+										style={{
+											color: showFavorites ? backgroundWhite : '#B0B9BE',
+											marginLeft: '5px',
+											cursor: 'pointer',
+											fontSize: 26,
+											alignSelf: 'center',
+										}}
+									/>
+								</div>
+							</GCButton>
 						</div>
-					</>
-				)}
+					</div>
+				</>
+			)}
 		</div>
 	);
 };
@@ -153,11 +166,12 @@ const handlePageLoad = async (props) => {
 
 	// Get User Favorites from home App
 	const { data } = await gameChangerAPI.getUserFavoriteHomeApps();
-	setState(dispatch, { favoriteApps: data.favorite_apps || [] });
+	const favorites = await searchHandler.handleGetUserFavorites(data.favorite_apps, state);
+	setState(dispatch, { favoriteApps: data.favorite_apps || [], favorites });
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs } = props;
+	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs: renderHideTabsInner } = props;
 
 	const {
 		loading,
@@ -189,7 +203,7 @@ const getMainView = (props) => {
 						<div id="game-changer-content-top" />
 						<StyledCenterContainer showSideFilters={false}>
 							<div className={'right-container'}>
-								{hideSearchResults && renderHideTabs(props)}
+								{hideSearchResults && renderHideTabsInner(props)}
 								{noSearchResults && (
 									<>
 										<div style={{ margin: '40px auto', width: '67%' }}>
@@ -198,7 +212,7 @@ const getMainView = (props) => {
 												search terms.
 											</Typography>
 										</div>
-										{renderHideTabs(props)}
+										{renderHideTabsInner(props)}
 									</>
 								)}
 								{!(hideSearchResults || noSearchResults) &&
@@ -233,27 +247,87 @@ const getMainView = (props) => {
 	);
 };
 
-const getViewNames = (props) => {
+const getViewNames = (_props) => {
 	return [];
 };
 
-const getExtraViewPanels = (props) => {
+const getExtraViewPanels = (_props) => {
 	return [];
 };
+
+const getListViewStyle = (listView) => {
+	return listView ? styles.listViewContainer : styles.containerDiv;
+};
+
+function renderItems({
+	items,
+	activePage,
+	isLoading,
+	isPaginating,
+	totalCount,
+	dispatch,
+	itemCategory,
+	categoryColor,
+	categoryIcon,
+	state,
+}) {
+	const { cloneData, activeCategoryTab, selectedCategories, listView } = state;
+
+	return (
+		<>
+			{items?.length > 0 &&
+				(activeCategoryTab === itemCategory || activeCategoryTab === 'all') &&
+				selectedCategories[itemCategory] && (
+					<div className={'col-xs-12'} style={getListViewStyle(listView)}>
+						<SearchSection section={itemCategory} color={categoryColor} icon={categoryIcon}>
+							{!isLoading && !isPaginating ? (
+								getSearchResults(items, state, dispatch)
+							) : (
+								<div className="col-xs-12">
+									<LoadingIndicator customColor={PRIMARY_COLOR} />
+								</div>
+							)}
+							<div className="gcPagination col-xs-12 text-center">
+								<Pagination
+									activePage={activePage}
+									itemsCountPerPage={RESULTS_PER_PAGE}
+									totalItemsCount={totalCount}
+									pageRangeDisplayed={8}
+									onChange={async (page) => {
+										trackEvent(
+											getTrackingNameForFactory(cloneData.clone_name),
+											'PaginationChanged',
+											'page',
+											page
+										);
+										setState(dispatch, {
+											applicationsLoading: true,
+											applicationsPage: page,
+											applicationsPagination: true,
+										});
+									}}
+								/>
+							</div>
+						</SearchSection>
+					</div>
+				)}
+		</>
+	);
+}
 
 const getCardViewPanel = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 	const {
-		activeCategoryTab,
 		componentStepNumbers,
 		iframePreviewLink,
-		selectedCategories,
 		applicationsSearchResults,
 		applicationsPage,
 		applicationsLoading,
 		applicationsPagination,
+		applicationsTotalCount,
 		dashboardsSearchResults,
+		dashboardsTotalCount,
 		dashboardsPage,
 		dashboardsLoading,
 		dashboardsPagination,
@@ -261,10 +335,12 @@ const getCardViewPanel = (props) => {
 		dataSourcesPage,
 		dataSourcesLoading,
 		dataSourcesPagination,
+		dataSourcesTotalCount,
 		databasesSearchResults,
 		databasesPage,
 		databasesLoading,
 		databasesPagination,
+		databasesTotalCount,
 		modelsSearchResults,
 		modelsPage,
 		modelsLoading,
@@ -291,205 +367,70 @@ const getCardViewPanel = (props) => {
 			style={{ marginTop: 0 }}
 		>
 			<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-				{applications?.length > 0 &&
-					(activeCategoryTab === 'Applications' || activeCategoryTab === 'all') &&
-					selectedCategories['Applications'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Applications'} color={'rgb(50, 18, 77)'} icon={ApplicationsIcon}>
-								{!applicationsLoading && !applicationsPagination ? (
-									getSearchResults(applications, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={PRIMARY_COLOR} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={applicationsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.applicationsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												applicationsLoading: true,
-												applicationsPage: page,
-												applicationsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems({
+					items: applications,
+					activePage: applicationsPage,
+					isLoading: applicationsLoading,
+					isPaginating: applicationsPagination,
+					totalCount: applicationsTotalCount,
+					dispatch,
+					itemCategory: 'Applications',
+					categoryColor: 'rgb(50, 18, 77)',
+					categoryIcon: ApplicationsIcon,
+					state,
+				})}
 
-				{dashboards?.length > 0 &&
-					(activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') &&
-					selectedCategories['Dashboards'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Dashboards'} color={'rgb(11, 167, 146)'} icon={DashboardsIcon}>
-								{!dashboardsLoading && !dashboardsPagination ? (
-									getSearchResults(dashboards, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={PRIMARY_COLOR} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={dashboardsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.dashboardsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												dashboardsLoading: true,
-												dashboardsPage: page,
-												dashboardsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems({
+					items: dashboards,
+					activePage: dashboardsPage,
+					isLoading: dashboardsLoading,
+					isPaginating: dashboardsPagination,
+					totalCount: dashboardsTotalCount,
+					dispatch,
+					itemCategory: 'Dashboards',
+					categoryColor: 'rgb(11, 167, 146)',
+					categoryIcon: DashboardsIcon,
+					state,
+				})}
 
-				{dataSources?.length > 0 &&
-					(activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') &&
-					selectedCategories['DataSources'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Data Sources'} color={'rgb(5, 159, 217)'} icon={DataSourcesIcon}>
-								{!dataSourcesLoading && !dataSourcesPagination ? (
-									getSearchResults(dataSources, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={PRIMARY_COLOR} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={dataSourcesPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.dataSourcesTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												dataSourcesLoading: true,
-												dataSourcesPage: page,
-												dataSourcesPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems({
+					items: dataSources,
+					activePage: dataSourcesPage,
+					isLoading: dataSourcesLoading,
+					isPaginating: dataSourcesPagination,
+					totalCount: dataSourcesTotalCount,
+					dispatch,
+					itemCategory: 'DataSources',
+					categoryColor: 'rgb(5, 159, 217)',
+					categoryIcon: DataSourcesIcon,
+					state,
+				})}
 
-				{databases?.length > 0 &&
-					(activeCategoryTab === 'Databases' || activeCategoryTab === 'all') &&
-					selectedCategories['Databases'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Databases'} color={'rgb(233, 105, 29)'} icon={DatabasesIcon}>
-								{!databasesLoading && !databasesPagination ? (
-									getSearchResults(databases, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={PRIMARY_COLOR} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={databasesPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.databasesTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												databasesLoading: true,
-												databasesPage: page,
-												databasesPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems({
+					items: databases,
+					activePage: databasesPage,
+					isLoading: databasesLoading,
+					isPaginating: databasesPagination,
+					totalCount: databasesTotalCount,
+					dispatch,
+					itemCategory: 'Databases',
+					categoryColor: 'rgb(233, 105, 29)',
+					categoryIcon: DatabasesIcon,
+					state,
+				})}
 
-				{models?.length > 0 &&
-					(activeCategoryTab === 'Models' || activeCategoryTab === 'all') &&
-					selectedCategories['Models'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Models'} color={'#131E43'} icon={DatabasesIcon}>
-								{!modelsLoading && !modelsPagination ? (
-									getSearchResults(models, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={PRIMARY_COLOR} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={modelsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={modelsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												modelsLoading: true,
-												modelsPage: page,
-												modelsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems({
+					items: models,
+					activePage: modelsPage,
+					isLoading: modelsLoading,
+					isPaginating: modelsPagination,
+					totalCount: modelsTotalCount,
+					dispatch,
+					itemCategory: 'Models',
+					categoryColor: '#131E43',
+					categoryIcon: DatabasesIcon,
+					state,
+				})}
 
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
@@ -501,6 +442,26 @@ const getCardViewPanel = (props) => {
 	);
 };
 
+const handlePagination = (state, dispatch, searchHandler) => {
+	if (searchHandler) {
+		if (state.applicationsPagination) {
+			searchHandler.handleApplicationsPagination(state, dispatch);
+		}
+		if (state.dashboardsPagination) {
+			searchHandler.handleDashboardsPagination(state, dispatch);
+		}
+		if (state.dataSourcesPagination) {
+			searchHandler.handleDataSourcesPagination(state, dispatch);
+		}
+		if (state.databasesPagination) {
+			searchHandler.handleDatabasesPagination(state, dispatch);
+		}
+		if (state.modelsPagination) {
+			searchHandler.handleModelsPagination(state, dispatch);
+		}
+	}
+};
+
 const GlobalSearchMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
 
@@ -508,21 +469,7 @@ const GlobalSearchMainViewHandler = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
-		if (state.applicationsPagination && searchHandler) {
-			searchHandler.handleApplicationsPagination(state, dispatch);
-		}
-		if (state.dashboardsPagination && searchHandler) {
-			searchHandler.handleDashboardsPagination(state, dispatch);
-		}
-		if (state.dataSourcesPagination && searchHandler) {
-			searchHandler.handleDataSourcesPagination(state, dispatch);
-		}
-		if (state.databasesPagination && searchHandler) {
-			searchHandler.handleDatabasesPagination(state, dispatch);
-		}
-		if (state.modelsPagination && searchHandler) {
-			searchHandler.handleModelsPagination(state, dispatch);
-		}
+		handlePagination(state, dispatch, searchHandler);
 	}, [state, dispatch, searchHandler]);
 
 	useEffect(() => {
