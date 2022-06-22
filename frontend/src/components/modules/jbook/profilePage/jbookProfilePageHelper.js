@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {
 	StyledTableContainer,
@@ -593,34 +592,6 @@ const getMetadataTableData = (
 						: 'None'}
 				</div>
 			),
-		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Obligations
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `$${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} M`
-					: 'N/A',
-		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Expenditures
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `$${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} M`
-					: 'N/A',
 		},
 	];
 
