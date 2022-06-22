@@ -288,7 +288,7 @@ const EDADocumentsComparisonTool = ({
 				}
 			}
 		},
-		[compareDocument, state.cloneData, selectedParagraph]
+		[compareDocument, state.cloneData, selectedParagraph, gameChangerAPI]
 	);
 
 	useEffect(() => {

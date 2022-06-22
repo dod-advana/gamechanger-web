@@ -44,7 +44,7 @@ const DragAndDrop = ({ text = '', acceptedFileTypes = null, handleFileDrop = () 
 	);
 
 	// create dropzone component props
-	const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+	const { getRootProps, getInputProps } = useDropzone({
 		multiple: false,
 		validator: validateFile,
 		onDrop: handleFileDrop,
