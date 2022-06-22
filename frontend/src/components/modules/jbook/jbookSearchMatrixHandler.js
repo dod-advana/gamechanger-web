@@ -114,7 +114,6 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, use
 	const specificSelected = `${type}SpecificSelected`;
 
 	let optionType = useES ? type + 'ES' : type;
-	console.log(customOptions);
 	const options = customOptions || state.defaultOptions[optionType];
 
 	return (
