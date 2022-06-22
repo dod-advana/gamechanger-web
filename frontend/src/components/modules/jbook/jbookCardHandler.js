@@ -212,7 +212,7 @@ const cardHandler = {
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				case 'rdoc':
-					displayTitleTop = `PE Num: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
+					displayTitleTop = `BLI: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				default:
 					break;
