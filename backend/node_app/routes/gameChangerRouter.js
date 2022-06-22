@@ -195,6 +195,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
 	router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
+	router.get('/admin/getUserDashboard', appStatsController.getDashboardData);
 }
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
