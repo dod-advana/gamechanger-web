@@ -30,6 +30,22 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 const PRIMARY_COLOR = '#13A792';
 
 const getViewHeader = (state, dispatch) => {
+	let gridView, listView, showFavorites;
+
+	if (state.showFavorites) {
+		gridView = false;
+		listView = false;
+		showFavorites = true;
+	} else if (state.listView) {
+		gridView = false;
+		listView = true;
+		showFavorites = false;
+	} else {
+		gridView = true;
+		listView = false;
+		showFavorites = false;
+	}
+
 	return (
 		<div style={styles.showingResultsRow}>
 			{state.searchText &&
@@ -45,14 +61,14 @@ const getViewHeader = (state, dispatch) => {
 						<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
 							<div style={{ ...styles.container, margin: '0px 25px' }}>
 								<GCButton
-									onClick={() => setState(dispatch, { listView: false })}
+									onClick={() => setState(dispatch, { listView: false, showFavorites: false })}
 									style={{
 										...styles.buttons,
-										...(!state.listView ? styles.unselectedButton : {}),
+										...(!gridView ? styles.unselectedButton : {}),
 									}}
-									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-									buttonColor={!state.listView ? PRIMARY_COLOR : backgroundWhite}
-									borderColor={!state.listView ? PRIMARY_COLOR : '#B0B9BE'}
+									textStyle={{ color: gridView ? backgroundWhite : '#8091A5' }}
+									buttonColor={gridView ? PRIMARY_COLOR : backgroundWhite}
+									borderColor={gridView ? PRIMARY_COLOR : '#B0B9BE'}
 								>
 									<div>
 										<AppsIcon style={styles.icon} />
@@ -60,17 +76,51 @@ const getViewHeader = (state, dispatch) => {
 								</GCButton>
 
 								<GCButton
-									onClick={() => setState(dispatch, { listView: true })}
+									onClick={() => setState(dispatch, { listView: true, showFavorites: false })}
 									style={{
 										...styles.buttons,
-										...(!state.listView ? {} : styles.unselectedButton),
+										...(!listView ? styles.unselectedButton : {}),
 									}}
-									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-									buttonColor={!state.listView ? backgroundWhite : PRIMARY_COLOR}
-									borderColor={!state.listView ? '#B0B9BE' : PRIMARY_COLOR}
+									textStyle={{ color: listView ? backgroundWhite : '#8091A5' }}
+									buttonColor={listView ? PRIMARY_COLOR : backgroundWhite}
+									borderColor={listView ? PRIMARY_COLOR : '#B0B9BE'}
 								>
 									<div>
 										<ListIcon style={styles.icon} />
+									</div>
+								</GCButton>
+
+								<GCButton
+									onClick={() => setState(dispatch, { showFavorites: true })}
+									style={{
+										...styles.buttons,
+										...(!showFavorites ? styles.unselectedButton : {}),
+										width: 170,
+									}}
+									textStyle={{ color: showFavorites ? backgroundWhite : '#8091A5' }}
+									buttonColor={showFavorites ? PRIMARY_COLOR : backgroundWhite}
+									borderColor={showFavorites ? PRIMARY_COLOR : '#B0B9BE'}
+								>
+									<div style={{ display: 'flex' }}>
+										<Typography
+											style={{
+												fontSize: 14,
+												fontWeight: showFavorites ? 'bold' : 500,
+												color: showFavorites ? backgroundWhite : '#8091A5',
+											}}
+										>
+											Show Favorites
+										</Typography>
+										<i
+											className={showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
+											style={{
+												color: showFavorites ? backgroundWhite : '#B0B9BE',
+												marginLeft: '5px',
+												cursor: 'pointer',
+												fontSize: 26,
+												alignSelf: 'center',
+											}}
+										/>
 									</div>
 								</GCButton>
 							</div>
@@ -229,10 +279,11 @@ const getCardViewPanel = (props) => {
 	const databases = databasesSearchResults;
 	const models = modelsSearchResults;
 
-	let sideScroll = {
-		height: '72vh',
-	};
-	if (!iframePreviewLink) sideScroll = {};
+	let sideScroll = !iframePreviewLink
+		? {}
+		: {
+				height: '72vh',
+		  };
 
 	return (
 		<div
