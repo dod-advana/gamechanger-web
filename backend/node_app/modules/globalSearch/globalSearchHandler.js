@@ -48,7 +48,6 @@ class GlobalSearchHandler extends SearchHandler {
 
 		const {
 			useGCCache,
-			forCacheReload = false,
 			showTutorial,
 			tiny_url,
 			cloneName,
@@ -71,13 +70,9 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const cloneSpecificObject = {};
 
-			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
-			// }
 			const searchResults = { totalCount: 0 };
 			searchResults[category] = {};
 
-			let results = [];
 			switch (category) {
 				case 'applications':
 					searchResults[category] = await this.getApplicationResults(searchText, offset, limit, userId);
@@ -90,8 +85,8 @@ class GlobalSearchHandler extends SearchHandler {
 						searchText,
 						offset,
 						limit,
-						'Data Source',
-						userId
+						userId,
+						'Data Source'
 					);
 					break;
 				case 'databases':
@@ -99,8 +94,8 @@ class GlobalSearchHandler extends SearchHandler {
 						searchText,
 						offset,
 						limit,
-						'Database',
-						userId
+						userId,
+						'Database'
 					);
 					break;
 				case 'models':
@@ -108,8 +103,8 @@ class GlobalSearchHandler extends SearchHandler {
 						searchText,
 						offset,
 						limit,
-						'AI/ML Model',
-						userId
+						userId,
+						'AI/ML Model'
 					);
 					break;
 				default:
@@ -143,17 +138,14 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async callFunctionHelper(req, userId, res) {
+	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
-		switch (functionName) {
-			default:
-				this.logger.error(
-					`There is no function called ${functionName} defined in the policySearchHandler`,
-					'4BC876D',
-					userId
-				);
-		}
+		this.logger.error(
+			`There is no function called ${functionName} defined in the policySearchHandler`,
+			'4BC876D',
+			userId
+		);
 	}
 
 	async getApplicationResults(searchText, offset, limit, userId) {
@@ -194,9 +186,9 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
-			const userApps = await getQlikApps({}, userId.substring(0, userId.length - 4), this.logger, false, false);
+			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, false, {});
 
-			returnData.hits = this.mergeUserApps(returnData.hits, userApps.data || []);
+			returnData.results = this.mergeUserApps(returnData.hits, userApps.data || []);
 
 			const t1 = new Date().getTime();
 			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
@@ -207,10 +199,11 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
+	async getDataCatalogResults(searchText, offset, limit, userId, searchType = 'all') {
 		const t0 = new Date().getTime();
 		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
 		const qStatus = await this.dcUtils.getQueryableStatuses();
+		if (!searchText) searchText = 'a';
 
 		try {
 			const defaultSearchOptions = {
@@ -233,8 +226,6 @@ class GlobalSearchHandler extends SearchHandler {
 				offset,
 			};
 
-			if (!searchText) throw new Error('keywords is required in the request body');
-
 			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
@@ -244,10 +235,11 @@ class GlobalSearchHandler extends SearchHandler {
 			if (response.data.results) {
 				// Get all the user ids
 				const userIds = new Set(response.data.results.map((result) => result.resource.createdBy));
+				let tempUrl;
 
 				// Get all assets
 				const assetCalls = response.data.results.map((result) => {
-					const tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
+					tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
 					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				});
 				const assetsResults = await Promise.all(assetCalls);
@@ -260,14 +252,13 @@ class GlobalSearchHandler extends SearchHandler {
 
 				// Get Attributes
 				const assetAttributeCalls = response.data.results.map((result) => {
-					//console.log(result);
-					const tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
+					tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
 					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				});
 				const assetAttributesResults = await Promise.all(assetAttributeCalls);
 				const combinedAttributeResults = {};
 				const attributeIdMap = {};
-				assetAttributesResults.forEach((attributeResult, idx) => {
+				assetAttributesResults.forEach((attributeResult) => {
 					if (attributeResult.data.results.length > 0) {
 						combinedAttributeResults[attributeResult.data.results[0].asset.id] =
 							attributeResult.data.results.map((attrResult) => {
@@ -281,8 +272,8 @@ class GlobalSearchHandler extends SearchHandler {
 				});
 
 				// Get Users Info
-				let tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
-				userIds.forEach((userId) => (tempUrl += '&userId=' + userId));
+				tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
+				userIds.forEach((usrId) => (tempUrl += '&userId=' + usrId));
 				const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				const combinedUserData = {};
 				userData.results.forEach((data) => {
@@ -403,7 +394,7 @@ class GlobalSearchHandler extends SearchHandler {
 				ret.push({ ...apps[res.ref], score: res.score });
 			}
 
-			return { hits: ret, totalCount: searchResults.length, count: ret.length };
+			return { results: ret, totalCount: searchResults.length, count: ret.length };
 		} catch (e) {
 			this.logger.error(e, 'QW8UGJM');
 			return { hits: [], totalCount: 0, count: 0 };
