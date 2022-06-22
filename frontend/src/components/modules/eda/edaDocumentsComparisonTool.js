@@ -621,7 +621,7 @@ const EDADocumentsComparisonTool = ({
 											To search for similar documents, upload a document:
 										</div>
 										<DragAndDrop
-											text="Drag and drop a file here, or click to select a file (pdf, txt, json or docx only)"
+											text="Drag and drop a file here, or click to select a file (currently pdf, txt, or json only)"
 											acceptedFileTypes={[
 												'application/pdf',
 												'text/plain',
