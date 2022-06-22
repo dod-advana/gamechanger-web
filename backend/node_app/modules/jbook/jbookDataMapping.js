@@ -2140,7 +2140,6 @@ module.exports = {
 		p3a_contract_data_n: 'Contracts',
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
-		budgetActivityTitle_t: 'Activity Title',
 		budgetLineItem_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
