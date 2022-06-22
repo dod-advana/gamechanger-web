@@ -1443,7 +1443,7 @@ class JBookSearchUtility {
 				programElement_s: 6,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
-				budgetLineItem_s: 6,
+				budgetLineItem_t: 6,
 			};
 
 			Object.keys(wildcardList).forEach((wildCardKey) => {
@@ -1713,7 +1713,7 @@ class JBookSearchUtility {
 					filterQueries.push({
 						query_string: {
 							query: `*${jbookSearchSettings.programElement}*`,
-							default_field: 'budgetLineItem_s',
+							default_field: 'budgetLineItem_t',
 						},
 					});
 				}
