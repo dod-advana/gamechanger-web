@@ -506,6 +506,31 @@ const getMetadataTableData = (
 ) => {
 	const metadata = [
 		{
+			Key: 'Total Cost',
+			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+		},
+		{
+			Key: 'Current Year Amount',
+			Value:
+				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
+					? `${formatNum(projectData.currentYearAmount)}`
+					: 'N/A',
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value:
+				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
+					? `${formatNum(projectData.priorYearAmount)}`
+					: 'N/A',
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value:
+				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
+					? `${formatNum(projectData.allPriorYearsAmount)}`
+					: 'N/A',
+		},
+		{
 			Key: 'Project',
 			Value: projectData.projectTitle || 'N/A',
 		},
@@ -524,37 +549,12 @@ const getMetadataTableData = (
 			Hidden: budgetType === 'Procurement',
 		},
 		{
-			Key: 'All Prior Years Amount',
-			Value:
-				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-					? `${formatNum(projectData.allPriorYearsAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Prior Year Amount',
-			Value:
-				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-					? `${formatNum(projectData.priorYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Current Year Amount',
-			Value:
-				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-					? `${formatNum(projectData.currentYearAmount)}`
-					: 'N/A',
-		},
-		{
 			Key: 'Fiscal Year',
 			Value: projectData.budgetYear || 'N/A',
 		},
 		{
 			Key: 'To Complete',
 			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
-		},
-		{
-			Key: 'Total Cost',
-			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
 		},
 		{
 			Key: 'Budget Year (FY)',
