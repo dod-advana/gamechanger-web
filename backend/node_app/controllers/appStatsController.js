@@ -846,8 +846,8 @@ class AppStatsController {
 			);
 		});
 	}
-	
-	mapDocumentsUsage(searchMap){
+
+	mapDocumentsUsage(searchMap) {
 		const docMap = {};
 
 		for (const [visitID, arr] of Object.entries(searchMap)) {
@@ -867,7 +867,7 @@ class AppStatsController {
 				}
 			}
 		}
-		return docMap
+		return docMap;
 	}
 
 	async createDocumentUsageData(startDate, endDate, userId, connection) {
