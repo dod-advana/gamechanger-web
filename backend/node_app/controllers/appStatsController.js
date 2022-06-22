@@ -257,7 +257,7 @@ class AppStatsController {
 				[startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP1');
 						throw error;
 					}
 					resolve(self.cleanFilePath(results));
@@ -339,7 +339,7 @@ class AppStatsController {
 				[cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP2');
 						throw error;
 					}
 					resolve(results);
@@ -369,7 +369,7 @@ class AppStatsController {
 				[userID],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP3');
 						resolve([]);
 					} else {
 						resolve(results);
@@ -403,7 +403,7 @@ class AppStatsController {
 				[cloneName],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP4');
 						resolve([]);
 					} else {
 						resolve(results);
@@ -445,7 +445,7 @@ class AppStatsController {
 				[cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP5');
 						throw error;
 					}
 					resolve(results);
@@ -476,7 +476,7 @@ class AppStatsController {
 			`,
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP6');
 						resolve([]);
 					} else {
 						resolve(results);
@@ -697,7 +697,6 @@ class AppStatsController {
 					{ header: 'Viewer List', key: 'user_list' },
 					{ header: 'Searches', key: 'searches' },
 				];
-				const docDate = this.getDateNDaysAgo(opts.daysBack);
 				const docData = await this.createDocumentUsageData(opt.startDate, opts.endDate, userId, connection);
 				sendExcelFile(res, 'Documents', columns, docData);
 			}
@@ -803,7 +802,7 @@ class AppStatsController {
 				[startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP7');
 						throw error;
 					}
 					resolve(results);
@@ -839,7 +838,7 @@ class AppStatsController {
 				[startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP8');
 						throw error;
 					}
 					resolve(results);
@@ -847,22 +846,10 @@ class AppStatsController {
 			);
 		});
 	}
-
-	async createDocumentUsageData(startDate, endDate, userId, connection) {
-		const searches = await this.getSearchesAndPdfs(startDate, endDate, connection);
-		const docData = await this.queryDocumentUsageData(startDate, endDate, connection);
-
-		// create search map, grouping searches by visit ID, ordered by time.
-		const searchMap = {};
-		for (let search of searches) {
-			if (!searchMap[search.idvisit]) {
-				searchMap[search.idvisit] = [];
-			}
-			searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
-		}
-
-		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
+	
+	mapDocumentsUsage(searchMap){
 		const docMap = {};
+		
 		for (const [visitID, arr] of Object.entries(searchMap)) {
 			let currentSearch = '';
 			for (const search_doc of arr) {
@@ -880,7 +867,25 @@ class AppStatsController {
 				}
 			}
 		}
+		return docMap
+	}
 
+	async createDocumentUsageData(startDate, endDate, userId, connection) {
+		const searches = await this.getSearchesAndPdfs(startDate, endDate, connection);
+		const docData = await this.queryDocumentUsageData(startDate, endDate, connection);
+
+		// create search map, grouping searches by visit ID, ordered by time.
+		const searchMap = {};
+		for (let search of searches) {
+			if (!searchMap[search.idvisit]) {
+				searchMap[search.idvisit] = [];
+			}
+			searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
+		}
+
+		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
+		const docMap = mapDocumentsUsage();
+		
 		// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
 		for (const doc of docData) {
 			const searches = docMap[doc.document];
@@ -927,8 +932,7 @@ class AppStatsController {
 	async getDocumentUsageData(req, res) {
 		let connection;
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
+		const { startDate, endDate } = req.query;
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -979,7 +983,7 @@ class AppStatsController {
 				[cloneName + '_combined', cloneName, cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP9');
 						throw error;
 					}
 					resolve(results);
@@ -1083,7 +1087,7 @@ class AppStatsController {
 				[cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIPA');
 						throw error;
 					}
 					resolve(results);
