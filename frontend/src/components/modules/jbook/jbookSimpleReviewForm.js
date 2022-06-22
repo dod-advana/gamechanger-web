@@ -43,7 +43,7 @@ const JBookSimpleReviewForm = React.memo((props) => {
 	const { reviewData, primaryReviewLoading } = state;
 
 	const getSimpleReviewData = () => {
-		const simpleReviewData = [
+		return [
 			{
 				// this is a column in pdoc/rdoc, but not review
 				Key: 'Reviewers',
@@ -78,7 +78,6 @@ const JBookSimpleReviewForm = React.memo((props) => {
 				),
 			},
 		];
-		return simpleReviewData;
 	};
 
 	return (
