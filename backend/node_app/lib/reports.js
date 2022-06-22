@@ -107,7 +107,6 @@ class Reports {
 
 	jbookWriteCSV(stringifier, data) {
 		if (data && data.docs && data.docs.length > 0) {
-			const sample = data.docs[0].dataValues ?? data.docs[0];
 			const header = [
 				'Budget Year',
 				'PL Title',
@@ -247,7 +246,7 @@ class Reports {
 						const splitReplace = snip.snippet
 							.toString()
 							.replace(/<em>/g, '')
-							.replace(new RegExp('</em>', 'g'), '');
+							.replace(/<\/em>/g, '');
 
 						return {
 							stack: [
@@ -295,14 +294,12 @@ class Reports {
 		});
 
 		const sideMargin = 50;
-		const title = 'GAMECHANGER REPORT';
-		const footer = 'REPORT';
 		const timeZone = 'America/New_York';
 		const date = timeZone ? moment.tz(timeZone) : moment();
 		const dateString = `${date.format('MM/DD/YYYY')}`;
 		const displaySearchTerm = data.searchTerms.join(' ');
 
-		let doc = {
+		return {
 			pageSize: 'LETTER',
 			pageMargins: [50, 50, 50, 100],
 
@@ -429,23 +426,15 @@ class Reports {
 				},
 			},
 		};
-
-		return doc;
 	}
 
 	async constructProfilePagePDF(fullData, userId, showPOC = true) {
-		const sideMargin = 50;
-
-		const timeZone = 'America/New_York';
-		const date = timeZone ? moment.tz(timeZone) : moment();
-		const dateString = `${date.format('MM/DD/YYYY')}`;
-		const img = path.resolve(__dirname, './ProfilePagePDFImages/JAIC_blk.png');
 		let currentYear = new Date().getFullYear();
 
 		// Define base document
 		let doc = {
 			pageMargins: [30, 60, 30, 55],
-			header: function (currentPage, pageCount, pageSize) {
+			header: function () {
 				return {
 					stack: [
 						{
@@ -675,384 +664,496 @@ class Reports {
 		return doc;
 	}
 
-	async constructRdocContent(docData, rdocContent, userId, showPOC) {
-		try {
-			let label = '';
-			if (docData) {
-				if (docData.pocAgreeLabel && docData.pocAgreeLabel === 'No' && docData.pocClassLabel) {
-					label = docData.pocClassLabel;
-				} else if (
-					docData.serviceAgreeLabel &&
-					docData.serviceAgreeLabel === 'No' &&
-					docData.serviceClassLabel
-				) {
-					label = docData.serviceClassLabel;
-				} else if (docData.primaryClassLabel) {
-					label = docData.primaryClassLabel;
-				} else {
-					label = 'Unknown';
-				}
-			}
-
-			let totalCost = null;
-			if (docData.allPriorYearsAmount) {
-				totalCost += docData.allPriorYearsAmount;
-			}
-			if (docData.priorYearAmount) {
-				totalCost += docData.priorYearAmount;
-			}
-			if (docData.currentYearAmount) {
-				totalCost += docData.currentYearAmount;
-			}
-
-			const pocReviewer =
-				docData.altPOCName && docData.altPOCName !== null && docData.altPOCName !== ''
-					? docData.altPOCName
-					: docData.servicePOCName && docData.servicePOCName !== null && docData.servicePOCName !== ''
-					? docData.servicePOCName
-					: docData.serviceSecondaryReviewer &&
-					  docData.serviceSecondaryReviewer !== null &&
-					  docData.serviceSecondaryReviewer !== ''
-					? docData.serviceSecondaryReviewer
-					: docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== ''
-					? docData.serviceReviewer
-					: docData.primaryReviewer && docData.primaryReviewer !== null && docData.primaryReviewer !== ''
-					? docData.primaryReviewer
-					: 'N/A';
-
-			const pocOrganization =
-				docData.altPOCOrg && docData.altPOCOrg !== null && docData.altPOCOrg !== ''
-					? docData.altPOCOrg
-					: docData.servicePOCOrg && docData.servicePOCOrg !== null && docData.servicePOCOrg !== ''
-					? docData.servicePOCOrg
-					: docData.serviceSecondaryReviewer &&
-					  docData.serviceSecondaryReviewer !== null &&
-					  docData.serviceSecondaryReviewer !== ''
-					? docData.serviceSecondaryReviewer.split('(')[1].replace(')', '')
-					: docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== ''
-					? docData.serviceReviewer.split('(')[1].replace(')', '')
-					: 'N/A';
-
-			const pocEmail =
-				docData.altPOCEmail && docData.altPOCEmail !== null && docData.altPOCEmail !== ''
-					? docData.altPOCEmail
-					: docData.servicePOCEmail && docData.servicePOCEmail !== null && docData.servicePOCEmail !== ''
-					? docData.servicePOCEmail
-					: 'N/A';
-
-			const pocPhone =
-				docData.altPOCPhoneNumber && docData.altPOCPhoneNumber !== null && docData.altPOCPhoneNumber !== ''
-					? docData.altPOCPhoneNumber
-					: docData.servicePOCPhoneNumber &&
-					  docData.servicePOCPhoneNumber !== null &&
-					  docData.servicePOCPhoneNumber !== ''
-					? docData.servicePOCPhoneNumber
-					: 'N/A';
-
-			const plannedTransitionPartner =
-				docData.pocPlannedTransitionPartner &&
-				docData.pocPlannedTransitionPartner !== null &&
-				docData.pocPlannedTransitionPartner !== ''
-					? docData.pocPlannedTransitionPartner
-					: docData.servicePlannedTransitionPartner &&
-					  docData.servicePlannedTransitionPartner !== null &&
-					  docData.servicePlannedTransitionPartner !== ''
-					? docData.servicePlannedTransitionPartner
-					: docData.primaryPlannedTransitionPartner &&
-					  docData.primaryPlannedTransitionPartner !== null &&
-					  docData.primaryPlannedTransitionPartner !== ''
-					? docData.primaryPlannedTransitionPartner
-					: 'N/A';
-
-			const domainTask =
-				docData.domainTask && docData.domainTask !== null && docData.domainTask !== ''
-					? `${docData.domainTask}${
-							docData.domainTaskSecondary &&
-							docData.domainTaskSecondary !== null &&
-							docData.domainTaskSecondary != ''
-								? `: ${docData.domainTaskSecondary}`
-								: ''
-					  }`
-					: 'N/A';
-
-			// const referenceName = `rdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.programElement}#${docData.serviceAgency}#${docData.appropriationNumber}#${docData.projectNum}`;
-			const referenceName = docData.id;
-
-			// General Data
-			rdocContent.push(
-				{
-					text: referenceName,
-					id: referenceName,
-					fontSize: 1,
-					color: 'white',
-				},
-				{
-					style: 'table',
-					table: {
-						widths: [70, '*', 100, '*'],
-						body: [
-							[
-								{
-									text: 'Project Title:',
-									style: 'subheader',
-								},
-								docData.projectTitle ?? 'N/A',
-								{
-									text: 'AI Category:',
-									style: 'subheader',
-								},
-								label ?? 'N/A',
-							],
-							[
-								{
-									text: 'Project:',
-									style: 'subheader',
-								},
-								docData.projectNum ?? 'N/A',
-								{
-									text: 'Service Agency Name:',
-									style: 'subheader',
-								},
-								docData.serviceAgency ?? 'N/A',
-							],
-							[
-								{
-									text: showPOC ? 'Project POC:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocReviewer : ''}`,
-								{
-									text: showPOC ? 'POC Organization:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocOrganization : ''}`,
-							],
-							[
-								{
-									text: showPOC ? 'POC Email:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocEmail : ''}`,
-								{
-									text: showPOC ? 'POC Phone:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocPhone : ''}`,
-							],
-							[
-								{
-									text: 'Appropriation:',
-									style: 'subheader',
-								},
-								docData.appropriationNumber ?? 'N/A',
-								{
-									text: 'Appropriation Title:',
-									style: 'subheader',
-								},
-								docData.appropriationTitle ?? 'N/A',
-							],
-							[
-								{
-									text: 'Budget Activity:',
-									style: 'subheader',
-								},
-								docData.budgetActivityNumber ?? 'N/A',
-								{
-									text: 'Budget Activity Title:',
-									style: 'subheader',
-								},
-								docData.budgetActivityTitle,
-							],
-							[{ text: 'Source Tags:', style: 'subheader' }, docData.sourceTag ?? 'N/A', '', ''],
-							[
-								{
-									text: '# of Keywords:',
-									style: 'subheader',
-								},
-								docData.keywords ? docData.keywords.length : 'N/A',
-								{
-									text: 'Included Keywords:',
-									style: 'subheader',
-								},
-								docData.keywords ?? 'N/A',
-							],
-							[
-								{
-									text: 'Program Element:',
-									style: 'subheader',
-								},
-								docData.programElement ?? 'N/A',
-								{
-									text: 'Planned Transition Partner (if known):',
-									style: 'subheader',
-								},
-								plannedTransitionPartner,
-							],
-							[{ text: 'AI Domain: ', style: 'subheader' }, domainTask, '', ''],
-						],
-					},
-					layout: {
-						defaultBorder: false,
-					},
-					fontSize: 10,
-				}
-			);
-
-			// Costs, data type, jca
-			const JCAData = this.budgetSearchUtility.getJCAData();
-			const tmpJCAData = [];
-			if (
-				docData.pocJointCapabilityArea &&
-				docData.pocJointCapabilityArea !== null &&
-				docData.pocJointCapabilityArea !== ''
-			) {
-				tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
-				const areas2 =
-					docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
-						? docData.pocJointCapabilityArea2.split(', ')
-						: [];
-				const areas3 =
-					docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
-						? docData.pocJointCapabilityArea3.split(', ')
-						: [];
-				const areasCombined = {};
-				areas2.forEach((area2) => {
-					areasCombined[area2] = [];
-				});
-
-				areas3.forEach((area3) => {
-					areas2.forEach((area2) => {
-						if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
-							areasCombined[area2].push(area3);
-						}
-					});
-				});
-
-				areas2.forEach((area2) => {
-					tmpJCAData.push(
-						{ text: `${area2}:`, marginLeft: 5 },
-						{
-							ul: areasCombined[area2].map((area3) => {
-								return { text: area3 };
-							}),
-							marginBottom: 5,
-							marginLeft: 10,
-						}
-					);
-				});
+	// helper function to generate rdoc content
+	getLabel(docData) {
+		let label = '';
+		if (docData) {
+			if (docData.pocAgreeLabel && docData.pocAgreeLabel === 'No' && docData.pocClassLabel) {
+				label = docData.pocClassLabel;
+			} else if (docData.serviceAgreeLabel && docData.serviceAgreeLabel === 'No' && docData.serviceClassLabel) {
+				label = docData.serviceClassLabel;
+			} else if (docData.primaryClassLabel) {
+				label = docData.primaryClassLabel;
 			} else {
-				tmpJCAData.push('N/A');
+				label = 'Unknown';
 			}
-			let currentYear = new Date().getFullYear();
+		}
+		return label;
+	}
 
-			rdocContent.push({
-				pageBreak: 'after',
-				style: 'table',
-				table: {
-					widths: ['*', '*', '*'],
-					body: [
-						[
-							{ text: 'FY21-FY25 Total Program Element Cost', style: 'subheader' },
-							{
-								text: 'Data Type',
-								style: 'subheader',
-							},
-							{ text: 'Joint Capability Area', style: 'subheader' },
-						],
-						[
-							{
-								stack: [
-									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
-									{
-										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
-											docData.priorYearAmount !== undefined ? docData.priorYearAmount + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${currentYear.toString().substring(2)}: ${
-											docData.currentYearAmount !== undefined
-												? docData.currentYearAmount + ' M'
-												: ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by2_d !== undefined ? docData.proj_fund_by2_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{ text: 'To Complete:', marginBottom: 5 },
-									{ text: `Total Cost: ${docData.totalCost}`, marginBottom: 5 },
-								],
-							},
-							{
-								stack: [
-									{ text: 'How does the project fit this data type?', marginBottom: 5 },
-									{
-										text:
-											docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== ''
-												? `${docData.pocAIType}:`
-												: 'N/A',
-										marginBottom: 5,
-										bold:
-											docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== '',
-									},
-									{
-										text:
-											docData.pocAITypeDescription &&
-											docData.pocAITypeDescription !== null &&
-											docData.pocAITypeDescription !== ''
-												? docData.pocAITypeDescription
-												: '',
-										marginLeft: 5,
-									},
-								],
-							},
-							{
-								stack: [{ text: 'Role of AI in this project?', marginBottom: 5 }, ...tmpJCAData],
-							},
-						],
-					],
-				},
+	getPocReviewer(docData) {
+		if (docData.altPOCName && docData.altPOCName !== null && docData.altPOCName !== '') {
+			return docData.altPOCName;
+		} else if (docData.servicePOCName && docData.servicePOCName !== null && docData.servicePOCName !== '') {
+			return docData.servicePOCName;
+		} else if (
+			docData.serviceSecondaryReviewer &&
+			docData.serviceSecondaryReviewer !== null &&
+			docData.serviceSecondaryReviewer !== ''
+		) {
+			return docData.serviceSecondaryReviewer;
+		} else if (docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '') {
+			return docData.serviceReviewer;
+		} else if (docData.primaryReviewer && docData.primaryReviewer !== null && docData.primaryReviewer !== '') {
+			return docData.primaryReviewer;
+		} else {
+			return 'N/A';
+		}
+	}
+
+	getPocOrganization(docData) {
+		if (docData.altPOCOrg && docData.altPOCOrg !== null && docData.altPOCOrg !== '') {
+			return docData.altPOCOrg;
+		} else if (docData.servicePOCOrg && docData.servicePOCOrg !== null && docData.servicePOCOrg !== '') {
+			return docData.servicePOCOrg;
+		} else if (
+			docData.serviceSecondaryReviewer &&
+			docData.serviceSecondaryReviewer !== null &&
+			docData.serviceSecondaryReviewer !== ''
+		) {
+			return docData.serviceSecondaryReviewer.split('(')[1].replace(')', '');
+		} else if (docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '') {
+			return docData.serviceReviewer.split('(')[1].replace(')', '');
+		} else {
+			return 'N/A';
+		}
+	}
+
+	getPocEmail(docData) {
+		if (docData.altPOCEmail && docData.altPOCEmail !== null && docData.altPOCEmail !== '') {
+			return docData.altPOCEmail;
+		} else if (docData.servicePOCEmail && docData.servicePOCEmail !== null && docData.servicePOCEmail !== '') {
+			return docData.servicePOCEmail;
+		}
+		return 'N/A';
+	}
+
+	getPocPhone(docData) {
+		if (docData.altPOCPhoneNumber && docData.altPOCPhoneNumber !== null && docData.altPOCPhoneNumber !== '') {
+			return docData.altPOCPhoneNumber;
+		} else if (
+			docData.servicePOCPhoneNumber &&
+			docData.servicePOCPhoneNumber !== null &&
+			docData.servicePOCPhoneNumber !== ''
+		) {
+			return docData.servicePOCPhoneNumber;
+		}
+		return 'N/A';
+	}
+
+	getPlannedTransitionPartner(docData) {
+		if (
+			docData.pocPlannedTransitionPartner &&
+			docData.pocPlannedTransitionPartner !== null &&
+			docData.pocPlannedTransitionPartner !== ''
+		) {
+			return docData.pocPlannedTransitionPartner;
+		} else if (
+			docData.servicePlannedTransitionPartner &&
+			docData.servicePlannedTransitionPartner !== null &&
+			docData.servicePlannedTransitionPartner !== ''
+		) {
+			return docData.servicePlannedTransitionPartner;
+		} else if (
+			docData.primaryPlannedTransitionPartner &&
+			docData.primaryPlannedTransitionPartner !== null &&
+			docData.primaryPlannedTransitionPartner !== ''
+		) {
+			return docData.primaryPlannedTransitionPartner;
+		}
+		return 'N/A';
+	}
+
+	getDomainTask(docData) {
+		if (docData.domainTask && docData.domainTask !== null && docData.domainTask !== '') {
+			return `${docData.domainTask}${
+				docData.domainTaskSecondary && docData.domainTaskSecondary !== null && docData.domainTaskSecondary != ''
+					? `: ${docData.domainTaskSecondary}`
+					: ''
+			}`;
+		}
+		return 'N/A';
+	}
+
+	formatJCAData(JCAData, docData) {
+		const tmpJCAData = [];
+		if (
+			docData.pocJointCapabilityArea &&
+			docData.pocJointCapabilityArea !== null &&
+			docData.pocJointCapabilityArea !== ''
+		) {
+			tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
+			const areas2 =
+				docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
+					? docData.pocJointCapabilityArea2.split(', ')
+					: [];
+			const areas3 =
+				docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
+					? docData.pocJointCapabilityArea3.split(', ')
+					: [];
+			const areasCombined = {};
+			areas2.forEach((area2) => {
+				areasCombined[area2] = [];
 			});
 
+			areas3.forEach((area3) => {
+				areas2.forEach((area2) => {
+					if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
+						areasCombined[area2].push(area3);
+					}
+				});
+			});
+
+			areas2.forEach((area2) => {
+				tmpJCAData.push(
+					{ text: `${area2}:`, marginLeft: 5 },
+					{
+						ul: areasCombined[area2].map((area3) => {
+							return { text: area3 };
+						}),
+						marginBottom: 5,
+						marginLeft: 10,
+					}
+				);
+			});
+		} else {
+			tmpJCAData.push('N/A');
+		}
+
+		return tmpJCAData;
+	}
+
+	constructTitle(label, docData) {
+		if (docData.budgetType === 'rdoc') {
+			return [
+				{
+					text: 'Project Title:',
+					style: 'subheader',
+				},
+				docData.projectTitle ?? 'N/A',
+				{
+					text: 'AI Category:',
+					style: 'subheader',
+				},
+				label ?? 'N/A',
+			];
+		} else {
+			return [
+				{
+					text: 'Line Item Title:',
+					style: 'subheader',
+				},
+				docData.projectTitle ?? 'N/A',
+				{
+					text: 'AI Category:',
+					style: 'subheader',
+				},
+				label ?? 'N/A',
+			];
+		}
+	}
+
+	constructSubheader(docData) {
+		if (docData.docType === 'rdoc') {
+			return [
+				{
+					text: 'Project:',
+					style: 'subheader',
+				},
+				docData.projectNum ?? 'N/A',
+				{
+					text: 'Service Agency Name:',
+					style: 'subheader',
+				},
+				docData.serviceAgency ?? 'N/A',
+			];
+		} else {
+			return [
+				{
+					text: 'Line Item:',
+					style: 'subheader',
+				},
+				docData.budgetLineItem ?? 'N/A',
+				{
+					text: 'Service Agency Name:',
+					style: 'subheader',
+				},
+				docData.serviceAgency ?? 'N/A',
+			];
+		}
+	}
+
+	constructEndData(docData) {
+		const plannedTransitionPartner = this.getPlannedTransitionPartner(docData);
+		const domainTask = this.getDomainTask(docData);
+
+		if (docData.docType === 'rdoc') {
+			return [
+				[
+					{
+						text: 'Program Element:',
+						style: 'subheader',
+					},
+					docData.programElement ?? 'N/A',
+					{
+						text: 'Planned Transition Partner (if known):',
+						style: 'subheader',
+					},
+					plannedTransitionPartner,
+				],
+				[{ text: 'AI Domain: ', style: 'subheader' }, domainTask, '', ''],
+			];
+		} else {
+			return [
+				[
+					{ text: 'AI Domain: ', style: 'subheader' },
+					domainTask,
+					{
+						text: 'Planned Transition Partner (if known):',
+						style: 'subheader',
+					},
+					plannedTransitionPartner,
+				],
+			];
+		}
+	}
+
+	getGeneralData(docData, showPOC) {
+		const label = this.getLabel(docData);
+		const pocReviewer = this.getPocReviewer(docData);
+		const pocOrganization = this.getPocOrganization(docData);
+		const pocEmail = this.getPocEmail(docData);
+		const pocPhone = this.getPocPhone(docData);
+		const title = this.constructTitle(label, docData);
+		const subheader = this.constructSubheader(docData);
+		const endData = this.constructEndData(docData);
+
+		const referenceName = docData.id;
+
+		return [
+			{
+				text: referenceName,
+				id: referenceName,
+				fontSize: 1,
+				color: 'white',
+			},
+			{
+				style: 'table',
+				table: {
+					widths: [70, '*', 100, '*'],
+					body: [
+						title,
+						subheader,
+						[
+							{
+								text: showPOC ? 'Project POC:' : '',
+								style: 'subheader',
+							},
+							`${showPOC ? pocReviewer : ''}`,
+							{
+								text: showPOC ? 'POC Organization:' : '',
+								style: 'subheader',
+							},
+							`${showPOC ? pocOrganization : ''}`,
+						],
+						[
+							{
+								text: showPOC ? 'POC Email:' : '',
+								style: 'subheader',
+							},
+							`${showPOC ? pocEmail : ''}`,
+							{
+								text: showPOC ? 'POC Phone:' : '',
+								style: 'subheader',
+							},
+							`${showPOC ? pocPhone : ''}`,
+						],
+						[
+							{
+								text: 'Appropriation:',
+								style: 'subheader',
+							},
+							docData.appropriationNumber ?? 'N/A',
+							{
+								text: 'Appropriation Title:',
+								style: 'subheader',
+							},
+							docData.appropriationTitle ?? 'N/A',
+						],
+						[
+							{
+								text: 'Budget Activity:',
+								style: 'subheader',
+							},
+							docData.budgetActivityNumber ?? 'N/A',
+							{
+								text: 'Budget Activity Title:',
+								style: 'subheader',
+							},
+							docData.budgetActivityTitle,
+						],
+						[{ text: 'Source Tags:', style: 'subheader' }, docData.sourceTag ?? 'N/A', '', ''],
+						[
+							{
+								text: '# of Keywords:',
+								style: 'subheader',
+							},
+							docData.keywords ? docData.keywords.length : 'N/A',
+							{
+								text: 'Included Keywords:',
+								style: 'subheader',
+							},
+							docData.keywords ?? 'N/A',
+						],
+						...endData,
+					],
+				},
+				layout: {
+					defaultBorder: false,
+				},
+				fontSize: 10,
+			},
+		];
+	}
+
+	constructJCAData(docData) {
+		const JCAData = this.budgetSearchUtility.getJCAData();
+		const tmpJCAData = this.formatJCAData(JCAData, docData);
+		let currentYear = new Date().getFullYear();
+
+		return {
+			pageBreak: 'after',
+			style: 'table',
+			table: {
+				widths: ['*', '*', '*'],
+				body: [
+					[
+						{ text: 'FY21-FY25 Total Program Element Cost', style: 'subheader' },
+						{
+							text: 'Data Type',
+							style: 'subheader',
+						},
+						{ text: 'Joint Capability Area', style: 'subheader' },
+					],
+					[
+						{
+							stack: [
+								{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
+								{
+									text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
+										docData.priorYearAmount !== undefined ? docData.priorYearAmount + ' M' : ''
+									}`,
+									marginBottom: 5,
+								},
+								{
+									text: `FY${currentYear.toString().substring(2)}: ${
+										docData.currentYearAmount !== undefined ? docData.currentYearAmount + ' M' : ''
+									}`,
+									marginBottom: 5,
+								},
+								{
+									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+										docData.proj_fund_by2_d !== undefined ? docData.proj_fund_by2_d + ' M' : ''
+									}`,
+									marginBottom: 5,
+								},
+								{
+									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+										docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
+									}`,
+									marginBottom: 5,
+								},
+								{
+									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+										docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
+									}`,
+									marginBottom: 5,
+								},
+								{ text: 'To Complete:', marginBottom: 5 },
+								{ text: `Total Cost: ${docData.totalCost}`, marginBottom: 5 },
+							],
+						},
+						{
+							stack: [
+								{ text: 'How does the project fit this data type?', marginBottom: 5 },
+								{
+									text:
+										docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== ''
+											? `${docData.pocAIType}:`
+											: 'N/A',
+									marginBottom: 5,
+									bold: docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== '',
+								},
+								{
+									text:
+										docData.pocAITypeDescription &&
+										docData.pocAITypeDescription !== null &&
+										docData.pocAITypeDescription !== ''
+											? docData.pocAITypeDescription
+											: '',
+									marginLeft: 5,
+								},
+							],
+						},
+						{
+							stack: [{ text: 'Role of AI in this project?', marginBottom: 5 }, ...tmpJCAData],
+						},
+					],
+				],
+			},
+		};
+	}
+
+	getPartnerList(docData) {
+		let serviceMPList = '';
+		if (
+			docData.serviceMissionPartnersList &&
+			docData.serviceMissionPartnersList !== null &&
+			docData.serviceMissionPartnersList !== ''
+		) {
+			serviceMPList = docData.serviceMissionPartnersList;
+		}
+
+		return !docData.pocMPAgreeLabel &&
+			docData.pocMissionPartnersList &&
+			docData.pocMissionPartnersList !== null &&
+			docData.pocMissionPartnersList !== ''
+			? docData.pocMissionPartnersList
+			: serviceMPList;
+	}
+
+	getPartnerChecklist(docData) {
+		let serviceMPChecklist = '';
+		if (
+			docData.serviceMissionPartnersChecklist &&
+			docData.serviceMissionPartnersChecklist !== null &&
+			docData.serviceMissionPartnersChecklist !== ''
+		) {
+			serviceMPChecklist = docData.serviceMissionPartnersChecklist;
+		}
+
+		return !docData.pocMPAgreeLabel &&
+			docData.pocMissionPartnersChecklist &&
+			docData.pocMissionPartnersChecklist !== null &&
+			docData.pocMissionPartnersChecklist !== ''
+			? docData.pocMissionPartnersChecklist
+			: serviceMPChecklist;
+	}
+
+	// actual function to construct rdoc content
+	async constructRdocContent(docData, rdocContent, userId, showPOC) {
+		try {
+			const generalData = this.getGeneralData(docData, showPOC);
+			// General Data
+			rdocContent.push(generalData);
+
+			// Costs, data type, jca
+			const jca = this.constructJCAData(docData);
+			rdocContent.push(jca);
+
 			// Mission partners acomplishments
-			let partnerList =
-				!docData.pocMPAgreeLabel &&
-				docData.pocMissionPartnersList &&
-				docData.pocMissionPartnersList !== null &&
-				docData.pocMissionPartnersList !== ''
-					? docData.pocMissionPartnersList
-					: docData.serviceMissionPartnersList &&
-					  docData.serviceMissionPartnersList !== null &&
-					  docData.serviceMissionPartnersList !== ''
-					? docData.serviceMissionPartnersList
-					: '';
-			let partnerChecklist =
-				!docData.pocMPAgreeLabel &&
-				docData.pocMissionPartnersChecklist &&
-				docData.pocMissionPartnersChecklist !== null &&
-				docData.pocMissionPartnersChecklist !== ''
-					? docData.pocMissionPartnersChecklist
-					: docData.serviceMissionPartnersChecklist &&
-					  docData.serviceMissionPartnersChecklist !== null &&
-					  docData.serviceMissionPartnersChecklist !== ''
-					? docData.serviceMissionPartnersChecklist
-					: '';
+			let partnerList = this.getPartnerList(docData);
+			let partnerChecklist = this.getPartnerChecklist(docData);
 
 			if (partnerList !== '') {
 				partnerList = partnerList.split('|');
@@ -1115,6 +1216,9 @@ class Reports {
 				},
 			});
 
+			const referenceName = docData.id;
+			const label = this.getLabel(docData);
+
 			// Updating TOC
 			return [
 				{ text: docData.programElement, linkToDestination: referenceName, marginBottom: 5, marginTop: 5 },
@@ -1133,378 +1237,16 @@ class Reports {
 
 	async constructPdocContent(docData, pdocContent, userId, showPOC) {
 		try {
-			let label = '';
-			if (docData) {
-				if (docData.pocAgreeLabel && docData.pocAgreeLabel === 'No' && docData.pocClassLabel) {
-					label = docData.pocClassLabel;
-				} else if (
-					docData.serviceAgreeLabel &&
-					docData.serviceAgreeLabel === 'No' &&
-					docData.serviceClassLabel
-				) {
-					label = docData.serviceClassLabel;
-				} else if (docData.primaryClassLabel) {
-					label = docData.primaryClassLabel;
-				} else {
-					label = 'Unknown';
-				}
-			}
-
-			let totalCost = null;
-			if (docData.allPriorYearsAmount) {
-				totalCost += docData.allPriorYearsAmount;
-			}
-			if (docData.priorYearAmount) {
-				totalCost += docData.priorYearAmount;
-			}
-			if (docData.currentYearAmount) {
-				totalCost += docData.currentYearAmount;
-			}
-
-			const pocReviewer =
-				docData.altPOCName && docData.altPOCName !== null && docData.altPOCName !== ''
-					? docData.altPOCName
-					: docData.servicePOCName && docData.servicePOCName !== null && docData.servicePOCName !== ''
-					? docData.servicePOCName
-					: docData.serviceSecondaryReviewer &&
-					  docData.serviceSecondaryReviewer !== null &&
-					  docData.serviceSecondaryReviewer !== ''
-					? docData.serviceSecondaryReviewer
-					: docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== ''
-					? docData.serviceReviewer
-					: docData.primaryReviewer && docData.primaryReviewer !== null && docData.primaryReviewer !== ''
-					? docData.primaryReviewer
-					: 'N/A';
-
-			const pocOrganization =
-				docData.altPOCOrg && docData.altPOCOrg !== null && docData.altPOCOrg !== ''
-					? docData.altPOCOrg
-					: docData.servicePOCOrg && docData.servicePOCOrg !== null && docData.servicePOCOrg !== ''
-					? docData.servicePOCOrg
-					: docData.serviceSecondaryReviewer &&
-					  docData.serviceSecondaryReviewer !== null &&
-					  docData.serviceSecondaryReviewer !== ''
-					? docData.serviceSecondaryReviewer.split('(')[1].replace(')', '')
-					: docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== ''
-					? docData.serviceReviewer.split('(')[1].replace(')', '')
-					: 'N/A';
-
-			const pocEmail =
-				docData.altPOCEmail && docData.altPOCEmail !== null && docData.altPOCEmail !== ''
-					? docData.altPOCEmail
-					: docData.servicePOCEmail && docData.servicePOCEmail !== null && docData.servicePOCEmail !== ''
-					? docData.servicePOCEmail
-					: 'N/A';
-
-			const pocPhone =
-				docData.altPOCPhoneNumber && docData.altPOCPhoneNumber !== null && docData.altPOCPhoneNumber !== ''
-					? docData.altPOCPhoneNumber
-					: docData.servicePOCPhoneNumber &&
-					  docData.servicePOCPhoneNumber !== null &&
-					  docData.servicePOCPhoneNumber !== ''
-					? docData.servicePOCPhoneNumber
-					: 'N/A';
-
-			const plannedTransitionPartner =
-				docData.pocPlannedTransitionPartner &&
-				docData.pocPlannedTransitionPartner !== null &&
-				docData.pocPlannedTransitionPartner !== ''
-					? docData.pocPlannedTransitionPartner
-					: docData.servicePlannedTransitionPartner &&
-					  docData.servicePlannedTransitionPartner !== null &&
-					  docData.servicePlannedTransitionPartner !== ''
-					? docData.servicePlannedTransitionPartner
-					: docData.primaryPlannedTransitionPartner &&
-					  docData.primaryPlannedTransitionPartner !== null &&
-					  docData.primaryPlannedTransitionPartner !== ''
-					? docData.primaryPlannedTransitionPartner
-					: 'N/A';
-
-			const domainTask =
-				docData.domainTask && docData.domainTask !== null && docData.domainTask !== ''
-					? `${docData.domainTask}${
-							docData.domainTaskSecondary &&
-							docData.domainTaskSecondary !== null &&
-							docData.domainTaskSecondary != ''
-								? `: ${docData.domainTaskSecondary}`
-								: ''
-					  }`
-					: 'N/A';
-
-			// const referenceName = `pdoc#${docData.budgetYear}#${docData.budgetCycle}#${docData.budgetActivityNumber}#${docData.budgetLineItem}#${docData.serviceAgency}#${docData.appropriationNumber}`;
-			const referenceName = docData.id;
+			const generalData = this.getGeneralData(docData, showPOC);
 			// General Data
-			pdocContent.push(
-				{
-					text: referenceName,
-					id: referenceName,
-					fontSize: 1,
-					color: 'white',
-				},
-				{
-					style: 'table',
-					table: {
-						widths: [70, '*', 100, '*'],
-						body: [
-							[
-								{
-									text: 'Line Item Title:',
-									style: 'subheader',
-								},
-								docData.projectTitle ?? 'N/A',
-								{
-									text: 'AI Category:',
-									style: 'subheader',
-								},
-								label ?? 'N/A',
-							],
-							[
-								{
-									text: 'Line Item:',
-									style: 'subheader',
-								},
-								docData.budgetLineItem ?? 'N/A',
-								{
-									text: 'Service Agency Name:',
-									style: 'subheader',
-								},
-								docData.serviceAgency ?? 'N/A',
-							],
-							[
-								{
-									text: showPOC ? 'Project POC:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocReviewer : ''}`,
-								{
-									text: showPOC ? 'POC Organization:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocOrganization : ''}`,
-							],
-							[
-								{
-									text: showPOC ? 'POC Email:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocEmail : ''}`,
-								{
-									text: showPOC ? 'POC Phone:' : '',
-									style: 'subheader',
-								},
-								`${showPOC ? pocPhone : ''}`,
-							],
-							[
-								{
-									text: 'Appropriation:',
-									style: 'subheader',
-								},
-								docData.appropriationNumber ?? 'N/A',
-								{
-									text: 'Appropriation Title:',
-									style: 'subheader',
-								},
-								docData.appropriationTitle ?? 'N/A',
-							],
-							[
-								{
-									text: 'Budget Activity:',
-									style: 'subheader',
-								},
-								docData.budgetActivityNumber ?? 'N/A',
-								{
-									text: 'Budget Activity Title:',
-									style: 'subheader',
-								},
-								docData.budgetActivityTitle,
-							],
-							[{ text: 'Source Tags:', style: 'subheader' }, docData.sourceTag ?? 'N/A', '', ''],
-							[
-								{
-									text: '# of Keywords:',
-									style: 'subheader',
-								},
-								docData.keywords ? docData.keywords.length : 'N/A',
-								{
-									text: 'Included Keywords:',
-									style: 'subheader',
-								},
-								docData.keywords ?? 'N/A',
-							],
-							[
-								{ text: 'AI Domain: ', style: 'subheader' },
-								domainTask,
-								{
-									text: 'Planned Transition Partner (if known):',
-									style: 'subheader',
-								},
-								plannedTransitionPartner,
-							],
-						],
-					},
-					layout: {
-						defaultBorder: false,
-					},
-					fontSize: 10,
-				}
-			);
+			pdocContent.push(generalData);
 
-			// Costs, data type, jca
-			const JCAData = this.budgetSearchUtility.getJCAData();
-			const tmpJCAData = [];
-			if (
-				docData.pocJointCapabilityArea &&
-				docData.pocJointCapabilityArea !== null &&
-				docData.pocJointCapabilityArea !== ''
-			) {
-				tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
-				const areas2 =
-					docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
-						? docData.pocJointCapabilityArea2.split(', ')
-						: [];
-				const areas3 =
-					docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
-						? docData.pocJointCapabilityArea3.split(', ')
-						: [];
-				const areasCombined = {};
-				areas2.forEach((area2) => {
-					areasCombined[area2] = [];
-				});
-
-				areas3.forEach((area3) => {
-					areas2.forEach((area2) => {
-						if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
-							areasCombined[area2].push(area3);
-						}
-					});
-				});
-
-				areas2.forEach((area2) => {
-					tmpJCAData.push(
-						{ text: `${area2}:`, marginLeft: 5 },
-						{
-							ul: areasCombined[area2].map((area3) => {
-								return { text: area3 };
-							}),
-							marginBottom: 5,
-							marginLeft: 10,
-						}
-					);
-				});
-			} else {
-				tmpJCAData.push('N/A');
-			}
-
-			let currentYear = new Date().getFullYear();
-
-			pdocContent.push({
-				pageBreak: 'after',
-				style: 'table',
-				table: {
-					widths: ['*', '*', '*'],
-					body: [
-						[
-							{ text: 'FY21-FY25 Total Program Element Cost', style: 'subheader' },
-							{
-								text: 'Data Type',
-								style: 'subheader',
-							},
-							{ text: 'Joint Capability Area', style: 'subheader' },
-						],
-						[
-							{
-								stack: [
-									{ text: 'Total $ attributed to AI: ', marginBottom: 5 },
-									{
-										text: `FY${(currentYear - 1).toString().substring(2)} (previous year): ${
-											docData.priorYearAmount !== undefined ? docData.priorYearAmount + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${currentYear.toString().substring(2)}: ${
-											docData.currentYearAmount !== undefined
-												? docData.currentYearAmount + ' M'
-												: ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by2_d !== undefined ? docData.proj_fund_by2_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{
-										text: `FY${(currentYear + 1).toString().substring(2)}: ${
-											docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
-										}`,
-										marginBottom: 5,
-									},
-									{ text: 'To Complete:', marginBottom: 5 },
-									{ text: `Total Cost: ${docData.totalCost}`, marginBottom: 5 },
-								],
-							},
-							{
-								stack: [
-									{ text: 'How does the project fit this data type?', marginBottom: 5 },
-									{
-										text:
-											docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== ''
-												? `${docData.pocAIType}:`
-												: 'N/A',
-										marginBottom: 5,
-										bold:
-											docData.pocAIType && docData.pocAIType !== null && docData.pocAIType !== '',
-									},
-									{
-										text:
-											docData.pocAITypeDescription &&
-											docData.pocAITypeDescription !== null &&
-											docData.pocAITypeDescription !== ''
-												? docData.pocAITypeDescription
-												: '',
-										marginLeft: 5,
-									},
-								],
-							},
-							{
-								stack: [{ text: 'Role of AI in this project?', marginBottom: 5 }, ...tmpJCAData],
-							},
-						],
-					],
-				},
-			});
+			const jca = this.constructJCAData(docData);
+			pdocContent.push(jca);
 
 			// Mission partners acomplishments
-			let partnerList =
-				!docData.pocMPAgreeLabel &&
-				docData.pocMissionPartnersList &&
-				docData.pocMissionPartnersList !== null &&
-				docData.pocMissionPartnersList !== ''
-					? docData.pocMissionPartnersList
-					: docData.serviceMissionPartnersList &&
-					  docData.serviceMissionPartnersList !== null &&
-					  docData.serviceMissionPartnersList !== ''
-					? docData.serviceMissionPartnersList
-					: '';
-			let partnerChecklist =
-				!docData.pocMPAgreeLabel &&
-				docData.pocMissionPartnersChecklist &&
-				docData.pocMissionPartnersChecklist !== null &&
-				docData.pocMissionPartnersChecklist !== ''
-					? docData.pocMissionPartnersChecklist
-					: docData.serviceMissionPartnersChecklist &&
-					  docData.serviceMissionPartnersChecklist !== null &&
-					  docData.serviceMissionPartnersChecklist !== ''
-					? docData.serviceMissionPartnersChecklist
-					: '';
+			let partnerList = this.getPartnerList(docData);
+			let partnerChecklist = this.getPartnerChecklist(docData);
 
 			if (partnerList !== '') {
 				partnerList = partnerList.split('|');
@@ -1542,6 +1284,9 @@ class Reports {
 					],
 				},
 			});
+
+			const referenceName = docData.id;
+			const label = this.getLabel(docData);
 
 			// Updating TOC
 			return [

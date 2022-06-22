@@ -641,6 +641,307 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
+	getReviewStep(review_n) {
+		const review = {
+			primaryReviewStatus: 'Needs Review',
+			serviceReviewStatus: 'Needs Review',
+			pocReviewStatus: 'Needs Review',
+		};
+		if (Array.isArray(review_n) && review_n.length > 0) {
+			review_n.forEach((rev) => {
+				if (rev['portfolio_name_s'] === 'AI Inventory') {
+					review['primaryReviewStatus'] = review_n['primary_review_status_s'];
+					review['serviceReviewStatus'] = review_n['service_review_status_s'];
+					review['pocReviewStatus'] = review_n['poc_review_status_s'];
+				}
+			});
+		}
+		let reviewStep = 'service';
+		if (review.serviceReviewStatus === 'Finished Review') reviewStep = 'poc';
+		if (review.pocReviewStatus === 'Finished Review') reviewStep = 'finished';
+		return reviewStep;
+	}
+
+	processCounts(results) {
+		const counts = {
+			fy22: {
+				hasKeywords: {
+					army: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					af: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					navy: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					usmc: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					socom: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					osd: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					js: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					other: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					total: 0,
+					service: 0,
+					poc: 0,
+					finished: 0,
+				},
+				noKeywords: {
+					army: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					af: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					navy: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					usmc: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					socom: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					osd: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					js: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					other: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					total: 0,
+					service: 0,
+					poc: 0,
+					finished: 0,
+				},
+			},
+			fy21: {
+				hasKeywords: {
+					army: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					af: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					navy: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					usmc: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					socom: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					osd: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					js: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					other: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					total: 0,
+					service: 0,
+					poc: 0,
+					finished: 0,
+				},
+				noKeywords: {
+					army: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					af: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					navy: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					usmc: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					socom: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					osd: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					js: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					other: {
+						total: 0,
+						service: 0,
+						poc: 0,
+						finished: 0,
+					},
+					total: 0,
+					service: 0,
+					poc: 0,
+					finished: 0,
+				},
+			},
+		};
+
+		if (results === undefined || results.docs === undefined) {
+			return counts;
+		}
+
+		results.docs.forEach((result) => {
+			let serviceKey;
+			let keywordsKey;
+			let yearKey;
+
+			switch (result.serviceAgency) {
+				case 'Army':
+					serviceKey = 'army';
+					break;
+				case 'Air Force (AF)':
+					serviceKey = 'af';
+					break;
+				case 'Navy':
+					serviceKey = 'navy';
+					break;
+				case 'The Joint Staff (TJS)':
+					serviceKey = 'js';
+					break;
+				case 'United States Special Operations Command (SOCOM)':
+					serviceKey = 'socom';
+					break;
+				case 'Office of the Secretary Of Defense (OSD)':
+					serviceKey = 'osd';
+					break;
+				case 'US Marine Corp (USMC)':
+					serviceKey = 'usmc';
+					break;
+				default:
+					serviceKey = 'other';
+					break;
+			}
+
+			const reviewStep = this.getReviewStep(result.review_n);
+
+			keywordsKey = result.hasKeywords ? 'hasKeywords' : 'noKeywords';
+
+			if (result.budgetYear === '2022') {
+				yearKey = 'fy22';
+			} else {
+				yearKey = 'fy21';
+			}
+
+			counts[yearKey][keywordsKey][serviceKey].total = counts[yearKey][keywordsKey][serviceKey].total + 1;
+			counts[yearKey][keywordsKey].total = counts[yearKey][keywordsKey].total + 1;
+			counts[yearKey][keywordsKey][serviceKey][reviewStep] =
+				counts[yearKey][keywordsKey][serviceKey][reviewStep] + 1;
+			counts[yearKey][keywordsKey][reviewStep] = counts[yearKey][keywordsKey][reviewStep] + 1;
+		});
+
+		return counts;
+	}
+
 	async getExcelDataForReviewStatus(req, userId, res) {
 		try {
 			const { test = false } = req;
@@ -850,297 +1151,7 @@ class JBookSearchHandler extends SearchHandler {
 				true
 			);
 
-			const counts = {
-				fy22: {
-					hasKeywords: {
-						army: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						af: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						navy: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						usmc: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						socom: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						osd: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						js: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						other: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						total: 0,
-						service: 0,
-						poc: 0,
-						finished: 0,
-					},
-					noKeywords: {
-						army: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						af: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						navy: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						usmc: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						socom: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						osd: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						js: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						other: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						total: 0,
-						service: 0,
-						poc: 0,
-						finished: 0,
-					},
-				},
-				fy21: {
-					hasKeywords: {
-						army: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						af: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						navy: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						usmc: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						socom: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						osd: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						js: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						other: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						total: 0,
-						service: 0,
-						poc: 0,
-						finished: 0,
-					},
-					noKeywords: {
-						army: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						af: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						navy: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						usmc: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						socom: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						osd: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						js: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						other: {
-							total: 0,
-							service: 0,
-							poc: 0,
-							finished: 0,
-						},
-						total: 0,
-						service: 0,
-						poc: 0,
-						finished: 0,
-					},
-				},
-			};
-
-			if (results && results.docs) {
-				results.docs.forEach((result) => {
-					let serviceKey;
-					let reviewStep = 'service';
-					let keywordsKey;
-					let yearKey;
-
-					switch (result.serviceAgency) {
-						case 'Army':
-							serviceKey = 'army';
-							break;
-						case 'Air Force (AF)':
-							serviceKey = 'af';
-							break;
-						case 'Navy':
-							serviceKey = 'navy';
-							break;
-						case 'The Joint Staff (TJS)':
-							serviceKey = 'js';
-							break;
-						case 'United States Special Operations Command (SOCOM)':
-							serviceKey = 'socom';
-							break;
-						case 'Office of the Secretary Of Defense (OSD)':
-							serviceKey = 'osd';
-							break;
-						case 'US Marine Corp (USMC)':
-							serviceKey = 'usmc';
-							break;
-						default:
-							serviceKey = 'other';
-							break;
-					}
-
-					const review = {
-						primaryReviewStatus: 'Needs Review',
-						serviceReviewStatus: 'Needs Review',
-						pocReviewStatus: 'Needs Review',
-					};
-					if (Array.isArray(result.review_n) && result.review_n.length > 0) {
-						result.review_n.forEach((review) => {
-							if (review['portfolio_name_s'] === 'AI Inventory') {
-								review['primaryReviewStatus'] = result.review_n['primary_review_status_s'];
-								review['serviceReviewStatus'] = result.review_n['service_review_status_s'];
-								review['pocReviewStatus'] = result.review_n['poc_review_status_s'];
-							}
-						});
-					}
-
-					if (review.primaryReviewStatus === 'Finished Review') reviewStep = 'service';
-					if (result.serviceReviewStatus === 'Finished Review') reviewStep = 'poc';
-					if (result.pocReviewStatus === 'Finished Review') reviewStep = 'finished';
-
-					keywordsKey = result.hasKeywords ? 'hasKeywords' : 'noKeywords';
-
-					if (result.budgetYear === '2022') {
-						yearKey = 'fy22';
-					} else {
-						yearKey = 'fy21';
-					}
-
-					counts[yearKey][keywordsKey][serviceKey].total = counts[yearKey][keywordsKey][serviceKey].total + 1;
-					counts[yearKey][keywordsKey].total = counts[yearKey][keywordsKey].total + 1;
-					counts[yearKey][keywordsKey][serviceKey][reviewStep] =
-						counts[yearKey][keywordsKey][serviceKey][reviewStep] + 1;
-					counts[yearKey][keywordsKey][reviewStep] = counts[yearKey][keywordsKey][reviewStep] + 1;
-				});
-			}
+			const counts = this.processCounts(results);
 
 			// FY22 Totals
 			sheet.getCell('B4').value = counts.fy22.hasKeywords.total;
