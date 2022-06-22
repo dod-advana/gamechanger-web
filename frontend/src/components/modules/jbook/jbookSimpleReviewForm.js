@@ -41,7 +41,6 @@ const JBookSimpleReviewForm = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { reviewData, primaryReviewLoading } = state;
-	console.log(reviewData);
 
 	const getSimpleReviewData = () => {
 		const simpleReviewData = [
@@ -58,7 +57,7 @@ const JBookSimpleReviewForm = React.memo((props) => {
 				),
 			},
 			{
-				Key: <CoreAIAnalysisKey />,
+				Key: state.selectedPortfolio === 'AI Inventory' ? <CoreAIAnalysisKey /> : 'Tag',
 				Value: (
 					<CoreAIAnalysisValue
 						dropdownData={dropdownData}
