@@ -29,30 +29,20 @@ require('typeface-noto-sans');
 require('typeface-montserrat');
 require('./favicon.ico');
 
+const emptyPage = () => {
+	return (
+		<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+			<LoadingIndicator />
+		</div>
+	);
+};
+
 const ConsentAgreement = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/ConsentAgreement'),
 	loading: () => {
 		return <></>;
 	},
 });
-
-// const SlideOutMenu = LoadableVisibility({
-// 	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenu'),
-// 	loading: () => {
-// 		return (
-// 			<div
-// 				style={{
-// 					position: 'fixed',
-// 					left: 0,
-// 					top: '2em',
-// 					bottom: 0,
-// 					zIndex: 500,
-// 					backgroundColor: '#171A23',
-// 				}}
-// 			/>
-// 		);
-// 	},
-// });
 
 const SlideOutMenuContextHandler = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenuContext'),
@@ -74,46 +64,22 @@ const SlideOutMenuContextHandler = LoadableVisibility({
 
 const ErrorPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage'),
-	loading: () => {
-		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<LoadingIndicator />
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const NotFoundPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/NotFoundPage'),
-	loading: () => {
-		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const UnauthorizedPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage'),
-	loading: () => {
-		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const JBookProfilePage = LoadableVisibility({
 	loader: () => import('./containers/JBookProfilePage'),
-	loading: () => {
-		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const GamechangerPage = LoadableVisibility({
@@ -131,57 +97,27 @@ const GamechangerPage = LoadableVisibility({
 
 const GamechangerAdminPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerAdminPage'),
-	loading: () => {
-		return (
-			<div className="main-container" style={{ minHeight: 'calc(100vh - 220px)' }}>
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const GamechangerEsPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerEsPage'),
-	loading: () => {
-		return (
-			<div className="main-container">
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const GameChangerDetailsPage = LoadableVisibility({
 	loader: () => import('./containers/GameChangerDetailsPage'),
-	loading: () => {
-		return (
-			<div className="main-container">
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const GamechangerPdfViewer = LoadableVisibility({
 	loader: () => import('./components/documentViewer/PDFViewer'),
-	loading: () => {
-		return (
-			<div className="main-container">
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const GamechangerLiteAdminPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerLiteAdminPage'),
-	loading: () => {
-		return (
-			<div className="main-container">
-				<></>
-			</div>
-		);
-	},
+	loading: () => emptyPage(),
 });
 
 const instance = createInstance({
@@ -189,7 +125,7 @@ const instance = createInstance({
 	siteId: Config.MATOMO_SITE_ID || 2,
 });
 
-const history = createBrowserHistory();
+const browserHistory = createBrowserHistory();
 
 const tutorialOverlayAPI = new TutorialOverlayAPI();
 const gameChangerAPI = new GameChangerAPI();
@@ -278,7 +214,7 @@ const App = () => {
 		try {
 			const data = await gameChangerAPI.getCloneData();
 			const cloneRoutes = [];
-			_.forEach(data.data, (clone, idx) => {
+			_.forEach(data.data, (clone) => {
 				if (clone.is_live) {
 					const name = clone.clone_name;
 					const GamechangerProvider = getProvider(name);
@@ -322,7 +258,7 @@ const App = () => {
 														? tutorialData[name].newUserTutorial
 														: null
 												}
-												history={history}
+												history={browserHistory}
 												isClone={true}
 												cloneData={clone}
 												location={location}
@@ -356,7 +292,7 @@ const App = () => {
 														? tutorialData[name].newUserTutorial
 														: null
 												}
-												history={history}
+												history={browserHistory}
 												isClone={true}
 												cloneData={clone}
 												location={location}
@@ -405,7 +341,7 @@ const App = () => {
 		return includePaths.includes(location.pathname);
 	};
 
-	const getStyleType = (match, location) => {
+	const getStyleType = (location) => {
 		let style = styles.newContainer;
 		if (isShowNothingButComponent(location)) {
 			style = styles.emptyContainer;
@@ -463,13 +399,13 @@ const App = () => {
 			<MatomoProvider value={instance}>
 				<MuiThemeProvider theme={ThemeDefault}>
 					<ClassificationBanner />
-					<ConsentAgreement />
+					<ConsentAgreement id={'consent-agreement'} />
 
 					<Route
 						exact
 						path="/"
 						children={({ match, location, history }) => (
-							<div style={getStyleType(match, location)}>
+							<div style={getStyleType(location)}>
 								<SlideOutMenuContextHandler>
 									<>
 										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>

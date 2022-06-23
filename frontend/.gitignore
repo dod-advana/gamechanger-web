@@ -11,6 +11,7 @@
 jest_0/
 jest/
 *.snap
+./cypress.env.json
 
 # production
 /build

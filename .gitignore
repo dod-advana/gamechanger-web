@@ -8,3 +8,4 @@ matomo
 .npmrc
 mysql
 /.github/CODEOWNERS
+cypress.env.json
