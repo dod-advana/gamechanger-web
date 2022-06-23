@@ -218,6 +218,11 @@ const Metadata = (props) => {
 
 const ProjectDescription = (props) => {
 	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
+	const title =
+		(projectData.projectMissionDescription || projectData.programDescription) ??
+		projectData.projectMissionDescription
+			? 'Project Description'
+			: 'Program Description';
 	return (
 		<>
 			{profileLoading ? (
@@ -228,10 +233,7 @@ const ProjectDescription = (props) => {
 						{renderTitle(projectData, programElement, projectNum)}
 					</Typography>
 					<Typography variant="h3" style={{ fontWeight: 'bold', width: '100%', marginBottom: '20px' }}>
-						{(projectData.projectMissionDescription || projectData.programDescription) ??
-						projectData.projectMissionDescription
-							? 'Project Description'
-							: 'Program Description'}
+						{title}
 					</Typography>
 					<div style={{ overflow: 'auto' }}>
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
@@ -424,7 +426,7 @@ const Contracts = (props) => {
 	return <StyledTableContainer>{contractTables}</StyledTableContainer>;
 };
 
-const NavButtons = (props) => {
+const NavButtons = () => {
 	const buttonNames = [
 		'The Basics',
 		'Accomplishment',
@@ -494,16 +496,8 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
-const getMetadataTableData = (
-	projectData,
-	budgetType,
-	projectNum,
-	reviewData,
-	keywordsChecked,
-	keywordCheckboxes,
-	setKeywordCheck
-) => {
-	const metadata = [
+const a = (projectData) => {
+	return [
 		{
 			Key: 'Total Cost',
 			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
@@ -533,6 +527,19 @@ const getMetadataTableData = (
 			Key: 'Project',
 			Value: projectData.projectTitle || 'N/A',
 		},
+	];
+};
+
+const getMetadataTableData = (
+	projectData,
+	budgetType,
+	projectNum,
+	reviewData,
+	keywordsChecked,
+	keywordCheckboxes,
+	setKeywordCheck
+) => {
+	return a(projectData).concat([
 		{
 			Key: 'Program Element',
 			Value: projectData.programElement || 'N/A',
@@ -593,19 +600,17 @@ const getMetadataTableData = (
 				</div>
 			),
 		},
-	];
-
-	return metadata;
+	]);
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
 	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
-	const service = projectData.serviceAgency;
-	return `${projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : ''} ${
-		programElement && programElement !== 'undefined' ? `${programElement} ` : ''
-	} ${service && service !== 'undefined' ? `${service}` : ''} ${
-		projectNum && projectNum !== 'undefined' ? `${projectNum} ` : ''
-	}`;
+	const title = projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : '';
+	const element = programElement && programElement !== 'undefined' ? `${programElement} ` : '';
+	const service =
+		projectData.serviceAgency && projectData.serviceAgency !== 'undefined' ? `${projectData.serviceAgency}` : '';
+	const num = projectNum && projectNum !== 'undefined' ? `${projectNum} ` : '';
+	return `${title} ${element} ${service} ${num}`;
 };
 
 export {
