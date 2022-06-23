@@ -56,6 +56,8 @@ const JBookSearchHandler = {
 				options: {
 					searchVersion: 1,
 					jbookSearchSettings: cleanSearchSettings,
+					portfolio: state.selectedPortfolio || 'AI Inventory',
+					sortSelected: state.sortSelected,
 					exportSearch: true,
 				},
 			});
@@ -89,7 +91,7 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						portfolio: state.portfolio || 'AI Inventory',
+						portfolio: state.selectedPortfolio || 'AI Inventory',
 						sortSelected: state.sortSelected,
 					},
 				},
