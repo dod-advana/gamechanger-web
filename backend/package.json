@@ -22,56 +22,46 @@
 	"author": "",
 	"license": "ISC",
 	"resolutions": {
-		"node-forge": "1.2.1",
-		"types/node": "12.20.13",
+		"types/node": "12.12.34",
 		"ansi-regex": "5.0.1",
-		"async": "2.6.4"
+		"moment": "2.29.3"
 	},
 	"dependencies": {
 		"@dod-advana/advana-api-auth": "0.0.45",
 		"@dod-advana/advana-logger": "0.0.4",
 		"@elastic/elasticsearch": "7.10.0",
-		"async": "2.6.4",
 		"async-redis": "2.0.0",
 		"aws-sdk": "2.976.0",
 		"axios": "0.24.0",
 		"body-parser": "1.19.0",
 		"chai": "4.3.0",
-		"cors": "2.8.5",
 		"crypto-js": "4.1.1",
 		"csv-stringify": "5.5.3",
 		"d3-force-3d": "2.2.0",
 		"dotenv": "8.6.0",
 		"exceljs": "4.3.0",
 		"express": "4.17.1",
-		"express-session": "1.17.2",
 		"hat": "0.0.3",
 		"jsonwebtoken": "8.5.1",
 		"lodash": "4.17.21",
 		"lunr": "2.3.9",
-		"moment": "2.20.1",
+		"moment": "2.29.3",
 		"moment-timezone": "0.5.31",
 		"mysql": "2.18.1",
-		"neo4j-driver": "4.2.3",
+		"neo4j-driver": "4.4.4",
 		"node-cron": "2.0.3",
-		"node-forge": "1.2.1",
 		"nodemailer": "6.6.3",
 		"npm-force-resolutions": "0.0.10",
 		"pagerank.js": "1.0.2",
-		"passport": "0.4.1",
-		"passport-ldapauth": "2.1.4",
 		"pdfmake": "0.2.4",
-		"redis": "3.1.2",
 		"secure-random": "1.1.1",
 		"sequelize": "6.6.5",
 		"spark-md5": "3.0.1",
-		"spdy": "4.0.2",
+		"spdy": "4.0.1",
 		"ssh-key-decrypt": "0.1.2",
-		"strip-ansi": "6.0.0",
 		"swagger-jsdoc": "6.0.1",
 		"swagger-ui-express": "4.1.6",
-		"underscore": "1.13.2",
-		"winston": "3.3.3"
+		"underscore": "1.13.1"
 	},
 	"devDependencies": {
 		"eslint": "^8.10.0",
@@ -87,9 +77,13 @@
 		"coverageReporters": [
 			"text",
 			"cobertura",
-			"lcov"
+			"lcov",
+			"text-summary"
 		],
-		"reporters": [ "default", "jest-junit" ],
+		"reporters": [
+			"default",
+			"jest-junit"
+		],
 		"testTimeout": 10000
 	}
 }

@@ -18,7 +18,7 @@ import './jbook.css';
 import './jbook-styles.css';
 import { setState } from '../utils/sharedFunctions';
 import Notifications from '../components/notifications/Notifications';
-import { getClassLabel, getSearchTerms } from '../utils/jbookUtilities';
+import { getClassLabel, getSearchTerms, formatNum } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
 
@@ -26,7 +26,6 @@ import {
 	Accomplishments,
 	aggregateProjectDescriptions,
 	Contracts,
-	formatNum,
 	Metadata,
 	ProjectDescription,
 	SideNav,
@@ -73,7 +72,7 @@ const JBookProfilePage = (props) => {
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { projectData, reviewData, keywordsChecked } = state;
+	const { projectData, reviewData, keywordsChecked, selectedPortfolio } = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
@@ -106,7 +105,6 @@ const JBookProfilePage = (props) => {
 	const [contracts, setContracts] = useState([]);
 	const [contractMapping, setContractMapping] = useState([]);
 
-	const [selectedPortfolio, setSelectedPortfolio] = useState(state.selectedPortfolio ?? '');
 	const [pMap, setMap] = useState({});
 	const [userMap, setUserMap] = useState({});
 	let [init, setInit] = useState(false);
@@ -241,7 +239,7 @@ const JBookProfilePage = (props) => {
 			setID(id);
 
 			getProjectData(id, tmpPortfolioName).then(() => {
-				setSelectedPortfolio(tmpPortfolioName);
+				setState(dispatch, { selectedPortfolio: tmpPortfolioName });
 			});
 
 			if (searchText && searchText !== 'undefined') {
@@ -297,31 +295,32 @@ const JBookProfilePage = (props) => {
 				setKeywordCheckboxes(projectData.keywords);
 			} else {
 				let accomp = [];
-
 				if (projectData.accomplishments) {
 					projectData.accomplishments.forEach((accom) => {
 						accomp.push({
-							title: accom.Accomp_Title_text,
+							title: accom.Accomp_Title_text_t,
 							data: [
 								{
 									Key: 'Description',
-									Value: accom.Accomp_Desc_text ?? '',
+									Value: accom.Accomp_Desc_text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Plans',
-									Value: accom.PlanPrgrm_Fund_CY_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_CY_Text_t ?? '',
 								},
 								{
 									Key: 'Prior Year Amount',
-									Value: accom.PlanPrgrm_Fund_CY ? formatNum(accom.PlanPrgrm_Fund_CY) : '',
+									Value: accom.PlanPrgrm_Fund_CY_d ? formatNum(accom.PlanPrgrm_Fund_CY_d) : '',
 								},
 								{
 									Key: 'Current Year Plans',
-									Value: accom.PlanPrgrm_Fund_BY1Base_Text ?? '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_Text_t ?? '',
 								},
 								{
 									Key: 'Current Year Amount',
-									Value: accom.PlanPrgrm_Fund_BY1Base ? formatNum(accom.PlanPrgrm_Fund_BY1Base) : '',
+									Value: accom.PlanPrgrm_Fund_BY1Base_d
+										? formatNum(accom.PlanPrgrm_Fund_BY1Base_d)
+										: '',
 								},
 							],
 						});
@@ -345,8 +344,6 @@ const JBookProfilePage = (props) => {
 							}
 						});
 					});
-
-					console.log(accomp);
 				}
 
 				try {
@@ -955,7 +952,6 @@ const JBookProfilePage = (props) => {
 						<PortfolioSelector
 							selectedPortfolio={selectedPortfolio}
 							portfolios={state.portfolios}
-							setPortfolio={setSelectedPortfolio}
 							dispatch={dispatch}
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}

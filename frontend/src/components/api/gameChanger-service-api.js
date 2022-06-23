@@ -1,7 +1,8 @@
 import axiosLib from 'axios';
 import Config from '../../config/config.js';
 import https from 'https';
-import { axiosGET, axiosDELETE, axiosPOST } from '../../utils/axiosUtils';
+import { axiosGET, axiosDELETE, axiosPOST, axiosPUT } from '../../utils/axiosUtils';
+import html2pdf from 'html2pdf.js';
 
 const endpoints = {
 	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
@@ -84,6 +85,7 @@ const endpoints = {
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
+	getClonesMatomo: '/api/gameChanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
@@ -144,6 +146,8 @@ const endpoints = {
 	exportChecklist: '/api/gameChanger/modular/exportChecklist',
 	exportProfilePage: '/api/gameChanger/modular/exportProfilePage',
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
+	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
+	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -323,8 +327,7 @@ export default class GameChangerAPI {
 		return splits.join(' ');
 	};
 
-	getPdfViewerUrl = (response, highlightText, pageNumber, fileName) => {
-		const generatedUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+	buildPdfViewerUrl = (generatedUrl, highlightText, pageNumber, fileName) => {
 		let redirectUrl = `/pdfjs/web/viewer.html?file=${generatedUrl}`;
 		let append = '';
 		if (highlightText) {
@@ -338,6 +341,22 @@ export default class GameChangerAPI {
 		if (fileName) append += `${append[0] === '#' ? '&' : '#'}filename=${fileName}`;
 		redirectUrl += append;
 		return redirectUrl;
+	};
+
+	getPdfViewerUrl = async (response, highlightText, pageNumber, fileName) => {
+		let generatedUrl;
+		if (fileName.toLowerCase().endsWith('html')) {
+			const htmlString = await response.data.text();
+			const opt = {
+				margin: 10,
+				enableLinks: false,
+			};
+			const blobUri = await html2pdf().set(opt).from(htmlString).outputPdf('bloburi');
+			generatedUrl = blobUri;
+		} else {
+			generatedUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+		}
+		return this.buildPdfViewerUrl(generatedUrl, highlightText, pageNumber, fileName);
 	};
 
 	dataStorageDownloadGET = async (
@@ -371,8 +390,8 @@ export default class GameChangerAPI {
 					withCredentials: false,
 				}
 			)
-				.then((resp) => {
-					const redirectUrl = this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
+				.then(async (resp) => {
+					const redirectUrl = await this.getPdfViewerUrl(resp, highlightText, pageNumber, fileName);
 					resolve(redirectUrl);
 				})
 				.catch((e) => {
@@ -764,6 +783,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, { params: body });
 	};
 
+	getClonesMatomo = async (body) => {
+		const url = endpoints.getClonesMatomo;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
 	exportUserData = async (body) => {
 		const url = endpoints.exportUserData;
 		return axiosGET(this.axios, url, { params: body, responseType: 'arraybuffer' });
@@ -1148,5 +1172,15 @@ export default class GameChangerAPI {
 		const url = endpoints.exportProfilePage;
 		const options = {}; //{responseType: 'blob'};
 		return axiosPOST(this.axios, url, body, options);
+	};
+
+	getUserFavoriteHomeApps = async () => {
+		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		return axiosGET(this.axios, url);
+	};
+
+	putUserFavoriteHomeApps = async (data) => {
+		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		return axiosPUT(this.axios, url, data);
 	};
 }
