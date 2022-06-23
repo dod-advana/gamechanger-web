@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
+import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -77,6 +78,28 @@ const EDAViewHeaderHandler = (props) => {
 			setState(dispatch, { currentViewName: 'Card', listView: true });
 		}
 	}, [dispatch]);
+
+	const setDrawer = (open) => {
+		setState(dispatch, { docsDrawerOpen: open });
+	};
+
+	const setDrawerReady = (ready) => {
+		setState(dispatch, { isDrawerReady: ready });
+	};
+
+	const setStepIndex = (stepIndex) => {
+		setState(dispatch, { stepIndex: stepIndex });
+	};
+
+	const removeSelectedDocument = (key) => {
+		const { selectedDocuments } = state;
+
+		if (selectedDocuments.has(key)) {
+			selectedDocuments.delete(key);
+		}
+
+		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
+	};
 
 	const handleChangeView = (event) => {
 		const {
@@ -282,6 +305,21 @@ const EDAViewHeaderHandler = (props) => {
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCTooltip>
 				</GCButton>
+				<SelectedDocsDrawer
+					selectedDocuments={state.selectedDocuments}
+					docsDrawerOpen={state.docsDrawerOpen}
+					setDrawer={setDrawer}
+					clearSelections={() => setState(dispatch, { selectedDocuments: new Map() })}
+					openExport={() => setState(dispatch, { exportDialogVisible: true })}
+					removeSelection={(doc) => removeSelectedDocument(doc)}
+					componentStepNumbers={state.componentStepNumbers}
+					isDrawerReady={state.isDrawerReady}
+					setDrawerReady={setDrawerReady}
+					setShowTutorial={(showTutorial) => setState(dispatch, { showTutorial: showTutorial })}
+					setStepIndex={setStepIndex}
+					showTutorial={state.showTutorial}
+					rawSearchResults={state.rawSearchResults}
+				/>
 			</div>
 		</div>
 	);

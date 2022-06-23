@@ -171,6 +171,8 @@ router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.post('/getRecentSearches', user.getRecentSearches);
+router.get('/user/profile/current-user', user.getCurrentUserAdvana);
+router.put('/user/profile/current-user', user.putCurrentUserAdvana);
 
 router.get('/admin/getReviewerData', reviewer.getReviewerData);
 router.post('/admin/createUpdateReviewer', reviewer.updateOrCreateReviewer);
@@ -190,6 +192,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
 	router.get('/admin/exportUserData', appStatsController.exportUserData);
+	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
 	router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
 }

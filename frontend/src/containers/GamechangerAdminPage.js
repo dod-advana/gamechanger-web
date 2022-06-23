@@ -152,7 +152,6 @@ const userListTableAdditions = [
  */
 const GamechangerAdminPage = (props) => {
 	const { jupiter, location } = props;
-
 	const [pageToView, setPageToView] = useState(PAGES.general);
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 	const { path } = useRouteMatch();
@@ -199,7 +198,6 @@ const GamechangerAdminPage = (props) => {
 			extraSupportLinks: [],
 			associatedApplications: [],
 		});
-
 		return () => {
 			unsetTool();
 		};
