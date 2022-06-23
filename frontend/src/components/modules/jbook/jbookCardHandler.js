@@ -212,7 +212,7 @@ const cardHandler = {
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				case 'rdoc':
-					displayTitleTop = `PE Num: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
+					displayTitleTop = `BLI: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
 					break;
 				default:
 					break;
@@ -659,7 +659,8 @@ const cardHandler = {
 		},
 
 		getCardBack: (props) => {
-			const { item, detailPage = false } = props;
+			const { state, item, detailPage = false } = props;
+			const { selectedPortfolio } = state;
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
@@ -743,20 +744,28 @@ const cardHandler = {
 							? projectData.budgetActivityTitle ?? 'N/A'
 							: projectData.budgetSubActivity ?? 'N/A',
 				},
-				{
-					Key: 'Category',
-					Value: getClassLabel(projectData),
-				},
-				{
-					Key: 'Keywords',
-					Value: (
-						<div>
-							{projectData.keywords && projectData.keywords.length > 0
-								? projectData.keywords.map((keyword) => <p>{keyword}</p>)
-								: 'None'}
-						</div>
-					),
-				},
+				...(selectedPortfolio === 'AI Inventory'
+					? [
+							{
+								Key: 'Category',
+								Value: getClassLabel(projectData),
+							},
+					  ]
+					: []),
+				...(selectedPortfolio === 'AI Inventory'
+					? [
+							{
+								Key: 'Keywords',
+								Value: (
+									<div>
+										{projectData.keywords && projectData.keywords.length > 0
+											? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+											: 'None'}
+									</div>
+								),
+							},
+					  ]
+					: []),
 				// {
 				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
 				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
