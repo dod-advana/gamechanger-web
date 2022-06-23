@@ -292,7 +292,7 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetSubActivity && jbookSearchSettings.budgetSubActivity !== ''}
-					header={<b>BUDGET SUB ACTIVITY</b>}
+					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -304,7 +304,7 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
-					header={<b>PROGRAM ELEMENT / BLI</b>}
+					header={<b>Budget Line Item (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -316,7 +316,7 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={jbookSearchSettings.projectNum && jbookSearchSettings.projectNum !== ''}
-					header={<b>PROJECT #</b>}
+					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
