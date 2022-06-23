@@ -68,11 +68,41 @@ const GlobalSearchHandler = {
 			autocompleteItems: [],
 			rawSearchResults: [],
 			docSearchResults: [],
-			applicationsSearchResults: [],
-			dashboardsSearchResults: [],
-			dataSourcesSearchResults: [],
-			databasesSearchResults: [],
-			modelsSearchResults: [],
+			applicationsSearchResults: {
+				searchResults: [],
+				loading: selectedCategories.Applications,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			dashboardsSearchResults: {
+				searchResults: [],
+				loading: selectedCategories.Dashboards,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			dataSourcesSearchResults: {
+				searchResults: [],
+				loading: selectedCategories.DataSources,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			databasesSearchResults: {
+				searchResults: [],
+				loading: selectedCategories.Databases,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			modelsSearchResults: {
+				searchResults: [],
+				loading: selectedCategories.Models,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
 			searchResultsCount: 0,
 			count: 0,
 			resultsDownloadURL: '',
@@ -85,17 +115,7 @@ const GlobalSearchHandler = {
 			runningEntitySearch: true,
 			runningTopicSearch: true,
 			hideTabs: true,
-			applicationsLoading: selectedCategories.Applications,
-			dashboardsLoading: selectedCategories.Dashboards,
-			dataSourcesLoading: selectedCategories.DataSources,
-			databasesLoading: selectedCategories.Databases,
-			modelsLoading: selectedCategories.Models,
 			categoryMetadata: {},
-			applicationsTotalCount: 0,
-			dashboardsTotalCount: 0,
-			dataSourcesTotalCount: 0,
-			databasesTotalCount: 0,
-			modelsTotalCount: 0,
 		});
 
 		try {
@@ -132,197 +152,219 @@ const GlobalSearchHandler = {
 		const tiny_url = await createTinyUrl(cloneData);
 
 		if (selectedCategories.Applications) {
-			try {
-				this.handleModularSearch(state, 'applications', 1, offset, tiny_url)
-					.then((data) => {
-						setState(dispatch, {
-							applicationsSearchResults: data.applications.results.map((hit) => ({
+			this.handleModularSearch(state, 'applications', 1, offset, tiny_url)
+				.then((data) => {
+					setState(dispatch, {
+						applicationsSearchResults: {
+							searchResults: data.applications.results.map((hit) => ({
 								...hit,
-								type: 'application',
+								type: 'applications',
 							})),
-							applicationsTotalCount: data.applications.totalCount,
-							applicationsLoading: false,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							applicationsTotalCount: 0,
-							applicationsLoading: false,
-						});
+							totalCount: data.applications.totalCount,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
 					});
-			} catch (err) {
-				console.error(err);
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					setState(dispatch, {
+						applicationsSearchResults: {
+							searchResults: [],
+							totalCount: 0,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
+					});
+				});
 		}
 
 		if (selectedCategories.Dashboards) {
-			try {
-				this.handleModularSearch(state, 'dashboards', 1, offset, tiny_url)
-					.then((data) => {
-						setState(dispatch, {
-							dashboardsSearchResults: data.dashboards.results.map((hit) => ({
+			this.handleModularSearch(state, 'dashboards', 1, offset, tiny_url)
+				.then((data) => {
+					setState(dispatch, {
+						dashboardsSearchResults: {
+							searchResults: data.dashboards.results.map((hit) => ({
 								...hit,
-								type: 'dashboard',
+								type: 'dashboards',
 							})),
-							dashboardsTotalCount: data.dashboards.totalCount,
-							dashboardsLoading: false,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							dashboardsTotalCount: 0,
-							dashboardsLoading: false,
-						});
+							totalCount: data.dashboards.totalCount,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
 					});
-			} catch (err) {
-				console.error(err);
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					setState(dispatch, {
+						dashboardsSearchResults: {
+							searchResults: [],
+							totalCount: 0,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
+					});
+				});
 		}
 
 		if (selectedCategories.DataSources) {
-			try {
-				this.handleModularSearch(state, 'dataSources', 1, offset, tiny_url)
-					.then((data) => {
-						setState(dispatch, {
-							dataSourcesSearchResults: data.dataSources.results.map((hit) => ({
+			this.handleModularSearch(state, 'dataSources', 1, offset, tiny_url)
+				.then((data) => {
+					setState(dispatch, {
+						dataSourcesSearchResults: {
+							searchResults: data.dataSources.results.map((hit) => ({
 								...hit,
-								type: 'dataSource',
+								type: 'dataSources',
 							})),
-							dataSourcesTotalCount: data.dataSources.total,
-							dataSourcesLoading: false,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							dataSourcesTotalCount: 0,
-							dataSourcesLoading: false,
-						});
+							totalCount: data.dataSources.total,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
 					});
-			} catch (err) {
-				console.error(err);
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					setState(dispatch, {
+						dataSourcesSearchResults: {
+							searchResults: [],
+							totalCount: 0,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
+					});
+				});
 		}
 
 		if (selectedCategories.Databases) {
-			try {
-				this.handleModularSearch(state, 'databases', 1, offset, tiny_url)
-					.then((data) => {
-						setState(dispatch, {
-							databasesSearchResults: data.databases.results.map((hit) => ({
+			this.handleModularSearch(state, 'databases', 1, offset, tiny_url)
+				.then((data) => {
+					setState(dispatch, {
+						databasesSearchResults: {
+							searchResults: data.databases.results.map((hit) => ({
 								...hit,
-								type: 'database',
+								type: 'databases',
 							})),
-							databasesTotalCount: data.databases.total,
-							databasesLoading: false,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							databasesTotalCount: 0,
-							databasesLoading: false,
-						});
+							totalCount: data.databases.total,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
 					});
-			} catch (err) {
-				console.error(err);
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					setState(dispatch, {
+						databasesSearchResults: {
+							searchResults: [],
+							totalCount: 0,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
+					});
+				});
 		}
 
 		if (selectedCategories.Models) {
-			try {
-				this.handleModularSearch(state, 'models', 1, offset, tiny_url)
-					.then((data) => {
-						setState(dispatch, {
-							modelsSearchResults: data.models.results.map((hit) => ({
+			this.handleModularSearch(state, 'models', 1, offset, tiny_url)
+				.then((data) => {
+					setState(dispatch, {
+						modelsSearchResults: {
+							searchResults: data.models.results.map((hit) => ({
 								...hit,
 								type: 'models',
 							})),
-							modelsTotalCount: data.models.total,
-							modelsLoading: false,
-						});
-					})
-					.catch(() => {
-						setState(dispatch, {
-							modelsTotalCount: 0,
-							modelsLoading: false,
-						});
+							totalCount: data.models.total,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
 					});
-			} catch (err) {
-				console.error(err);
-			}
+				})
+				.catch((err) => {
+					console.error(err);
+					setState(dispatch, {
+						modelsSearchResults: {
+							searchResults: [],
+							totalCount: 0,
+							loading: false,
+							pagination: false,
+							page: 1,
+						},
+					});
+				});
 		}
 	},
 
-	async handleApplicationsPagination(state, dispatch) {
-		const data = await this.handleModularSearch(state, 'applications', state.applicationsPage);
+	async handlePagination(state, searchResultsObject, category) {
+		const tmpResults = structuredClone(searchResultsObject);
+
+		const data = await this.handleModularSearch(state, category, tmpResults.page);
 
 		if (data) {
+			tmpResults.searchResults = data[category].hits.map((hit) => {
+				hit.type = category;
+				return hit;
+			});
+			tmpResults.loading = false;
+			tmpResults.pagination = false;
+		}
+
+		return tmpResults;
+	},
+
+	async handleApplicationsPagination(state, dispatch) {
+		const results = this.handlePagination(state, state.applicationsSearchResults, 'applications');
+
+		if (results) {
 			setState(dispatch, {
-				applicationsSearchResults: data.applications.hits.map((hit) => {
-					hit.type = 'application';
-					return hit;
-				}),
-				applicationsLoading: false,
-				applicationsPagination: false,
+				applicationsSearchResults: results,
 			});
 		}
 	},
 
 	async handleDashboardsPagination(state, dispatch) {
-		const data = await this.handleModularSearch(state, 'dashboards', state.dashboardsPage);
+		const results = this.handlePagination(state, state.dashboardsSearchResults, 'dashboards');
 
-		if (data) {
+		if (results) {
 			setState(dispatch, {
-				dashboardsSearchResults: data.dashboards.hits.map((hit) => {
-					hit.type = 'dashboard';
-					return hit;
-				}),
-				dashboardsLoading: false,
-				dashboardsPagination: false,
+				dashboardsSearchResults: results,
 			});
 		}
 	},
 
 	async handleDataSourcesPagination(state, dispatch) {
-		const data = await this.handleModularSearch(state, 'dataSources', state.dataSourcesPage);
+		const results = this.handlePagination(state, state.dataSourcesSearchResults, 'dataSources');
 
-		if (data) {
+		if (results) {
 			setState(dispatch, {
-				dataSourcesSearchResults: data.dataSources.results.map((result) => {
-					result.type = 'dataSource';
-					return result;
-				}),
-				dataSourcesLoading: false,
-				dataSourcesPagination: false,
+				dataSourcesSearchResults: results,
 			});
 		}
 	},
 
 	async handleDatabasesPagination(state, dispatch) {
-		const data = await this.handleModularSearch(state, 'databases', state.databasesPage);
+		const results = this.handlePagination(state, state.databasesSearchResults, 'databases');
 
-		if (data) {
+		if (results) {
 			setState(dispatch, {
-				databasesSearchResults: data.databases.results.map((result) => {
-					result.type = 'database';
-					return result;
-				}),
-				databasesLoading: false,
-				databasesPagination: false,
+				databasesSearchResults: results,
 			});
 		}
 	},
 
 	async handleModelsPagination(state, dispatch) {
-		const data = await this.handleModularSearch(state, 'models', state.modelsPage);
+		const results = this.handlePagination(state, state.modelsSearchResults, 'models');
 
-		if (data) {
+		if (results) {
 			setState(dispatch, {
-				modelsSearchResults: data.models.results.map((result) => {
-					result.type = 'models';
-					return result;
-				}),
-				modelsLoading: false,
-				modelsPagination: false,
+				modelsSearchResults: results,
 			});
 		}
 	},
@@ -334,9 +376,52 @@ const GlobalSearchHandler = {
 		const limit = 100;
 		const tiny_url = await createTinyUrl(cloneData);
 
-		const favorites = { applications: [], dashboards: [], dataSources: [], databases: [], models: [] };
-		const sections = ['applications', 'dashboards', 'dataSources', 'databases', 'models'];
-		const conversion = ['application', 'dashboard', 'dataSource', 'database', 'models'];
+		const favorites = {
+			applicationsSearchResults: {
+				searchResults: [],
+				loading: false,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			dashboardsSearchResults: {
+				searchResults: [],
+				loading: false,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			dataSourcesSearchResults: {
+				searchResults: [],
+				loading: false,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			databasesSearchResults: {
+				searchResults: [],
+				loading: false,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+			modelsSearchResults: {
+				searchResults: [],
+				loading: false,
+				totalCount: 0,
+				pagination: false,
+				page: 1,
+			},
+		};
+
+		const categories = ['applications', 'dashboards', 'dataSources', 'databases', 'models'];
+		const conversion = [
+			'applicationsSearchResults',
+			'dashboardsSearchResults',
+			'dataSourcesSearchResults',
+			'databasesSearchResults',
+			'modelsSearchResults',
+		];
 
 		const calls = [
 			await this.handleModularSearch(state, 'applications', 1, offset, tiny_url, limit),
@@ -349,7 +434,7 @@ const GlobalSearchHandler = {
 		const favoriteResults = await Promise.all(calls);
 
 		favoriteResults.forEach((results, idx) => {
-			const type = sections[idx];
+			const type = categories[idx];
 
 			results[type].results?.forEach((item) => {
 				let isFavorite = false;
@@ -369,10 +454,11 @@ const GlobalSearchHandler = {
 				}
 
 				if (isFavorite) {
-					favorites[type].push({
+					favorites[conversion[idx]].searchResults.push({
 						...item,
-						type: conversion[idx],
+						type,
 					});
+					favorites[conversion[idx]].totalCount += 1;
 				}
 			});
 		});
