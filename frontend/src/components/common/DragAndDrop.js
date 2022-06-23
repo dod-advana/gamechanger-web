@@ -27,7 +27,7 @@ const StyledContainer = styled.div`
 // text = the description that goes in the drag and drop
 // acceptedFileTypes = list of string, expects the file MIME type
 // handleFileDrop = function for handling when files are uploaded
-const DragAndDrop = ({ text = '', acceptedFileTypes = null, handleFileDrop = () => {} }) => {
+const DragAndDrop = ({ text = '', acceptedFileTypes = null, handleFileDrop }) => {
 	// file validator function
 	const validateFile = useCallback(
 		(file) => {
@@ -49,8 +49,6 @@ const DragAndDrop = ({ text = '', acceptedFileTypes = null, handleFileDrop = () 
 		validator: validateFile,
 		onDrop: handleFileDrop,
 	});
-
-	// console.log(acceptedFiles);
 
 	return (
 		<StyledContainer>
