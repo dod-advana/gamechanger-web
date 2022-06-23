@@ -1459,7 +1459,7 @@ class JBookSearchUtility {
 
 			let sortText = jbookSearchSettings.sort[0].id;
 			if (!sortSelected && searchText && searchText !== '') {
-				sortText = 'Relevance';
+				sortText = 'relevance';
 			}
 
 			// SORT
@@ -1638,16 +1638,16 @@ class JBookSearchUtility {
 				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
 					const rangeQuery = {
 						range: {
-							totalCost_s: {},
+							totalCost_d: {},
 						},
 					};
 
 					if (jbookSearchSettings.minTotalCost) {
-						rangeQuery.range.totalCost_s.gte = jbookSearchSettings.minTotalCost;
+						rangeQuery.range.totalCost_d.gte = jbookSearchSettings.minTotalCost;
 					}
 
 					if (jbookSearchSettings.maxTotalCost) {
-						rangeQuery.range.totalCost_s.lte = jbookSearchSettings.maxTotalCost;
+						rangeQuery.range.totalCost_d.lte = jbookSearchSettings.maxTotalCost;
 					}
 
 					filterQueries.push(rangeQuery);
