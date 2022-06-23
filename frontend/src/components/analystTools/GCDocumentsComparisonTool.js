@@ -9,26 +9,20 @@ import { gcOrange } from '../common/gc-colors';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const WrappedLoadingIndicator = (
+	<div style={{ width: window.screen.width - 50 }}>
+		<LoadingIndicator shaddedOverlay={true} />
+	</div>
+);
+
 const PolicyDocumentsComparisonTool = LoadableVisibility({
 	loader: () => import('../modules/policy/policyDocumentsComparisonTool'),
-	loading: () => {
-		return (
-			<div style={{ width: window.screen.width - 50 }}>
-				<LoadingIndicator shaddedOverlay={true} />
-			</div>
-		);
-	},
+	loading: () => WrappedLoadingIndicator,
 });
 
 const EDADocumentsComparisonTool = LoadableVisibility({
 	loader: () => import('../modules/eda/edaDocumentsComparisonTool'),
-	loading: () => {
-		return (
-			<div style={{ width: window.screen.width - 50 }}>
-				<LoadingIndicator shaddedOverlay={true} />
-			</div>
-		);
-	},
+	loading: () => WrappedLoadingIndicator,
 });
 
 const GCDocumentsComparisonTool = ({ context }) => {
