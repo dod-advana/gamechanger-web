@@ -1736,10 +1736,10 @@ class JBookSearchUtility {
 				filterQueries.push(rangeQuery);
 			}
 
-			let by1Funding = by1Funding(jbookSearchSettings);
-			filterqueries.push(...by1Funding);
+			let by1Funding = this.by1Funding(jbookSearchSettings);
+			filterQueries.push(...by1Funding);
 
-			let budgetType = budgetType(jbookSearchSettings);
+			let budgetType = this.budgetType(jbookSearchSettings);
 			filterQueries.push(...budgetType);
 
 			// Budget Year filter
@@ -1771,7 +1771,7 @@ class JBookSearchUtility {
 				});
 			}
 
-			let serviceAgencies = serviceAgency(jbookSearchSettings, serviceAgencyMappings);
+			let serviceAgencies = this.serviceAgency(jbookSearchSettings, serviceAgencyMappings);
 			filterQueries.push(...serviceAgencies);
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
