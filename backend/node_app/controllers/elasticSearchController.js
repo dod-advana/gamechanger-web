@@ -70,7 +70,7 @@ class ElasticSearchController {
 
 	async cacheStoreQlikApps() {
 		try {
-			await this.redisDB.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
 			const isReloading = await this.redisDB.get(CACHE_QLIK_RELOAD_KEY);
 			if (isReloading === CACHE_IS_RELOADING) {
 				throw new Error('Will not create qlik data cache - cache is already reloading');
@@ -141,7 +141,7 @@ class ElasticSearchController {
 		try {
 			this.logger.info('Caching Full Qlik Apps');
 			const respData = JSON.stringify(qlikApps);
-			await this.redisDB.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
 			await this.redisDB.set('qlik-full-app-list', respData);
 			this.logger.info('Finished Caching Full Qlik Apps');
 		} catch (e) {

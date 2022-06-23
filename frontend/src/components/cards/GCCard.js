@@ -394,43 +394,16 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-function GCCard(props) {
-	const {
-		id,
-		idx,
-		state,
-		dispatch,
-		item,
-		graphView = false,
-		closeGraphCard,
-		collection = [],
-		detailPage = false,
-		card_module = null,
-	} = props;
+const FavoriteComponent = (props) => {
+	const { cardType, state, dispatch, filename, item, idx, displayTitle, classes } = props;
 
-	const cardType = item.type;
-	const selected = state.selectedDocuments.has(item.filename);
-
-	const isRevoked = item.is_revoked_b;
-	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
-	const allowScroll = true;
-
-	const classes = useStyles();
-
-	const [toggledMore, setToggledMore] = useState(false);
-	const [metadataExpanded, setMetadataExpanded] = useState(false);
-	const [hitsExpanded, setHitsExpanded] = useState(false);
-	const [hoveredHit, setHoveredHit] = useState(0);
 	const [favorite, setFavorite] = useState(false);
+	const [favoriteSummary, setFavoriteSummary] = useState('');
+	const [favorite_id, setFavoriteId] = useState(null);
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
 	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
-	const [favoriteSummary, setFavoriteSummary] = useState('');
-	const [feedback, setFeedback] = useState('');
-	const [loaded, setLoaded] = useState(false);
-	const [filename, setFilename] = useState('');
-	const [displayTitle, setDisplayTitle] = useState('');
-	const [modalOpen, setModalOpen] = useState(false);
-	const [favorite_id, setFavoriteId] = useState(null);
+
+	useEffect(() => Function.prototype, [popperIsOpen, popperAnchorEl, favorite]);
 
 	useEffect(() => {
 		let isFavorite = false;
@@ -462,14 +435,14 @@ function GCCard(props) {
 						return organization.organization_name.toLowerCase() === item.name.toLowerCase();
 					}) !== undefined;
 				break;
-			case 'application':
-			case 'dashboard':
+			case 'applications':
+			case 'dashboards':
 				favApps = state.favoriteApps || [];
 				isFavorite = favApps?.includes(item.id.toString()) || false;
 				temp_id = item.id.toString();
 				break;
-			case 'dataSource':
-			case 'database':
+			case 'dataSources':
+			case 'databases':
 			case 'models':
 				favApps = state.favoriteApps || [];
 				isFavorite = favApps?.includes(item.resource.id.toString()) || false;
@@ -481,41 +454,7 @@ function GCCard(props) {
 
 		setFavoriteId(temp_id);
 		setFavorite(isFavorite);
-
-		// eslint-disable-next-line
-	}, [state.favoriteApps]);
-
-	useEffect(() => {
-		// Create the factory
-		if (cardType && !loaded) {
-			setLoaded(true);
-			if (cardType === 'organization') {
-				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({ data }) => {
-					item.sealURLOverride = data[item.name];
-				});
-			}
-		}
-	}, [state, loaded, cardType, item, card_module]);
-
-	useEffect(() => Function.prototype, [popperIsOpen, popperAnchorEl, favorite]);
-
-	useEffect(() => {
-		if (state.listView) {
-			setToggledMore(false);
-		}
-	}, [state.listView]);
-
-	let searchText = state.searchText;
-
-	const openFavoritePopper = (target) => {
-		if (popperIsOpen) {
-			setPopperIsOpen(false);
-			setPopperAnchorEl(null);
-		} else {
-			setPopperIsOpen(true);
-			setPopperAnchorEl(target);
-		}
-	};
+	}, [cardType, item, state.favoriteApps, state.userData]);
 
 	const handleSaveFavorite = (isFavorite = false) => {
 		switch (cardType) {
@@ -535,10 +474,10 @@ function GCCard(props) {
 			case 'topic':
 				handleSaveFavoriteTopic(item.name, favoriteSummary, isFavorite, dispatch);
 				break;
-			case 'application':
-			case 'dashboard':
-			case 'dataSource':
-			case 'database':
+			case 'applications':
+			case 'dashboards':
+			case 'dataSources':
+			case 'databases':
 			case 'models':
 				let favApps = state.favoriteApps || [];
 				if (isFavorite) {
@@ -558,21 +497,159 @@ function GCCard(props) {
 		setFavoriteSummary('');
 	};
 
+	const openFavoritePopper = (target) => {
+		if (popperIsOpen) {
+			setPopperIsOpen(false);
+			setPopperAnchorEl(null);
+		} else {
+			setPopperIsOpen(true);
+			setPopperAnchorEl(target);
+		}
+	};
+
 	const handleCancelFavorite = () => {
 		setPopperIsOpen(false);
 		setPopperAnchorEl(null);
 	};
 
-	const favoriteComponent = () => {
-		return (
+	return (
+		<>
+			<Popover
+				onClose={() => handleCancelFavorite()}
+				id={idx}
+				open={popperIsOpen}
+				anchorEl={popperAnchorEl}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+			>
+				{favorite ? (
+					<div style={{ padding: '0px 15px 10px' }}>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<CloseButton onClick={() => handleCancelFavorite()}>
+								<CloseIcon fontSize="small" />
+							</CloseButton>
+						</div>
+						<div style={{ width: 350, margin: 5 }}>
+							<div style={{ margin: '65px 15px 0' }}>
+								Are you sure you want to delete this favorite? You will lose any comments made.
+							</div>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+									isSecondaryBtn={true}
+								>
+									No
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										handleSaveFavorite(false);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_cancel_favorite_document',
+											displayTitle,
+											state.searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'CancelFavorite',
+											filename,
+											`search : ${state.searchText}`
+										);
+									}}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 10px 0px',
+										marginRight: 10,
+									}}
+								>
+									Yes
+								</GCButton>
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className={classes.paper}>
+						<div style={{ width: 330, margin: 5 }}>
+							<TextField
+								label={'Favorite Summary'}
+								value={favoriteSummary}
+								onChange={(event) => {
+									setFavoriteSummary(event.target.value);
+								}}
+								className={classes.textArea}
+								margin="none"
+								size="small"
+								variant="outlined"
+								multiline={true}
+								rows={8}
+							/>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+									isSecondaryBtn={true}
+								>
+									Cancel
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										handleSaveFavorite(true);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_favorite_document',
+											displayTitle,
+											state.searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'Favorite',
+											filename,
+											`search : ${state.searchText}`
+										);
+									}}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+								>
+									Save
+								</GCButton>
+							</div>
+						</div>
+					</div>
+				)}
+			</Popover>
 			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
 				<i
 					onClick={(event) => {
 						switch (cardType) {
-							case 'application':
-							case 'dashboard':
-							case 'dataSource':
-							case 'database':
+							case 'applications':
+							case 'dashboards':
+							case 'dataSources':
+							case 'databases':
 							case 'models':
 								handleSaveFavorite(!favorite);
 								break;
@@ -591,8 +668,64 @@ function GCCard(props) {
 					}}
 				/>
 			</GCTooltip>
-		);
-	};
+		</>
+	);
+};
+
+function GCCard(props) {
+	const {
+		id,
+		idx,
+		state,
+		dispatch,
+		item,
+		graphView = false,
+		closeGraphCard,
+		collection = [],
+		detailPage = false,
+		card_module = null,
+	} = props;
+
+	const cardType = item.type;
+	const selected = state.selectedDocuments.has(item.filename);
+
+	const isRevoked = item.is_revoked_b;
+	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
+	const allowScroll = true;
+
+	const classes = useStyles();
+
+	const [toggledMore, setToggledMore] = useState(false);
+	const [metadataExpanded, setMetadataExpanded] = useState(false);
+	const [hitsExpanded, setHitsExpanded] = useState(false);
+	const [hoveredHit, setHoveredHit] = useState(0);
+	const [favorite, setFavorite] = useState(false);
+	const [favoriteSummary, setFavoriteSummary] = useState('');
+	const [feedback, setFeedback] = useState('');
+	const [loaded, setLoaded] = useState(false);
+	const [filename, setFilename] = useState('');
+	const [displayTitle, setDisplayTitle] = useState('');
+	const [modalOpen, setModalOpen] = useState(false);
+
+	useEffect(() => {
+		// Create the factory
+		if (cardType && !loaded) {
+			setLoaded(true);
+			if (cardType === 'organization') {
+				gameChangerAPI.getOrgImageOverrideURLs([item.name]).then(({ data }) => {
+					item.sealURLOverride = data[item.name];
+				});
+			}
+		}
+	}, [state, loaded, cardType, item, card_module]);
+
+	useEffect(() => {
+		if (state.listView) {
+			setToggledMore(false);
+		}
+	}, [state.listView]);
+
+	let searchText = state.searchText;
 
 	const checkboxComponent = (key, value, tmpId) => {
 		return (
@@ -732,135 +865,6 @@ function GCCard(props) {
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}
 		>
-			<Popover
-				onClose={() => handleCancelFavorite()}
-				id={idx}
-				open={popperIsOpen}
-				anchorEl={popperAnchorEl}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'right',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'right',
-				}}
-			>
-				{favorite ? (
-					<div style={{ padding: '0px 15px 10px' }}>
-						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-							<CloseButton onClick={() => handleCancelFavorite()}>
-								<CloseIcon fontSize="small" />
-							</CloseButton>
-						</div>
-						<div style={{ width: 350, margin: 5 }}>
-							<div style={{ margin: '65px 15px 0' }}>
-								Are you sure you want to delete this favorite? You will lose any comments made.
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-									isSecondaryBtn={true}
-								>
-									No
-								</GCButton>
-								<GCButton
-									onClick={() => {
-										handleSaveFavorite(false);
-										gameChangerAPI.sendIntelligentSearchFeedback(
-											'intelligent_search_cancel_favorite_document',
-											displayTitle,
-											searchText
-										);
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'CancelFavorite',
-											filename,
-											`search : ${searchText}`
-										);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 10px 0px',
-										marginRight: 10,
-									}}
-								>
-									Yes
-								</GCButton>
-							</div>
-						</div>
-					</div>
-				) : (
-					<div className={classes.paper}>
-						<div style={{ width: 330, margin: 5 }}>
-							<TextField
-								label={'Favorite Summary'}
-								value={favoriteSummary}
-								onChange={(event) => {
-									setFavoriteSummary(event.target.value);
-								}}
-								className={classes.textArea}
-								margin="none"
-								size="small"
-								variant="outlined"
-								multiline={true}
-								rows={8}
-							/>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-									isSecondaryBtn={true}
-								>
-									Cancel
-								</GCButton>
-								<GCButton
-									onClick={() => {
-										handleSaveFavorite(true);
-										gameChangerAPI.sendIntelligentSearchFeedback(
-											'intelligent_search_favorite_document',
-											displayTitle,
-											searchText
-										);
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'Favorite',
-											filename,
-											`search : ${searchText}`
-										);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-								>
-									Save
-								</GCButton>
-							</div>
-						</div>
-					</div>
-				)}
-			</Popover>
-
 			{getCardComponent({
 				id,
 				IS_EDGE,
@@ -869,7 +873,8 @@ function GCCard(props) {
 				item,
 				idx,
 				checkboxComponent,
-				favoriteComponent,
+				favoriteComponent: () =>
+					FavoriteComponent({ cardType, state, dispatch, filename, item, idx, displayTitle, classes }),
 				graphView,
 				intelligentSearch,
 				toggledMore,

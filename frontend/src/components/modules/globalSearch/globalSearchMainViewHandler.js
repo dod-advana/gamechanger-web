@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { styles } from '../../mainView/commonStyles';
 import { renderHideTabs, getAboutUs } from '../../mainView/commonFunctions';
 import { trackEvent } from '../../telemetry/Matomo';
@@ -29,14 +28,10 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 
 const PRIMARY_COLOR = '#13A792';
 
-const dataLoading = (state) => {
-	return (
-		!state.applicationsLoading ||
-		!state.dashboardsLoading ||
-		!state.dataSourcesLoading ||
-		!state.databasesLoading ||
-		!state.modelsLoading
-	);
+const dataLoading = (extras) => {
+	const { applications, dashboards, dataSources, databases, models } = extras;
+
+	return applications.loading || dashboards.loading || dataSources.loading || databases.loading || models.loading;
 };
 
 const getHeaderStyles = (view) => {
@@ -47,34 +42,29 @@ const getHeaderStyles = (view) => {
 	};
 };
 
-const getViewHeader = (state, dispatch) => {
-	let gridView, listView, showFavorites;
+const getViewHeader = (state, dispatch, extras) => {
+	let gridView, listView;
 
-	if (state.showFavorites) {
-		gridView = false;
-		listView = false;
-		showFavorites = true;
-	} else if (state.listView) {
+	if (state.listView) {
 		gridView = false;
 		listView = true;
-		showFavorites = false;
 	} else {
 		gridView = true;
 		listView = false;
-		showFavorites = false;
 	}
 
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText && dataLoading(state) && (
+			{state.searchText && !dataLoading(extras) && (
 				<>
 					<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
-						Showing results for <b>{state.searchText}</b>
+						{state.showFavorites ? 'Showing' : 'Showing results for'}{' '}
+						<b>{state.showFavorites ? 'favorites' : state.searchText}</b>
 					</Typography>
 					<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
 						<div style={{ ...styles.container, margin: '0px 25px' }}>
 							<GCButton
-								onClick={() => setState(dispatch, { listView: false, showFavorites: false })}
+								onClick={() => setState(dispatch, { listView: false })}
 								style={{
 									...styles.buttons,
 									...(!gridView ? styles.unselectedButton : {}),
@@ -89,7 +79,7 @@ const getViewHeader = (state, dispatch) => {
 							</GCButton>
 
 							<GCButton
-								onClick={() => setState(dispatch, { listView: true, showFavorites: false })}
+								onClick={() => setState(dispatch, { listView: true })}
 								style={{
 									...styles.buttons,
 									...(!listView ? styles.unselectedButton : {}),
@@ -104,30 +94,31 @@ const getViewHeader = (state, dispatch) => {
 							</GCButton>
 
 							<GCButton
-								onClick={() => setState(dispatch, { showFavorites: true })}
+								onClick={() => setState(dispatch, { showFavorites: !state.showFavorites })}
 								style={{
 									...styles.buttons,
-									...(!showFavorites ? styles.unselectedButton : {}),
+									...(!state.showFavorites ? styles.unselectedButton : {}),
 									width: 170,
 								}}
-								textStyle={getHeaderStyles(showFavorites)['textStyle']}
-								buttonColor={getHeaderStyles(showFavorites)['buttonColor']}
-								borderColor={getHeaderStyles(showFavorites)['borderColor']}
+								textStyle={getHeaderStyles(state.showFavorites)['textStyle']}
+								buttonColor={getHeaderStyles(state.showFavorites)['buttonColor']}
+								borderColor={getHeaderStyles(state.showFavorites)['borderColor']}
+								disabled={!state.favorites}
 							>
 								<div style={{ display: 'flex' }}>
 									<Typography
 										style={{
 											fontSize: 14,
-											fontWeight: showFavorites ? 'bold' : 500,
-											color: showFavorites ? backgroundWhite : '#8091A5',
+											fontWeight: state.showFavorites ? 'bold' : 500,
+											color: state.showFavorites ? backgroundWhite : '#8091A5',
 										}}
 									>
 										Show Favorites
 									</Typography>
 									<i
-										className={showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
+										className={state.showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
 										style={{
-											color: showFavorites ? backgroundWhite : '#B0B9BE',
+											color: state.showFavorites ? backgroundWhite : '#B0B9BE',
 											marginLeft: '5px',
 											cursor: 'pointer',
 											fontSize: 26,
@@ -145,7 +136,7 @@ const getViewHeader = (state, dispatch) => {
 };
 
 const getSearchResults = (searchResultData, state, dispatch) => {
-	return _.map(searchResultData, (item, idx) => {
+	return searchResultData.map((item, idx) => {
 		return <Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />;
 	});
 };
@@ -165,31 +156,36 @@ const handlePageLoad = async (props) => {
 	}
 
 	// Get User Favorites from home App
-	const { data } = await gameChangerAPI.getUserFavoriteHomeApps();
-	const favorites = await searchHandler.handleGetUserFavorites(data.favorite_apps, state);
-	setState(dispatch, { favoriteApps: data.favorite_apps || [], favorites });
+	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
+		setState(dispatch, { favoriteApps: data.favorite_apps });
+		searchHandler.handleGetUserFavorites(data.favorite_apps, state).then((favorites) => {
+			setState(dispatch, { favorites });
+		});
+	});
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs: renderHideTabsInner } = props;
-
 	const {
-		loading,
-		viewNames,
-		applicationsTotalCount,
-		dashboardsTotalCount,
-		dataSourcesTotalCount,
-		databasesTotalCount,
-		modelsTotalCount,
-		searchText,
-	} = state;
+		state,
+		dispatch,
+		pageLoaded,
+		getViewPanels,
+		renderHideTabs: renderHideTabsInner,
+		applications,
+		dashboards,
+		dataSources,
+		databases,
+		models,
+	} = props;
+
+	const { loading, viewNames, searchText } = state;
 
 	const noResults = Boolean(
-		!applicationsTotalCount &&
-			!dashboardsTotalCount &&
-			!dataSourcesTotalCount &&
-			!databasesTotalCount &&
-			!modelsTotalCount
+		!applications.totalCount &&
+			!dashboards.totalCount &&
+			!dataSources.totalCount &&
+			!databases.totalCount &&
+			!models.totalCount
 	);
 
 	const hideSearchResults = noResults && !loading && !searchText;
@@ -217,13 +213,19 @@ const getMainView = (props) => {
 								)}
 								{!(hideSearchResults || noSearchResults) &&
 									pageLoaded &&
-									(applicationsTotalCount > 0 ||
-									dashboardsTotalCount > 0 ||
-									dataSourcesTotalCount > 0 ||
-									databasesTotalCount > 0 ||
-									modelsTotalCount > 0 ? (
+									(applications.totalCount > 0 ||
+									dashboards.totalCount > 0 ||
+									dataSources.totalCount > 0 ||
+									databases.totalCount > 0 ||
+									models.totalCount > 0 ? (
 										<>
-											{getViewHeader(state, dispatch)}
+											{getViewHeader(state, dispatch, {
+												applications,
+												dashboards,
+												dataSources,
+												databases,
+												models,
+											})}
 											<div style={{ margin: '0 15px 0 5px' }}>
 												<ResultView
 													context={{ state, dispatch }}
@@ -259,29 +261,19 @@ const getListViewStyle = (listView) => {
 	return listView ? styles.listViewContainer : styles.containerDiv;
 };
 
-function renderItems({
-	items,
-	activePage,
-	isLoading,
-	isPaginating,
-	totalCount,
-	dispatch,
-	itemCategory,
-	categoryColor,
-	categoryIcon,
-	state,
-}) {
+const renderItems = (items, dispatch, itemCategory, stateCategoryName, categoryColor, categoryIcon, state) => {
 	const { cloneData, activeCategoryTab, selectedCategories, listView } = state;
+	const { loading, page: tmpPage, pagination, totalCount, searchResults } = items;
 
 	return (
 		<>
-			{items?.length > 0 &&
+			{searchResults?.length > 0 &&
 				(activeCategoryTab === itemCategory || activeCategoryTab === 'all') &&
 				selectedCategories[itemCategory] && (
 					<div className={'col-xs-12'} style={getListViewStyle(listView)}>
 						<SearchSection section={itemCategory} color={categoryColor} icon={categoryIcon}>
-							{!isLoading && !isPaginating ? (
-								getSearchResults(items, state, dispatch)
+							{!loading && !pagination ? (
+								getSearchResults(searchResults, state, dispatch)
 							) : (
 								<div className="col-xs-12">
 									<LoadingIndicator customColor={PRIMARY_COLOR} />
@@ -289,7 +281,7 @@ function renderItems({
 							)}
 							<div className="gcPagination col-xs-12 text-center">
 								<Pagination
-									activePage={activePage}
+									activePage={tmpPage}
 									itemsCountPerPage={RESULTS_PER_PAGE}
 									totalItemsCount={totalCount}
 									pageRangeDisplayed={8}
@@ -301,9 +293,12 @@ function renderItems({
 											page
 										);
 										setState(dispatch, {
-											applicationsLoading: true,
-											applicationsPage: page,
-											applicationsPagination: true,
+											[stateCategoryName]: {
+												loading: true,
+												page: page,
+												pagination: true,
+												totalCount,
+											},
 										});
 									}}
 								/>
@@ -313,47 +308,12 @@ function renderItems({
 				)}
 		</>
 	);
-}
+};
 
 const getCardViewPanel = (props) => {
-	const { context } = props;
+	const { context, applications, dashboards, dataSources, databases, models } = props;
 	const { state, dispatch } = context;
-	const {
-		componentStepNumbers,
-		iframePreviewLink,
-		applicationsSearchResults,
-		applicationsPage,
-		applicationsLoading,
-		applicationsPagination,
-		applicationsTotalCount,
-		dashboardsSearchResults,
-		dashboardsTotalCount,
-		dashboardsPage,
-		dashboardsLoading,
-		dashboardsPagination,
-		dataSourcesSearchResults,
-		dataSourcesPage,
-		dataSourcesLoading,
-		dataSourcesPagination,
-		dataSourcesTotalCount,
-		databasesSearchResults,
-		databasesPage,
-		databasesLoading,
-		databasesPagination,
-		databasesTotalCount,
-		modelsSearchResults,
-		modelsPage,
-		modelsLoading,
-		modelsPagination,
-		modelsTotalCount,
-		loading,
-	} = state;
-
-	const applications = applicationsSearchResults;
-	const dashboards = dashboardsSearchResults;
-	const dataSources = dataSourcesSearchResults;
-	const databases = databasesSearchResults;
-	const models = modelsSearchResults;
+	const { componentStepNumbers, iframePreviewLink, loading } = state;
 
 	let sideScroll = !iframePreviewLink
 		? {}
@@ -367,70 +327,47 @@ const getCardViewPanel = (props) => {
 			style={{ marginTop: 0 }}
 		>
 			<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-				{renderItems({
-					items: applications,
-					activePage: applicationsPage,
-					isLoading: applicationsLoading,
-					isPaginating: applicationsPagination,
-					totalCount: applicationsTotalCount,
+				{renderItems(
+					applications,
 					dispatch,
-					itemCategory: 'Applications',
-					categoryColor: 'rgb(50, 18, 77)',
-					categoryIcon: ApplicationsIcon,
-					state,
-				})}
+					'Applications',
+					'applicationsSearchResults',
+					'rgb(50, 18, 77)',
+					ApplicationsIcon,
+					state
+				)}
 
-				{renderItems({
-					items: dashboards,
-					activePage: dashboardsPage,
-					isLoading: dashboardsLoading,
-					isPaginating: dashboardsPagination,
-					totalCount: dashboardsTotalCount,
+				{renderItems(
+					dashboards,
 					dispatch,
-					itemCategory: 'Dashboards',
-					categoryColor: 'rgb(11, 167, 146)',
-					categoryIcon: DashboardsIcon,
-					state,
-				})}
+					'Dashboards',
+					'dashboardsSearchResults',
+					'rgb(11, 167, 146)',
+					DashboardsIcon,
+					state
+				)}
 
-				{renderItems({
-					items: dataSources,
-					activePage: dataSourcesPage,
-					isLoading: dataSourcesLoading,
-					isPaginating: dataSourcesPagination,
-					totalCount: dataSourcesTotalCount,
+				{renderItems(
+					dataSources,
 					dispatch,
-					itemCategory: 'DataSources',
-					categoryColor: 'rgb(5, 159, 217)',
-					categoryIcon: DataSourcesIcon,
-					state,
-				})}
+					'DataSources',
+					'dataSourcesSearchResults',
+					'rgb(5, 159, 217)',
+					DataSourcesIcon,
+					state
+				)}
 
-				{renderItems({
-					items: databases,
-					activePage: databasesPage,
-					isLoading: databasesLoading,
-					isPaginating: databasesPagination,
-					totalCount: databasesTotalCount,
+				{renderItems(
+					databases,
 					dispatch,
-					itemCategory: 'Databases',
-					categoryColor: 'rgb(233, 105, 29)',
-					categoryIcon: DatabasesIcon,
-					state,
-				})}
+					'Databases',
+					'databasesSearchResults',
+					'rgb(233, 105, 29)',
+					DatabasesIcon,
+					state
+				)}
 
-				{renderItems({
-					items: models,
-					activePage: modelsPage,
-					isLoading: modelsLoading,
-					isPaginating: modelsPagination,
-					totalCount: modelsTotalCount,
-					dispatch,
-					itemCategory: 'Models',
-					categoryColor: '#131E43',
-					categoryIcon: DatabasesIcon,
-					state,
-				})}
+				{renderItems(models, dispatch, 'Models', 'modelsSearchResults', '#131E43', DatabasesIcon, state)}
 
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
@@ -462,11 +399,63 @@ const handlePagination = (state, dispatch, searchHandler) => {
 	}
 };
 
+const checkFinishedLoading = (state, dispatch, applications, dashboards, dataSources, databases, models) => {
+	if (
+		state.runningSearch &&
+		!applications.loading &&
+		!dashboards.loading &&
+		!dataSources.loading &&
+		!databases.loading &&
+		!models.loading
+	) {
+		setState(dispatch, {
+			runningSearch: false,
+			loading: false,
+		});
+	}
+};
+
+const setMetaData = (state, dispatch, applications, dashboards, dataSources, databases, models) => {
+	const tmpMeta = structuredClone(state.categoryMetadata);
+
+	if (!applications.loading) {
+		tmpMeta['Applications'] = { total: applications.totalCount };
+	}
+
+	if (!dashboards.loading) {
+		tmpMeta['Dashboards'] = { total: dashboards.totalCount };
+	}
+	if (!dataSources.loading) {
+		tmpMeta['DataSources'] = { total: dataSources.totalCount };
+	}
+	if (!databases.loading) {
+		tmpMeta['Databases'] = { total: databases.totalCount };
+	}
+	if (!models.loading) {
+		tmpMeta['Models'] = { total: models.totalCount };
+	}
+
+	setState(dispatch, { categoryMetadata: tmpMeta });
+};
+
 const GlobalSearchMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
+	const [applications, setApplications] = useState(state.applicationsSearchResults);
+	const [dashboards, setDashboards] = useState(state.dashboardsSearchResults);
+	const [dataSources, setDataSources] = useState(state.dataSourcesSearchResults);
+	const [databases, setDatabases] = useState(state.databasesSearchResults);
+	const [models, setModels] = useState(state.modelsSearchResults);
+
+	const [showFavorites, setShowFavorites] = useState(state.showFavorites);
+	const [favorites, setFavorites] = useState(state.favorites);
+
+	useEffect(() => {
+		setFavorites(state.favorites);
+		setShowFavorites(state.showFavorites);
+	}, [state.showFavorites, state.favorites]);
 
 	useEffect(() => {
 		handlePagination(state, dispatch, searchHandler);
@@ -493,47 +482,57 @@ const GlobalSearchMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	useEffect(() => {
-		if (
-			state.runningSearch &&
-			!state.applicationsLoading &&
-			!state.dashboardsLoading &&
-			!state.dataSourcesLoading &&
-			!state.databasesLoading &&
-			!state.modelsLoading
-		) {
-			setState(dispatch, {
-				categoryMetadata: {
-					Applications: { total: state.applicationsTotalCount },
-					Dashboards: { total: state.dashboardsTotalCount },
-					DataSources: { total: state.dataSourcesTotalCount },
-					Databases: { total: state.databasesTotalCount },
-					Models: { total: state.modelsTotalCount },
-					Documentation: { total: 0 },
-					Organizations: { total: 0 },
-					Services: { total: 0 },
-				},
-				runningSearch: false,
-				loading: false,
-			});
+		let tmpApplications, tmpDashboards, tmpDataSources, tmpDatabases, tmpModels;
+
+		if (showFavorites) {
+			tmpApplications = favorites.applicationsSearchResults;
+			tmpDashboards = favorites.dashboardsSearchResults;
+			tmpDataSources = favorites.dataSourcesSearchResults;
+			tmpDatabases = favorites.databasesSearchResults;
+			tmpModels = favorites.modelsSearchResults;
+		} else {
+			tmpApplications = state.applicationsSearchResults;
+			tmpDashboards = state.dashboardsSearchResults;
+			tmpDataSources = state.dataSourcesSearchResults;
+			tmpDatabases = state.databasesSearchResults;
+			tmpModels = state.modelsSearchResults;
 		}
+
+		setApplications(tmpApplications);
+		setDashboards(tmpDashboards);
+		setDataSources(tmpDataSources);
+		setDatabases(tmpDatabases);
+		setModels(tmpModels);
 	}, [
 		state.runningSearch,
-		state.applicationsLoading,
-		state.dashboardsLoading,
-		state.dataSourcesLoading,
-		state.databasesLoading,
-		state.modelsLoading,
-		state.applicationsTotalCount,
-		state.dashboardsTotalCount,
-		state.dataSourcesTotalCount,
-		state.databasesTotalCount,
-		state.modelsTotalCount,
 		state.loading,
 		dispatch,
+		favorites,
+		showFavorites,
+		state.applicationsSearchResults,
+		state.dashboardsSearchResults,
+		state.dataSourcesSearchResults,
+		state.databasesSearchResults,
+		state.modelsSearchResults,
 	]);
 
+	useEffect(() => {
+		setMetaData(state, dispatch, applications, dashboards, dataSources, databases, models);
+		checkFinishedLoading(state, dispatch, applications, dashboards, dataSources, databases, models);
+		// eslint-disable-next-line
+	}, [applications, dashboards, dataSources, databases, dispatch, models]);
+
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
+		const viewPanels = {
+			Card: getCardViewPanel({
+				context: { state, dispatch },
+				applications,
+				dashboards,
+				dataSources,
+				databases,
+				models,
+			}),
+		};
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -555,6 +554,11 @@ const GlobalSearchMainViewHandler = (props) => {
 				renderHideTabs,
 				pageLoaded,
 				getViewPanels,
+				applications,
+				dashboards,
+				dataSources,
+				databases,
+				models,
 			});
 	}
 };

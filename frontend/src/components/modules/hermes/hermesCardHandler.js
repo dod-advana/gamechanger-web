@@ -4,7 +4,6 @@ import { KeyboardArrowRight } from '@material-ui/icons';
 import {
 	capitalizeFirst,
 	CARD_FONT_SIZE,
-	getSubTypes,
 	getTrackingNameForFactory,
 	getTypeDisplay,
 } from '../../../utils/gamechangerUtils';
@@ -63,7 +62,7 @@ const clickFn = (body) => {
 	myWindow.focus();
 };
 
-const renderHighlights = (highlights, capitalizeFirst, hoveredHit, setHoveredHit) => {
+const renderHighlights = (highlights, hoveredHit, setHoveredHit) => {
 	const fontSize = 12;
 	const highlightList = [];
 
@@ -106,12 +105,11 @@ const renderHighlights = (highlights, capitalizeFirst, hoveredHit, setHoveredHit
 							setHoveredHit(highlightLabel);
 						}}
 					>
-						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label}`}</span>
+						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label++}`}</span>
 						<i className="fa fa-chevron-right" style={{ marginLeft: 10, fontSize, color: 'white' }} />
 					</div>
 				</>
 			);
-			label += 1;
 		}
 	}
 	if (hoveredHit === 0) {
@@ -147,7 +145,10 @@ const cardHandler = {
 				<StyledFrontCardHeader listView={state.listView} docListView={docListView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={title} placement="top" arrow>
-							<div className={'title-text'} onClick={docListView ? () => clickFn(item.body) : () => {}}>
+							<div
+								className={'title-text'}
+								onClick={docListView ? () => clickFn(item.body) : () => Function.prototype}
+							>
 								<div className={'text'}>{title}</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
@@ -161,7 +162,7 @@ const cardHandler = {
 						<div className={'list-view-sub-header'}>
 							<p>
 								{' '}
-								{getSubTypes(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
+								{getTypeDisplay(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
 							</p>
 						</div>
 					)}
@@ -199,7 +200,7 @@ const cardHandler = {
 							docTypeColor={typeColor}
 							docOrgColor={orgColor}
 						>
-							<div className={'sub-header-one'}>{getSubTypes(type)}</div>
+							<div className={'sub-header-one'}>{getTypeDisplay(type)}</div>
 							<div className={'sub-header-two'}>{getTypeDisplay(org)}</div>
 						</StyledFrontCardSubHeader>
 					)}
@@ -244,7 +245,7 @@ const cardHandler = {
 									overflow: 'scroll',
 								}}
 							>
-								{renderHighlights(item.highlight, capitalizeFirst, hoveredHit, setHoveredHit)}
+								{renderHighlights(item.highlight, hoveredHit, setHoveredHit)}
 							</div>
 							<div
 								style={{
@@ -336,11 +337,11 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 	},
