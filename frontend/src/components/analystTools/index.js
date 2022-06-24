@@ -8,7 +8,7 @@ import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import PolicyDocumentsComparisonTool from '../modules/policy/policyDocumentsComparisonTool';
 import EDADocumentsComparisonTool from '../modules/eda/edaDocumentsComparisonTool';
 import { setState } from '../../utils/sharedFunctions';
-import GCResponsibilityExplorer from './GCResponsibilityExplorer';
+import GCResponsibilityExplorer from './responsibilityExplorer/GCResponsibilityExplorer';
 
 const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocumentComparisonTool = true }) => {
 	const { state, dispatch } = context;

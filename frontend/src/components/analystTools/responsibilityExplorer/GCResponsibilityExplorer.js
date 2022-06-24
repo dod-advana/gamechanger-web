@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import ExportIcon from '../../images/icon/Export.svg';
+import ExportIcon from '../../../images/icon/Export.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import { trackEvent } from '../telemetry/Matomo';
-import GCButton from '../common/GCButton';
-import GameChangerAPI from '../api/gameChanger-service-api';
-import { gcOrange } from '../common/gc-colors';
-import GCResponsibilityTracker from './GCResponsibilityChartView';
-import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentView';
-import GCToolTip from '../common/GCToolTip';
-import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+import { trackEvent } from '../../telemetry/Matomo';
+import GCButton from '../../common/GCButton';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import { gcOrange } from '../../common/gc-colors';
+import GCResponsibilityChartView from './GCResponsibilityChartView';
+import GCResponsibilityDocumentView from './GCResponsibilityDocumentView';
+import GCToolTip from '../../common/GCToolTip';
+import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
-import { reTutorialSteps } from './reTutotialSteps';
+import { reTutorialSteps } from './tutotialSteps';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -108,6 +108,10 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			window.scrollTo(0, 0);
 			const resultsDiv = document.getElementById('re-results-col');
 			resultsDiv.scrollTop = 0;
+			setCollapseKeys({
+				'DoDI 1304.02 Accession Processing Data Collection Forms': true,
+				'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+			});
 		}
 	}, [stepIndex]);
 
@@ -330,7 +334,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				</div>
 			</div>
 			{reView === 'Chart' && (
-				<GCResponsibilityTracker
+				<GCResponsibilityChartView
 					state={state}
 					filters={filters}
 					setFilters={setFilters}
@@ -343,7 +347,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				/>
 			)}
 			{reView === 'Document' && (
-				<ResponsibilityDocumentExplorer
+				<GCResponsibilityDocumentView
 					state={state}
 					dispatch={dispatch}
 					responsibilityData={docResponsibilityData}

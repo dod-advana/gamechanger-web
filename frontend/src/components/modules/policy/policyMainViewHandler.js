@@ -390,19 +390,15 @@ const handlePageLoad = async (props) => {
 	}
 	const view = getQueryVariable('view', window.location.hash.toString());
 	if (view) {
-		switch (view) {
-			case 'graph':
-				setState(dispatch, { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true });
-				break;
-			default:
-				setState(dispatch, { adminTopics: topics, currentViewName: view });
-				break;
+		if (view === 'graph') {
+			setState(dispatch, { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true });
+		} else {
+			setState(dispatch, { adminTopics: topics, currentViewName: view });
 		}
 	} else {
 		setState(dispatch, { adminTopics: topics });
 	}
 
-	// handlePubs(pubs, state, dispatch);
 	handleSources(state, dispatch, cancelToken, gameChangerAPI);
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI);
 	handleRecDocs(rec_docs, state, dispatch, cancelToken, gameChangerAPI);
@@ -1077,7 +1073,6 @@ const getCardViewPanel = (props) => {
 																		'page',
 																		page
 																	);
-																	// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
 																}}
 															/>
 														</div>

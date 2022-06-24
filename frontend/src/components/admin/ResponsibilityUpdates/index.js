@@ -9,7 +9,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import Pagination from 'react-js-pagination';
-import PDFHighlighter from '../../analystTools/PDFHighlighter';
+import PDFHighlighter from '../../analystTools/responsibilityExplorer/PDFHighlighter';
 import { styles as adminStyles } from '../util/GCAdminStyles';
 import GCButton from '../../common/GCButton';
 

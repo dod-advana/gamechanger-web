@@ -752,14 +752,14 @@ const PolicySearchHandler = {
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const orgFilterText = !allOrgsSelected
-			? Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(orgFilter, (value) => value)).join('_')
 			: undefined;
 
 		const typeFilterText = !allTypesSelected
-			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(typeFilter, (value) => value)).join('_')
 			: undefined;
 
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value) => value.field))
 			.map((key) => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
 			.join('_');
 

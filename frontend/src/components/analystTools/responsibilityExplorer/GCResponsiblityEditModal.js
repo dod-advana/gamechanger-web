@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import {
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Typography,
+	FormControl,
+	Select,
+	MenuItem,
+} from '@material-ui/core';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
-import { FormControl, Select, MenuItem } from '@material-ui/core';
-import GCButton from '../common/GCButton';
+import GCButton from '../../common/GCButton';
 
 const CloseButton = styled.div`
 	padding: 6px;
