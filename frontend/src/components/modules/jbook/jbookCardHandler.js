@@ -205,7 +205,7 @@ const cardHandler = {
 			const { cloneData, searchText, selectedPortfolio } = state;
 
 			let displayTitleTop = '';
-			let displayTitleBot = ''; // item.projectTitle;
+			let displayTitleBot = '';
 			switch (item.budgetType) {
 				case 'odoc':
 				case 'pdoc':
@@ -231,14 +231,11 @@ const cardHandler = {
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={
-									docListView
-										? (e) => {
-												e.preventDefault();
-												clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
-										  }
-										: () => {}
-								}
+								onClick={(e) => {
+									if (!docListView) return;
+									e.preventDefault();
+									clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
+								}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -254,7 +251,6 @@ const cardHandler = {
 										<KeyboardArrowRight style={{ color: 'rgb(56, 111, 148)', fontSize: 32 }} />
 									</div>
 								)}
-								{/* {isBaseAward && <img src={AwardIcon}  style={{ width: 19 }} alt="award"/>} */}
 							</div>
 						</GCTooltip>
 						<div className={'selected-favorite'}>
@@ -288,7 +284,6 @@ const cardHandler = {
 					appropriationTitle = item.accountTitle;
 				}
 
-				budgetPrefix = '';
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
 				let cycle = item.budgetCycle ?? 'PB';
 				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
@@ -670,6 +665,29 @@ const cardHandler = {
 					Value: projectData.projectTitle || 'N/A',
 				},
 				{
+					Key: 'Budget Year (FY)',
+					Value: projectData.budgetYear || 'N/A',
+				},
+				{
+					Key: 'Service Agency Name',
+					Value: projectData.serviceAgency || 'N/A',
+				},
+				{
+					Key: 'Main Account',
+					Value: projectData.appropriationNumber || 'N/A',
+				},
+				{
+					Key: 'Budget Activity',
+					Value: projectData.budgetActivityNumber || 'N/A',
+				},
+				{
+					Key: 'Budget Sub Activity',
+					Value:
+						projectData.budgetType === 'odoc'
+							? projectData.budgetActivityTitle ?? 'N/A'
+							: projectData.budgetSubActivity ?? 'N/A',
+				},
+				{
 					Key: 'Program Element',
 					Value: projectData.programElement || 'N/A',
 					Hidden: budgetType === 'PDOC',
@@ -679,10 +697,7 @@ const cardHandler = {
 					Value: projectData.projectNum || 'N/A',
 					Hidden: budgetType === 'PDOC',
 				},
-				{
-					Key: 'Service Agency Name',
-					Value: projectData.serviceAgency || 'N/A',
-				},
+
 				{
 					Key: 'All Prior Years Amount',
 					Value:
@@ -716,33 +731,17 @@ const cardHandler = {
 					Key: 'Total Cost',
 					Value: projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A',
 				},
-				{
-					Key: 'Budget Year (FY)',
-					Value: projectData.budgetYear || 'N/A',
-				},
+
 				{
 					Key: 'Budget Cycle',
 					Value: projectData.budgetCycle || 'N/A',
 				},
-				{
-					Key: 'Main Account',
-					Value: projectData.appropriationNumber || 'N/A',
-				},
+
 				{
 					Key: 'Appropriation Title',
 					Value: projectData.appropriationTitle || 'N/A',
 				},
-				{
-					Key: 'Budget Activity',
-					Value: projectData.budgetActivityNumber || 'N/A',
-				},
-				{
-					Key: 'Budget Sub Activity',
-					Value:
-						projectData.budgetType === 'odoc'
-							? projectData.budgetActivityTitle ?? 'N/A'
-							: projectData.budgetSubActivity ?? 'N/A',
-				},
+
 				{
 					Key: 'Category',
 					Value: getClassLabel(projectData),
