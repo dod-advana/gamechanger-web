@@ -781,18 +781,21 @@ const PolicySearchHandler = {
 			window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, '')
 		);
 
+		const appendParams = (parameters, field, paramName) => {
+			if (field) parameters.append(paramName, field);
+		};
 		const params = new URLSearchParams();
-		if (searchText) params.append('q', searchText);
-		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (searchType) params.append('searchType', searchType);
-		if (orgFilterText) params.append('orgFilter', orgFilterText);
-		if (typeFilterText) params.append('typeFilter', typeFilterText);
-		if (searchFieldText) params.append('searchFields', searchFieldText);
-		if (accessDateText) params.append('accessDate', accessDateText);
-		if (pubDateText) params.append('pubDate', pubDateText);
-		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		appendParams(params, searchText, 'q');
+		appendParams(params, offset, 'offset');
+		appendParams(params, searchType, 'searchType');
+		appendParams(params, orgFilterText, 'orgFilter');
+		appendParams(params, typeFilterText, 'typeFilter');
+		appendParams(params, searchFieldText, 'searchFields');
+		appendParams(params, accessDateText, 'accessDate');
+		appendParams(params, pubDateText, 'pubDate');
+		appendParams(params, includeRevoked, 'revoked');
+		appendParams(params, currentParams.get('view'), 'view');
 		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
-		if (currentParams.get('view')) params.append('view', currentParams.get('view'));
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 
