@@ -429,6 +429,7 @@ class Reports {
 	}
 
 	async constructProfilePagePDF(fullData, userId, showPOC = true) {
+		const img = path.resolve(__dirname, './ProfilePagePDFImages/cdao_logo.png');
 		let currentYear = new Date().getFullYear();
 
 		// Define base document
@@ -438,8 +439,15 @@ class Reports {
 				return {
 					stack: [
 						{
+							image: img,
+							width: 60,
+							absolutePosition: { x: 20, y: 5 },
+							marginBottom: 5,
+						},
+						{
 							text: `Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
 							alignment: 'center',
+							marginTop: 4,
 							marginBottom: 5,
 							fontSize: 11,
 						},
@@ -489,6 +497,12 @@ class Reports {
 								widths: ['*', 120, '*', 120, 130],
 								body: [
 									[
+										{
+											image: img,
+											width: 60,
+											marginLeft: 20,
+											marginTop: 8,
+										},
 										{
 											text: 'Go To: R&D Activities',
 											linkToDestination: 'rdActivities',
