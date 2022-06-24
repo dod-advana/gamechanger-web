@@ -5,10 +5,9 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import propTypes from 'prop-types';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import PolicyDocumentsComparisonTool from '../modules/policy/policyDocumentsComparisonTool';
-import EDADocumentsComparisonTool from '../modules/eda/edaDocumentsComparisonTool';
 import { setState } from '../../utils/sharedFunctions';
 import GCResponsibilityExplorer from './GCResponsibilityExplorer';
+import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
 
 const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocumentComparisonTool = true }) => {
 	const { state, dispatch } = context;
@@ -102,11 +101,7 @@ const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocument
 							)}
 							{showDocumentComparisonTool && (
 								<TabPanel>
-									{state.cloneData.clone_name === 'eda' ? (
-										<EDADocumentsComparisonTool context={context} />
-									) : (
-										<PolicyDocumentsComparisonTool context={context} />
-									)}
+									<GCDocumentsComparisonTool context={context} />
 								</TabPanel>
 							)}
 						</div>
