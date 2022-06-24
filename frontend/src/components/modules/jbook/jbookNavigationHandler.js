@@ -11,7 +11,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import { setState } from '../../../utils/sharedFunctions';
-import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
+// import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 import UserIcon from '../../../images/icon/UserIcon.png';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
@@ -72,7 +72,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="About Us" placement="right" arrow>
+			{/* <GCTooltip title="About Us" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -93,7 +93,7 @@ const generateClosedContentArea = (state, dispatch) => {
 				>
 					<ConstrainedIcon src={AboutUsIcon} />
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			<GCTooltip title="User Feedback" placement="right" arrow>
 				<HoverNavItem
 					centered
@@ -180,7 +180,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="About Us" placement="right" arrow>
+			{/* <GCTooltip title="About Us" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -201,7 +201,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={AboutUsIcon} />
 					<span style={{ marginLeft: '10px' }}>About Us</span>
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			<GCTooltip title="Tell us what you think!" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
