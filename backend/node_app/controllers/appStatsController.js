@@ -149,8 +149,8 @@ class AppStatsController {
 	}
 
 	htmlDecode(encodedString) {
-		var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
-		var translate = {
+		let translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+		let translate = {
 			nbsp: ' ',
 			amp: '&',
 			quot: '"',
@@ -162,7 +162,7 @@ class AppStatsController {
 				return translate[entity];
 			})
 			.replace(/&#(\d+);/gi, function (numStr) {
-				var num = parseInt(numStr, 10);
+				let num = parseInt(numStr, 10);
 				return String.fromCharCode(num);
 			});
 	}
@@ -1196,7 +1196,7 @@ class AppStatsController {
 	 */
  	mapOpenedVisitIDs(opened, documentMap, vistitIDMap){
 		for (let open of opened) {
-			if (vistitIDMap[open.idvisitor]) {
+			if (vistitIDMap[open.idvisitor] && vistitIDMap[open.idvisitor] in documentMap) {
 				if (
 					!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
 					documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
@@ -1243,7 +1243,7 @@ class AppStatsController {
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneID, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		this.mapVisitIDs(searches, documentMap, vistitIDMap);
+		this.mapSearchVisitIDs(searches, documentMap, vistitIDMap);
 		this.mapDocumentVisitIDs(documents, documentMap, vistitIDMap);
 		this.mapOpenedVisitIDs(opened, documentMap, vistitIDMap);
 		return { users: Object.values(documentMap) };
