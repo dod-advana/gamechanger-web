@@ -4,7 +4,10 @@
   "description": "Testing package for cypress",
   "main": "cypress.config.js",
   "scripts": {
-    "test": "npx cypress run && npx mochawesome-merge \"cypress/results/*.json\" > results.json && node cypress/support/sendResults.js"
+    "pretest": "rm cypress/results/* || true",
+    "test": "npx cypress run",
+    "report:merge": "npx mochawesome-merge \"cypress/results/*.json\" > results.json",
+    "report:send": "node cypress/support/sendResults.js"
   },
   "author": "",
   "license": "ISC",
