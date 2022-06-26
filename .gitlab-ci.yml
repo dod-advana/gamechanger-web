@@ -166,7 +166,7 @@ cypress-testing-job:
   script:
     - cd frontend
     - npm ci
-    - npx cypress run --env BASE_URL=${AWS_URL}${AWS_SERVER}:8080,API_URL=${AWS_URL}${AWS_SERVER}:8990,SSL_CLIENT_S_DN_CN=${CYPRESS_SSL_CLIENT_S_DN_CN},SSL_CLIENT_CERTIFICATE=${CYPRESS_SSL_CLIENT_CERTIFICATE} --reporter mochawesome
+    - npx cypress run --env BASE_URL=$AWS_SERVER:8080,API_URL=$AWS_SERVER:8990,SSL_CLIENT_S_DN_CN=$CYPRESS_SSL_CLIENT_S_DN_CN,SSL_CLIENT_CERTIFICATE=$CYPRESS_SSL_CLIENT_CERTIFICATE --reporter mochawesome
     - npm run cy:test
     - node cypress/support/sendResults.js
 
