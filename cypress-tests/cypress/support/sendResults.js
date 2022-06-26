@@ -7,7 +7,7 @@ const GITLAB_MERGE_REQUEST_ID = process.env.CI_MERGE_REQUEST_IID;
 const GITLAB_CYPRESS_TOKEN = process.env.GITLAB_CYPRESS_TOKEN;
 
 const axios = axiosLib.create({
-  baseURL: `https://gitlab.advana.boozallencsn.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${GITLAB_MERGE_REQUEST_ID}/notes`,
+  baseURL: `https://gitlab.advana.boozallencsn.com/api/v4/projects/${GITLAB_PROJECT_ID}/merge_requests/${GITLAB_MERGE_REQUEST_ID}/notes`,
   httpsAgent: new https.Agent({
     keepAlive: false,
     rejectUnauthorized: false,
