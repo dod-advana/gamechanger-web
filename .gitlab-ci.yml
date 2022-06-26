@@ -162,7 +162,7 @@ cypress-testing-job:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
   script:
-    - npm install -g mochawesome mochawesome-merge mochawesome-report-generator
+    - npm install -g cypress mochawesome mochawesome-merge mochawesome-report-generator
     - cd frontend
     - npx cypress run --reporter mochawesome
     - npm run cy:test
