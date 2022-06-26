@@ -17,10 +17,6 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		cy.get('[data-cy="consent-agreement-okay"]').click();
 	});
 
-	after(() => {
-		cypressHelper.sendFailuresToSlack();
-	});
-
 	// Test the consent banner appears and a cookie is created when okay clicked
 	it('The consent banner should be there.', () => {
 		// Clear cookies just for this one to test consent banner
