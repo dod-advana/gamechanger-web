@@ -1,7 +1,7 @@
 stages:          # List of stages for jobs, and their order of execution.
+  - setup-test-server
   - static-test
   - security-test
-  - setup-test-server
   - integration-test
   - deploy
 
@@ -22,9 +22,10 @@ unit-backend-test-job:    # Job for the unit tests
       files:
         - backend/package-lock.json
     paths:
-    - .npm/
+      - backend/node_modules
+      - .npm/
   script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - cd backend && npm ci
     - npm run test:gitlab
   artifacts:
     paths:
@@ -48,9 +49,10 @@ lint-frontend-test-job:  # front end lint job
       files:
         - frontend/package-lock.json
     paths:
-    - .npm/
+      - frontend/node_modules
+      - .npm/
   script:
-    - cd frontend && npm ci --cache ../.npm --prefer-offline
+    - cd frontend && npm ci
     - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
   artifacts:
     paths:
@@ -68,9 +70,10 @@ lint-backend-test-job:  # backend lint job
       files:
         - backend/package-lock.json
     paths:
-    - .npm/
+      - backend/node_modules
+      - .npm/
   script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - cd backend && npm ci
     - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
   artifacts:
     paths:
@@ -128,6 +131,7 @@ sonar_scan-job:  # Run code through sonar scanner
       EOF
 
 
+
 setup-server:  # build dev server with the commit branch
   stage: setup-test-server
   variables:
@@ -144,6 +148,25 @@ setup-server:  # build dev server with the commit branch
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
+
+cypress-testing-job:
+  image: cypress/browsers:node16.13.2-chrome100-ff98
+  stage: static-test
+  extends: .setup-github-npm
+  variables:
+    CYPRESS_BASE_URL: "${AWS_URL}${AWS_SERVER}:8080"
+    CYPRESS_API_URL: "${AWS_URL}${AWS_SERVER}:8990"
+    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
+    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
+  rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: $DAILY_SCAN == "true"
+  script:
+    - npm install -g mochawesome mochawesome-merge mochawesome-report-generator
+    - cd frontend
+    - npx cypress run --reporter mochawesome
+    - npm run cy:test
+    - node cypress/support/sendResults.js
 
 integration-testing-job:  # Start the integration testing
   stage: integration-test

@@ -205,136 +205,106 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	return <Route {...rest} render={(props) => <RenderComponent {...rest} {...props} />} />;
 };
 
+const getGamechangerRoute = (clone, tutorialData) => {
+	const cloneRoutes = [];
+	const name = clone.clone_name;
+	const GamechangerProvider = getProvider(name);
+
+	const url = new URL(window.location.href).hostname;
+	if (clone.available_at === null) {
+		clone.available_at = []; // if there's nothing at all, set as empty array
+	}
+	if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
+		cloneRoutes.push((location) => (
+			<PrivateTrackedRoute
+				key={`${clone.url}-admin-lite`}
+				path={`/${clone.url}/admin`}
+				render={(props) => (
+					<GamechangerProvider>
+						<GamechangerLiteAdminPage {...props} cloneData={clone} jupiter={false} location={location} />
+					</GamechangerProvider>
+				)}
+				pageName={clone.display_name}
+				allowFunction={() => {
+					return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+				}}
+			/>
+		));
+		if (clone.clone_name === 'jbook') {
+			cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
+		}
+		cloneRoutes.push((location) => (
+			<PrivateTrackedRoute
+				key={`${clone.url}-main`}
+				path={`/${clone.url}`}
+				render={(props) => (
+					<GamechangerProvider>
+						<GamechangerPage
+							{...props}
+							tutorialData={tutorialData?.[name]?.newUserTutorial || null}
+							history={browserHistory}
+							isClone={true}
+							cloneData={clone}
+							location={location}
+						/>
+					</GamechangerProvider>
+				)}
+				pageName={clone.display_name}
+				allowFunction={() => {
+					if (clone.permissions_required) {
+						Permissions.allowGCClone(clone.clone_name) ||
+							Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+					} else {
+						return true;
+					}
+				}}
+			/>
+		));
+	}
+
+	return cloneRoutes;
+};
+
+const getGamechangerClones = async (tutorialData, setGameChangerCloneRoutes) => {
+	try {
+		const data = await gameChangerAPI.getCloneData();
+		const cloneRoutes = [];
+		_.forEach(data.data, (clone) => {
+			if (clone.is_live) {
+				cloneRoutes.push(...getGamechangerRoute(clone, tutorialData));
+			}
+		});
+		setGameChangerCloneRoutes(cloneRoutes);
+	} catch (err) {
+		console.log(err);
+		console.log('Failed to retrieve GC Clones.');
+	}
+};
+
+const getJBookProfileRoute = (cloneData, location) => {
+	const JBookProvider = getProvider('jbook');
+
+	return (
+		<PrivateTrackedRoute
+			key={`jbook-profile`}
+			path={`/jbook/profile`}
+			render={(props) => (
+				<JBookProvider>
+					<JBookProfilePage {...props} cloneData={cloneData} location={location} />
+				</JBookProvider>
+			)}
+			pageName={'JBookProfilePage'}
+			allowFunction={() => {
+				return true;
+			}}
+		/>
+	);
+};
+
 const App = () => {
 	const [gameChangerCloneRoutes, setGameChangerCloneRoutes] = useState([]);
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
-
-	const getGamechangerClones = async (tutorialData) => {
-		try {
-			const data = await gameChangerAPI.getCloneData();
-			const cloneRoutes = [];
-			_.forEach(data.data, (clone) => {
-				if (clone.is_live) {
-					const name = clone.clone_name;
-					const GamechangerProvider = getProvider(name);
-
-					const url = new URL(window.location.href).hostname;
-					if (clone.available_at === null) {
-						clone.available_at = []; // if there's nothing at all, set as empty array
-					}
-					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
-						cloneRoutes.push((location) => (
-							<PrivateTrackedRoute
-								key={`${clone.url}-admin-lite`}
-								path={`/${clone.url}/admin`}
-								render={(props) => (
-									<GamechangerProvider>
-										<GamechangerLiteAdminPage
-											{...props}
-											cloneData={clone}
-											jupiter={false}
-											location={location}
-										/>
-									</GamechangerProvider>
-								)}
-								pageName={clone.display_name}
-								allowFunction={() => {
-									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
-								}}
-							/>
-						));
-						if (clone.permissions_required) {
-							cloneRoutes.push((location) => (
-								<PrivateTrackedRoute
-									key={`${clone.url}-main`}
-									path={`/${clone.url}`}
-									render={(props) => (
-										<GamechangerProvider>
-											<GamechangerPage
-												{...props}
-												tutorialData={
-													tutorialData && tutorialData[name]
-														? tutorialData[name].newUserTutorial
-														: null
-												}
-												history={browserHistory}
-												isClone={true}
-												cloneData={clone}
-												location={location}
-											/>
-										</GamechangerProvider>
-									)}
-									pageName={clone.display_name}
-									allowFunction={() => {
-										return (
-											Permissions.allowGCClone(clone.clone_name) ||
-											Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
-										);
-									}}
-								/>
-							));
-						} else {
-							// if clone name is jbook, then push jbook route + cloneData
-							if (clone.clone_name === 'jbook') {
-								cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
-							}
-							cloneRoutes.push((location) => (
-								<PrivateTrackedRoute
-									key={`${clone.url}-main`}
-									path={`/${clone.url}`}
-									render={(props) => (
-										<GamechangerProvider>
-											<GamechangerPage
-												{...props}
-												tutorialData={
-													tutorialData && tutorialData[name]
-														? tutorialData[name].newUserTutorial
-														: null
-												}
-												history={browserHistory}
-												isClone={true}
-												cloneData={clone}
-												location={location}
-											/>
-										</GamechangerProvider>
-									)}
-									pageName={clone.display_name}
-									allowFunction={() => {
-										return true;
-									}}
-								/>
-							));
-						}
-					}
-				}
-			});
-			setGameChangerCloneRoutes(cloneRoutes);
-		} catch (err) {
-			console.log(err);
-			console.log('Failed to retrieve GC Clones.');
-		}
-	};
-
-	const getJBookProfileRoute = (cloneData, location) => {
-		const JBookProvider = getProvider('jbook');
-
-		return (
-			<PrivateTrackedRoute
-				key={`jbook-profile`}
-				path={`/jbook/profile`}
-				render={(props) => (
-					<JBookProvider>
-						<JBookProfilePage {...props} cloneData={cloneData} location={location} />
-					</JBookProvider>
-				)}
-				pageName={'JBookProfilePage'}
-				allowFunction={() => {
-					return true;
-				}}
-			/>
-		);
-	};
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
@@ -373,7 +343,7 @@ const App = () => {
 					console.log('Failed to retrieve Tutorial Overlay data');
 				}
 			}
-			await getGamechangerClones(tutorialData);
+			await getGamechangerClones(tutorialData, setGameChangerCloneRoutes);
 		};
 		if (!initialized) {
 			setInitialized(true);
@@ -404,14 +374,12 @@ const App = () => {
 					<Route
 						exact
 						path="/"
-						children={({ match, location, history }) => (
+						children={({ location }) => (
 							<div style={getStyleType(location)}>
 								<SlideOutMenuContextHandler>
 									<>
 										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
-											{!isShowNothingButComponent(location) && (
-												<SlideOutMenu match={match} location={location} history={history} />
-											)}
+											{!isShowNothingButComponent(location) && <SlideOutMenu />}
 											<Switch>
 												{tokenLoaded && gameChangerCloneRoutes.map((route) => route(location))}
 												<Route
@@ -458,7 +426,9 @@ const App = () => {
 												<Route
 													exact
 													path="/unauthorized"
-													component={UnauthorizedPage}
+													component={() => (
+														<div data-cy={'unauthorized-page'}>{UnauthorizedPage()}</div>
+													)}
 													location={location}
 												/>
 												<Route path="*" component={NotFoundPage} />

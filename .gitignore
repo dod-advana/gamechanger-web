@@ -9,3 +9,4 @@ matomo
 mysql
 /.github/CODEOWNERS
 cypress.env.json
+junit.xml
