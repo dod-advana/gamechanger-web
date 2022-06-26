@@ -156,19 +156,25 @@ cypress-testing-job:
   cache:
     key:
       files:
-        - frontend/package-lock.json
+        - cypress-tests/package-lock.json
     paths:
-      - frontend/node_modules
+      - cypress-tests/node_modules
       - .npm/
   rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      - if: $DAILY_SCAN == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  variables:
+    CYPRESS_BASE_URL: "${AWS_SERVER}:8080"
+    CYPRESS_API_URL: "${AWS_SERVER}:8990"
+    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
+    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   script:
-    - cd frontend
-    - npm ci
-    - npx cypress ci --env BASE_URL="${AWS_SERVER}:8080",API_URL="${AWS_SERVER}:8990",SSL_CLIENT_S_DN_CN="${CYPRESS_SSL_CLIENT_S_DN_CN}",SSL_CLIENT_CERTIFICATE="${CYPRESS_SSL_CLIENT_CERTIFICATE}" --reporter mochawesome
-    - npm run cy:test
-    - node cypress/support/sendResults.js
+    - echo $CYPRESS_BASE_URL
+    - echo "${CYPRESS_BASE_URL}"
+    - |
+      cd cypress-tests
+      npm ci
+      npm run test
 
 integration-testing-job:  # Start the integration testing
   stage: integration-test
