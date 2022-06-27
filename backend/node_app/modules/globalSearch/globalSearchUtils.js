@@ -63,9 +63,7 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 
 		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
 
-		const processedApps = processQlikApps(qlikApps.data, qlikStreams.data);
-
-		return processedApps;
+		return processQlikApps(qlikApps.data, qlikStreams.data);
 	} catch (err) {
 		if (!userId)
 			// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
