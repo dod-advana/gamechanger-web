@@ -153,6 +153,13 @@ export const populateDropDowns = async (state, dispatch) => {
 		jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
 			.map((tag) => (tag !== null ? tag : 'Blank'))
 			.sort(filterSortFunction);
+
+		if (jbookSearchSettings.budgetYearES) {
+			defaultOptions.budgetYear = jbookSearchSettings.budgetYearES;
+		}
+		if (jbookSearchSettings.serviceAgencyES) {
+			defaultOptions.serviceAgency = jbookSearchSettings.serviceAgencyES;
+		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
 		console.log(err);
