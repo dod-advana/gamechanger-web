@@ -65,11 +65,4 @@ results.results.forEach((result) => {
   }
 });
 
-axios
-  .post(`?private_token=${GITLAB_CYPRESS_TOKEN}`, { body: message })
-  .then((response) => {
-    console.log(response);
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+await axios.post(`?private_token=${GITLAB_CYPRESS_TOKEN}`, { body: message });

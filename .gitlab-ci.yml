@@ -169,16 +169,8 @@ cypress-testing-job:
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
-    - |
-      until [ "(curl --silent --show-error --connect-timeout 1 -I ${AWS_SERVER}:8080 | grep 'ADVANA')" != "" ];
-      do
-        echo --- App is starting, please wait...
-        sleep 10
-      done
-      echo -e "\e[00;32mApplication is ready!\e[00m"
+    - curl ${AWS_SERVER}:8080
   script:
-    - echo $CI_MERGE_REQUEST_PROJECT_ID
-    - echo "${CI_MERGE_REQUEST_IID}"
     - |
       cd cypress-tests
       npm ci

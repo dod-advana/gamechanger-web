@@ -4,7 +4,6 @@ describe("Tests the advanaCommon functionality of the app including side nav and
   const cypressHelper = new CypressHelper(cy);
 
   beforeEach(() => {
-    // Setup headers
     cypressHelper.setupHeaders();
 
     // Clear cookies
@@ -23,7 +22,7 @@ describe("Tests the advanaCommon functionality of the app including side nav and
     cy.clearCookies();
 
     // Visit the main page
-    cy.visit(Cypress.env("BASE_URL") + "/#/gamechanger");
+    cy.visit(Cypress.env("BASE_URL"));
 
     // Check the consent banner is there
     cy.get('[data-cy="consent-agreement"]').should("exist");
@@ -39,11 +38,23 @@ describe("Tests the advanaCommon functionality of the app including side nav and
 
   // Tests the basic side navigation functionality
   it("The side nav should be there.", () => {
-    cy.get('[data-cy="blah"]').should("exist");
+    // The side nav should exit
+    cy.get('[data-cy="side-nav"]').should("exist");
+
+    // The open button should be there meaning the side nav is closed, find it and click it
+    cy.get('[data-cy="side-nav-open-button"]').should("exist");
+    cy.get('[data-cy="side-nav-open-button"]').click();
+
+    // The close button should be there meaning the menu is open, find it and click it
+    cy.get('[data-cy="side-nav-close-button"]').should("exist");
+    cy.get('[data-cy="side-nav-close-button"]').click();
+
+    // Side nav should be closed again ensure the open button is there
+    cy.get('[data-cy="side-nav-open-button"]').should("exist");
   });
 
   // Tests the advana pills functionality
-  it("The advana pills should be there.", () => {
-    cy.get('[data-cy="blah2"]').should("exist");
-  });
+  // it("The advana pills should be there.", () => {
+  //   cy.get('[data-cy="blah2"]').should("exist");
+  // });
 });
