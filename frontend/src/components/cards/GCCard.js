@@ -86,10 +86,10 @@ const PolicyCardHandler = LoadableVisibility({
 const CARD_HEIGHT = 412;
 
 // Internet Explorer 6-11
-var IS_IE = /*@cc_on!@*/ !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
-var IS_EDGE = !IS_IE && !!window.StyleMedia;
+const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const gameChangerAPI = new GameChangerAPI();
 
