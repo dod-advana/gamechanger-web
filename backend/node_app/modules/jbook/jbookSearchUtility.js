@@ -59,7 +59,7 @@ class JBookSearchUtility {
 		try {
 			let mapping;
 			if (Mappings[`${docType}Mapping`]) {
-				mapping = structuredClone(Mappings[`${docType}Mapping`]);
+				mapping = _.clone(Mappings[`${docType}Mapping`]);
 			} else {
 				console.log(`${docType} mapping not found`);
 				return {};
@@ -71,7 +71,7 @@ class JBookSearchUtility {
 					const newName = mapping[field].newName;
 
 					if (!frontEndMapping[newName]) {
-						frontEndMapping[newName] = structuredClone(mapping[field]);
+						frontEndMapping[newName] = _.clone(mapping[field]);
 						frontEndMapping[newName].newName = field;
 					}
 				}
@@ -79,7 +79,7 @@ class JBookSearchUtility {
 			} else if (docType !== 'review' || docType !== 'gl') {
 				mapping = {
 					...mapping,
-					...reviewMapping,
+					...Mappings.reviewMapping,
 				};
 			}
 
@@ -87,6 +87,7 @@ class JBookSearchUtility {
 		} catch (err) {
 			console.log('Error retrieving jbook mapping');
 			this.logger.error(err.message, 'AJTKSKQ');
+			console.log('an update was made');
 		}
 	}
 
