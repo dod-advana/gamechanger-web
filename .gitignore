@@ -8,7 +8,7 @@ matomo
 .npmrc
 mysql
 /.github/CODEOWNERS
-cypress-tests/cypress.env.json
+frontend/cypress.env.json
 cypress-tests/cypress/videos
 cypress-tests/cypress/screenshots
 cypress-tests/cypress/results

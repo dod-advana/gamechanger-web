@@ -150,26 +150,29 @@ setup-server:  # build dev server with the commit branch
     branch: "main"
 
 cypress-testing-job:
-  image: cypress/browsers:node16.13.2-chrome100-ff98
+  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: static-test
   extends: .setup-github-npm
   cache:
     key:
       files:
-        - cypress-tests/package-lock.json
+        - frontend/package-lock.json
+        - backend/package-lock.json
     paths:
-      - cypress-tests/node_modules
+      - frontend/node_modules
+      - backend/node_modules
       - .npm/
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   variables:
-    CYPRESS_BASE_URL: "${AWS_SERVER}:8080"
-    CYPRESS_API_URL: "${AWS_SERVER}:8990"
+    CYPRESS_BASE_URL: "http://localhost:8080"
+    CYPRESS_API_URL: "http://localhost:8990"
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
-    - curl ${AWS_SERVER}:8080
+    - curl http://localhost:8080
+    - curl http://localhost:8990
   script:
     - |
       cd cypress-tests
