@@ -205,7 +205,7 @@ class AppStatsController {
 				daysAgo,
 				internalUsers,
 				blacklist,
-				10,
+				10
 			);
 			let cleanedTopSearches = [];
 			results.data.topSearches.data.forEach((d) => {
@@ -488,16 +488,16 @@ class AppStatsController {
 	/**
 	 * helper to map events for search pdf mappings
 	 *
-	 * @returns a dictionary to map events to searches 
-	*/
-	mapEventsMappings(searchMap, events){
+	 * @returns a dictionary to map events to searches
+	 */
+	mapEventsMappings(searchMap, events) {
 		const tempSearch = { ...searchMap };
 		const eventMap = {};
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
-			let search = ''
+			let search = '';
 			if (tempSearch[event.idvisit]) {
 				let i = 0;
 				let tempSearchList = tempSearch[event.idvisit].map((a) => a).reverse();
@@ -515,9 +515,9 @@ class AppStatsController {
 	/**
 	 * helper to map search documents for the pdf mappings
 	 *
-	 * @returns a dictionary to map searches 
-	*/
-	mapSearchMappings(searches, documents, events, searchPdfMapping){
+	 * @returns a dictionary to map searches
+	 */
+	mapSearchMappings(searches, documents, events, searchPdfMapping) {
 		const searchMap = {};
 		for (let search of searches) {
 			if (!searchMap[search.idvisit]) {
@@ -525,7 +525,7 @@ class AppStatsController {
 			}
 			searchMap[search.idvisit].push({ ...search, value: this.htmlDecode(search.value) });
 		}
-		this.mapEventsMappings(searchMap,events);
+		this.mapEventsMappings(searchMap, events);
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
@@ -538,7 +538,7 @@ class AppStatsController {
 				}
 			}
 		}
-		return searchMap
+		return searchMap;
 	}
 
 	/**
@@ -1138,11 +1138,10 @@ class AppStatsController {
 		}
 	}
 
-
 	/**
 	 * helper to map searches to the document mapper
 	 */
-	mapSearchVisitIDs(searches, documentMap, vistitIDMap){
+	mapSearchVisitIDs(searches, documentMap, vistitIDMap) {
 		for (let search of searches) {
 			if (vistitIDMap[search.idvisitor]) {
 				if (documentMap[vistitIDMap[search.idvisitor]]) {
@@ -1174,7 +1173,7 @@ class AppStatsController {
 	/**
 	 * helper to map documents to the document mapper
 	 */
-	 mapDocumentVisitIDs(documents, documentMap, vistitIDMap){
+	mapDocumentVisitIDs(documents, documentMap, vistitIDMap) {
 		for (let doc of documents) {
 			if (vistitIDMap[doc.idvisitor]) {
 				if (
@@ -1188,13 +1187,12 @@ class AppStatsController {
 				}
 			}
 		}
-		
 	}
 
 	/**
 	 * helper to map opened documents to the document mapper
 	 */
- 	mapOpenedVisitIDs(opened, documentMap, vistitIDMap){
+	mapOpenedVisitIDs(opened, documentMap, vistitIDMap) {
 		for (let open of opened) {
 			if (vistitIDMap[open.idvisitor] && vistitIDMap[open.idvisitor] in documentMap) {
 				if (

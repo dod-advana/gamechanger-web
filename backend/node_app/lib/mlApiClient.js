@@ -71,7 +71,7 @@ class MLApiClient {
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 	}
-	
+
 	async getExpandedSearchTerms(termsList, userId = 'unknown', qe_model = undefined) {
 		const data = { termsList, docIdsOnly: true };
 		if (qe_model) data['qe_model'] = qe_model;
