@@ -85,10 +85,12 @@ const endpoints = {
 	addInternalUser: '/api/gameChanger/admin/addInternalUser',
 	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
 	getAppStats: '/api/gameChanger/getAppStats',
+	getClonesMatomo: '/api/gameChanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
 	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
+	getUserDashboard: '/api/gameChanger/admin/getUserDashboard',
 	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
@@ -782,6 +784,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, { params: body });
 	};
 
+	getClonesMatomo = async (body) => {
+		const url = endpoints.getClonesMatomo;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
 	exportUserData = async (body) => {
 		const url = endpoints.exportUserData;
 		return axiosGET(this.axios, url, { params: body, responseType: 'arraybuffer' });
@@ -796,7 +803,10 @@ export default class GameChangerAPI {
 		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, { params: body });
 	};
-
+	getUserDashboard = async (body) => {
+		const url = endpoints.getUserDashboard;
+		return axiosGET(this.axios, url, { params: body });
+	};
 	sendUserAggregations = async (body) => {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });

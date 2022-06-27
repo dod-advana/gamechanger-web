@@ -56,6 +56,8 @@ const JBookSearchHandler = {
 				options: {
 					searchVersion: 1,
 					jbookSearchSettings: cleanSearchSettings,
+					portfolio: state.selectedPortfolio || 'AI Inventory',
+					sortSelected: state.sortSelected,
 					exportSearch: true,
 				},
 			});
@@ -89,7 +91,7 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						portfolio: state.portfolio || 'AI Inventory',
+						portfolio: state.selectedPortfolio || 'AI Inventory',
 						sortSelected: state.sortSelected,
 					},
 				},
@@ -364,6 +366,7 @@ const JBookSearchHandler = {
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+		searchSettings.selectedPortfolio = state.selectedPortfolio;
 		const sortDesc = state.currentOrder === 'desc';
 
 		switch (state.currentSort) {
