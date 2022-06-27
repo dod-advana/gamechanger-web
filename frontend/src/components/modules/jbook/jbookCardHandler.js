@@ -187,6 +187,39 @@ const types = {
 	odoc: 'O&M',
 };
 
+// helper functions
+const getBudgetSubActivity = (projectData) => {
+	return projectData.budgetType === 'odoc'
+		? projectData.budgetActivityTitle ?? 'N/A'
+		: projectData.budgetSubActivity ?? 'N/A';
+};
+
+const getAllPriorYearsAmount = (projectData) => {
+	return projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
+		? `${formatNum(projectData.allPriorYearsAmount)}`
+		: 'N/A';
+};
+
+const getPriorYearAmount = (projectData) => {
+	return projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
+		? `${formatNum(projectData.priorYearAmount)}`
+		: 'N/A';
+};
+
+const getCurrentYearAmount = (projectData) => {
+	return projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
+		? `${formatNum(projectData.currentYearAmount)}`
+		: 'N/A';
+};
+
+const getToComplete = (projectData, budgetType) => {
+	return `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A';
+};
+
+const emptyFunction = function () {
+	// this is intentionally empty
+};
+
 const clickFn = (cloneName, searchText, item, portfolioName) => {
 	const { budgetType, appropriationNumber, id, budgetYear } = item;
 
@@ -280,6 +313,7 @@ const getItemPageHits = (item) => {
 	return pageHits;
 };
 
+// sub-components
 const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
 	if (item.pageHits && item.pageHits.length > 0) {
 		return (
@@ -397,6 +431,11 @@ const ListViewFrontCardContent = ({
 	);
 };
 
+const ProjectKeywords = (keywords) => {
+	return <>{keywords && keywords.length > 0 ? keywords.map((keyword) => <p>{keyword}</p>) : 'None'}</>;
+};
+
+// main card handler
 const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
@@ -630,10 +669,7 @@ const cardHandler = {
 				},
 				{
 					Key: 'Budget Sub Activity',
-					Value:
-						projectData.budgetType === 'odoc'
-							? projectData.budgetActivityTitle ?? 'N/A'
-							: projectData.budgetSubActivity ?? 'N/A',
+					Value: getBudgetSubActivity(projectData),
 				},
 				{
 					Key: 'Program Element',
@@ -648,24 +684,15 @@ const cardHandler = {
 
 				{
 					Key: 'All Prior Years Amount',
-					Value:
-						projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-							? `${formatNum(projectData.allPriorYearsAmount)}`
-							: 'N/A',
+					Value: getAllPriorYearsAmount(projectData),
 				},
 				{
 					Key: 'Prior Year Amount',
-					Value:
-						projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-							? `${formatNum(projectData.priorYearAmount)}`
-							: 'N/A',
+					Value: getPriorYearAmount(projectData),
 				},
 				{
 					Key: 'Current Year Amount',
-					Value:
-						projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-							? `${formatNum(projectData.currentYearAmount)}`
-							: 'N/A',
+					Value: getCurrentYearAmount(projectData),
 				},
 				{
 					Key: 'Fiscal Year',
@@ -673,7 +700,7 @@ const cardHandler = {
 				},
 				{
 					Key: 'To Complete',
-					Value: `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A',
+					Value: getToComplete(projectData, budgetType),
 				},
 				{
 					Key: 'Total Cost',
@@ -689,37 +716,24 @@ const cardHandler = {
 					Key: 'Appropriation Title',
 					Value: projectData.appropriationTitle || 'N/A',
 				},
-				...(selectedPortfolio === 'AI Inventory'
-					? [
-							{
-								Key: 'Category',
-								Value: getClassLabel(projectData),
-							},
-					  ]
-					: []),
-				...(selectedPortfolio === 'AI Inventory'
-					? [
-							{
-								Key: 'Keywords',
-								Value: (
-									<div>
-										{projectData.keywords && projectData.keywords.length > 0
-											? projectData.keywords.map((keyword) => <p>{keyword}</p>)
-											: 'None'}
-									</div>
-								),
-							},
-					  ]
-					: []),
-				// {
-				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Obligations<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
-				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M` : 'N/A'
-				// },
-				// {
-				// 	Key: <div style={{ display: 'flex', alignItems: 'center' }}>Cumulative Expenditures<Tooltip title={'Metadata above reflects data at the BLI level'}><InfoOutlinedIcon style={{ margin: '-2px 6px' }} /></Tooltip></div>,
-				// 	Value: projectData.obligations && projectData.obligations[0] ? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M` : 'N/A'
-				// },
 			];
+
+			if (selectedPortfolio === 'AI Inventory') {
+				metadata.concat([
+					{
+						Key: 'Category',
+						Value: getClassLabel(projectData),
+					},
+					{
+						Key: 'Keywords',
+						Value: (
+							<div>
+								<ProjectKeywords keywords={projectData.keywords} />
+							</div>
+						),
+					},
+				]);
+			}
 
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
@@ -751,8 +765,8 @@ const cardHandler = {
 				toggledMore,
 				graphView,
 				cloneName,
-				setToggledMore = () => {},
-				closeGraphCard = () => {},
+				setToggledMore = emptyFunction,
+				closeGraphCard = emptyFunction,
 			} = props;
 
 			const { searchText, selectedPortfolio } = state;
@@ -821,15 +835,15 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: () => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: () => {
 			return '';
 		},
 
-		getDisplayTitle: (item) => {
+		getDisplayTitle: () => {
 			return '';
 		},
 	},
