@@ -73,45 +73,60 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 	}
 };
 
-const processQlikApps = (apps, streams) => {
-	const processedApps = [];
-	for (const app of apps) {
-		const shouldExclude = app.customProperties.some(
-			(property) =>
-				property.definition.name === QLIK_EXCLUDE_CUST_PROP_NAME &&
-				property.value === QLIK_EXCLUDE_CUST_PROP_VAL
-		);
+const determineIfExcluded = (app) => {
+	return app.customProperties.some(
+		(property) =>
+			property.definition.name === QLIK_EXCLUDE_CUST_PROP_NAME && property.value === QLIK_EXCLUDE_CUST_PROP_VAL
+	);
+};
 
-		if (!shouldExclude) {
-			const appsFullStreamData = _.find(streams, (stream) => {
-				return stream.id === app.stream.id;
-			});
-			const businessDomains = [];
-			app.stream.customProperties = [];
+const separateBusinessDomainsAndCustomProps = (customProperties = []) => {
+	const businessDomains = [];
+	const otherCustomProps = [];
 
-			for (const customProp of appsFullStreamData?.customProperties || []) {
-				if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
-					businessDomains.push(customProp.value);
-				} else {
-					app.stream.customProperties.push(customProp.value);
-				}
-			}
-
-			const appCustomProperties = [];
-
-			for (const customProp of app.customProperties) {
-				if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
-					businessDomains.push(customProp.value);
-				} else {
-					appCustomProperties.push(customProp.value);
-				}
-			}
-			app.customProperties = appCustomProperties;
-			app.businessDomains = businessDomains;
-			processedApps.push(app);
+	for (const customProp of customProperties) {
+		if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
+			businessDomains.push(customProp.value);
+		} else {
+			otherCustomProps.push(customProp.value);
 		}
 	}
-	return processedApps;
+
+	return { businessDomains, otherCustomProps };
+};
+
+const processQlikApps = (apps, streams) => {
+	try {
+		const processedApps = [];
+		for (const app of apps) {
+			if (!determineIfExcluded(app)) {
+				const appsFullStreamData = _.find(streams, (stream) => {
+					return stream.id === app.stream.id;
+				});
+				let allBusinessDomains = [];
+				app.stream.customProperties = [];
+
+				const { businessDomains: streamBDs, otherCustomProps: streamOtherProps } =
+					separateBusinessDomainsAndCustomProps(appsFullStreamData?.customProperties);
+
+				allBusinessDomains = allBusinessDomains.concat(streamBDs);
+				app.stream.customProperties = app.stream.customProperties.concat(streamOtherProps);
+
+				const { businessDomains: appBDs, otherCustomProps: appOtherProps } =
+					separateBusinessDomainsAndCustomProps(app.customProperties);
+
+				allBusinessDomains = allBusinessDomains.concat(appBDs);
+
+				app.customProperties = appOtherProps;
+				app.businessDomains = allBusinessDomains;
+				processedApps.push(app);
+			}
+		}
+		return processedApps;
+	} catch (err) {
+		logger.error(err, 'W290KC1');
+		throw err;
+	}
 };
 
 const getRequestConfigs = (params = {}, userid = QLIK_SYS_ACCOUNT) => {
