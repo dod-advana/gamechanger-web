@@ -320,7 +320,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleApplicationsPagination(state, dispatch) {
-		const results = this.handlePagination(state, state.applicationsSearchResults, 'applications');
+		const results = await this.handlePagination(state, state.applicationsSearchResults, 'applications');
 
 		if (results) {
 			setState(dispatch, {
@@ -330,7 +330,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDashboardsPagination(state, dispatch) {
-		const results = this.handlePagination(state, state.dashboardsSearchResults, 'dashboards');
+		const results = await this.handlePagination(state, state.dashboardsSearchResults, 'dashboards');
 
 		if (results) {
 			setState(dispatch, {
@@ -340,7 +340,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDataSourcesPagination(state, dispatch) {
-		const results = this.handlePagination(state, state.dataSourcesSearchResults, 'dataSources');
+		const results = await this.handlePagination(state, state.dataSourcesSearchResults, 'dataSources');
 
 		if (results) {
 			setState(dispatch, {
@@ -350,7 +350,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleDatabasesPagination(state, dispatch) {
-		const results = this.handlePagination(state, state.databasesSearchResults, 'databases');
+		const results = await this.handlePagination(state, state.databasesSearchResults, 'databases');
 
 		if (results) {
 			setState(dispatch, {
@@ -360,7 +360,7 @@ const GlobalSearchHandler = {
 	},
 
 	async handleModelsPagination(state, dispatch) {
-		const results = this.handlePagination(state, state.modelsSearchResults, 'models');
+		const results = await this.handlePagination(state, state.modelsSearchResults, 'models');
 
 		if (results) {
 			setState(dispatch, {

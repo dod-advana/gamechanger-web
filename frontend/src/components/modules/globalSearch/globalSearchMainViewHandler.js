@@ -294,6 +294,7 @@ const renderItems = (items, dispatch, itemCategory, stateCategoryName, categoryC
 										);
 										setState(dispatch, {
 											[stateCategoryName]: {
+												...items,
 												loading: true,
 												page: page,
 												pagination: true,
@@ -381,19 +382,19 @@ const getCardViewPanel = (props) => {
 
 const handlePagination = (state, dispatch, searchHandler) => {
 	if (searchHandler) {
-		if (state.applicationsPagination) {
+		if (state.applicationsSearchResults.pagination) {
 			searchHandler.handleApplicationsPagination(state, dispatch);
 		}
-		if (state.dashboardsPagination) {
+		if (state.dashboardsSearchResults.pagination) {
 			searchHandler.handleDashboardsPagination(state, dispatch);
 		}
-		if (state.dataSourcesPagination) {
+		if (state.dataSourcesSearchResults.pagination) {
 			searchHandler.handleDataSourcesPagination(state, dispatch);
 		}
-		if (state.databasesPagination) {
+		if (state.databasesSearchResults.pagination) {
 			searchHandler.handleDatabasesPagination(state, dispatch);
 		}
-		if (state.modelsPagination) {
+		if (state.modelsSearchResults.pagination) {
 			searchHandler.handleModelsPagination(state, dispatch);
 		}
 	}
@@ -458,8 +459,25 @@ const GlobalSearchMainViewHandler = (props) => {
 	}, [state.showFavorites, state.favorites]);
 
 	useEffect(() => {
-		handlePagination(state, dispatch, searchHandler);
-	}, [state, dispatch, searchHandler]);
+		// if pagination is true in any of the pagination values then true
+		const pagination =
+			state.applicationsSearchResults.pagination ||
+			state.dashboardsSearchResults.pagination ||
+			state.dataSourcesSearchResults.pagination ||
+			state.databasesSearchResults.pagination ||
+			state.modelsSearchResults.pagination;
+
+		if (pagination) handlePagination(state, dispatch, searchHandler);
+	}, [
+		state,
+		dispatch,
+		searchHandler,
+		state.applicationsSearchResults.pagination,
+		state.dashboardsSearchResults.pagination,
+		state.dataSourcesSearchResults.pagination,
+		state.databasesSearchResults.pagination,
+		state.modelsSearchResults.pagination,
+	]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {

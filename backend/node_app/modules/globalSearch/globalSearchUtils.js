@@ -69,7 +69,7 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ parsedQuery, plainQuery, offset, limit, operator = 'and' },
+	{ parsedQuery, offset, limit, operator = 'and', searchText },
 	userId,
 	logger
 ) => {
@@ -91,6 +91,11 @@ const getElasticSearchQueryForQlikApps = (
 								analyzer: 'standard',
 							},
 						},
+						{
+							match_phrase: {
+								name_s: searchText,
+							},
+						},
 					],
 				},
 			},
@@ -104,23 +109,6 @@ const getElasticSearchQueryForQlikApps = (
 
 		QLIK_ES_FIELDS.forEach((field) => {
 			query.highlight.fields[field] = {};
-		});
-
-		const wildcardList = {
-			id: 6,
-			name_s: 5,
-			streamName_s: 4,
-		};
-
-		Object.keys(wildcardList).forEach((wildCardKey) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[wildCardKey]: {
-						value: `*${plainQuery}*`,
-						boost: wildcardList[wildCardKey],
-					},
-				},
-			});
 		});
 
 		return query;
