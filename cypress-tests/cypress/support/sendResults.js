@@ -65,4 +65,8 @@ results.results.forEach((result) => {
   }
 });
 
-await axios.post(`?private_token=${GITLAB_CYPRESS_TOKEN}`, { body: message });
+axios
+  .post(`?private_token=${GITLAB_CYPRESS_TOKEN}`, { body: message })
+  .then(() => {
+    console.log("Successfully sent results to gitlab");
+  });
