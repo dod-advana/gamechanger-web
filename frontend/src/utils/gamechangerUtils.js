@@ -54,7 +54,7 @@ const processRow = (row) => {
 		if (row[j] instanceof Date) {
 			innerValue = row[j].toLocaleString();
 		}
-		var result = innerValue.replace(/"/g, '""');
+		let result = innerValue.replace(/"/g, '""');
 		if (result.search(/\("|,|\n\)/g) >= 0) result = '"' + result + '"';
 		if (j > 0) finalVal += ',';
 		finalVal += result;
@@ -87,16 +87,16 @@ export const exportToCsv = (filename, data, isJson = false) => {
 		csvFile += processRow(row);
 	});
 
-	var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+	const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
 	if (navigator.msSaveBlob) {
 		// IE 10+
 		navigator.msSaveBlob(blob, filename);
 	} else {
-		var link = document.createElement('a');
+		const link = document.createElement('a');
 		if (link.download !== undefined) {
 			// feature detection
 			// Browsers that support HTML5 download attribute
-			var url = URL.createObjectURL(blob);
+			const url = URL.createObjectURL(blob);
 			link.setAttribute('href', url);
 			link.setAttribute('download', filename);
 			link.style.visibility = 'hidden';
@@ -713,7 +713,7 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 		element.addEventListener('mouseup', function () {
 			const win = iframe.contentWindow;
 			const doc = win.document;
-			var text;
+			let text;
 
 			if (win.getSelection) {
 				text = win.getSelection().toString();
