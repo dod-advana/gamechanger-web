@@ -53,6 +53,14 @@ const getViewHeader = (state, dispatch, extras) => {
 		listView = false;
 	}
 
+	let disableFavoritesButton = true;
+
+	Object.keys(state.favorites || {}).forEach((key) => {
+		if (state.favorites[key].searchResults.length > 0) {
+			disableFavoritesButton = false;
+		}
+	});
+
 	return (
 		<div style={styles.showingResultsRow}>
 			{state.searchText && !dataLoading(extras) && (
@@ -103,7 +111,7 @@ const getViewHeader = (state, dispatch, extras) => {
 								textStyle={getHeaderStyles(state.showFavorites)['textStyle']}
 								buttonColor={getHeaderStyles(state.showFavorites)['buttonColor']}
 								borderColor={getHeaderStyles(state.showFavorites)['borderColor']}
-								disabled={!state.favorites}
+								disabled={disableFavoritesButton}
 							>
 								<div style={{ display: 'flex' }}>
 									<Typography
@@ -157,8 +165,9 @@ const handlePageLoad = async (props) => {
 
 	// Get User Favorites from home App
 	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
-		setState(dispatch, { favoriteApps: data.favorite_apps });
-		searchHandler.handleGetUserFavorites(data.favorite_apps, state).then((favorites) => {
+		const favoriteApps = data.favorite_apps || [];
+		setState(dispatch, { favoriteApps });
+		searchHandler.handleGetUserFavorites(favoriteApps, state).then((favorites) => {
 			setState(dispatch, { favorites });
 		});
 	});
