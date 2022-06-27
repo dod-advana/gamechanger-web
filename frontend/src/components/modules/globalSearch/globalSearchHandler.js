@@ -442,12 +442,12 @@ const GlobalSearchHandler = {
 				switch (type) {
 					case 'applications':
 					case 'dashboards':
-						if (favorite_apps.includes(item.id.toString())) {
+						if (favorite_apps?.includes(item.id.toString())) {
 							isFavorite = true;
 						}
 						break;
 					default:
-						if (favorite_apps.includes(item.resource.id.toString())) {
+						if (favorite_apps?.includes(item.resource.id.toString())) {
 							isFavorite = true;
 						}
 						break;
