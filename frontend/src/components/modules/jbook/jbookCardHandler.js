@@ -197,6 +197,206 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 	window.open(url);
 };
 
+const renderContracts = (contracts, length) => {
+	let contractElements = `<b>Contracts: ${contracts.length}</b>`;
+
+	let lengthOver = false;
+
+	for (let i = 0; i < contracts.length && i < 5; i++) {
+		const contract = contracts[i];
+		if (contractElements.length < length) {
+			const contractPiin = contract.piin_s ? `- ${contract.piin_s}` : '';
+			contractElements += `<br/><p>${contractPiin}</p>`;
+		} else {
+			lengthOver = true;
+		}
+	}
+
+	contractElements += lengthOver ? '...' : '';
+
+	return contractElements;
+};
+
+const renderAccomplishments = (accomplishments, length) => {
+	let accomplishmentElements = `<b>Accomplishments: ${accomplishments.length}</b>`;
+
+	let lengthOver = false;
+
+	for (let i = 0; i < accomplishments.length && i < 5; i++) {
+		const accomplishment = accomplishments[i];
+		if (accomplishmentElements.length < length) {
+			accomplishmentElements += `<br/><p>${
+				accomplishment.Accomp_Title_text_t ? `- ${accomplishment.Accomp_Title_text_t}` : ''
+			}</p>`;
+		} else {
+			lengthOver = true;
+		}
+	}
+
+	accomplishmentElements += lengthOver ? '...' : '';
+
+	return accomplishmentElements;
+};
+
+const renderPortfolioTags = (tags) => {
+	let tagElements = [];
+
+	try {
+		if (tags && tags.length) {
+			for (const tag of tags) {
+				tagElements.push(<StyledPill>{tag}</StyledPill>);
+			}
+		}
+	} catch (err) {
+		console.log('Error rendering portfolio tags');
+		console.log(err);
+	}
+
+	return tagElements;
+};
+
+const getItemPageHits = (item) => {
+	const pageHits = [
+		{
+			title: 'Project Description',
+			snippet: _.truncate(item.projectMissionDescription, { length: 150 }),
+		},
+	];
+
+	if (item.contracts) {
+		pageHits.push({
+			title: 'Contracts',
+			snippet: renderContracts(item.contracts, 180),
+		});
+	}
+
+	if (item.accomplishments) {
+		pageHits.push({
+			title: 'Accomplishments',
+			snippet: renderAccomplishments(item.accomplishments, 200),
+		});
+	}
+
+	return pageHits;
+};
+
+const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
+	if (item.pageHits && item.pageHits.length > 0) {
+		return (
+			<button
+				type="button"
+				className={'list-view-button'}
+				onClick={() => {
+					trackEvent(
+						getTrackingNameForFactory(clone_name),
+						'ListViewInteraction',
+						!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
+					);
+					setHitsExpanded(!hitsExpanded);
+				}}
+			>
+				<span className="buttonText">Details</span>
+				<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
+			</button>
+		);
+	} else return <></>;
+};
+
+const ExpandedHits = ({ hitsExpanded, item, hoveredHit, setHoveredHit, contextHtml }) => {
+	if (hitsExpanded) {
+		return (
+			<div className={'expanded-hits'}>
+				<div className={'page-hits'}>
+					{_.chain(item.pageHits)
+						.map((page, key) => {
+							return (
+								<div
+									className={'page-hit'}
+									key={key}
+									style={{
+										...(hoveredHit === key && {
+											backgroundColor: '#E9691D',
+											color: 'white',
+										}),
+									}}
+									onMouseEnter={() => setHoveredHit(key)}
+									onClick={(e) => {
+										e.preventDefault();
+									}}
+								>
+									<span>{page.title && <span>{page.title}</span>}</span>
+									<i
+										className="fa fa-chevron-right"
+										style={{
+											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+										}}
+									/>
+								</div>
+							);
+						})
+						.value()}
+				</div>
+				<div className={'expanded-metadata'}>
+					<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+				</div>
+			</div>
+		);
+	} else return <></>;
+};
+
+const ExpandedMetadata = ({ metadataExpanded, backBody }) => {
+	if (metadataExpanded) {
+		return (
+			<div className={'metadata'}>
+				<div className={'inner-scroll-container'}>{backBody}</div>
+			</div>
+		);
+	} else return <></>;
+};
+
+const ListViewFrontCardContent = ({
+	intelligentSearch,
+	item,
+	clone_name,
+	hitsExpanded,
+	setHitsExpanded,
+	hoveredHit,
+	setHoveredHit,
+	contextHtml,
+	toggleExpandMetadata,
+	metadataExpanded,
+	backBody,
+	intelligentFeedbackComponent,
+}) => {
+	return (
+		<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
+			<HitsExpandedButton
+				item={item}
+				clone_name={clone_name}
+				hitsExpanded={hitsExpanded}
+				setHitsExpanded={setHitsExpanded}
+			/>
+			<ExpandedHits
+				hitsExpanded={hitsExpanded}
+				item={item}
+				hoveredHit={hoveredHit}
+				setHoveredHit={setHoveredHit}
+				contextHtml={contextHtml}
+			/>
+			<div>
+				<button type="button" className={'list-view-button'} onClick={toggleExpandMetadata}>
+					<span className="buttonText">Document Metadata</span>
+					<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
+				</button>
+				<ExpandedMetadata metadataExpanded={metadataExpanded} backBody={backBody} />
+			</div>
+			{intelligentSearch && (
+				<div style={{ marginTop: '10px', marginBottom: '10px' }}> {intelligentFeedbackComponent()} </div>
+			)}
+		</StyledListViewFrontCardContent>
+	);
+};
+
 const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
@@ -329,64 +529,16 @@ const cardHandler = {
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
 			try {
-				const renderContracts = (contracts, length) => {
-					let contractElements = `<b>Contracts: ${contracts.length}</b>`;
-
-					let lengthOver = false;
-
-					for (let i = 0; i < contracts.length && i < 5; i++) {
-						const contract = contracts[i];
-						if (contractElements.length < length) {
-							contractElements += `<br/><p>${contract.piin_s ? `- ${contract.piin_s}` : ''}</p>`;
-						} else {
-							lengthOver = true;
-						}
-					}
-
-					contractElements += lengthOver ? '...' : '';
-
-					return contractElements;
+				const toggleExpandMetadata = () => {
+					trackEvent(
+						getTrackingNameForFactory(state.cloneData.clone_name),
+						'ListViewInteraction',
+						!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+					);
+					setMetadataExpanded(!metadataExpanded);
 				};
-
-				const renderAccomplishments = (accomplishments, length) => {
-					let accomplishmentElements = `<b>Accomplishments: ${accomplishments.length}</b>`;
-
-					let lengthOver = false;
-
-					for (let i = 0; i < accomplishments.length && i < 5; i++) {
-						const accomplishment = accomplishments[i];
-						if (accomplishmentElements.length < length) {
-							accomplishmentElements += `<br/><p>${
-								accomplishment.Accomp_Title_text_t ? `- ${accomplishment.Accomp_Title_text_t}` : ''
-							}</p>`;
-						} else {
-							lengthOver = true;
-						}
-					}
-
-					accomplishmentElements += lengthOver ? '...' : '';
-
-					return accomplishmentElements;
-				};
-
-				const renderPortfolioTags = (tags) => {
-					let tagElements = [];
-
-					try {
-						if (tags && tags.length) {
-							for (const tag of tags) {
-								tagElements.push(<StyledPill>{tag}</StyledPill>);
-							}
-						}
-					} catch (err) {
-						console.log('Error rendering portfolio tags');
-						console.log(err);
-					}
-
-					return tagElements;
-				};
-
 				// render the hover menu and options
+
 				if (
 					!state.searchText ||
 					state.searchText === null ||
@@ -394,26 +546,7 @@ const cardHandler = {
 					!item.pageHits ||
 					item.pageHits.length <= 0
 				) {
-					item.pageHits = [
-						{
-							title: 'Project Description',
-							snippet: _.truncate(item.projectMissionDescription, { length: 150 }),
-						},
-					];
-
-					if (item.contracts) {
-						item.pageHits.push({
-							title: 'Contracts',
-							snippet: renderContracts(item.contracts, 180),
-						});
-					}
-
-					if (item.accomplishments) {
-						item.pageHits.push({
-							title: 'Accomplishments',
-							snippet: renderAccomplishments(item.accomplishments, 200),
-						});
-					}
+					item.pageHits = getItemPageHits(item);
 				}
 
 				let hoveredSnippet = '';
@@ -425,162 +558,20 @@ const cardHandler = {
 
 				if (state.listView && !intelligentSearch) {
 					return (
-						<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-							{item.pageHits && item.pageHits.length > 0 && (
-								<button
-									type="button"
-									className={'list-view-button'}
-									onClick={() => {
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'ListViewInteraction',
-											!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
-										);
-										setHitsExpanded(!hitsExpanded);
-									}}
-								>
-									<span className="buttonText">Details</span>
-									<i
-										className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-										aria-hidden="true"
-									/>
-								</button>
-							)}
-							{hitsExpanded && (
-								<div className={'expanded-hits'}>
-									<div className={'page-hits'}>
-										{_.chain(item.pageHits)
-											.map((page, key) => {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-															// clickFn(item.filename, page.pageNumber);
-														}}
-													>
-														<span>{page.title && <span>{page.title}</span>}</span>
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											})
-											.value()}
-									</div>
-									<div className={'expanded-metadata'}>
-										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-									</div>
-								</div>
-							)}
-							<div>
-								<button
-									type="button"
-									className={'list-view-button'}
-									onClick={() => {
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'ListViewInteraction',
-											!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
-										);
-										setMetadataExpanded(!metadataExpanded);
-									}}
-								>
-									<span className="buttonText">Document Metadata</span>
-									<i
-										className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-										aria-hidden="true"
-									/>
-								</button>
-								{metadataExpanded && (
-									<div className={'metadata'}>
-										<div className={'inner-scroll-container'}>{backBody}</div>
-									</div>
-								)}
-							</div>
-						</StyledListViewFrontCardContent>
-					);
-				} else if (state.listView && intelligentSearch) {
-					return (
-						<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits)
-										.map((page, key) => {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-														// clickFn(item.filename, page.pageNumber);
-													}}
-												>
-													<span>{page.title && <span>{page.title}</span>}</span>
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
-							<button
-								type="button"
-								className={'list-view-button'}
-								onClick={() => {
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										'ListViewInteraction',
-										!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
-									);
-									setMetadataExpanded(!metadataExpanded);
-								}}
-							>
-								<span className="buttonText">Document Metadata</span>
-								<i
-									className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-									aria-hidden="true"
-								/>
-							</button>
-
-							{metadataExpanded && (
-								<div className={'metadata'}>
-									<div className={'inner-scroll-container'}>{backBody}</div>
-								</div>
-							)}
-
-							<div style={{ marginTop: '10px', marginBottom: '10px' }}>
-								{' '}
-								{intelligentFeedbackComponent()}{' '}
-							</div>
-						</StyledListViewFrontCardContent>
+						<ListViewFrontCardContent
+							intelligentSearch={intelligentSearch}
+							item={item}
+							clone_name={state.cloneData.clone_name}
+							hitsExpanded={hitsExpanded}
+							setHitsExpanded={setHitsExpanded}
+							hoveredHit={hoveredHit}
+							setHoveredHit={setHoveredHit}
+							contextHtml={contextHtml}
+							toggleExpandMetadata={toggleExpandMetadata}
+							metadataExpanded={metadataExpanded}
+							backBody={backBody}
+							intelligentFeedbackComponent={intelligentFeedbackComponent}
+						/>
 					);
 				} else {
 					return (
@@ -588,59 +579,15 @@ const cardHandler = {
 							<div className={'currents-as-of-div'}>
 								<div className={'current-text'}>{/*currentAsOfText*/}</div>
 							</div>
-							<div className={'hits-container'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits)
-										.map((page, key) => {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-														// clickFn(
-														// 	item.filename,
-														// 	state.cloneData.clone_name,
-														// 	state.searchText,
-														// 	page.pageNumber
-														// );
-													}}
-												>
-													{page.title && <span>{page.title}</span>}
-													{page.pageNumber && (
-														<span>
-															{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
-														</span>
-													)}
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote
-										className="searchdemo-blockquote"
-										dangerouslySetInnerHTML={{
-											__html: sanitizeHtml(contextHtml),
-										}}
-									/>
-								</div>
-							</div>
+							<ExpandedHits
+								hitsExpanded={hitsExpanded}
+								item={item}
+								hoveredHit={hoveredHit}
+								setHoveredHit={setHoveredHit}
+								contextHtml={contextHtml}
+							/>
 							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-								{review && review.primaryClassLabel && 'Tag:'}{' '}
+								{review && review.primaryClassLabel && 'Tag: '}
 								{renderPortfolioTags([review.primaryClassLabel])}
 							</div>
 						</StyledFrontCardContent>
