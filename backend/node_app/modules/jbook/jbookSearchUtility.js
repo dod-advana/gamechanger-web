@@ -532,7 +532,7 @@ class JBookSearchUtility {
 					contract_totals: {
 						aggs: {
 							sum_agg: {
-								sum: { field: 'by1BaseYear_d' },
+								sum: { field: 'currentYearAmount_d' },
 							},
 						},
 						terms: {
@@ -864,16 +864,16 @@ class JBookSearchUtility {
 					case 'maxBY1Funding':
 						const rangeQuery = {
 							range: {
-								by1BaseYear_d: {},
+								currentYearAmount_d: {},
 							},
 						};
 
 						if (jbookSearchSettings.minBY1Funding) {
-							rangeQuery.range.by1BaseYear_d.gte = jbookSearchSettings.minBY1Funding;
+							rangeQuery.range.currentYearAmount_d.gte = jbookSearchSettings.minBY1Funding;
 						}
 
 						if (jbookSearchSettings.maxBY1Funding) {
-							rangeQuery.range.by1BaseYear_d.lte = jbookSearchSettings.maxBY1Funding;
+							rangeQuery.range.currentYearAmount_d.lte = jbookSearchSettings.maxBY1Funding;
 						}
 
 						filterQueries.push(rangeQuery);
