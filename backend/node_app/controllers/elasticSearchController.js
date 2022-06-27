@@ -129,7 +129,7 @@ class ElasticSearchController {
 					dynamicColor_s: app['dynamicColor'],
 					appCustomProperties_s: app['customProperties'],
 					businessDomains_s: app['businessDomains'],
-					owner_s: app['owner']['name']
+					owner_s: app['owner']['name'],
 				};
 			});
 
