@@ -156,7 +156,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async setOrCreateReview(tmpReview, updateESReview_n) {
+	async setOrCreateReview(doc, tmpReview, updateESReview_n, portfolioName, id, userId) {
 		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 
 		// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
@@ -223,37 +223,37 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async getReviewerEmails(tmp) {
+	async getReviewerEmails(review) {
 		try {
 			// Add reviewer emails for primary secondary and service
 			let primaryReviewer;
 
-			if (tmp.primaryReviewer) {
+			if (review.primaryReviewer) {
 				primaryReviewer = await this.reviewer.findOne({
 					where: {
 						type: 'primary',
-						name: tmp.primaryReviewer.trim(),
+						name: review.primaryReviewer.trim(),
 					},
 					raw: true,
 				});
 			}
-			tmp.primaryReviewerEmail = primaryReviewer?.email || null;
+			review.primaryReviewerEmail = primaryReviewer?.email || null;
 
 			let serviceReviewer;
-			if (tmp.serviceReviewer) {
+			if (review.serviceReviewer) {
 				serviceReviewer = await this.reviewer.findOne({
 					where: {
 						type: 'service',
-						name: tmp.serviceReviewer ? tmp.serviceReviewer.split('(')[0].trim() : '',
+						name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : '',
 					},
 					raw: true,
 				});
 			}
-			tmp.serviceReviewerEmail = serviceReviewer?.email || null;
+			review.serviceReviewerEmail = serviceReviewer?.email || null;
 
 			let secondaryReviewer;
-			const secName = tmp.serviceSecondaryReviewer ? tmp.serviceSecondaryReviewer.split('(')[0].trim() : '';
-			if (tmp.serviceSecondaryReviewer) {
+			const secName = review.serviceSecondaryReviewer ? review.serviceSecondaryReviewer.split('(')[0].trim() : '';
+			if (review.serviceSecondaryReviewer) {
 				secondaryReviewer = await this.reviewer.findOne({
 					where: {
 						type: 'secondary',
@@ -262,16 +262,17 @@ class JBookDataHandler extends DataHandler {
 					raw: true,
 				});
 			}
-			tmp.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
+			review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
 		} catch (err) {
 			console.log('Error fetching reviewer emails');
 			console.log(err);
 		}
+		return review;
 	}
 
 	async parseESReviews(doc) {
 		for (let idx in doc.review_n) {
-			const tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
+			let tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
 
 			// If this only has portfolio id look up the portfolio and add the name
 			if (!tmp.portfolioName && tmp.portfolio_id_s) {
@@ -280,7 +281,7 @@ class JBookDataHandler extends DataHandler {
 			}
 
 			// get emails if possible
-			this.getReviewerEmails(tmp);
+			tmp = await this.getReviewerEmails(tmp);
 
 			doc.reviews[tmp.portfolioName] = tmp;
 		}
@@ -329,17 +330,18 @@ class JBookDataHandler extends DataHandler {
 
 			// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
 			if (portfolio) {
-				await this.setOrCreateReview(tmpReview, updateESReview_n);
+				await this.setOrCreateReview(doc, tmpReview, updateESReview_n, portfolioName, id, userId);
 			}
 
 			doc.reviews = {};
 
-			this.parseESReviews(doc);
+			await this.parseESReviews(doc);
 
 			delete doc.review_n;
 
 			return doc;
 		} catch (err) {
+			console.log(err);
 			this.logger.error(err, '6T0ILGP', userId);
 			return [];
 		}
@@ -378,7 +380,6 @@ class JBookDataHandler extends DataHandler {
 				where: query,
 			});
 
-			// console.log(review)
 			if (reviewData && reviewData.dataValues) {
 				// parse mission partners
 				if (reviewData.service_mp_list && typeof reviewData.service_mp_list === 'string') {
@@ -739,7 +740,6 @@ class JBookDataHandler extends DataHandler {
 				id,
 				userId
 			);
-			console.log(updated);
 
 			if (!updated) {
 				console.log('ES NOT UPDATED for REVIEW');
