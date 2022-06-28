@@ -24,7 +24,7 @@ const QLIK_ES_MAPPING = {
 	dynamicColor_s: { newName: 'dynamicColor' },
 };
 
-const getQlikApps = async (params = {}, userId, logger, getCount = false, getFull = false) => {
+const getQlikApps = async (userId, logger, getCount = false, getFull = false, params = {}) => {
 	try {
 		let url = `${QLIK_URL}/qrs/app`;
 
@@ -69,7 +69,7 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ searchText = '', parsedQuery, plainQuery, offset, limit, operator = 'and' },
+	{ parsedQuery, offset, limit, operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
@@ -91,6 +91,11 @@ const getElasticSearchQueryForQlikApps = (
 								analyzer: 'standard',
 							},
 						},
+						{
+							match_phrase: {
+								name_s: searchText,
+							},
+						},
 					],
 				},
 			},
@@ -102,25 +107,14 @@ const getElasticSearchQueryForQlikApps = (
 			},
 		};
 
+		if (isForFavorites) {
+			query.query = {
+				terms: { 'id.keyword': favoriteApps },
+			};
+		}
+
 		QLIK_ES_FIELDS.forEach((field) => {
 			query.highlight.fields[field] = {};
-		});
-
-		const wildcardList = {
-			id: 6,
-			name_s: 5,
-			streamName_s: 4,
-		};
-
-		Object.keys(wildcardList).forEach((wildCardKey) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[wildCardKey]: {
-						value: `*${plainQuery}*`,
-						boost: wildcardList[wildCardKey],
-					},
-				},
-			});
 		});
 
 		return query;
