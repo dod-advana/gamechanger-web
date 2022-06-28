@@ -197,9 +197,9 @@ class JBookSearchUtility {
 			Object.keys(hit.inner_hits).forEach((hitKey) => {
 				hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
 					Object.keys(innerHit.highlight).forEach((highlightKey) => {
-						if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+						if (Mappings.esTopLevelFieldsNameMapping[hitKey] !== undefined) {
 							pageHits.push({
-								title: esTopLevelFieldsNameMapping[hitKey],
+								title: Mappings.esTopLevelFieldsNameMapping[hitKey],
 								snippet: innerHit.highlight[highlightKey][0],
 							});
 						}
@@ -211,7 +211,7 @@ class JBookSearchUtility {
 		if (hit.highlight) {
 			Object.keys(hit.highlight).forEach((hitKey) => {
 				pageHits.push({
-					title: esTopLevelFieldsNameMapping[hitKey],
+					title: Mappings.esTopLevelFieldsNameMapping[hitKey],
 					snippet: hit.highlight[hitKey][0],
 				});
 			});
@@ -255,7 +255,7 @@ class JBookSearchUtility {
 
 				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
 
-				result.pageHits = getPageHits(hit);
+				result.pageHits = this.getPageHits(hit);
 
 				switch (result.budgetType) {
 					case 'rdte':
@@ -278,6 +278,7 @@ class JBookSearchUtility {
 
 			return searchResults;
 		} catch (e) {
+			console.log(e);
 			const { message } = e;
 			this.logger.error(message, '8V1IZLH', userId);
 			return results;
@@ -288,7 +289,7 @@ class JBookSearchUtility {
 		let result = {};
 		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
 
-		esInnerHitFields.forEach((innerField) => {
+		Mappings.esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
 		});
 
@@ -576,7 +577,7 @@ class JBookSearchUtility {
 				query.highlight.fields[field] = {};
 			});
 
-			esInnerHitFields.forEach((innerField) => {
+			Mappings.esInnerHitFields.forEach((innerField) => {
 				const nested = {
 					nested: {
 						path: innerField.path,
