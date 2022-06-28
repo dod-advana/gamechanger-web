@@ -2,10 +2,11 @@ const assert = require('assert');
 const JBookDataHandler = require('../../../node_app/modules/jbook/jbookDataHandler');
 const { constructorOptionsMock } = require('../../resources/testUtility');
 
-const { keywordData, esData, portfolioData } = require('../../resources/mockResponses/jbookMockData');
+const { keywordData, esData, portfolioData, reviewData } = require('../../resources/mockResponses/jbookMockData');
 
 describe('JBookDataHandler', function () {
 	describe('#getProjectData', () => {
+		let review = reviewData['pdoc'];
 		let keywords = keywordData['pdoc'];
 		let esReturn = esData['pdoc'];
 		let portfolios = portfolioData;
@@ -17,12 +18,12 @@ describe('JBookDataHandler', function () {
 				GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 				EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 			},
-			pdocs: {
+			pdoc: {
 				findAll() {
 					return Promise.resolve();
 				},
 			},
-			rdocs: {
+			rdoc: {
 				findAll() {
 					return Promise.resolve();
 				},
@@ -68,6 +69,14 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve([1]);
 				},
 			},
+			review: {
+				findAll() {
+					return Promise.resolve(review);
+				},
+			},
+			gl: {},
+			userRequest: {},
+			feedback: {},
 		};
 
 		it('should get the pdoc project data for ES', async (done) => {
@@ -131,6 +140,12 @@ describe('JBookDataHandler', function () {
 				pageHits: [],
 				classification: {},
 				reviews: {
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
 						id: 233170,
@@ -169,16 +184,11 @@ describe('JBookDataHandler', function () {
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
-					'Test AI Inventory': {
-						portfolioName: 'Test AI Inventory',
-						primaryReviewerEmail: null,
-						serviceReviewerEmail: null,
-						serviceSecondaryReviewerEmail: null,
-					},
 				},
 			};
+
 			const actual = await target.getESProjectData(req, 'Test');
-			assert.deepStrictEqual(actual, expected);
+			assert.deepEqual(actual, expected);
 			done();
 		});
 
