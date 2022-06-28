@@ -17,7 +17,7 @@ export default function PDFHighlighter({ highlights, scrollId, handleSave, saveA
 		}
 	};
 
-	let scrollViewerTo = (highlight) => {};
+	let scrollViewerTo = (_highlight) => null;
 
 	const getHighlightById = (id) => {
 		return highlights.find((highlight) => `${highlight.id}` === id);
@@ -29,7 +29,7 @@ export default function PDFHighlighter({ highlights, scrollId, handleSave, saveA
 				<PdfHighlighter
 					pdfDocument={pdfDocument}
 					enableAreaSelection={(event) => event.altKey}
-					onScrollChange={() => {}}
+					onScrollChange={() => null}
 					// pdfScaleValue="page-width"
 					scrollRef={(scrollTo) => {
 						scrollViewerTo = scrollTo;
@@ -85,7 +85,7 @@ export default function PDFHighlighter({ highlights, scrollId, handleSave, saveA
 						return (
 							<Popup
 								popupContent={<></>}
-								onMouseOver={(popupContent) => setTip(highlight, (highlight) => popupContent)}
+								onMouseOver={(popupContent) => setTip(highlight, (_highlight) => popupContent)}
 								onMouseOut={hideTip}
 								key={index}
 								children={component}
