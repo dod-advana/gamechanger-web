@@ -679,6 +679,127 @@ class JBookSearchUtility {
 		}
 	}
 
+	handleBudgetSubPrimaryReviewFilter(jbookSearchSettings) {
+		let shouldQuery = {
+			bool: {
+				should: [],
+			},
+		};
+		if (jbookSearchSettings.budgetSubActivity) {
+			shouldQuery.bool.should.push({
+				query_string: {
+					query: `*${jbookSearchSettings.budgetSubActivity}*`,
+					default_field: 'P40-13_BSA_Title_t',
+				},
+			});
+
+			shouldQuery.bool.should.push({
+				query_string: {
+					query: `*${jbookSearchSettings.budgetSubActivity}*`,
+					default_field: 'budgetActivityTitle_t',
+				},
+			});
+		}
+
+		if (jbookSearchSettings.primaryReviewStatus) {
+			jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+				if (status === 'Not Reviewed') {
+					shouldQuery.bool.should.push({
+						bool: {
+							must_not: [
+								{
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														term: {
+															'review_n.primary_review_status_s': 'Finished Review',
+														},
+													},
+													{
+														term: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+								{
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														term: {
+															'review_n.primary_review_status_s': 'Partial Review',
+														},
+													},
+													{
+														term: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+							],
+						},
+					});
+				} else {
+					shouldQuery.bool.should.push({
+						nested: {
+							path: 'review_n',
+							query: {
+								bool: {
+									must: [
+										{
+											match: {
+												'review_n.primary_review_status_s': status,
+											},
+										},
+										{
+											match: {
+												'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio,
+											},
+										},
+									],
+								},
+							},
+						},
+					});
+				}
+			});
+		}
+		return shouldQuery;
+	}
+
+	handleRangeFilter(jbookSearchSettings, min, max, field) {
+		const rangeQuery = {
+			range: {
+				[field]: {},
+			},
+		};
+
+		if (jbookSearchSettings[min]) {
+			totalCostRange.range[field].gte = jbookSearchSettings[min];
+		}
+
+		if (jbookSearchSettings[max]) {
+			totalCostRange.range[field].lte = jbookSearchSettings[max];
+		}
+
+		return rangeQuery;
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
@@ -725,110 +846,7 @@ class JBookSearchUtility {
 					// Budget Sub Activity
 					case 'budgetSubActivity':
 					case 'primaryReviewStatus':
-						let shouldQuery = {
-							bool: {
-								should: [],
-							},
-						};
-						if (jbookSearchSettings.budgetSubActivity) {
-							shouldQuery.bool.should.push({
-								query_string: {
-									query: `*${jbookSearchSettings.budgetSubActivity}*`,
-									default_field: 'P40-13_BSA_Title_t',
-								},
-							});
-
-							shouldQuery.bool.should.push({
-								query_string: {
-									query: `*${jbookSearchSettings.budgetSubActivity}*`,
-									default_field: 'budgetActivityTitle_t',
-								},
-							});
-						}
-
-						if (jbookSearchSettings.primaryReviewStatus) {
-							jbookSearchSettings.primaryReviewStatus.forEach((status) => {
-								if (status === 'Not Reviewed') {
-									shouldQuery.bool.should.push({
-										bool: {
-											must_not: [
-												{
-													nested: {
-														path: 'review_n',
-														query: {
-															bool: {
-																must: [
-																	{
-																		term: {
-																			'review_n.primary_review_status_s':
-																				'Finished Review',
-																		},
-																	},
-																	{
-																		term: {
-																			'review_n.portfolio_name_s':
-																				jbookSearchSettings.selectedPortfolio,
-																		},
-																	},
-																],
-															},
-														},
-													},
-												},
-												{
-													nested: {
-														path: 'review_n',
-														query: {
-															bool: {
-																must: [
-																	{
-																		term: {
-																			'review_n.primary_review_status_s':
-																				'Partial Review',
-																		},
-																	},
-																	{
-																		term: {
-																			'review_n.portfolio_name_s':
-																				jbookSearchSettings.selectedPortfolio,
-																		},
-																	},
-																],
-															},
-														},
-													},
-												},
-											],
-										},
-									});
-								} else {
-									shouldQuery.bool.should.push({
-										nested: {
-											path: 'review_n',
-											query: {
-												bool: {
-													must: [
-														{
-															match: {
-																'review_n.primary_review_status_s': status,
-															},
-														},
-														{
-															match: {
-																'review_n.portfolio_name_s':
-																	jbookSearchSettings.selectedPortfolio,
-															},
-														},
-													],
-												},
-											},
-										},
-									});
-								}
-							});
-						}
-
-						filterQueries.push(shouldQuery);
+						filterQueries.push(this.handleBudgetSubPrimaryReviewFilter(jbookSearchSettings));
 						break;
 
 					// MainAccount
@@ -844,41 +862,22 @@ class JBookSearchUtility {
 					// Total Funding
 					case 'minTotalCost':
 					case 'maxTotalCost':
-						const totalCostRange = {
-							range: {
-								totalCost_d: {},
-							},
-						};
-
-						if (jbookSearchSettings.minTotalCost) {
-							totalCostRange.range.totalCost_d.gte = jbookSearchSettings.minTotalCost;
-						}
-
-						if (jbookSearchSettings.maxTotalCost) {
-							totalCostRange.range.totalCost_d.lte = jbookSearchSettings.maxTotalCost;
-						}
-
-						filterQueries.push(totalCostRange);
+						filterQueries.push(
+							this.handleRangeFilter(jbookSearchSettings, 'minTotalCost', 'maxTotalCost', 'totalCost_d')
+						);
 						break;
 
 					// BY1 Funding
 					case 'minBY1Funding':
 					case 'maxBY1Funding':
-						const rangeQuery = {
-							range: {
-								currentYearAmount_d: {},
-							},
-						};
-
-						if (jbookSearchSettings.minBY1Funding) {
-							rangeQuery.range.currentYearAmount_d.gte = jbookSearchSettings.minBY1Funding;
-						}
-
-						if (jbookSearchSettings.maxBY1Funding) {
-							rangeQuery.range.currentYearAmount_d.lte = jbookSearchSettings.maxBY1Funding;
-						}
-
-						filterQueries.push(rangeQuery);
+						filterQueries.push(
+							this.handleRangeFilter(
+								jbookSearchSettings,
+								'minBY1Funding',
+								'maxBY1Funding',
+								'currentYearAmount_d'
+							)
+						);
 						break;
 
 					// Budget Type
