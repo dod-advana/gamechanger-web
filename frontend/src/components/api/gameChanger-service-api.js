@@ -90,6 +90,7 @@ const endpoints = {
 	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
+	getUserDashboard: '/api/gameChanger/admin/getUserDashboard',
 	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
@@ -791,7 +792,10 @@ export default class GameChangerAPI {
 		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, { params: body });
 	};
-
+	getUserDashboard = async (body) => {
+		const url = endpoints.getUserDashboard;
+		return axiosGET(this.axios, url, { params: body });
+	};
 	sendUserAggregations = async (body) => {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });
