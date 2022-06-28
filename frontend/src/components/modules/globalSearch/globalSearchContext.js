@@ -132,37 +132,41 @@ const initState = {
 
 	activeCategoryTab: 'all',
 
-	applicationsLoading: false,
-	applicationsPage: 1,
-	applicationsPagination: false,
-
-	dashboardsLoading: false,
-	dashboardsPage: 1,
-	dashboardsPagination: false,
-
-	dataSourcesLoading: false,
-	dataSourcesPage: 1,
-	dataSourcesPagination: false,
-
-	databasesLoading: false,
-	databasesPage: 1,
-	databasesPagination: false,
-
-	modelsLoading: false,
-	modelsPage: 1,
-	modelsPagination: false,
-
-	documentationLoading: false,
-	documentationPage: 1,
-	documentationPagination: false,
-
-	organizationsLoading: false,
-	organizationsPage: 1,
-	organizationsPagination: false,
-
-	servicesLoading: false,
-	servicesPage: 1,
-	servicesPagination: false,
+	applicationsSearchResults: {
+		searchResults: [],
+		loading: false,
+		totalCount: 0,
+		pagination: false,
+		page: 1,
+	},
+	dashboardsSearchResults: {
+		searchResults: [],
+		loading: false,
+		totalCount: 0,
+		pagination: false,
+		page: 1,
+	},
+	dataSourcesSearchResults: {
+		searchResults: [],
+		loading: false,
+		totalCount: 0,
+		pagination: false,
+		page: 1,
+	},
+	databasesSearchResults: {
+		searchResults: [],
+		loading: false,
+		totalCount: 0,
+		pagination: false,
+		page: 1,
+	},
+	modelsSearchResults: {
+		searchResults: [],
+		loading: false,
+		totalCount: 0,
+		pagination: false,
+		page: 1,
+	},
 };
 
 const init = (initialState) => {

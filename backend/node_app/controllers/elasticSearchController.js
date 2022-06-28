@@ -3,7 +3,6 @@ const constantsFile = require('../config/constants');
 const { ESSearchLib } = require('../lib/ESSearchLib');
 const asyncRedisLib = require('async-redis');
 const https = require('https');
-const constants = require('../config/constants');
 const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
@@ -40,7 +39,7 @@ class ElasticSearchController {
 		}
 	}
 
-	getESClientConfig({ user, password, ca, protocol, host, port, index, requestTimeout }) {
+	getESClientConfig({ user, password, ca, protocol, host, port, requestTimeout }) {
 		let config = {
 			node: {},
 		};
@@ -71,14 +70,14 @@ class ElasticSearchController {
 
 	async cacheStoreQlikApps() {
 		try {
-			await this.redisDB.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
 			const isReloading = await this.redisDB.get(CACHE_QLIK_RELOAD_KEY);
 			if (isReloading === CACHE_IS_RELOADING) {
 				throw new Error('Will not create qlik data cache - cache is already reloading');
 			}
 			this.logger.info('START qlik full app cache and ES storage');
 
-			const { data } = await getQlikApps(undefined, undefined, this.logger, false, true);
+			const { data } = await getQlikApps(undefined, this.logger, false, true, undefined);
 
 			await Promise.all([this.storeUpdateQlikAppsInES(data), this.cacheQlikApps(data)]);
 
@@ -142,7 +141,7 @@ class ElasticSearchController {
 		try {
 			this.logger.info('Caching Full Qlik Apps');
 			const respData = JSON.stringify(qlikApps);
-			await this.redisDB.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			await this.redisDB.select(this.constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
 			await this.redisDB.set('qlik-full-app-list', respData);
 			this.logger.info('Finished Caching Full Qlik Apps');
 		} catch (e) {
