@@ -1,14 +1,9 @@
 const PDOC = require('../../models').pdoc;
 const RDOC = require('../../models').rdoc;
 const OM = require('../../models').om;
-const ACCOMP = require('../../models').rdoc_accomp;
 const REVIEW = require('../../models').review;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc;
-const KEYWORD = require('../../models').keyword;
-const VENDORS = require('../../models').vendor;
 const USER_REQUEST = require('../../models').user_request;
-const GL_CONTRACTS = require('../../models').gl_contracts;
-const OBLIGATIONS = require('../../models').obligations_expenditures;
 const REVIEWER = require('../../models').reviewer;
 const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
@@ -36,19 +31,14 @@ class JBookDataHandler extends DataHandler {
 			pdoc = PDOC,
 			rdoc = RDOC,
 			om = OM,
-			accomp = ACCOMP,
 			review = REVIEW,
 			searchUtility = new SearchUtility(opts),
 			jbookSearchUtility = new JBookSearchUtility(opts),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
-			keyword = KEYWORD,
 			gl = GL,
 			db = DB,
-			vendors = VENDORS,
 			userRequest = USER_REQUEST,
-			gl_contracts = GL_CONTRACTS,
-			obligations = OBLIGATIONS,
 			reviewer = REVIEWER,
 			feedback = FEEDBACK_JBOOK,
 			jbook_classification = JBOOK_CLASSIFICATION,
@@ -61,19 +51,14 @@ class JBookDataHandler extends DataHandler {
 		this.pdocs = pdoc;
 		this.rdocs = rdoc;
 		this.om = om;
-		this.accomp = accomp;
 		this.rev = review;
 		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 		this.constants = constants;
 		this.gl = gl;
 		this.keyword_assoc = keyword_assoc;
-		this.keyword = keyword;
 		this.db = db;
-		this.vendors = vendors;
 		this.userRequest = userRequest;
-		this.gl_contracts = gl_contracts;
-		this.obligations = obligations;
 		this.reviewer = reviewer;
 		this.feedback = feedback;
 		this.portfolio = portfolio;
@@ -122,76 +107,204 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async setDocClassification(doc) {
+		// classification
+		try {
+			let classification;
+
+			switch (doc.budgetType) {
+				case 'pdoc':
+					classification = await this.jbook_classification.findOne({
+						where: {
+							'P40-01_LI_Number': doc.budgetLineItem,
+							budgetYear: doc.budgetYear,
+							docType: 'pdoc',
+						},
+					});
+					break;
+				case 'rdoc':
+					classification = await this.jbook_classification.findOne({
+						where: {
+							PE_Num: doc.programElement,
+							Proj_Number: doc.projectNum,
+							budgetYear: doc.budgetYear,
+							docType: 'rdoc',
+						},
+					});
+					break;
+				case 'om':
+					classification = await this.jbook_classification.findOne({
+						where: {
+							line_number: doc.budgetLineItem,
+							sag_bli: doc.programElement,
+							budgetYear: doc.budgetYear,
+							docType: 'om',
+						},
+					});
+					break;
+				default:
+					break;
+			}
+
+			// CLASSIFICATION
+			if (classification?.dataValues) {
+				doc.classification = classification.dataValues;
+			}
+		} catch (e) {
+			console.log('error getting classification');
+			console.log(e);
+		}
+	}
+
+	async setOrCreateReview(doc, tmpReview, updateESReview_n, portfolioName, id, userId) {
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+
+		// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
+		if (!tmpReview) {
+			updateESReview_n = true;
+			const tmpData = _.clone(doc);
+			const currentYear = new Date().getFullYear();
+			tmpData.budgetYear = (parseInt(currentYear) - 1).toString();
+			const oldReview = await this.getReviewData(tmpData);
+			if (Object.keys(oldReview).length !== 0) {
+				oldReview.budget_year = doc.budgetYear;
+				oldReview.review_status = 'Needs Review';
+				oldReview.primary_review_status = 'Needs Review';
+				oldReview.service_review_status = 'Needs Review';
+				oldReview.poc_review_status = 'Needs Review';
+				oldReview.portfolio_name = portfolioName;
+				tmpReview = oldReview;
+				delete tmpReview.id;
+				delete tmpReview.primary_reviewer;
+				delete tmpReview.service_reviewer;
+				delete tmpReview.service_secondary_reviewer;
+				delete tmpReview.service_secondary_reviewer;
+				delete tmpReview.service_poc_email;
+				delete tmpReview.service_poc_name;
+				delete tmpReview.service_poc_org;
+				delete tmpReview.service_poc_title;
+				delete tmpReview.service_poc_phone_number;
+				delete tmpReview.alternate_poc_email;
+				delete tmpReview.alternate_poc_name;
+				delete tmpReview.alternate_poc_org;
+				delete tmpReview.alternate_poc_title;
+				delete tmpReview.alternate_poc_phone_number;
+				delete tmpReview.createdAt;
+				delete tmpReview.updatedAt;
+
+				// Now create the entry in PG
+				const newReview = await this.rev.create(tmpReview);
+				tmpReview = newReview['dataValues'];
+				tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
+			}
+		} else {
+			tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
+		}
+
+		if (tmpReview) {
+			doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
+			if (!tmpReview.portfolio_name_s) {
+				tmpReview.portfolio_name_s = portfolioName;
+				updateESReview_n = true;
+			}
+		}
+
+		if (updateESReview_n) {
+			const updated = await this.dataLibrary.updateDocument(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				{ review_n: doc.review_n },
+				id,
+				userId
+			);
+			if (!updated) {
+				console.log(updated);
+			}
+		}
+	}
+
+	async getReviewerEmails(review) {
+		try {
+			// Add reviewer emails for primary secondary and service
+			let primaryReviewer;
+
+			if (review.primaryReviewer) {
+				primaryReviewer = await this.reviewer.findOne({
+					where: {
+						type: 'primary',
+						name: review.primaryReviewer.trim(),
+					},
+					raw: true,
+				});
+			}
+			review.primaryReviewerEmail = primaryReviewer?.email || null;
+
+			let serviceReviewer;
+			if (review.serviceReviewer) {
+				serviceReviewer = await this.reviewer.findOne({
+					where: {
+						type: 'service',
+						name: review.serviceReviewer ? review.serviceReviewer.split('(')[0].trim() : '',
+					},
+					raw: true,
+				});
+			}
+			review.serviceReviewerEmail = serviceReviewer?.email || null;
+
+			let secondaryReviewer;
+			const secName = review.serviceSecondaryReviewer ? review.serviceSecondaryReviewer.split('(')[0].trim() : '';
+			if (review.serviceSecondaryReviewer) {
+				secondaryReviewer = await this.reviewer.findOne({
+					where: {
+						type: 'secondary',
+						name: secName,
+					},
+					raw: true,
+				});
+			}
+			review.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
+		} catch (err) {
+			console.log('Error fetching reviewer emails');
+			console.log(err);
+		}
+		return review;
+	}
+
+	async parseESReviews(doc) {
+		for (let idx in doc.review_n) {
+			let tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
+
+			// If this only has portfolio id look up the portfolio and add the name
+			if (!tmp.portfolioName && tmp.portfolio_id_s) {
+				const tmpPortfolio = await this.getPortfolio({ body: { id: parseInt(tmp.portfolio_id_s) } }, userId);
+				tmp.portfolioName = tmpPortfolio?.name || '';
+			}
+
+			// get emails if possible
+			tmp = await this.getReviewerEmails(tmp);
+
+			doc.reviews[tmp.portfolioName] = tmp;
+		}
+	}
+
 	async getESProjectData(req, userId) {
 		try {
 			const { id, portfolioName } = req.body;
 
-			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
-
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
-			// classification
-			try {
-				let classification;
-
-				switch (doc.budgetType) {
-					case 'pdoc':
-						classification = await this.jbook_classification.findOne({
-							where: {
-								'P40-01_LI_Number': doc.budgetLineItem,
-								budgetYear: doc.budgetYear,
-								docType: 'pdoc',
-							},
-						});
-						break;
-					case 'rdoc':
-						classification = await this.jbook_classification.findOne({
-							where: {
-								PE_Num: doc.programElement,
-								Proj_Number: doc.projectNum,
-								budgetYear: doc.budgetYear,
-								docType: 'rdoc',
-							},
-						});
-						break;
-					case 'om':
-						classification = await this.jbook_classification.findOne({
-							where: {
-								line_number: doc.budgetLineItem,
-								sag_bli: doc.programElement,
-								budgetYear: doc.budgetYear,
-								docType: 'om',
-							},
-						});
-						break;
-					default:
-						break;
-				}
-
-				// CLASSIFICATION
-				if (classification && classification.dataValues) {
-					try {
-						doc.classification = classification.dataValues;
-					} catch (e) {
-						console.log('Error fetching classification');
-						console.log(e);
-					}
-				}
-			} catch (e) {
-				console.log('error getting classification');
-				console.log(e);
-			}
+			await this.setDocClassification(doc);
 
 			// Only return a review for the current portfolio
 			let tmpReview;
-
 			let updateESReview_n = false;
-			if (doc.review_n && Array.isArray(doc.review_n)) {
+
+			if (Array.isArray(doc?.review_n)) {
 				const tmpReview_n = [];
 				doc.review_n.forEach((review) => {
 					if (
 						review['portfolio_name_s'] === portfolioName ||
-						(portfolio && portfolio !== null && review['portfolio_id_s'] === portfolio?.id.toString())
+						review['portfolio_id_s'] === portfolio?.id?.toString()
 					) {
 						tmpReview = review;
 					} else {
@@ -199,10 +312,10 @@ class JBookDataHandler extends DataHandler {
 					}
 				});
 				doc.review_n = tmpReview_n;
-			} else if (doc.review_n && doc.review_n.constructor === Object) {
+			} else if (doc?.review_n?.constructor === Object) {
 				if (
 					doc.review_n?.portfolio_name_s === portfolioName ||
-					(portfolio && portfolio !== null && doc.review_n?.portfolio_id_s === portfolio?.id.toString())
+					doc.review_n?.portfolio_id_s === portfolio?.id?.toString()
 				) {
 					tmpReview = doc.review_n;
 					doc.review_n = [];
@@ -210,148 +323,25 @@ class JBookDataHandler extends DataHandler {
 					doc.review_n = [doc.review_n];
 				}
 				updateESReview_n = true;
-			} else if (!doc.review_n || doc.review_n === null) {
-				doc.review_n = [];
-				updateESReview_n = true;
 			} else {
 				doc.review_n = [];
 				updateESReview_n = true;
 			}
 
-			if (portfolio && portfolio !== null) {
-				// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
-				if (!tmpReview) {
-					updateESReview_n = true;
-					const tmpData = _.clone(doc);
-					const currentYear = new Date().getFullYear();
-					tmpData.budgetYear = (parseInt(currentYear) - 1).toString();
-					const oldReview = await this.getReviewData(tmpData);
-					if (Object.keys(oldReview).length === 0) {
-						// console.log('TEMPDATA');
-						// console.log(tmpData);
-					} else {
-						oldReview.budget_year = doc.budgetYear;
-						oldReview.review_status = 'Needs Review';
-						oldReview.primary_review_status = 'Needs Review';
-						oldReview.service_review_status = 'Needs Review';
-						oldReview.poc_review_status = 'Needs Review';
-						oldReview.portfolio_name = portfolioName;
-						tmpReview = oldReview;
-						delete tmpReview.id;
-						delete tmpReview.primary_reviewer;
-						delete tmpReview.service_reviewer;
-						delete tmpReview.service_secondary_reviewer;
-						delete tmpReview.service_secondary_reviewer;
-						delete tmpReview.service_poc_email;
-						delete tmpReview.service_poc_name;
-						delete tmpReview.service_poc_org;
-						delete tmpReview.service_poc_title;
-						delete tmpReview.service_poc_phone_number;
-						delete tmpReview.alternate_poc_email;
-						delete tmpReview.alternate_poc_name;
-						delete tmpReview.alternate_poc_org;
-						delete tmpReview.alternate_poc_title;
-						delete tmpReview.alternate_poc_phone_number;
-						delete tmpReview.createdAt;
-						delete tmpReview.updatedAt;
-
-						// Now create the entry in PG
-						const newReview = await this.rev.create(tmpReview);
-						tmpReview = newReview['dataValues'];
-						tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'review', true);
-					}
-				} else {
-					tmpReview = this.jbookSearchUtility.parseFields(tmpReview, false, 'reviewES', true);
-				}
-
-				if (tmpReview && !tmpReview.portfolio_name_s) {
-					tmpReview.portfolio_name_s = portfolioName;
-					updateESReview_n = true;
-				}
-				if (tmpReview) {
-					doc.review_n.push(this.jbookSearchUtility.parseFields(tmpReview, true, 'reviewES', true));
-				}
-
-				if (updateESReview_n) {
-					const updated = await this.dataLibrary.updateDocument(
-						clientObj.esClientName,
-						clientObj.esIndex,
-						{ review_n: doc.review_n },
-						id,
-						userId
-					);
-					if (!updated) {
-						console.log('ES NOT UPDATED for REVIEW');
-					}
-				}
+			// If no review then look for one from the year prior, if nothing then create a empty one for this portfolio
+			if (portfolio) {
+				await this.setOrCreateReview(doc, tmpReview, updateESReview_n, portfolioName, id, userId);
 			}
 
 			doc.reviews = {};
-			for (let idx in doc.review_n) {
-				const tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
 
-				// If this only has portfolio id look up the portfolio and add the name
-				if (!tmp.portfolioName && tmp.portfolio_id_s) {
-					const tmpPortfolio = await this.getPortfolio(
-						{ body: { id: parseInt(tmp.portfolio_id_s) } },
-						userId
-					);
-					tmp.portfolioName = tmpPortfolio?.name || '';
-				}
-
-				// Get emails if they exist
-				try {
-					// Add reviewer emails for primary secondary and service
-					let primaryReviewer;
-
-					if (tmp.primaryReviewer) {
-						primaryReviewer = await this.reviewer.findOne({
-							where: {
-								type: 'primary',
-								name: tmp.primaryReviewer.trim(),
-							},
-							raw: true,
-						});
-					}
-					tmp.primaryReviewerEmail = primaryReviewer?.email || null;
-
-					let serviceReviewer;
-					if (tmp.serviceReviewer) {
-						serviceReviewer = await this.reviewer.findOne({
-							where: {
-								type: 'service',
-								name: tmp.serviceReviewer ? tmp.serviceReviewer.split('(')[0].trim() : '',
-							},
-							raw: true,
-						});
-					}
-					tmp.serviceReviewerEmail = serviceReviewer?.email || null;
-
-					let secondaryReviewer;
-					const secName = tmp.serviceSecondaryReviewer
-						? tmp.serviceSecondaryReviewer.split('(')[0].trim()
-						: '';
-					if (tmp.serviceSecondaryReviewer) {
-						secondaryReviewer = await this.reviewer.findOne({
-							where: {
-								type: 'secondary',
-								name: secName,
-							},
-							raw: true,
-						});
-					}
-					tmp.serviceSecondaryReviewerEmail = secondaryReviewer?.email || null;
-				} catch (err) {
-					console.log('Error fetching reviewer emails');
-					console.log(err);
-				}
-				doc.reviews[tmp.portfolioName] = tmp;
-			}
+			await this.parseESReviews(doc);
 
 			delete doc.review_n;
 
 			return doc;
 		} catch (err) {
+			console.log(err);
 			this.logger.error(err, '6T0ILGP', userId);
 			return [];
 		}
@@ -390,12 +380,11 @@ class JBookDataHandler extends DataHandler {
 				where: query,
 			});
 
-			// console.log(review)
 			if (reviewData && reviewData.dataValues) {
 				// parse mission partners
 				if (reviewData.service_mp_list && typeof reviewData.service_mp_list === 'string') {
 					reviewData.service_mp_list = reviewData.service_mp_list
-						.replace(/\[|\]|\\/g, '')
+						.replace(/[\[\]\\]/g, '')
 						.split(';')
 						.join('|');
 				}
@@ -409,24 +398,8 @@ class JBookDataHandler extends DataHandler {
 		return review;
 	}
 
-	async getBudgetDropdownData(req, userId) {
+	async getBudgetDropdownData(userId) {
 		try {
-			// const reviewers = await this.pdocs.findAll({
-			//     attributes: [Sequelize.fn('DISTINCT', Sequelize.col('reviewer')), 'reviewer']
-			// });
-
-			// const coreAILabel = await this.pdocs.findAll({
-			//     attributes: [Sequelize.fn('DISTINCT', Sequelize.col('core_ai_label')), 'core_ai_label']
-			// });
-
-			// const serviceReviewer = await this.pdocs.findAll({
-			//     attributes: [Sequelize.fn('DISTINCT', Sequelize.col('service_review')), 'service_review']
-			// });
-
-			// const reviewStat = await this.pdocs.findAll({
-			//     attributes: [Sequelize.fn('DISTINCT', Sequelize.col('jaic_review_stat')), 'jaic_review_stat']
-			// });
-
 			let transitionPartnerP;
 			let transitionPartnerR;
 			let transitionPartnerO;
@@ -465,10 +438,6 @@ class JBookDataHandler extends DataHandler {
 			];
 			transitionPartner.sort();
 			transitionPartner.push('Unknown');
-
-			// const missionPartners = await this.pdocs.findAll({
-			//     attributes: [Sequelize.fn('DISTINCT', Sequelize.col('current_msn_part')), 'current_msn_part']
-			// });
 
 			const reviewers = await this.reviewer.findAll({
 				where: {
@@ -532,6 +501,49 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	checkReviewerPermissions(permissions) {
+		if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
+			if (
+				(reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) ||
+				(reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) ||
+				(reviewType === 'poc' && !permissions.includes('JBOOK POC Reviewer'))
+			) {
+				throw new Error('Unauthorized');
+			}
+		}
+	}
+
+	updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName) {
+		// Review Status Update logic
+		if (!isSubmit) {
+			frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
+		} else {
+			frontendReviewData[reviewType + 'ReviewStatus'] = 'Finished Review';
+		}
+
+		// Review Status Update logic
+		const { primaryReviewStatus, serviceReviewStatus, pocReviewStatus } = frontendReviewData;
+		let status = '';
+		if (
+			(primaryReviewStatus === 'Finished Review' &&
+				serviceReviewStatus === 'Finished Review' &&
+				pocReviewStatus === 'Finished Review') ||
+			(isSubmit && portfolioName !== 'AI Inventory')
+		) {
+			status = 'Finished Review';
+		} else if (primaryReviewStatus === 'Finished Review' && serviceReviewStatus === 'Finished Review') {
+			status = 'Partial Review (POC)';
+		} else if (primaryReviewStatus === 'Finished Review') {
+			status = 'Partial Review (Service)';
+		} else if (primaryReviewStatus === 'Partial Review') {
+			status = 'Partial Review (Primary)';
+		} else {
+			status = 'Needs Review';
+		}
+
+		frontendReviewData['reviewStatus'] = status;
+	}
+
 	async storeBudgetReview(req, userId) {
 		try {
 			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
@@ -540,47 +552,10 @@ class JBookDataHandler extends DataHandler {
 			let wasUpdated = false;
 
 			// check permissions
-			if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
-				if (reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) {
-					throw 'Unauthorized';
-				} else if (reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) {
-					throw 'Unauthorized';
-				} else if (reviewType === 'poc' && !permissions.includes('JBOOK POC Reviewer')) {
-					throw 'Unauthorized';
-				}
-			}
+			this.checkReviewerPermissions(permissions);
 
-			// Review Status Update logic
-			if (!isSubmit) {
-				frontendReviewData[reviewType + 'ReviewStatus'] = 'Partial Review';
-			} else {
-				frontendReviewData[reviewType + 'ReviewStatus'] = 'Finished Review';
-			}
-
-			// Review Status Update logic
-			const { primaryReviewStatus, serviceReviewStatus, pocReviewStatus } = frontendReviewData;
-			let status = '';
-			if (primaryReviewStatus === 'Finished Review') {
-				if (serviceReviewStatus === 'Finished Review') {
-					if (pocReviewStatus === 'Finished Review') {
-						status = 'Finished Review';
-					} else {
-						status = 'Partial Review (POC)';
-					}
-				} else {
-					status = 'Partial Review (Service)';
-				}
-			} else if (primaryReviewStatus === 'Partial Review') {
-				status = 'Partial Review (Primary)';
-			} else {
-				status = 'Needs Review';
-			}
-
-			if (isSubmit && portfolioName !== 'AI Inventory') {
-				status = 'Finished Review';
-			}
-
-			frontendReviewData['reviewStatus'] = status;
+			// Review Status Update
+			this.updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName);
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 			const tmpId = reviewData.id;
@@ -608,7 +583,7 @@ class JBookDataHandler extends DataHandler {
 			let newOrUpdatedReview;
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
-				// console.log(reviewData);
+
 				const newReview = await this.rev.create(reviewData);
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
@@ -637,12 +612,12 @@ class JBookDataHandler extends DataHandler {
 			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
-			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+			const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
 			let esReviews = [];
 			if (doc.review_n && Array.isArray(doc.review_n)) {
 				esReviews = doc.review_n;
-			} else if (doc.review_n && doc.review_n !== null) {
+			} else if (doc.review_n) {
 				esReviews = [doc.review_n];
 			} else {
 				esReviews = [];
@@ -668,51 +643,6 @@ class JBookDataHandler extends DataHandler {
 			if (!updated) {
 				console.log('ES NOT UPDATED for REVIEW');
 			}
-
-			// If Submitting and POC info added email them letting them know.
-			// if (isSubmit && reviewType === 'service') {
-			// 	const info = await this.sendPOCEmail(
-			// 		userId,
-			// 		reviewData.service_poc_name,
-			// 		reviewData.service_poc_email,
-			// 		reviewData.service_poc_org,
-			// 		reviewData.poc_phone_number,
-			// 		false
-			// 	);
-			// }
-
-			// if (!isSubmit && reviewType === 'service') {
-			// 	if (reviewData.service_secondary_reviewer && reviewData.service_secondary_reviewer !== null) {
-			// 		const secondaryReviewer = await this.reviewer.findOne({
-			// 			where: {
-			// 				type: 'secondary',
-			// 				name: reviewData.service_secondary_reviewer.split('(')[0].trim(),
-			// 			},
-			// 			raw: true,
-			// 		});
-			//
-			// 		if (secondaryReviewer) {
-			// 			const serviceInfo = await this.sendServiceEmail(
-			// 				userId,
-			// 				reviewData.service_secondary_reviewer,
-			// 				secondaryReviewer.email,
-			// 				secondaryReviewer.organization,
-			// 				secondaryReviewer.phone_number
-			// 			);
-			// 		}
-			// 	}
-			// }
-
-			// if (!isSubmit && reviewType === 'poc') {
-			// 	const info = await this.sendPOCEmail(
-			// 		userId,
-			// 		reviewData.alternate_poc_name,
-			// 		reviewData.alternate_poc_email,
-			// 		reviewData.alternate_poc_org,
-			// 		reviewData.alternate_poc_phone_number,
-			// 		true
-			// 	);
-			// }
 
 			return { created: wasUpdated && updated };
 		} catch (err) {
@@ -782,7 +712,7 @@ class JBookDataHandler extends DataHandler {
 			let tmpPGToES = this.jbookSearchUtility.parseFields(review, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
-			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+			const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
 			let esReviews = [];
 			if (doc.review_n && Array.isArray(doc.review_n)) {
@@ -795,9 +725,9 @@ class JBookDataHandler extends DataHandler {
 
 			// Find if there already is a review in esReviews for this portfolio if so then replace if not add
 			const newReviews = [];
-			esReviews.forEach((review) => {
-				if (review.portfolio_name_s !== portfolioName) {
-					newReviews.push(review);
+			esReviews.forEach((esReview) => {
+				if (esReview.portfolio_name_s !== portfolioName) {
+					newReviews.push(esReview);
 				}
 			});
 			newReviews.push(tmpPGToES);
@@ -810,7 +740,6 @@ class JBookDataHandler extends DataHandler {
 				id,
 				userId
 			);
-			console.log(updated);
 
 			if (!updated) {
 				console.log('ES NOT UPDATED for REVIEW');
@@ -835,89 +764,60 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getReviewer(jbookSearchSettings, email, type) {
+		let reviewer = await this.reviewer.findOne({
+			where: {
+				type: type,
+				email: email,
+			},
+			raw: true,
+		});
+
+		if (reviewer) {
+			reviewer = `${reviewer.name}${reviewer.organization?.length > 1 ? '(' + reviewer.organization + ')' : ''}`;
+
+			switch (type) {
+				case 'primary':
+					jbookSearchSettings[type + 'ReviewerForUserDash'] = reviewer;
+					break;
+				case 'service':
+					jbookSearchSettings[type + 'ReviewerForUserDash'] = [reviewer];
+					break;
+				case 'secondary':
+					if (jbookSearchSettings.hasOwnProperty(serviceReviewer)) {
+						jbookSearchSettings['serviceReviewerForUserDash'].push(reviewer);
+					} else {
+						jbookSearchSettings['serviceReviewerForUserDash'] = [reviewer];
+					}
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+	async setJbookSearchSettingReviewers(permissions, email, jbookSearchSettings) {
+		if (permissions.primary) {
+			await this.getReviewer(jbookSearchSettings, email, 'primary');
+		}
+
+		if (permissions.service) {
+			await this.getReviewer(jbookSearchSettings, email, 'service');
+
+			await this.getReviewer(jbookSearchSettings, email, 'secondary');
+		}
+
+		if (permissions.poc) {
+			jbookSearchSettings['pocReviewerEmailForUserDash'] = email;
+		}
+	}
+
 	async getUserSpecificReviews(req, userId) {
 		try {
 			const { permissions, email } = req.body;
 
-			let primaryReviewer;
-			let serviceReviewer;
-			let secondaryReviewer;
-
 			const jbookSearchSettings = {};
-
-			if (permissions.primary) {
-				primaryReviewer = await this.reviewer.findOne({
-					where: {
-						type: 'primary',
-						email: email,
-					},
-					raw: true,
-				});
-
-				if (primaryReviewer !== null) {
-					primaryReviewer = `${primaryReviewer.name}${
-						primaryReviewer.organization &&
-						primaryReviewer.organization.length &&
-						primaryReviewer.organization.length > 1
-							? ` (${primaryReviewer.organization})`
-							: ''
-					}`;
-				}
-			}
-
-			if (permissions.service) {
-				serviceReviewer = await this.reviewer.findOne({
-					where: {
-						type: 'service',
-						email: email,
-					},
-					raw: true,
-				});
-				if (serviceReviewer !== null) {
-					serviceReviewer = `${serviceReviewer.name}${
-						serviceReviewer.organization &&
-						serviceReviewer.organization.length &&
-						serviceReviewer.organization.length > 1
-							? ` (${serviceReviewer.organization})`
-							: ''
-					}`;
-				}
-
-				secondaryReviewer = await this.reviewer.findOne({
-					where: {
-						type: 'secondary',
-						email: email,
-					},
-					raw: true,
-				});
-				if (secondaryReviewer !== null) {
-					secondaryReviewer = `${secondaryReviewer.name}${
-						secondaryReviewer.organization &&
-						secondaryReviewer.organization.length &&
-						secondaryReviewer.organization.length > 1
-							? ` (${secondaryReviewer.organization})`
-							: ''
-					}`;
-				}
-			}
-
-			if (primaryReviewer && primaryReviewer !== null) {
-				jbookSearchSettings['primaryReviewerForUserDash'] = primaryReviewer;
-			}
-
-			if (serviceReviewer && serviceReviewer !== null) {
-				jbookSearchSettings['serviceReviewerForUserDash'] = [serviceReviewer];
-			}
-
-			if (secondaryReviewer && secondaryReviewer !== null) {
-				if (jbookSearchSettings.hasOwnProperty(serviceReviewer))
-					jbookSearchSettings['serviceReviewerForUserDash'].push(secondaryReviewer);
-				else jbookSearchSettings['serviceReviewerForUserDash'] = [secondaryReviewer];
-			}
-
-			if (permissions.poc) {
-				jbookSearchSettings['pocReviewerEmailForUserDash'] = email;
-			}
+			this.setJbookSearchSettingReviewers(permissions, email, jbookSearchSettings);
 
 			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
 			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQueryForUserDash(jbookSearchSettings);
@@ -952,19 +852,9 @@ class JBookDataHandler extends DataHandler {
 	async getContractTotals(req, userId) {
 		const { useElasticSearch = false } = req.body;
 		if (useElasticSearch) {
-			return this.getESContractTotals(req, userId);
+			return { contractTotals: {} };
 		} else {
 			return this.getPGContractTotals(req, userId);
-		}
-	}
-
-	async getESContractTotals(req, userId) {
-		try {
-			return { contractTotals: {} };
-		} catch (e) {
-			const { message } = e;
-			this.logger.error(message, '0Z82N92', userId);
-			return { contractTotals: {} };
 		}
 	}
 
@@ -975,8 +865,8 @@ class JBookDataHandler extends DataHandler {
 
 			const hasSearchText = searchText && searchText !== '';
 
-			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
+			const [pSelect, rSelect] = this.jbookSearchUtility.buildSelectQuery();
+			const [pWhere, rWhere] = this.jbookSearchUtility.buildWhereQuery(
 				jbookSearchSettings,
 				hasSearchText,
 				null,
@@ -986,7 +876,6 @@ class JBookDataHandler extends DataHandler {
 
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
-			const oQuery = oSelect + oWhere;
 
 			let giantQuery = ``;
 
@@ -1001,13 +890,6 @@ class JBookDataHandler extends DataHandler {
 					giantQuery += ` UNION ALL ` + rQuery;
 				}
 			}
-			// if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
-			// 	if (giantQuery.length === 0) {
-			// 		giantQuery = oQuery;
-			// 	} else {
-			// 		giantQuery += ` UNION ALL ` + oQuery;
-			// 	}
-			// }
 
 			if (giantQuery.length === 0) {
 				return { contractTotals: { 'Total Obligated Amt.': 0 } };
@@ -1046,7 +928,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async getPortfolios(req, userId) {
+	async getPortfolios(userId) {
 		try {
 			return await this.portfolio.findAll({
 				where: {
@@ -1190,7 +1072,7 @@ class JBookDataHandler extends DataHandler {
 				case 'getProjectData':
 					return await this.getESProjectData(req, userId);
 				case 'getBudgetDropdownData':
-					return await this.getBudgetDropdownData(req, userId);
+					return await this.getBudgetDropdownData(userId);
 				case 'storeBudgetReview':
 					return await this.storeBudgetReview(req, userId);
 				case 'reenableForm':
@@ -1202,7 +1084,7 @@ class JBookDataHandler extends DataHandler {
 				case 'getContractTotals':
 					return await this.getContractTotals(req, userId);
 				case 'getPortfolios':
-					return await this.getPortfolios(req, userId);
+					return await this.getPortfolios(userId);
 				case 'getPortfolio':
 					return await this.getPortfolio(req, userId);
 				case 'editPortfolio':
@@ -1227,10 +1109,10 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async sendPOCEmail(userId, toName, email, organization, phoneNumber, isAlternate = false) {
+	async sendPOCEmail(userId, toName, email, organization, phoneNumber) {
 		try {
 			// First check to make sure an email has not already been sent for this user.
-			const [request, created] = await this.userRequest.findOrCreate({
+			const [, created] = await this.userRequest.findOrCreate({
 				where: { email: email },
 				defaults: {
 					email: email,
@@ -1290,10 +1172,10 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async sendServiceEmail(userId, toName, email, organization, phoneNumber, isAlternate = false) {
+	async sendServiceEmail(userId, toName, email, organization, phoneNumber) {
 		try {
 			// First check to make sure an email has not already been sent for this user.
-			const [request, created] = await this.userRequest.findOrCreate({
+			const [, created] = await this.userRequest.findOrCreate({
 				where: { email: email },
 				defaults: {
 					email: email,

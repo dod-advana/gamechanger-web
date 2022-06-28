@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="10" failures="0" errors="0" time="4.448">
-  <testsuite name="AppStatsController" errors="0" failures="0" skipped="0" timestamp="2022-06-22T00:37:05" time="3.735" tests="10">
-    <testcase classname="AppStatsController #getAppStats should get application stats" name="AppStatsController #getAppStats should get application stats" time="0.016">
+<testsuites name="jest tests" tests="8" failures="0" errors="0" time="6.642">
+  <testsuite name="JBookDataHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-28T20:04:56" time="4.414" tests="5">
+    <testcase classname="JBookDataHandler #getProjectData should get the pdoc project data for ES" name="JBookDataHandler #getProjectData should get the pdoc project data for ES" time="0.014">
     </testcase>
-    <testcase classname="AppStatsController #getAppStats should get application stats with clone data" name="AppStatsController #getAppStats should get application stats with clone data" time="0.002">
+    <testcase classname="JBookDataHandler #getProjectData should get the rdoc project data for ES" name="JBookDataHandler #getProjectData should get the rdoc project data for ES" time="0.002">
     </testcase>
-    <testcase classname="AppStatsController #getAppStats should get application stats with internal users to exclude" name="AppStatsController #getAppStats should get application stats with internal users to exclude" time="0.012">
+    <testcase classname="JBookDataHandler #getProjectData should get the odoc project data for ES" name="JBookDataHandler #getProjectData should get the odoc project data for ES" time="0.002">
     </testcase>
-    <testcase classname="AppStatsController #getAppStats should get application stats with queries to exclude for top queries" name="AppStatsController #getAppStats should get application stats with queries to exclude for top queries" time="0.002">
+    <testcase classname="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" name="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" time="0.001">
     </testcase>
-    <testcase classname="AppStatsController #getSearchPdfMapping should get users searches" name="AppStatsController #getSearchPdfMapping should get users searches" time="0.005">
+    <testcase classname="JBookDataHandler #getPortfolios should get all portfolios" name="JBookDataHandler #getPortfolios should get all portfolios" time="0.001">
     </testcase>
-    <testcase classname="AppStatsController #getRecentlyOpenedDocs should get recently opened documents" name="AppStatsController #getRecentlyOpenedDocs should get recently opened documents" time="0.002">
+  </testsuite>
+  <testsuite name="JBookSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-28T20:04:56" time="5.638" tests="3">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for an ES search" name="JBookSearchHandler #searchHelper should return data for an ES search" time="0.005">
     </testcase>
-    <testcase classname="AppStatsController #getDocumentUsageData should get Document Usage Data stats" name="AppStatsController #getDocumentUsageData should get Document Usage Data stats" time="0.082">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for filters" name="JBookSearchHandler #searchHelper should return data for filters" time="0.043">
     </testcase>
-    <testcase classname="AppStatsController #getUserAggregations should get users aggregated searches" name="AppStatsController #getUserAggregations should get users aggregated searches" time="0.002">
-    </testcase>
-    <testcase classname="AppStatsController #getUserLastOpened should return documents for users" name="AppStatsController #getUserLastOpened should return documents for users" time="0.001">
-    </testcase>
-    <testcase classname="AppStatsController #getDashboardData should get users dashboard data" name="AppStatsController #getDashboardData should get users dashboard data" time="0.001">
+    <testcase classname="JBookSearchHandler #searchHelper should return excel data for review status" name="JBookSearchHandler #searchHelper should return excel data for review status" time="0.016">
     </testcase>
   </testsuite>
 </testsuites>
