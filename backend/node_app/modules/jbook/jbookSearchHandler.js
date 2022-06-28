@@ -116,7 +116,6 @@ class JBookSearchHandler extends SearchHandler {
 				const { totalCount } = searchResults;
 				historyRec.endTime = new Date().toISOString();
 				historyRec.numResults = totalCount;
-				// await this.storeRecordOfSearchInPg(historyRec, userId);
 			} catch (e) {
 				this.logger.error(e.message, 'ZMVI2TO', userId);
 			}
@@ -127,7 +126,6 @@ class JBookSearchHandler extends SearchHandler {
 			this.logger.error(message, 'WHMU1G2', userId);
 			historyRec.endTime = new Date().toISOString();
 			historyRec.hadError = true;
-			// await this.storeRecordOfSearchInPg(historyRec, showTutorial);
 
 			throw err;
 		}
@@ -633,7 +631,6 @@ class JBookSearchHandler extends SearchHandler {
 				);
 			}
 
-			// console.log(returnData);
 			return returnData;
 		} catch (e) {
 			console.log('Error getESDataForFilters');
