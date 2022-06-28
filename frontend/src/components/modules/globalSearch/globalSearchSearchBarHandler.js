@@ -1,17 +1,12 @@
 import React from 'react';
 import { SearchBarForm, SearchBarInput, SearchButton } from '../../searchBar/SearchBarStyledComponents';
 import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
-import GCButton from '../../common/GCButton';
-import Popover from '@material-ui/core/Popover';
-import TextField from '@material-ui/core/TextField';
 
 const GlobalSearchSearchBarHandler = {
 	debouncedFetchSearchSuggestions() {},
 	getSearchBar(props) {
 		const {
 			state,
-			classes,
-			searchFavoritePopperAnchorEl,
 			advancedSearchOpen,
 			dropdownOpen,
 			ref,
@@ -21,15 +16,8 @@ const GlobalSearchSearchBarHandler = {
 			handleOnBlur,
 			searchText,
 			setDropdownOpen,
-			handleFavoriteSearchClicked,
 			dataRows,
 			cursor,
-			searchFavoritePopperOpen,
-			favoriteName,
-			setFavoriteName,
-			setFavoriteSummary,
-			favoriteSummary,
-			handleSaveSearch,
 		} = props;
 
 		return (
@@ -72,78 +60,6 @@ const GlobalSearchSearchBarHandler = {
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
-
-				<Popover
-					onClose={() => {
-						handleFavoriteSearchClicked(null);
-					}}
-					open={searchFavoritePopperOpen}
-					anchorEl={searchFavoritePopperAnchorEl}
-					anchorOrigin={{
-						vertical: 'bottom',
-						horizontal: 'right',
-					}}
-					transformOrigin={{
-						vertical: 'top',
-						horizontal: 'right',
-					}}
-				>
-					<div className={classes.paper}>
-						<div style={{ width: 330, margin: 5 }}>
-							<TextField
-								label={'Favorite Name'}
-								value={favoriteName}
-								onChange={(event) => {
-									setFavoriteName(event.target.value);
-								}}
-								className={classes.textField}
-								margin="none"
-								size="small"
-								variant="outlined"
-							/>
-							<TextField
-								label={'Favorite Summary'}
-								value={favoriteSummary}
-								onChange={(event) => {
-									setFavoriteSummary(event.target.value);
-								}}
-								className={classes.textArea}
-								margin="none"
-								size="small"
-								variant="outlined"
-								multiline={true}
-								rows={4}
-							/>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => handleFavoriteSearchClicked(null)}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-									isSecondaryBtn={true}
-								>
-									Cancel
-								</GCButton>
-								<GCButton
-									onClick={() => handleSaveSearch(true)}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-								>
-									Save
-								</GCButton>
-							</div>
-						</div>
-					</div>
-				</Popover>
 			</div>
 		);
 	},

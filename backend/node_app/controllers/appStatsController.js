@@ -70,7 +70,7 @@ class AppStatsController {
 	 * @param {Number} daysAgo
 	 * @returns
 	 */
-	async getAvgSearchesPerSession(daysAgo = 3, connection) {
+	async getAvgSearchesPerSession(connection, daysAgo = 3) {
 		return new Promise((resolve) => {
 			const startDate = this.getDateNDaysAgo(daysAgo);
 			connection.query(
@@ -100,7 +100,7 @@ class AppStatsController {
 	 * @param {Boolean} isClone
 	 * @returns
 	 */
-	async getTopSearches(cloneData = {}, daysAgo = 3, excluding = [], blacklist = [], topN = 10, connection) {
+	async getTopSearches(connection, cloneData = {}, daysAgo = 3, excluding = [], blacklist = [], topN = 10) {
 		return new Promise((resolve) => {
 			let cloneNameAdd = cloneData.clone_name.toLowerCase();
 
@@ -149,8 +149,8 @@ class AppStatsController {
 	}
 
 	htmlDecode(encodedString) {
-		var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
-		var translate = {
+		let translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+		let translate = {
 			nbsp: ' ',
 			amp: '&',
 			quot: '"',
@@ -158,11 +158,11 @@ class AppStatsController {
 			gt: '>',
 		};
 		return encodedString
-			.replace(translate_re, function (match, entity) {
+			.replace(translate_re, function (entity) {
 				return translate[entity];
 			})
-			.replace(/&#(\d+);/gi, function (match, numStr) {
-				var num = parseInt(numStr, 10);
+			.replace(/&#(\d+);/gi, function (numStr) {
+				let num = parseInt(numStr, 10);
 				return String.fromCharCode(num);
 			});
 	}
@@ -198,14 +198,14 @@ class AppStatsController {
 					blacklist: blacklist,
 				},
 			};
-			results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(3, connection);
+			results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(connection, 3);
 			results.data.topSearches.data = await this.getTopSearches(
+				connection,
 				cloneData,
 				daysAgo,
 				internalUsers,
 				blacklist,
-				10,
-				connection
+				10
 			);
 			let cleanedTopSearches = [];
 			results.data.topSearches.data.forEach((d) => {
@@ -275,7 +275,6 @@ class AppStatsController {
 	 */
 	async queryPDFOpenedByUserId(userId, connection) {
 		return new Promise((resolve) => {
-			const self = this;
 			connection.query(
 				`
 				select 
@@ -485,46 +484,48 @@ class AppStatsController {
 			);
 		});
 	}
-	/**
-	 * This method takes in options from the endpoint and queries matomo with those parameters.
-	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
-	 * @returns an array of data from Matomo.
-	 */
-	async querySearchPdfMapping(opts, connection) {
-		const { userId } = opts;
-		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, connection);
-		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, connection);
-		const searchMap = {};
-		const eventMap = {};
-		const searchPdfMapping = [];
 
-		for (let search of searches) {
-			if (!searchMap[search.idvisit]) {
-				searchMap[search.idvisit] = [];
-			}
-			search = { ...search, value: this.htmlDecode(search.value) };
-			searchMap[search.idvisit].push(search);
-		}
+	/**
+	 * helper to map events for search pdf mappings
+	 *
+	 * @returns a dictionary to map events to searches
+	 */
+	mapEventsMappings(searchMap, events) {
 		const tempSearch = { ...searchMap };
+		const eventMap = {};
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
+			let search = '';
 			if (tempSearch[event.idvisit]) {
 				let i = 0;
-				let search = '';
 				let tempSearchList = tempSearch[event.idvisit].map((a) => a).reverse();
 				while (i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime) {
 					search = tempSearchList[i].value;
 					i++;
 				}
-				event = { ...event, value: search };
 			}
 			if (searchMap[event.idvisit]) {
-				searchMap[event.idvisit].push(event);
+				searchMap[event.idvisit].push({ ...event, value: search });
 			}
 		}
+	}
+
+	/**
+	 * helper to map search documents for the pdf mappings
+	 *
+	 * @returns a dictionary to map searches
+	 */
+	mapSearchMappings(searches, documents, events, searchPdfMapping) {
+		const searchMap = {};
+		for (let search of searches) {
+			if (!searchMap[search.idvisit]) {
+				searchMap[search.idvisit] = [];
+			}
+			searchMap[search.idvisit].push({ ...search, value: this.htmlDecode(search.value) });
+		}
+		this.mapEventsMappings(searchMap, events);
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
@@ -537,7 +538,23 @@ class AppStatsController {
 				}
 			}
 		}
-		for (const [key, value] of Object.entries(searchMap)) {
+		return searchMap;
+	}
+
+	/**
+	 * This method takes in options from the endpoint and queries matomo with those parameters.
+	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
+	 * @returns an array of data from Matomo.
+	 */
+	async querySearchPdfMapping(opts, connection) {
+		const { userId } = opts;
+		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
+		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, connection);
+
+		const searchPdfMapping = [];
+		const searchMap = this.mapSearchMappings(searches, documents, events, searchPdfMapping);
+		for (const [, value] of Object.entries(searchMap)) {
 			for (let search of value) {
 				if (search.visited === undefined) {
 					searchPdfMapping.push(search);
@@ -749,11 +766,8 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getRecentlyOpenedDocs(req, res) {
-		let userId = 'Unknown';
 		let connection;
-
 		try {
-			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -850,7 +864,7 @@ class AppStatsController {
 	mapDocumentsUsage(searchMap) {
 		const docMap = {};
 
-		for (const [visitID, arr] of Object.entries(searchMap)) {
+		for (const [, arr] of Object.entries(searchMap)) {
 			let currentSearch = '';
 			for (const search_doc of arr) {
 				const currItem = this.htmlDecode(search_doc.search_doc);
@@ -887,13 +901,13 @@ class AppStatsController {
 		const docMap = this.mapDocumentsUsage(searchMap);
 		// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
 		for (const doc of docData) {
-			const searches = docMap[doc.document];
-			if (searches !== undefined) {
-				const sortSearches = Object.keys(searches)
+			const search = docMap[doc.document];
+			if (search !== undefined) {
+				const sortSearches = Object.keys(search)
 					.sort(function (a, b) {
-						return searches[b] - searches[a];
+						return search[b] - search[a];
 					})
-					.map((item) => item + ' (' + searches[item] + ')')
+					.map((item) => item + ' (' + search[item] + ')')
 					.slice(0, 5);
 				const strSearches = sortSearches.join(', ');
 				doc.searches = strSearches;
@@ -1198,6 +1212,76 @@ class AppStatsController {
 	}
 
 	/**
+	 * helper to map searches to the document mapper
+	 */
+	mapSearchVisitIDs(searches, documentMap, vistitIDMap) {
+		for (let search of searches) {
+			if (vistitIDMap[search.idvisitor]) {
+				if (documentMap[vistitIDMap[search.idvisitor]]) {
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
+					}
+				} else {
+					documentMap[vistitIDMap[search.idvisitor]] = {
+						user_id: vistitIDMap[search.idvisitor],
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
+				}
+			}
+		}
+	}
+
+	/**
+	 * helper to map documents to the document mapper
+	 */
+	mapDocumentVisitIDs(documents, documentMap, vistitIDMap) {
+		for (let doc of documents) {
+			if (vistitIDMap[doc.idvisitor]) {
+				if (
+					!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
+				) {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+				} else {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
+				}
+			}
+		}
+	}
+
+	/**
+	 * helper to map opened documents to the document mapper
+	 */
+	mapOpenedVisitIDs(opened, documentMap, vistitIDMap) {
+		for (let open of opened) {
+			if (vistitIDMap[open.idvisitor] && vistitIDMap[open.idvisitor] in documentMap) {
+				if (
+					!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
+				) {
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+				} else {
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].shift();
+				}
+			}
+		}
+	}
+
+	/**
 	 * This method gets the user aggregation table for the frontend
 	 * by a user
 	 * @param {*} opts
@@ -1356,11 +1440,10 @@ class AppStatsController {
 			});
 			connection.connect();
 			const visitorID = await this.getOneUserVisitorID(userdID, connection);
-			const opened = await this.queryPDFOpenedByUserId(
+			return await this.queryPDFOpenedByUserId(
 				visitorID.map((x) => x.idvisitor),
 				connection
 			);
-			return opened;
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];
