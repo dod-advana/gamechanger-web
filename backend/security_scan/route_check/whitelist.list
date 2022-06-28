@@ -23,7 +23,6 @@
 .* /api/gamechanger/responsibilities/setRejectionStatus .*
 .* /api/gamechanger/responsibilities/updateResponsibility .*
 .* /api/gamechanger/responsibilities/updateResponsibilityReport .*
-.* /api/gamechanger/responsibilities/getOtherEntityFilterList .*
 .* /api/gamechanger/responsibilities/storeReport .*
 .* /api/gamechanger/responsibilities/getUpdates .*
 .* /api/gamechanger/getNotifications .*

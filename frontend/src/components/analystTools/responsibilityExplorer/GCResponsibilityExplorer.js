@@ -2,18 +2,31 @@ import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Icon from '@material-ui/core/Icon';
+import ExportIcon from '../../../images/icon/Export.svg';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
-import { trackEvent } from '../telemetry/Matomo';
-import GCButton from '../common/GCButton';
-import GameChangerAPI from '../api/gameChanger-service-api';
-import { gcOrange } from '../common/gc-colors';
-import GCResponsibilityTracker from './GCResponsibilityTracker';
-import ResponsibilityDocumentExplorer from './GCResponsibilityDocumentExplorer';
-import GCToolTip from '../common/GCToolTip';
-import { exportToCsv, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
+import { trackEvent } from '../../telemetry/Matomo';
+import GCButton from '../../common/GCButton';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import { gcOrange } from '../../common/gc-colors';
+import GCResponsibilityChartView from './GCResponsibilityChartView';
+import GCResponsibilityDocumentView from './GCResponsibilityDocumentView';
+import GCToolTip from '../../common/GCToolTip';
+import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
+import { reTutorialSteps } from './tutotialSteps';
 
 const gameChangerAPI = new GameChangerAPI();
+
+const parseFilename = (filename) => {
+	const splitName = filename.split(' ');
+	const letters = splitName[0];
+	let numbers = splitName[1];
+	if (numbers.includes('.pdf')) {
+		numbers = numbers.slice(0, -4);
+	}
+	return `${letters} ${numbers}`;
+};
 
 const useStyles = makeStyles({
 	root: {
@@ -67,6 +80,40 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const [organization, setOrganization] = useState([]);
 	const [responsibilityText, setResponsibilityText] = useState({});
 	const [infiniteCount, setInfiniteCount] = useState(1);
+	const [collapseKeys, setCollapseKeys] = useState({});
+
+	const [stepIndex, setStepIndex] = useState(0);
+	const [showTutorial, setShowTutorial] = useState(false);
+
+	const tutorialSearch = () => {
+		setOrganization(['dod']);
+		const newFilters = [{ id: 'organizationPersonnel', value: 'dod' }];
+		setCollapseKeys({
+			'DoDI 1304.02 Accession Processing Data Collection Forms': true,
+			'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+		});
+		setFilters(newFilters);
+		setInfiniteCount(1);
+		setReloadResponsibilities(true);
+	};
+
+	useEffect(() => {
+		if (stepIndex === 5) {
+			setReView('Document');
+		}
+		if (stepIndex === 6) {
+			setReView('Chart');
+		}
+		if (stepIndex === 1 || stepIndex === 2) {
+			window.scrollTo(0, 0);
+			const resultsDiv = document.getElementById('re-results-col');
+			resultsDiv.scrollTop = 0;
+			setCollapseKeys({
+				'DoDI 1304.02 Accession Processing Data Collection Forms': true,
+				'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+			});
+		}
+	}, [stepIndex]);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -82,6 +129,15 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		};
 		fetchDocTitles();
 	}, []);
+
+	const resetPage = () => {
+		setStepIndex(0);
+		setReView('Document');
+		setFilters([]);
+		setOrganization([]);
+		setResponsibilityText({});
+		setReloadResponsibilities(true);
+	};
 
 	const scrollRef = useBottomScrollListener(
 		() => {
@@ -129,11 +185,10 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			setLoading(false);
 		}
 	};
-
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility) => {
-			const doc = responsibility.documentTitle;
+			const doc = `${parseFilename(responsibility.filename)} ${responsibility.documentTitle}`;
 			let entity = responsibility.organizationPersonnel;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
@@ -197,31 +252,64 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	return (
 		<div>
-			<div className="row" style={{ height: 65, margin: 0, padding: 0 }}>
-				<div style={{ display: 'flex', justifyContent: 'flex-end', padding: 0 }}>
-					<GCButton
-						onClick={exportCSV}
+			<div className="row" style={{ margin: 0, padding: 0, justifyContent: 'flex-end' }}>
+				<div style={{ display: 'flex', alignItems: 'center', margin: '10px 0 20px 0' }}>
+					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
+						The Responsibility Explorer enables users to identify the responsibilities that have been
+						assigned to various entities across an expansive corpus of DoD strategy, guidance, and policy
+						documents. Filter capabilities allow users to explore extracted portions of responsibility text
+						in specific documents, by organization/role/entity, and/or by responsibility area.
+					</div>
+					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+						<HelpOutlineIcon
+							style={{ cursor: 'pointer' }}
+							onClick={() => {
+								setReView('Document');
+								setShowTutorial(true);
+							}}
+						/>
+					</GCToolTip>
+					<span
 						style={{
-							minWidth: 50,
-							padding: '0px 7px',
-							margin: '6px 10px 0px 0px',
-							height: 50,
+							margin: '0px 10px',
 						}}
 					>
-						<GCToolTip title="Export" placement="bottom" arrow enterDelay={500}>
-							<Icon className="fa fa-external-link" style={{ paddingTop: 2, transform: 'scale(1.3)' }} />
+						<GCToolTip title="Export" placement="top" arrow enterDelay={500}>
+							<span>
+								<GCButton
+									className="re-tutorial-step-5"
+									onClick={exportCSV}
+									style={{
+										minWidth: 50,
+										padding: '0px 7px',
+										height: 50,
+										marginLeft: 0,
+									}}
+									disabled={Object.keys(docResponsibilityData).length ? false : true}
+								>
+									<img
+										src={ExportIcon}
+										style={{
+											margin: '0 0 3px 3px',
+											width: 15,
+											opacity: Object.keys(docResponsibilityData).length ? 1 : 0.6,
+										}}
+										alt="export"
+									/>
+								</GCButton>
+							</span>
 						</GCToolTip>
-					</GCButton>
+					</span>
 					<FormControl
 						variant="outlined"
 						classes={{ root: classes.root }}
-						style={{ marginLeft: 'auto', margin: '-10px 0px 0px 0px' }}
+						style={{ minWidth: 210, margin: '-16px 0px 0px 0px' }}
 					>
 						<InputLabel classes={{ root: classes.formlabel }} id="view-name-select">
 							View
 						</InputLabel>
 						<Select
-							className={`MuiInputBase-root`}
+							className={`MuiInputBase-root re-tutorial-step-6`}
 							labelId="re-view-name"
 							label="View"
 							id="re-view-name-select"
@@ -246,7 +334,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				</div>
 			</div>
 			{reView === 'Chart' && (
-				<GCResponsibilityTracker
+				<GCResponsibilityChartView
 					state={state}
 					filters={filters}
 					setFilters={setFilters}
@@ -259,7 +347,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				/>
 			)}
 			{reView === 'Document' && (
-				<ResponsibilityDocumentExplorer
+				<GCResponsibilityDocumentView
 					state={state}
 					dispatch={dispatch}
 					responsibilityData={docResponsibilityData}
@@ -278,8 +366,23 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					setFilters={setFilters}
 					documentList={documentList}
 					infiniteScrollRef={scrollRef}
+					collapseKeys={collapseKeys}
+					setCollapseKeys={setCollapseKeys}
+					showTutorial={showTutorial}
 				/>
 			)}
+			<TutorialOverlay
+				tutorialJoyrideSteps={reTutorialSteps}
+				setShowTutorial={setShowTutorial}
+				showTutorial={showTutorial}
+				buttonColor={gcOrange}
+				resetPage={resetPage}
+				stepIndex={stepIndex}
+				setStepIndex={setStepIndex}
+				showSkipButton={false}
+			/>
+
+			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
 		</div>
 	);
 }
