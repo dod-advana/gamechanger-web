@@ -116,6 +116,9 @@ const initState = {
 
 		primaryReviewStatusSpecificSelected: false,
 		primaryReviewStatusAllSelected: true,
+
+		budgetActivitySpecificSelected: false,
+		budgetActivityAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
