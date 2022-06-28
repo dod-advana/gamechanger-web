@@ -3,11 +3,9 @@ const constantsFile = require('../../config/constants');
 const SearchUtility = require('../../utils/searchUtility');
 const Mappings = require('./jbookDataMapping');
 const _ = require('underscore');
-const { reviewMapping, esInnerHitFields, esTopLevelFieldsNameMapping } = require('./jbookDataMapping');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const asyncRedisLib = require('async-redis');
 const { Thesaurus } = require('../../lib/thesaurus');
-const { esTopLevelFields } = require('./jbookDataMapping');
 const abbreviationRedisAsyncClientDB = 9;
 
 class JBookSearchUtility {
@@ -81,7 +79,7 @@ class JBookSearchUtility {
 			} else if (docType !== 'review' || docType !== 'gl') {
 				mapping = {
 					...mapping,
-					...reviewMapping,
+					...Mappings.reviewMapping,
 				};
 			}
 
@@ -89,829 +87,8 @@ class JBookSearchUtility {
 		} catch (err) {
 			console.log('Error retrieving jbook mapping');
 			this.logger.error(err.message, 'AJTKSKQ');
+			console.log('an update was made');
 		}
-	}
-
-	getDocCols(docType, totals = false, fullPDFExport = false) {
-		let fields = [];
-		let mapping = this.getMapping(docType, true);
-		let reviewMapping = this.getMapping('review', true);
-
-		const requiredCols = [
-			'budgetType',
-			'budgetYear',
-			'programElement',
-			'projectNum',
-			'budgetLineItem',
-			'projectTitle',
-			'serviceAgency',
-			'primaryReviewer',
-			'primaryClassLabel',
-			'primaryReviewStatus',
-			'serviceReviewStatus',
-			'pocReviewStatus',
-			'reviewStatus',
-			'sourceTag',
-			'appropriationNumber',
-			'serviceReviewer',
-			'serviceSecondaryReviewer',
-			'pocReviewer',
-			'servicePOCName',
-			'servicePOCEmail',
-			'servicePOCOrg',
-			'servicePOCTitle',
-			'altPOCTitle',
-			'altPOCName',
-			'altPOCEmail',
-			'altPOCOrg',
-			'altPOCPhoneNumber',
-			'serviceClassLabel',
-			'pocClassLabel',
-			// gc cards
-			'projectMissionDescription',
-
-			'allPriorYearsAmount',
-			'priorYearAmount',
-			'currentYearAmount',
-
-			'budgetCycle',
-			'appropriationTitle',
-			'budgetActivityNumber',
-			'budgetActivityTitle',
-
-			// for class label
-			'pocAgreeLabel',
-			'pocClassLabel',
-			'serviceAgreeLabel',
-			'serviceClassLabel',
-			'primaryClassLabel',
-		];
-
-		if (fullPDFExport) {
-			requiredCols.push(
-				'budgetActivityNumber',
-				'budgetActivityTitle',
-				'servicePOCPhoneNumber',
-				'altPOCPhoneNumber',
-				'serviceMissionPartnersList',
-				'pocMissionPartnersList',
-				'pocMissionPartnersChecklist',
-				'serviceMissionPartnersChecklist',
-				'budgetCycle',
-				'pocPlannedTransitionPartner',
-				'servicePlannedTransitionPartner',
-				'primaryPlannedTransitionPartner',
-				'appropriationTitle',
-				'domainTask',
-				'pocJointCapabilityArea',
-				'pocJointCapabilityArea2',
-				'pocJointCapabilityArea3',
-				'domainTask',
-				'domainTaskSecondary',
-				'pocAIType',
-				'pocAITypeDescription',
-				'pocMPAgreeLabel'
-			);
-		}
-
-		const typeMap = {
-			rdoc: 'rd',
-			pdoc: 'p',
-			odoc: 'o',
-		};
-
-		for (const field of requiredCols) {
-			if (mapping[field]) {
-				// console.log(field + ' : ' + mapping[field].newName);
-				if (docType === 'odoc' && field === 'priorYearAmount') {
-					fields.push(
-						`cast(replace(${typeMap[docType]}."${mapping[field].newName}", ',', '') as double precision) AS "${field}"`
-					);
-				} else {
-					fields.push(`${typeMap[docType]}."${mapping[field].newName}"  AS "${field}"`);
-				}
-			} else if (reviewMapping[field] && !totals) {
-				// console.log(field + ' : ' + mapping[field].newName)
-				fields.push(`r."${reviewMapping[field].newName}" AS "${field}"`);
-			} else {
-				if (['allPriorYearsAmount', 'priorYearAmount', 'currentYearAmount'].includes(field)) {
-					fields.push(`cast(NULL AS DOUBLE PRECISION) AS "${field}"`);
-				} else {
-					fields.push(`'' AS "${field}"`);
-				}
-			}
-		}
-
-		fields.push(`${typeMap[docType]}.id`);
-
-		//  add type
-		const typeMap2 = {
-			rdoc: 'RDT&E',
-			pdoc: 'Procurement',
-			odoc: 'O&M',
-		};
-		fields.push(`'${typeMap2[docType]}' as type`);
-
-		return fields;
-	}
-
-	buildSelectQuery() {
-		let pQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('pdoc').join(
-			', '
-		)}, p.id as id FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN pdoc p on p.id = k_a.pdoc_id JOIN keyword k on k.id = k_a.keyword_id group by p.id) keywords ON keywords.id = p.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type  FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = p."P40-01_LI_Number" AND contracts.budget_type = 'pdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = p."P40-01_LI_Number" AND accomplishments."BudgetYear" = p."P40-04_BudgetYear"`;
-		let rQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('rdoc').join(
-			', '
-		)}, rd.id as id FROM rdoc rd LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'rdoc' AND rd."PE_Num" = r.program_element AND rd."Proj_Number" = r.budget_line_item AND rd."BudgetYear" = r."budget_year" AND rd."Appn_Num" = r."appn_num" AND rd."BA_Number" = r."budget_activity" AND rd."Organization" = r."agency"  LEFT JOIN (SELECT rd.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN rdoc rd on rd.id = k_a.rdoc_id JOIN keyword k on k.id = k_a.keyword_id group by rd.id) keywords ON keywords.id = rd.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = rd."PE_Num" AND contracts.budget_type = 'rdoc' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = rd."PE_Num" AND accomplishments."Proj_Number" = rd."Proj_Number" AND accomplishments."BudgetYear" = rd."BudgetYear"`;
-		let oQuery = `SELECT DISTINCT accomplishments, contracts, keywords, ${this.getDocCols('odoc').join(
-			', '
-		)}, o.id as id FROM om o LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'odoc' AND o.line_number = r.budget_line_item AND o.sag_bli = r.program_element AND o."budget_year" = r."budget_year" AND o."line_number" is not null AND o."line_number" != '' AND o."account" = r."appn_num" AND o."budget_activity" = r."budget_activity" AND o."organization" = r."agency"  LEFT JOIN (SELECT o.id, string_agg(k.name, ', ') FROM keyword_assoc k_a JOIN om o on o.id = k_a.om_id JOIN keyword k on k.id = k_a.keyword_id group by o.id) keywords ON keywords.id = o.id LEFT JOIN (select string_agg(vendor_name, '; '), string_agg(piin, '; '), string_agg(fiscal_year, '; '), bli, budget_type FROM gl_contracts group by bli, budget_type) contracts ON contracts.bli = o."line_number" AND contracts.budget_type = 'om' LEFT JOIN (select string_agg("Accomp_Title_text", '; '), "PE_Num", "Proj_Number", "BudgetYear" FROM rdoc_accomp group by "PE_Num", "Proj_Number", "BudgetYear") accomplishments ON accomplishments."PE_Num" = o."account" AND accomplishments."Proj_Number" = o."sag_bli" AND accomplishments."BudgetYear" = o."budget_year"`;
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildSelectQueryForFullPDF() {
-		let pQuery = `SELECT DISTINCT ${this.getDocCols('pdoc', false, true).join(
-			', '
-		)}, p.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM pdoc p LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'pdoc' AND p."P40-01_LI_Number" = r.budget_line_item AND p."P40-04_BudgetYear" = r."budget_year" AND p."P40-08_Appn_Number" = r."appn_num" AND p."P40-10_BA_Number" = r."budget_activity" AND p."P40-06_Organization" = r."agency" LEFT JOIN (SELECT p.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN pdoc p ON p.id = k_a.pdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY p.id) keywords ON keywords.id = p.id LEFT JOIN (SELECT p.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN pdoc p ON '' = rda."PE_Num" AND '' = rda."Proj_Number" AND p."P40-04_BudgetYear" = rda."BudgetYear" GROUP BY p.id) accomp ON accomp.id = p.id`;
-		let rQuery = `SELECT DISTINCT ${this.getDocCols('rdoc', false, true).join(
-			', '
-		)}, rd.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM rdoc rd LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'rdoc' AND  rd."PE_Num" = r.program_element AND rd."Proj_Number" = r.budget_line_item AND rd."BudgetYear" = r."budget_year" AND rd."Appn_Num" = r."appn_num" AND rd."BA_Number" = r."budget_activity" AND rd."Organization" = r."agency" LEFT JOIN (SELECT rd.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN rdoc rd ON rd.id = k_a.rdoc_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY rd.id) keywords ON keywords.id = rd.id LEFT JOIN (SELECT rd.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN rdoc rd ON rd."PE_Num" = rda."PE_Num" AND rd."Proj_Number" = rda."Proj_Number" AND rd."BudgetYear" = rda."BudgetYear" GROUP BY rd.id) accomp ON accomp.id = rd.id`;
-		let oQuery = `SELECT DISTINCT ${this.getDocCols('odoc', false, true).join(
-			', '
-		)}, o.id as id, keywords.keywords_arr as keywords, accomp.accomp as accomp FROM om o LEFT JOIN (SELECT *, CASE WHEN review_status = 'Finished Review' THEN poc_class_label WHEN review_status = 'Partial Review (POC)' THEN service_class_label ELSE primary_class_label END AS search_label FROM (SELECT id, MAX(rc."updatedAt") as time FROM review rc GROUP BY id) b JOIN review d ON b.id = d.id AND b.time = d."updatedAt") r ON r."budget_type" = 'odoc' AND o.line_number = r.budget_line_item AND o.sag_bli = r.program_element AND o."budget_year" = r."budget_year"  AND o."line_number" is not null AND o."line_number" != '' AND o."account" = r."appn_num" AND o."budget_activity" = r."budget_activity" AND o."organization" = r."agency" LEFT JOIN (SELECT o.id as id, ARRAY_AGG(k.name) as keywords_arr FROM keyword_assoc k_a JOIN om o ON o.id = k_a.om_id JOIN keyword k ON k.id = k_a.keyword_id GROUP BY o.id) keywords ON keywords.id = o.id LEFT JOIN (SELECT om.id as id, ARRAY_AGG("Accomp_Title_text") as accomp FROM rdoc_accomp rda JOIN om om ON om."account" = rda."PE_Num" AND om."sag_bli" = rda."Proj_Number" AND om."budget_year" = rda."BudgetYear" GROUP BY om.id) accomp ON accomp.id = o.id`;
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildWhereQuery(jbookSearchSettings, hasSearchText, keywordIds, perms, userId) {
-		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
-		let rQueryFilter = `rd."PE_Num" is not null AND rd."PE_Num" != '' AND rd."Proj_Number" is not null AND rd."Proj_Number" != '' AND rd."Proj_Title" is not null AND rd."Proj_Title" != ''`;
-		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
-
-		const pDocSearchQueryArray = Mappings['pdocSearchMapping'].map((pdocSearchText) => {
-			return `"${pdocSearchText}" @@ to_tsquery('english', :searchText)`;
-		});
-		const rDocSearchQueryArray = Mappings['rdocSearchMapping'].map((rdocSearchText) => {
-			return `"${rdocSearchText}" @@ to_tsquery('english', :searchText)`;
-		});
-		const oDocSearchQueryArray = Mappings['odocSearchMapping'].map((odocSearchText) => {
-			return `"${odocSearchText}" @@ to_tsquery('english', :searchText)`;
-		});
-
-		let pQuery = hasSearchText
-			? ` WHERE ( ${pDocSearchQueryArray.join(' OR ')} AND ${pQueryFilter} )`
-			: ` WHERE ${pQueryFilter}`;
-		let rQuery = hasSearchText
-			? ` WHERE ( ${rDocSearchQueryArray.join(' OR ')} AND ${rQueryFilter} )`
-			: ` WHERE ${rQueryFilter}`;
-		let oQuery = hasSearchText
-			? ` WHERE ( ${oDocSearchQueryArray.join(' OR ')} AND ${oQueryFilter} )`
-			: ` WHERE ${oQueryFilter}`;
-
-		if (keywordIds) {
-			let queryText = 'IN';
-			if (jbookSearchSettings.hasKeywords && jbookSearchSettings.hasKeywords.indexOf('No') !== -1) {
-				queryText = 'NOT ' + queryText;
-			}
-			pQuery += ` AND p."${this.mapFieldName('pdoc', 'id', true)}" ${queryText} (${keywordIds['pdoc'].join(
-				', '
-			)})`;
-			rQuery += ` AND rd."${this.mapFieldName('rdoc', 'id', true)}" ${queryText} (${keywordIds['rdoc'].join(
-				', '
-			)})`;
-			oQuery += ` AND o."${this.mapFieldName('odoc', 'id', true)}" ${queryText} (${keywordIds['om'].join(', ')})`;
-		}
-
-		for (const setting in jbookSearchSettings) {
-			switch (setting) {
-				case 'reviewStatus':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 1
-					) {
-						const reviewString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (r.review_status IN ${reviewString} OR r.review_status = '' OR r.review_status IS NULL)`;
-							rQuery += ` AND (r.review_status IN ${reviewString} OR r.review_status = '' OR r.review_status IS NULL)`;
-							oQuery += ` AND (r.review_status IN ${reviewString} OR r.review_status = '' OR r.review_status IS NULL)`;
-						} else {
-							pQuery += ` AND r.review_status IN ${reviewString}`;
-							rQuery += ` AND r.review_status IN ${reviewString}`;
-							oQuery += ` AND r.review_status IN ${reviewString}`;
-						}
-					} else if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length === 1
-					) {
-						const searchString = jbookSearchSettings[setting][0];
-						const hasNull = searchString === 'Blank';
-						pQuery += ` AND ${
-							hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`
-						}`;
-						rQuery += ` AND ${
-							hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`
-						}`;
-						oQuery += ` AND ${
-							hasNull ? `r.review_status IS NULL` : `r.review_status = '${jbookSearchSettings[setting]}'`
-						}`;
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND r.review_status = '${jbookSearchSettings[setting]}'`;
-						rQuery += ` AND r.review_status = '${jbookSearchSettings[setting]}'`;
-						oQuery += ` AND r.review_status = '${jbookSearchSettings[setting]}'`;
-					}
-					break;
-				// review-specific filters
-				case 'primaryClassLabel':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (r."search_label" IN ${fieldString} OR r."search_label" = '' OR r."search_label" IS NULL)`;
-							rQuery += ` AND (r."search_label" IN ${fieldString} OR r."search_label" = '' OR r."search_label" IS NULL)`;
-							oQuery += ` AND (r."search_label" IN ${fieldString} OR r."search_label" = '' OR r."search_label" IS NULL)`;
-						} else {
-							pQuery += ` AND r."search_label" IN ${fieldString}`;
-							rQuery += ` AND r."search_label" IN ${fieldString}`;
-							oQuery += ` AND r."search_label" IN ${fieldString}`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND r."search_label" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						rQuery += ` AND r."search_label" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						oQuery += ` AND r."search_label" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					}
-					break;
-				case 'serviceReviewer':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" = '' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IS NULL)`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" = '' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IS NULL)`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" = '' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" IS NULL)`;
-						} else {
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString})`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString})`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'serviceReviewer',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'serviceSecondaryReviewer',
-								true
-							)}" IN ${fieldString})`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND (r."${this.mapFieldName('review', 'serviceReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-						rQuery += ` AND (r."${this.mapFieldName('review', 'serviceReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-						oQuery += ` AND (r."${this.mapFieldName('review', 'serviceReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'serviceSecondaryReviewer', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-					}
-					break;
-				case 'pocReviewer':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-						} else {
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'servicePOCName',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'altPOCName',
-								true
-							)}" IN ${fieldString})`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'servicePOCName',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'altPOCName',
-								true
-							)}" IN ${fieldString})`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								'servicePOCName',
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								'altPOCName',
-								true
-							)}" IN ${fieldString})`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND (r."${this.mapFieldName('review', 'servicePOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'altPOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-						rQuery += ` AND (r."${this.mapFieldName('review', 'servicePOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'altPOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-						oQuery += ` AND (r."${this.mapFieldName('review', 'servicePOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%' OR r."${this.mapFieldName('review', 'altPOCName', true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%')`;
-					}
-					break;
-				case 'sourceTag':
-				case 'primaryReviewer':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							rQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-							oQuery += ` AND (r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" IN ${fieldString} OR r."${this.mapFieldName(
-								'review',
-								setting,
-								true
-							)}" = '' OR r."${this.mapFieldName('review', setting, true)}" IS NULL)`;
-						} else {
-							pQuery += ` AND r."${this.mapFieldName('review', setting, true)}" IN ${fieldString}`;
-							rQuery += ` AND r."${this.mapFieldName('review', setting, true)}" IN ${fieldString}`;
-							oQuery += ` AND r."${this.mapFieldName('review', setting, true)}" IN ${fieldString}`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND r."${this.mapFieldName('review', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-						rQuery += ` AND r."${this.mapFieldName('review', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-						oQuery += ` AND r."${this.mapFieldName('review', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-					}
-					break;
-				case 'serviceAgency':
-				case 'budgetYear':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const yearString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						const hasNull = jbookSearchSettings[setting].includes('Blank');
-						if (hasNull) {
-							pQuery += ` AND (p."${this.mapFieldName(
-								'pdoc',
-								setting,
-								true
-							)}" IN ${yearString} OR p."${this.mapFieldName(
-								'pdoc',
-								setting,
-								true
-							)}" = '' OR p."${this.mapFieldName('pdoc', setting, true)}" IS NULL )`;
-							rQuery += ` AND (rd."${this.mapFieldName(
-								'rdoc',
-								setting,
-								true
-							)}" IN ${yearString} OR rd."${this.mapFieldName(
-								'rdoc',
-								setting,
-								true
-							)}" = '' OR rd."${this.mapFieldName('rdoc', setting, true)}" IS NULL)`;
-							oQuery += ` AND (o."${this.mapFieldName(
-								'odoc',
-								setting,
-								true
-							)}" IN ${yearString} OR o."${this.mapFieldName(
-								'odoc',
-								setting,
-								true
-							)}" = '' OR o."${this.mapFieldName('odoc', setting, true)}" IS NULL)`;
-						} else {
-							pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" IN ${yearString}`;
-							rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" IN ${yearString}`;
-							oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" IN ${yearString}`;
-						}
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-						rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-						oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${
-							jbookSearchSettings[setting]
-						}%'`;
-					}
-					break;
-				case 'programElement':
-					pQuery += ` AND p."P40-01_LI_Number" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					oQuery += ` AND (o."${this.mapFieldName('odoc', 'programElement', true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%' OR o."${this.mapFieldName('odoc', 'budgetLineItem', true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%')`;
-					break;
-				case 'projectNum':
-					pQuery += ` AND p."P40-01_LI_Number" ILIKE 'THIS IS HERE TO MAKE SURE YOU DONT GET RESULTS'`;
-					rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					break;
-				case 'projectTitle':
-					pQuery += ` AND p."${this.mapFieldName('pdoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					rQuery += ` AND rd."${this.mapFieldName('rdoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					oQuery += ` AND o."${this.mapFieldName('odoc', setting, true)}" ILIKE '%${
-						jbookSearchSettings[setting]
-					}%'`;
-					break;
-				default:
-					break;
-			}
-		}
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildWhereQueryForUserDash(jbookSearchSettings) {
-		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
-		let rQueryFilter = `rd."PE_Num" is not null AND rd."PE_Num" != '' AND rd."Proj_Number" is not null AND rd."Proj_Number" != '' AND rd."Proj_Title" is not null AND rd."Proj_Title" != ''`;
-		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
-
-		const useAND = Object.keys(jbookSearchSettings).length > 1;
-
-		let pQuery = ` WHERE ${pQueryFilter}${useAND ? ' AND (' : ''}`;
-		let rQuery = ` WHERE ${rQueryFilter}${useAND ? ' AND (' : ''}`;
-		let oQuery = ` WHERE ${oQueryFilter}${useAND ? ' AND (' : ''}`;
-
-		Object.keys(jbookSearchSettings).forEach((setting, i) => {
-			switch (setting) {
-				case 'primaryReviewerForUserDash':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" IN ${fieldString}`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" IN ${fieldString}`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" IN ${fieldString}`;
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}r."${this.mapFieldName(
-							'review',
-							'primaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%'`;
-					}
-					break;
-				case 'serviceReviewerForUserDash':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" IN ${fieldString})`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" IN ${fieldString})`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" IN ${fieldString})`;
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'serviceReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'serviceSecondaryReviewer',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-					}
-					break;
-				case 'pocReviewerEmailForUserDash':
-					if (
-						jbookSearchSettings[setting] &&
-						Array.isArray(jbookSearchSettings[setting]) &&
-						jbookSearchSettings[setting].length > 0
-					) {
-						const fieldString = `('${jbookSearchSettings[setting].join("', '")}')`;
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" IN ${fieldString})`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" IN ${fieldString})`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" IN ${fieldString} OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" IN ${fieldString})`;
-					} else if (typeof jbookSearchSettings[setting] === 'string') {
-						pQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-						rQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-						oQuery += `${useAND ? (i > 0 ? ' OR ' : '') : ' AND '}(r."${this.mapFieldName(
-							'review',
-							'servicePOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%' OR r."${this.mapFieldName(
-							'review',
-							'altPOCEmail',
-							true
-						)}" ILIKE '%${jbookSearchSettings[setting]}%')`;
-					}
-					break;
-				default:
-					break;
-			}
-		});
-
-		if (Object.keys(jbookSearchSettings).length > 1) {
-			pQuery += ')';
-			rQuery += ')';
-			oQuery += ')';
-		}
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildStatusUpdateWhereQuery(year = '2022') {
-		let pQueryFilter = `"P40-01_LI_Number" is not null AND "P40-01_LI_Number" != '' AND "P40-02_LI_Title" is not null AND "P40-02_LI_Title" != ''`;
-		let rQueryFilter = `"PE_Num" is not null AND "PE_Num" != '' AND "Proj_Number" is not null AND "Proj_Number" != '' AND "Proj_Title" is not null AND "Proj_Title" != ''`;
-		let oQueryFilter = `"account" is not null AND "account" != '' AND "account_title" is not null AND "account_title" != '' AND "budget_activity_title" is not null AND "budget_activity_title" != ''`;
-
-		let pQuery = ` WHERE ${pQueryFilter} AND r."primary_reviewer" IS NOT NULL AND r."primary_reviewer" != '' AND r."primary_reviewer" != 'Unknown' AND r."budget_year" = '${year}'`;
-		let rQuery = ` WHERE ${rQueryFilter} AND r."primary_reviewer" IS NOT NULL AND r."primary_reviewer" != '' AND r."primary_reviewer" != 'Unknown' AND r."budget_year" = '${year}'`;
-		let oQuery = ` WHERE ${oQueryFilter} AND r."primary_reviewer" IS NOT NULL AND r."primary_reviewer" != '' AND r."primary_reviewer" != 'Unknown' AND r."budget_year" = '${year}'`;
-
-		return [pQuery, rQuery, oQuery];
-	}
-
-	buildEndQuery(sort) {
-		let newQuery = '';
-		if (sort && sort.length) {
-			if (sort[0].id === 'serviceReviewer') {
-				newQuery += ` ORDER BY "serviceSecondaryReviewer" ${sort[0].desc ? 'DESC' : 'ASC'}, "serviceReviewer" ${
-					sort[0].desc ? 'DESC' : 'ASC'
-				}`;
-			}
-			if (sort[0].id === 'pocReviewer') {
-				newQuery += ` ORDER BY "altPOCName" ${sort[0].desc ? 'DESC' : 'ASC'}, "servicePOCName" ${
-					sort[0].desc ? 'DESC' : 'ASC'
-				}`;
-			} else {
-				newQuery += ` ORDER BY "${sort[0].id}" ${sort[0].desc ? 'DESC' : 'ASC'}`;
-			}
-		}
-		return newQuery;
 	}
 
 	async gatherExpansionTerms(body, userId) {
@@ -966,15 +143,11 @@ class JBookSearchUtility {
 			let expandedTerm = await this.redisDB.get(upperTerm);
 			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
 			let compressedTerm = await this.redisDB.get(lowerTerm);
-			if (expandedTerm) {
-				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-				}
+			if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
+				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
-			if (compressedTerm) {
-				if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-				}
+			if (compressedTerm && !abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
+				abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
 			}
 		}
 
@@ -1009,12 +182,42 @@ class JBookSearchUtility {
 				}
 			}
 		}
-		//const synonyms = thesaurus.lookUp(lookUpTerm);
+
 		let text = searchText;
 		if (!useText && termsArray && termsArray.length && termsArray[0]) {
 			text = termsArray[0];
 		}
 		return [synList, text];
+	}
+
+	getPageHits(hit) {
+		let pageHits = [];
+
+		if (hit.inner_hits) {
+			Object.keys(hit.inner_hits).forEach((hitKey) => {
+				hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
+					Object.keys(innerHit.highlight).forEach((highlightKey) => {
+						if (Mappings.esTopLevelFieldsNameMapping[hitKey] !== undefined) {
+							pageHits.push({
+								title: Mappings.esTopLevelFieldsNameMapping[hitKey],
+								snippet: innerHit.highlight[highlightKey][0],
+							});
+						}
+					});
+				});
+			});
+		}
+
+		if (hit.highlight) {
+			Object.keys(hit.highlight).forEach((hitKey) => {
+				pageHits.push({
+					title: Mappings.esTopLevelFieldsNameMapping[hitKey],
+					snippet: hit.highlight[hitKey][0],
+				});
+			});
+		}
+
+		return pageHits;
 	}
 
 	cleanESResults(esResults, userId) {
@@ -1043,39 +246,16 @@ class JBookSearchUtility {
 			hits.forEach((hit) => {
 				let result = this.transformEsFields(hit._source);
 
-				result.hasKeywords = result.keywords && result.keywords.length > 0;
+				result.hasKeywords = result?.keywords?.length > 0;
 				if (result.hasKeywords) {
 					result.keywords = result.keywords.map((keyword) => {
 						return keyword.keyword_s;
 					});
 				}
+
 				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
 
-				result.pageHits = [];
-
-				if (hit.inner_hits) {
-					Object.keys(hit.inner_hits).forEach((hitKey) => {
-						hit.inner_hits[hitKey].hits.hits.forEach((innerHit) => {
-							Object.keys(innerHit.highlight).forEach((highlightKey) => {
-								if (esTopLevelFieldsNameMapping[hitKey] !== undefined) {
-									result.pageHits.push({
-										title: esTopLevelFieldsNameMapping[hitKey],
-										snippet: innerHit.highlight[highlightKey][0],
-									});
-								}
-							});
-						});
-					});
-				}
-
-				if (hit.highlight) {
-					Object.keys(hit.highlight).forEach((hitKey) => {
-						result.pageHits.push({
-							title: esTopLevelFieldsNameMapping[hitKey],
-							snippet: hit.highlight[hitKey][0],
-						});
-					});
-				}
+				result.pageHits = this.getPageHits(hit);
 
 				switch (result.budgetType) {
 					case 'rdte':
@@ -1098,6 +278,7 @@ class JBookSearchUtility {
 
 			return searchResults;
 		} catch (e) {
+			console.log(e);
 			const { message } = e;
 			this.logger.error(message, '8V1IZLH', userId);
 			return results;
@@ -1108,7 +289,7 @@ class JBookSearchUtility {
 		let result = {};
 		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
 
-		esInnerHitFields.forEach((innerField) => {
+		Mappings.esInnerHitFields.forEach((innerField) => {
 			arrayFields.push(innerField.path);
 		});
 
@@ -1385,18 +566,18 @@ class JBookSearchUtility {
 				query.query.bool.must.push({
 					multi_match: {
 						query: `${parsedQuery}`,
-						fields: esTopLevelFields,
+						fields: Mappings.esTopLevelFields,
 						type: 'best_fields',
 						operator: `${operator}`,
 					},
 				});
 			}
 
-			esTopLevelFields.forEach((field) => {
+			Mappings.esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
 			});
 
-			esInnerHitFields.forEach((innerField) => {
+			Mappings.esInnerHitFields.forEach((innerField) => {
 				const nested = {
 					nested: {
 						path: innerField.path,
@@ -1458,38 +639,39 @@ class JBookSearchUtility {
 			});
 
 			let sortText = jbookSearchSettings.sort[0].id;
-			if (!sortSelected && searchText && searchText !== '') {
+			if (!sortSelected && searchText !== '') {
 				sortText = 'Relevance';
 			}
 
+			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
 			// SORT
 			switch (sortText) {
 				case 'relevance':
-					query.sort = [{ _score: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ _score: { order: sort } }];
 					break;
 				case 'budgetYear':
-					query.sort = [{ budgetYear_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ budgetYear_s: { order: sort } }];
 					break;
 				case 'programElement':
-					query.sort = [{ programElement_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ programElement_s: { order: sort } }];
 					break;
 				case 'projectNum':
-					query.sort = [{ projectNum_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ projectNum_s: { order: sort } }];
 					break;
 				case 'projectTitle':
-					query.sort = [{ projectTitle_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ projectTitle_s: { order: sort } }];
 					break;
 				case 'serviceAgency':
-					query.sort = [{ serviceAgency_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ serviceAgency_s: { order: sort } }];
 					break;
 				case 'budgetLineItem':
-					query.sort = [{ budgetLineItem_s: { order: jbookSearchSettings.sort[0].desc ? 'desc' : 'asc' } }];
+					query.sort = [{ budgetLineItem_s: { order: sort } }];
 					break;
 				default:
 					break;
 			}
 
-			// console.log(JSON.stringify(query));
+			console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
@@ -1499,115 +681,47 @@ class JBookSearchUtility {
 		}
 	}
 
-	// creates the portions of the ES query for filtering based on jbookSearchSettings
-	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
-	getJbookESFilters(jbookSearchSettings, serviceAgencyMappings) {
-		let filterQueries = [];
-		try {
-			if (jbookSearchSettings) {
-				// Budget Activity
-				if (jbookSearchSettings.budgetActivity) {
-					filterQueries.push({
-						query_string: {
-							query: `*${jbookSearchSettings.budgetActivity}*`,
-							default_field: 'budgetActivityNumber_s',
-						},
-					});
-				}
+	handleBudgetSubPrimaryReviewFilter(jbookSearchSettings) {
+		let shouldQuery = {
+			bool: {
+				should: [],
+			},
+		};
+		if (jbookSearchSettings.budgetSubActivity) {
+			shouldQuery.bool.should.push({
+				query_string: {
+					query: `*${jbookSearchSettings.budgetSubActivity}*`,
+					default_field: 'P40-13_BSA_Title_t',
+				},
+			});
 
-				let shouldQuery = {
-					bool: {
-						should: [],
-					},
-				};
+			shouldQuery.bool.should.push({
+				query_string: {
+					query: `*${jbookSearchSettings.budgetSubActivity}*`,
+					default_field: 'budgetActivityTitle_t',
+				},
+			});
+		}
 
-				// Budget Sub Activity
-				if (jbookSearchSettings.budgetSubActivity || jbookSearchSettings.primaryReviewStatus) {
-					if (jbookSearchSettings.budgetSubActivity) {
-						shouldQuery.bool.should.push({
-							query_string: {
-								query: `*${jbookSearchSettings.budgetSubActivity}*`,
-								default_field: 'P40-13_BSA_Title_t',
-							},
-						});
-
-						shouldQuery.bool.should.push({
-							query_string: {
-								query: `*${jbookSearchSettings.budgetSubActivity}*`,
-								default_field: 'budgetActivityTitle_t',
-							},
-						});
-					}
-
-					if (jbookSearchSettings.primaryReviewStatus) {
-						jbookSearchSettings.primaryReviewStatus.forEach((status) => {
-							if (status === 'Not Reviewed') {
-								shouldQuery.bool.should.push({
-									bool: {
-										must_not: [
-											{
-												nested: {
-													path: 'review_n',
-													query: {
-														bool: {
-															must: [
-																{
-																	term: {
-																		'review_n.primary_review_status_s':
-																			'Finished Review',
-																	},
-																},
-																{
-																	term: {
-																		'review_n.portfolio_name_s':
-																			jbookSearchSettings.selectedPortfolio,
-																	},
-																},
-															],
-														},
-													},
-												},
-											},
-											{
-												nested: {
-													path: 'review_n',
-													query: {
-														bool: {
-															must: [
-																{
-																	term: {
-																		'review_n.primary_review_status_s':
-																			'Partial Review',
-																	},
-																},
-																{
-																	term: {
-																		'review_n.portfolio_name_s':
-																			jbookSearchSettings.selectedPortfolio,
-																	},
-																},
-															],
-														},
-													},
-												},
-											},
-										],
-									},
-								});
-							} else {
-								shouldQuery.bool.should.push({
+		if (jbookSearchSettings.primaryReviewStatus) {
+			jbookSearchSettings.primaryReviewStatus.forEach((status) => {
+				if (status === 'Not Reviewed') {
+					shouldQuery.bool.should.push({
+						bool: {
+							must_not: [
+								{
 									nested: {
 										path: 'review_n',
 										query: {
 											bool: {
 												must: [
 													{
-														match: {
-															'review_n.primary_review_status_s': status,
+														term: {
+															'review_n.primary_review_status_s': 'Finished Review',
 														},
 													},
 													{
-														match: {
+														term: {
 															'review_n.portfolio_name_s':
 																jbookSearchSettings.selectedPortfolio,
 														},
@@ -1616,135 +730,235 @@ class JBookSearchUtility {
 											},
 										},
 									},
-								});
+								},
+								{
+									nested: {
+										path: 'review_n',
+										query: {
+											bool: {
+												must: [
+													{
+														term: {
+															'review_n.primary_review_status_s': 'Partial Review',
+														},
+													},
+													{
+														term: {
+															'review_n.portfolio_name_s':
+																jbookSearchSettings.selectedPortfolio,
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+							],
+						},
+					});
+				} else {
+					shouldQuery.bool.should.push({
+						nested: {
+							path: 'review_n',
+							query: {
+								bool: {
+									must: [
+										{
+											match: {
+												'review_n.primary_review_status_s': status,
+											},
+										},
+										{
+											match: {
+												'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio,
+											},
+										},
+									],
+								},
+							},
+						},
+					});
+				}
+			});
+		}
+		return shouldQuery;
+	}
+
+	handleRangeFilter(jbookSearchSettings, min, max, field) {
+		const rangeQuery = {
+			range: {
+				[field]: {},
+			},
+		};
+
+		if (jbookSearchSettings[min]) {
+			totalCostRange.range[field].gte = jbookSearchSettings[min];
+		}
+
+		if (jbookSearchSettings[max]) {
+			totalCostRange.range[field].lte = jbookSearchSettings[max];
+		}
+
+		return rangeQuery;
+	}
+
+	// creates the portions of the ES query for filtering based on jbookSearchSettings
+	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
+	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
+		let filterQueries = [];
+		try {
+			let settingKeys = Object.keys(jbookSearchSettings);
+			for (const key of settingKeys) {
+				switch (key) {
+					// Review Status
+					case 'reviewStatus':
+						filterQueries.push({
+							nested: {
+								path: 'review_n',
+								query: {
+									bool: {
+										must: [
+											{
+												terms: {
+													'review_n.review_status_s': jbookSearchSettings.reviewStatus,
+												},
+											},
+											{
+												term: {
+													'review_n.portfolio_name_s': jbookSearchSettings.selectedPortfolio,
+												},
+											},
+										],
+									},
+								},
+							},
+						});
+						break;
+
+					// Budget Activity
+					case 'budgetActivity':
+						filterQueries.push({
+							query_string: {
+								query: `*${jbookSearchSettings.budgetActivity}*`,
+								default_field: 'budgetActivityNumber_s',
+							},
+						});
+						break;
+
+					// Budget Sub Activity
+					case 'budgetSubActivity':
+					case 'primaryReviewStatus':
+						filterQueries.push(this.handleBudgetSubPrimaryReviewFilter(jbookSearchSettings));
+						break;
+
+					// MainAccount
+					case 'appropriationNumber':
+						filterQueries.push({
+							query_string: {
+								query: `*${jbookSearchSettings.appropriationNumber}*`,
+								default_field: 'appropriationNumber_s',
+							},
+						});
+						break;
+
+					// Total Funding
+					case 'minTotalCost':
+					case 'maxTotalCost':
+						filterQueries.push(
+							this.handleRangeFilter(jbookSearchSettings, 'minTotalCost', 'maxTotalCost', 'totalCost_d')
+						);
+						break;
+
+					// BY1 Funding
+					case 'minBY1Funding':
+					case 'maxBY1Funding':
+						filterQueries.push(
+							this.handleRangeFilter(
+								jbookSearchSettings,
+								'minBY1Funding',
+								'maxBY1Funding',
+								'currentYearAmount_d'
+							)
+						);
+						break;
+
+					// Budget Type
+					case 'budgetType':
+						const budgetTypesTemp = [];
+
+						jbookSearchSettings.budgetType.forEach((budgetType) => {
+							switch (budgetType) {
+								case 'RDT&E':
+									budgetTypesTemp.push('rdte');
+									break;
+								case 'O&M':
+									budgetTypesTemp.push('om');
+									break;
+								case 'Procurement':
+									budgetTypesTemp.push('procurement');
+									break;
+								default:
+									break;
 							}
 						});
-					}
 
-					filterQueries.push(shouldQuery);
-				}
-
-				// Main Account
-				if (jbookSearchSettings.appropriationNumber) {
-					filterQueries.push({
-						query_string: {
-							query: `*${jbookSearchSettings.appropriationNumber}*`,
-							default_field: 'appropriationNumber_s',
-						},
-					});
-				}
-
-				// Total Funding
-				if (jbookSearchSettings.minTotalCost || jbookSearchSettings.maxTotalCost) {
-					const rangeQuery = {
-						range: {
-							totalCost_d: {},
-						},
-					};
-
-					if (jbookSearchSettings.minTotalCost) {
-						rangeQuery.range.totalCost_d.gte = jbookSearchSettings.minTotalCost;
-					}
-
-					if (jbookSearchSettings.maxTotalCost) {
-						rangeQuery.range.totalCost_d.lte = jbookSearchSettings.maxTotalCost;
-					}
-
-					filterQueries.push(rangeQuery);
-				}
-
-				// BY1 Funding
-				if (jbookSearchSettings.minBY1Funding || jbookSearchSettings.maxBY1Funding) {
-					const rangeQuery = {
-						range: {
-							currentYearAmount_d: {},
-						},
-					};
-
-					if (jbookSearchSettings.minBY1Funding) {
-						rangeQuery.range.currentYearAmount_d.gte = jbookSearchSettings.minBY1Funding;
-					}
-
-					if (jbookSearchSettings.maxBY1Funding) {
-						rangeQuery.range.currentYearAmount_d.lte = jbookSearchSettings.maxBY1Funding;
-					}
-
-					filterQueries.push(rangeQuery);
-				}
-
-				// Budget Type filter
-				if (jbookSearchSettings.budgetType) {
-					const budgetTypesTemp = [];
-
-					jbookSearchSettings.budgetType.forEach((budgetType) => {
-						switch (budgetType) {
-							case 'RDT&E':
-								budgetTypesTemp.push('rdte');
-								break;
-							case 'O&M':
-								budgetTypesTemp.push('om');
-								break;
-							case 'Procurement':
-								budgetTypesTemp.push('procurement');
-								break;
-							default:
-								break;
-						}
-					});
-
-					filterQueries.push({
-						terms: {
-							type_s: budgetTypesTemp,
-						},
-					});
-				}
-
-				// Budget Year filter
-				if (jbookSearchSettings.budgetYear) {
-					filterQueries.push({
-						terms: {
-							budgetYear_s: jbookSearchSettings.budgetYear,
-						},
-					});
-				}
-
-				// Program Element / BLI filter
-				if (jbookSearchSettings.programElement) {
-					filterQueries.push({
-						query_string: {
-							query: `*${jbookSearchSettings.programElement}*`,
-							default_field: 'budgetLineItem_t',
-						},
-					});
-				}
-
-				// Project Number filter (doesn't appear in kibana)
-				if (jbookSearchSettings.projectNum) {
-					filterQueries.push({
-						query_string: {
-							query: `*${jbookSearchSettings.projectNum}*`,
-							default_field: 'projectNum_s',
-						},
-					});
-				}
-
-				// Service Agency filter
-				if (jbookSearchSettings.serviceAgency) {
-					const convertedAgencies = [];
-
-					jbookSearchSettings.serviceAgency.forEach((agency) => {
-						Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
-							if (serviceAgencyMappings[agencyKey] === agency) {
-								convertedAgencies.push(agencyKey);
-							}
+						filterQueries.push({
+							terms: {
+								type_s: budgetTypesTemp,
+							},
 						});
-					});
+						break;
 
-					filterQueries.push({
-						terms: {
-							serviceAgency_s: convertedAgencies,
-						},
-					});
+					// Budget Year
+					case 'budgetYear':
+						filterQueries.push({
+							terms: {
+								budgetYear_s: jbookSearchSettings.budgetYear,
+							},
+						});
+						break;
+
+					// Program Element / BLI
+					case 'programElement':
+						filterQueries.push({
+							query_string: {
+								query: `*${jbookSearchSettings.programElement}*`,
+								default_field: 'budgetLineItem_s',
+							},
+						});
+						break;
+
+					// Project Number
+					case 'projectNum':
+						filterQueries.push({
+							query_string: {
+								query: `*${jbookSearchSettings.projectNum}*`,
+								default_field: 'projectNum_s',
+							},
+						});
+						break;
+
+					// Service Agency
+					case 'serviceAgency':
+						const convertedAgencies = [];
+
+						jbookSearchSettings.serviceAgency.forEach((agency) => {
+							Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
+								if (serviceAgencyMappings[agencyKey] === agency) {
+									convertedAgencies.push(agencyKey);
+								}
+							});
+						});
+
+						filterQueries.push({
+							terms: {
+								serviceAgency_s: convertedAgencies,
+							},
+						});
+						break;
+					default:
+						console.log('Jbook search setting not found');
+						break;
 				}
 			}
 		} catch (e) {
@@ -1758,19 +972,6 @@ class JBookSearchUtility {
 
 	getJBookESReviewFilters(jbookSearchSettings) {
 		const nestedMustObjects = [];
-		// Review Status
-		if (jbookSearchSettings.reviewStatus) {
-			nestedMustObjects.push({
-				nested: {
-					path: 'review_n',
-					query: {
-						terms: {
-							'review_n.review_status_s': jbookSearchSettings.reviewStatus,
-						},
-					},
-				},
-			});
-		}
 
 		// Primary Reviewer
 		if (jbookSearchSettings.primaryReviewer) {
