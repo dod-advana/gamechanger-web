@@ -764,57 +764,47 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getReviewer(jbookSearchSettings, email, type) {
+		let reviewer = await this.reviewer.findOne({
+			where: {
+				type: type,
+				email: email,
+			},
+			raw: true,
+		});
+
+		if (reviewer) {
+			reviewer = `${reviewer.name}${reviewer.organization?.length > 1 ? '(' + reviewer.organization + ')' : ''}`;
+
+			switch (type) {
+				case 'primary':
+					jbookSearchSettings[type + 'ReviewerForUserDash'] = reviewer;
+					break;
+				case 'service':
+					jbookSearchSettings[type + 'ReviewerForUserDash'] = [reviewer];
+					break;
+				case 'secondary':
+					if (jbookSearchSettings.hasOwnProperty(serviceReviewer)) {
+						jbookSearchSettings['serviceReviewerForUserDash'].push(reviewer);
+					} else {
+						jbookSearchSettings['serviceReviewerForUserDash'] = [reviewer];
+					}
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
 	async setJbookSearchSettingReviewers(permissions, email, jbookSearchSettings) {
 		if (permissions.primary) {
-			let primaryReviewer = await this.reviewer.findOne({
-				where: {
-					type: 'primary',
-					email: email,
-				},
-				raw: true,
-			});
-
-			if (primaryReviewer) {
-				primaryReviewer = `${primaryReviewer.name}${
-					primaryReviewer.organization?.length > 1 ? ` (${primaryReviewer.organization})` : ''
-				}`;
-				jbookSearchSettings['primaryReviewerForUserDash'] = primaryReviewer;
-			}
+			await this.getReviewer(jbookSearchSettings, email, 'primary');
 		}
 
 		if (permissions.service) {
-			let serviceReviewer = await this.reviewer.findOne({
-				where: {
-					type: 'service',
-					email: email,
-				},
-				raw: true,
-			});
-			if (serviceReviewer) {
-				serviceReviewer = `${serviceReviewer.name}${
-					serviceReviewer.organization?.length > 1 ? ` (${serviceReviewer.organization})` : ''
-				}`;
-				jbookSearchSettings['serviceReviewerForUserDash'] = [serviceReviewer];
-			}
+			await this.getReviewer(jbookSearchSettings, email, 'service');
 
-			let secondaryReviewer = await this.reviewer.findOne({
-				where: {
-					type: 'secondary',
-					email: email,
-				},
-				raw: true,
-			});
-			if (secondaryReviewer !== null) {
-				secondaryReviewer = `${secondaryReviewer.name}${
-					secondaryReviewer.organization?.length > 1 ? ` (${secondaryReviewer.organization})` : ''
-				}`;
-
-				if (jbookSearchSettings.hasOwnProperty(serviceReviewer)) {
-					jbookSearchSettings['serviceReviewerForUserDash'].push(secondaryReviewer);
-				} else {
-					jbookSearchSettings['serviceReviewerForUserDash'] = [secondaryReviewer];
-				}
-			}
+			await this.getReviewer(jbookSearchSettings, email, 'secondary');
 		}
 
 		if (permissions.poc) {
