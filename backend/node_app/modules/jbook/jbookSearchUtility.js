@@ -1459,7 +1459,7 @@ class JBookSearchUtility {
 
 			let sortText = jbookSearchSettings.sort[0].id;
 			if (!sortSelected && searchText && searchText !== '') {
-				sortText = 'Relevance';
+				sortText = 'relevance';
 			}
 
 			// SORT
