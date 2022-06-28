@@ -499,13 +499,22 @@ const getCardHeaderHandler = (props) => {
 	);
 };
 
-const getCollibraHighlights = (item) => {
+const getCollibraHighlights = (item, showFavorites) => {
 	const tmpHighlights = [];
-	item.highlights.forEach((highlight) => {
-		if (highlight.field && highlight.field.indexOf('attribute') < 0) {
-			tmpHighlights.push(highlight);
-		}
-	});
+
+	if (showFavorites) {
+		item.attributes?.forEach((attr) => {
+			if (attr.field && attr.field.indexOf('attribute') < 0) {
+				tmpHighlights.push({ ...attr, fragment: attr.value });
+			}
+		});
+	} else {
+		item.highlights?.forEach((highlight) => {
+			if (highlight.field && highlight.field.indexOf('attribute') < 0) {
+				tmpHighlights.push(highlight);
+			}
+		});
+	}
 	return tmpHighlights;
 };
 
@@ -550,10 +559,10 @@ const pageHits = (highlights, hoveredHit, setHoveredHit, field = 'title') => {
 
 const getDataSourcesDatabasesFrontView = (props) => {
 	const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+	let tmpHighlights, contextHtml;
 
-	const tmpHighlights = getCollibraHighlights(item);
-
-	const contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
+	tmpHighlights = getCollibraHighlights(item, state.showFavorites);
+	contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
 
 	const getDSDBPageHits = () => {
 		return _.chain(tmpHighlights)
@@ -593,7 +602,7 @@ const getDataSourcesDatabasesFrontView = (props) => {
 		return (
 			<StyledListViewFrontCardContent>
 				<GCAccordion
-					header={'KEYWORD HITS'}
+					header={state.showFavorites ? 'KEY METADATA' : 'KEYWORD HITS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -744,17 +753,21 @@ const cardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						<GCAccordion
-							header={'KEYWORD HITS'}
+							header={state.showFavorites ? 'DESCRIPTION' : 'KEYWORD HITS'}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+							{state.showFavorites ? (
+								<div className={'description'}>{item.description}</div>
+							) : (
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
 								</div>
-							</div>
+							)}
 						</GCAccordion>
 						<GCAccordion
 							header={'METADATA'}
@@ -776,18 +789,22 @@ const cardHandler = {
 						<div className={'image-container'}>
 							<img src={getThumbnail()} style={styles.image} alt={name} />
 						</div>
-						<div className={'hits-container'}>
-							<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
-							<div className={'expanded-metadata'}>
-								<blockquote
-									className="searchdemo-blockquote"
-									style={{ maxHeight: 90 }}
-									dangerouslySetInnerHTML={{
-										__html: sanitizeHtml(contextHtml),
-									}}
-								/>
+						{state.showFavorites ? (
+							<div className={'description'}>{item.description}</div>
+						) : (
+							<div className={'hits-container'}>
+								<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
+								<div className={'expanded-metadata'}>
+									<blockquote
+										className="searchdemo-blockquote"
+										style={{ maxHeight: 90 }}
+										dangerouslySetInnerHTML={{
+											__html: sanitizeHtml(contextHtml),
+										}}
+									/>
+								</div>
 							</div>
-						</div>
+						)}
 					</StyledFrontCardContent>
 				);
 			}
@@ -942,7 +959,7 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			const url = getUrl(item, getRestricted(item, 'dataSource'), 'dataSources');
+			const url = getUrl(item, getRestricted(item, 'dataSources'), 'dataSources');
 
 			return (
 				<>
@@ -1003,7 +1020,7 @@ const cardHandler = {
 		getCardBack: (props) => {
 			const { item, state } = props;
 
-			const metaData = getMetadataForPropertyTable(item, 'database');
+			const metaData = getMetadataForPropertyTable(item, 'databases');
 
 			return (
 				<div>
@@ -1026,7 +1043,7 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			const url = getUrl(item, getRestricted(item, 'models'), 'database');
+			const url = getUrl(item, getRestricted(item, 'models'), 'databases');
 
 			return (
 				<>
@@ -1069,7 +1086,7 @@ const cardHandler = {
 		},
 
 		getDisplayTitle: (item) => {
-			return getDisplayTitle(item, 'database');
+			return getDisplayTitle(item, 'databases');
 		},
 	},
 
@@ -1085,9 +1102,10 @@ const cardHandler = {
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
 
-			const tmpHighlights = getCollibraHighlights(item);
+			let tmpHighlights, contextHtml;
 
-			const contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
+			tmpHighlights = getCollibraHighlights(item, state.showFavorites);
+			contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
 
 			const modelPageHits = () => {
 				return _.chain(tmpHighlights)
@@ -1131,7 +1149,7 @@ const cardHandler = {
 				return (
 					<StyledListViewFrontCardContent>
 						<GCAccordion
-							header={'KEYWORD HITS'}
+							header={state.showFavorites ? 'KEY METADATA' : 'KEYWORD HITS'}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}

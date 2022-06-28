@@ -57,6 +57,8 @@ class GlobalSearchHandler extends SearchHandler {
 			limit,
 			offset,
 			category,
+			favoriteApps,
+			isForFavorites,
 		} = req.body;
 
 		try {
@@ -75,16 +77,32 @@ class GlobalSearchHandler extends SearchHandler {
 
 			switch (category) {
 				case 'applications':
-					searchResults[category] = await this.getApplicationResults(searchText, offset, limit, userId);
+					searchResults[category] = await this.getApplicationResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId
+					);
 					break;
 				case 'dashboards':
-					searchResults[category] = await this.getDashboardResults(searchText, offset, limit, userId);
+					searchResults[category] = await this.getDashboardResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId
+					);
 					break;
 				case 'dataSources':
 					searchResults[category] = await this.getDataCatalogResults(
 						searchText,
 						offset,
 						limit,
+						favoriteApps,
+						isForFavorites,
 						userId,
 						'Data Source'
 					);
@@ -94,6 +112,8 @@ class GlobalSearchHandler extends SearchHandler {
 						searchText,
 						offset,
 						limit,
+						favoriteApps,
+						isForFavorites,
 						userId,
 						'Database'
 					);
@@ -103,6 +123,8 @@ class GlobalSearchHandler extends SearchHandler {
 						searchText,
 						offset,
 						limit,
+						favoriteApps,
+						isForFavorites,
 						userId,
 						'AI/ML Model'
 					);
@@ -148,16 +170,32 @@ class GlobalSearchHandler extends SearchHandler {
 		);
 	}
 
-	async getApplicationResults(searchText, offset, limit, userId) {
+	async getApplicationResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
 		try {
 			const t0 = new Date().getTime();
-			const hitQuery = `select description, permission, href, link_label, id
-							  from megamenu_links
-							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
-								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
-			const results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
-			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
-			const tmpReturn = this.generateRespData(apps, appResults, offset, limit);
+			let hitQuery = `select description, permission, href, link_label, id
+				from megamenu_links
+				where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
+				or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
+			if (isForFavorites) {
+				const tmpFavorites = favoriteApps.filter((app) => !isNaN(app));
+				hitQuery = `select description, permission, href, link_label, id
+          from megamenu_links
+          where id in (${tmpFavorites.join(',')})`;
+			}
+			let results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
+			let tmpReturn;
+			if (isForFavorites) {
+				tmpReturn = {
+					totalCount: results.length,
+					count: results.length,
+					results,
+				};
+			} else {
+				const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
+				tmpReturn = this.generateRespData(apps, appResults, offset, limit);
+			}
+
 			const t1 = new Date().getTime();
 			this.logger.info(`Get Application Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'MJ2D6VGTime', userId);
 			return tmpReturn;
@@ -167,14 +205,23 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getDashboardResults(searchText, offset, limit, userId) {
+	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
 		try {
 			const t0 = new Date().getTime();
 			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX };
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms({ searchText });
 			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
 			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
-			const body = { searchText, parsedQuery, searchTerms, plainQuery, limit, offset };
+			const body = {
+				searchText,
+				parsedQuery,
+				searchTerms,
+				plainQuery,
+				limit,
+				offset,
+				favoriteApps,
+				isForFavorites,
+			};
 			const esQuery = getElasticSearchQueryForQlikApps(body, userId, this.logger);
 
 			const esResults = await this.dataLibrary.queryElasticSearch(
@@ -199,13 +246,97 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getDataCatalogResults(searchText, offset, limit, userId, searchType = 'all') {
+	async getDataCatalogResults(searchText, offset, limit, favoriteApps, isForFavorites, userId, searchType = 'all') {
 		const t0 = new Date().getTime();
-		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
-		const qStatus = await this.dcUtils.getQueryableStatuses();
-		if (!searchText) searchText = 'a';
 
 		try {
+			let cleanedData;
+
+			if (isForFavorites) {
+				cleanedData = this.getDataCatalogResultsForFavorites(favoriteApps, userId, searchType);
+			} else {
+				cleanedData = this.getDataCatalogResultsSearch(searchText, offset, limit, userId, searchType);
+			}
+
+			const t1 = new Date().getTime();
+
+			this.logger.info(
+				`Get Data Catalog Results Time for ${searchType}: ${((t1 - t0) / 1000).toFixed(2)}`,
+				'FE656U9Time',
+				userId
+			);
+
+			return cleanedData;
+		} catch (err) {
+			this.logger.error(err, 'FE656U9', userId);
+			return { total: 0, results: [] };
+		}
+	}
+
+	async getDataCatalogResultsForFavorites(favoriteApps, userId, searchType) {
+		try {
+			let tempUrl;
+			const userIds = new Set();
+			const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+
+			// Get all assets
+			const assetCalls = favoriteApps.map((app) => {
+				tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + app;
+				return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			});
+
+			const assetsResults = await Promise.allSettled(assetCalls);
+			const combinedAssetResults = {};
+			const results = [];
+
+			assetsResults.forEach((assetResult) => {
+				if (assetResult.status === 'fulfilled') {
+					const asset = assetResult.value.data;
+					if (searchTypeIds.includes(asset.type.id)) {
+						combinedAssetResults[asset.id] = asset;
+						userIds.add(asset['lastModifiedBy']);
+						results.push({ id: asset.id, resource: asset });
+					}
+				}
+			});
+
+			// Get Attributes
+			const assetAttributeCalls = results.map((result) => {
+				tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
+				return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			});
+
+			const assetAttributesResults = await Promise.allSettled(assetAttributeCalls);
+			const { combinedAttributeResults, attributeIdMap } = this.handleAttributeResults(assetAttributesResults);
+
+			// Get Users Info
+			tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
+			userIds.forEach((usrId) => (tempUrl += '&userId=' + usrId));
+			const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			const combinedUserData = {};
+			userData.results.forEach((data) => {
+				combinedUserData[data.id] = data;
+			});
+
+			return await this.cleanDataCatalogResults(
+				{ results },
+				combinedAssetResults,
+				combinedAttributeResults,
+				attributeIdMap,
+				combinedUserData,
+				userId
+			);
+		} catch (err) {
+			this.logger.error(err, 'KL86OV6', userId);
+			return { total: 0, results: [] };
+		}
+	}
+
+	async getDataCatalogResultsSearch(searchText, offset, limit, userId, searchType) {
+		try {
+			const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+			const qStatus = await this.dcUtils.getQueryableStatuses();
+
 			const defaultSearchOptions = {
 				keywords: this.dcUtils.cleanSearchText(searchText),
 				filters: [
@@ -242,12 +373,14 @@ class GlobalSearchHandler extends SearchHandler {
 					tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
 					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				});
-				const assetsResults = await Promise.all(assetCalls);
+				const assetsResults = await Promise.allSettled(assetCalls);
 				const combinedAssetResults = {};
 				assetsResults.forEach((assetResult) => {
-					const data = assetResult.data;
-					combinedAssetResults[data.id] = data;
-					userIds.add(data['lastModifiedBy']);
+					if (assetResult.status === 'fulfilled') {
+						const data = assetResult.value.data;
+						combinedAssetResults[data.id] = data;
+						userIds.add(data['lastModifiedBy']);
+					}
 				});
 
 				// Get Attributes
@@ -255,21 +388,9 @@ class GlobalSearchHandler extends SearchHandler {
 					tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
 					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
 				});
-				const assetAttributesResults = await Promise.all(assetAttributeCalls);
-				const combinedAttributeResults = {};
-				const attributeIdMap = {};
-				assetAttributesResults.forEach((attributeResult) => {
-					if (attributeResult.data.results.length > 0) {
-						combinedAttributeResults[attributeResult.data.results[0].asset.id] =
-							attributeResult.data.results.map((attrResult) => {
-								attributeIdMap[attrResult.id] = attrResult.type.name;
-								return {
-									field: attrResult.type.name,
-									value: attrResult.value,
-								};
-							});
-					}
-				});
+				const assetAttributesResults = await Promise.allSettled(assetAttributeCalls);
+				const { combinedAttributeResults, attributeIdMap } =
+					this.handleAttributeResults(assetAttributesResults);
 
 				// Get Users Info
 				tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
@@ -289,18 +410,34 @@ class GlobalSearchHandler extends SearchHandler {
 				);
 			}
 
-			const t1 = new Date().getTime();
-			this.logger.info(
-				`Get Data Catalog Results Time for ${searchType}: ${((t1 - t0) / 1000).toFixed(2)}`,
-				'FE656U9Time',
-				userId
-			);
-
 			return cleanedData;
 		} catch (err) {
-			this.logger.error(err, 'FE656U9', userId);
+			this.logger.error(err, 'HEDFA5A', userId);
 			return { total: 0, results: [] };
 		}
+	}
+
+	handleAttributeResults(assetAttributesResults) {
+		const combinedAttributeResults = {};
+		const attributeIdMap = {};
+		assetAttributesResults.forEach((attributeResult) => {
+			if (attributeResult.status === 'fulfilled') {
+				const attributeData = attributeResult.value.data;
+				if (attributeData.results.length > 0) {
+					combinedAttributeResults[attributeData.results[0].asset.id] = attributeData.results.map(
+						(attrResult) => {
+							attributeIdMap[attrResult.id] = attrResult.type.name;
+							return {
+								field: attrResult.type.name,
+								value: attrResult.value,
+							};
+						}
+					);
+				}
+			}
+		});
+
+		return { combinedAttributeResults, attributeIdMap };
 	}
 
 	async cleanDataCatalogResults(
@@ -335,9 +472,9 @@ class GlobalSearchHandler extends SearchHandler {
 						case 'lastModifiedBy':
 							const tempUser = fullUserData[result.resource[resourceKey]];
 							result.resource[resourceKey] = {
-								firstName: tempUser['firstName'],
-								lastName: tempUser['lastName'],
-								emailAddress: tempUser['emailAddress'],
+								firstName: tempUser?.['firstName'],
+								lastName: tempUser?.['lastName'],
+								emailAddress: tempUser?.['emailAddress'],
 							};
 							break;
 						default:
@@ -345,14 +482,16 @@ class GlobalSearchHandler extends SearchHandler {
 					}
 				});
 
-				result.highlights.forEach((highlight) => {
-					if (highlight.id) {
-						highlight.field = attributeTypes[highlight.id];
-					} else if (highlight.field.indexOf('attribute') !== -1) {
-						const attId = highlight.field.split(':')[1];
-						highlight.field = attributeTypes[attId];
-					}
-				});
+				if (result.highlights) {
+					result.highlights.forEach((highlight) => {
+						if (highlight.id) {
+							highlight.field = attributeTypes[highlight.id];
+						} else if (highlight.field.indexOf('attribute') !== -1) {
+							const attId = highlight.field.split(':')[1];
+							highlight.field = attributeTypes[attId];
+						}
+					});
+				}
 			});
 		} catch (e) {
 			this.logger.error(e, 'YCD2HPY', userId);
@@ -397,42 +536,8 @@ class GlobalSearchHandler extends SearchHandler {
 			return { results: ret, totalCount: searchResults.length, count: ret.length };
 		} catch (e) {
 			this.logger.error(e, 'QW8UGJM');
-			return { hits: [], totalCount: 0, count: 0 };
+			return { results: [], totalCount: 0, count: 0 };
 		}
-	}
-
-	performSearch(allApps, searchText) {
-		// create a map of apps keyed by id field so that we can reference them from the search results
-		let apps = _.keyBy(allApps, 'id');
-
-		// create lunr search index
-		let idx = lunr(function () {
-			// key field in our data that search results will be keyed by
-			this.ref('id');
-			// fields to search
-			this.field('name');
-			this.field('description');
-			this.field('stream', { extractor: ({ stream: { name } }) => name });
-
-			this.field('customProperties', {
-				extractor: ({ customProperties }) =>
-					customProperties.reduce((prev, curr) => {
-						return prev.concat([curr?.value, curr?.schemaPath, curr?.definition?.name]);
-					}, []),
-			});
-
-			this.field('tags', { extractor: ({ tags: { name } }) => name });
-
-			// data to search
-			allApps.forEach(function (app) {
-				this.add(app);
-			}, this);
-		});
-
-		// perform search
-		let searchResults = idx.search(searchText);
-
-		return [apps, searchResults];
 	}
 
 	mergeUserApps(apps, userApps) {
