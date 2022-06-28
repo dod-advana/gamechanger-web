@@ -336,46 +336,47 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 	} else return <></>;
 };
 
-const ExpandedHits = ({ hitsExpanded, item, hoveredHit, setHoveredHit, contextHtml }) => {
-	if (hitsExpanded) {
-		return (
-			<div className={'expanded-hits'}>
-				<div className={'page-hits'}>
-					{_.chain(item.pageHits)
-						.map((page, key) => {
-							return (
-								<div
-									className={'page-hit'}
-									key={key}
+const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
+	return (
+		<div className={'expanded-hits'}>
+			<div className={'page-hits'}>
+				{_.chain(item.pageHits)
+					.map((page, key) => {
+						return (
+							<div
+								className={'page-hit'}
+								key={key}
+								style={{
+									...(hoveredHit === key && {
+										backgroundColor: '#E9691D',
+										color: 'white',
+									}),
+								}}
+								onMouseEnter={() => setHoveredHit(key)}
+								onClick={(e) => {
+									e.preventDefault();
+								}}
+							>
+								<span>{page.title && <span>{page.title}</span>}</span>
+								<i
+									className="fa fa-chevron-right"
 									style={{
-										...(hoveredHit === key && {
-											backgroundColor: '#E9691D',
-											color: 'white',
-										}),
+										color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 									}}
-									onMouseEnter={() => setHoveredHit(key)}
-									onClick={(e) => {
-										e.preventDefault();
-									}}
-								>
-									<span>{page.title && <span>{page.title}</span>}</span>
-									<i
-										className="fa fa-chevron-right"
-										style={{
-											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-										}}
-									/>
-								</div>
-							);
-						})
-						.value()}
-				</div>
-				<div className={'expanded-metadata'}>
-					<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-				</div>
+								/>
+							</div>
+						);
+					})
+					.value()}
 			</div>
-		);
-	} else return <></>;
+			<div className={'expanded-metadata'}>
+				<blockquote
+					className="searchdemo-blockquote"
+					dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }}
+				/>
+			</div>
+		</div>
+	);
 };
 
 const ExpandedMetadata = ({ metadataExpanded, backBody }) => {
@@ -410,13 +411,14 @@ const ListViewFrontCardContent = ({
 				hitsExpanded={hitsExpanded}
 				setHitsExpanded={setHitsExpanded}
 			/>
-			<ExpandedHits
-				hitsExpanded={hitsExpanded}
-				item={item}
-				hoveredHit={hoveredHit}
-				setHoveredHit={setHoveredHit}
-				contextHtml={contextHtml}
-			/>
+			{hitsExpanded && (
+				<ExpandedHits
+					item={item}
+					hoveredHit={hoveredHit}
+					setHoveredHit={setHoveredHit}
+					contextHtml={contextHtml}
+				/>
+			)}
 			<div>
 				<button type="button" className={'list-view-button'} onClick={toggleExpandMetadata}>
 					<span className="buttonText">Document Metadata</span>
@@ -595,7 +597,7 @@ const cardHandler = {
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
 
-				if (state.listView && !intelligentSearch) {
+				if (state.listView) {
 					return (
 						<ListViewFrontCardContent
 							intelligentSearch={intelligentSearch}
@@ -619,14 +621,13 @@ const cardHandler = {
 								<div className={'current-text'}>{/*currentAsOfText*/}</div>
 							</div>
 							<ExpandedHits
-								hitsExpanded={hitsExpanded}
 								item={item}
 								hoveredHit={hoveredHit}
 								setHoveredHit={setHoveredHit}
 								contextHtml={contextHtml}
 							/>
 							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-								{review && review.primaryClassLabel && 'Tag: '}
+								{review && review.primaryClassLabel && 'Tag:'}{' '}
 								{renderPortfolioTags([review.primaryClassLabel])}
 							</div>
 						</StyledFrontCardContent>
