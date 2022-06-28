@@ -473,9 +473,7 @@ const App = () => {
 								<SlideOutMenuContextHandler>
 									<>
 										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
-											{!isShowNothingButComponent(location) && (
-												<SlideOutMenu match={match} location={location} history={history} />
-											)}
+											{!isShowNothingButComponent(location) && <SlideOutMenu />}
 											<Switch>
 												{tokenLoaded && gameChangerCloneRoutes.map((route) => route(location))}
 												<Route
