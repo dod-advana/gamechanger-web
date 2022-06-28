@@ -566,14 +566,14 @@ class JBookSearchUtility {
 				query.query.bool.must.push({
 					multi_match: {
 						query: `${parsedQuery}`,
-						fields: esTopLevelFields,
+						fields: Mappings.esTopLevelFields,
 						type: 'best_fields',
 						operator: `${operator}`,
 					},
 				});
 			}
 
-			esTopLevelFields.forEach((field) => {
+			Mappings.esTopLevelFields.forEach((field) => {
 				query.highlight.fields[field] = {};
 			});
 
@@ -670,6 +670,8 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
+
+			console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
