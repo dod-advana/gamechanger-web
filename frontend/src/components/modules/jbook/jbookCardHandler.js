@@ -720,20 +720,18 @@ const cardHandler = {
 			];
 
 			if (selectedPortfolio === 'AI Inventory') {
-				metadata.concat([
-					{
-						Key: 'Category',
-						Value: getClassLabel(projectData),
-					},
-					{
-						Key: 'Keywords',
-						Value: (
-							<div>
-								<ProjectKeywords keywords={projectData.keywords} />
-							</div>
-						),
-					},
-				]);
+				metadata.push({
+					Key: 'Category',
+					Value: getClassLabel(projectData),
+				});
+				metadata.push({
+					Key: 'Keywords',
+					Value: (
+						<div>
+							<ProjectKeywords keywords={projectData.keywords} />
+						</div>
+					),
+				});
 			}
 
 			return (
