@@ -285,7 +285,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity')}
 				</GCAccordion>
 			</div>
 
