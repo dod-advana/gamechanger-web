@@ -152,7 +152,7 @@ const GlobalSearchHandler = {
 		const tiny_url = await createTinyUrl(cloneData);
 
 		if (selectedCategories.Applications) {
-			this.handleModularSearch(state, 'applications', 1, offset, tiny_url)
+			this.handleModularSearch({ state, category: 'applications', page: 1, offset, tiny_url })
 				.then((data) => {
 					setState(dispatch, {
 						applicationsSearchResults: {
@@ -182,7 +182,7 @@ const GlobalSearchHandler = {
 		}
 
 		if (selectedCategories.Dashboards) {
-			this.handleModularSearch(state, 'dashboards', 1, offset, tiny_url)
+			this.handleModularSearch({ state, category: 'dashboards', page: 1, offset, tiny_url })
 				.then((data) => {
 					setState(dispatch, {
 						dashboardsSearchResults: {
@@ -212,7 +212,7 @@ const GlobalSearchHandler = {
 		}
 
 		if (selectedCategories.DataSources) {
-			this.handleModularSearch(state, 'dataSources', 1, offset, tiny_url)
+			this.handleModularSearch({ state, category: 'dataSources', page: 1, offset, tiny_url })
 				.then((data) => {
 					setState(dispatch, {
 						dataSourcesSearchResults: {
@@ -242,7 +242,7 @@ const GlobalSearchHandler = {
 		}
 
 		if (selectedCategories.Databases) {
-			this.handleModularSearch(state, 'databases', 1, offset, tiny_url)
+			this.handleModularSearch({ state, category: 'databases', page: 1, offset, tiny_url })
 				.then((data) => {
 					setState(dispatch, {
 						databasesSearchResults: {
@@ -272,7 +272,7 @@ const GlobalSearchHandler = {
 		}
 
 		if (selectedCategories.Models) {
-			this.handleModularSearch(state, 'models', 1, offset, tiny_url)
+			this.handleModularSearch({ state, category: 'models', page: 1, offset, tiny_url })
 				.then((data) => {
 					setState(dispatch, {
 						modelsSearchResults: {
@@ -305,7 +305,7 @@ const GlobalSearchHandler = {
 	async handlePagination(state, searchResultsObject, category) {
 		const tmpResults = structuredClone(searchResultsObject);
 
-		const data = await this.handleModularSearch(state, category, tmpResults.page);
+		const data = await this.handleModularSearch({ state, category, page: tmpResults.page });
 
 		if (data) {
 			tmpResults.searchResults = data[category].hits.map((hit) => {
@@ -423,13 +423,18 @@ const GlobalSearchHandler = {
 			'modelsSearchResults',
 		];
 
-		const calls = [
-			await this.handleModularSearch(state, 'applications', 1, offset, tiny_url, limit),
-			await this.handleModularSearch(state, 'dashboards', 1, offset, tiny_url, limit),
-			await this.handleModularSearch(state, 'dataSources', 1, offset, tiny_url, limit),
-			await this.handleModularSearch(state, 'databases', 1, offset, tiny_url, limit),
-			await this.handleModularSearch(state, 'models', 1, offset, tiny_url, limit),
-		];
+		const calls = categories.map(async (category) => {
+			return this.handleModularSearch({
+				state,
+				category,
+				page: 1,
+				offset,
+				tiny_url,
+				limit,
+				favoriteApps: favorite_apps,
+				isForFavorites: true,
+			});
+		});
 
 		const favoriteResults = await Promise.all(calls);
 
@@ -437,36 +442,27 @@ const GlobalSearchHandler = {
 			const type = categories[idx];
 
 			results[type].results?.forEach((item) => {
-				let isFavorite = false;
-
-				switch (type) {
-					case 'applications':
-					case 'dashboards':
-						if (favorite_apps?.includes(item.id.toString())) {
-							isFavorite = true;
-						}
-						break;
-					default:
-						if (favorite_apps?.includes(item.resource.id.toString())) {
-							isFavorite = true;
-						}
-						break;
-				}
-
-				if (isFavorite) {
-					favorites[conversion[idx]].searchResults.push({
-						...item,
-						type,
-					});
-					favorites[conversion[idx]].totalCount += 1;
-				}
+				favorites[conversion[idx]].searchResults.push({
+					...item,
+					type,
+				});
+				favorites[conversion[idx]].totalCount += 1;
 			});
 		});
 
 		return favorites;
 	},
 
-	async handleModularSearch(state, category, page, offset, tiny_url, limit) {
+	async handleModularSearch({
+		state,
+		category,
+		page,
+		offset,
+		tiny_url,
+		limit,
+		favoriteApps,
+		isForFavorites = false,
+	}) {
 		const { searchText = '', listView, showTutorial, cloneData } = state;
 
 		if (tiny_url === undefined) {
@@ -497,6 +493,8 @@ const GlobalSearchHandler = {
 						useGCCache,
 						tiny_url,
 						category,
+						favoriteApps,
+						isForFavorites,
 					},
 				})
 				.then(({ data }) => {

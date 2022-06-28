@@ -166,6 +166,7 @@ const handlePageLoad = async (props) => {
 	// Get User Favorites from home App
 	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
 		const favoriteApps = data.favorite_apps || [];
+
 		setState(dispatch, { favoriteApps });
 		searchHandler.handleGetUserFavorites(favoriteApps, state).then((favorites) => {
 			setState(dispatch, { favorites });
@@ -448,6 +449,18 @@ const setMetaData = (state, dispatch, applications, dashboards, dataSources, dat
 	setState(dispatch, { categoryMetadata: tmpMeta });
 };
 
+const updateSearchFavorites = (gameChangerAPI, dispatch, state, searchHandler) => {
+	// Get User Favorites from home App
+	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
+		const favoriteApps = data.favorite_apps || [];
+
+		setState(dispatch, { favoriteApps });
+		searchHandler.handleGetUserFavorites(favoriteApps, state).then((tmpFavorites) => {
+			setState(dispatch, { favorites: tmpFavorites, updateSearchFavorites: false });
+		});
+	});
+};
+
 const GlobalSearchMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
 
@@ -461,6 +474,12 @@ const GlobalSearchMainViewHandler = (props) => {
 
 	const [showFavorites, setShowFavorites] = useState(state.showFavorites);
 	const [favorites, setFavorites] = useState(state.favorites);
+
+	useEffect(() => {
+		if (state.updateSearchFavorites) {
+			updateSearchFavorites(gameChangerAPI, dispatch, state, searchHandler);
+		}
+	}, [dispatch, gameChangerAPI, searchHandler, state]);
 
 	useEffect(() => {
 		setFavorites(state.favorites);

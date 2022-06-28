@@ -69,7 +69,7 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ parsedQuery, offset, limit, operator = 'and', searchText },
+	{ parsedQuery, offset, limit, operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
@@ -106,6 +106,12 @@ const getElasticSearchQueryForQlikApps = (
 				type: 'unified',
 			},
 		};
+
+		if (isForFavorites) {
+			query.query = {
+				terms: { 'id.keyword': favoriteApps },
+			};
+		}
 
 		QLIK_ES_FIELDS.forEach((field) => {
 			query.highlight.fields[field] = {};

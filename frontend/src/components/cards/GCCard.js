@@ -486,7 +486,7 @@ const FavoriteComponent = (props) => {
 					favApps = favApps.filter((app) => app !== favorite_id);
 				}
 				gameChangerAPI.putUserFavoriteHomeApps({ favorite_apps: favApps });
-				setState(dispatch, { favoriteApps: favApps });
+				setState(dispatch, { favoriteApps: favApps, updateSearchFavorites: true });
 				break;
 			default:
 				break;
