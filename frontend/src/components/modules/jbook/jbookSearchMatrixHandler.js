@@ -784,7 +784,7 @@ const JBookSearchMatrixHandler = (props) => {
 	const { state } = props;
 	const { selectedPortfolio } = state;
 	if (selectedPortfolio === 'AI Inventory') {
-		return getSearchMatrixItemsAIInventory();
+		return getSearchMatrixItemsAIInventory(props);
 	}
 	return getSearchMatrixItems(props);
 };
