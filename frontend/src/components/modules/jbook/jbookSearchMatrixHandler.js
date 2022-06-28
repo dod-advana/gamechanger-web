@@ -307,7 +307,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
-					header={<b>Budget Line Item (PE)</b>}
+					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -784,7 +784,7 @@ const JBookSearchMatrixHandler = (props) => {
 	const { state } = props;
 	const { selectedPortfolio } = state;
 	if (selectedPortfolio === 'AI Inventory') {
-		return getSearchMatrixItemsAIInventory();
+		return getSearchMatrixItemsAIInventory(props);
 	}
 	return getSearchMatrixItems(props);
 };
