@@ -271,7 +271,7 @@ export default function GCResponsibilityDocumentView({
 		createAlert(
 			'Update error',
 			'error',
-			'There was an error sending your responsibility update. Please try againg later.'
+			'There was an error sending your responsibility update. Please try again later.'
 		);
 	};
 
