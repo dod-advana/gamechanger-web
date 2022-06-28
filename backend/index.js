@@ -192,7 +192,7 @@ app.use('/api/gamechanger/external', [
 	require('./node_app/routes/externalGraphRouter'),
 ]);
 
-const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash) => {
+const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req) => {
 	if (userTokenOld && tokenTimeoutOld) {
 		tokenTimeoutOld = moment(tokenTimeoutOld);
 		if (tokenTimeoutOld <= moment()) {
@@ -228,7 +228,6 @@ app.post('/api/auth/token', async function (req, res) {
 
 	try {
 		cn = req.session.user.cn;
-
 		let user = await checkUser(req);
 		// Remove once we feel like most admins have used the new system
 		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
@@ -263,7 +262,7 @@ app.post('/api/auth/token', async function (req, res) {
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
 		let csrfHash = userTokenOld;
-		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash);
+		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash, req);
 		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
@@ -311,7 +310,7 @@ app.use(async function (req, res, next) {
 	} else {
 		const signatureFromApp = req.get('x-ua-signature');
 		await redisAsyncClient.select(12);
-		let csrfHash = checkHash(req);
+		let csrfHash = await checkHash(req);
 		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
