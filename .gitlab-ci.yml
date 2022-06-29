@@ -6,14 +6,18 @@ stages:          # List of stages for jobs, and their order of execution.
   - deploy
 
 cache:
-  key:
-    files:
-      - backend/package-lock.json
-      - frontend/package-lock.json
-  paths:
-    - backend/node_modules
-    - frontend/node_modules
-    - .npm/
+  - key:
+      files:
+        - backend/yarn.lock
+    paths:
+      - backend/node_modules
+      - .yarn-cache-back/
+  - key:
+      files:
+        - frontend/yarn.lock
+    paths:
+      - frontend/node_modules
+      - .yarn-cache-front/
 
 .setup-github-npm:
   before_script:   # Setups the npm vars
@@ -28,7 +32,10 @@ prepare-frontend-node-modules-job: # Prepares the frontend node modules for the 
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
   script:
-    - cd frontend && npm ci --cache ../.npm --prefer-offline
+    - cd frontend
+    - echo 'yarn-offline-mirror "../.yarn-cache-front/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache-front --frozen-lockfile --no-progress
 
 prepare-backend-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
@@ -38,7 +45,10 @@ prepare-backend-node-modules-job: # Prepares the frontend node modules for the n
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
   script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
+    - cd backemd
+    - echo 'yarn-offline-mirror "../.yarn-cache-back/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache-back --frozen-lockfile --no-progress
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14

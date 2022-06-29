@@ -34,8 +34,6 @@ sh.exe.stackdump
 .vscode/launch.json
 .editorconfig
 dump.rdb
-yarn.lock
-yarn.lock
 .idea
 
 .npmrc
