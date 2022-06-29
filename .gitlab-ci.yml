@@ -4,10 +4,8 @@ stages:          # List of stages for jobs, and their order of execution.
   - security-test
   - integration-test
   - deploy
-  - test
-  - test-again
 
-cache:
+cache: &global_cache
   untracked: true
   key:
     files:
@@ -17,31 +15,7 @@ cache:
     - frontend/node_modules
     - backend/node_modules
     - .yarn-cache/
-
-test-one-job:
-  stage: test
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - test.txt
-    policy: pull-push
-  script:
-    - echo "test-one-job" > test.txt
-    - cat test.txt
-  rules:
-    - if: $TEST == "true"
-
-test-two-job:
-  stage: test-again
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - test.txt
-    policy: pull
-  script:
-    - cat test.txt
-  rules:
-    - if: $TEST == "true"
+  policy: pull
 
 .setup-github-npm:
   before_script:   # Setups the npm vars
@@ -51,6 +25,9 @@ test-two-job:
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
   stage: prepare
+  cache:
+    <<: *global_cache
+    policy: push
   extends: .setup-github-npm
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
