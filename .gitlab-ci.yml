@@ -6,14 +6,14 @@ stages:          # List of stages for jobs, and their order of execution.
   - deploy
 
 cache:
-  key:
-    files:
-      - backend/yarn.lock
-      - frontend/yarn.lock
-    paths:
-      - frontend/node_modules
-      - backend/node_modules
-      - .yarn-cache/
+  - key:
+      files:
+        - backend/yarn.lock
+        - frontend/yarn.lock
+      paths:
+        - frontend/node_modules
+        - backend/node_modules
+        - .yarn-cache/
 
 .setup-github-npm:
   before_script:   # Setups the npm vars
