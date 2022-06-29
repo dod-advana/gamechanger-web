@@ -112,6 +112,7 @@ cypress-testing-job:
       echo "Cypress tests finished"
       pm2 stop backend
       pm2 delete backend
+      cd frontend
       npm run report:merge
       npm run report:send
   artifacts:
