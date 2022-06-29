@@ -21,7 +21,7 @@ cache:
 test-one-job:
   stage: test
   cache:
-    key: "this-is-aa-test"
+    key: "$CI_COMMIT_REF_SLUG"
     paths:
       - test.txt
   script:
@@ -33,7 +33,7 @@ test-one-job:
 test-two-job:
   stage: test-again
   cache:
-    key: "this-is-aa-test"
+    key: "$CI_COMMIT_REF_SLUG"
     paths:
       - test.txt
   script:
@@ -66,16 +66,11 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd backend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-    - npm run test:gitlab
+    - cd backend && npm run test:gitlab
   artifacts:
     paths:
       - backend/coverage/lcov.info
@@ -89,16 +84,11 @@ unit-backend-test-job:    # Job for the unit tests
 lint-frontend-test-job:  # front end lint job
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd frontend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
+    - cd frontend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
   artifacts:
     paths:
       - frontend/eslintReport.json
@@ -106,16 +96,11 @@ lint-frontend-test-job:  # front end lint job
 lint-backend-test-job:  # backend lint job
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd backend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - cd backend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
   artifacts:
     paths:
       - backend/eslintReport.json
@@ -133,25 +118,16 @@ cypress-testing-job:
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
     - |
-      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
       npm install pm2 -g
-      cd frontend
-      echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-      echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-      yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-      npm run build
+      cd frontend && npm run build
       mv ./build ../backend
       cd ../backend
-      echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-      echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-      yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
       echo "${BACKEND_ENV}" | tr -d '\r' > ./.env
       cd ../
   script:
     - |
       cd backend && pm2 start index.js --name backend -o out.log -e err.log
-      (tail -f -n0 out.log & ) | grep -q "info ---> Process"
+      tail -f out.log |grep -m 1 "Process" | xargs echo "" >> logfile \;
       cd ../frontend && npm run cy:test
   after_script:
     - |
