@@ -198,6 +198,12 @@ const initState = {
 			'Matt Poe',
 			'Erik Kirk',
 		],
+		minBY1Funding: '',
+		maxBY1Funding: '',
+		minTotalCost: '',
+		maxTotalCost: '',
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		budgetSubActivity: '',
 	},
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
