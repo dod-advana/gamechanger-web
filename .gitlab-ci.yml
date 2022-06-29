@@ -14,7 +14,6 @@ cache: &global_cache
   paths:
     - frontend/node_modules
     - backend/node_modules
-    - .yarn-cache/
   policy: pull
 
 .setup-github-npm:
