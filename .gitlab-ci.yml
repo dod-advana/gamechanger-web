@@ -24,6 +24,7 @@ test-one-job:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - test.txt
+    policy: pull-push
   script:
     - echo "test-one-job" > test.txt
     - cat test.txt
@@ -36,6 +37,7 @@ test-two-job:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - test.txt
+  - policy: pull
   script:
     - cat test.txt
   rules:
