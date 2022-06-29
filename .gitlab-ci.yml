@@ -5,6 +5,16 @@ stages:          # List of stages for jobs, and their order of execution.
   - integration-test
   - deploy
 
+cache:
+  key:
+    files:
+      - backend/package-lock.json
+      - frontend/package-lock.json
+  paths:
+    - backend/node_modules
+    - frontend/node_modules
+    - .npm/
+
 .setup-github-npm:
   before_script:   # Setups the npm vars
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
@@ -17,18 +27,8 @@ prepare-frontend-node-modules-job: # Prepares the frontend node modules for the 
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
-  cache:
-    key:
-      files:
-        - frontend/package-lock.json
-    paths:
-      - frontend/node_modules
-      - .npm/
   script:
-    - cd frontend && npm ci
-  artifacts:
-    paths:
-      - frontend/node_modules
+    - cd frontend && npm ci --cache ../.npm --prefer-offline
 
 prepare-backend-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
@@ -37,36 +37,17 @@ prepare-backend-node-modules-job: # Prepares the frontend node modules for the n
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
-  cache:
-    key:
-      files:
-        - backend/package-lock.json
-    paths:
-      - backend/node_modules
-      - .npm/
   script:
-    - cd backend && npm ci
-  artifacts:
-    paths:
-      - backend/node_modules
+    - cd backend && npm ci --cache ../.npm --prefer-offline
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  cache:
-    key:
-      files:
-        - backend/package-lock.json
-    paths:
-      - backend/node_modules
-      - .npm/
   script:
-    - cd backend && npm ci
-    - npm run test:gitlab
+    - cd backend && npm run test:gitlab
   artifacts:
     paths:
       - backend/coverage/lcov.info
