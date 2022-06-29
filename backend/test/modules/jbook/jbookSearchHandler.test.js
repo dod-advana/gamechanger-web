@@ -28,7 +28,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Other Procurement, Army',
 						budgetActivityNumber_s: '02',
 						budgetActivityTitle_t: 'Communications and Electronics Equipment',
-						budgetLineItem_s: '0131B89000',
+						budgetLineItem_t: '0131B89000',
 						projectTitle_s: 'Insider Threat Program - Unit Activity Monitoring',
 						p1LineNumber_s: '54',
 						projectMissionDescription_t:
@@ -156,7 +156,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Procurement, Defense-Wide',
 						budgetActivityNumber_s: '01',
 						budgetActivityTitle_t: 'Major Equipment',
-						budgetLineItem_s: '0902298J',
+						budgetLineItem_t: '0902298J',
 						projectTitle_s: 'Management Headquarters',
 						p1LineNumber_s: '40',
 						projectMissionDescription_t:

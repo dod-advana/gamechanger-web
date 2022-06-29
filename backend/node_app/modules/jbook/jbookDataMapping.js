@@ -1894,7 +1894,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		budgetLineItem_s: {
+		budgetLineItem_t: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -2119,7 +2119,8 @@ module.exports = {
 		'P40-13_BSA_Title_t',
 		'P40-15_Justification_t',
 		'projectTitle_s',
-		'budgetActivityTitle_s',
+		'budgetActivityTitle_t',
+		'budgetLineItem_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -2139,7 +2140,7 @@ module.exports = {
 		p3a_contract_data_n: 'Contracts',
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
-		budgetActivityTitle_s: 'Activity Title',
+		budgetLineItem_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
 		// p3a_rdte_n
