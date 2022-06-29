@@ -984,29 +984,6 @@ class JBookSearchUtility {
 						break;
 				}
 			}
-
-			// Program Element / BLI filter
-			if (jbookSearchSettings.programElement) {
-				filterQueries.push({
-					query_string: {
-						query: `*${jbookSearchSettings.programElement}*`,
-						default_field: 'budgetLineItem_s',
-					},
-				});
-			}
-
-			// Project Number filter (doesn't appear in kibana)
-			if (jbookSearchSettings.projectNum) {
-				filterQueries.push({
-					query_string: {
-						query: `*${jbookSearchSettings.projectNum}*`,
-						default_field: 'projectNum_s',
-					},
-				});
-			}
-
-			let serviceAgencies = this.serviceAgency(jbookSearchSettings, serviceAgencyMappings);
-			filterQueries.push(...serviceAgencies);
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
 			this.logger.error(e.message, 'IEPGRAZ9');
