@@ -139,7 +139,7 @@ cypress-testing-job:
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
     - |
-      npm install pm2 -g
+      npm install pm2 cypress -g
       cd frontend && npm run build
       mv ./build ../backend
       cd ../backend
