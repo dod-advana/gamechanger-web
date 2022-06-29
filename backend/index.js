@@ -39,7 +39,6 @@ const userController = new UserController();
 
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
-// var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
 const keyFileData = constants.TLS_KEY;
 const private_key =
 	'-----BEGIN RSA PRIVATE KEY-----\n' +
@@ -112,7 +111,7 @@ app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
-	app.use(async function (req, res, next) {
+	app.use(async function (req, _res, next) {
 		req.headers['x-env-ssl_client_certificate'] =
 			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`;
 		next();
@@ -123,7 +122,7 @@ app.use(AAA.redisSession());
 AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);
 
-app.use(async function (req, res, next) {
+app.use(async function (req, _res, next) {
 	let user_id;
 	if (req.session.user) {
 		user_id = getUserIdFromSAMLUserId(req);
@@ -193,6 +192,34 @@ app.use('/api/gamechanger/external', [
 	require('./node_app/routes/externalGraphRouter'),
 ]);
 
+const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req) => {
+	if (userTokenOld && tokenTimeoutOld) {
+		tokenTimeoutOld = moment(tokenTimeoutOld);
+		if (tokenTimeoutOld <= moment()) {
+			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+			const tokenTimeout = moment().add(2, 'days').format();
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+		}
+	} else {
+		csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+		const tokenTimeout = moment().add(2, 'days').format();
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+	}
+	return csrfHash
+};
+
+const checkUser = async (req) => {
+	let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+	if (!user || user === null) {
+		await userController.updateOrCreateUserHelper(sessUser);
+		user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+	}
+	return user
+}
+
+
 app.post('/api/auth/token', async function (req, res) {
 	let cn = 'unknown user';
 	let perms = ['View gamechanger'];
@@ -201,14 +228,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 	try {
 		cn = req.session.user.cn;
-
-		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-
-		if (!user || user === null) {
-			await userController.updateOrCreateUserHelper(sessUser);
-			user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-		}
-
+		let user = await checkUser(req);
 		// Remove once we feel like most admins have used the new system
 		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
 
@@ -241,25 +261,8 @@ app.post('/api/auth/token', async function (req, res) {
 
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
-		let csrfHash;
-
-		if (userTokenOld && tokenTimeoutOld) {
-			tokenTimeoutOld = moment(tokenTimeoutOld);
-			if (tokenTimeoutOld <= moment()) {
-				csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-				const tokenTimeout = moment().add(2, 'days').format();
-				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-			} else {
-				csrfHash = userTokenOld;
-			}
-		} else {
-			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-			const tokenTimeout = moment().add(2, 'days').format();
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-		}
-
+		let csrfHash = userTokenOld;
+		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash, req);
 		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
@@ -278,24 +281,36 @@ app.post('/api/auth/token', async function (req, res) {
 	}
 });
 
+const checkHash = async (req) => {
+	let csrfHash;
+	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
+		csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
+	} else {
+		csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+	}
+	return csrfHash
+}
+
 app.use(async function (req, res, next) {
 	const routesAllowedWithoutToken = [
 		'/api/gamechanger/modular/getAllCloneMeta',
 		'/api/tutorialOverlay',
 		'/api/userAppVersion',
+		'/api/gameChanger/mlApi/expandTerms',
+		'/api/gameChanger/mlApi/queryExpansion',
+		'/api/gameChanger/mlApi/questionAnswer',
+		'/api/gameChanger/mlApi/textExtractions',
+		'/api/gameChanger/mlApi/transSentenceSearch',
+		'/api/gameChanger/mlApi/documentCompare',
+		'/api/gameChanger/mlApi/transformResults',
+		'/api/gameChanger/mlApi/recommender',
 	];
-
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
 	} else {
 		const signatureFromApp = req.get('x-ua-signature');
 		await redisAsyncClient.select(12);
-		let csrfHash = '';
-		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
-		} else {
-			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
-		}
+		let csrfHash = await checkHash(req);
 		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
