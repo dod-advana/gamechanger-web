@@ -6,25 +6,21 @@ stages:          # List of stages for jobs, and their order of execution.
   - deploy
 
 cache:
-  - key:
-      files:
-        - backend/yarn.lock
-    paths:
-      - backend/node_modules
-      - .yarn-cache-back/
-  - key:
-      files:
-        - frontend/yarn.lock
+  key:
+    files:
+      - backend/yarn.lock
+      - frontend/yarn.lock
     paths:
       - frontend/node_modules
-      - .yarn-cache-front/
+      - backend/node_modules
+      - .yarn-cache/
 
 .setup-github-npm:
   before_script:   # Setups the npm vars
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
-prepare-frontend-node-modules-job: # Prepares the frontend node modules for the next jobs
+prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
   stage: prepare
   extends: .setup-github-npm
@@ -33,22 +29,13 @@ prepare-frontend-node-modules-job: # Prepares the frontend node modules for the 
       - if: $DAILY_SCAN == "true"
   script:
     - cd frontend
-    - echo 'yarn-offline-mirror "../.yarn-cache-front/"' >> .yarnrc
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache-front --frozen-lockfile --no-progress
-
-prepare-backend-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: node:14
-  stage: prepare
-  extends: .setup-github-npm
-  rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      - if: $DAILY_SCAN == "true"
-  script:
-    - cd backend
-    - echo 'yarn-offline-mirror "../.yarn-cache-back/"' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - cd ../backend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache-back --frozen-lockfile --no-progress
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
