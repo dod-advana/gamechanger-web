@@ -12,6 +12,10 @@ class CypressHelper {
 	}
 
 	static setupHeaders = (cy, cn, userId) => {
+		Cypress.on('uncaught:exception', (_err, _runnable) => {
+			return false;
+		});
+
 		cy.intercept(`${Cypress.env('API_URL')}**`, (req) => {
 			req.headers['x-env-ssl_client_certificate'] = cn || Cypress.env('SSL_CLIENT_CERTIFICATE');
 			req.headers['SSL_CLIENT_S_DN_CN'] = userId || Cypress.env('SSL_CLIENT_S_DN_CN');

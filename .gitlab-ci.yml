@@ -162,7 +162,8 @@ cypress-testing-job:
       cd ../
   script:
     - |
-      cd backend && pm2 start index.js --name backend
+      cd backend && pm2 start index.js --name backend -o out.log -e err.log
+      (tail -f -n0 out.log & ) | grep -q "info ---> Process"
       cd ../frontend && npm run cy:test
   after_script:
     - |

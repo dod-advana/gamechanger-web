@@ -83,7 +83,7 @@
 		"@testing-library/cypress": "^8.0.3",
 		"babel-plugin-import": "1.13.5",
 		"chai": "^4.3.4",
-		"cypress": "^10.2.0",
+		"cypress": "^10.3.0",
 		"decompress-tar": "^4.0.0",
 		"decompress-tarbz2": "^4.0.0",
 		"decompress-targz": "^4.0.0",
