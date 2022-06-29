@@ -14,6 +14,7 @@ cache: &global_cache
   paths:
     - frontend/node_modules
     - backend/node_modules
+    - .yarn-cache
   policy: pull
 
 .setup-github-npm:
@@ -26,7 +27,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   stage: prepare
   cache:
     <<: *global_cache
-    policy: push-pull
+    policy: pull-push
   extends: .setup-github-npm
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
