@@ -1,60 +1,64 @@
-import CypressHelper from "../../support/CypressHelper";
+import CypressHelper from '../../support/CypressHelper';
 
-describe("Tests the advanaCommon functionality of the app including side nav and consent banner.", () => {
-  const cypressHelper = new CypressHelper(cy);
+describe('Tests the advanaCommon functionality of the app including side nav and consent banner.', () => {
+	// Test the consent banner appears and a cookie is created when okay clicked
+	it('The consent banner should be there.', () => {
+		CypressHelper.setupHeaders(cy);
 
-  beforeEach(() => {
-    cypressHelper.setupHeaders();
+		// Clear cookies just for this one to test consent banner
+		cy.clearCookies();
 
-    // Clear cookies
-    cy.clearCookies();
+		// Visit the main page
+		cy.visit(Cypress.env('BASE_URL'));
 
-    // Visit the main page
-    cy.visit(Cypress.env("BASE_URL") + "/#/gamechanger");
+		// Check the consent banner is there
+		cy.get('[data-cy="consent-agreement"]').should('exist');
+	});
 
-    // Click the okay button
-    cy.get('[data-cy="consent-agreement-okay"]').click();
-  });
+	it('The consent banner should be gone with a cookie showing agreement.', () => {
+		CypressHelper.setupHeaders(cy);
 
-  // Test the consent banner appears and a cookie is created when okay clicked
-  it("The consent banner should be there.", () => {
-    // Clear cookies just for this one to test consent banner
-    cy.clearCookies();
+		// Clear cookies
+		cy.clearCookies();
 
-    // Visit the main page
-    cy.visit(Cypress.env("BASE_URL"));
+		// Visit the main page
+		cy.visit(Cypress.env('BASE_URL') + '/#/gamechanger');
 
-    // Check the consent banner is there
-    cy.get('[data-cy="consent-agreement"]').should("exist");
-  });
+		// Click the okay button
+		cy.get('[data-cy="consent-agreement-okay"]').click();
 
-  it("The consent banner should be gone with a cookie showing agreement.", () => {
-    // Get the consent cookie
-    cy.getCookie("data.mil-consent-agreed").should("exist");
+		// Get the consent cookie
+		cy.getCookie('data.mil-consent-agreed').should('exist');
 
-    // Check the consent banner is not there
-    cy.get('[data-cy="consent-agreement"]').should("not.exist");
-  });
+		// Check the consent banner is not there
+		cy.get('[data-cy="consent-agreement"]').should('not.exist');
+	});
 
-  // Tests the basic side navigation functionality
-  it("The side nav should be there.", () => {
-    // The side nav should exit
-    cy.get('[data-cy="side-nav"]').should("exist");
+	// Tests the basic side navigation functionality
+	it('The side nav should be there, open and close', () => {
+		CypressHelper.setupHeaders(cy);
 
-    // The open button should be there meaning the side nav is closed, find it and click it
-    cy.get('[data-cy="side-nav-open-button"]').should("exist");
-    cy.get('[data-cy="side-nav-open-button"]').click();
+		// Clear cookies
+		cy.clearCookies();
 
-    // The close button should be there meaning the menu is open, find it and click it
-    cy.get('[data-cy="side-nav-close-button"]').should("exist");
-    cy.get('[data-cy="side-nav-close-button"]').click();
+		// Visit the main page
+		cy.visit(Cypress.env('BASE_URL') + '/#/gamechanger');
 
-    // Side nav should be closed again ensure the open button is there
-    cy.get('[data-cy="side-nav-open-button"]').should("exist");
-  });
+		// Click the okay button
+		cy.get('[data-cy="consent-agreement-okay"]').click();
 
-  // Tests the advana pills functionality
-  // it("The advana pills should be there.", () => {
-  //   cy.get('[data-cy="blah2"]').should("exist");
-  // });
+		// The side nav should exit
+		cy.get('[data-cy="side-nav"]').should('exist');
+
+		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
+		cy.get('[data-cy="side-nav-open-button"]').click();
+		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('exist');
+		cy.get('[data-cy="side-nav-close-button"]').click();
+		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
+	});
+
+	// Tests the advana pills functionality
+	// it("The advana pills should be there.", () => {
+	//   cy.get('[data-cy="blah2"]').should("exist");
+	// });
 });

@@ -1,52 +1,33 @@
 class CypressHelper {
-  constructor(cy) {
-    this.cy = cy;
-    this.failedTests = [];
+	constructor(cy) {
+		this.cy = cy;
+		this.failedTests = [];
 
-    // Catch all failures and send to slack
-    Cypress.on("fail", (error, test) => {
-      const parentTitle = test.parent.title;
-      const testFile = test.invocationDetails.relativeFile;
-      const testTitle = test.title;
-      const errorMessage = error.message;
+		// Catch all failures and send to slack
+		Cypress.on('fail', (error, _test) => {
+			console.log(error);
 
-      this.failedTests.push({
-        parentTitle,
-        testFile,
-        testTitle,
-        errorMessage,
-      });
+			throw error; // throw error to have test still fail
+		});
+	}
 
-      throw error; // throw error to have test still fail
-    });
-  }
+	static setupHeaders = (cy, cn, userId) => {
+		cy.intercept(`${Cypress.env('API_URL')}**`, (req) => {
+			req.headers['x-env-ssl_client_certificate'] = cn || Cypress.env('SSL_CLIENT_CERTIFICATE');
+			req.headers['SSL_CLIENT_S_DN_CN'] = userId || Cypress.env('SSL_CLIENT_S_DN_CN');
+		}).as('gamechangerAPI');
 
-  setupHeaders = (cn, userId) => {
-    this.cy
-      .intercept(`${Cypress.env("API_URL")}**`, ({ headers }) => {
-        this.addHeaders(headers, cn, userId);
-      })
-      .as("gamechangerAPI");
+		cy.server({
+			onAnyRequest: (_route, proxy) => {
+				proxy.xhr.setRequestHeader('x-env-ssl_client_certificate', cn || Cypress.env('SSL_CLIENT_CERTIFICATE'));
+				proxy.xhr.setRequestHeader('SSL_CLIENT_S_DN_CN', userId || Cypress.env('SSL_CLIENT_S_DN_CN'));
+			},
+		});
 
-    this.cy.server({
-      onAnyRequest: (_route, proxy) => {
-        proxy.xhr.setRequestHeader(
-          "x-env-ssl_client_certificate",
-          cn || Cypress.env("SSL_CLIENT_CERTIFICATE")
-        );
-        proxy.xhr.setRequestHeader(
-          "SSL_CLIENT_S_DN_CN",
-          userId || Cypress.env("SSL_CLIENT_S_DN_CN")
-        );
-      },
-    });
-  };
-
-  addHeaders = (headers, cn, userId) => {
-    headers["x-env-ssl_client_certificate"] =
-      cn || Cypress.env("SSL_CLIENT_CERTIFICATE");
-    headers["SSL_CLIENT_S_DN_CN"] = userId || Cypress.env("SSL_CLIENT_S_DN_CN");
-  };
+		cy.intercept(`${Cypress.env('API_URL')}/api/gamechanger/thumbnailDownload`, (req) => {
+			req.reply({ statusCode: 200, body: 'thumbnail' });
+		});
+	};
 }
 
 export default CypressHelper;

@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@datapunt/matomo-tracker-react": "0.3.1",
 		"@dod-advana/advana-platform-ui": "1.4.11",
-		"@dod-advana/advana-side-nav": "0.1.5",
+		"@dod-advana/advana-side-nav": "0.1.6",
 		"@dod-advana/advana-tutorial-overlay": "0.0.9",
 		"@emotion/react": "11.7.0",
 		"@emotion/styled": "11.6.0",
@@ -120,7 +120,7 @@
 		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/",
 		"cy:open": "./node_modules/cypress/bin/cypress open",
 		"precy:test": "rm cypress/results/* || true",
-		"cy:test": "npx cypress run",
+		"cy:test": "npx cypress run --browser chrome",
 		"report:merge": "npx mochawesome-merge \"cypress/results/*.json\" > results.json",
 		"report:send": "node cypress/support/sendResults.js"
 	},
