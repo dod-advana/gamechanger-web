@@ -11,6 +11,7 @@ stages:          # List of stages for jobs, and their order of execution.
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
 prepare-frontend-node-modules-job: # Prepares the frontend node modules for the next jobs
+  image: node:14
   stage: prepare
   extends: .setup-github-npm
   rules:
@@ -30,6 +31,7 @@ prepare-frontend-node-modules-job: # Prepares the frontend node modules for the 
       - frontend/node_modules
 
 prepare-backend-node-modules-job: # Prepares the frontend node modules for the next jobs
+  image: node:14
   stage: prepare
   extends: .setup-github-npm
   rules:
