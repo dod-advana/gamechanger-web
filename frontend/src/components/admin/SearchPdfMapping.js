@@ -456,6 +456,8 @@ export default () => {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 				table: name,
+				cloneName: cloneName.split('-')[1],
+				cloneID: cloneName.split('-')[0],
 			};
 			const data = await gameChangerAPI.exportUserData(params);
 			const url = window.URL.createObjectURL(

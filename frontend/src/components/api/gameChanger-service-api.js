@@ -105,7 +105,6 @@ const endpoints = {
 	setRejectionStatus: '/api/gamechanger/responsibilities/setRejectionStatus',
 	updateResponsibility: '/api/gamechanger/responsibilities/updateResponsibility',
 	updateResponsibilityReport: '/api/gamechanger/responsibilities/updateResponsibilityReport',
-	getOtherEntityFilterList: '/api/gamechanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gamechanger/responsibilities/storeReport',
 	getResponsibilityUpdates: '/api/gamechanger/responsibilities/getUpdates',
 	approveRejectAPIKeyRequestPOST: '/api/gamechanger/admin/approveRejectAPIKeyRequest',
@@ -513,11 +512,6 @@ export default class GameChangerAPI {
 	updateResponsibilityReport = async (options) => {
 		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
-	};
-
-	getOtherEntityFilterList = async (options) => {
-		const url = endpoints.getOtherEntityFilterList;
-		return axiosGET(this.axios, url, options);
 	};
 
 	storeResponsibilityReportData = async (data) => {
