@@ -152,6 +152,8 @@ cypress-testing-job:
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
     - |
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
       npm install pm2 -g
       cd frontend && npm ci && npm run build
       mv ./build ../backend
