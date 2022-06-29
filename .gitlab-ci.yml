@@ -183,7 +183,6 @@ cypress-testing-job:
       cd ../frontend && npm run cy:test
   after_script:
     - echo "Cypress tests finished"
-    - cd cypress-tests
     - npm run report:merge
     - npm run report:send
   artifacts:
