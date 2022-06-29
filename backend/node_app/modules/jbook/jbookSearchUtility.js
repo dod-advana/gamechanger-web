@@ -802,29 +802,6 @@ class JBookSearchUtility {
 		return rangeQuery;
 	}
 
-	serviceAgency(jbookSearchSettings, serviceAgencyMappings) {
-		const filterQueries = [];
-		// Service Agency filter
-		if (jbookSearchSettings.serviceAgency) {
-			const convertedAgencies = [];
-
-			jbookSearchSettings.serviceAgency.forEach((agency) => {
-				Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
-					if (serviceAgencyMappings[agencyKey] === agency) {
-						convertedAgencies.push(agencyKey);
-					}
-				});
-			});
-
-			filterQueries.push({
-				terms: {
-					serviceAgency_s: convertedAgencies,
-				},
-			});
-		}
-		return filterQueries;
-	}
-
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
