@@ -1,8 +1,9 @@
 stages:          # List of stages for jobs, and their order of execution.
   - prepare
   - static-test
-  - security-test
   - integration-test
+  - security-test
+
   - deploy
 
 cache: &global_cache
