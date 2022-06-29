@@ -10676,7 +10676,7 @@ node-sass@6.0.1:
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
 
-node@12.20.13:
+node@14.19.3:
   version "14.19.3"
   resolved "https://registry.yarnpkg.com/node/-/node-14.19.3.tgz#b821c41e984c351afda2d37ddbd907a938d7689f"
   integrity sha512-DS65cq8ueBsV7vnpECY/ge/lTwjXPp96dmiXGi2jUqSIO7BLS9vE+MGUqeZdcfUTwV0m/PTmFniJrjUQyzlxcg==
@@ -12968,14 +12968,6 @@ react-transition-group@^4.4.0, react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react@12.0.0, react@17.0.2:
-  version "17.0.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-17.0.2.tgz#d0b5cc516d29eb3eee383f75b62864cfb6800037"
-  integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-
 "react@15.x.x - 16.x.x":
   version "16.14.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"
@@ -12984,6 +12976,14 @@ react@12.0.0, react@17.0.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
+
+react@17.0.2:
+  version "17.0.2"
+  resolved "https://registry.yarnpkg.com/react/-/react-17.0.2.tgz#d0b5cc516d29eb3eee383f75b62864cfb6800037"
+  integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
 
 read-pkg-up@^7.0.1:
   version "7.0.1"

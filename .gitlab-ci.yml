@@ -45,7 +45,7 @@ prepare-backend-node-modules-job: # Prepares the frontend node modules for the n
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $DAILY_SCAN == "true"
   script:
-    - cd backemd
+    - cd backend
     - echo 'yarn-offline-mirror "../.yarn-cache-back/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache-back --frozen-lockfile --no-progress
