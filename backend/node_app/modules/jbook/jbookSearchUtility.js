@@ -639,8 +639,8 @@ class JBookSearchUtility {
 			});
 
 			let sortText = jbookSearchSettings.sort[0].id;
-			if (!sortSelected && searchText !== '') {
-				sortText = 'Relevance';
+			if (!sortSelected && searchText && searchText !== '') {
+				sortText = 'relevance';
 			}
 
 			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
@@ -802,6 +802,29 @@ class JBookSearchUtility {
 		return rangeQuery;
 	}
 
+	serviceAgency(jbookSearchSettings, serviceAgencyMappings) {
+		const filterQueries = [];
+		// Service Agency filter
+		if (jbookSearchSettings.serviceAgency) {
+			const convertedAgencies = [];
+
+			jbookSearchSettings.serviceAgency.forEach((agency) => {
+				Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
+					if (serviceAgencyMappings[agencyKey] === agency) {
+						convertedAgencies.push(agencyKey);
+					}
+				});
+			});
+
+			filterQueries.push({
+				terms: {
+					serviceAgency_s: convertedAgencies,
+				},
+			});
+		}
+		return filterQueries;
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
@@ -961,6 +984,29 @@ class JBookSearchUtility {
 						break;
 				}
 			}
+
+			// Program Element / BLI filter
+			if (jbookSearchSettings.programElement) {
+				filterQueries.push({
+					query_string: {
+						query: `*${jbookSearchSettings.programElement}*`,
+						default_field: 'budgetLineItem_s',
+					},
+				});
+			}
+
+			// Project Number filter (doesn't appear in kibana)
+			if (jbookSearchSettings.projectNum) {
+				filterQueries.push({
+					query_string: {
+						query: `*${jbookSearchSettings.projectNum}*`,
+						default_field: 'projectNum_s',
+					},
+				});
+			}
+
+			let serviceAgencies = this.serviceAgency(jbookSearchSettings, serviceAgencyMappings);
+			filterQueries.push(...serviceAgencies);
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
 			this.logger.error(e.message, 'IEPGRAZ9');
