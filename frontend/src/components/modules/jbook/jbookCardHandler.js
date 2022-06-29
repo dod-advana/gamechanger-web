@@ -653,26 +653,6 @@ const cardHandler = {
 					Value: projectData.projectTitle || 'N/A',
 				},
 				{
-					Key: 'Budget Year (FY)',
-					Value: projectData.budgetYear || 'N/A',
-				},
-				{
-					Key: 'Service Agency Name',
-					Value: projectData.serviceAgency || 'N/A',
-				},
-				{
-					Key: 'Main Account',
-					Value: projectData.appropriationNumber || 'N/A',
-				},
-				{
-					Key: 'Budget Activity',
-					Value: projectData.budgetActivityNumber || 'N/A',
-				},
-				{
-					Key: 'Budget Sub Activity',
-					Value: getBudgetSubActivity(projectData),
-				},
-				{
 					Key: 'Program Element',
 					Value: projectData.programElement || 'N/A',
 					Hidden: budgetType === 'PDOC',
@@ -682,7 +662,10 @@ const cardHandler = {
 					Value: projectData.projectNum || 'N/A',
 					Hidden: budgetType === 'PDOC',
 				},
-
+				{
+					Key: 'Service Agency Name',
+					Value: projectData.serviceAgency || 'N/A',
+				},
 				{
 					Key: 'All Prior Years Amount',
 					Value: getAllPriorYearsAmount(projectData),
@@ -707,15 +690,29 @@ const cardHandler = {
 					Key: 'Total Cost',
 					Value: projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A',
 				},
-
+				{
+					Key: 'Budget Year (FY)',
+					Value: projectData.budgetYear || 'N/A',
+				},
 				{
 					Key: 'Budget Cycle',
 					Value: projectData.budgetCycle || 'N/A',
 				},
-
+				{
+					Key: 'Main Account',
+					Value: projectData.appropriationNumber || 'N/A',
+				},
 				{
 					Key: 'Appropriation Title',
 					Value: projectData.appropriationTitle || 'N/A',
+				},
+				{
+					Key: 'Budget Activity',
+					Value: projectData.budgetActivityNumber || 'N/A',
+				},
+				{
+					Key: 'Budget Sub Activity',
+					Value: getBudgetSubActivity(projectData),
 				},
 			];
 
