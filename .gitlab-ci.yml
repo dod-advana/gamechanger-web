@@ -127,7 +127,7 @@ sonar_scan-job:  # Run code through sonar scanner
 
 cypress-testing-job:
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
-  stage: static-test
+  stage: integration-test
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"

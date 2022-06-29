@@ -119,7 +119,7 @@
 		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/",
 		"cy:open": "./node_modules/cypress/bin/cypress open",
 		"precy:test": "rm cypress/results/* || true",
-		"cy:test": "npx cypress run --browser chrome",
+		"cy:test": "./node_modules/cypress/bin/cypress run --browser chrome",
 		"report:merge": "npx mochawesome-merge \"cypress/results/*.json\" > results.json",
 		"report:send": "node cypress/support/sendResults.js"
 	},
