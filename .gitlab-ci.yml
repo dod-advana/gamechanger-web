@@ -36,10 +36,17 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+  artifacts:
+    paths:
+      - backend/node_modules
+      - frontend/node_modules
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: static-test
+  needs:
+    - job: prepare-node-modules-job
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -58,6 +65,9 @@ unit-backend-test-job:    # Job for the unit tests
 lint-frontend-test-job:  # front end lint job
   image: node:14
   stage: static-test
+  needs:
+    - job: prepare-node-modules-job
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -70,6 +80,9 @@ lint-frontend-test-job:  # front end lint job
 lint-backend-test-job:  # backend lint job
   image: node:14
   stage: static-test
+  needs:
+    - job: prepare-node-modules-job
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
@@ -82,6 +95,9 @@ lint-backend-test-job:  # backend lint job
 cypress-testing-job:
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: static-test
+  needs:
+    - job: prepare-node-modules-job
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
