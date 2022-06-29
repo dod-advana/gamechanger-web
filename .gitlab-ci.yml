@@ -37,7 +37,7 @@ test-two-job:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - test.txt
-  - policy: pull
+    policy: pull
   script:
     - cat test.txt
   rules:
