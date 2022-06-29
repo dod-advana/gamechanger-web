@@ -45,7 +45,11 @@ unit-backend-test-job:    # Job for the unit tests
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd backend && npm run test:gitlab
+    - cd backend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - npm run test:gitlab
   artifacts:
     paths:
       - backend/coverage/lcov.info
@@ -63,7 +67,11 @@ lint-frontend-test-job:  # front end lint job
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd frontend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
+    - cd frontend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
   artifacts:
     paths:
       - frontend/eslintReport.json
@@ -75,7 +83,11 @@ lint-backend-test-job:  # backend lint job
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   script:
-    - cd backend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - cd backend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
   artifacts:
     paths:
       - backend/eslintReport.json
@@ -93,10 +105,19 @@ cypress-testing-job:
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
     - |
+      npm set "@dod-advana:registry" "https://npm.pkg.github.com"
+      npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
       npm install pm2 -g
-      cd frontend && npm run build
+      cd frontend
+      echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+      echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+      yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+      npm run build
       mv ./build ../backend
       cd ../backend
+      echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+      echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+      yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
       echo "${BACKEND_ENV}" | tr -d '\r' > ./.env
       cd ../
   script:
