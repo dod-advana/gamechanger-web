@@ -3,8 +3,16 @@ stages:          # List of stages for jobs, and their order of execution.
   - static-test
   - integration-test
   - security-test
-
+  - test
   - deploy
+
+test:
+  stage: test
+  rules:
+    - if: $TEST == 'true'
+  script:
+    - echo "${BACKEND_ENV}" | tr -d '\r' > ./.env
+    - cat ./.env
 
 cache: &global_cache
   untracked: true
