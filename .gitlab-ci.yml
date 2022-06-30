@@ -143,7 +143,7 @@ cypress-testing-job:
   before_script:
     - |
       npm install pm2 cypress -g
-      cd ../backend
+      cd backend
       cp "${BACKEND_ENV}" .env
       pm2 start index.js --name backend -o out.log -e err.log
       cd ../frontend
