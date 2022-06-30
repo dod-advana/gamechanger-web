@@ -11,8 +11,8 @@ test:
   rules:
     - if: $TEST == 'true'
   script:
-    - echo "${BACKEND_ENV}" | tr -d '\r' > ./.env
-    - cat ./.env
+    - cp "${BACKEND_ENV}" .env
+    - cat .env
 
 cache: &global_cache
   untracked: true
