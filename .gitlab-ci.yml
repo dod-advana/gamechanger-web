@@ -136,8 +136,8 @@ cypress-testing-job:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   variables:
-    CYPRESS_BASE_URL: "http://localhost:8080"
-    CYPRESS_API_URL: "http://localhost:8990"
+    CYPRESS_BASE_URL: "http://0.0.0.0:8080"
+    CYPRESS_API_URL: "http://0.0.0.0:8990"
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:
@@ -151,7 +151,7 @@ cypress-testing-job:
       pm2 start --name frontend ./start.sh -o out.log -e err.log
       cd ../
   script:
-    - curl http://localhost:8080
+    - curl http://0.0.0.0:8080
     - cd ../frontend && npm run cy:test
   after_script:
     - |
