@@ -132,7 +132,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
-		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
@@ -140,9 +140,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 		jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
@@ -154,9 +151,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 
 		if (jbookSearchSettings.budgetYearES) {
 			defaultOptions.budgetYear = jbookSearchSettings.budgetYearES;
-		}
-		if (jbookSearchSettings.serviceAgencyES) {
-			defaultOptions.serviceAgency = jbookSearchSettings.serviceAgencyES;
 		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
