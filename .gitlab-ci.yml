@@ -162,6 +162,8 @@ cypress-testing-job:
       npm run report:merge
       npm run report:send
   artifacts:
+    when: always
+    expire_in: 1 days
     paths:
       - frontend/results.json
       - frontend/cypress/screenshots
