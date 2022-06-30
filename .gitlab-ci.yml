@@ -163,9 +163,10 @@ cypress-testing-job:
       npm run report:send
   artifacts:
     paths:
-      - "frontend/results.json"
-      - "frontend/cypress/screenshots"
-      - "frontend/cypress/videos"
+      - frontend/results.json
+      - frontend/cypress/screenshots
+      - frontend/cypress/videos
+      - backend/out.log
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
