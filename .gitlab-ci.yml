@@ -1,7 +1,7 @@
 stages:          # List of stages for jobs, and their order of execution.
   - prepare
-  - static-test
   - integration-test
+  - static-test
   - security-test
   - deploy
 
@@ -35,7 +35,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   script:
     - |
       if [[ -d frontend/node_modules ]]; then
-        exit 10
+        exit 0
       fi
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
@@ -45,8 +45,6 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-  allow_failure:
-    exit_codes: 10
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
@@ -153,7 +151,7 @@ cypress-testing-job:
   script:
     - |
       cd backend && pm2 start index.js --name backend -o out.log -e err.log
-      curl http://localhost:8990
+      sleep 45
     - cd ../frontend && npm run cy:test
   after_script:
     - |
