@@ -14,11 +14,11 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import InputFilter from './InputFilter';
 
-const handleSelectSpecific = (state, dispatch, type) => {
+const handleSelectSpecific = (state, dispatch, type, checked) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	newSearchSettings[`${type}SpecificSelected`] = true;
 	newSearchSettings[`${type}AllSelected`] = false;
-	newSearchSettings[type] = [];
+	if (!checked) newSearchSettings[type] = [];
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -157,7 +157,14 @@ const renderFilterCheckboxes = (
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectSpecific(state, dispatch, type)}
+									onClick={() =>
+										handleSelectSpecific(
+											state,
+											dispatch,
+											type,
+											state.jbookSearchSettings[specificSelected]
+										)
+									}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.jbookSearchSettings[specificSelected]}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
