@@ -21,6 +21,7 @@ const MLRoutes = {
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
 	transSentenceSearch: `${transformerBaseUrl}/transSentenceSearch`,
+	textExtractions: `${transformerBaseUrl}/textExtractions`,
 	documentCompare: `${transformerBaseUrl}/documentCompare`,
 	transformResults: `${transformerBaseUrl}/transformerSearch`,
 	reloadModels: `${transformerBaseUrl}/reloadModels`,
@@ -74,25 +75,30 @@ class MLApiClient {
 	async getExpandedSearchTerms(termsList, userId = 'unknown', qe_model = undefined) {
 		const data = { termsList, docIdsOnly: true };
 		if (qe_model) data['qe_model'] = qe_model;
-		return await this.postData('expandTerms', userId, data);
+		return this.postData('expandTerms', userId, data);
 	}
 
 	async queryExpansion(searchText, userId = 'unknown') {
 		const data = { termsList: [searchText], qe_model: 'jbook' };
-		return await this.postData('expandTerms', userId, data);
+		return this.postData('expandTerms', userId, data);
 	}
 
 	async getIntelAnswer(searchQuery, searchContext, userId = 'unknown') {
 		const data = { query: searchQuery, search_context: searchContext };
-		return await this.postData('questionAnswer', userId, data);
+		return this.postData('questionAnswer', userId, data);
+	}
+
+	async getTextExtractions(text, extractType, userId = 'unknown') {
+		const data = { text: text };
+		return this.postData('textExtractions', userId, data, `?extractType=${extractType}`);
 	}
 
 	async getSentenceTransformerResults(searchText, userId = 'unknown') {
 		const data = { text: searchText };
-		return await this.postData('transSentenceSearch', userId, data);
+		return this.postData('transSentenceSearch', userId, data);
 	}
 
-	async getSentenceTransformerResultsForCompare(searchText, userId = 'unknown', paragraphIdBeingMatched) {
+	async getSentenceTransformerResultsForCompare(searchText, paragraphIdBeingMatched, userId = 'unknown') {
 		const data = { text: searchText };
 		const returnData = await this.postData('documentCompare', userId, data, '?num_results=15');
 
@@ -101,12 +107,12 @@ class MLApiClient {
 
 	async transformResults(searchText, docs, userId = 'unknown') {
 		const data = { query: searchText, documents: docs };
-		return await this.postData('transformResults', userId, data);
+		return this.postData('transformResults', userId, data);
 	}
 
 	async recommender(doc, userId = 'unknown') {
 		const data = { filenames: doc };
-		return await this.postData('recommender', userId, data);
+		return this.postData('recommender', userId, data);
 	}
 	/**
 	 * A generic get method to query the ML API.
@@ -148,6 +154,7 @@ class MLApiClient {
 			let url = MLRoutes[key];
 
 			if (queryString) url += queryString;
+			console.log(url, postData);
 			const { data } = await this.axios({
 				url,
 				method: 'post',

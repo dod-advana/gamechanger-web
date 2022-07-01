@@ -11,26 +11,22 @@ import {
 	DialogTitle,
 	FormControl,
 	IconButton,
-	Popover,
 	TextField,
 	Typography,
 } from '@material-ui/core';
-import { backgroundGreyDark, backgroundGreyLight, backgroundWhite } from '../common/gc-colors';
-import { gcOrange } from '../common/gc-colors';
-import GCPrimaryButton from '../common/GCButton';
-import GameChangerAPI from '../api/gameChanger-service-api';
-import { trackEvent } from '../telemetry/Matomo';
+import { backgroundGreyDark, backgroundGreyLight, backgroundWhite, gcOrange } from '../../common/gc-colors';
+import GCPrimaryButton from '../../common/GCButton';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import { trackEvent } from '../../telemetry/Matomo';
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import CloseIcon from '@material-ui/icons/Close';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
-import { getTrackingNameForFactory, exportToCsv } from '../../utils/gamechangerUtils';
-// import { setState } from '../../utils/sharedFunctions';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { getTrackingNameForFactory, exportToCsv } from '../../../utils/gamechangerUtils';
 
 const _ = require('lodash');
 
@@ -102,16 +98,6 @@ const TableRow = styled.div`
 	min-height: 20px;
 `;
 
-const GCCheckbox = withStyles({
-	root: {
-		color: '#E9691D',
-		'&$checked': {
-			color: '#E9691D',
-		},
-	},
-	checked: {},
-})((props) => <Checkbox color="default" {...props} />);
-
 const gameChangerAPI = new GameChangerAPI();
 const PAGE_SIZE = 10;
 
@@ -135,7 +121,7 @@ const getData = async ({ limit = PAGE_SIZE, offset = 0, sorted = [], filtered = 
 
 const preventDefault = (event) => event.preventDefault();
 
-const GCResponsibilityTracker = ({
+const GCResponsibilityChartView = ({
 	state,
 	filters,
 	setFilters,
@@ -160,52 +146,7 @@ const GCResponsibilityTracker = ({
 	const [issueDescription, setIssueDescription] = useState('');
 	const [sendingReports, setSendingReports] = useState(false);
 	const [reportsSent, setReportsSent] = useState(false);
-	const [filterPopperIsOpen, setFilterPopperIsOpen] = useState(false);
-	const [filterPopperAnchorEl, setFilterPopperAnchorEl] = useState(null);
-	const [otherEntRespFilters, setOtherEntRespFilters] = useState({});
-	const [otherEntRespFiltersList, setOtherEntRespFiltersList] = useState([]);
-	const [visibleOtherEntRespFilters, setVisibleOtherEntRespFilters] = useState({});
-	const [otherEntRespSearchText, setOtherEntRespSearchText] = useState('');
 	const [reloadResponsibilityTable, setReloadResponsibilityTable] = useState(true);
-
-	useEffect(() => {
-		gameChangerAPI.getOtherEntityFilterList().then((resp) => {
-			const tmpFilters = {
-				'Select All': { name: 'Select All', checked: true },
-			};
-			resp.data.forEach((org) => {
-				tmpFilters[org] = {
-					name: org,
-					checked: false,
-				};
-			});
-			setOtherEntRespFilters(tmpFilters);
-			setVisibleOtherEntRespFilters(tmpFilters);
-		});
-	}, []);
-
-	useEffect(() => {
-		if (otherEntRespSearchText === '') {
-			setVisibleOtherEntRespFilters(otherEntRespFilters);
-		} else {
-			const filteredList = {
-				'Select All': {
-					name: 'Select All',
-					checked: otherEntRespFilters['Select All'].checked,
-				},
-			};
-			Object.keys(otherEntRespFilters).forEach((org) => {
-				if (org.toLowerCase().includes(otherEntRespSearchText.toLowerCase())) {
-					filteredList[org] = otherEntRespFilters[org];
-				}
-			});
-			setVisibleOtherEntRespFilters(filteredList);
-		}
-	}, [otherEntRespSearchText, otherEntRespFilters]);
-
-	useEffect(() => {
-		handleFetchData({ page: pageIndex, sorted: sorts, filtered: filters });
-	}, [otherEntRespFiltersList]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (reloadResponsibilityTable) {
@@ -236,12 +177,6 @@ const GCResponsibilityTracker = ({
 		try {
 			setLoading(true);
 			const tmpFiltered = _.cloneDeep(filtered);
-			if (otherEntRespFiltersList.length > 0) {
-				tmpFiltered.push({
-					id: 'otherOrganizationPersonnel',
-					value: otherEntRespFiltersList,
-				});
-			}
 			const { totalCount, results = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
@@ -286,31 +221,6 @@ const GCResponsibilityTracker = ({
 		}
 	};
 
-	// const reportButtonAction = async () => {
-	// 	getRowData();
-	// }
-
-	// const getRowData = async () => {
-	// 	try {
-	// 		const { results = []} = await getData({ limit: null, offset: 0, sorted: sorts, filtered: filters });
-	// 		const rtnResults = results.filter(result => {
-	// 			return selectedIds.includes(result.id);
-	// 		})
-	// 		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'GetRowData', selectedIds.length > 0 ? rtnResults.length : results.length);
-
-	// 		const rtn = selectedIds.length > 0 ? rtnResults : results;
-	// 		const id = rtn[0].id;
-	// 		const filename = rtn[0].filename;
-	// 		const responsibilityText = rtn[0].responsibilityText;
-
-	// 		setState(dispatch, {showResponsibilityAssistModal: true, id, filename, responsibilityText});
-
-	// 		deselectRows();
-	// 	} catch (e) {
-	// 		console.error(e);
-	// 	}
-	// }
-
 	const deselectRows = async () => {
 		responsibilityTableData.forEach((result) => {
 			result.selected = false;
@@ -331,8 +241,8 @@ const GCResponsibilityTracker = ({
 						value={docTitle.map((doc) => doc.documentTitle).join(' AND ')}
 						setValue={(filter) => {
 							const splitFilter = filter.split(' AND ');
-							const parsedFilter = splitFilter.map((filter) => {
-								return { documentTitle: filter };
+							const parsedFilter = splitFilter.map((docFilter) => {
+								return { documentTitle: docFilter };
 							});
 							setDocTitle(parsedFilter);
 						}}
@@ -356,7 +266,7 @@ const GCResponsibilityTracker = ({
 				),
 			},
 			{
-				Header: 'Organization/Personnel',
+				Header: 'Entity',
 				accessor: 'organizationPersonnel',
 				style: { whiteSpace: 'unset' },
 				Filter: (
@@ -383,30 +293,6 @@ const GCResponsibilityTracker = ({
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
 			},
 			{
-				Header: () => (
-					<div style={{ cursor: 'default' }}>
-						<>Other Organization/Personnel</>
-						<i
-							onClick={(event) => {
-								openFilterPopper(event.target, 'otherOrgsPers');
-							}}
-							className={'fa fa-filter'}
-							style={{
-								color: '#E9691D',
-								marginLeft: '50px',
-								cursor: 'pointer',
-								fontSize: 18,
-							}}
-						/>
-					</div>
-				),
-				accessor: 'otherOrganizationPersonnel',
-				style: { whiteSpace: 'unset' },
-				width: 300,
-				filterable: false,
-				Cell: (row) => <TableRow>{row.value}</TableRow>,
-			},
-			{
 				Header: 'Documents Referenced',
 				accessor: 'documentsReferenced',
 				style: { whiteSpace: 'unset' },
@@ -426,7 +312,7 @@ const GCResponsibilityTracker = ({
 					<TableRow>
 						<Checkbox
 							style={styles.checkbox}
-							onChange={(e) => handleSelected(row.value)}
+							onChange={() => handleSelected(row.value)}
 							color="primary"
 							icon={
 								<CheckBoxOutlineBlankIcon
@@ -444,6 +330,7 @@ const GCResponsibilityTracker = ({
 
 		return (
 			<ReactTable
+				className="re-tutorial-step-7"
 				data={responsibilityTableData}
 				columns={dataColumns}
 				style={{ height: 700, marginTop: 10 }}
@@ -455,8 +342,8 @@ const GCResponsibilityTracker = ({
 					setSorts(newSorts);
 					setReloadResponsibilityTable(true);
 				}}
-				onPageChange={(pageIndex) => {
-					setPageIndex(pageIndex);
+				onPageChange={(page) => {
+					setPageIndex(page);
 					setReloadResponsibilityTable(true);
 				}}
 				defaultSorted={[
@@ -481,14 +368,13 @@ const GCResponsibilityTracker = ({
 				getTheadThProps={() => {
 					return { style: { fontSize: 15, fontWeight: 'bold' } };
 				}}
-				getTrProps={(state, rowInfo, column) => {
+				getTrProps={(_stateProp, rowInfo, _column) => {
 					if (rowInfo && rowInfo.row) {
 						return {
-							onClick: (e, t) => {},
-							onMouseEnter: (e) => {
+							onMouseEnter: () => {
 								setHoveredRow(rowInfo.index);
 							},
-							onMouseLeave: (e) => {
+							onMouseLeave: () => {
 								setHoveredRow(null);
 							},
 							style: {
@@ -502,18 +388,6 @@ const GCResponsibilityTracker = ({
 				}}
 			/>
 		);
-	};
-
-	const openFilterPopper = (target, column) => {
-		if (filterPopperIsOpen) {
-			setFilterPopperIsOpen(false);
-			setFilterPopperAnchorEl(null);
-			//(null);
-		} else {
-			setFilterPopperIsOpen(true);
-			setFilterPopperAnchorEl(target);
-			//setFilterColumn(column);
-		}
 	};
 
 	const fileClicked = (filename, searchText, pageNumber) => {
@@ -665,97 +539,8 @@ const GCResponsibilityTracker = ({
 		);
 	};
 
-	const handleFilterCheck = (event) => {
-		const tmpEntFilters = _.cloneDeep(otherEntRespFilters);
-		let selectAll = false;
-
-		if (event.target.name === 'Select All' && event.target.checked) {
-			selectAll = true;
-			Object.keys(tmpEntFilters).forEach((key) => {
-				if (key === 'Select All') {
-					tmpEntFilters[key].checked = event.target.checked;
-				} else {
-					tmpEntFilters[key].checked = false;
-				}
-			});
-		} else {
-			tmpEntFilters[event.target.name].checked = event.target.checked;
-			tmpEntFilters['Select All'].checked = false;
-		}
-
-		setOtherEntRespFilters(tmpEntFilters);
-
-		if (!selectAll) {
-			const tmpEntFilterNames = [];
-			Object.keys(tmpEntFilters).forEach((key) => {
-				if (tmpEntFilters[key].checked)
-					tmpEntFilterNames.push(key === 'null' ? null : `%${tmpEntFilters[key].name}%`);
-			});
-			setOtherEntRespFiltersList(tmpEntFilterNames);
-		} else {
-			setOtherEntRespFiltersList([]);
-		}
-	};
-
 	return (
 		<>
-			<Popover
-				onClose={() => {
-					setFilterPopperIsOpen(false);
-					setFilterPopperAnchorEl(null);
-				}}
-				open={filterPopperIsOpen}
-				anchorEl={filterPopperAnchorEl}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'right',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'right',
-				}}
-			>
-				<div style={{ padding: '0px 15px 10px', height: 200, width: 250 }}>
-					<div style={{ margin: '10px 0' }}>
-						<FormControl>
-							<TextField
-								variant="outlined"
-								placeholder="Search filters..."
-								value={otherEntRespSearchText}
-								onChange={(e) => setOtherEntRespSearchText(e.target.value)}
-								classes={{
-									root: classes.textFieldFilter,
-								}}
-							/>
-						</FormControl>
-					</div>
-					<div>
-						{Object.keys(otherEntRespFilters).length > 0 &&
-							Object.keys(visibleOtherEntRespFilters).length > 0 &&
-							Object.keys(visibleOtherEntRespFilters).map((org) => {
-								return (
-									<div>
-										<FormControlLabel
-											control={
-												<GCCheckbox
-													checked={otherEntRespFilters[org].checked}
-													onChange={handleFilterCheck}
-													name={org}
-													color="primary"
-												/>
-											}
-											label={otherEntRespFilters[org].name}
-											classes={{
-												label: classes.checkedLabel,
-											}}
-										/>
-									</div>
-								);
-							})}
-					</div>
-				</div>
-			</Popover>
-
 			<div style={styles.disclaimerContainer}>
 				Data in the table below does not currently reflect all documents in GAMECHANGER. As we continue to
 				process data for this capability, please check back later or reach us by email if your document/s of
@@ -911,7 +696,7 @@ const styles = {
 	},
 };
 
-GCResponsibilityTracker.propTypes = {
+GCResponsibilityChartView.propTypes = {
 	state: propTypes.objectOf({
 		cloneData: propTypes.objectOf({
 			clone_name: propTypes.string,
@@ -919,4 +704,4 @@ GCResponsibilityTracker.propTypes = {
 	}),
 };
 
-export default GCResponsibilityTracker;
+export default GCResponsibilityChartView;

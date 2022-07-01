@@ -511,6 +511,9 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
+					budgetType: state.jbookSearchSettings.budgetType.find((item) => item === 'O&M')
+						? state.jbookSearchSettings.budgetType.filter((item) => item !== 'O&M')
+						: state.jbookSearchSettings.budgetType,
 					reviewStatus: state.defaultOptions.reviewStatus,
 					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
 					primaryReviewer: state.defaultOptions.primaryReviewer,

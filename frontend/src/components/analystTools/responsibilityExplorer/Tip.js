@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import GCButton from '../common/GCButton';
+import GCButton from '../../common/GCButton';
 
 export class Tip extends Component {
 	state = {
@@ -8,7 +8,7 @@ export class Tip extends Component {
 	};
 
 	// for TipContainer
-	componentDidUpdate(nextProps, nextState) {
+	componentDidUpdate(_nextProps, nextState) {
 		const { onUpdate } = this.props;
 
 		if (onUpdate && this.state.compact !== nextState.compact) {

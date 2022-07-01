@@ -182,45 +182,12 @@ const StyledPill = styled.div`
 `;
 
 // mappings
-
 const types = {
 	pdoc: 'Procurement',
 	rdoc: 'RDT&E',
 	odoc: 'O&M',
 };
 
-const filterNameToMetadataName = {
-	// clearText: true,
-	// budgetType: ['RDT&E', 'Procurement', 'O&M'],
-	// reviewStatus: [
-	// 	'Needs Review',
-	// 	'Partial Review (Primary)',
-	// 	'Partial Review (Service)',
-	// 	'Partial Review (POC)',
-	// 	'Finished Review',
-	// ],
-	// primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
-	serviceAgency: 'Service Agency Name',
-	budgetYear: 'Budget Year (FY)',
-	// primaryReviewer: [],
-	// serviceReviewer: [],
-	// pocReviewer: '',
-	// primaryClassLabel: [],
-	// sourceTag: [],
-	programElement: 'Program Element',
-	projectNum: 'Project Number',
-	projectTitle: 'Project',
-	// sort: [],
-	hasKeywords: 'Keywords',
-	// secondaryReviewer: [],
-	// minBY1Funding: '',
-	// maxBY1Funding: '',
-	minTotalCost: 'Total Cost',
-	maxTotalCost: 'Total Cost',
-	appropriationNumber: 'Main Account', // this is labeled as Main Account to the viewer
-	budgetActivity: 'Budget Activity',
-	budgetSubActivity: 'Budget Sub Activity',
-};
 const metadataNameToSearchFilterName = {
 	'Service Agency Name': 'serviceAgency',
 	'Budget Year (FY)': 'budgetYear',
@@ -241,24 +208,6 @@ const getBudgetSubActivity = (projectData) => {
 		: projectData.budgetSubActivity ?? 'N/A';
 };
 
-const getAllPriorYearsAmount = (projectData) => {
-	return projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-		? `${formatNum(projectData.allPriorYearsAmount)}`
-		: 'N/A';
-};
-
-const getPriorYearAmount = (projectData) => {
-	return projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-		? `${formatNum(projectData.priorYearAmount)}`
-		: 'N/A';
-};
-
-const getCurrentYearAmount = (projectData) => {
-	return projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-		? `${formatNum(projectData.currentYearAmount)}`
-		: 'N/A';
-};
-
 const getToComplete = (projectData, budgetType) => {
 	return `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A';
 };
@@ -275,6 +224,14 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 		types[budgetType]
 	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
+};
+
+const formatField = (projectData, field) => {
+	let finalString = 'N/A';
+	if (projectData[field] !== null && projectData[field] !== undefined) {
+		finalString = `${formatNum(projectData[field])}`;
+	}
+	return finalString;
 };
 
 const renderContracts = (contracts, length) => {
@@ -726,40 +683,58 @@ const cardHandler = {
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
 
+			let keys = [
+				'projectTitle',
+				'programElement',
+				'projectNum',
+				'serviceAgency',
+				'budgetYear',
+				'budgetCycle',
+				'appropriationNumber',
+				'appropriationTitle',
+				'budgetActivityNumber',
+			];
+
+			for (let key of keys) {
+				if (projectData[key] === undefined) {
+					projectData[key] = 'N/A';
+				}
+			}
+
 			const metadata = [
 				{
 					Key: 'Project',
-					Value: projectData.projectTitle || 'N/A',
+					Value: projectData.projectTitle,
 				},
 				{
 					Key: 'Program Element',
-					Value: projectData.programElement || 'N/A',
+					Value: projectData.programElement,
 					Hidden: budgetType === 'PDOC',
 				},
 				{
 					Key: 'Project Number',
-					Value: projectData.projectNum || 'N/A',
+					Value: projectData.projectNum,
 					Hidden: budgetType === 'PDOC',
 				},
 				{
 					Key: 'Service Agency Name',
-					Value: projectData.serviceAgency || 'N/A',
+					Value: projectData.serviceAgency,
 				},
 				{
 					Key: 'All Prior Years Amount',
-					Value: getAllPriorYearsAmount(projectData),
+					Value: formatField(projectData, 'allPriorYearsAmount'),
 				},
 				{
 					Key: 'Prior Year Amount',
-					Value: getPriorYearAmount(projectData),
+					Value: formatField(projectData, 'priorYearAmount'),
 				},
 				{
 					Key: 'Current Year Amount',
-					Value: getCurrentYearAmount(projectData),
+					Value: formatField(projectData, 'currentYearAmount'),
 				},
 				{
 					Key: 'Fiscal Year',
-					Value: projectData.budgetYear || 'N/A',
+					Value: projectData.budgetYear,
 				},
 				{
 					Key: 'To Complete',
@@ -767,27 +742,27 @@ const cardHandler = {
 				},
 				{
 					Key: 'Total Cost',
-					Value: projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A',
+					Value: formatField(projectData, 'totalCost'),
 				},
 				{
 					Key: 'Budget Year (FY)',
-					Value: projectData.budgetYear || 'N/A',
+					Value: projectData.budgetYear,
 				},
 				{
 					Key: 'Budget Cycle',
-					Value: projectData.budgetCycle || 'N/A',
+					Value: projectData.budgetCycle,
 				},
 				{
 					Key: 'Main Account',
-					Value: projectData.appropriationNumber || 'N/A',
+					Value: projectData.appropriationNumber,
 				},
 				{
 					Key: 'Appropriation Title',
-					Value: projectData.appropriationTitle || 'N/A',
+					Value: projectData.appropriationTitle,
 				},
 				{
 					Key: 'Budget Activity',
-					Value: projectData.budgetActivityNumber || 'N/A',
+					Value: projectData.budgetActivityNumber,
 				},
 				{
 					Key: 'Budget Sub Activity',
