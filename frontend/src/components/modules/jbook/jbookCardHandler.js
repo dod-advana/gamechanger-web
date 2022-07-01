@@ -181,10 +181,57 @@ const StyledPill = styled.div`
 	}
 `;
 
+// mappings
+
 const types = {
 	pdoc: 'Procurement',
 	rdoc: 'RDT&E',
 	odoc: 'O&M',
+};
+
+const filterNameToMetadataName = {
+	// clearText: true,
+	// budgetType: ['RDT&E', 'Procurement', 'O&M'],
+	// reviewStatus: [
+	// 	'Needs Review',
+	// 	'Partial Review (Primary)',
+	// 	'Partial Review (Service)',
+	// 	'Partial Review (POC)',
+	// 	'Finished Review',
+	// ],
+	// primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
+	serviceAgency: 'Service Agency Name',
+	budgetYear: 'Budget Year (FY)',
+	// primaryReviewer: [],
+	// serviceReviewer: [],
+	// pocReviewer: '',
+	// primaryClassLabel: [],
+	// sourceTag: [],
+	programElement: 'Program Element',
+	projectNum: 'Project Number',
+	projectTitle: 'Project',
+	// sort: [],
+	hasKeywords: 'Keywords',
+	// secondaryReviewer: [],
+	// minBY1Funding: '',
+	// maxBY1Funding: '',
+	minTotalCost: 'Total Cost',
+	maxTotalCost: 'Total Cost',
+	appropriationNumber: 'Main Account', // this is labeled as Main Account to the viewer
+	budgetActivity: 'Budget Activity',
+	budgetSubActivity: 'Budget Sub Activity',
+};
+const metadataNameToSearchFilterName = {
+	'Service Agency Name': 'serviceAgency',
+	'Budget Year (FY)': 'budgetYear',
+	'Program Element': 'programElement',
+	'Project Number': 'projectNum',
+	Project: 'projectTitle',
+	Keywords: 'hasKeywords',
+	'Total Cost': ['minTotalCost', 'maxTotalCost'],
+	'Main Account': 'appropriationNumber',
+	'Budget Activity': 'budgetActivity',
+	'Budget Sub Activity': 'budgetSubActivity',
 };
 
 // helper functions
@@ -311,6 +358,38 @@ const getItemPageHits = (item) => {
 	}
 
 	return pageHits;
+};
+
+const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
+	return (a, b) => {
+		if (
+			!Object.keys(metadataNameToSearchFilterName).includes(a.Key) &&
+			!Object.keys(metadataNameToSearchFilterName).includes(b.Key)
+		)
+			return 0;
+		if (
+			Object.keys(metadataNameToSearchFilterName).includes(a.Key) &&
+			modifiedSearchSettings.includes(metadataNameToSearchFilterName[a.Key])
+		) {
+			if (
+				Object.keys(metadataNameToSearchFilterName).includes(b.Key) &&
+				modifiedSearchSettings.includes(metadataNameToSearchFilterName[b.Key])
+			) {
+				return 0;
+			} else {
+				return -1;
+			}
+		} else {
+			if (
+				Object.keys(metadataNameToSearchFilterName).includes(b.Key) &&
+				modifiedSearchSettings.includes(metadataNameToSearchFilterName[b.Key])
+			) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	};
 };
 
 // sub-components
@@ -642,7 +721,7 @@ const cardHandler = {
 
 		getCardBack: (props) => {
 			const { state, item, detailPage = false } = props;
-			const { selectedPortfolio } = state;
+			const { selectedPortfolio, modifiedSearchSettings } = state;
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
@@ -731,13 +810,15 @@ const cardHandler = {
 				});
 			}
 
+			const rankedMetadata = metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
+
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
 					<SimpleTable
 						tableClass={'magellan-table'}
 						zoom={1}
 						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={metadata}
+						rows={rankedMetadata}
 						height={'auto'}
 						dontScroll={true}
 						colWidth={colWidth}

@@ -202,6 +202,38 @@ const initState = {
 		budgetActivity: '',
 		budgetSubActivity: '',
 	},
+	defaultAllAndSelectedOptions: {
+		budgetTypeSpecificSelected: false,
+		budgetTypeAllSelected: true,
+
+		budgetYearSpecificSelected: false,
+		budgetYearAllSelected: true,
+
+		serviceAgencySpecificSelected: false,
+		serviceAgencyAllSelected: true,
+
+		primaryReviewerSpecificSelected: false,
+		primaryReviewerAllSelected: true,
+
+		serviceReviewerSpecificSelected: false,
+		serviceReviewerAllSelected: true,
+
+		hasKeywordsSpecificSelected: false,
+		hasKeywordsAllSelected: true,
+
+		primaryClassLabelSpecificSelected: false,
+		primaryClassLabelAllSelected: true,
+
+		sourceTagSpecificSelected: false,
+		sourceTagAllSelected: true,
+
+		reviewStatusSpecificSelected: false,
+		reviewStatusAllSelected: true,
+
+		primaryReviewStatusSpecificSelected: false,
+		primaryReviewStatusAllSelected: true,
+	},
+	modifiedSearchSettings: [],
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
 	projectData: {},
@@ -449,7 +481,8 @@ function reducer(state, action) {
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				jbookSearchSettings: { ...state.defaultOptions },
+				jbookSearchSettings: { ...state.defaultOptions, ...state.defaultAllAndSelectedOptions },
+				modifiedSearchSettings: [],
 			};
 		case 'RESET_PORTFOLIO_FILTERS':
 			return {
@@ -487,6 +520,7 @@ function reducer(state, action) {
 					hasKeyword: state.defaultOptions.hasKeyword,
 					primaryClassLabel: state.defaultOptions.primaryClassLabel,
 				},
+				modifiedSearchSettings: [],
 			};
 		default:
 			return state;
