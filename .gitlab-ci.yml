@@ -163,7 +163,7 @@ integration-testing-job:  # Start the integration testing
   script:
     - npm install -g cypress
     - curl ${CYPRESS_BASE_URL}
-    - cd ../frontend && npm run cy:test
+    - cd frontend && npm run cy:test
   after_script:
     - |
       echo "Cypress tests finished"
