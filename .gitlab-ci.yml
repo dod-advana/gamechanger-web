@@ -160,6 +160,7 @@ integration-testing-job:  # Start the integration testing
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   script:
+    - npm install -g cypress
     - curl ${CYPRESS_BASE_URL}
     - cd ../frontend && npm run cy:test
   after_script:
