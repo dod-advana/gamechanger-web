@@ -149,6 +149,7 @@ setup-server:  # build dev server with the commit branch
     branch: "main"
 
 integration-testing-job:  # Start the integration testing
+  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: integration-test
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"

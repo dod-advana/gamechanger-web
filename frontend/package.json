@@ -104,7 +104,6 @@
 	"scripts": {
 		"109": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=test109 yarn start",
 		"analyze": "source-map-explorer 'build/static/js/*.js'",
-		"preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
 		"start": "react-scripts start",
 		"dev": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=development PORT=8080 yarn start",
 		"devDecoupled": "REACT_APP_GLUU_SSO=disabled NODE_ENV=development REACT_APP_NODE_ENV=development REACT_APP_GC_DECOUPLED=1 yarn start",
