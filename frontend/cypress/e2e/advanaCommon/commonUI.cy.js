@@ -33,34 +33,4 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		// Check the consent banner is not there
 		cy.get('[data-cy="consent-agreement"]').should('not.exist');
 	});
-
-	// Tests the basic side navigation functionality
-	it('The side nav should be there, open and close', () => {
-		CypressHelper.setupHeaders(cy);
-
-		// Clear cookies
-		cy.clearCookies();
-
-		// Visit the main page
-		cy.visit(`${BASE_URL}/#/gamechanger`);
-
-		// Click the okay button
-		cy.get('[data-cy="consent-agreement-okay"]').click();
-
-		// The side nav should exit
-		cy.get('[data-cy="side-nav"]').should('exist');
-
-		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
-		cy.get('[data-cy="side-nav-open-button"]').click();
-		cy.wait(1500);
-		cy.get('[data-cy="side-nav-close-button"]').should('exist');
-		cy.get('[data-cy="side-nav-close-button"]').click();
-		cy.wait(1500);
-		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
-	});
-
-	// Tests the advana pills functionality
-	// it("The advana pills should be there.", () => {
-	//   cy.get('[data-cy="blah2"]').should("exist");
-	// });
 });
