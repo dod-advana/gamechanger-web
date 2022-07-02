@@ -53,7 +53,7 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
 		cy.get('[data-cy="side-nav-open-button"]').click();
 		cy.wait(1500);
-		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('exist');
+		cy.get('[data-cy="side-nav-close-button"]').should('exist');
 		cy.get('[data-cy="side-nav-close-button"]').click();
 		cy.wait(1500);
 		cy.get('[data-cy="side-nav-open-button"]').parent().parent().invoke('attr', 'open').should('not.exist');
