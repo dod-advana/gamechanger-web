@@ -1,4 +1,4 @@
-import CypressHelper from '../../support/CypressHelper';
+import CypressHelper, { BASE_URL } from '../../support/CypressHelper';
 
 describe('Tests the advanaCommon functionality of the app including side nav and consent banner.', () => {
 	// Test the consent banner appears and a cookie is created when okay clicked
@@ -9,7 +9,7 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		cy.clearCookies();
 
 		// Visit the main page
-		cy.visit(Cypress.env('BASE_URL'));
+		cy.visit(`${BASE_URL}/#/gamechanger`);
 
 		// Check the consent banner is there
 		cy.get('[data-cy="consent-agreement"]').should('exist');
@@ -22,7 +22,7 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		cy.clearCookies();
 
 		// Visit the main page
-		cy.visit(Cypress.env('BASE_URL') + '/#/gamechanger');
+		cy.visit(`${BASE_URL}/#/gamechanger`);
 
 		// Click the okay button
 		cy.get('[data-cy="consent-agreement-okay"]').click();
@@ -42,7 +42,7 @@ describe('Tests the advanaCommon functionality of the app including side nav and
 		cy.clearCookies();
 
 		// Visit the main page
-		cy.visit(Cypress.env('BASE_URL') + '/#/gamechanger');
+		cy.visit(`${BASE_URL}/#/gamechanger`);
 
 		// Click the okay button
 		cy.get('[data-cy="consent-agreement-okay"]').click();

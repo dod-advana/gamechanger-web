@@ -5481,7 +5481,7 @@ debug@^3.1.0, debug@^3.1.1, debug@^3.2.7:
   dependencies:
     ms "^2.1.1"
 
-"debug@github:ngokevin/debug#noTimestamp":
+debug@ngokevin/debug#noTimestamp:
   version "2.2.0"
   resolved "https://codeload.github.com/ngokevin/debug/tar.gz/ef5f8e66d49ce8bc64c6f282c15f8b7164409e3a"
 
@@ -5786,7 +5786,7 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-"document-register-element@github:dmarcos/document-register-element#8ccc532b7f3744be954574caf3072a5fd260ca90":
+document-register-element@dmarcos/document-register-element#8ccc532b7f3744be954574caf3072a5fd260ca90:
   version "0.5.4"
   resolved "https://codeload.github.com/dmarcos/document-register-element/tar.gz/8ccc532b7f3744be954574caf3072a5fd260ca90"
 
@@ -10676,10 +10676,10 @@ node-sass@6.0.1:
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
 
-node@14.19.3:
-  version "14.19.3"
-  resolved "https://registry.yarnpkg.com/node/-/node-14.19.3.tgz#b821c41e984c351afda2d37ddbd907a938d7689f"
-  integrity sha512-DS65cq8ueBsV7vnpECY/ge/lTwjXPp96dmiXGi2jUqSIO7BLS9vE+MGUqeZdcfUTwV0m/PTmFniJrjUQyzlxcg==
+node@14.17.6:
+  version "14.17.6"
+  resolved "https://registry.yarnpkg.com/node/-/node-14.17.6.tgz#4834aaf50da41740a88e15408baf5e793d4f3127"
+  integrity sha512-bnXk1lBs8Gh/Md5MP4ziojLOMBU05QLc16Ie7/rNORpLf1K5+2OdEl4KbMfllE3cDWM//qQXyvN59ZSZdFnBaQ==
   dependencies:
     node-bin-setup "^1.0.0"
 
@@ -14754,7 +14754,7 @@ text-table@0.2.0, text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==
 
-"three-bmfont-text@github:dmarcos/three-bmfont-text#21d017046216e318362c48abd1a48bddfb6e0733":
+three-bmfont-text@dmarcos/three-bmfont-text#21d017046216e318362c48abd1a48bddfb6e0733:
   version "2.4.0"
   resolved "https://codeload.github.com/dmarcos/three-bmfont-text/tar.gz/21d017046216e318362c48abd1a48bddfb6e0733"
   dependencies:
