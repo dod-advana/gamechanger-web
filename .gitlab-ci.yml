@@ -1,5 +1,6 @@
 stages:          # List of stages for jobs, and their order of execution.
   - prepare
+  - setup-test-server
   - integration-test
   - static-test
   - security-test
@@ -129,15 +130,33 @@ sonar_scan-job:  # Run code through sonar scanner
       </html>
       EOF
 
-cypress-testing-job:
-  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
+
+setup-server:  # build dev server with the commit branch
+  stage: setup-test-server
+  variables:
+    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
+    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
+    APP_NAME: "gamechanger"
+    AWS_SERVER: "88"
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    - if: $DAILY_SCAN == "true"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-ci-cd"
+    branch: "main"
+
+integration-testing-job:  # Start the integration testing
   stage: integration-test
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   variables:
-    CYPRESS_BASE_URL: "http://0.0.0.0:8080"
-    CYPRESS_API_URL: "http://0.0.0.0:8990"
+    AWS_SERVER: "88"
+    CYPRESS_BASE_URL: "http://10.194.9.${AWS_SERVER}:8080"
+    CYPRESS_API_URL: "http://10.194.9.${AWS_SERVER}:8990"
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   before_script:

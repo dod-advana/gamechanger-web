@@ -6,7 +6,7 @@ COPY .npmrc /usr/src/app
 RUN npm install -g nodemon \
     && npm install -g sequelize-cli \
     && npm install -g jest \
-    && npm install
+    && yarn install
 COPY . /usr/src/app
 EXPOSE 8990
 CMD ./start.sh
