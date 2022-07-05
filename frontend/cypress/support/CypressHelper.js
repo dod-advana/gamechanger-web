@@ -17,6 +17,14 @@ class CypressHelper {
 		});
 	}
 
+	static setConsentCookie(cy) {
+		const futureDate = new Date();
+		futureDate.setUTCDate(futureDate.getUTCDate() + 2);
+		cy.setCookie('data.mil-consent-agreed', new Date().toString(), {
+			domain: BASE_URL,
+		});
+	}
+
 	static setupHeaders = (cy, cn, userId) => {
 		Cypress.on('uncaught:exception', (_err, _runnable) => {
 			return false;
