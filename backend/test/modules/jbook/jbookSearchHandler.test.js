@@ -28,7 +28,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Other Procurement, Army',
 						budgetActivityNumber_s: '02',
 						budgetActivityTitle_t: 'Communications and Electronics Equipment',
-						budgetLineItem_s: '0131B89000',
+						budgetLineItem_t: '0131B89000',
 						projectTitle_s: 'Insider Threat Program - Unit Activity Monitoring',
 						p1LineNumber_s: '54',
 						projectMissionDescription_t:
@@ -156,7 +156,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Procurement, Defense-Wide',
 						budgetActivityNumber_s: '01',
 						budgetActivityTitle_t: 'Major Equipment',
-						budgetLineItem_s: '0902298J',
+						budgetLineItem_t: '0902298J',
 						projectTitle_s: 'Management Headquarters',
 						p1LineNumber_s: '40',
 						projectMissionDescription_t:
@@ -766,78 +766,10 @@ describe('JBookSearchHandler', function () {
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();
 		});
-
-		// it('should return data for PDF Export',
-		// 	async (done) => {
-		// 		const req = {
-		// 			body: {
-		//
-		// 			}
-		// 		};
-		//
-		// 		const mockQueryForPDF = ['pSelect', 'rSelect', 'oSelect'];
-		// 		const mockWhereQuery = ['pWhere', 'rWhere', 'oWhere'];
-		// 		const keywordAssocMock = [[{pdoc_ids: [1, 2, 3]}]];
-		// 		// const mockEndQuery = {};
-		//
-		// 		// update when we add jbook profile page export to gc
-		// 		const mockPGResults = [[{
-		// 			type:'Procurement',
-		// 			id: 1
-		// 		}]];
-		//
-		// 		const opts = {
-		// 			keyword_assoc: {
-		// 				sequelize: {
-		// 					query() {
-		// 						return Promise.resolve(keywordAssocMock);
-		// 					}
-		// 				}
-		// 			},
-		// 			jbookSearchUtility: {
-		// 				buildSelectQueryForFullPDF() {
-		// 					return mockQueryForPDF;
-		// 				},
-		// 				buildWhereQuery() {
-		// 					return mockWhereQuery;
-		// 				},
-		// 				// buildEndQuery() {
-		// 				// 	return mockEndQuery;
-		// 				// }
-		// 			},
-		// 			db: {
-		// 				jbook: {
-		// 					query () {
-		// 						return Promise.resolve(mockPGResults);
-		// 					}
-		// 				}
-		// 			}
-		// 		};
-		//
-		// 		const target = new JBookSearchHandler(opts);
-		//
-		// 		try {
-		// 			const actual = await target.getDataForFullPDFExport(req, true);
-		// 			const expected = [
-		// 				{
-		// 					hasKeywords: true,
-		// 					id: 1,
-		// 					type: 'Procurement'
-		// 				}
-		// 			];
-		// 			assert.deepStrictEqual(actual, expected);
-		//
-		// 		} catch (e) {
-		// 			console.log(e);
-		// 			assert.fail(e);
-		// 		}
-		// 		done();
-		// 	});
 
 		it('should return data for filters', async (done) => {
 			const req = {};
@@ -963,7 +895,6 @@ describe('JBookSearchHandler', function () {
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();
@@ -1304,7 +1235,6 @@ describe('JBookSearchHandler', function () {
 				assert.equal(resStatus, true);
 				assert.equal(setHeader, 2);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();

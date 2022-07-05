@@ -109,11 +109,11 @@ sonar_scan-job:  # Run code through sonar scanner
     - |
       sonar-scanner \
         -Dsonar.qualitygate.wait=true \
+        -Dsonar.exclusions=backend/node_app/sql/* \
         -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
         -Dsonar.junit.reportPaths=backend/junit.xml \
         -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
         -Dsonar.language=js \
-        -Dsonar.exclusions=backend/node_app/sql/* \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
