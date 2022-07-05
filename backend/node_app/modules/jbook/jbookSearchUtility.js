@@ -639,8 +639,8 @@ class JBookSearchUtility {
 			});
 
 			let sortText = jbookSearchSettings.sort[0].id;
-			if (!sortSelected && searchText !== '') {
-				sortText = 'Relevance';
+			if (!sortSelected && searchText && searchText !== '') {
+				sortText = 'relevance';
 			}
 
 			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
@@ -925,7 +925,7 @@ class JBookSearchUtility {
 						filterQueries.push({
 							query_string: {
 								query: `*${jbookSearchSettings.programElement}*`,
-								default_field: 'budgetLineItem_s',
+								default_field: 'budgetLineItem_t',
 							},
 						});
 						break;

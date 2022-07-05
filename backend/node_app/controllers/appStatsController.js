@@ -610,7 +610,7 @@ class AppStatsController {
 	 * @param {*} req
 	 * @param {*} res
 	 */
-	async getClones(_, res) {
+	async getClones(_req, res) {
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -637,8 +637,8 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async exportUserData(req, res) {
-		const { startDate, endDate, table, daysBack } = req.query;
-		const opts = { startDate, endDate, daysBack };
+		const { startDate, endDate, table, daysBack, cloneName, cloneID } = req.query;
+		const opts = { startDate, endDate, daysBack, cloneName, cloneID };
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		let connection;
@@ -1129,6 +1129,7 @@ class AppStatsController {
 			});
 			connection.connect();
 			const userData = await this.queryUserAggregations(opts, connection);
+			console.log(userData);
 			res.status(200).send(userData);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -1136,6 +1137,78 @@ class AppStatsController {
 		} finally {
 			connection.end();
 		}
+	}
+
+	addSearches(visitMap, docMap, searches) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+		for (let search of searches) {
+			if (visitIDMap[search.idvisitor]) {
+				if (documentMap[visitIDMap[search.idvisitor]]) {
+					documentMap[visitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[visitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[visitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[visitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[visitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[visitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[visitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
+					}
+				} else {
+					documentMap[visitIDMap[search.idvisitor]] = {
+						user_id: visitIDMap[search.idvisitor],
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
+				}
+			}
+		}
+
+		return [visitIDMap, documentMap];
+	}
+
+	addDocs(visitMap, docMap, documents) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+		for (let doc of documents) {
+			if (visitIDMap[doc.idvisitor]) {
+				if (
+					!documentMap[visitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].length < 5
+				) {
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+				} else {
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].shift();
+				}
+			}
+		}
+		return [visitIDMap, documentMap];
+	}
+
+	addOpened(visitMap, docMap, opened) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+
+		for (let open of opened) {
+			if (visitIDMap[open.idvisitor]) {
+				if (
+					!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+					documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
+				) {
+					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+				} else {
+					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+					documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+				}
+			}
+		}
+		return [visitIDMap, documentMap];
 	}
 
 	/**
@@ -1215,12 +1288,12 @@ class AppStatsController {
 	 * @param {*} connection
 	 */
 	async queryUserAggregations(opts, connection) {
-		const documentMap = {};
-		const vistitIDMap = {};
+		let documentMap = {};
+		let visitIDMap = {};
 		const users = await this.user.findAll();
 		const visitorIDs = await this.getUserVisitorID(opts.cloneID, connection);
 		for (let visit of visitorIDs) {
-			vistitIDMap[visit.idvisitor] = visit.user_id;
+			visitIDMap[visit.idvisitor] = visit.user_id;
 		}
 		for (let user of users) {
 			documentMap[this.sparkMD5.hash(user.user_id)] = {
@@ -1241,9 +1314,18 @@ class AppStatsController {
 		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
 		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneID, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		this.mapSearchVisitIDs(searches, documentMap, vistitIDMap);
-		this.mapDocumentVisitIDs(documents, documentMap, vistitIDMap);
-		this.mapOpenedVisitIDs(opened, documentMap, vistitIDMap);
+
+		let addSearches = this.addSearches(visitIDMap, documentMap, searches);
+		visitIDMap = addSearches[0];
+		documentMap = addSearches[1];
+
+		let addDocs = this.addDocs(visitIDMap, documentMap, documents);
+		visitIDMap = addDocs[0];
+		documentMap = addDocs[1];
+
+		let addOpened = this.addOpened(visitIDMap, documentMap, opened);
+		documentMap = addOpened[1];
+
 		return { users: Object.values(documentMap) };
 	}
 
