@@ -61,11 +61,17 @@ const handleFilterChange = (event, state, dispatch, type) => {
 
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
-	const diffSearchSettings = [...state.modifiedSearchSettings];
-	if (!diffSearchSettings.includes(type)) {
+
+	let diffSearchSettings = [...state.modifiedSearchSettings];
+	// if filter is being applied for the first time
+	if (index === -1 && !diffSearchSettings.includes(type)) {
 		diffSearchSettings.push(type);
 		diffSearchSettings.sort();
+		// if a filter was removed and no longer applies
+	} else if (index !== -1 && diffSearchSettings.includes(type)) {
+		diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
 	}
+
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,

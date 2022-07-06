@@ -330,28 +330,6 @@ const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
 	return modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName]);
 };
 
-/* handle sorting the Total Cost metadata field
-	helper for sortMetadataByAppliedSearchFilters
-	either a.Key or b.Key or both will be "Total Cost" when this function is invoked
-	return -1, 0, or 1 indicating the respective order of a and b given which search
-		filters have been modified from the default
-*/
-const sortTotalCostMetadataByAppliedSearchFilters = (modifiedSearchSettings, a, b) => {
-	if (a.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, a.Key)) {
-		if (b.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
-			return 0;
-		} else return -1;
-	} else if (b.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
-		if (isSearchFilterModified(modifiedSearchSettings, a.Key)) {
-			return 0;
-		} else {
-			return 1;
-		}
-	} else {
-		return 0;
-	}
-};
-
 /* handle sorting metadata fields based on the search filters
 	return -1, 0, or 1 indicating the respective order of a and b given which search
 		filters have been modified from the default
@@ -360,9 +338,7 @@ const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	return (a, b) => {
 		const metadataNames = Object.keys(metadataNameToSearchFilterName);
 		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
-		if (a.Key === 'Total Cost' || b.Key === 'Total Cost') {
-			return sortTotalCostMetadataByAppliedSearchFilters(modifiedSearchSettings, a, b);
-		}
+
 		if (metadataNames.includes(a.Key) && isSearchFilterModified(modifiedSearchSettings, a.Key)) {
 			if (metadataNames.includes(b.Key) && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
 				return 0;
