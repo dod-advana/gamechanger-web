@@ -815,7 +815,7 @@ const cardHandler = {
 				});
 			}
 
-			const rankedMetadata = metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
+			metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
 
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
@@ -823,7 +823,7 @@ const cardHandler = {
 						tableClass={'magellan-table'}
 						zoom={1}
 						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={rankedMetadata}
+						rows={metadata}
 						height={'auto'}
 						dontScroll={true}
 						colWidth={colWidth}
