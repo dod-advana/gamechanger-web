@@ -1,9 +1,9 @@
 stages:          # List of stages for jobs, and their order of execution.
   - prepare
-  - setup-test-server
-  - integration-test
   - static-test
   - security-test
+  - setup-test-server
+  - integration-test
   - deploy
 
 cache: &global_cache
@@ -148,7 +148,7 @@ setup-server:  # build dev server with the commit branch
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
-integration-testing-job:  # Start the integration testing
+integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: integration-test
   rules:
@@ -177,6 +177,21 @@ integration-testing-job:  # Start the integration testing
       - frontend/results.json
       - frontend/cypress/screenshots
       - frontend/cypress/videos
+
+integration-testing-selenium-job:  # Start the integration testing
+  stage: integration-test
+  variables:
+    AWS_SERVER: "88"
+    DO_INTEGRATION_TEST: "true"
+    DO_DEPLOY: "true"
+  rules:
+    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
+  trigger:
+    strategy: "depend"
+    project: "advana/gamechanger/gamechanger-ci-cd"
+    branch: "main"
+  allow_failure: true
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy
