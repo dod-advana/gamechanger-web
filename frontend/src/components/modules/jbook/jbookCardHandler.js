@@ -404,7 +404,7 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 
 const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
 	return (
-		<div className={'expanded-hits'}>
+		<div className="hits-container">
 			<div className={'page-hits'}>
 				{_.chain(item.pageHits)
 					.map((page, key) => {
