@@ -864,6 +864,7 @@ function GCCard(props) {
 			showSideFilters={state.showSideFilters}
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}
+			data-cy={'searchCard'}
 		>
 			{getCardComponent({
 				id,
