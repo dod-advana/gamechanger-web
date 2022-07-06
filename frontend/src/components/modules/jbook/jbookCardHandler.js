@@ -815,11 +815,8 @@ const cardHandler = {
 				});
 			}
 
-			console.log('modified : ', modifiedSearchSettings);
-			console.log(metadata);
 			const rankedMetadata = metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
-			console.log(rankedMetadata);
-			console.log('\n\n\n\n\n');
+
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
 					<SimpleTable
