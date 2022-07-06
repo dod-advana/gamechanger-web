@@ -10,7 +10,7 @@ describe('Tests multiple types of policy searches.', () => {
 		cy.visit(`${BASE_URL}/#/gamechanger`);
 
 		// Click the okay button
-		cy.get('[data-cy="consent-agreement-okay"]').click();
+		cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
 
 		// Wait for search box to be visible
 		cy.get('#gcSearchInput', { timeout: 10000 }).should('exist');
