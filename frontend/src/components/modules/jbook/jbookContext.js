@@ -82,7 +82,9 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 
-		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+		appropriationNumber: [], // this is labeled as Main Account to the viewer
 
 		budgetSubActivity: '',
 
@@ -198,7 +200,7 @@ const initState = {
 		maxBY1Funding: '',
 		minTotalCost: '',
 		maxTotalCost: '',
-		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		appropriationNumber: [], // this is labeled as Main Account to the viewer
 		budgetActivity: '',
 		budgetSubActivity: '',
 	},
@@ -478,9 +480,10 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
-					budgetType: state.jbookSearchSettings.budgetType.find((item) => item === 'O&M')
-						? state.jbookSearchSettings.budgetType.filter((item) => item !== 'O&M')
-						: state.jbookSearchSettings.budgetType,
+					budgetType:
+						state.selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions.budgetType.filter((item) => item !== 'O&M')
+							: state.defaultOptions.budgetType,
 					reviewStatus: state.defaultOptions.reviewStatus,
 					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
 					primaryReviewer: state.defaultOptions.primaryReviewer,

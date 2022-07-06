@@ -95,9 +95,9 @@ class JBookSearchUtility {
 		const { searchText } = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
+			const termsArray = this.searchUtility.getEsSearchTerms({ searchText })[1];
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
+			let synonyms = this.thesaurusExpansion(searchText, termsArray)[0];
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
@@ -136,9 +136,7 @@ class JBookSearchUtility {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
+		for (let term of termsArray) {
 			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
 			let expandedTerm = await this.redisDB.get(upperTerm);
 			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
@@ -618,7 +616,6 @@ class JBookSearchUtility {
 				programElementTitle_t: 1,
 				serviceAgency_s: 2,
 				appropriationTitle_t: 1,
-				appropriationNumber_s: 6,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
 				programElement_s: 6,
@@ -854,9 +851,15 @@ class JBookSearchUtility {
 					// MainAccount
 					case 'appropriationNumber':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.appropriationNumber}*`,
-								default_field: 'appropriationNumber_s',
+							bool: {
+								should: [
+									{
+										terms: { appropriationNumber_s: jbookSearchSettings.appropriationNumber },
+									},
+									{
+										terms: { programElement_s: jbookSearchSettings.appropriationNumber },
+									},
+								],
 							},
 						});
 						break;
