@@ -84,7 +84,9 @@ const initState = {
 
 		appropriationNumberSpecificSelected: false,
 		appropriationNumberAllSelected: true,
-		appropriationNumber: [], // this is labeled as Main Account to the viewer
+		paccts: [],
+		raccts: [],
+		oaccts: [],
 
 		budgetSubActivity: '',
 
@@ -200,7 +202,9 @@ const initState = {
 		maxBY1Funding: '',
 		minTotalCost: '',
 		maxTotalCost: '',
-		appropriationNumber: [], // this is labeled as Main Account to the viewer
+		paccts: [],
+		raccts: [],
+		oaccts: [],
 		budgetActivity: '',
 		budgetSubActivity: '',
 	},

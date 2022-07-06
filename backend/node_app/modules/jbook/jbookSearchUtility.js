@@ -848,22 +848,6 @@ class JBookSearchUtility {
 						filterQueries.push(this.handleBudgetSubPrimaryReviewFilter(jbookSearchSettings));
 						break;
 
-					// MainAccount
-					case 'appropriationNumber':
-						filterQueries.push({
-							bool: {
-								should: [
-									{
-										terms: { appropriationNumber_s: jbookSearchSettings.appropriationNumber },
-									},
-									{
-										terms: { programElement_s: jbookSearchSettings.appropriationNumber },
-									},
-								],
-							},
-						});
-						break;
-
 					// Total Funding
 					case 'minTotalCost':
 					case 'maxTotalCost':
@@ -963,6 +947,45 @@ class JBookSearchUtility {
 						console.log('Jbook search setting not found');
 						break;
 				}
+			}
+
+			if (jbookSearchSettings.appropriationNumberSpecificSelected) {
+				let mainAcct = {
+					bool: {
+						should: [],
+					},
+				};
+				if (jbookSearchSettings.paccts) {
+					mainAcct.bool.should.push({
+						bool: {
+							must: [
+								{ term: { type_s: 'procurement' } },
+								{ terms: { appropriationNumber_s: jbookSearchSettings.paccts } },
+							],
+						},
+					});
+				}
+				if (jbookSearchSettings.raccts) {
+					mainAcct.bool.should.push({
+						bool: {
+							must: [
+								{ term: { type_s: 'rdte' } },
+								{ terms: { appropriationNumber_s: jbookSearchSettings.raccts } },
+							],
+						},
+					});
+				}
+				if (jbookSearchSettings.oaccts) {
+					mainAcct.bool.should.push({
+						bool: {
+							must: [
+								{ term: { type_s: 'om' } },
+								{ terms: { programElement_s: jbookSearchSettings.oaccts } },
+							],
+						},
+					});
+				}
+				filterQueries.push(mainAcct);
 			}
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');

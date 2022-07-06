@@ -36,6 +36,11 @@ const handleSelectAll = (state, dispatch, type) => {
 		let runSearch = true;
 		let runGraphSearch = false;
 		newSearchSettings[type] = state.defaultOptions[type];
+		if (type === 'appropriationNumber') {
+			newSearchSettings.paccts = [];
+			newSearchSettings.raccts = [];
+			newSearchSettings.oaccts = [];
+		}
 		setState(dispatch, {
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
@@ -48,7 +53,6 @@ const handleSelectAll = (state, dispatch, type) => {
 const handleFilterChange = (event, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	let optionName = event.target.name;
-
 	const index = newSearchSettings[type].indexOf(optionName);
 
 	if (index !== -1) {
@@ -56,6 +60,8 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	} else {
 		newSearchSettings[type].push(optionName);
 	}
+
+	console.log(newSearchSettings);
 
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
@@ -76,11 +82,11 @@ const handleFilterChange = (event, state, dispatch, type) => {
 const keywordsOpts = ['Yes', 'No'];
 
 const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
-	const renderOptions = (op) => {
-		return op.map((option) => {
+	const renderOptions = (op, doctype = '') => {
+		return op.map((option, index) => {
 			return (
 				<FormControlLabel
-					key={`${option}`}
+					key={`${option} ${index}`}
 					value={`${option}`}
 					classes={{
 						root: classes.rootLabel,
@@ -93,8 +99,10 @@ const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) 
 								checked: classes.checkedButton,
 							}}
 							name={`${option}`}
-							checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
-							onClick={(event) => handleFilterChange(event, state, dispatch, type)}
+							checked={state.jbookSearchSettings[doctype === '' ? type : doctype].indexOf(option) !== -1}
+							onClick={(event) =>
+								handleFilterChange(event, state, dispatch, doctype === '' ? type : doctype)
+							}
 						/>
 					}
 					label={`${option}`}
@@ -129,7 +137,7 @@ const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) 
 							<Typography style={{ width: '100%', display: 'inline-flex', fontSize: '20' }}>
 								{map[doctype]}
 							</Typography>
-							{renderOptions(options[doctype])}
+							{renderOptions(options[doctype], doctype)}
 						</>
 					);
 				})}
