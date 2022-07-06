@@ -710,9 +710,9 @@ const PolicySearchHandler = {
 			newSearchSettings.typeFilter = typeFilters;
 
 			//initiallize original org and type filters to revert counts to.
-			if (!newSearchSettings.originalOrgFilters)
+			if (!newSearchSettings?.originalOrgFilters?.length)
 				newSearchSettings.originalOrgFilters = Object.keys(orgFilters).map((org) => [org, 0]);
-			if (!newSearchSettings.originalTypeFilters)
+			if (!newSearchSettings?.originalTypeFilters?.length)
 				newSearchSettings.originalTypeFilters = Object.keys(typeFilters).map((type) => [type, 0]);
 
 			if (_.isEmpty(state.presearchSources)) {
@@ -752,14 +752,14 @@ const PolicySearchHandler = {
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const orgFilterText = !allOrgsSelected
-			? Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(orgFilter, (value) => value)).join('_')
 			: undefined;
 
 		const typeFilterText = !allTypesSelected
-			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(typeFilter, (value) => value)).join('_')
 			: undefined;
 
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value) => value.field))
 			.map((key) => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
 			.join('_');
 
@@ -781,18 +781,21 @@ const PolicySearchHandler = {
 			window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, '')
 		);
 
+		const appendParams = (parameters, field, paramName) => {
+			if (field) parameters.append(paramName, field);
+		};
 		const params = new URLSearchParams();
-		if (searchText) params.append('q', searchText);
-		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (searchType) params.append('searchType', searchType);
-		if (orgFilterText) params.append('orgFilter', orgFilterText);
-		if (typeFilterText) params.append('typeFilter', typeFilterText);
-		if (searchFieldText) params.append('searchFields', searchFieldText);
-		if (accessDateText) params.append('accessDate', accessDateText);
-		if (pubDateText) params.append('pubDate', pubDateText);
-		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		appendParams(params, searchText, 'q');
+		appendParams(params, offset, 'offset');
+		appendParams(params, searchType, 'searchType');
+		appendParams(params, orgFilterText, 'orgFilter');
+		appendParams(params, typeFilterText, 'typeFilter');
+		appendParams(params, searchFieldText, 'searchFields');
+		appendParams(params, accessDateText, 'accessDate');
+		appendParams(params, pubDateText, 'pubDate');
+		appendParams(params, includeRevoked, 'revoked');
+		appendParams(params, currentParams.get('view'), 'view');
 		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
-		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

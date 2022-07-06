@@ -42,43 +42,9 @@ class ResponsibilityController {
 		this.getResponsibilityDocTitles = this.getResponsibilityDocTitles.bind(this);
 		this.storeResponsibilityReports = this.storeResponsibilityReports.bind(this);
 		this.getResponsibilityUpdates = this.getResponsibilityUpdates.bind(this);
-		this.getOtherEntResponsibilityFilterList = this.getOtherEntResponsibilityFilterList.bind(this);
 		this.rejectResponsibility = this.rejectResponsibility.bind(this);
 		this.updateResponsibility = this.updateResponsibility.bind(this);
 		this.updateResponsibilityReport = this.updateResponsibilityReport.bind(this);
-	}
-
-	async getOtherEntResponsibilityFilterList(req, res) {
-		let userId = 'unknown_webapp';
-		try {
-			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-			const results = await this.responsibilities.findAll({
-				raw: true,
-				attributes: ['otherOrganizationPersonnel'],
-			});
-
-			const filterReturns = [];
-
-			results.forEach((result) => {
-				if (result.otherOrganizationPersonnel === null) {
-					if (!filterReturns.includes('null')) {
-						filterReturns.push('null');
-					}
-				} else {
-					const otherOrgsArray = result.otherOrganizationPersonnel.split('|');
-					otherOrgsArray.forEach((org) => {
-						if (!filterReturns.includes(org)) {
-							filterReturns.push(org);
-						}
-					});
-				}
-			});
-
-			res.status(200).send(filterReturns.sort());
-		} catch (err) {
-			this.logger.error(err, 'DPDA9Y3', userId);
-			res.status(500).send([]);
-		}
 	}
 
 	paraNumQuery(filename, text) {
