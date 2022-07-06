@@ -317,30 +317,60 @@ const getItemPageHits = (item) => {
 	return pageHits;
 };
 
+/* takes list of modified searchSettings and the name of a metadata field
+	returns true if that metadata field represents a search setting that has been modified
+	false otherwise */
+const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
+	if (metadataName === 'Total Cost') {
+		return (
+			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][0]) ||
+			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][1])
+		);
+	}
+	return modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName]);
+};
+
+/* handle sorting the Total Cost metadata field
+	helper for sortMetadataByAppliedSearchFilters
+	either a.Key or b.Key or both will be "Total Cost" when this function is invoked
+	return -1, 0, or 1 indicating the respective order of a and b given which search
+		filters have been modified from the default
+*/
+const sortTotalCostMetadataByAppliedSearchFilters = (modifiedSearchSettings, a, b) => {
+	if (a.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, a.Key)) {
+		if (b.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
+			return 0;
+		} else return -1;
+	} else if (b.Key === 'Total Cost' && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
+		if (isSearchFilterModified(modifiedSearchSettings, a.Key)) {
+			return 0;
+		} else {
+			return 1;
+		}
+	} else {
+		return 0;
+	}
+};
+
+/* handle sorting metadata fields based on the search filters
+	return -1, 0, or 1 indicating the respective order of a and b given which search
+		filters have been modified from the default
+*/
 const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	return (a, b) => {
-		if (
-			!Object.keys(metadataNameToSearchFilterName).includes(a.Key) &&
-			!Object.keys(metadataNameToSearchFilterName).includes(b.Key)
-		)
-			return 0;
-		if (
-			Object.keys(metadataNameToSearchFilterName).includes(a.Key) &&
-			modifiedSearchSettings.includes(metadataNameToSearchFilterName[a.Key])
-		) {
-			if (
-				Object.keys(metadataNameToSearchFilterName).includes(b.Key) &&
-				modifiedSearchSettings.includes(metadataNameToSearchFilterName[b.Key])
-			) {
+		const metadataNames = Object.keys(metadataNameToSearchFilterName);
+		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
+		if (a.Key === 'Total Cost' || b.Key === 'Total Cost') {
+			return sortTotalCostMetadataByAppliedSearchFilters(modifiedSearchSettings, a, b);
+		}
+		if (metadataNames.includes(a.Key) && isSearchFilterModified(modifiedSearchSettings, a.Key)) {
+			if (metadataNames.includes(b.Key) && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
 				return 0;
 			} else {
 				return -1;
 			}
 		} else {
-			if (
-				Object.keys(metadataNameToSearchFilterName).includes(b.Key) &&
-				modifiedSearchSettings.includes(metadataNameToSearchFilterName[b.Key])
-			) {
+			if (metadataNames.includes(b.Key) && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
 				return 1;
 			} else {
 				return 0;
@@ -785,8 +815,11 @@ const cardHandler = {
 				});
 			}
 
+			console.log('modified : ', modifiedSearchSettings);
+			console.log(metadata);
 			const rankedMetadata = metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
-
+			console.log(rankedMetadata);
+			console.log('\n\n\n\n\n');
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
 					<SimpleTable
