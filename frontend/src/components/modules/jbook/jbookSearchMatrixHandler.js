@@ -36,37 +36,15 @@ const handleSelectAll = (state, dispatch, type) => {
 		let runSearch = true;
 		let runGraphSearch = false;
 		newSearchSettings[type] = state.defaultOptions[type];
+		const diffSearchSettings = [...state.modifiedSearchSettings].filter((e) => e !== type);
 		setState(dispatch, {
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
 			runSearch,
 			runGraphSearch,
+			modifiedSearchSettings: diffSearchSettings,
 		});
 	}
-};
-
-/*
- * Compare two objects by reducing an array of keys in obj1, having the
- * keys in obj2 as the intial value of the result. Key points:
- *
- * - All keys of obj2 are initially in the result.
- *
- * - If the loop finds a key (from obj1, remember) not in obj2, it adds
- *   it to the result.
- *
- * - If the loop finds a key that are both in obj1 and obj2, it compares
- *   the value. If it's the same value, the key is removed from the result.
- */
-const getObjectDiff = (obj1, obj2) => {
-	return Object.keys(obj1).reduce((result, key) => {
-		if (!obj2.hasOwnProperty(key)) {
-			result.push(key);
-		} else if (_.isEqual(obj1[key], obj2[key])) {
-			const resultKeyIndex = result.indexOf(key);
-			result.splice(resultKeyIndex, 1);
-		}
-		return result;
-	}, Object.keys(obj2));
 };
 
 const handleFilterChange = (event, state, dispatch, type) => {
@@ -83,9 +61,11 @@ const handleFilterChange = (event, state, dispatch, type) => {
 
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
-	const diffSearchSettings = getObjectDiff(newSearchSettings, state.defaultOptions)
-		.filter((item) => !Object.keys(state.defaultAllAndSelectedOptions).includes(item))
-		.sort();
+	const diffSearchSettings = [...state.modifiedSearchSettings];
+	if (!diffSearchSettings.includes(type)) {
+		diffSearchSettings.push(type);
+		diffSearchSettings.sort();
+	}
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -212,8 +192,20 @@ const handleFilterInputChange = (field, value, state, dispatch) => {
 
 	newSearchSettings[field] = value;
 
+	// track that a change was made to a filter
+	let diffSearchSettings = [...state.modifiedSearchSettings];
+	// if a new value that is not empty was set
+	if (!diffSearchSettings.includes(field) && value !== '') {
+		diffSearchSettings.push(field);
+		diffSearchSettings.sort();
+		// if a value was unset
+	} else if (value === '') {
+		diffSearchSettings = diffSearchSettings.filter((e) => e !== field);
+	}
+
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
+		modifiedSearchSettings: diffSearchSettings,
 	});
 };
 
