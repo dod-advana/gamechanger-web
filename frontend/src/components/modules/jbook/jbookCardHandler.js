@@ -815,7 +815,9 @@ const cardHandler = {
 				});
 			}
 
-			metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
+			if (modifiedSearchSettings.length > 0) {
+				metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
+			}
 
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
