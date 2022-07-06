@@ -178,21 +178,6 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/cypress/screenshots
       - frontend/cypress/videos
 
-integration-testing-selenium-job:  # Start the integration testing
-  stage: integration-test
-  variables:
-    AWS_SERVER: "88"
-    DO_INTEGRATION_TEST: "true"
-    DO_DEPLOY: "true"
-  rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-ci-cd"
-    branch: "main"
-  allow_failure: true
-
 deploy-job:       # This job runs the build for dev.
   stage: deploy
   rules:
