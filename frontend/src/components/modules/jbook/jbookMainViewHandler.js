@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { getUserProfilePage } from '../../mainView/commonFunctions';
 import { styles } from '../../mainView/commonStyles';
-import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
 import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -16,9 +15,16 @@ import {
 	PAGE_DISPLAYED,
 	scrollToContentTop,
 	StyledCenterContainer,
+	getOrgToOrgQuery,
+	getTypeQuery,
 } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
+import {
+	getNonMainPageOuterContainer,
+	getSearchObjectFromString,
+	getUserData,
+	setState,
+} from '../../../utils/sharedFunctions';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
@@ -30,6 +36,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
+import ExportResultsDialog from '../../export/ExportResultsDialog';
 
 const _ = require('lodash');
 
@@ -69,9 +76,6 @@ const handlePageLoad = async (props) => {
 	const url = window.location.href;
 	const searchText = getQueryVariable('q', url) ?? '';
 	let mainTabSelected = 0;
-	// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
-	// 	mainTabSelected = 1;
-	// }
 
 	// grab the portfolio data
 	let portfolios = [];
@@ -99,20 +103,59 @@ const handlePageLoad = async (props) => {
 	});
 };
 
-const renderHideTabs = (props) => {
+const renderHideTabs = () => {
 	return <></>;
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, getViewPanels, pageLoaded } = props;
+	const { state, dispatch, getViewPanels, pageLoaded, setCurrentTime, searchHandler } = props;
 
-	const { loading, rawSearchResults, viewNames, currentViewName } = state;
+	const {
+		exportDialogVisible,
+		searchSettings,
+		prevSearchText,
+		selectedDocuments,
+		loading,
+		rawSearchResults,
+		viewNames,
+		edaSearchSettings,
+		currentSort,
+		currentOrder,
+		currentViewName,
+	} = state;
+	const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
 
 	const noResults = Boolean(!rawSearchResults || rawSearchResults?.length === 0);
 	const hideSearchResults = noResults && loading;
+	const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 	return (
 		<>
+			{exportDialogVisible && (
+				<ExportResultsDialog
+					state={state}
+					dispatch={dispatch}
+					searchHandler={searchHandler}
+					open={exportDialogVisible}
+					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
+					searchObject={getSearchObjectFromString(prevSearchText)}
+					setCurrentTime={setCurrentTime}
+					selectedDocuments={selectedDocuments}
+					isSelectedDocs={isSelectedDocs}
+					orgFilterString={getOrgToOrgQuery(allOrgsSelected, orgFilter)}
+					typeFilterString={getTypeQuery(allTypesSelected, typeFilter)}
+					orgFilter={orgFilter}
+					typeFilter={typeFilter}
+					getUserData={() => getUserData(dispatch)}
+					isClone={true}
+					cloneData={state.cloneData}
+					searchType={searchType}
+					searchFields={searchFields}
+					edaSearchSettings={edaSearchSettings}
+					sort={currentSort}
+					order={currentOrder}
+				/>
+			)}
 			<FeedbackModal state={state} dispatch={dispatch} />
 			<JBookWelcome dispatch={dispatch} state={state} />
 			{loading &&
@@ -131,12 +174,79 @@ const getMainView = (props) => {
 	);
 };
 
-const getViewNames = (props) => {
+const getViewNames = (_props) => {
 	return [{ name: 'Card', title: 'Card View', id: 'gcCardView' }];
 };
 
-const getExtraViewPanels = (props) => {
+const getExtraViewPanels = (_props) => {
 	return [];
+};
+
+const getSideFilters = (context, cloneData, showSideFilters, expansionDict) => {
+	return (
+		showSideFilters && (
+			<div className={'left-container'} style={{ marginTop: -130 }}>
+				<div className={'side-bar-container'}>
+					<GameChangerSearchMatrix context={context} />
+					{expansionDict && Object.keys(expansionDict).length > 0 && (
+						<>
+							<div className={'sidebar-section-title'} style={{ marginLeft: 5 }}>
+								RELATED
+							</div>
+							<JBookSideBar context={context} cloneData={cloneData} />
+						</>
+					)}
+				</div>
+			</div>
+		)
+	);
+};
+
+const getPagination = (state, dispatch, edaCloneData, edaLoading, edaSearchResults, edaResultsPage, edaCount) => {
+	return (
+		(Permissions.permissionValidator(`${edaCloneData.clone_name} Admin`, true) ||
+			Permissions.permissionValidator(`View ${edaCloneData.clone_name}`, true)) && (
+			<>
+				{edaLoading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={GC_COLORS.primary} />
+					</div>
+				)}
+				{!edaLoading && (
+					<div className="row" style={{ padding: 5 }}>
+						{getSearchResults(
+							edaSearchResults ? edaSearchResults : [],
+							state,
+							dispatch,
+							edaCloneData.card_module
+						)}
+						<div className="jbookPagination col-xs-12 text-center">
+							<Pagination
+								activePage={edaResultsPage}
+								itemsCountPerPage={18}
+								totalItemsCount={edaCount}
+								pageRangeDisplayed={8}
+								onChange={(page) => {
+									trackEvent(
+										getTrackingNameForFactory(edaCloneData.clone_name),
+										'PaginationChanged',
+										'page',
+										page
+									);
+									setState(dispatch, {
+										edaResultsPage: page,
+										runSearch: true,
+										edaPaginationSearch: true,
+									});
+									scrollToContentTop();
+								}}
+							/>
+						</div>
+					</div>
+				)}
+			</>
+		)
+	);
 };
 
 const getCardViewPanel = (props) => {
@@ -148,7 +258,6 @@ const getCardViewPanel = (props) => {
 		resultsPage,
 		hideTabs,
 		iframePreviewLink,
-		loading,
 		showSideFilters,
 		rawSearchResults,
 		mainTabSelected,
@@ -158,12 +267,15 @@ const getCardViewPanel = (props) => {
 		edaCloneData,
 		edaResultsPage,
 		edaCount,
+		expansionDict,
+		cloneData,
 	} = state;
 
-	let sideScroll = {
-		height: '72vh',
-	};
-	if (!iframePreviewLink) sideScroll = {};
+	const sideScroll = !iframePreviewLink
+		? {}
+		: {
+				height: '72vh',
+		  };
 
 	return (
 		<div key={'cardView'}>
@@ -197,21 +309,7 @@ const getCardViewPanel = (props) => {
 								</div>
 							</div>
 						</div>
-						{showSideFilters && (
-							<div className={'left-container'} style={{ marginTop: -130 }}>
-								<div className={'side-bar-container'}>
-									<GameChangerSearchMatrix context={context} />
-									{state.expansionDict && Object.keys(state.expansionDict).length > 0 && (
-										<>
-											<div className={'sidebar-section-title'} style={{ marginLeft: 5 }}>
-												RELATED
-											</div>
-											<JBookSideBar context={context} cloneData={state.cloneData} />
-										</>
-									)}
-								</div>
-							</div>
-						)}
+						{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
 
 						<div className={'right-container'} style={{ marginTop: '-50px' }}>
 							<div
@@ -219,9 +317,6 @@ const getCardViewPanel = (props) => {
 								style={{ padding: 0 }}
 							>
 								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
-										{false && !loading && <GetQAResults context={context} />}
-									</div>
 									<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 										<Tabs selectedIndex={mainTabSelected ?? 0}>
 											<div
@@ -310,7 +405,7 @@ const getCardViewPanel = (props) => {
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
-																					state.cloneData.clone_name
+																					cloneData.clone_name
 																				),
 																				'PaginationChanged',
 																				'page',
@@ -330,57 +425,14 @@ const getCardViewPanel = (props) => {
 														)}
 													</TabPanel>
 													<TabPanel>
-														{(Permissions.permissionValidator(
-															`${edaCloneData.clone_name} Admin`,
-															true
-														) ||
-															Permissions.permissionValidator(
-																`View ${edaCloneData.clone_name}`,
-																true
-															)) && (
-															<>
-																{edaLoading && (
-																	<div style={{ margin: '0 auto' }}>
-																		<LoadingIndicator
-																			customColor={GC_COLORS.primary}
-																		/>
-																	</div>
-																)}
-																{!edaLoading && (
-																	<div className="row" style={{ padding: 5 }}>
-																		{getSearchResults(
-																			edaSearchResults ? edaSearchResults : [],
-																			state,
-																			dispatch,
-																			edaCloneData.card_module
-																		)}
-																		<div className="jbookPagination col-xs-12 text-center">
-																			<Pagination
-																				activePage={edaResultsPage}
-																				itemsCountPerPage={18}
-																				totalItemsCount={edaCount}
-																				pageRangeDisplayed={8}
-																				onChange={(page) => {
-																					trackEvent(
-																						getTrackingNameForFactory(
-																							edaCloneData.clone_name
-																						),
-																						'PaginationChanged',
-																						'page',
-																						page
-																					);
-																					setState(dispatch, {
-																						edaResultsPage: page,
-																						runSearch: true,
-																						edaPaginationSearch: true,
-																					});
-																					scrollToContentTop();
-																				}}
-																			/>
-																		</div>
-																	</div>
-																)}
-															</>
+														{getPagination(
+															state,
+															dispatch,
+															edaCloneData,
+															edaLoading,
+															edaSearchResults,
+															edaResultsPage,
+															edaCount
 														)}
 													</TabPanel>
 												</div>
@@ -403,11 +455,23 @@ const getCardViewPanel = (props) => {
 };
 
 const getAboutUs = (props) => {
-	return <JBookAboutUs />;
+	const { state, dispatch } = props;
+	return (
+		<>
+			<FeedbackModal state={state} dispatch={dispatch} />
+			<JBookAboutUs />
+		</>
+	);
 };
 
-const displayUserRelatedItems = () => {
-	return <JBookUserDashboard />;
+const displayUserRelatedItems = (props) => {
+	const { state, dispatch } = props;
+	return (
+		<>
+			<FeedbackModal state={state} dispatch={dispatch} />
+			<JBookUserDashboard />
+		</>
+	);
 };
 
 const JBookMainViewHandler = (props) => {
@@ -448,7 +512,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -461,12 +525,13 @@ const JBookMainViewHandler = (props) => {
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(displayUserRelatedItems(), gameChangerUserAPI),
+				getUserProfilePage(displayUserRelatedItems(props), gameChangerUserAPI),
 				state,
-				dispatch
+				dispatch,
+				searchHandler
 			);
 		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
+			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({
@@ -476,6 +541,7 @@ const JBookMainViewHandler = (props) => {
 				renderHideTabs,
 				pageLoaded,
 				getViewPanels,
+				searchHandler,
 			});
 	}
 };
