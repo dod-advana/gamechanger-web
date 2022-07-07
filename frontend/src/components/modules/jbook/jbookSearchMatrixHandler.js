@@ -265,7 +265,17 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
+					{renderFilterCheckboxes(
+						state,
+						dispatch,
+						classes,
+						'budgetType',
+						'budget type',
+						false,
+						selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
+							: undefined
+					)}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }}>
@@ -533,7 +543,6 @@ const getSearchMatrixItems = (props) => {
 
 	const { contractTotals, jbookSearchSettings, selectedPortfolio, portfolios } = state;
 	const portfolioMap = getPortfolioMap(portfolios);
-	const budgetTypeOptions = state.defaultOptions['budgetType'].filter((item) => item !== 'O&M');
 	return (
 		<div style={{ marginLeft: 15 }}>
 			<div style={{ width: '100%', marginBottom: 10 }}>
@@ -555,15 +564,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
-						state,
-						dispatch,
-						classes,
-						'budgetType',
-						'budget type',
-						false,
-						budgetTypeOptions
-					)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }}>
@@ -574,7 +575,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
 				</GCAccordion>
 			</div>
 
