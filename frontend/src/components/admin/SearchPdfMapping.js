@@ -7,6 +7,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Select, MenuItem, Typography, Grid, Card, CardContent } from '@material-ui/core';
 import moment from 'moment';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { gcOrange } from '../common/gc-colors';
 import TabStyles from '../common/TabStyles';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import GCPrimaryButton from '../common/GCButton';
@@ -40,15 +42,6 @@ const DatePickerWrapper = styled.div`
 			}
 		}
 	}
-`;
-const CreateWrapper = styled.div`
-	display: flex;
-	align-items: center;
-	float: right;
-`;
-const LabelStack = styled.div`
-    display: flex
-	margin-left: 24px;
 `;
 
 const TableRow = styled.div`
@@ -264,11 +257,11 @@ const documentUsageColumns = [
  */
 const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData) => {
 	try {
-		// daysBack, offset, filters, sorting, pageSize
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			cloneName: cloneName,
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
 		};
 		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
 		setMappingData(data.data);
@@ -284,7 +277,6 @@ const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData
  */
 const getFeedbackData = async (setFeedbackData) => {
 	try {
-		// daysBack, offset, filters, sorting, pageSize
 		const data = await gameChangerAPI.getFeedbackData();
 		setFeedbackData(data.data.results);
 	} catch (e) {
@@ -297,9 +289,9 @@ const getFeedbackData = async (setFeedbackData) => {
  * The query is handled in gamechanger-api.
  * @method getDocumentData
  */
-const getDocumentData = async (daysBack, setDocumentData) => {
+const getDocumentData = async (startDate, endDate, setDocumentData) => {
 	try {
-		const params = { daysBack };
+		const params = { startDate, endDate };
 		const { data = {} } = await gameChangerAPI.getDocumentUsage(params);
 		setDocumentData(data.data);
 	} catch (e) {
@@ -312,59 +304,64 @@ const getDocumentData = async (daysBack, setDocumentData) => {
  * The query is handled in gamechanger-api.
  * @method getUserAggData
  */
-const getUserAggData = async (startDate, endDate, cloneName, setUserAggData, setCardData) => {
+const getUserAggData = async (startDate, endDate, cloneName, setUserAggData) => {
 	try {
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			cloneName: cloneName,
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
 		};
 		const { data = {} } = await gameChangerAPI.getUserAggregations(params);
 		setUserAggData(data.users);
-		setCardData(data.cards);
 	} catch (e) {
 		console.error(e);
 	}
 };
 
 /**
+ * This method queries postgres for graph data.
+ * The query is handled in gamechanger-api.
+ * @method getUserGraphData
+ */
+const getUserGraphData = async (startDate, endDate, cloneName, setGraphData, setCardData) => {
+	try {
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		const { data = {} } = await gameChangerAPI.getUserDashboard(params);
+		setGraphData({
+			searchBar: data.searchBar,
+			userBar: data.userBar,
+		});
+		setCardData(data.cards);
+	} catch (e) {
+		console.error(e);
+	}
+};
+/**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
  * to download as a csv
  * @class SearchPdfMapping
  */
-export default (props) => {
+export default () => {
 	// Set state variables
 	const [mappingData, setMappingData] = useState([]);
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
 	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0, unique_searches: 0 });
+	const [graphData, setGraphData] = useState({ userBar: [], searchBar: [] });
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
-	const [daysBack, setDaysBack] = useState(3);
-	const [tabIndex, setTabIndex] = useState('pdfMapping');
-	const [cloneName, setCloneName] = useState('');
+	const [tabIndex, setTabIndex] = useState('userAgg');
+	const [cloneName, setCloneName] = useState({ name: '', id: 0 });
 	const [cloneList, setCloneList] = useState([]);
 
-	// flags that parameters have been changed and on
-	// blur or enter press we should update the query
-	const [shouldUpdate, setShouldUpdate] = useState(false);
-	/**
-	 * Handles text change in input
-	 * @method handleDaysBackChange
-	 * @param {*} event
-	 */
-	const handleDaysBackChange = (event) => {
-		const value = event.target.value;
-		const parsed = parseInt(value);
-		if (!isNaN(parsed) && parsed > 0) {
-			setShouldUpdate(true);
-			setDaysBack(parsed);
-		} else if (parsed === 0 || value === '') {
-			setDaysBack(value);
-		}
-	};
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
@@ -380,45 +377,6 @@ export default (props) => {
 			setCloneList(data.data);
 		} catch (e) {
 			console.error(e);
-		}
-	};
-
-	/**
-	 * When an input is deselected check if the inputs are valid and a
-	 * change was made. If so then query the data with new values.
-	 * @method handleBlur
-	 * @param {*} event
-	 */
-	const handleBlur = (event) => {
-		if (!daysBack) {
-			setShouldUpdate(false);
-			setDaysBack(3);
-		}
-		if (shouldUpdate) {
-			setShouldUpdate(false);
-			switch (tabIndex) {
-				case 'pdfMapping':
-					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-					getUserAggData(startDate, endDate, cloneName, setUserAggData);
-					break;
-				case 'userTracking':
-					getDocumentData(daysBack, setDocumentData);
-					break;
-				default:
-					getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-					getUserAggData(startDate, endDate, cloneName, setUserAggData);
-					getDocumentData(daysBack, setDocumentData);
-			}
-		}
-	};
-	/**
-	 * If the enter key is pressed while in an input trigger handleBlur
-	 * @method handlePositionEnter
-	 * @param {*} event
-	 */
-	const handlePositionEnter = (event) => {
-		if (event.key === 'Enter') {
-			handleBlur();
 		}
 	};
 
@@ -494,15 +452,14 @@ export default (props) => {
 	 */
 	const exportData = async (name) => {
 		try {
-			// daysBack, offset, filters, sorting, pageSize
 			const params = {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 				table: name,
-				daysBack: daysBack,
+				cloneName: cloneName.split('-')[1],
+				cloneID: cloneName.split('-')[0],
 			};
 			const data = await gameChangerAPI.exportUserData(params);
-			console.log(data);
 			const url = window.URL.createObjectURL(
 				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
 			);
@@ -543,18 +500,20 @@ export default (props) => {
 		switch (tabIndex) {
 			case 'pdfMapping':
 				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData);
+				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
 				break;
 			case 'userTracking':
-				getDocumentData(daysBack, setDocumentData);
+				getDocumentData(startDate, endDate, setDocumentData);
 				break;
 			default:
 				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
 				getFeedbackData(setFeedbackData);
-				getUserAggData(startDate, endDate, cloneName, setUserAggData, setCardData);
-				getDocumentData(daysBack, setDocumentData);
+				getUserAggData(startDate, endDate, cloneName, setUserAggData);
+				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
+				getDocumentData(startDate, endDate, setDocumentData);
 		}
-	}, [daysBack, tabIndex, startDate, endDate, cloneName]);
+	}, [tabIndex, startDate, endDate, cloneName]);
 
 	useEffect(() => {
 		getCloneData();
@@ -562,6 +521,89 @@ export default (props) => {
 
 	return (
 		<div style={{ ...TabStyles.tabContainer, minHeight: 'calc(100vh-100px)' }}>
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'space-between',
+					margin: '10px 80px',
+				}}
+			>
+				<Grid container spacing={2}>
+					<Grid item lg={2} xs={3}>
+						<DatePickerWrapper>
+							<label>Start Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={startDate}
+								onChange={(date) => handleDateChange(date, setStartDate)}
+								dateFormat="MM/dd/yyyy h:mm aa"
+							/>
+						</DatePickerWrapper>
+					</Grid>
+					<Grid item lg={2} xs={3}>
+						<DatePickerWrapper>
+							<label>End Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={endDate}
+								onChange={(date) => handleDateChange(date, setEndDate)}
+								dateFormat="MM/dd/yyyy h:mm aa"
+							/>
+						</DatePickerWrapper>
+					</Grid>
+					<Grid item lg={4} xs={4}>
+						<GCPrimaryButton
+							onClick={() => {
+								timeBack('day');
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Last Day
+						</GCPrimaryButton>
+						<GCPrimaryButton
+							onClick={() => {
+								timeBack('week');
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Last Week
+						</GCPrimaryButton>
+						<GCPrimaryButton
+							onClick={() => {
+								timeBack('month');
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Last Month
+						</GCPrimaryButton>
+					</Grid>
+					<Grid item lg={2} xs={2}>
+						<div style={{ width: '120px', display: 'inline-block' }}>Clones:</div>
+						<Select
+							value={cloneName}
+							onChange={(e) => setCloneName(e.target.value)}
+							name="labels"
+							style={{
+								fontSize: 'small',
+								minWidth: '200px',
+								margin: '10px',
+							}}
+						>
+							{cloneList.map((clone) => {
+								return (
+									<MenuItem
+										style={{ fontSize: 'small', display: 'flex' }}
+										value={`${clone.category_id}-${clone.name}`}
+										key={clone.name}
+									>
+										{clone.name}
+									</MenuItem>
+								);
+							})}
+						</Select>
+					</Grid>
+				</Grid>
+			</div>
 			<Tabs>
 				<div
 					style={{
@@ -573,13 +615,27 @@ export default (props) => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
+								...(tabIndex === 'userAgg' ? TabStyles.tabSelectedStyle : {}),
+								borderRadius: `5px 0 0 0`,
+							}}
+							title="userAgg"
+							onClick={() => {
+								setTabIndex('userAgg');
+							}}
+						>
+							<Typography variant="h6" display="inline">
+								User Aggregation
+							</Typography>
+						</Tab>
+						<Tab
+							style={{
+								...TabStyles.tabStyle,
 								...(tabIndex === 'pdfMapping' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="pdfMapping"
 							onClick={() => {
 								setTabIndex('pdfMapping');
-								setDaysBack(3);
 							}}
 						>
 							<Typography variant="h6" display="inline">
@@ -608,7 +664,6 @@ export default (props) => {
 							title="userTracker"
 							onClick={() => {
 								setTabIndex('userTracker');
-								setDaysBack(30);
 							}}
 						>
 							<Typography variant="h6" display="inline">
@@ -630,89 +685,6 @@ export default (props) => {
 							}}
 						>
 							<Grid container spacing={2}>
-								<Grid item lg={2} xs={3}>
-									<DatePickerWrapper>
-										<label>Start Date</label>
-										<DatePicker
-											showTimeSelect
-											selected={startDate}
-											onChange={(date) => handleDateChange(date, setStartDate)}
-											dateFormat="MM/dd/yyyy h:mm aa"
-										/>
-									</DatePickerWrapper>
-								</Grid>
-								<Grid item lg={2} xs={3}>
-									<DatePickerWrapper>
-										<label>End Date</label>
-										<DatePicker
-											showTimeSelect
-											selected={endDate}
-											onChange={(date) => handleDateChange(date, setEndDate)}
-											dateFormat="MM/dd/yyyy h:mm aa"
-										/>
-									</DatePickerWrapper>
-								</Grid>
-								<Grid item lg={4} xs={4}>
-									<GCPrimaryButton
-										onClick={() => {
-											timeBack('day');
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										Last Day
-									</GCPrimaryButton>
-									<GCPrimaryButton
-										onClick={() => {
-											timeBack('week');
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										Last Week
-									</GCPrimaryButton>
-									<GCPrimaryButton
-										onClick={() => {
-											timeBack('month');
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										Last Month
-									</GCPrimaryButton>
-								</Grid>
-								<Grid item lg={2} xs={2}>
-									<div style={{ width: '120px', display: 'inline-block' }}>Clones:</div>
-									<Select
-										value={cloneName}
-										onChange={(e) => setCloneName(e.target.value)}
-										name="labels"
-										style={{
-											fontSize: 'small',
-											minWidth: '200px',
-											margin: '10px',
-										}}
-									>
-										{cloneList.map((clone) => {
-											return (
-												<MenuItem
-													style={{ fontSize: 'small', display: 'flex' }}
-													value={clone.category_id}
-												>
-													{clone.name}
-												</MenuItem>
-											);
-										})}
-									</Select>
-								</Grid>
-								<Grid item lg={2} xs={2}>
-									<GCPrimaryButton
-										onClick={() => {
-											trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
-											exportData('SearchPdfMapping', mappingData);
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										Export Mapping
-									</GCPrimaryButton>
-								</Grid>
 								<Grid item xs={2}>
 									<Card>
 										<CardContent>
@@ -743,7 +715,76 @@ export default (props) => {
 										</CardContent>
 									</Card>
 								</Grid>
-								<Grid item xs={6}></Grid>
+								<Grid item xs={3}></Grid>
+								<Grid item lg={2} xs={3}>
+									<GCPrimaryButton
+										onClick={() => {
+											trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
+											exportData('UserData');
+										}}
+										style={{ minWidth: 'unset' }}
+									>
+										Export User Data
+									</GCPrimaryButton>
+								</Grid>
+								<Grid item xs={12} lg={6}>
+									<div
+										style={{
+											font: 'normal normal 600 14px Noto Sans',
+											color: '#666666',
+											marginBottom: 10,
+										}}
+									>
+										USERS BY MONTH
+									</div>
+									<div style={{ height: 250 }}>
+										<ResponsiveContainer width="100%" height="100%">
+											<BarChart
+												data={graphData.userBar}
+												margin={{
+													top: 15,
+													right: 30,
+													left: 20,
+													bottom: 5,
+												}}
+											>
+												<XAxis dataKey="date" />
+												<YAxis allowDataOverflow={true} type="number" width={35} />
+												<Tooltip />
+												<Bar dataKey="count" fill={gcOrange} />
+											</BarChart>
+										</ResponsiveContainer>
+									</div>
+								</Grid>
+								<Grid item xs={12} lg={6}>
+									<div
+										style={{
+											font: 'normal normal 600 14px Noto Sans',
+											color: '#666666',
+											marginBottom: 10,
+										}}
+									>
+										SEARCHES BY MONTH
+									</div>
+									<div style={{ height: 250 }}>
+										<ResponsiveContainer width="100%" height="100%">
+											<BarChart
+												data={graphData.searchBar}
+												margin={{
+													top: 15,
+													right: 30,
+													left: 20,
+													bottom: 5,
+												}}
+											>
+												<XAxis dataKey="date" />
+												<YAxis allowDataOverflow={true} type="number" width={35} />
+												<Tooltip />
+												<Bar dataKey="count" fill={gcOrange} />
+											</BarChart>
+										</ResponsiveContainer>
+									</div>
+								</Grid>
 							</Grid>
 						</div>
 						<div
@@ -753,34 +794,7 @@ export default (props) => {
 								margin: '10px 80px',
 							}}
 						>
-							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-								Documents Opened Given Search
-							</p>
-						</div>
-						<ReactTable
-							data={mappingData}
-							columns={columns}
-							style={{ margin: '0 80px 20px 80px', height: 1000 }}
-							defaultSorted={[{ id: 'searchtime', desc: true }]}
-						/>
-
-						<div
-							style={{
-								display: 'flex',
-								justifyContent: 'space-between',
-								margin: '10px 80px',
-							}}
-						>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>User Data</p>
-							<GCPrimaryButton
-								onClick={() => {
-									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-									exportData('UserData', userAggData);
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Export User Data
-							</GCPrimaryButton>
 						</div>
 						<ReactTable
 							data={userAggData}
@@ -798,11 +812,40 @@ export default (props) => {
 								margin: '10px 80px',
 							}}
 						>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+								Documents Opened Given Search
+							</p>
+							<GCPrimaryButton
+								onClick={() => {
+									trackEvent('GAMECHANGER', 'ExportSearchPDFMapping', 'onClick');
+									exportData('SearchPdfMapping');
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Export Mapping
+							</GCPrimaryButton>
+						</div>
+
+						<ReactTable
+							data={mappingData}
+							columns={columns}
+							style={{ margin: '0 80px 20px 80px', height: 1000 }}
+							defaultSorted={[{ id: 'searchtime', desc: true }]}
+						/>
+					</TabPanel>
+					<TabPanel>
+						<div
+							style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								margin: '10px 80px',
+							}}
+						>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Feedback Data</p>
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-									exportData('Feedback', feedbackData);
+									exportData('Feedback');
 								}}
 								style={{ minWidth: 'unset' }}
 							>
@@ -819,24 +862,10 @@ export default (props) => {
 					<TabPanel>
 						<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Document Usage Data</p>
-							<CreateWrapper>
-								<LabelStack>
-									<label htmlFor="daysBack" style={{ marginRight: '10px', marginTop: '4px' }}>
-										Days Back:
-									</label>
-									<input
-										name="daysBack"
-										value={daysBack}
-										onChange={handleDaysBackChange}
-										onBlur={handleBlur}
-										onKeyPress={handlePositionEnter}
-									/>
-								</LabelStack>
-							</CreateWrapper>
 							<GCPrimaryButton
 								onClick={() => {
 									trackEvent('GAMECHANGER', 'ExportDocumentUsage', 'onClick');
-									exportData('DocumentUsage', documentData);
+									exportData('DocumentUsage');
 								}}
 								style={{ minWidth: 'unset' }}
 							>

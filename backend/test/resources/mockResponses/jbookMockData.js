@@ -461,6 +461,12 @@ const profileData = {
 				"'-130':183 '-16':179 '-2':175,177 '-3':181 '-35':192 '-4':188 '078054f':507 '1':1,52,259 '10usc':205 '13834':474 '2':62,80,265 '2535':206 '3':68,269 '3000':91,111 '4':277 '5b':186 '6000':95,223 '6044':102,389 '7000':98,301 'accur':249 'acquisit':263,281 'act':472,499 'activ':83,466 'af':391,414,468 'af/cv':478 'afford':39 'aid':29 'air':3,255,409 'aircraft':15,45,237,260 'alloc':267 'analysi':228 'apprais':126 'appropri':14,88 'assembl':169 'assess':67,94,219,230,245,451 'avoid':369 'b':174 'backbon':164 'base':66,93,218,233,251,288 'basic':82 'benefit':464 'bp14':513 'bp19':511 'budget':266 'c':182,185 'c-5b':184 'capit':105,118 'chromium':491 'classifi':196 'cleanup':373 'combin':9 'command':43 'commod':292 'complianc':70,97,297,310,332,338 'compliant':351 'comprehens':26 'concern':234 'condit':129 'congress':204 'conserv':134,447,496 'construct':120 'continu':357 'contractor':141,326,396 'contractor-oper':140,325,395 'control':343 'cost':108,220,298,374,386,415,437 'creat':24 'cycl':436 'deal':235 'decis':257 'defens':33,166,278 'demolit':121 'develop':240 'direct':125 'divestitur':283 'easement':127 'effect':150 'effici':475 'effort':305,335 'element':8,109,221,299,387 'elimin':486 'emiss':344,407 'enabl':354 'energi':133,446 'enhanc':337 'ensur':31,136 'environment':69,96,296,309,331,350,420 'eo':473 'equip':122,445 'esoh':425 'essenti':210 'etc':131 'expans':116 'f':178,191 'facil':90,104,144,295,329,353,399,417 'fed':476 'feder':312,378 'fighter':195 'forc':4,256 'four':81 'fund':85,503 'fy15':502 'fy19':508 'global':189 'goal':469 'goco':398 'govern':58,76,138,213,323,393 'government-own':57,75,137,322,392 'grow':359 'hawk':190 'hazard':348,456 'health':424 'hexaval':490 'identif':227 'impact':433 'implement':400,419 'improv':441 'includ':334,438 'industri':5,34,49,60,65,78,89,92,103,143,158,215,217,232,250,279,287,328,352 'inform':252 'initi':448 'intent':202 'invest':268 'joint':193,285 'l':489 'land':410 'life':435 'local':315,381 'logist':274 'maintain':308 'mainten':22,171 'major':117 'manag':53,63,427 'materi':349,443 'meet':152,361 'merger':280 'minim':455 'missil':17 'move':509 'mpc':110,222,300,388 'nation':154,363 'need':159,306,367 'nucleus':211 'occup':423 'op':477 'oper':20,42,142,146,319,327,397 'opportun':450 'other':465 'own':59,77,139,214,324,394 'owner':418 'p':180 'p2':385,449,471,483 'part':47 'pe':506 'penalti':376 'physic':128 'plan':289 'plant':61,79,161,216 'polici':481,493 'pollut':72,100,340,383,402 'prepared':6,50 'prevent':73,101,341,384,403 'prior':500 'process':442 'procur':16,18,46 'product':241,355 'program':7,27,197,333,404,458 'properti':124 'provid':112,208,224,246,302,504 'qualif':439 'real':123 'recoveri':498 'recovery/recycling':453 'reduc':342,406,413,429 'reduct':492 'regard':318 'regul':382 'regulatori':316 'rehabilit':107,119 'reliabl':37 'remain':145 'repair':114 'report':130 'requir':317 'research':238 'resourc':11,495 'result':459 'risk':264,371,426,432 'rq':187 'saf/ie':480 'safe':38,147 'safeti':421 'servic':286 'sever':13 'share':291,462 'state':313,379 'strike':194 'suitabl':148 'suppli':36 'support':51,254,275,284,467 'sustain':243,272 'system':40,157,168,262,271,366,431 'technolog':293 'time':247 'type':106 'u':176 'upkeep':55 'usd':487 'use':346 'wast':457,485 'water':412 'weapon':156,167,261,270,365,430",
 			'P40-15_Justification_Search':
 				"'0708011f':32 '3000':6 '6000':11 '6044':21 '7000':16 'assess':14 'base':13 'capit':7 'complianc':18 'contain':29 'environment':17 'exhibit':27 'fund':24 'fy2022':1 'industri':12 'mpc':5,10,15,20 'pe':31 'pollut':22 'prevent':23 'rehabilit':9 'requir':2 'type':8",
+			review_n: [
+				{
+					portfolio_name_s: 'AI Inventory',
+					portfolio_id_s: '1',
+				},
+			],
 		},
 	],
 	rdoc: [
@@ -933,7 +939,7 @@ const esData = {
 							appropriationTitle_t: 'Aircraft Procurement, Air Force',
 							budgetActivityNumber_s: '07',
 							budgetActivityTitle_t: 'Aircraft Supt Equipment & Facilities',
-							budgetLineItem_s: '000075',
+							budgetLineItem_t: '000075',
 							projectTitle_s: 'Other Production Charges',
 							p1LineNumber_s: '85',
 							projectMissionDescription_t:
@@ -1261,7 +1267,7 @@ const esData = {
 							projectTitle_s: 'Operating Forces',
 							budgetActivityNumber_s: '13',
 							budgetActivityTitle_t: 'Land Forces Readiness Support',
-							budgetLineItem_s: '120',
+							budgetLineItem_t: '120',
 							projectNum_s: '132',
 							budgetLineItemTitle_s: 'Facilities Sustainment, Restoration & Modernization',
 							include_in_toa_s: 'Y',
