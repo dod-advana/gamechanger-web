@@ -194,6 +194,13 @@ const initState = {
 			'Matt Poe',
 			'Erik Kirk',
 		],
+		minBY1Funding: '',
+		maxBY1Funding: '',
+		minTotalCost: '',
+		maxTotalCost: '',
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		budgetActivity: '',
+		budgetSubActivity: '',
 	},
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
@@ -471,6 +478,9 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
+					budgetType: state.jbookSearchSettings.budgetType.find((item) => item === 'O&M')
+						? state.jbookSearchSettings.budgetType.filter((item) => item !== 'O&M')
+						: state.jbookSearchSettings.budgetType,
 					reviewStatus: state.defaultOptions.reviewStatus,
 					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
 					primaryReviewer: state.defaultOptions.primaryReviewer,

@@ -41,10 +41,9 @@ const JBookSimpleReviewForm = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { reviewData, primaryReviewLoading } = state;
-	console.log(reviewData);
 
 	const getSimpleReviewData = () => {
-		const simpleReviewData = [
+		return [
 			{
 				// this is a column in pdoc/rdoc, but not review
 				Key: 'Reviewers',
@@ -58,7 +57,7 @@ const JBookSimpleReviewForm = React.memo((props) => {
 				),
 			},
 			{
-				Key: <CoreAIAnalysisKey />,
+				Key: state.selectedPortfolio === 'AI Inventory' ? <CoreAIAnalysisKey /> : 'Tag',
 				Value: (
 					<CoreAIAnalysisValue
 						dropdownData={dropdownData}
@@ -79,7 +78,6 @@ const JBookSimpleReviewForm = React.memo((props) => {
 				),
 			},
 		];
-		return simpleReviewData;
 	};
 
 	return (
