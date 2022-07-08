@@ -171,8 +171,8 @@ const initState = {
 		orgUpdate: false,
 		typeUpdate: false,
 		expansionTermAdded: false,
-		originalOrgFilters: null,
-		originalTypeFilters: null,
+		originalOrgFilters: [],
+		originalTypeFilters: [],
 		orgFilter: orgFilters,
 		typeFilter: typeFilters,
 		allCategoriesSelected: true,
@@ -277,10 +277,15 @@ function reducer(state, action) {
 				exportDialogVisible: action.payload,
 				isSelectedDocs: action.payload,
 			};
-		case 'RESET_SEARCH_SETTINGS':
+		case 'RESET_PRESEARCH_SETTINGS':
 			return {
 				...state,
 				searchSettings: initState.searchSettings,
+			};
+		case 'RESET_SEARCH_SETTINGS':
+			return {
+				...state,
+				searchSettings: { ...initState.searchSettings, isFilterUpdate: true },
 			};
 		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
 			const newState = {

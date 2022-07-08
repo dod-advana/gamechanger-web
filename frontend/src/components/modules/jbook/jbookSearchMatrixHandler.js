@@ -286,7 +286,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
 				</GCAccordion>
 			</div>
 
