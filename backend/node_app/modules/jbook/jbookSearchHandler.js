@@ -409,7 +409,6 @@ class JBookSearchHandler extends SearchHandler {
 				for (let key of keys) {
 					obj[key] = results.body.aggregations[key].proc_accts.buckets.map((item) => item.key);
 				}
-				console.log(obj);
 				return obj;
 			};
 
