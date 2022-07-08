@@ -178,9 +178,7 @@ const ClassificationScoreCard = (props) => {
 	);
 };
 
-const Metadata = (props) => {
-	const { budgetType, projectNum, keywordCheckboxes, setKeywordCheck } = props;
-
+const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
@@ -194,7 +192,6 @@ const Metadata = (props) => {
 					? getMetadataTableData(
 							projectData,
 							budgetType,
-							projectNum,
 							reviewData,
 							keywordsChecked,
 							keywordCheckboxes,
@@ -216,8 +213,7 @@ const Metadata = (props) => {
 	);
 };
 
-const ProjectDescription = (props) => {
-	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
+const ProjectDescription = ({ profileLoading, projectData, programElement, projectNum, projectDescriptions }) => {
 	const title =
 		(projectData.projectMissionDescription || projectData.programDescription) ??
 		projectData.projectMissionDescription
@@ -266,8 +262,7 @@ const ProjectDescription = (props) => {
 	);
 };
 
-const Accomplishments = (props) => {
-	const { accomplishments } = props;
+const Accomplishments = ({ accomplishments }) => {
 	return (
 		<StyledTableContainer>
 			{accomplishments.map((accomp) => {
@@ -496,50 +491,39 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
-const a = (projectData) => {
-	return [
-		{
-			Key: 'Total Cost',
-			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
-		},
-		{
-			Key: 'Current Year Amount',
-			Value:
-				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-					? `${formatNum(projectData.currentYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Prior Year Amount',
-			Value:
-				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-					? `${formatNum(projectData.priorYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'All Prior Years Amount',
-			Value:
-				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-					? `${formatNum(projectData.allPriorYearsAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Project',
-			Value: projectData.projectTitle || 'N/A',
-		},
-	];
+const getFormattedTotalCost = (projectData) => {
+	return getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A';
+};
+
+const getFormattedYearAmount = (yearAmount) => {
+	return yearAmount !== null && yearAmount !== undefined ? `${formatNum(yearAmount)}` : 'N/A';
 };
 
 const getMetadataTableData = (
 	projectData,
 	budgetType,
-	projectNum,
 	reviewData,
 	keywordsChecked,
 	keywordCheckboxes,
 	setKeywordCheck
 ) => {
-	return a(projectData).concat([
+	return [
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
+		},
+		{
+			Key: 'Current Year Amount',
+			Value: getFormattedYearAmount(projectData.currentYearAmount),
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value: getFormattedYearAmount(projectData.priorYearAmount),
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value: getFormattedYearAmount(projectData.allPriorYearsAmount),
+		},
 		{
 			Key: 'Program Element',
 			Value: projectData.programElement || 'N/A',
@@ -548,11 +532,6 @@ const getMetadataTableData = (
 		{
 			Key: 'Service Agency Name',
 			Value: projectData.serviceAgency || 'N/A',
-		},
-		{
-			Key: 'Project Number',
-			Value: projectNum || 'N/A',
-			Hidden: budgetType === 'Procurement',
 		},
 		{
 			Key: 'Fiscal Year',
@@ -600,7 +579,7 @@ const getMetadataTableData = (
 				</div>
 			),
 		},
-	]);
+	];
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {

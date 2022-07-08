@@ -547,6 +547,7 @@ class JBookSearchUtility {
 					bool: {
 						must: [],
 						should: [],
+						minimum_should_match: 1,
 					},
 				},
 				highlight: {
@@ -563,12 +564,12 @@ class JBookSearchUtility {
 			}
 
 			if (searchText !== '') {
-				query.query.bool.must.push({
-					multi_match: {
+				query.query.bool.should.push({
+					query_string: {
 						query: `${parsedQuery}`,
 						fields: Mappings.esTopLevelFields,
 						type: 'best_fields',
-						operator: `${operator}`,
+						default_operator: `${operator}`,
 					},
 				});
 			}
@@ -591,11 +592,11 @@ class JBookSearchUtility {
 							bool: {
 								should: [
 									{
-										multi_match: {
+										query_string: {
 											query: `${parsedQuery}`,
 											fields: innerField.fields,
 											type: 'best_fields',
-											operator: `${operator}`,
+											default_operator: `${operator}`,
 										},
 									},
 								],

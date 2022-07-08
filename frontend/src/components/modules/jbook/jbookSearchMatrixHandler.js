@@ -14,11 +14,11 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import InputFilter from './InputFilter';
 
-const handleSelectSpecific = (state, dispatch, type) => {
+const handleSelectSpecific = (state, dispatch, type, checked) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	newSearchSettings[`${type}SpecificSelected`] = true;
 	newSearchSettings[`${type}AllSelected`] = false;
-	newSearchSettings[type] = [];
+	if (!checked) newSearchSettings[type] = [];
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -36,11 +36,13 @@ const handleSelectAll = (state, dispatch, type) => {
 		let runSearch = true;
 		let runGraphSearch = false;
 		newSearchSettings[type] = state.defaultOptions[type];
+		const diffSearchSettings = [...state.modifiedSearchSettings].filter((e) => e !== type);
 		setState(dispatch, {
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
 			runSearch,
 			runGraphSearch,
+			modifiedSearchSettings: diffSearchSettings,
 		});
 	}
 };
@@ -59,11 +61,23 @@ const handleFilterChange = (event, state, dispatch, type) => {
 
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
+
+	let diffSearchSettings = [...state.modifiedSearchSettings];
+	// if filter is being applied for the first time
+	if (index === -1 && !diffSearchSettings.includes(type)) {
+		diffSearchSettings.push(type);
+		diffSearchSettings.sort();
+		// if a filter was removed and no longer applies
+	} else if (index !== -1 && diffSearchSettings.includes(type)) {
+		diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
+	}
+
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
 		metricsCounted: false,
 		runSearch: true,
 		runGraphSearch: true,
+		modifiedSearchSettings: diffSearchSettings,
 	});
 	trackEvent(
 		getTrackingNameForFactory(state.cloneData.clone_name),
@@ -157,7 +171,14 @@ const renderFilterCheckboxes = (
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectSpecific(state, dispatch, type)}
+									onClick={() =>
+										handleSelectSpecific(
+											state,
+											dispatch,
+											type,
+											state.jbookSearchSettings[specificSelected]
+										)
+									}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 									checked={state.jbookSearchSettings[specificSelected]}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
@@ -184,8 +205,20 @@ const handleFilterInputChange = (field, value, state, dispatch) => {
 
 	newSearchSettings[field] = value;
 
+	// track that a change was made to a filter
+	let diffSearchSettings = [...state.modifiedSearchSettings];
+	// if a new value that is not empty was set
+	if (!diffSearchSettings.includes(field) && value !== '') {
+		diffSearchSettings.push(field);
+		diffSearchSettings.sort();
+		// if a value was unset
+	} else if (value === '') {
+		diffSearchSettings = diffSearchSettings.filter((e) => e !== field);
+	}
+
 	setState(dispatch, {
 		jbookSearchSettings: newSearchSettings,
+		modifiedSearchSettings: diffSearchSettings,
 	});
 };
 
