@@ -286,7 +286,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
 				</GCAccordion>
 			</div>
 
@@ -317,7 +317,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetSubActivity')}
-					header={<b>BUDGET SUB ACTIVITY</b>}
+					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -329,7 +329,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={shouldBeExpanded(jbookSearchSettings, 'programElement')}
-					header={<b>PROGRAM ELEMENT / BLI</b>}
+					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -341,7 +341,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={shouldBeExpanded(jbookSearchSettings, 'projectNum')}
-					header={<b>PROJECT #</b>}
+					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -618,7 +618,7 @@ const getSearchMatrixItems = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
-					header={<b>Budget Line Item (PE)</b>}
+					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
