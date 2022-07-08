@@ -2215,6 +2215,7 @@ module.exports = {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'DEPARTMENT OF THE DEFENSE': 'Department of Defense (DOD)',
 		ARMY: 'Army',
 		NAVY: 'Navy',
 		AF: 'Air Force (AF)',
