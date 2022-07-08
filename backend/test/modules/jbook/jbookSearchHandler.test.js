@@ -878,6 +878,9 @@ describe('JBookSearchHandler', function () {
 			const target = new JBookSearchHandler(opts);
 
 			try {
+				target.getESDataForFilters = (returnData) =>
+					Promise.resolve({ ...returnData, ...mockESServiceAgency, ...mockESBudgetYear });
+
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
 					budgetYearES: ['2020', '2021', '2022'],
