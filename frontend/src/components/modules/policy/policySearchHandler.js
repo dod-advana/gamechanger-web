@@ -710,9 +710,9 @@ const PolicySearchHandler = {
 			newSearchSettings.typeFilter = typeFilters;
 
 			//initiallize original org and type filters to revert counts to.
-			if (!newSearchSettings.originalOrgFilters)
+			if (!newSearchSettings?.originalOrgFilters?.length)
 				newSearchSettings.originalOrgFilters = Object.keys(orgFilters).map((org) => [org, 0]);
-			if (!newSearchSettings.originalTypeFilters)
+			if (!newSearchSettings?.originalTypeFilters?.length)
 				newSearchSettings.originalTypeFilters = Object.keys(typeFilters).map((type) => [type, 0]);
 
 			if (_.isEmpty(state.presearchSources)) {

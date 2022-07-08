@@ -518,7 +518,6 @@ class JBookSearchHandler extends SearchHandler {
 		const agencyYearData = await this.db.jbook.query(mainQuery, { replacements: {} });
 
 		returnData.budgetYear = [];
-		returnData.serviceAgency = [];
 
 		if (agencyYearData[0].length > 0) {
 			agencyYearData[0].forEach((data) => {
@@ -526,12 +525,6 @@ class JBookSearchHandler extends SearchHandler {
 					...new Set([
 						...returnData.budgetYear,
 						...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : []),
-					]),
-				];
-				returnData.serviceAgency = [
-					...new Set([
-						...returnData.serviceAgency,
-						...(data.serviceagency && data.serviceagency !== null ? data.serviceagency : []),
 					]),
 				];
 			});
@@ -548,14 +541,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 		returnData.servicereviewer = serviceReviewers;
 
-		index = returnData.serviceAgency.indexOf('');
-		if (index !== undefined) {
-			returnData.serviceAgency.splice(index, 1);
-		}
-
-		returnData.serviceAgency.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 		returnData.budgetYear.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
-		returnData.serviceAgency.push(null);
 		returnData.reviewstatus.push(null);
 
 		returnData = await this.getESDataForFilters(returnData, userId);
@@ -616,17 +602,17 @@ class JBookSearchHandler extends SearchHandler {
 					},
 				},
 			];
-			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
+			const serviceAgencyResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
 				query,
 				userId
 			);
 
-			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
+			if (serviceAgencyResults && serviceAgencyResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgencyES = processESResults(serviceAgencyESResults, 'serviceAgency_s').map(
+				returnData.serviceAgency = processESResults(serviceAgencyResults, 'serviceAgency_s').map(
 					(sa) => saMapping[sa]
 				);
 			}
