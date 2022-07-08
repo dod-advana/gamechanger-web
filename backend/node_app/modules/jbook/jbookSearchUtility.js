@@ -530,7 +530,7 @@ class JBookSearchUtility {
 					contract_totals: {
 						aggs: {
 							sum_agg: {
-								sum: { field: 'currentYearAmount_d' },
+								sum: { field: 'by1_request_d' },
 							},
 						},
 						terms: {
@@ -873,7 +873,7 @@ class JBookSearchUtility {
 								jbookSearchSettings,
 								'minBY1Funding',
 								'maxBY1Funding',
-								'currentYearAmount_d'
+								'by1_request_d'
 							)
 						);
 						break;
