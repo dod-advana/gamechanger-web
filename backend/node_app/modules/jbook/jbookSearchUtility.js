@@ -838,9 +838,11 @@ class JBookSearchUtility {
 					// Budget Activity
 					case 'budgetActivity':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.budgetActivity}*`,
-								default_field: 'budgetActivityNumber_s',
+							bool: {
+								should: [
+									{ terms: { budgetActivityNumber_s: jbookSearchSettings.budgetActivity } },
+									{ terms: { appropriationNumber_s: jbookSearchSettings.budgetActivity } },
+								],
 							},
 						});
 						break;
