@@ -301,11 +301,7 @@ class JBookSearchUtility {
 				newKey = mapping[key].newName;
 			}
 
-			if (
-				(raw[key] && raw[key][0]) ||
-				Number.isInteger(raw[key]) ||
-				(typeof raw[key] === 'object' && raw[key] !== null)
-			) {
+			if ((raw[key] && raw[key][0]) || !isNaN(raw[key]) || (typeof raw[key] === 'object' && raw[key] !== null)) {
 				if (arrayFields.includes(key)) {
 					result[newKey] = raw[key];
 				} else if (Array.isArray(raw[key])) {
@@ -792,11 +788,11 @@ class JBookSearchUtility {
 		};
 
 		if (jbookSearchSettings[min]) {
-			totalCostRange.range[field].gte = jbookSearchSettings[min];
+			rangeQuery.range[field].gte = jbookSearchSettings[min];
 		}
 
 		if (jbookSearchSettings[max]) {
-			totalCostRange.range[field].lte = jbookSearchSettings[max];
+			rangeQuery.range[field].lte = jbookSearchSettings[max];
 		}
 
 		return rangeQuery;
