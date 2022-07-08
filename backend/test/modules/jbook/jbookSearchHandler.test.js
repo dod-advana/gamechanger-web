@@ -865,7 +865,6 @@ describe('JBookSearchHandler', function () {
 				redisDB: {},
 				dataLibrary: {
 					queryElasticSearch() {
-						console.log('QUERY ' + esQueryCalled);
 						switch (esQueryCalled) {
 							case 0:
 								esQueryCalled += 1;
