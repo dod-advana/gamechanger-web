@@ -865,11 +865,19 @@ describe('JBookSearchHandler', function () {
 				redisDB: {},
 				dataLibrary: {
 					queryElasticSearch() {
-						if (esQueryCalled) {
-							return Promise.resolve(mockESServiceAgency);
-						} else {
-							esQueryCalled = true;
-							return Promise.resolve(mockESBudgetYear);
+						console.log('QUERY ' + esQueryCalled);
+						switch (esQueryCalled) {
+							case 0:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESBudgetYear);
+							case 1:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESServiceAgency);
+							case 2:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESAppropriationNumber);
+							default:
+								break;
 						}
 					},
 				},
@@ -878,9 +886,6 @@ describe('JBookSearchHandler', function () {
 			const target = new JBookSearchHandler(opts);
 
 			try {
-				target.getESDataForFilters = (returnData) =>
-					Promise.resolve({ ...returnData, ...mockESServiceAgency, ...mockESBudgetYear });
-
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
 					budgetYearES: ['2020', '2021', '2022'],
@@ -895,6 +900,61 @@ describe('JBookSearchHandler', function () {
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
+					appropriationNumberES: {
+						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
+						paccts: [
+							'2035',
+							'1810',
+							'3010',
+							'0300',
+							'3080',
+							'1506',
+							'1109',
+							'1507',
+							'2033',
+							'2031',
+							'2034',
+							'1508',
+							'2032',
+							'3020',
+							'1611',
+							'3011',
+							'3021',
+							'3022',
+							'0360',
+							'0303',
+							'2093',
+						],
+						oaccts: [
+							'1804',
+							'2020',
+							'0100',
+							'3400',
+							'1106',
+							'2065',
+							'2080',
+							'0130',
+							'1806',
+							'2091',
+							'3740',
+							'3410',
+							'3840',
+							'1107',
+							'0105',
+							'0107',
+							'0810',
+							'2099',
+							'5188',
+							'5189',
+							'0104',
+							'0111',
+							'0134',
+							'0811',
+							'0819',
+							'0838',
+							'5751',
+						],
+					},
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
