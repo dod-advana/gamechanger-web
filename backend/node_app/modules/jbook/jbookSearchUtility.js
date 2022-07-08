@@ -799,6 +799,42 @@ class JBookSearchUtility {
 		return rangeQuery;
 	}
 
+	handleMainAccount(jbookSearchSettings) {
+		let mainAcct = {
+			bool: {
+				should: [],
+			},
+		};
+		if (jbookSearchSettings.paccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'procurement' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.paccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.raccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'rdte' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.raccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.oaccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [{ term: { type_s: 'om' } }, { terms: { programElement_s: jbookSearchSettings.oaccts } }],
+				},
+			});
+		}
+		return mainAcct;
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
@@ -950,42 +986,7 @@ class JBookSearchUtility {
 			}
 
 			if (jbookSearchSettings.appropriationNumberSpecificSelected) {
-				let mainAcct = {
-					bool: {
-						should: [],
-					},
-				};
-				if (jbookSearchSettings.paccts) {
-					mainAcct.bool.should.push({
-						bool: {
-							must: [
-								{ term: { type_s: 'procurement' } },
-								{ terms: { appropriationNumber_s: jbookSearchSettings.paccts } },
-							],
-						},
-					});
-				}
-				if (jbookSearchSettings.raccts) {
-					mainAcct.bool.should.push({
-						bool: {
-							must: [
-								{ term: { type_s: 'rdte' } },
-								{ terms: { appropriationNumber_s: jbookSearchSettings.raccts } },
-							],
-						},
-					});
-				}
-				if (jbookSearchSettings.oaccts) {
-					mainAcct.bool.should.push({
-						bool: {
-							must: [
-								{ term: { type_s: 'om' } },
-								{ terms: { programElement_s: jbookSearchSettings.oaccts } },
-							],
-						},
-					});
-				}
-				filterQueries.push(mainAcct);
+				filterQueries.push(this.handleMainAccount(jbookSearchSettings));
 			}
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
