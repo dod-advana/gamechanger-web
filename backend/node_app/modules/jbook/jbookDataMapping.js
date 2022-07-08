@@ -2121,6 +2121,7 @@ module.exports = {
 		'projectTitle_s',
 		'budgetActivityTitle_t',
 		'budgetLineItem_t',
+		'programElement_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -2141,6 +2142,7 @@ module.exports = {
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
 		budgetLineItem_t: 'BLI',
+		programElement_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
 		// p3a_rdte_n
