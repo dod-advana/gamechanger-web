@@ -573,29 +573,23 @@ class JBookSearchHandler extends SearchHandler {
 				size: 0,
 				aggs: {
 					values: {
-						composite: {
-							sources: [],
+						terms: {
+							field: '',
+							size: 1000,
 						},
 					},
 				},
 			};
 
-			const processESResults = (results, field) => {
+			const processESResults = (results) => {
 				return results.body.aggregations.values.buckets
-					.map((bucket) => bucket.key[field])
+					.map((bucket) => bucket.key)
 					.filter((value) => value !== '');
 			};
 
 			// get budget year data
-			query.aggs.values.composite.sources = [
-				{
-					budgetYear_s: {
-						terms: {
-							field: 'budgetYear_s',
-						},
-					},
-				},
-			];
+			query.aggs.values.terms.field = 'budgetYear_s';
+
 			const budgetYearESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
@@ -603,19 +597,12 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYearES = processESResults(budgetYearESResults, 'budgetYear_s');
+				returnData.budgetYearES = processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
-			query.aggs.values.composite.sources = [
-				{
-					serviceAgency_s: {
-						terms: {
-							field: 'serviceAgency_s',
-						},
-					},
-				},
-			];
+			query.aggs.values.terms.field = 'serviceAgency_s';
+
 			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
@@ -626,8 +613,8 @@ class JBookSearchHandler extends SearchHandler {
 			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgencyES = processESResults(serviceAgencyESResults, 'serviceAgency_s').map(
-					(sa) => saMapping[sa]
+				returnData.serviceAgencyES = _.uniq(
+					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa])
 				);
 			}
 
