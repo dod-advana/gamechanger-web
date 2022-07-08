@@ -33,9 +33,7 @@ const boldKeys = (data) => {
 	});
 };
 
-const SideNav = (props) => {
-	const { budgetType, budgetYear, context } = props;
-
+const SideNav = ({ budgetType, budgetYear, context }) => {
 	return (
 		<>
 			<StyledNavBar id="The Basics">
