@@ -1919,6 +1919,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		continuing_b: {
+			newName: 'continuing',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		currentYearAmount_d: {
 			newName: 'currentYearAmount',
 			defaultValue: '',
