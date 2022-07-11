@@ -417,10 +417,10 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 
-			if (serviceAgencyResults && serviceAgencyResults.body.aggregations) {
+			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgencyES = _.uniq(
+				returnData.serviceAgency = _.uniq(
 					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}
