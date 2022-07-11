@@ -2,6 +2,14 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { getAuthConfig, getCollibraUrl } = require('./DataCatalogUtils');
+const moment = require('moment');
+const CryptoJS = require('crypto-js');
+const secureRandom = require('secure-random');
+const { getUserIdFromSAMLUserId } = require('./userUtility');
+const { UserController } = require('../controllers/userController');
+const User = require('../models').user;
+
+const userController = new UserController();
 
 const copyConfigToBuild = () => {
 	try {
@@ -58,7 +66,47 @@ const storeDataCatalogInfo = async (redisAsyncClient) => {
 	);
 };
 
+const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req) => {
+	if (userTokenOld && tokenTimeoutOld) {
+		tokenTimeoutOld = moment(tokenTimeoutOld);
+		if (tokenTimeoutOld <= moment()) {
+			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+			const tokenTimeout = moment().add(2, 'days').format();
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+		}
+	} else {
+		csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
+		const tokenTimeout = moment().add(2, 'days').format();
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
+		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
+	}
+	return csrfHash;
+};
+
+const checkUser = async (req, sessUser) => {
+	let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+	if (!user || user === null) {
+		await userController.updateOrCreateUserHelper(sessUser);
+		user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
+	}
+	return user;
+};
+
+const checkHash = async (req) => {
+	let csrfHash;
+	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
+		csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
+	} else {
+		csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
+	}
+	return csrfHash;
+};
+
 module.exports = {
 	copyConfigToBuild,
 	storeDataCatalogInfo,
+	checkOldTokens,
+	checkUser,
+	checkHash,
 };
