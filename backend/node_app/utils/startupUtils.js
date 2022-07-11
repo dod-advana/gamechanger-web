@@ -93,7 +93,7 @@ const checkUser = async (req, sessUser) => {
 	return user;
 };
 
-const checkHash = async (req) => {
+const checkHash = async (req, redisAsyncClient) => {
 	let csrfHash;
 	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
 		csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';

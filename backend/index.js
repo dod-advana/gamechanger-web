@@ -268,7 +268,7 @@ app.use(async function (req, res, next) {
 	} else {
 		const signatureFromApp = req.get('x-ua-signature');
 		await redisAsyncClient.select(12);
-		let csrfHash = await checkHash(req);
+		let csrfHash = await checkHash(req, redisAsyncClient);
 		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
