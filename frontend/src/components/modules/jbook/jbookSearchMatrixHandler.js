@@ -5,7 +5,7 @@ import { GC_COLORS } from './jbookMainViewHandler';
 import SimpleTable from '../../common/SimpleTable';
 
 import _ from 'lodash';
-import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
+import { Typography, FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import Pluralize from 'pluralize';
 import { setState } from '../../../utils/sharedFunctions';
@@ -36,6 +36,11 @@ const handleSelectAll = (state, dispatch, type) => {
 		let runSearch = true;
 		let runGraphSearch = false;
 		newSearchSettings[type] = state.defaultOptions[type];
+		if (type === 'appropriationNumber') {
+			newSearchSettings.paccts = [];
+			newSearchSettings.raccts = [];
+			newSearchSettings.oaccts = [];
+		}
 		setState(dispatch, {
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
@@ -48,7 +53,6 @@ const handleSelectAll = (state, dispatch, type) => {
 const handleFilterChange = (event, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	let optionName = event.target.name;
-
 	const index = newSearchSettings[type].indexOf(optionName);
 
 	if (index !== -1) {
@@ -56,6 +60,8 @@ const handleFilterChange = (event, state, dispatch, type) => {
 	} else {
 		newSearchSettings[type].push(optionName);
 	}
+
+	console.log(newSearchSettings);
 
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
@@ -76,33 +82,71 @@ const handleFilterChange = (event, state, dispatch, type) => {
 const keywordsOpts = ['Yes', 'No'];
 
 const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
+	const renderOptions = (op, doctype = '') => {
+		return op.map((option, index) => {
+			return (
+				<FormControlLabel
+					key={`${option} ${index}`}
+					value={`${option}`}
+					classes={{
+						root: classes.rootLabel,
+						label: classes.checkboxPill,
+					}}
+					control={
+						<Checkbox
+							classes={{
+								root: classes.rootButton,
+								checked: classes.checkedButton,
+							}}
+							name={`${option}`}
+							checked={state.jbookSearchSettings[doctype === '' ? type : doctype].indexOf(option) !== -1}
+							onClick={(event) =>
+								handleFilterChange(event, state, dispatch, doctype === '' ? type : doctype)
+							}
+						/>
+					}
+					label={`${option}`}
+					labelPlacement="end"
+				/>
+			);
+		});
+	};
+
+	if (type === 'appropriationNumber') {
+		let docs = Object.keys(options);
+		let map = {
+			raccts: 'RDT&E',
+			'RDT&E': 'raccts',
+			paccts: 'Procurement',
+			Procurement: 'paccts',
+			oaccts: 'O&M',
+			'O&M': 'oaccts',
+		};
+
+		if (state.selectedPortfolio !== 'AI Inventory') {
+			docs = docs.filter((item) => item !== 'oaccts');
+		}
+		if (state.jbookSearchSettings.budgetTypeSpecificSelected && state.jbookSearchSettings.budgetType.length > 0) {
+			docs = state.jbookSearchSettings.budgetType.map((item) => map[item]);
+		}
+		return (
+			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+				{docs.map((doctype) => {
+					return (
+						<>
+							<Typography style={{ width: '100%', display: 'inline-flex', fontSize: '20' }}>
+								{map[doctype]}
+							</Typography>
+							{renderOptions(options[doctype], doctype)}
+						</>
+					);
+				})}
+			</FormGroup>
+		);
+	}
 	return (
 		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-			{options.map((option) => {
-				return (
-					<FormControlLabel
-						key={`${option}`}
-						value={`${option}`}
-						classes={{
-							root: classes.rootLabel,
-							label: classes.checkboxPill,
-						}}
-						control={
-							<Checkbox
-								classes={{
-									root: classes.rootButton,
-									checked: classes.checkedButton,
-								}}
-								name={`${option}`}
-								checked={state.jbookSearchSettings[type].indexOf(option) !== -1}
-								onClick={(event) => handleFilterChange(event, state, dispatch, type)}
-							/>
-						}
-						label={`${option}`}
-						labelPlacement="end"
-					/>
-				);
-			})}
+			{renderOptions(options)}
 		</FormGroup>
 	);
 };
@@ -292,13 +336,20 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'appropriationNumber')}
+					expanded={jbookSearchSettings.appropriationNumberSpecificSelected}
 					header={<b>MAIN ACCOUNT</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					<InputFilter setJBookSetting={handleFilterInputChange} field={'appropriationNumber'} />
+					{renderFilterCheckboxes(
+						state,
+						dispatch,
+						classes,
+						'appropriationNumber',
+						'appropriation number',
+						true
+					)}
 				</GCAccordion>
 			</div>
 
@@ -564,7 +615,17 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetType', 'budget type')}
+					{renderFilterCheckboxes(
+						state,
+						dispatch,
+						classes,
+						'budgetType',
+						'budget type',
+						false,
+						selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
+							: undefined
+					)}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }}>
@@ -581,13 +642,20 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.appropriationNumber && jbookSearchSettings.appropriationNumber !== ''}
+					expanded={jbookSearchSettings.appropriationNumberSpecificSelected}
 					header={<b>MAIN ACCOUNT</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					<InputFilter setJBookSetting={handleFilterInputChange} field={'appropriationNumber'} />
+					{renderFilterCheckboxes(
+						state,
+						dispatch,
+						classes,
+						'appropriationNumber',
+						'appropriation number',
+						true
+					)}
 				</GCAccordion>
 			</div>
 
