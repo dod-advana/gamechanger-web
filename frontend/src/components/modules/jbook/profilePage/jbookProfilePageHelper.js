@@ -16,7 +16,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost, formatNum } from '../../../../utils/jbookUtilities';
+import { getClassLabel, formatNum } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
