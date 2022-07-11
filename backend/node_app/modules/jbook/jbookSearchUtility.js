@@ -95,9 +95,9 @@ class JBookSearchUtility {
 		const { searchText } = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
+			const termsArray = this.searchUtility.getEsSearchTerms({ searchText })[1];
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
+			let synonyms = this.thesaurusExpansion(searchText, termsArray)[0];
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
@@ -136,9 +136,7 @@ class JBookSearchUtility {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
 		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
+		for (let term of termsArray) {
 			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
 			let expandedTerm = await this.redisDB.get(upperTerm);
 			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
@@ -618,7 +616,6 @@ class JBookSearchUtility {
 				programElementTitle_t: 1,
 				serviceAgency_s: 2,
 				appropriationTitle_t: 1,
-				appropriationNumber_s: 6,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
 				programElement_s: 6,
@@ -802,6 +799,42 @@ class JBookSearchUtility {
 		return rangeQuery;
 	}
 
+	handleMainAccount(jbookSearchSettings) {
+		let mainAcct = {
+			bool: {
+				should: [],
+			},
+		};
+		if (jbookSearchSettings.paccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'procurement' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.paccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.raccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'rdte' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.raccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.oaccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [{ term: { type_s: 'om' } }, { terms: { programElement_s: jbookSearchSettings.oaccts } }],
+				},
+			});
+		}
+		return mainAcct;
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
@@ -851,16 +884,6 @@ class JBookSearchUtility {
 					case 'budgetSubActivity':
 					case 'primaryReviewStatus':
 						filterQueries.push(this.handleBudgetSubPrimaryReviewFilter(jbookSearchSettings));
-						break;
-
-					// MainAccount
-					case 'appropriationNumber':
-						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.appropriationNumber}*`,
-								default_field: 'appropriationNumber_s',
-							},
-						});
 						break;
 
 					// Total Funding
@@ -962,6 +985,10 @@ class JBookSearchUtility {
 						console.log('Jbook search setting not found');
 						break;
 				}
+			}
+
+			if (jbookSearchSettings.appropriationNumberSpecificSelected) {
+				filterQueries.push(this.handleMainAccount(jbookSearchSettings));
 			}
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
