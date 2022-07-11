@@ -361,7 +361,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					<InputFilter setJBookSetting={handleFilterInputChange} field={'budgetActivity'} />
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity')}
 				</GCAccordion>
 			</div>
 
@@ -667,7 +667,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					<InputFilter setJBookSetting={handleFilterInputChange} field={'budgetActivity'} />
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity')}
 				</GCAccordion>
 			</div>
 
