@@ -616,7 +616,7 @@ class JBookSearchUtility {
 				appropriationNumber_s: 6,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
-				programElement_s: 6,
+				programElement_t: 6,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
 				budgetLineItem_t: 6,
@@ -916,9 +916,21 @@ class JBookSearchUtility {
 					// Program Element / BLI
 					case 'programElement':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.programElement}*`,
-								default_field: 'budgetLineItem_t',
+							bool: {
+								should: [
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'budgetLineItem_t',
+										},
+									},
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'programElement_s',
+										},
+									},
+								],
 							},
 						});
 						break;
