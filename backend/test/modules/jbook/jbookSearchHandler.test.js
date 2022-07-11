@@ -849,8 +849,96 @@ describe('JBookSearchHandler', function () {
 					},
 				},
 			};
+			const mockESAppropriationNumber = {
+				body: {
+					aggregations: {
+						raccts: {
+							doc_count: 23468,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '2040', doc_count: 6815 },
+									{ key: '1319', doc_count: 5978 },
+									{ key: '0400', doc_count: 4948 },
+									{ key: '3600', doc_count: 4474 },
+									{ key: '0130', doc_count: 1007 },
+									{ key: '3620', doc_count: 216 },
+									{ key: '0460', doc_count: 30 },
+								],
+							},
+						},
+						paccts: {
+							doc_count: 9136,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '2035', doc_count: 1798 },
+									{ key: '1810', doc_count: 1423 },
+									{ key: '3010', doc_count: 806 },
+									{ key: '0300', doc_count: 684 },
+									{ key: '3080', doc_count: 642 },
+									{ key: '1506', doc_count: 625 },
+									{ key: '1109', doc_count: 537 },
+									{ key: '1507', doc_count: 383 },
+									{ key: '2033', doc_count: 383 },
+									{ key: '2031', doc_count: 372 },
+									{ key: '2034', doc_count: 306 },
+									{ key: '1508', doc_count: 228 },
+									{ key: '2032', doc_count: 226 },
+									{ key: '3020', doc_count: 207 },
+									{ key: '1611', doc_count: 167 },
+									{ key: '3011', doc_count: 145 },
+									{ key: '3021', doc_count: 123 },
+									{ key: '3022', doc_count: 63 },
+									{ key: '0360', doc_count: 10 },
+									{ key: '0303', doc_count: 6 },
+									{ key: '2093', doc_count: 2 },
+								],
+							},
+						},
+						oaccts: {
+							doc_count: 393,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '1804', doc_count: 63 },
+									{ key: '2020', doc_count: 57 },
+									{ key: '0100', doc_count: 50 },
+									{ key: '3400', doc_count: 45 },
+									{ key: '1106', doc_count: 21 },
+									{ key: '2065', doc_count: 20 },
+									{ key: '2080', doc_count: 20 },
+									{ key: '0130', doc_count: 19 },
+									{ key: '1806', doc_count: 16 },
+									{ key: '2091', doc_count: 16 },
+									{ key: '3740', doc_count: 12 },
+									{ key: '3410', doc_count: 11 },
+									{ key: '3840', doc_count: 10 },
+									{ key: '1107', doc_count: 5 },
+									{ key: '0105', doc_count: 4 },
+									{ key: '0107', doc_count: 4 },
+									{ key: '0810', doc_count: 4 },
+									{ key: '2099', doc_count: 3 },
+									{ key: '5188', doc_count: 3 },
+									{ key: '5189', doc_count: 3 },
+									{ key: '0104', doc_count: 1 },
+									{ key: '0111', doc_count: 1 },
+									{ key: '0134', doc_count: 1 },
+									{ key: '0811', doc_count: 1 },
+									{ key: '0819', doc_count: 1 },
+									{ key: '0838', doc_count: 1 },
+									{ key: '5751', doc_count: 1 },
+								],
+							},
+						},
+					},
+				},
+			};
 
-			let esQueryCalled = false;
+			let esQueryCalled = 0;
 			const opts = {
 				db: {
 					jbook: {
@@ -865,11 +953,18 @@ describe('JBookSearchHandler', function () {
 				redisDB: {},
 				dataLibrary: {
 					queryElasticSearch() {
-						if (esQueryCalled) {
-							return Promise.resolve(mockESServiceAgency);
-						} else {
-							esQueryCalled = true;
-							return Promise.resolve(mockESBudgetYear);
+						switch (esQueryCalled) {
+							case 0:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESBudgetYear);
+							case 1:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESServiceAgency);
+							case 2:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESAppropriationNumber);
+							default:
+								break;
 						}
 					},
 				},
@@ -892,6 +987,61 @@ describe('JBookSearchHandler', function () {
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
+					appropriationNumberES: {
+						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
+						paccts: [
+							'2035',
+							'1810',
+							'3010',
+							'0300',
+							'3080',
+							'1506',
+							'1109',
+							'1507',
+							'2033',
+							'2031',
+							'2034',
+							'1508',
+							'2032',
+							'3020',
+							'1611',
+							'3011',
+							'3021',
+							'3022',
+							'0360',
+							'0303',
+							'2093',
+						],
+						oaccts: [
+							'1804',
+							'2020',
+							'0100',
+							'3400',
+							'1106',
+							'2065',
+							'2080',
+							'0130',
+							'1806',
+							'2091',
+							'3740',
+							'3410',
+							'3840',
+							'1107',
+							'0105',
+							'0107',
+							'0810',
+							'2099',
+							'5188',
+							'5189',
+							'0104',
+							'0111',
+							'0134',
+							'0811',
+							'0819',
+							'0838',
+							'5751',
+						],
+					},
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
