@@ -210,7 +210,6 @@ const initState = {
 		paccts: [],
 		raccts: [],
 		oaccts: [],
-		budgetActivity: '',
 		budgetSubActivity: '',
 	},
 	serviceReviewersOnly: [],
