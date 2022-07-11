@@ -230,7 +230,7 @@ app.post('/api/auth/token', async function (req, res) {
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
 		let csrfHash = userTokenOld;
-		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash, req);
+		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash, req, redisAsyncClient);
 		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
