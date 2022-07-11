@@ -5,7 +5,6 @@ const express = require('express');
 const fs = require('fs');
 const spdy = require('spdy');
 const bodyParser = require('body-parser');
-const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
 const jwt = require('jsonwebtoken');
 const asyncRedisLib = require('async-redis');
@@ -13,7 +12,6 @@ const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const constants = require('./node_app/config/constants');
 const models = require('./node_app/models');
-const User = require('./node_app/models').user;
 const Admin = models.admin;
 const LOGGER = require('@dod-advana/advana-logger');
 const path = require('path');
@@ -25,17 +23,15 @@ const ApiKey = models.api_key;
 const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
-const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
-const moment = require('moment');
 const startupUtils = require('./node_app/utils/startupUtils');
+const { checkUser, checkOldTokens, checkHash } = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
 const logger = LOGGER;
 const port = 8990;
 const securePort = 8443;
-const userController = new UserController();
 
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
@@ -192,34 +188,6 @@ app.use('/api/gamechanger/external', [
 	require('./node_app/routes/externalGraphRouter'),
 ]);
 
-const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req) => {
-	if (userTokenOld && tokenTimeoutOld) {
-		tokenTimeoutOld = moment(tokenTimeoutOld);
-		if (tokenTimeoutOld <= moment()) {
-			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-			const tokenTimeout = moment().add(2, 'days').format();
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-		}
-	} else {
-		csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-		const tokenTimeout = moment().add(2, 'days').format();
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-	}
-	return csrfHash
-};
-
-const checkUser = async (req) => {
-	let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-	if (!user || user === null) {
-		await userController.updateOrCreateUserHelper(sessUser);
-		user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-	}
-	return user
-}
-
-
 app.post('/api/auth/token', async function (req, res) {
 	let cn = 'unknown user';
 	let perms = ['View gamechanger'];
@@ -228,7 +196,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 	try {
 		cn = req.session.user.cn;
-		let user = await checkUser(req);
+		let user = await checkUser(req, sessUser);
 		// Remove once we feel like most admins have used the new system
 		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
 
@@ -236,9 +204,9 @@ app.post('/api/auth/token', async function (req, res) {
 			perms.push('Gamechanger Super Admin');
 		}
 
-		if (user) {
-			if (user.is_super_admin) perms.push('Gamechanger Super Admin');
+		if (user?.is_super_admin) perms.push('Gamechanger Super Admin');
 
+		if (user) {
 			let isAdminLite = false;
 
 			// Other attributes in extra_fields other than clone specific
@@ -256,7 +224,7 @@ app.post('/api/auth/token', async function (req, res) {
 			if (isAdminLite) perms.push('Gamechanger Admin Lite');
 		}
 
-		sessUser.perms = sessUser.perms.concat(perms);
+		sessUser.perms = sessUser?.perms?.concat(perms) || [];
 		sessUser.extra_fields = user.extra_fields;
 
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
@@ -280,16 +248,6 @@ app.post('/api/auth/token', async function (req, res) {
 		res.sendStatus(500);
 	}
 });
-
-const checkHash = async (req) => {
-	let csrfHash;
-	if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-		csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
-	} else {
-		csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
-	}
-	return csrfHash
-}
 
 app.use(async function (req, res, next) {
 	const routesAllowedWithoutToken = [
