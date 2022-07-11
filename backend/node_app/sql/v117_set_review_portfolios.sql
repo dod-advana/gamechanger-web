@@ -1,1 +1,0 @@
-UPDATE review SET portfolio_name = 'AI Inventory'
