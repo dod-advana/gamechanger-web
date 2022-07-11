@@ -66,7 +66,7 @@ const storeDataCatalogInfo = async (redisAsyncClient) => {
 	);
 };
 
-const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req) => {
+const checkOldTokens = async (userTokenOld, tokenTimeoutOld, csrfHash, req, redisAsyncClient) => {
 	if (userTokenOld && tokenTimeoutOld) {
 		tokenTimeoutOld = moment(tokenTimeoutOld);
 		if (tokenTimeoutOld <= moment()) {
