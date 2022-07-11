@@ -116,6 +116,9 @@ const initState = {
 
 		primaryReviewStatusSpecificSelected: false,
 		primaryReviewStatusAllSelected: true,
+
+		budgetActivitySpecificSelected: false,
+		budgetActivityAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -127,6 +130,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		budgetActivity: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'],
 		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
@@ -199,7 +203,6 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 		appropriationNumber: '', // this is labeled as Main Account to the viewer
-		budgetActivity: '',
 		budgetSubActivity: '',
 	},
 	serviceReviewersOnly: [],
