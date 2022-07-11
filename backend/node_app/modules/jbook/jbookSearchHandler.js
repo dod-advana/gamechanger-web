@@ -380,29 +380,23 @@ class JBookSearchHandler extends SearchHandler {
 				size: 0,
 				aggs: {
 					values: {
-						composite: {
-							sources: [],
+						terms: {
+							field: '',
+							size: 1000,
 						},
 					},
 				},
 			};
 
-			const processESResults = (results, field) => {
+			const processESResults = (results) => {
 				return results.body.aggregations.values.buckets
-					.map((bucket) => bucket.key[field])
+					.map((bucket) => bucket.key)
 					.filter((value) => value !== '');
 			};
 
 			// get budget year data
-			query.aggs.values.composite.sources = [
-				{
-					budgetYear_s: {
-						terms: {
-							field: 'budgetYear_s',
-						},
-					},
-				},
-			];
+			query.aggs.values.terms.field = 'budgetYear_s';
+
 			const budgetYearESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
@@ -410,31 +404,24 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYearES = processESResults(budgetYearESResults, 'budgetYear_s');
+				returnData.budgetYearES = processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
-			query.aggs.values.composite.sources = [
-				{
-					serviceAgency_s: {
-						terms: {
-							field: 'serviceAgency_s',
-						},
-					},
-				},
-			];
-			const serviceAgencyResults = await this.dataLibrary.queryElasticSearch(
+			query.aggs.values.terms.field = 'serviceAgency_s';
+
+			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
 				query,
 				userId
 			);
 
-			if (serviceAgencyResults && serviceAgencyResults.body.aggregations) {
+			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgency = processESResults(serviceAgencyResults, 'serviceAgency_s').map(
-					(sa) => saMapping[sa]
+				returnData.serviceAgency = _.uniq(
+					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}
 
