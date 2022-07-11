@@ -95,9 +95,9 @@ class JBookSearchUtility {
 		const { searchText } = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
+			const [, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
+			let [synonyms] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
@@ -135,14 +135,12 @@ class JBookSearchUtility {
 	async abbreviationCleaner(termsArray) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
+		const abbreviationExpansions = [];
+		for (const term of termsArray) {
+			const upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+			const expandedTerm = await this.redisDB.get(upperTerm);
+			const lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+			const compressedTerm = await this.redisDB.get(lowerTerm);
 			if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
@@ -152,9 +150,9 @@ class JBookSearchUtility {
 		}
 
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-		let cleanedAbbreviations = [];
+		const cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
-			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
+			const cleaned = abb.toLowerCase().replace(/['"]+/g, '');
 			let found = false;
 			termsArray.forEach((term) => {
 				if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
