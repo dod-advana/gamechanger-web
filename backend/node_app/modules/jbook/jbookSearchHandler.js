@@ -130,7 +130,7 @@ class JBookSearchHandler extends SearchHandler {
 
 	async documentSearch(req, userId) {
 		try {
-			return this.elasticSearchDocumentSearch(req, userId);
+			return await this.elasticSearchDocumentSearch(req, userId);
 		} catch (e) {
 			console.log('Error running jbook document search');
 			const { message } = e;
