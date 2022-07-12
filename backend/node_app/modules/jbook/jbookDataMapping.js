@@ -1914,6 +1914,16 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		by1_request_d: {
+			newName: 'by1Request',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		continuing_b: {
+			newName: 'continuing',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		currentYearAmount_d: {
 			newName: 'currentYearAmount',
 			defaultValue: '',
@@ -2121,6 +2131,7 @@ module.exports = {
 		'projectTitle_s',
 		'budgetActivityTitle_t',
 		'budgetLineItem_t',
+		'programElement_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -2141,6 +2152,7 @@ module.exports = {
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
 		budgetLineItem_t: 'BLI',
+		programElement_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
 		// p3a_rdte_n
@@ -2215,6 +2227,7 @@ module.exports = {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'DEPARTMENT OF THE DEFENSE': 'Department of Defense (DOD)',
 		ARMY: 'Army',
 		NAVY: 'Navy',
 		AF: 'Air Force (AF)',
