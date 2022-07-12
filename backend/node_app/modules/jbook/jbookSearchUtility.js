@@ -172,7 +172,7 @@ class JBookSearchUtility {
 		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for (var term in termsArray) {
+			for (let term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1) {
@@ -666,8 +666,6 @@ class JBookSearchUtility {
 					break;
 			}
 
-			console.log(JSON.stringify(query));
-
 			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
@@ -964,7 +962,6 @@ class JBookSearchUtility {
 						});
 						break;
 					default:
-						console.log('Jbook search setting not found');
 						break;
 				}
 			}

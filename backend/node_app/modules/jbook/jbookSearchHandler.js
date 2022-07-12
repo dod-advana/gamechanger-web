@@ -420,7 +420,7 @@ class JBookSearchHandler extends SearchHandler {
 			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgency = _.uniq(
+				returnData.serviceAgencyES = _.uniq(
 					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}
