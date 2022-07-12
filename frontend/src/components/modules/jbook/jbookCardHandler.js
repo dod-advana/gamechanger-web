@@ -538,6 +538,7 @@ const renderListViewWithIntelligentSearch = (
 };
 
 const renderCardFront = (isWideCard, item, hoveredHit, setHoveredHit, contextHtml, review) => {
+	console.log(item.pageHits);
 	return (
 		<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
 			<div className={'currents-as-of-div'}>
@@ -775,7 +776,7 @@ const cardHandler = {
 				const isWideCard = true;
 
 				if (state.listView && !intelligentSearch) {
-					renderListViewWithoutIntelligentSearch(
+					return renderListViewWithoutIntelligentSearch(
 						state,
 						item,
 						{
@@ -790,7 +791,7 @@ const cardHandler = {
 						backBody
 					);
 				} else if (state.listView && intelligentSearch) {
-					renderListViewWithIntelligentSearch(
+					return renderListViewWithIntelligentSearch(
 						state,
 						item,
 						{ hoveredHit, setHoveredHit, metadataExpanded, setMetadataExpanded },
@@ -799,7 +800,7 @@ const cardHandler = {
 						intelligentFeedbackComponent
 					);
 				} else {
-					renderCardFront(isWideCard, item, hoveredHit, setHoveredHit, contextHtml, review);
+					return renderCardFront(isWideCard, item, hoveredHit, setHoveredHit, contextHtml, review);
 				}
 			} catch (e) {
 				console.log('Error rendering jbook card front');
