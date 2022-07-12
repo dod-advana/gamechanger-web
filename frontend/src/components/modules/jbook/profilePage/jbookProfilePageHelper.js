@@ -16,7 +16,12 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost, formatNum } from '../../../../utils/jbookUtilities';
+import {
+	getClassLabel,
+	formatNum,
+	getTableFormattedCost,
+	getFormattedTotalCost,
+} from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
@@ -176,9 +181,7 @@ const ClassificationScoreCard = (props) => {
 	);
 };
 
-const Metadata = (props) => {
-	const { budgetType, projectNum, keywordCheckboxes, setKeywordCheck } = props;
-
+const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
@@ -192,7 +195,6 @@ const Metadata = (props) => {
 					? getMetadataTableData(
 							projectData,
 							budgetType,
-							projectNum,
 							reviewData,
 							keywordsChecked,
 							keywordCheckboxes,
@@ -203,7 +205,7 @@ const Metadata = (props) => {
 			height={'auto'}
 			dontScroll={true}
 			disableWrap={true}
-			title={'Metadata'}
+			title={`Budget Year (FY) ${projectData.budgetYear || ''}`}
 			headerExtraStyle={{
 				backgroundColor: '#313541',
 				color: 'white',
@@ -303,8 +305,9 @@ const aggregateProjectDescriptions = (projectData) => {
 	const titleMapping = {
 		// both or rdoc
 		programElementTitle: { title: 'Program Element Title' },
-		projectTitle: { title: 'Project Title' },
-		projectMissionDescription: { title: 'Project Mission Description' },
+		projectMissionDescription: {
+			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
+		},
 		missionDescBudgetJustification: { title: 'Project Description' },
 		budgetActivityTitle: { title: 'Budget Activity Title' },
 		SubProj_Title: { title: 'Sub-project Title' },
@@ -494,75 +497,72 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
-const a = (projectData) => {
-	return [
-		{
-			Key: 'Total Cost',
-			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
-		},
-		{
-			Key: 'Current Year Amount',
-			Value:
-				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-					? `${formatNum(projectData.currentYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Prior Year Amount',
-			Value:
-				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-					? `${formatNum(projectData.priorYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'All Prior Years Amount',
-			Value:
-				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-					? `${formatNum(projectData.allPriorYearsAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Project',
-			Value: projectData.projectTitle || 'N/A',
-		},
-	];
-};
-
 const getMetadataTableData = (
 	projectData,
 	budgetType,
-	projectNum,
 	reviewData,
 	keywordsChecked,
 	keywordCheckboxes,
 	setKeywordCheck
 ) => {
-	return a(projectData).concat([
+	return [
+		{
+			Key: 'Budget Year 1 Requested',
+			Value: getTableFormattedCost(projectData.by1Request),
+		},
+		{
+			Key: 'Current Year Amount',
+			Value: getTableFormattedCost(projectData.currentYearAmount),
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value: getTableFormattedCost(projectData.priorYearAmount),
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value: getTableFormattedCost(projectData.allPriorYearsAmount),
+		},
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
+		},
+		{
+			Key: 'BY2',
+			Value: getTableFormattedCost(projectData.p4082_toa_by2_d || projectData.proj_fund_by2_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY3',
+			Value: getTableFormattedCost(projectData.p4083_toa_by3_d || projectData.proj_fund_by3_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY4',
+			Value: getTableFormattedCost(projectData.p4084_toa_by4_d || projectData.proj_fund_by4_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY5',
+			Value: getTableFormattedCost(projectData.p4085_toa_by5_d || projectData.proj_fund_by5_d),
+			Hidden: budgetType === 'O&M',
+		},
 		{
 			Key: 'Program Element',
 			Value: projectData.programElement || 'N/A',
 			Hidden: budgetType === 'Procurement',
 		},
 		{
+			Key: 'Project Number',
+			Value: projectData.projectNum,
+			Hidden: budgetType !== 'RDT&E',
+		},
+		{
 			Key: 'Service Agency Name',
 			Value: projectData.serviceAgency || 'N/A',
 		},
 		{
-			Key: 'Project Number',
-			Value: projectNum || 'N/A',
-			Hidden: budgetType === 'Procurement',
-		},
-		{
-			Key: 'Fiscal Year',
-			Value: projectData.budgetYear || 'N/A',
-		},
-		{
 			Key: 'To Complete',
 			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
-		},
-		{
-			Key: 'Budget Year (FY)',
-			Value: projectData.budgetYear || 'N/A',
 		},
 		{
 			Key: 'Budget Cycle',
@@ -598,7 +598,7 @@ const getMetadataTableData = (
 				</div>
 			),
 		},
-	]);
+	];
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
