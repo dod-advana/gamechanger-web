@@ -973,7 +973,7 @@ const JBookProfilePage = (props) => {
 					isSubmit,
 					reviewType,
 					portfolioName: selectedPortfolio,
-					docID,
+					id: docID,
 				},
 			});
 
