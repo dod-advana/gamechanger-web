@@ -185,7 +185,7 @@ const getExtraViewPanels = (_props) => {
 const getSideFilters = (context, cloneData, showSideFilters, expansionDict) => {
 	return (
 		showSideFilters && (
-			<div className={'left-container'} style={{ marginTop: -130 }}>
+			<div className={'left-container'}>
 				<div className={'side-bar-container'}>
 					<GameChangerSearchMatrix context={context} />
 					{expansionDict && Object.keys(expansionDict).length > 0 && (
@@ -284,40 +284,42 @@ const getCardViewPanel = (props) => {
 					<div id="game-changer-content-top" />
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
-						<div className={'top-container'}>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<div style={{ paddingTop: 0, zIndex: 99, marginRight: '20px' }}>
-									<GCTooltip
-										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
-										placement="bottom"
-										arrow
-									>
-										<GCButton
-											buttonColor={'rgb(28, 45, 101)'}
-											onClick={() => {
-												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
-												);
-											}}
-										>
-											Qlik Dashboard
-										</GCButton>
-									</GCTooltip>
-								</div>
-							</div>
-						</div>
 						{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
 
-						<div className={'right-container'} style={{ marginTop: '-50px' }}>
+						<div className={'right-container'}>
+							<div className={'top-container'}>
+								<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+									{!hideTabs && (
+										<ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />
+									)}
+								</div>
+							</div>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
 							>
 								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+									<div
+										className={'col-xs-12'}
+										style={{ ...sideScroll, padding: 0, position: 'relative' }}
+									>
+										<GCTooltip
+											title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
+											placement="bottom"
+											arrow
+										>
+											<GCButton
+												buttonColor={'rgb(28, 45, 101)'}
+												style={{ position: 'absolute', right: 25, top: 5 }}
+												onClick={() => {
+													window.open(
+														'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													);
+												}}
+											>
+												Qlik Dashboard
+											</GCButton>
+										</GCTooltip>
 										<Tabs selectedIndex={mainTabSelected ?? 0}>
 											<div
 												style={{
