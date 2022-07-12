@@ -1,12 +1,7 @@
 import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
-import {
-	capitalizeFirst,
-	getSubTypes,
-	getTrackingNameForFactory,
-	getTypeDisplay,
-} from '../../../utils/gamechangerUtils';
+import { capitalizeFirst, getTrackingNameForFactory, getTypeDisplay } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { primary } from '../../common/gc-colors';
 import { trackEvent } from '../../telemetry/Matomo';
@@ -45,13 +40,6 @@ const auxDisplayFieldJSONMap = {
 };
 const auxDisplayLeftSubtitleText = 'AuthorFullName';
 const auxDisplayRightSubtitleField = 'Classification';
-
-// const clickFn = (body) => {
-// 	let data = `<pre> ${body} </pre>`;
-// 	let myWindow = window.open('data:text/html,', '_blank', '');
-// 	myWindow.document.write(data);
-// 	myWindow.focus();
-// };
 
 const renderHighlights = (text, hoveredHit, setHoveredHit, setHighlightText) => {
 	const fontSize = 12;
@@ -149,7 +137,7 @@ const cardHandler = {
 						<div className={'list-view-sub-header'}>
 							<p>
 								{' '}
-								{getSubTypes(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
+								{getTypeDisplay(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
 							</p>
 						</div>
 					)}
@@ -187,7 +175,7 @@ const cardHandler = {
 							docTypeColor={typeColor}
 							docOrgColor={orgColor}
 						>
-							<div className={'sub-header-one'}>{getSubTypes(type)}</div>
+							<div className={'sub-header-one'}>{getTypeDisplay(type)}</div>
 							<div className={'sub-header-two'}>{getTypeDisplay(org)}</div>
 						</StyledFrontCardSubHeader>
 					)}
@@ -278,17 +266,6 @@ const cardHandler = {
 
 			return (
 				<>
-					{/* <CardButton
-						target={'_blank'}
-						style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-						href={'#'}
-						onClick={(e) => {
-							e.preventDefault();
-							clickFn(item.Body);
-						}}
-					>
-						Open
-					</CardButton> */}
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
@@ -312,11 +289,11 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 	},
