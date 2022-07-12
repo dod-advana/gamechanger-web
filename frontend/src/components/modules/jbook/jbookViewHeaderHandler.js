@@ -30,6 +30,21 @@ const PORTFOLIO_FILTERS = [
 	'budgetType',
 ];
 
+const filterNameMap = {
+	budgetYear: 'Budget Year',
+	budgetType: 'PL Title',
+	serviceAgency: 'Service/Agency',
+	raccts: 'Main Account',
+	budgetActivity: 'Budget Activity',
+	budgetSubActivity: 'Budget Sub Activity',
+	programElement: 'BLI',
+	projectNum: 'Project #',
+	minBY1Funding: 'BY1 Fund Min',
+	maxBY1Funding: 'BY1 Fund Max',
+	minTotalCost: 'Total Cost Min',
+	maxTotalCost: 'Total Cost Max',
+};
+
 const handleFilterChange = (option, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 
@@ -251,12 +266,9 @@ const JbookViewHeaderHandler = (props) => {
 	return (
 		<div
 			className={'results-count-view-buttons-container'}
-			style={{ ...extraStyle, flexDirection: 'column', marginRight: 10 }}
+			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 10px 0px 0px' }}
 		>
-			<div
-				className={'view-buttons-container'}
-				style={{ marginRight: 10, marginBottom: 15, zIndex: 99, justifyContent: 'right' }}
-			>
+			<div className={'view-buttons-container'} style={{ marginRight: 10, zIndex: 99, justifyContent: 'right' }}>
 				<JBookPortfolioSelector
 					portfolios={portfolios}
 					selectedPortfolio={state.selectedPortfolio}
@@ -438,9 +450,10 @@ const JbookViewHeaderHandler = (props) => {
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'right' }}>
+			<div style={{ display: 'flex', justifyContent: 'right', marginTop: 15, flexWrap: 'wrap' }}>
 				{filterList.map((filter) => {
 					const { type, optionName } = filter;
+					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : '';
 					return (
 						<Button
 							variant="outlined"
@@ -448,6 +461,7 @@ const JbookViewHeaderHandler = (props) => {
 							display="inline-flex"
 							style={{
 								marginRight: '10px',
+								marginBottom: '15px',
 								padding: '10px 15px',
 								backgroundColor: 'white',
 								color: 'rgb(28, 45, 101)',
@@ -469,7 +483,7 @@ const JbookViewHeaderHandler = (props) => {
 									marginBottom: '5px',
 								}}
 							>
-								{`${type}: ${optionName}`}
+								{`${typeText}${optionName}`}
 							</span>
 						</Button>
 					);
