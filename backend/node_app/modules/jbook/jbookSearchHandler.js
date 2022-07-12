@@ -77,7 +77,7 @@ class JBookSearchHandler extends SearchHandler {
 		this.keyword_assoc = keyword_assoc;
 	}
 
-	async searchHelper(req, userId, res) {
+	async searchHelper(req, userId, _res) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -106,7 +106,7 @@ class JBookSearchHandler extends SearchHandler {
 			let searchResults;
 
 			// search postgres
-			searchResults = await this.documentSearch(req, userId, res);
+			searchResults = await this.documentSearch(req, userId);
 
 			// store record in history
 			try {
@@ -230,22 +230,24 @@ class JBookSearchHandler extends SearchHandler {
 	getGiantQuery(pQuery, rQuery, oQuery) {
 		let giantQuery = ``;
 
-		// setting up promise.all
-		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
-			giantQuery = pQuery;
+		if (!jbookSearchSettings.budgetType) {
+			giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
 		}
-		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
-			if (giantQuery.length === 0) {
-				giantQuery = rQuery;
-			} else {
-				giantQuery += ` UNION ALL ` + rQuery;
-			}
-		}
-		if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
-			if (giantQuery.length === 0) {
-				giantQuery = oQuery;
-			} else {
-				giantQuery += ` UNION ALL ` + oQuery;
+
+		for (let btype of jbookSearchSettings.budgetType) {
+			let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
+			switch (btype) {
+				case 'Procurement':
+					giantQuery = pQuery;
+					break;
+				case 'RDT&E':
+					giantQuery += unionAll + rQuery;
+					break;
+				case 'O&M':
+					giantQuery += unionAll + oQuery;
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -394,6 +396,15 @@ class JBookSearchHandler extends SearchHandler {
 					.filter((value) => value !== '');
 			};
 
+			const processMainAccountResults = (results) => {
+				let keys = Object.keys(results.body.aggregations);
+				let obj = {};
+				for (let key of keys) {
+					obj[key] = results.body.aggregations[key].proc_accts.buckets.map((item) => item.key);
+				}
+				return obj;
+			};
+
 			// get budget year data
 			query.aggs.values.terms.field = 'budgetYear_s';
 
@@ -423,6 +434,42 @@ class JBookSearchHandler extends SearchHandler {
 				returnData.serviceAgencyES = _.uniq(
 					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
+			}
+
+			// get main account field data
+			query = {
+				size: 0,
+				aggs: {
+					paccts: {
+						filter: { term: { type_s: 'procurement' } },
+						aggs: {
+							proc_accts: { terms: { field: 'appropriationNumber_s', size: 500 } },
+						},
+					},
+					raccts: {
+						filter: { term: { type_s: 'rdte' } },
+						aggs: {
+							proc_accts: { terms: { field: 'appropriationNumber_s', size: 500 } },
+						},
+					},
+					oaccts: {
+						filter: { term: { type_s: 'om' } },
+						aggs: {
+							proc_accts: { terms: { field: 'programElement_s', size: 500 } },
+						},
+					},
+				},
+			};
+
+			const mainAccountESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				query,
+				userId
+			);
+
+			if (mainAccountESResults && mainAccountESResults.body.aggregations) {
+				returnData.appropriationNumberES = processMainAccountResults(mainAccountESResults);
 			}
 
 			return returnData;
@@ -937,9 +984,7 @@ class JBookSearchHandler extends SearchHandler {
 						exportSearch: false,
 					},
 				},
-				userId,
-				null,
-				true
+				userId
 			);
 
 			const counts = this.processCounts(results);
