@@ -216,9 +216,9 @@ const cardHandler = {
 
 			let hoveredSnippet = '';
 			if (hoveredHit) {
-				const sliceIndex = hoveredHit.match(/\d+$/).index;
-				const type = hoveredHit.slice(0, sliceIndex).trim();
-				const index = hoveredHit.slice(sliceIndex) - 1;
+				const type = hoveredHit.split(' ')[0];
+				const index = hoveredHit.split(' ')[1];
+
 				hoveredSnippet = item.highlight[type][index];
 			}
 			const highlightText = hoveredSnippet;
