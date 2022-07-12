@@ -82,7 +82,11 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 
-		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+		paccts: [],
+		raccts: [],
+		oaccts: [],
 
 		budgetSubActivity: '',
 
@@ -116,6 +120,9 @@ const initState = {
 
 		primaryReviewStatusSpecificSelected: false,
 		primaryReviewStatusAllSelected: true,
+
+		budgetActivitySpecificSelected: false,
+		budgetActivityAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -127,6 +134,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		budgetActivity: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'],
 		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
@@ -199,7 +207,9 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 		appropriationNumber: '', // this is labeled as Main Account to the viewer
-		budgetActivity: '',
+		paccts: [],
+		raccts: [],
+		oaccts: [],
 		budgetSubActivity: '',
 	},
 	serviceReviewersOnly: [],
@@ -425,6 +435,9 @@ const initState = {
 	// jbook portfolios
 	portfolios: [],
 	selectedPortfolio: 'General',
+
+	// profile page
+	profilePageBudgetYear: '2023',
 };
 
 const init = (initialState) => {
@@ -478,9 +491,10 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
-					budgetType: state.jbookSearchSettings.budgetType.find((item) => item === 'O&M')
-						? state.jbookSearchSettings.budgetType.filter((item) => item !== 'O&M')
-						: state.jbookSearchSettings.budgetType,
+					budgetType:
+						state.selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions.budgetType.filter((item) => item !== 'O&M')
+							: state.defaultOptions.budgetType,
 					reviewStatus: state.defaultOptions.reviewStatus,
 					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
 					primaryReviewer: state.defaultOptions.primaryReviewer,

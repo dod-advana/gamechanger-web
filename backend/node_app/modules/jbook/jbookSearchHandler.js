@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const SearchUtility = require('../../utils/searchUtility');
 const CONSTANTS = require('../../config/constants');
-// const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
@@ -13,8 +12,6 @@ const KEYWORD = require('../../models').keyword;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
-// const { result } = require('underscore');
-// const { Sequelize } = require('sequelize');
 const { Reports } = require('../../lib/reports');
 const ExcelJS = require('exceljs');
 const moment = require('moment');
@@ -80,7 +77,7 @@ class JBookSearchHandler extends SearchHandler {
 		this.keyword_assoc = keyword_assoc;
 	}
 
-	async searchHelper(req, userId, res) {
+	async searchHelper(req, userId, _res) {
 		const historyRec = {
 			user_id: userId,
 			clone_name: undefined,
@@ -109,7 +106,7 @@ class JBookSearchHandler extends SearchHandler {
 			let searchResults;
 
 			// search postgres
-			searchResults = await this.documentSearch(req, userId, res);
+			searchResults = await this.documentSearch(req, userId);
 
 			// store record in history
 			try {
@@ -131,9 +128,9 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	async documentSearch(req, userId, res, statusExport = false) {
+	async documentSearch(req, userId) {
 		try {
-			return this.elasticSearchDocumentSearch(req, userId, res, statusExport);
+			return await this.elasticSearchDocumentSearch(req, userId);
 		} catch (e) {
 			console.log('Error running jbook document search');
 			const { message } = e;
@@ -142,7 +139,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	async elasticSearchDocumentSearch(req, userId, res, statusExport = false) {
+	async elasticSearchDocumentSearch(req, userId) {
 		try {
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body);
@@ -199,187 +196,6 @@ class JBookSearchHandler extends SearchHandler {
 			const { message } = e;
 			console.log('Error running jbook ES doc search');
 			this.logger.error(message, 'G4W6UNW', userId);
-			throw e;
-		}
-	}
-
-	async postgresDocumentSearch(req, userId, res, statusExport = false) {
-		try {
-			const { offset, searchText, jbookSearchSettings, exportSearch } = req.body;
-
-			const perms = req.permissions;
-
-			let expansionDict = {};
-
-			if (searchText && searchText !== '') {
-				expansionDict = await this.jbookSearchUtility.gatherExpansionTerms(req.body, userId);
-			}
-
-			if (Object.keys(expansionDict)[0] === 'undefined') expansionDict = {};
-
-			const hasSearchText = searchText && searchText !== '';
-			let limit = 18;
-
-			let keywordIds = undefined;
-
-			keywordIds = { pdoc: [], rdoc: [], om: [] };
-			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
-							ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
-							ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
-			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map((i) => Number(i)) : [0];
-
-			const keywordIdsParam =
-				jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0
-					? keywordIds
-					: null;
-
-			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
-				jbookSearchSettings,
-				hasSearchText,
-				keywordIdsParam,
-				perms,
-				userId
-			);
-			const pQuery = pSelect + pWhere;
-			const rQuery = rSelect + rWhere;
-			const oQuery = oSelect + oWhere;
-
-			let giantQuery = ``;
-
-			// setting up promise.all
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
-				giantQuery = pQuery;
-			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = rQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + rQuery;
-				}
-			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = oQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + oQuery;
-				}
-			}
-
-			const structuredSearchText = this.searchUtility.getJBookPGQueryAndSearchTerms(searchText);
-
-			// grab counts, can be optimized with promise.all
-			const totalCountQuery = `SELECT COUNT(*) FROM (` + giantQuery + `) as combinedRows;`;
-
-			let totalCount;
-			try {
-				totalCount = await this.db.jbook.query(totalCountQuery, {
-					replacements: {
-						searchText: structuredSearchText,
-						offset,
-						limit,
-					},
-				});
-				totalCount = totalCount[0][0].count;
-			} catch (e) {
-				console.log('Error getting total count');
-				console.log(e);
-			}
-
-			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
-			giantQuery += queryEnd;
-
-			if (!exportSearch && !statusExport) {
-				giantQuery += ' LIMIT :limit';
-			}
-			giantQuery += ' OFFSET :offset;';
-
-			let data2 = await this.db.jbook.query(giantQuery, {
-				replacements: {
-					searchText: structuredSearchText,
-					offset,
-					limit,
-				},
-			});
-
-			// new data combined: no need to parse because we renamed the column names in the query to match the frontend
-			let returnData = data2[0];
-
-			// set the keywords
-			returnData.map((doc) => {
-				const typeMap = {
-					Procurement: 'pdoc',
-					'RDT&E': 'rdoc',
-					'O&M': 'odoc',
-				};
-				doc.budgetType = typeMap[doc.type];
-				doc.hasKeywords = keywordIds[typeMap[doc.type]]?.indexOf(doc.id) !== -1;
-				if (doc.keywords) {
-					try {
-						let keywords = doc.keywords.replace(/[\(\)\"]\s*/g, '');
-						keywords = keywords.split(',').slice(1);
-						doc.keywords = keywords;
-					} catch (e) {
-						console.log('Error adding keywords to doc');
-						console.log(e);
-					}
-				}
-
-				if (doc.contracts) {
-					try {
-						let contracts = doc.contracts.replace(/[\(\)]\s*/g, '');
-						contracts = contracts.split('",');
-
-						let titles = contracts[0].replace(/[\"]\s*/g, '').split('; ');
-						let piids = contracts[1].replace(/[\"]\s*/g, '').split('; ');
-						let fys = contracts[2].replace(/[\"]\s*/g, '').split('; ');
-
-						let contractData = [];
-						for (let i = 0; i < titles.length; i++) {
-							contractData.push(`${titles[i]} ${piids[i]} ${fys[i]}`);
-						}
-
-						doc.contracts = contractData;
-					} catch (e) {
-						console.log('Error adding contracts to doc');
-						console.log(e);
-					}
-				}
-
-				if (doc.accomplishments) {
-					try {
-						let accomps = doc.accomplishments.replace(/[\(\)]\s*/g, '');
-						accomps = accomps.split('",');
-
-						let titles = accomps[0].replace(/[\"]\s*/g, '').split('; ');
-
-						doc.accomplishments = titles;
-					} catch (e) {
-						console.log('Error adding accomplishments to doc');
-						console.log(e);
-					}
-				}
-
-				return doc;
-			});
-
-			if (exportSearch) {
-				const csvStream = await this.reports.createCsvStream({ docs: returnData }, userId);
-				csvStream.pipe(res);
-				res.status(200);
-			} else {
-				return {
-					totalCount,
-					docs: returnData,
-					expansionDict,
-				};
-			}
-		} catch (e) {
-			const { message } = e;
-			this.logger.error(message, 'O1U2WBP', userId);
 			throw e;
 		}
 	}
@@ -441,26 +257,27 @@ class JBookSearchHandler extends SearchHandler {
 			const pQuery = pSelect + pWhere;
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
-			const queryEnd = this.jbookSearchUtility.buildEndQuery([{ id: 'serviceAgency', desc: false }]);
 
 			let giantQuery = ``;
 
-			// setting up promise.all
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('Procurement') !== -1) {
-				giantQuery = pQuery;
+			if (!jbookSearchSettings.budgetType) {
+				giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
 			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('RDT&E') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = rQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + rQuery;
-				}
-			}
-			if (!jbookSearchSettings.budgetType || jbookSearchSettings.budgetType.indexOf('O&M') !== -1) {
-				if (giantQuery.length === 0) {
-					giantQuery = oQuery;
-				} else {
-					giantQuery += ` UNION ALL ` + oQuery;
+
+			for (let btype of jbookSearchSettings.budgetType) {
+				let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
+				switch (btype) {
+					case 'Procurement':
+						giantQuery = pQuery;
+						break;
+					case 'RDT&E':
+						giantQuery += unionAll + rQuery;
+						break;
+					case 'O&M':
+						giantQuery += unionAll + oQuery;
+						break;
+					default:
+						break;
 				}
 			}
 
@@ -489,7 +306,7 @@ class JBookSearchHandler extends SearchHandler {
 	}
 
 	// retrieving the data used to populate the filter options on the frontend
-	async getDataForFilters(req, userId) {
+	async getDataForFilters(_req, userId) {
 		let returnData = {};
 
 		const reviewQuery = `SELECT array_agg(DISTINCT primary_reviewer) as primaryReviewer,
@@ -572,6 +389,15 @@ class JBookSearchHandler extends SearchHandler {
 					.filter((value) => value !== '');
 			};
 
+			const processMainAccountResults = (results) => {
+				let keys = Object.keys(results.body.aggregations);
+				let obj = {};
+				for (let key of keys) {
+					obj[key] = results.body.aggregations[key].proc_accts.buckets.map((item) => item.key);
+				}
+				return obj;
+			};
+
 			// get budget year data
 			query.aggs.values.composite.sources = [
 				{
@@ -615,6 +441,42 @@ class JBookSearchHandler extends SearchHandler {
 				returnData.serviceAgency = processESResults(serviceAgencyResults, 'serviceAgency_s').map(
 					(sa) => saMapping[sa]
 				);
+			}
+
+			// get main account field data
+			query = {
+				size: 0,
+				aggs: {
+					paccts: {
+						filter: { term: { type_s: 'procurement' } },
+						aggs: {
+							proc_accts: { terms: { field: 'appropriationNumber_s', size: 500 } },
+						},
+					},
+					raccts: {
+						filter: { term: { type_s: 'rdte' } },
+						aggs: {
+							proc_accts: { terms: { field: 'appropriationNumber_s', size: 500 } },
+						},
+					},
+					oaccts: {
+						filter: { term: { type_s: 'om' } },
+						aggs: {
+							proc_accts: { terms: { field: 'programElement_s', size: 500 } },
+						},
+					},
+				},
+			};
+
+			const mainAccountESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				query,
+				userId
+			);
+
+			if (mainAccountESResults && mainAccountESResults.body.aggregations) {
+				returnData.appropriationNumberES = processMainAccountResults(mainAccountESResults);
 			}
 
 			return returnData;
@@ -1129,9 +991,7 @@ class JBookSearchHandler extends SearchHandler {
 						exportSearch: false,
 					},
 				},
-				userId,
-				null,
-				true
+				userId
 			);
 
 			const counts = this.processCounts(results);
