@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { Button, FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from '../../common/gc-colors';
 import PortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
@@ -66,6 +67,27 @@ const useStyles = makeStyles({
 	},
 });
 
+const handleFilterChange = (option, state, dispatch, type) => {
+	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+	const index = newSearchSettings[type].indexOf(option);
+
+	if (index !== -1) {
+		newSearchSettings[type].splice(index, 1);
+	} else {
+		newSearchSettings[type].push(option);
+	}
+
+	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings[`${type}Update`] = true;
+	setState(dispatch, {
+		jbookSearchSettings: newSearchSettings,
+		metricsCounted: false,
+		runSearch: true,
+		runGraphSearch: true,
+	});
+};
+
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
@@ -91,6 +113,52 @@ const JbookViewHeaderHandler = (props) => {
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [portfolios, setPortfolios] = useState([]);
+	const [filterList, setFilterList] = useState([]);
+
+	const processFilters = (settings) => {
+		const searchSettings = _.cloneDeep(settings);
+		for (const optionType in state.defaultOptions) {
+			if (
+				state.defaultOptions[optionType] &&
+				searchSettings[optionType] &&
+				state.defaultOptions[optionType].length === searchSettings[optionType].length
+			) {
+				delete searchSettings[optionType];
+			}
+
+			if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
+				delete searchSettings[optionType];
+			}
+		}
+
+		for (const setting in searchSettings) {
+			if (!searchSettings[setting]) {
+				delete searchSettings[setting];
+			}
+		}
+		console.log('searchSettings: ', searchSettings);
+		const testing = [];
+		Object.keys(searchSettings).forEach((type) => {
+			if (Object.keys(defaultOptions).includes(type) && type !== 'sort') {
+				if (isArray(searchSettings[type])) {
+					searchSettings[type].forEach((option) => {
+						testing.push({ type, optionName: option });
+					});
+				} else {
+					testing.push({ type, optionName: searchSettings[type] });
+				}
+			}
+		});
+
+		return testing;
+	};
+
+	useEffect(() => {
+		console.log('state.jbookSearchSettings: ', jbookSearchSettings);
+		const cleanedSearchSettings = processFilters(jbookSearchSettings);
+		setFilterList(cleanedSearchSettings);
+		console.log('processed: ', cleanedSearchSettings);
+	}, [jbookSearchSettings]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
 	useEffect(() => {
@@ -218,8 +286,14 @@ const JbookViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'} style={extraStyle}>
-			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
+		<div
+			className={'results-count-view-buttons-container'}
+			style={{ ...extraStyle, flexDirection: 'column', marginRight: 10 }}
+		>
+			<div
+				className={'view-buttons-container'}
+				style={{ marginRight: 10, marginBottom: 15, zIndex: 99, justifyContent: 'right' }}
+			>
 				<PortfolioSelector
 					portfolios={portfolios}
 					selectedPortfolio={state.selectedPortfolio}
@@ -400,6 +474,43 @@ const JbookViewHeaderHandler = (props) => {
 					)}
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
+			</div>
+			<div style={{ display: 'flex', justifyContent: 'right' }}>
+				{filterList.map((filter) => {
+					const { type, optionName } = filter;
+					return (
+						<Button
+							variant="outlined"
+							backgroundColor="white"
+							display="inline-flex"
+							style={{
+								marginRight: '10px',
+								padding: '10px 15px',
+								backgroundColor: 'white',
+								color: 'rgb(28, 45, 101)',
+								height: 40,
+								ariaPressed: 'true',
+							}}
+							endIcon={<CloseIcon />}
+							onClick={() => {
+								handleFilterChange(optionName, state, dispatch, type);
+							}}
+						>
+							<span
+								style={{
+									fontFamily: 'Montserrat',
+									fontWeight: 300,
+									color: 'black',
+									width: '100%',
+									marginTop: '5px',
+									marginBottom: '5px',
+								}}
+							>
+								{`${type}: ${optionName}`}
+							</span>
+						</Button>
+					);
+				})}
 			</div>
 		</div>
 	);
