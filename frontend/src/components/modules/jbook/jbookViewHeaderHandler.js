@@ -8,13 +8,12 @@ import _, { isArray } from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from '../../common/gc-colors';
-import PortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
+import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 import ExportIcon from '../../../images/icon/Export.svg';
+import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
@@ -30,42 +29,6 @@ const PORTFOLIO_FILTERS = [
 	'primaryClassLabel',
 	'budgetType',
 ];
-
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
 
 const handleFilterChange = (option, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -294,7 +257,7 @@ const JbookViewHeaderHandler = (props) => {
 				className={'view-buttons-container'}
 				style={{ marginRight: 10, marginBottom: 15, zIndex: 99, justifyContent: 'right' }}
 			>
-				<PortfolioSelector
+				<JBookPortfolioSelector
 					portfolios={portfolios}
 					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
