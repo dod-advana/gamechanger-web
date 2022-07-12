@@ -435,6 +435,9 @@ const initState = {
 	// jbook portfolios
 	portfolios: [],
 	selectedPortfolio: 'General',
+
+	// profile page
+	profilePageBudgetYear: '2023',
 };
 
 const init = (initialState) => {
