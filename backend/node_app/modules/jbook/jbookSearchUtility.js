@@ -491,6 +491,92 @@ class JBookSearchUtility {
 		};
 	}
 
+	getProfilePageQueryData(esResults, userId) {
+		try {
+			const { body = {} } = esResults;
+			const { hits } = body;
+
+			const pfpQueryData = {};
+
+			hits.hits.forEach((hit) => {
+				const { _source } = hit;
+
+				pfpQueryData.type_s = _source?.type_s;
+				pfpQueryData.appropriationNumber_s = _source?.appropriationNumber_s;
+				pfpQueryData.budgetActivityNumber_s = _source?.budgetActivityNumber_s;
+				pfpQueryData.budgetLineItem_s = _source?.budgetLineItem_s;
+				pfpQueryData.programElement_s = _source?.programElement_s;
+				pfpQueryData.projectNum_s = _source?.projectNum_s;
+			});
+
+			return pfpQueryData;
+		} catch (err) {
+			console.log('Error extracting data from ES results for profile page query');
+			this.logger.error(err, 'BNRKMTY', userId);
+		}
+	}
+
+	getESJBookProfilePageQuery(
+		{ type_s, appropriationNumber_s, budgetActivityNumber_s, budgetLineItem_s, programElement_s, projectNum_s },
+		userId
+	) {
+		try {
+			let query = {
+				track_total_hits: true,
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									type_s,
+								},
+							},
+							{
+								match: {
+									appropriationNumber_s,
+								},
+							},
+							{
+								match: {
+									budgetActivityNumber_s,
+								},
+							},
+						],
+					},
+				},
+			};
+
+			if (budgetLineItem_s) {
+				query.query.bool.must.push({
+					match: {
+						budgetLineItem_s,
+					},
+				});
+			}
+
+			if (programElement_s) {
+				query.query.bool.must.push({
+					match: {
+						programElement_s,
+					},
+				});
+			}
+
+			if (projectNum_s) {
+				query.query.bool.must.push({
+					match: {
+						projectNum_s,
+					},
+				});
+			}
+
+			return query;
+		} catch (err) {
+			console.log('Error generating ES query for profile page data (all years)');
+			this.logger.error(err, '3UDLIZ3', userId);
+		}
+	}
+
 	getElasticSearchJBookDataFromId({ docIds }, userId) {
 		try {
 			return {
@@ -670,8 +756,6 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
-
-			console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
