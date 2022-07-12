@@ -6,8 +6,12 @@ import propTypes from 'prop-types';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { setState } from '../../utils/sharedFunctions';
+<<<<<<< HEAD
 import GCResponsibilityExplorer from './GCResponsibilityExplorer';
 import GCDocumentsComparisonTool from './GCDocumentsComparisonTool';
+=======
+import GCResponsibilityExplorer from './responsibilityExplorer/GCResponsibilityExplorer';
+>>>>>>> 48d0146a77d22198c04e2cb3e449932185fa048d
 
 const AnalystTools = ({ context, showResponsibilityExplorer = true, showDocumentComparisonTool = true }) => {
 	const { state, dispatch } = context;

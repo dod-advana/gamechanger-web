@@ -232,6 +232,9 @@ const PolicyViewHeaderHandler = (props) => {
 				params.set('view', 'graph');
 				break;
 			case 'Explorer':
+				setState(dispatch, { currentViewName: value });
+				params.set('view', value);
+				break;
 			default:
 				setState(dispatch, { currentViewName: value });
 				params.delete('view');

@@ -886,7 +886,12 @@ const renderStatus = (state, dispatch, classes) => {
 };
 
 const resetAdvancedSettings = (dispatch) => {
+	dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
+};
+
+const clearFilters = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+	setState(dispatch, { runSearch: true, runGraphSearch: true });
 };
 
 const getSearchMatrixItems = (props) => {
@@ -954,8 +959,7 @@ const getSearchMatrixItems = (props) => {
 					borderRadius: 5,
 				}}
 				onClick={() => {
-					resetAdvancedSettings(dispatch);
-					setState(dispatch, { runSearch: true, runGraphSearch: true });
+					clearFilters(dispatch);
 				}}
 			>
 				<span

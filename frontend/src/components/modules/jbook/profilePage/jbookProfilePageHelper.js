@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {
 	StyledTableContainer,
@@ -34,9 +33,7 @@ const boldKeys = (data) => {
 	});
 };
 
-const SideNav = (props) => {
-	const { budgetType, budgetYear, context } = props;
-
+const SideNav = ({ budgetType, budgetYear, context }) => {
 	return (
 		<>
 			<StyledNavBar id="The Basics">
@@ -219,6 +216,11 @@ const Metadata = (props) => {
 
 const ProjectDescription = (props) => {
 	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
+	const title =
+		(projectData.projectMissionDescription || projectData.programDescription) ??
+		projectData.projectMissionDescription
+			? 'Project Description'
+			: 'Program Description';
 	return (
 		<>
 			{profileLoading ? (
@@ -229,10 +231,7 @@ const ProjectDescription = (props) => {
 						{renderTitle(projectData, programElement, projectNum)}
 					</Typography>
 					<Typography variant="h3" style={{ fontWeight: 'bold', width: '100%', marginBottom: '20px' }}>
-						{(projectData.projectMissionDescription || projectData.programDescription) ??
-						projectData.projectMissionDescription
-							? 'Project Description'
-							: 'Program Description'}
+						{title}
 					</Typography>
 					<div style={{ overflow: 'auto' }}>
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
@@ -425,7 +424,7 @@ const Contracts = (props) => {
 	return <StyledTableContainer>{contractTables}</StyledTableContainer>;
 };
 
-const NavButtons = (props) => {
+const NavButtons = () => {
 	const buttonNames = [
 		'The Basics',
 		'Accomplishment',
@@ -495,6 +494,40 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
+const a = (projectData) => {
+	return [
+		{
+			Key: 'Total Cost',
+			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
+		},
+		{
+			Key: 'Current Year Amount',
+			Value:
+				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
+					? `${formatNum(projectData.currentYearAmount)}`
+					: 'N/A',
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value:
+				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
+					? `${formatNum(projectData.priorYearAmount)}`
+					: 'N/A',
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value:
+				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
+					? `${formatNum(projectData.allPriorYearsAmount)}`
+					: 'N/A',
+		},
+		{
+			Key: 'Project',
+			Value: projectData.projectTitle || 'N/A',
+		},
+	];
+};
+
 const getMetadataTableData = (
 	projectData,
 	budgetType,
@@ -504,11 +537,7 @@ const getMetadataTableData = (
 	keywordCheckboxes,
 	setKeywordCheck
 ) => {
-	const metadata = [
-		{
-			Key: 'Project',
-			Value: projectData.projectTitle || 'N/A',
-		},
+	return a(projectData).concat([
 		{
 			Key: 'Program Element',
 			Value: projectData.programElement || 'N/A',
@@ -524,37 +553,12 @@ const getMetadataTableData = (
 			Hidden: budgetType === 'Procurement',
 		},
 		{
-			Key: 'All Prior Years Amount',
-			Value:
-				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-					? `${formatNum(projectData.allPriorYearsAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Prior Year Amount',
-			Value:
-				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-					? `${formatNum(projectData.priorYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Current Year Amount',
-			Value:
-				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-					? `${formatNum(projectData.currentYearAmount)}`
-					: 'N/A',
-		},
-		{
 			Key: 'Fiscal Year',
 			Value: projectData.budgetYear || 'N/A',
 		},
 		{
 			Key: 'To Complete',
 			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
-		},
-		{
-			Key: 'Total Cost',
-			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
 		},
 		{
 			Key: 'Budget Year (FY)',
@@ -594,47 +598,17 @@ const getMetadataTableData = (
 				</div>
 			),
 		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Obligations
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `$${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} M`
-					: 'N/A',
-		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Expenditures
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `$${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} M`
-					: 'N/A',
-		},
-	];
-
-	return metadata;
+	]);
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
 	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
-	const service = projectData.serviceAgency;
-	return `${projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : ''} ${
-		programElement && programElement !== 'undefined' ? `${programElement} ` : ''
-	} ${service && service !== 'undefined' ? `${service}` : ''} ${
-		projectNum && projectNum !== 'undefined' ? `${projectNum} ` : ''
-	}`;
+	const title = projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : '';
+	const element = programElement && programElement !== 'undefined' ? `${programElement} ` : '';
+	const service =
+		projectData.serviceAgency && projectData.serviceAgency !== 'undefined' ? `${projectData.serviceAgency}` : '';
+	const num = projectNum && projectNum !== 'undefined' ? `${projectNum} ` : '';
+	return `${title} ${element} ${service} ${num}`;
 };
 
 export {

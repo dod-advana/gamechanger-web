@@ -90,6 +90,7 @@ const endpoints = {
 	exportUserData: '/api/gameChanger/admin/exportUserData',
 	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
+	getUserDashboard: '/api/gameChanger/admin/getUserDashboard',
 	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
 	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
@@ -104,7 +105,6 @@ const endpoints = {
 	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
 	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
 	updateResponsibilityReport: '/api/gameChanger/responsibilities/updateResponsibilityReport',
-	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
 	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
 	getResponsibilityUpdates: '/api/gameChanger/responsibilities/getUpdates',
 	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
@@ -279,11 +279,6 @@ export default class GameChangerAPI {
 		const url = endpoints.gameChangerGraphSearchPOST;
 		return axiosPOST(this.axios, url, body);
 	};
-
-	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
-	// 	const url = endpoints.graphQueryPOST;
-	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
-	// }
 
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
@@ -517,11 +512,6 @@ export default class GameChangerAPI {
 	updateResponsibilityReport = async (options) => {
 		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
-	};
-
-	getOtherEntityFilterList = async (options) => {
-		const url = endpoints.getOtherEntityFilterList;
-		return axiosGET(this.axios, url, options);
 	};
 
 	storeResponsibilityReportData = async (data) => {
@@ -802,7 +792,10 @@ export default class GameChangerAPI {
 		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, { params: body });
 	};
-
+	getUserDashboard = async (body) => {
+		const url = endpoints.getUserDashboard;
+		return axiosGET(this.axios, url, { params: body });
+	};
 	sendUserAggregations = async (body) => {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });
