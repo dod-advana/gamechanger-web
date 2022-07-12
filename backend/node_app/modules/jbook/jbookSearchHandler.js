@@ -328,7 +328,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 
 		returnData.budgetYear = [];
-		returnData.serviceAgency = [];
+		returnData.serviceAgencyES = [];
 
 		const pdocQuery = `SELECT array_agg(DISTINCT "P40-04_BudgetYear") as budgetYear, array_agg(DISTINCT "P40-06_Organization") as serviceAgency FROM pdoc`;
 		const odocQuery = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
