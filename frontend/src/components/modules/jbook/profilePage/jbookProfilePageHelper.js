@@ -16,7 +16,12 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, formatNum } from '../../../../utils/jbookUtilities';
+import {
+	getClassLabel,
+	formatNum,
+	getTableFormattedCost,
+	getFormattedTotalCost,
+} from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
@@ -292,8 +297,9 @@ const aggregateProjectDescriptions = (projectData) => {
 		appropriationTitle: { title: 'Appropriation Title' },
 		budgetActivityTitle: { title: 'Budget Activity Title' },
 		programElementTitle: { title: 'Program Element Title' },
-		projectTitle: { title: 'Budget Line Item Title' },
-		projectMissionDescription: { title: 'Description' },
+		projectMissionDescription: {
+			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
+		},
 		missionDescBudgetJustification: { title: 'Project Description' },
 		SubProj_Title: { title: 'Sub-project Title' },
 		Adj_OtherAdj_Title: { title: 'Other Title' },
@@ -480,15 +486,6 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
-const getFormattedTotalCost = (projectData) => {
-	if (projectData.continuing) return 'Continuing';
-	return projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A';
-};
-
-const getTableFormattedCost = (cost) => {
-	return cost ? `${formatNum(cost)}` : 'N/A';
-};
-
 const getMetadataTableData = (
 	projectData,
 	budgetType,
@@ -498,6 +495,10 @@ const getMetadataTableData = (
 	setKeywordCheck
 ) => {
 	return [
+		{
+			Key: 'Budget Year 1 Requested',
+			Value: getTableFormattedCost(projectData.by1Request),
+		},
 		{
 			Key: 'Current Year Amount',
 			Value: getTableFormattedCost(projectData.currentYearAmount),
@@ -517,23 +518,27 @@ const getMetadataTableData = (
 		{
 			Key: 'BY2',
 			Value: getTableFormattedCost(projectData.p4082_toa_by2_d || projectData.proj_fund_by2_d),
+			Hidden: budgetType === 'O&M',
 		},
 		{
 			Key: 'BY3',
 			Value: getTableFormattedCost(projectData.p4083_toa_by3_d || projectData.proj_fund_by3_d),
+			Hidden: budgetType === 'O&M',
 		},
 		{
 			Key: 'BY4',
 			Value: getTableFormattedCost(projectData.p4084_toa_by4_d || projectData.proj_fund_by4_d),
+			Hidden: budgetType === 'O&M',
 		},
 		{
 			Key: 'BY5',
 			Value: getTableFormattedCost(projectData.p4085_toa_by5_d || projectData.proj_fund_by5_d),
+			Hidden: budgetType === 'O&M',
 		},
 		{
-			Key: 'Program Element',
-			Value: projectData.programElement || 'N/A',
-			Hidden: budgetType === 'Procurement',
+			Key: 'Project Number',
+			Value: projectData.projectNum,
+			Hidden: budgetType !== 'RDT&E',
 		},
 		{
 			Key: 'Service Agency Name',
