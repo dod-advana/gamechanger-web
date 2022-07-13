@@ -256,11 +256,7 @@ const JBookProfilePage = (props) => {
 				selectBudgetYearProjectData(allBYProjectData, year, portfolioName);
 			}
 
-			console.log(allBYProjectData);
-
 			getDropdownData();
-
-			console.log(projectData);
 		} catch (err) {
 			console.log(err);
 		}
@@ -973,7 +969,7 @@ const JBookProfilePage = (props) => {
 					isSubmit,
 					reviewType,
 					portfolioName: selectedPortfolio,
-					docID,
+					id: docID,
 				},
 			});
 
@@ -1326,7 +1322,7 @@ const JBookProfilePage = (props) => {
 							<GCAccordion
 								contentPadding={0}
 								expanded={false}
-								header={`ACCOMPLISHMENTS ${accomplishments ? `(${accomplishments.length})` : ''}`}
+								header={`ACCOMPLISHMENTS ${accomplishments.length}`}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'600'}
