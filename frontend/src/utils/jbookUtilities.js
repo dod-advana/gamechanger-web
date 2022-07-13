@@ -191,7 +191,7 @@ export const processSearchSettings = (state, _dispatch) => {
 };
 
 export const formatNum = (num) => {
-	const parsed = parseInt(num);
+	const parsed = num >= 5 ? parseInt(num) : parseFloat(num).toFixed(2);
 	if (parsed > 999) {
 		return `$${(parsed / 1000).toFixed(2)} B`;
 	}

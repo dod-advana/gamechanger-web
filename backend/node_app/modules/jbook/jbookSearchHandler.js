@@ -227,6 +227,35 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
+	getGiantQuery(pQuery, rQuery, oQuery) {
+		let giantQuery = ``;
+
+		if (!jbookSearchSettings.budgetType) {
+			giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
+		}
+
+		for (let btype of jbookSearchSettings.budgetType) {
+			let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
+			switch (btype) {
+				case 'Procurement':
+					giantQuery = pQuery;
+					break;
+				case 'RDT&E':
+					giantQuery += unionAll + rQuery;
+					break;
+				case 'O&M':
+					giantQuery += unionAll + oQuery;
+					break;
+				default:
+					break;
+			}
+		}
+
+		giantQuery += ';';
+
+		return giantQuery;
+	}
+
 	async getDataForFullPDFExport(req, userId) {
 		try {
 			const { jbookSearchSettings = { budgetYear: ['2022'] } } = req.body;
@@ -258,30 +287,7 @@ class JBookSearchHandler extends SearchHandler {
 			const rQuery = rSelect + rWhere;
 			const oQuery = oSelect + oWhere;
 
-			let giantQuery = ``;
-
-			if (!jbookSearchSettings.budgetType) {
-				giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
-			}
-
-			for (let btype of jbookSearchSettings.budgetType) {
-				let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
-				switch (btype) {
-					case 'Procurement':
-						giantQuery = pQuery;
-						break;
-					case 'RDT&E':
-						giantQuery += unionAll + rQuery;
-						break;
-					case 'O&M':
-						giantQuery += unionAll + oQuery;
-						break;
-					default:
-						break;
-				}
-			}
-
-			giantQuery += ';';
+			const giantQuery = getGiantQuery(pQuery, rQuery, oQuery);
 
 			const data = await this.db.jbook.query(giantQuery, { replacements: { searchText: '' } });
 
@@ -324,7 +330,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 
 		returnData.budgetYear = [];
-		returnData.serviceAgency = [];
+		returnData.serviceAgencyES = [];
 
 		const pdocQuery = `SELECT array_agg(DISTINCT "P40-04_BudgetYear") as budgetYear, array_agg(DISTINCT "P40-06_Organization") as serviceAgency FROM pdoc`;
 		const odocQuery = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
@@ -376,16 +382,17 @@ class JBookSearchHandler extends SearchHandler {
 				size: 0,
 				aggs: {
 					values: {
-						composite: {
-							sources: [],
+						terms: {
+							field: '',
+							size: 1000,
 						},
 					},
 				},
 			};
 
-			const processESResults = (results, field) => {
+			const processESResults = (results) => {
 				return results.body.aggregations.values.buckets
-					.map((bucket) => bucket.key[field])
+					.map((bucket) => bucket.key)
 					.filter((value) => value !== '');
 			};
 
@@ -399,15 +406,8 @@ class JBookSearchHandler extends SearchHandler {
 			};
 
 			// get budget year data
-			query.aggs.values.composite.sources = [
-				{
-					budgetYear_s: {
-						terms: {
-							field: 'budgetYear_s',
-						},
-					},
-				},
-			];
+			query.aggs.values.terms.field = 'budgetYear_s';
+
 			const budgetYearESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
@@ -415,31 +415,24 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYearES = processESResults(budgetYearESResults, 'budgetYear_s');
+				returnData.budgetYearES = processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
-			query.aggs.values.composite.sources = [
-				{
-					serviceAgency_s: {
-						terms: {
-							field: 'serviceAgency_s',
-						},
-					},
-				},
-			];
-			const serviceAgencyResults = await this.dataLibrary.queryElasticSearch(
+			query.aggs.values.terms.field = 'serviceAgency_s';
+
+			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
 				clientObj.esIndex,
 				query,
 				userId
 			);
 
-			if (serviceAgencyResults && serviceAgencyResults.body.aggregations) {
+			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgency = processESResults(serviceAgencyResults, 'serviceAgency_s').map(
-					(sa) => saMapping[sa]
+				returnData.serviceAgencyES = _.uniq(
+					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}
 

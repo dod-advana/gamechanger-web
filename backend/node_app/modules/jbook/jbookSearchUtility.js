@@ -95,9 +95,9 @@ class JBookSearchUtility {
 		const { searchText } = body;
 
 		try {
-			const termsArray = this.searchUtility.getEsSearchTerms({ searchText })[1];
+			const [, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let synonyms = this.thesaurusExpansion(searchText, termsArray)[0];
+			let [synonyms] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
@@ -135,12 +135,12 @@ class JBookSearchUtility {
 	async abbreviationCleaner(termsArray) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		for (let term of termsArray) {
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
+		const abbreviationExpansions = [];
+		for (const term of termsArray) {
+			const upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+			const expandedTerm = await this.redisDB.get(upperTerm);
+			const lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+			const compressedTerm = await this.redisDB.get(lowerTerm);
 			if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
@@ -150,9 +150,9 @@ class JBookSearchUtility {
 		}
 
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-		let cleanedAbbreviations = [];
+		const cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
-			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
+			const cleaned = abb.toLowerCase().replace(/['"]+/g, '');
 			let found = false;
 			termsArray.forEach((term) => {
 				if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
@@ -172,7 +172,7 @@ class JBookSearchUtility {
 		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for (var term in termsArray) {
+			for (let term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1) {
@@ -299,11 +299,7 @@ class JBookSearchUtility {
 				newKey = mapping[key].newName;
 			}
 
-			if (
-				(raw[key] && raw[key][0]) ||
-				Number.isInteger(raw[key]) ||
-				(typeof raw[key] === 'object' && raw[key] !== null)
-			) {
+			if ((raw[key] && raw[key][0]) || !isNaN(raw[key]) || (typeof raw[key] === 'object' && raw[key] !== null)) {
 				if (arrayFields.includes(key)) {
 					result[newKey] = raw[key];
 				} else if (Array.isArray(raw[key])) {
@@ -618,7 +614,7 @@ class JBookSearchUtility {
 					contract_totals: {
 						aggs: {
 							sum_agg: {
-								sum: { field: 'currentYearAmount_d' },
+								sum: { field: 'by1_request_d' },
 							},
 						},
 						terms: {
@@ -631,6 +627,7 @@ class JBookSearchUtility {
 					bool: {
 						must: [],
 						should: [],
+						minimum_should_match: 1,
 					},
 				},
 				highlight: {
@@ -647,12 +644,12 @@ class JBookSearchUtility {
 			}
 
 			if (searchText !== '') {
-				query.query.bool.must.push({
-					multi_match: {
+				query.query.bool.should.push({
+					query_string: {
 						query: `${parsedQuery}`,
 						fields: Mappings.esTopLevelFields,
 						type: 'best_fields',
-						operator: `${operator}`,
+						default_operator: `${operator}`,
 					},
 				});
 			}
@@ -675,11 +672,11 @@ class JBookSearchUtility {
 							bool: {
 								should: [
 									{
-										multi_match: {
+										query_string: {
 											query: `${parsedQuery}`,
 											fields: innerField.fields,
 											type: 'best_fields',
-											operator: `${operator}`,
+											default_operator: `${operator}`,
 										},
 									},
 								],
@@ -704,7 +701,7 @@ class JBookSearchUtility {
 				appropriationTitle_t: 1,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
-				programElement_s: 6,
+				programElement_t: 6,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
 				budgetLineItem_t: 6,
@@ -873,11 +870,11 @@ class JBookSearchUtility {
 		};
 
 		if (jbookSearchSettings[min]) {
-			totalCostRange.range[field].gte = jbookSearchSettings[min];
+			rangeQuery.range[field].gte = jbookSearchSettings[min];
 		}
 
 		if (jbookSearchSettings[max]) {
-			totalCostRange.range[field].lte = jbookSearchSettings[max];
+			rangeQuery.range[field].lte = jbookSearchSettings[max];
 		}
 
 		return rangeQuery;
@@ -986,7 +983,7 @@ class JBookSearchUtility {
 								jbookSearchSettings,
 								'minBY1Funding',
 								'maxBY1Funding',
-								'currentYearAmount_d'
+								'by1_request_d'
 							)
 						);
 						break;
@@ -1030,9 +1027,21 @@ class JBookSearchUtility {
 					// Program Element / BLI
 					case 'programElement':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.programElement}*`,
-								default_field: 'budgetLineItem_t',
+							bool: {
+								should: [
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'budgetLineItem_t',
+										},
+									},
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'programElement_s',
+										},
+									},
+								],
 							},
 						});
 						break;
@@ -1066,7 +1075,6 @@ class JBookSearchUtility {
 						});
 						break;
 					default:
-						console.log('Jbook search setting not found');
 						break;
 				}
 			}

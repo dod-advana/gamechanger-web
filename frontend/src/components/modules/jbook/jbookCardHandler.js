@@ -186,10 +186,39 @@ const StyledPill = styled.div`
 	}
 `;
 
+// mappings
 const types = {
 	pdoc: 'Procurement',
 	rdoc: 'RDT&E',
 	odoc: 'O&M',
+};
+
+const metadataNameToSearchFilterName = {
+	'Service Agency Name': 'serviceAgency',
+	'Budget Year (FY)': 'budgetYear',
+	'Program Element': 'programElement',
+	'Project Number': 'projectNum',
+	Project: 'projectTitle',
+	Keywords: 'hasKeywords',
+	'Total Cost': ['minTotalCost', 'maxTotalCost'],
+	'Main Account': 'appropriationNumber',
+	'Budget Activity': 'budgetActivity',
+	'Budget Sub Activity': 'budgetSubActivity',
+};
+
+// helper functions
+const getBudgetSubActivity = (projectData) => {
+	return projectData.budgetType === 'odoc'
+		? projectData.budgetActivityTitle ?? 'N/A'
+		: projectData.budgetSubActivity ?? 'N/A';
+};
+
+const getToComplete = (projectData, budgetType) => {
+	return `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A';
+};
+
+const emptyFunction = function () {
+	// this is intentionally empty
 };
 
 const clickFn = (cloneName, searchText, item, portfolioName) => {
@@ -272,7 +301,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'To Complete',
-			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A',
+			Value: getToComplete(projectData, budgetType),
 		},
 		{
 			Key: 'Budget Year (FY)',
@@ -292,10 +321,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'Budget Sub Activity',
-			Value:
-				projectData.budgetType === 'odoc'
-					? projectData.budgetActivityTitle ?? 'N/A'
-					: projectData.budgetSubActivity ?? 'N/A',
+			Value: getBudgetSubActivity(projectData),
 		},
 		...(selectedPortfolio === 'AI Inventory'
 			? [
@@ -322,13 +348,12 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	];
 };
 
-const trackListView = (cloneName, metadataExpanded, setMetadataExpanded) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'ListViewInteraction',
-		!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
-	);
-	setMetadataExpanded(!metadataExpanded);
+const getHoveredSnippet = (item, hoveredHit) => {
+	let hoveredSnippet = '';
+	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
+		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+	}
+	return hoveredSnippet;
 };
 
 const renderContracts = (contracts, length) => {
@@ -339,8 +364,8 @@ const renderContracts = (contracts, length) => {
 	for (let i = 0; i < contracts.length && i < 5; i++) {
 		const contract = contracts[i];
 		if (contractElements.length < length) {
-			const str = contract.piin_s ? `- ${contract.piin_s}` : '';
-			contractElements += `<br/><p>${str}</p>`;
+			const contractPiin = contract.piin_s ? `- ${contract.piin_s}` : '';
+			contractElements += `<br/><p>${contractPiin}</p>`;
 		} else {
 			lengthOver = true;
 		}
@@ -389,218 +414,194 @@ const renderPortfolioTags = (tags) => {
 	return tagElements;
 };
 
-const renderListViewWithoutIntelligentSearch = (state, item, stateValues, contextHtml, backBody) => {
-	const { hitsExpanded, setHitsExpanded, hoveredHit, setHoveredHit, metadataExpanded, setMetadataExpanded } =
-		stateValues;
-	return (
-		<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-			{item.pageHits && item.pageHits.length > 0 && (
-				<button
-					type="button"
-					className={'list-view-button'}
-					onClick={() => {
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'ListViewInteraction',
-							!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
-						);
-						setHitsExpanded(!hitsExpanded);
-					}}
-				>
-					<span className="buttonText">Details</span>
-					<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
-				</button>
-			)}
-			{hitsExpanded && (
-				<div className={'expanded-hits'}>
-					<div className={'page-hits'}>
-						{_.chain(item.pageHits)
-							.map((page, key) => {
-								return (
-									<div
-										className={'page-hit'}
-										key={key}
-										style={{
-											...(hoveredHit === key && {
-												backgroundColor: '#E9691D',
-												color: 'white',
-											}),
-										}}
-										onMouseEnter={() => setHoveredHit(key)}
-										onClick={(e) => {
-											e.preventDefault();
-										}}
-									>
-										<span>{page.title && <span>{page.title}</span>}</span>
-										<i
-											className="fa fa-chevron-right"
-											style={{
-												color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-											}}
-										/>
-									</div>
-								);
-							})
-							.value()}
-					</div>
-					<div className={'expanded-metadata'}>
-						<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-					</div>
-				</div>
-			)}
-			<div>
-				<button
-					type="button"
-					className={'list-view-button'}
-					onClick={() => {
-						trackListView(state.cloneData.clone_name, metadataExpanded, setMetadataExpanded);
-					}}
-				>
-					<span className="buttonText">Document Metadata</span>
-					<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
-				</button>
-				{metadataExpanded && (
-					<div className={'metadata'}>
-						<div className={'inner-scroll-container'}>{backBody}</div>
-					</div>
-				)}
-			</div>
-		</StyledListViewFrontCardContent>
-	);
+const getItemPageHits = (item) => {
+	const pageHits = [
+		{
+			title: 'Project Description',
+			snippet: _.truncate(item.projectMissionDescription, { length: 150 }),
+		},
+	];
+
+	if (item.contracts) {
+		pageHits.push({
+			title: 'Contracts',
+			snippet: renderContracts(item.contracts, 180),
+		});
+	}
+
+	if (item.accomplishments) {
+		pageHits.push({
+			title: 'Accomplishments',
+			snippet: renderAccomplishments(item.accomplishments, 200),
+		});
+	}
+
+	return pageHits;
 };
 
-const renderListViewWithIntelligentSearch = (
-	state,
-	item,
-	stateValues,
-	contextHtml,
-	backBody,
-	intelligentFeedbackComponent
-) => {
-	const { hoveredHit, setHoveredHit, metadataExpanded, setMetadataExpanded } = stateValues;
-	return (
-		<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-			<div className={'expanded-hits'}>
-				<div className={'page-hits'}>
-					{_.chain(item.pageHits)
-						.map((page, key) => {
-							return (
-								<div
-									className={'page-hit'}
-									key={key}
-									style={{
-										...(hoveredHit === key && {
-											backgroundColor: '#E9691D',
-											color: 'white',
-										}),
-									}}
-									onMouseEnter={() => setHoveredHit(key)}
-									onClick={(e) => {
-										e.preventDefault();
-									}}
-								>
-									<span>{page.title && <span>{page.title}</span>}</span>
-									<i
-										className="fa fa-chevron-right"
-										style={{
-											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-										}}
-									/>
-								</div>
-							);
-						})
-						.value()}
-				</div>
-				<div className={'expanded-metadata'}>
-					<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-				</div>
-			</div>
+/* takes list of modified searchSettings and the name of a metadata field
+	returns true if that metadata field represents a search setting that has been modified
+	false otherwise */
+const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
+	if (metadataName === 'Total Cost') {
+		return (
+			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][0]) ||
+			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][1])
+		);
+	}
+	return modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName]);
+};
+
+/* handle sorting metadata fields based on the search filters
+	return -1, 0, or 1 indicating the respective order of a and b given which search
+		filters have been modified from the default
+*/
+const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
+	return (a, b) => {
+		const metadataNames = Object.keys(metadataNameToSearchFilterName);
+		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
+
+		if (metadataNames.includes(a.Key) && isSearchFilterModified(modifiedSearchSettings, a.Key)) {
+			if (metadataNames.includes(b.Key) && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
+				return 0;
+			} else {
+				return -1;
+			}
+		} else {
+			if (metadataNames.includes(b.Key) && isSearchFilterModified(modifiedSearchSettings, b.Key)) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	};
+};
+
+// sub-components
+const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
+	if (item.pageHits && item.pageHits.length > 0) {
+		return (
 			<button
 				type="button"
 				className={'list-view-button'}
 				onClick={() => {
-					trackListView(state.cloneData.clone_name, metadataExpanded, setMetadataExpanded);
+					trackEvent(
+						getTrackingNameForFactory(clone_name),
+						'ListViewInteraction',
+						!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
+					);
+					setHitsExpanded(!hitsExpanded);
 				}}
 			>
-				<span className="buttonText">Document Metadata</span>
-				<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
+				<span className="buttonText">Details</span>
+				<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
 			</button>
+		);
+	} else return <></>;
+};
 
-			{metadataExpanded && (
-				<div className={'metadata'}>
-					<div className={'inner-scroll-container'}>{backBody}</div>
-				</div>
+const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
+	return (
+		<div className="hits-container">
+			<div className={'page-hits'}>
+				{_.chain(item.pageHits)
+					.map((page, key) => {
+						return (
+							<div
+								className={'page-hit'}
+								key={key}
+								style={{
+									...(hoveredHit === key && {
+										backgroundColor: '#E9691D',
+										color: 'white',
+									}),
+								}}
+								onMouseEnter={() => setHoveredHit(key)}
+								onClick={(e) => {
+									e.preventDefault();
+								}}
+							>
+								<span>{page.title && <span>{page.title}</span>}</span>
+								<i
+									className="fa fa-chevron-right"
+									style={{
+										color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+									}}
+								/>
+							</div>
+						);
+					})
+					.value()}
+			</div>
+			<div className={'expanded-metadata'}>
+				<blockquote
+					className="searchdemo-blockquote"
+					dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }}
+				/>
+			</div>
+		</div>
+	);
+};
+
+const ExpandedMetadata = ({ metadataExpanded, backBody }) => {
+	if (metadataExpanded) {
+		return (
+			<div className={'metadata'}>
+				<div className={'inner-scroll-container'}>{backBody}</div>
+			</div>
+		);
+	} else return <></>;
+};
+
+const ListViewFrontCardContent = ({
+	intelligentSearch,
+	item,
+	clone_name,
+	hitsExpanded,
+	setHitsExpanded,
+	hoveredHit,
+	setHoveredHit,
+	contextHtml,
+	toggleExpandMetadata,
+	metadataExpanded,
+	backBody,
+	intelligentFeedbackComponent,
+}) => {
+	return (
+		<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
+			<HitsExpandedButton
+				item={item}
+				clone_name={clone_name}
+				hitsExpanded={hitsExpanded}
+				setHitsExpanded={setHitsExpanded}
+			/>
+			{hitsExpanded && (
+				<ExpandedHits
+					item={item}
+					hoveredHit={hoveredHit}
+					setHoveredHit={setHoveredHit}
+					contextHtml={contextHtml}
+				/>
 			)}
-
-			<div style={{ marginTop: '10px', marginBottom: '10px' }}> {intelligentFeedbackComponent()} </div>
+			<div>
+				<button type="button" className={'list-view-button'} onClick={toggleExpandMetadata}>
+					<span className="buttonText">Document Metadata</span>
+					<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
+				</button>
+				<ExpandedMetadata metadataExpanded={metadataExpanded} backBody={backBody} />
+			</div>
+			{intelligentSearch && (
+				<div style={{ marginTop: '10px', marginBottom: '10px' }}> {intelligentFeedbackComponent()} </div>
+			)}
 		</StyledListViewFrontCardContent>
 	);
 };
 
-const renderCardFront = (isWideCard, item, hoveredHit, setHoveredHit, contextHtml, review) => {
-	return (
-		<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
-			<div className={'currents-as-of-div'}>
-				<div className={'current-text'}>{/*currentAsOfText*/}</div>
-			</div>
-			<div className={'hits-container'}>
-				<div className={'page-hits'}>
-					{_.chain(item.pageHits)
-						.map((page, key) => {
-							return (
-								<div
-									className={'page-hit'}
-									key={key}
-									style={{
-										...(hoveredHit === key && {
-											backgroundColor: '#E9691D',
-											color: 'white',
-										}),
-									}}
-									onMouseEnter={() => setHoveredHit(key)}
-									onClick={(e) => {
-										e.preventDefault();
-									}}
-								>
-									{page.title && <span>{page.title}</span>}
-									{page.pageNumber && (
-										<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
-									)}
-									<i
-										className="fa fa-chevron-right"
-										style={{
-											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-										}}
-									/>
-								</div>
-							);
-						})
-						.value()}
-				</div>
-				<div className={'expanded-metadata'}>
-					<blockquote
-						className="searchdemo-blockquote"
-						dangerouslySetInnerHTML={{
-							__html: sanitizeHtml(contextHtml),
-						}}
-					/>
-				</div>
-			</div>
-			<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-				{review && review.primaryClassLabel && 'Tag:'} {renderPortfolioTags([review.primaryClassLabel])}
-			</div>
-		</StyledFrontCardContent>
-	);
+const ProjectKeywords = (keywords) => {
+	return <>{keywords && keywords.length > 0 ? keywords.map((keyword) => <p>{keyword}</p>) : 'None'}</>;
 };
 
-const getHoveredSnippet = (item, hoveredHit) => {
-	let hoveredSnippet = '';
-	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
-		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-	}
-	return hoveredSnippet;
-};
-
+// main card handler
 const cardHandler = {
 	document: {
 		getCardHeader: (props) => {
@@ -635,16 +636,11 @@ const cardHandler = {
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
 								className={'title-text'}
-								onClick={
-									docListView
-										? (e) => {
-												e.preventDefault();
-												clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
-										  }
-										: () => {
-												// Do nothing
-										  }
-								}
+								onClick={(e) => {
+									if (!docListView) return;
+									e.preventDefault();
+									clickFn(cloneData.cloneName, searchText, item, selectedPortfolio);
+								}}
 								style={{
 									width: '100%',
 									display: 'flex',
@@ -740,7 +736,16 @@ const cardHandler = {
 				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
 
 			try {
+				const toggleExpandMetadata = () => {
+					trackEvent(
+						getTrackingNameForFactory(state.cloneData.clone_name),
+						'ListViewInteraction',
+						!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+					);
+					setMetadataExpanded(!metadataExpanded);
+				};
 				// render the hover menu and options
+
 				if (
 					!state.searchText ||
 					state.searchText === null ||
@@ -748,58 +753,48 @@ const cardHandler = {
 					!item.pageHits ||
 					item.pageHits.length <= 0
 				) {
-					item.pageHits = [
-						{
-							title: 'Project Description',
-							snippet: _.truncate(item.projectMissionDescription, { length: 150 }),
-						},
-					];
-
-					if (item.contracts) {
-						item.pageHits.push({
-							title: 'Contracts',
-							snippet: renderContracts(item.contracts, 180),
-						});
-					}
-
-					if (item.accomplishments) {
-						item.pageHits.push({
-							title: 'Accomplishments',
-							snippet: renderAccomplishments(item.accomplishments, 200),
-						});
-					}
+					item.pageHits = getItemPageHits(item);
 				}
 
 				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
 
-				if (state.listView && !intelligentSearch) {
-					return renderListViewWithoutIntelligentSearch(
-						state,
-						item,
-						{
-							hitsExpanded,
-							setHitsExpanded,
-							hoveredHit,
-							setHoveredHit,
-							metadataExpanded,
-							setMetadataExpanded,
-						},
-						contextHtml,
-						backBody
-					);
-				} else if (state.listView && intelligentSearch) {
-					return renderListViewWithIntelligentSearch(
-						state,
-						item,
-						{ hoveredHit, setHoveredHit, metadataExpanded, setMetadataExpanded },
-						contextHtml,
-						backBody,
-						intelligentFeedbackComponent
+				if (state.listView) {
+					return (
+						<ListViewFrontCardContent
+							intelligentSearch={intelligentSearch}
+							item={item}
+							clone_name={state.cloneData.clone_name}
+							hitsExpanded={hitsExpanded}
+							setHitsExpanded={setHitsExpanded}
+							hoveredHit={hoveredHit}
+							setHoveredHit={setHoveredHit}
+							contextHtml={contextHtml}
+							toggleExpandMetadata={toggleExpandMetadata}
+							metadataExpanded={metadataExpanded}
+							backBody={backBody}
+							intelligentFeedbackComponent={intelligentFeedbackComponent}
+						/>
 					);
 				} else {
-					return renderCardFront(isWideCard, item, hoveredHit, setHoveredHit, contextHtml, review);
+					return (
+						<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
+							<div className={'currents-as-of-div'}>
+								<div className={'current-text'}>{/*currentAsOfText*/}</div>
+							</div>
+							<ExpandedHits
+								item={item}
+								hoveredHit={hoveredHit}
+								setHoveredHit={setHoveredHit}
+								contextHtml={contextHtml}
+							/>
+							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
+								{review && review.primaryClassLabel && 'Tag:'}{' '}
+								{renderPortfolioTags([review.primaryClassLabel])}
+							</div>
+						</StyledFrontCardContent>
+					);
 				}
 			} catch (e) {
 				console.log('Error rendering jbook card front');
@@ -810,7 +805,7 @@ const cardHandler = {
 
 		getCardBack: (props) => {
 			const { state, item, detailPage = false } = props;
-			const { selectedPortfolio } = state;
+			const { selectedPortfolio, modifiedSearchSettings } = state;
 
 			const projectData = { ...item };
 			const budgetType = item.budgetType?.toUpperCase() || '';
@@ -834,6 +829,25 @@ const cardHandler = {
 			}
 
 			const metadata = getMetadataTable(projectData, budgetType, selectedPortfolio);
+
+			if (selectedPortfolio === 'AI Inventory') {
+				metadata.push({
+					Key: 'Category',
+					Value: getClassLabel(projectData),
+				});
+				metadata.push({
+					Key: 'Keywords',
+					Value: (
+						<div>
+							<ProjectKeywords keywords={projectData.keywords} />
+						</div>
+					),
+				});
+			}
+
+			if (modifiedSearchSettings.length > 0) {
+				metadata.sort(sortMetadataByAppliedSearchFilters(modifiedSearchSettings));
+			}
 
 			return (
 				<div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
@@ -865,12 +879,8 @@ const cardHandler = {
 				toggledMore,
 				graphView,
 				cloneName,
-				setToggledMore = () => {
-					// Do nothing
-				},
-				closeGraphCard = () => {
-					// Do nothing
-				},
+				setToggledMore = emptyFunction,
+				closeGraphCard = emptyFunction,
 			} = props;
 
 			const { searchText, selectedPortfolio } = state;
