@@ -41,8 +41,8 @@ const filterNameMap = {
 	projectNum: 'Project #',
 	minBY1Funding: 'BY1 Fund Min',
 	maxBY1Funding: 'BY1 Fund Max',
-	minTotalCost: 'Total Cost Min',
-	maxTotalCost: 'Total Cost Max',
+	minTotalCost: 'Total Fund Min',
+	maxTotalCost: 'Total Fund Max',
 	primaryReviewer: 'Primary Reviewer',
 	serviceReviewer: 'Service Reviewer',
 	pocReviewer: 'POC Reviewer',
@@ -77,6 +77,46 @@ const handleFilterChange = (option, state, dispatch, type) => {
 	});
 };
 
+const createFilterArray = (settings, options) => {
+	const processedFilters = [];
+	Object.keys(settings).forEach((type) => {
+		if (Object.keys(options).includes(type) && type !== 'sort') {
+			if (isArray(settings[type])) {
+				settings[type].forEach((option) => {
+					processedFilters.push({ type, optionName: option });
+				});
+			} else {
+				processedFilters.push({ type, optionName: settings[type] });
+			}
+		}
+	});
+	return processedFilters;
+};
+
+const processFilters = (settings, options) => {
+	const searchSettings = _.cloneDeep(settings);
+	for (const optionType in options) {
+		if (
+			options[optionType] &&
+			searchSettings[optionType] &&
+			options[optionType].length === searchSettings[optionType].length
+		) {
+			delete searchSettings[optionType];
+		}
+
+		if (searchSettings?.[optionType]?.length === 0) {
+			delete searchSettings[optionType];
+		}
+	}
+
+	for (const setting in searchSettings) {
+		if (!searchSettings[setting]) {
+			delete searchSettings[setting];
+		}
+	}
+	return createFilterArray(searchSettings, options);
+};
+
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
@@ -105,45 +145,10 @@ const JbookViewHeaderHandler = (props) => {
 	const [portfolios, setPortfolios] = useState([]);
 	const [filterList, setFilterList] = useState([]);
 
+	//Processes the search settings to find which filters are applied for displaying at the top
 	useEffect(() => {
-		const processFilters = (settings) => {
-			const searchSettings = _.cloneDeep(settings);
-			for (const optionType in defaultOptions) {
-				if (
-					defaultOptions[optionType] &&
-					searchSettings[optionType] &&
-					defaultOptions[optionType].length === searchSettings[optionType].length
-				) {
-					delete searchSettings[optionType];
-				}
-
-				if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
-					delete searchSettings[optionType];
-				}
-			}
-
-			for (const setting in searchSettings) {
-				if (!searchSettings[setting]) {
-					delete searchSettings[setting];
-				}
-			}
-			const testing = [];
-			Object.keys(searchSettings).forEach((type) => {
-				if (Object.keys(defaultOptions).includes(type) && type !== 'sort') {
-					if (isArray(searchSettings[type])) {
-						searchSettings[type].forEach((option) => {
-							testing.push({ type, optionName: option });
-						});
-					} else {
-						testing.push({ type, optionName: searchSettings[type] });
-					}
-				}
-			});
-
-			return testing;
-		};
 		if (runSearch) {
-			const cleanedSearchSettings = processFilters(jbookSearchSettings);
+			const cleanedSearchSettings = processFilters(jbookSearchSettings, defaultOptions);
 			setFilterList(cleanedSearchSettings);
 		}
 	}, [defaultOptions, jbookSearchSettings, runSearch]);
