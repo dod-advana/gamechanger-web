@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { Button, FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 import ExportIcon from '../../../images/icon/Export.svg';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
@@ -29,6 +30,93 @@ const PORTFOLIO_FILTERS = [
 	'budgetType',
 ];
 
+const filterNameMap = {
+	budgetYear: 'Budget Year',
+	budgetType: 'PL Title',
+	serviceAgency: 'Service/Agency',
+	raccts: 'Main Account',
+	budgetActivity: 'Budget Activity',
+	budgetSubActivity: 'Budget Sub Activity',
+	programElement: 'BLI',
+	projectNum: 'Project #',
+	minBY1Funding: 'BY1 Fund Min',
+	maxBY1Funding: 'BY1 Fund Max',
+	minTotalCost: 'Total Fund Min',
+	maxTotalCost: 'Total Fund Max',
+	primaryReviewer: 'Primary Reviewer',
+	serviceReviewer: 'Service Reviewer',
+	pocReviewer: 'POC Reviewer',
+	reviewStatus: 'Review Status',
+	hasKeywords: 'Keywords',
+	primaryClassLabel: 'Tag',
+	sourceTag: 'Source',
+};
+
+const handleFilterChange = (option, state, dispatch, type) => {
+	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+	if (isArray(newSearchSettings[type])) {
+		const index = newSearchSettings[type].indexOf(option);
+
+		if (index !== -1) {
+			newSearchSettings[type].splice(index, 1);
+		} else {
+			newSearchSettings[type].push(option);
+		}
+	} else {
+		newSearchSettings[type] = '';
+	}
+
+	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings[`${type}Update`] = true;
+	setState(dispatch, {
+		jbookSearchSettings: newSearchSettings,
+		metricsCounted: false,
+		runSearch: true,
+		runGraphSearch: true,
+	});
+};
+
+const createFilterArray = (settings, options) => {
+	const processedFilters = [];
+	Object.keys(settings).forEach((type) => {
+		if (Object.keys(options).includes(type) && type !== 'sort') {
+			if (isArray(settings[type])) {
+				settings[type].forEach((option) => {
+					processedFilters.push({ type, optionName: option });
+				});
+			} else {
+				processedFilters.push({ type, optionName: settings[type] });
+			}
+		}
+	});
+	return processedFilters;
+};
+
+const processFilters = (settings, options) => {
+	const searchSettings = _.cloneDeep(settings);
+	for (const optionType in options) {
+		if (
+			options[optionType] &&
+			searchSettings[optionType] &&
+			options[optionType].length === searchSettings[optionType].length
+		) {
+			delete searchSettings[optionType];
+		}
+
+		if (searchSettings?.[optionType]?.length === 0) {
+			delete searchSettings[optionType];
+		}
+	}
+
+	for (const setting in searchSettings) {
+		if (!searchSettings[setting]) {
+			delete searchSettings[setting];
+		}
+	}
+	return createFilterArray(searchSettings, options);
+};
+
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
@@ -50,10 +138,20 @@ const JbookViewHeaderHandler = (props) => {
 		sortSelected,
 		searchText,
 		exportLoading,
+		runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [portfolios, setPortfolios] = useState([]);
+	const [filterList, setFilterList] = useState([]);
+
+	//Processes the search settings to find which filters are applied for displaying at the top
+	useEffect(() => {
+		if (runSearch) {
+			const cleanedSearchSettings = processFilters(jbookSearchSettings, defaultOptions);
+			setFilterList(cleanedSearchSettings);
+		}
+	}, [defaultOptions, jbookSearchSettings, runSearch]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
 	useEffect(() => {
@@ -74,8 +172,8 @@ const JbookViewHeaderHandler = (props) => {
 		});
 		if (search) {
 			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
-			setState(dispatch, { runSearch: true });
 		}
+		setState(dispatch, { runSearch: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.selectedPortfolio, dispatch]);
 
@@ -181,8 +279,11 @@ const JbookViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'} style={extraStyle}>
-			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
+		<div
+			className={'results-count-view-buttons-container'}
+			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 10px 0px 0px' }}
+		>
+			<div className={'view-buttons-container'} style={{ marginRight: 10, zIndex: 99, justifyContent: 'right' }}>
 				<JBookPortfolioSelector
 					portfolios={portfolios}
 					selectedPortfolio={state.selectedPortfolio}
@@ -363,6 +464,48 @@ const JbookViewHeaderHandler = (props) => {
 					)}
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
+			</div>
+			<div style={{ display: 'flex', justifyContent: 'right', marginTop: 15, flexWrap: 'wrap' }}>
+				{filterList.map((filter) => {
+					const { type, optionName } = filter;
+					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';
+					return (
+						<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
+							<Button
+								variant="outlined"
+								backgroundColor="white"
+								display="inline-flex"
+								style={{
+									marginRight: '10px',
+									marginBottom: '15px',
+									padding: '10px 15px',
+									backgroundColor: 'white',
+									color: 'rgb(28, 45, 101)',
+									height: 40,
+									maxWidth: 400,
+									ariaPressed: 'true',
+								}}
+								endIcon={<CloseIcon />}
+								onClick={() => {
+									handleFilterChange(optionName, state, dispatch, type);
+								}}
+							>
+								<span
+									style={{
+										fontFamily: 'Montserrat',
+										fontWeight: 300,
+										color: 'black',
+										textOverflow: 'ellipsis',
+										overflow: 'hidden',
+										whiteSpace: 'nowrap',
+									}}
+								>
+									{`${typeText}${optionName}`}
+								</span>
+							</Button>
+						</GCTooltip>
+					);
+				})}
 			</div>
 		</div>
 	);

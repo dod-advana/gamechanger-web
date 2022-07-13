@@ -916,12 +916,23 @@ class JBookSearchUtility {
 		return mainAcct;
 	}
 
+	handleOmDefault(filters, jbookSearchSettings = {}) {
+		if (jbookSearchSettings.selectedPortfolio !== 'AI Inventory' && !jbookSearchSettings.budgetType) {
+			filters.push({
+				terms: {
+					type_s: ['rdte', 'procurement'],
+				},
+			});
+		}
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
 		let filterQueries = [];
 		try {
 			let settingKeys = Object.keys(jbookSearchSettings);
+			this.handleOmDefault(filterQueries, jbookSearchSettings);
 			for (const key of settingKeys) {
 				switch (key) {
 					// Review Status
