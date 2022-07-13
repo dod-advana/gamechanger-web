@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 import ExportIcon from '../../../images/icon/Export.svg';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
@@ -15,6 +14,7 @@ import GCToolTip from '../../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import { reTutorialSteps } from './tutotialSteps';
+import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -27,42 +27,6 @@ const parseFilename = (filename) => {
 	}
 	return `${letters} ${numbers}`;
 };
-
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
 
 export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const classes = useStyles();
