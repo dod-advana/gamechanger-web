@@ -315,9 +315,12 @@ class JBookDataHandler extends DataHandler {
 			const { docs } = this.jbookSearchUtility.cleanESResults(pfpESResults, userId);
 
 			let yearToDoc = {};
-			docs.forEach((doc) => {
+
+			for (let doc of docs) {
+				doc.reviews = {};
+				await this.parseESReviews(doc);
 				yearToDoc[doc.budgetYear] = doc;
-			});
+			}
 
 			return yearToDoc;
 		} catch (err) {
@@ -589,7 +592,6 @@ class JBookDataHandler extends DataHandler {
 	async storeBudgetReview(req, userId) {
 		try {
 			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
-
 			const permissions = req.permissions;
 			let wasUpdated = false;
 
