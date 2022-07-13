@@ -29,7 +29,6 @@ class AmhsSearchHandler extends SearchHandler {
 		};
 
 		const {
-			offset,
 			useGCCache,
 			forCacheReload = false,
 			showTutorial,
@@ -48,10 +47,6 @@ class AmhsSearchHandler extends SearchHandler {
 			historyRec.search_version = searchVersion;
 
 			const cloneSpecificObject = {};
-
-			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
-			// }
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: constants.AMHS_ELASTIC_SEARCH_OPTS.index };
 
@@ -169,7 +164,5 @@ class AmhsSearchHandler extends SearchHandler {
 		}
 	}
 }
-
-// const amhsSearchHandler = new AmhsSearchHandler();
 
 module.exports = AmhsSearchHandler;
