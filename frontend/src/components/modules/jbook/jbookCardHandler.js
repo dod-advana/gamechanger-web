@@ -5,7 +5,12 @@ import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
-import { getClassLabel, getConvertedType, formatNum } from '../../../utils/jbookUtilities';
+import {
+	getClassLabel,
+	getConvertedType,
+	getTableFormattedCost,
+	getFormattedTotalCost,
+} from '../../../utils/jbookUtilities';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -226,12 +231,129 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 	window.open(url);
 };
 
-const formatField = (projectData, field) => {
-	let finalString = 'N/A';
-	if (projectData[field] !== null && projectData[field] !== undefined) {
-		finalString = `${formatNum(projectData[field])}`;
+const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
+	return [
+		{
+			Key: 'Project',
+			Value: projectData.projectTitle,
+		},
+		{
+			Key: 'Program Element',
+			Value: projectData.programElement,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Project Number',
+			Value: projectData.projectNum,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Service Agency Name',
+			Value: projectData.serviceAgency,
+		},
+		{
+			Key: 'Appropriation Title',
+			Value: projectData.appropriationTitle,
+		},
+		{
+			Key: 'Budget Year 1 Requested',
+			Value: getTableFormattedCost(projectData.by1Request),
+		},
+		{
+			Key: 'Current Year Amount',
+			Value: getTableFormattedCost(projectData.currentYearAmount),
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value: getTableFormattedCost(projectData.priorYearAmount),
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value: getTableFormattedCost(projectData.allPriorYearsAmount),
+		},
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
+		},
+		{
+			Key: 'BY2',
+			Value: getTableFormattedCost(projectData.p4082_toa_by2_d || projectData.proj_fund_by2_d),
+			Hidden: budgetType === 'ODOC',
+		},
+		{
+			Key: 'BY3',
+			Value: getTableFormattedCost(projectData.p4083_toa_by3_d || projectData.proj_fund_by3_d),
+			Hidden: budgetType === 'ODOC',
+		},
+		{
+			Key: 'BY4',
+			Value: getTableFormattedCost(projectData.p4084_toa_by4_d || projectData.proj_fund_by4_d),
+			Hidden: budgetType === 'ODOC',
+		},
+		{
+			Key: 'BY5',
+			Value: getTableFormattedCost(projectData.p4085_toa_by5_d || projectData.proj_fund_by5_d),
+			Hidden: budgetType === 'ODOC',
+		},
+		{
+			Key: 'Fiscal Year',
+			Value: projectData.budgetYear,
+		},
+		{
+			Key: 'To Complete',
+			Value: getToComplete(projectData, budgetType),
+		},
+		{
+			Key: 'Budget Year (FY)',
+			Value: projectData.budgetYear,
+		},
+		{
+			Key: 'Budget Cycle',
+			Value: projectData.budgetCycle,
+		},
+		{
+			Key: 'Main Account',
+			Value: projectData.appropriationNumber,
+		},
+		{
+			Key: 'Budget Activity',
+			Value: projectData.budgetActivityNumber,
+		},
+		{
+			Key: 'Budget Sub Activity',
+			Value: getBudgetSubActivity(projectData),
+		},
+		...(selectedPortfolio === 'AI Inventory'
+			? [
+					{
+						Key: 'Category',
+						Value: getClassLabel(projectData),
+					},
+			  ]
+			: []),
+		...(selectedPortfolio === 'AI Inventory'
+			? [
+					{
+						Key: 'Keywords',
+						Value: (
+							<div>
+								{projectData.keywords && projectData.keywords.length > 0
+									? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+									: 'None'}
+							</div>
+						),
+					},
+			  ]
+			: []),
+	];
+};
+
+const getHoveredSnippet = (item, hoveredHit) => {
+	let hoveredSnippet = '';
+	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
+		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
 	}
-	return finalString;
+	return hoveredSnippet;
 };
 
 const renderContracts = (contracts, length) => {
@@ -557,7 +679,9 @@ const cardHandler = {
 		getCardSubHeader: (props) => {
 			const { item, state, toggledMore } = props;
 
-			let appropriationTitle, budgetPrefix, budgetAmount;
+			let appropriationTitle,
+				budgetPrefix = '',
+				budgetAmount;
 			try {
 				appropriationTitle = item.appropriationTitle
 					? item.appropriationTitle.replace('Procurement', 'Proc')
@@ -632,10 +756,7 @@ const cardHandler = {
 					item.pageHits = getItemPageHits(item);
 				}
 
-				let hoveredSnippet = '';
-				if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
-					hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-				}
+				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
 
@@ -707,74 +828,7 @@ const cardHandler = {
 				}
 			}
 
-			const metadata = [
-				{
-					Key: 'Project',
-					Value: projectData.projectTitle,
-				},
-				{
-					Key: 'Program Element',
-					Value: projectData.programElement,
-					Hidden: budgetType === 'PDOC',
-				},
-				{
-					Key: 'Project Number',
-					Value: projectData.projectNum,
-					Hidden: budgetType === 'PDOC',
-				},
-				{
-					Key: 'Service Agency Name',
-					Value: projectData.serviceAgency,
-				},
-				{
-					Key: 'All Prior Years Amount',
-					Value: formatField(projectData, 'allPriorYearsAmount'),
-				},
-				{
-					Key: 'Prior Year Amount',
-					Value: formatField(projectData, 'priorYearAmount'),
-				},
-				{
-					Key: 'Current Year Amount',
-					Value: formatField(projectData, 'currentYearAmount'),
-				},
-				{
-					Key: 'Fiscal Year',
-					Value: projectData.budgetYear,
-				},
-				{
-					Key: 'To Complete',
-					Value: getToComplete(projectData, budgetType),
-				},
-				{
-					Key: 'Total Cost',
-					Value: formatField(projectData, 'totalCost'),
-				},
-				{
-					Key: 'Budget Year (FY)',
-					Value: projectData.budgetYear,
-				},
-				{
-					Key: 'Budget Cycle',
-					Value: projectData.budgetCycle,
-				},
-				{
-					Key: 'Main Account',
-					Value: projectData.appropriationNumber,
-				},
-				{
-					Key: 'Appropriation Title',
-					Value: projectData.appropriationTitle,
-				},
-				{
-					Key: 'Budget Activity',
-					Value: projectData.budgetActivityNumber,
-				},
-				{
-					Key: 'Budget Sub Activity',
-					Value: getBudgetSubActivity(projectData),
-				},
-			];
+			const metadata = getMetadataTable(projectData, budgetType, selectedPortfolio);
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
