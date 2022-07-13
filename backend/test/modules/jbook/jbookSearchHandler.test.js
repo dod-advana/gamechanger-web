@@ -804,19 +804,13 @@ describe('JBookSearchHandler', function () {
 						values: {
 							buckets: [
 								{
-									key: {
-										budgetYear_s: '2020',
-									},
+									key: '2020',
 								},
 								{
-									key: {
-										budgetYear_s: '2021',
-									},
+									key: '2021',
 								},
 								{
-									key: {
-										budgetYear_s: '2022',
-									},
+									key: '2022',
 								},
 							],
 						},
@@ -830,19 +824,13 @@ describe('JBookSearchHandler', function () {
 						values: {
 							buckets: [
 								{
-									key: {
-										serviceAgency_s: 'AF',
-									},
+									key: 'AF',
 								},
 								{
-									key: {
-										serviceAgency_s: 'DCMA',
-									},
+									key: 'DCMA',
 								},
 								{
-									key: {
-										serviceAgency_s: 'CAAF',
-									},
+									key: 'CAAF',
 								},
 							],
 						},
@@ -978,7 +966,7 @@ describe('JBookSearchHandler', function () {
 					budgetYearES: ['2020', '2021', '2022'],
 					budgetYear: ['2015', '2016', '2020', '2021', '2022'],
 					reviewstatus: [null],
-					serviceAgency: [
+					serviceAgencyES: [
 						'Air Force (AF)',
 						'Defense Contract Management Agency (DCMA)',
 						'Court of Appeals for the Armed Forces (CAAF)',

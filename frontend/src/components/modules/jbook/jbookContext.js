@@ -212,6 +212,7 @@ const initState = {
 		oaccts: [],
 		budgetSubActivity: '',
 	},
+	modifiedSearchSettings: [],
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
 	projectData: {},
@@ -463,6 +464,7 @@ function reducer(state, action) {
 			return {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
+				modifiedSearchSettings: [],
 			};
 		case 'RESET_PORTFOLIO_FILTERS':
 			return {
@@ -504,6 +506,7 @@ function reducer(state, action) {
 					hasKeyword: state.defaultOptions.hasKeyword,
 					primaryClassLabel: state.defaultOptions.primaryClassLabel,
 				},
+				modifiedSearchSettings: [],
 			};
 		default:
 			return state;
