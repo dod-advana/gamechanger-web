@@ -95,9 +95,9 @@ class JBookSearchUtility {
 		const { searchText } = body;
 
 		try {
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
+			const [, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
 			let expansionDict = await this.mlApiExpansion(termsArray, false, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
+			let [synonyms] = this.thesaurusExpansion(searchText, termsArray);
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray);
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
@@ -135,14 +135,12 @@ class JBookSearchUtility {
 	async abbreviationCleaner(termsArray) {
 		// get expanded abbreviations
 		await this.redisDB.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await this.redisDB.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await this.redisDB.get(lowerTerm);
+		const abbreviationExpansions = [];
+		for (const term of termsArray) {
+			const upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+			const expandedTerm = await this.redisDB.get(upperTerm);
+			const lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+			const compressedTerm = await this.redisDB.get(lowerTerm);
 			if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
 				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
 			}
@@ -152,9 +150,9 @@ class JBookSearchUtility {
 		}
 
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-		let cleanedAbbreviations = [];
+		const cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
-			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
+			const cleaned = abb.toLowerCase().replace(/['"]+/g, '');
 			let found = false;
 			termsArray.forEach((term) => {
 				if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
@@ -174,7 +172,7 @@ class JBookSearchUtility {
 		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for (var term in termsArray) {
+			for (let term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = this.thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1) {
@@ -301,11 +299,7 @@ class JBookSearchUtility {
 				newKey = mapping[key].newName;
 			}
 
-			if (
-				(raw[key] && raw[key][0]) ||
-				Number.isInteger(raw[key]) ||
-				(typeof raw[key] === 'object' && raw[key] !== null)
-			) {
+			if ((raw[key] && raw[key][0]) || !isNaN(raw[key]) || (typeof raw[key] === 'object' && raw[key] !== null)) {
 				if (arrayFields.includes(key)) {
 					result[newKey] = raw[key];
 				} else if (Array.isArray(raw[key])) {
@@ -491,6 +485,92 @@ class JBookSearchUtility {
 		};
 	}
 
+	getProfilePageQueryData(esResults, userId) {
+		try {
+			const { body = {} } = esResults;
+			const { hits } = body;
+
+			const pfpQueryData = {};
+
+			hits.hits.forEach((hit) => {
+				const { _source } = hit;
+
+				pfpQueryData.type_s = _source?.type_s;
+				pfpQueryData.appropriationNumber_s = _source?.appropriationNumber_s;
+				pfpQueryData.budgetActivityNumber_s = _source?.budgetActivityNumber_s;
+				pfpQueryData.budgetLineItem_s = _source?.budgetLineItem_s;
+				pfpQueryData.programElement_s = _source?.programElement_s;
+				pfpQueryData.projectNum_s = _source?.projectNum_s;
+			});
+
+			return pfpQueryData;
+		} catch (err) {
+			console.log('Error extracting data from ES results for profile page query');
+			this.logger.error(err, 'BNRKMTY', userId);
+		}
+	}
+
+	getESJBookProfilePageQuery(
+		{ type_s, appropriationNumber_s, budgetActivityNumber_s, budgetLineItem_s, programElement_s, projectNum_s },
+		userId
+	) {
+		try {
+			let query = {
+				track_total_hits: true,
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									type_s,
+								},
+							},
+							{
+								match: {
+									appropriationNumber_s,
+								},
+							},
+							{
+								match: {
+									budgetActivityNumber_s,
+								},
+							},
+						],
+					},
+				},
+			};
+
+			if (budgetLineItem_s) {
+				query.query.bool.must.push({
+					match: {
+						budgetLineItem_s,
+					},
+				});
+			}
+
+			if (programElement_s) {
+				query.query.bool.must.push({
+					match: {
+						programElement_s,
+					},
+				});
+			}
+
+			if (projectNum_s) {
+				query.query.bool.must.push({
+					match: {
+						projectNum_s,
+					},
+				});
+			}
+
+			return query;
+		} catch (err) {
+			console.log('Error generating ES query for profile page data (all years)');
+			this.logger.error(err, '3UDLIZ3', userId);
+		}
+	}
+
 	getElasticSearchJBookDataFromId({ docIds }, userId) {
 		try {
 			return {
@@ -534,7 +614,7 @@ class JBookSearchUtility {
 					contract_totals: {
 						aggs: {
 							sum_agg: {
-								sum: { field: 'currentYearAmount_d' },
+								sum: { field: 'by1_request_d' },
 							},
 						},
 						terms: {
@@ -547,6 +627,7 @@ class JBookSearchUtility {
 					bool: {
 						must: [],
 						should: [],
+						minimum_should_match: 1,
 					},
 				},
 				highlight: {
@@ -563,12 +644,12 @@ class JBookSearchUtility {
 			}
 
 			if (searchText !== '') {
-				query.query.bool.must.push({
-					multi_match: {
+				query.query.bool.should.push({
+					query_string: {
 						query: `${parsedQuery}`,
 						fields: Mappings.esTopLevelFields,
 						type: 'best_fields',
-						operator: `${operator}`,
+						default_operator: `${operator}`,
 					},
 				});
 			}
@@ -591,11 +672,11 @@ class JBookSearchUtility {
 							bool: {
 								should: [
 									{
-										multi_match: {
+										query_string: {
 											query: `${parsedQuery}`,
 											fields: innerField.fields,
 											type: 'best_fields',
-											operator: `${operator}`,
+											default_operator: `${operator}`,
 										},
 									},
 								],
@@ -618,10 +699,9 @@ class JBookSearchUtility {
 				programElementTitle_t: 1,
 				serviceAgency_s: 2,
 				appropriationTitle_t: 1,
-				appropriationNumber_s: 6,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
-				programElement_s: 6,
+				programElement_t: 6,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
 				budgetLineItem_t: 6,
@@ -670,8 +750,6 @@ class JBookSearchUtility {
 				default:
 					break;
 			}
-
-			console.log(JSON.stringify(query));
 
 			return query;
 		} catch (e) {
@@ -792,14 +870,50 @@ class JBookSearchUtility {
 		};
 
 		if (jbookSearchSettings[min]) {
-			totalCostRange.range[field].gte = jbookSearchSettings[min];
+			rangeQuery.range[field].gte = jbookSearchSettings[min];
 		}
 
 		if (jbookSearchSettings[max]) {
-			totalCostRange.range[field].lte = jbookSearchSettings[max];
+			rangeQuery.range[field].lte = jbookSearchSettings[max];
 		}
 
 		return rangeQuery;
+	}
+
+	handleMainAccount(jbookSearchSettings) {
+		let mainAcct = {
+			bool: {
+				should: [],
+			},
+		};
+		if (jbookSearchSettings.paccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'procurement' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.paccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.raccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [
+						{ term: { type_s: 'rdte' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.raccts } },
+					],
+				},
+			});
+		}
+		if (jbookSearchSettings.oaccts) {
+			mainAcct.bool.should.push({
+				bool: {
+					must: [{ term: { type_s: 'om' } }, { terms: { programElement_s: jbookSearchSettings.oaccts } }],
+				},
+			});
+		}
+		return mainAcct;
 	}
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
@@ -838,9 +952,11 @@ class JBookSearchUtility {
 					// Budget Activity
 					case 'budgetActivity':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.budgetActivity}*`,
-								default_field: 'budgetActivityNumber_s',
+							bool: {
+								should: [
+									{ terms: { budgetActivityNumber_s: jbookSearchSettings.budgetActivity } },
+									{ terms: { appropriationNumber_s: jbookSearchSettings.budgetActivity } },
+								],
 							},
 						});
 						break;
@@ -849,16 +965,6 @@ class JBookSearchUtility {
 					case 'budgetSubActivity':
 					case 'primaryReviewStatus':
 						filterQueries.push(this.handleBudgetSubPrimaryReviewFilter(jbookSearchSettings));
-						break;
-
-					// MainAccount
-					case 'appropriationNumber':
-						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.appropriationNumber}*`,
-								default_field: 'appropriationNumber_s',
-							},
-						});
 						break;
 
 					// Total Funding
@@ -877,7 +983,7 @@ class JBookSearchUtility {
 								jbookSearchSettings,
 								'minBY1Funding',
 								'maxBY1Funding',
-								'currentYearAmount_d'
+								'by1_request_d'
 							)
 						);
 						break;
@@ -921,9 +1027,21 @@ class JBookSearchUtility {
 					// Program Element / BLI
 					case 'programElement':
 						filterQueries.push({
-							query_string: {
-								query: `*${jbookSearchSettings.programElement}*`,
-								default_field: 'budgetLineItem_t',
+							bool: {
+								should: [
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'budgetLineItem_t',
+										},
+									},
+									{
+										query_string: {
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'programElement_s',
+										},
+									},
+								],
 							},
 						});
 						break;
@@ -957,9 +1075,12 @@ class JBookSearchUtility {
 						});
 						break;
 					default:
-						console.log('Jbook search setting not found');
 						break;
 				}
+			}
+
+			if (jbookSearchSettings.appropriationNumberSpecificSelected) {
+				filterQueries.push(this.handleMainAccount(jbookSearchSettings));
 			}
 		} catch (e) {
 			console.log('Error applying Jbook ES filters');
