@@ -21,12 +21,12 @@ const getAndSetDidYouMean = (index, searchText, dispatch) => {
 		.then(({ data }) => {
 			setState(dispatch, { idYouMean: data?.autocorrect?.[0] });
 		})
-		.catch((_) => {
+		.catch(() => {
 			//do nothing
 		});
 };
 
-const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
+const clearFavoriteSearchUpdate = async (search, dispatch) => {
 	try {
 		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
 		getUserData(dispatch);
@@ -59,16 +59,11 @@ const AmhsSearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		const favSearchUrls = userData.favorite_searches.map((search) => {
-			return search.url;
-		});
+		let url = window.location.hash.toString().replace('#/', '');
 
 		this.setSearchURL({ ...state, searchSettings });
 
-		let url = window.location.hash.toString();
-		url = url.replace('#/', '');
-
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = this.getFavoriteSearch(userData, url);
 
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
@@ -84,14 +79,8 @@ const AmhsSearchHandler = {
 		if (_.isEmpty(trimmed)) return;
 
 		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
-		const recentSearchesParsed = JSON.parse(recentSearches);
 
-		if (!recentSearchesParsed.includes(searchText)) {
-			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
-			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
-		}
+		this.getRecentSearches(searchText, cloneData);
 
 		const t0 = new Date().getTime();
 
@@ -122,7 +111,7 @@ const AmhsSearchHandler = {
 			hideTabs: true,
 		});
 
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+		const offset = this.getOffset(resultsPage);
 
 		const charsPadding = listView ? 750 : 90;
 
@@ -130,12 +119,10 @@ const AmhsSearchHandler = {
 
 		const tiny_url = await createTinyUrl(cloneData);
 
-		try {
-			if (cloneData.show_graph && tabName === 'graphView') {
-				setState(dispatch, { runGraphSearch: true });
-			}
+		const combinedSearch = 'false';
 
-			const combinedSearch = 'false';
+		try {
+			this.checkGraphView(cloneData, tabName, dispatch);
 
 			const resp = await gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
@@ -159,57 +146,19 @@ const AmhsSearchHandler = {
 			const t1 = new Date().getTime();
 
 			let getUserDataFlag = true;
-
 			if (_.isObject(resp.data)) {
 				let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
 
 				if (docs && Array.isArray(docs)) {
-					// intelligent search failed, show keyword results with warning alert
-					if (resp.data.transformFailed) {
-						setState(dispatch, { transformFailed: true });
-					}
-
-					searchResults = searchResults.concat(docs);
-
-					const favFilenames = userData.favorite_documents.map((document) => {
-						return document.filename;
-					});
-
-					searchResults.forEach((result) => {
-						result.favorite = favFilenames.includes(result.filename);
-						result.type = 'document';
-					});
-
+					let newSearchResults = this.getSearchResults(searchResults, docs, userData);
 					// if this search is a favorite, turn off notifications of new results
-					if (searchFavorite) {
-						userData.favorite_searches.forEach((search, index) => {
-							if (search.url === url) {
-								clearFavoriteSearchUpdate(search, index, dispatch);
-								getUserDataFlag = false;
-							}
-						});
-					}
+					getUserDataFlag = this.checkFavorite(searchFavorite, userData, dispatch, url);
 
-					let hasExpansionTerms = false;
+					let hasExpansionTerms = this.checkExpansionTerms(expansionDict);
 
-					if (expansionDict) {
-						Object.keys(expansionDict).forEach((key) => {
-							if (expansionDict[key].length > 0) hasExpansionTerms = true;
-						});
-					}
+					this.trackSearchOffset(offset, searchText, cloneData, combinedSearch);
 
-					if (!offset) {
-						trackSearch(
-							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							totalCount + (foundEntity ? 1 : 0),
-							false
-						);
-					}
-
-					const categoryMetadata = {
-						Documents: { total: totalCount + (foundEntity ? 1 : 0) },
-					};
+					const categoryMetadata = this.getCategoryMetaData(totalCount, foundEntity);
 
 					setState(dispatch, {
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
@@ -217,9 +166,9 @@ const AmhsSearchHandler = {
 						loading: false,
 						count: totalCount + (foundEntity ? 1 : 0),
 						categoryMetadata,
-						rawSearchResults: searchResults,
+						rawSearchResults: newSearchResults,
 						docSearchResults: docs,
-						searchResultsCount: searchResults.length,
+						searchResultsCount: newSearchResults.length,
 						autocompleteItems: [],
 						expansionDict,
 						isCachedResult: isCached,
@@ -229,16 +178,10 @@ const AmhsSearchHandler = {
 						metricsCounted: true,
 						loadingTinyUrl: false,
 						hideTabs: false,
+						transformFailed: this.checkTransformer(resp.data.transformFailed), // intelligent search failed, show keyword results with warning alert
 					});
 				} else {
-					if (!offset) {
-						trackSearch(
-							searchText,
-							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
-							0,
-							false
-						);
-					}
+					this.trackSearchOffset(offset, searchText, cloneData, combinedSearch);
 
 					setState(dispatch, {
 						loading: false,
@@ -294,6 +237,86 @@ const AmhsSearchHandler = {
 
 		const index = 'gamechanger';
 		getAndSetDidYouMean(index, searchText, dispatch);
+	},
+	getCategoryMetaData(totalCount, foundEntity) {
+		return {
+			Documents: {
+				total: totalCount + (foundEntity ? 1 : 0),
+			},
+		};
+	},
+	getOffset(resultsPage) {
+		return (resultsPage - 1) * RESULTS_PER_PAGE;
+	},
+	trackSearchOffset(offset, searchText, cloneData, combinedSearch) {
+		if (!offset) {
+			trackSearch(
+				searchText,
+				`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
+				0,
+				false
+			);
+		}
+	},
+	getFavoriteSearch(userData, url) {
+		const favSearchUrls = userData.favorite_searches.map((search) => {
+			return search.url;
+		});
+
+		return favSearchUrls.includes(url);
+	},
+	checkGraphView(cloneData, tabName, dispatch) {
+		if (cloneData.show_graph && tabName === 'graphView') {
+			setState(dispatch, { runGraphSearch: true });
+		}
+	},
+	getSearchResults(searchResults, docs, userData) {
+		searchResults = searchResults.concat(docs);
+		const favFilenames = userData.favorite_documents.map((document) => {
+			return document.filename;
+		});
+		searchResults.forEach((result) => {
+			result.favorite = favFilenames.includes(result.filename);
+			result.type = 'document';
+		});
+		return searchResults;
+	},
+	checkFavorite(searchFavorite, userData, dispatch, url) {
+		// if this search is a favorite, turn off notifications of new results
+		let getUserDataFlag = true;
+		if (searchFavorite) {
+			userData.favorite_searches.forEach((search) => {
+				if (search.url === url) {
+					clearFavoriteSearchUpdate(search, dispatch);
+					getUserDataFlag = false;
+				}
+			});
+		}
+		return getUserDataFlag;
+	},
+	getRecentSearches(searchText, cloneData) {
+		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+		const recentSearchesParsed = JSON.parse(recentSearches);
+
+		if (!recentSearchesParsed.includes(searchText)) {
+			recentSearchesParsed.unshift(searchText);
+			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
+		}
+	},
+	checkTransformer(transformFailedFlag) {
+		if (transformFailedFlag) {
+			return true;
+		}
+	},
+	checkExpansionTerms(expansionDict) {
+		let hasExpansionTerms = false;
+		if (expansionDict) {
+			Object.keys(expansionDict).forEach((key) => {
+				if (expansionDict[key].length > 0) hasExpansionTerms = true;
+			});
+		}
+		return hasExpansionTerms;
 	},
 
 	parseSearchURL(defaultState, url) {
