@@ -43,6 +43,13 @@ const filterNameMap = {
 	maxBY1Funding: 'BY1 Fund Max',
 	minTotalCost: 'Total Cost Min',
 	maxTotalCost: 'Total Cost Max',
+	primaryReviewer: 'Primary Reviewer',
+	serviceReviewer: 'Service Reviewer',
+	pocReviewer: 'POC Reviewer',
+	reviewStatus: 'Review Status',
+	hasKeywords: 'Keywords',
+	primaryClassLabel: 'Tag',
+	sourceTag: 'Source',
 };
 
 const handleFilterChange = (option, state, dispatch, type) => {
@@ -91,54 +98,55 @@ const JbookViewHeaderHandler = (props) => {
 		sortSelected,
 		searchText,
 		exportLoading,
+		runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [portfolios, setPortfolios] = useState([]);
 	const [filterList, setFilterList] = useState([]);
 
-	const processFilters = (settings) => {
-		const searchSettings = _.cloneDeep(settings);
-		for (const optionType in state.defaultOptions) {
-			if (
-				state.defaultOptions[optionType] &&
-				searchSettings[optionType] &&
-				state.defaultOptions[optionType].length === searchSettings[optionType].length
-			) {
-				delete searchSettings[optionType];
-			}
+	useEffect(() => {
+		const processFilters = (settings) => {
+			const searchSettings = _.cloneDeep(settings);
+			for (const optionType in defaultOptions) {
+				if (
+					defaultOptions[optionType] &&
+					searchSettings[optionType] &&
+					defaultOptions[optionType].length === searchSettings[optionType].length
+				) {
+					delete searchSettings[optionType];
+				}
 
-			if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
-				delete searchSettings[optionType];
-			}
-		}
-
-		for (const setting in searchSettings) {
-			if (!searchSettings[setting]) {
-				delete searchSettings[setting];
-			}
-		}
-		console.log('searchSettings: ', searchSettings);
-		const testing = [];
-		Object.keys(searchSettings).forEach((type) => {
-			if (Object.keys(defaultOptions).includes(type) && type !== 'sort') {
-				if (isArray(searchSettings[type])) {
-					searchSettings[type].forEach((option) => {
-						testing.push({ type, optionName: option });
-					});
-				} else {
-					testing.push({ type, optionName: searchSettings[type] });
+				if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
+					delete searchSettings[optionType];
 				}
 			}
-		});
 
-		return testing;
-	};
+			for (const setting in searchSettings) {
+				if (!searchSettings[setting]) {
+					delete searchSettings[setting];
+				}
+			}
+			const testing = [];
+			Object.keys(searchSettings).forEach((type) => {
+				if (Object.keys(defaultOptions).includes(type) && type !== 'sort') {
+					if (isArray(searchSettings[type])) {
+						searchSettings[type].forEach((option) => {
+							testing.push({ type, optionName: option });
+						});
+					} else {
+						testing.push({ type, optionName: searchSettings[type] });
+					}
+				}
+			});
 
-	useEffect(() => {
-		const cleanedSearchSettings = processFilters(jbookSearchSettings);
-		setFilterList(cleanedSearchSettings);
-	}, [jbookSearchSettings]);
+			return testing;
+		};
+		if (runSearch) {
+			const cleanedSearchSettings = processFilters(jbookSearchSettings);
+			setFilterList(cleanedSearchSettings);
+		}
+	}, [defaultOptions, jbookSearchSettings, runSearch]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
 	useEffect(() => {
@@ -455,39 +463,42 @@ const JbookViewHeaderHandler = (props) => {
 			<div style={{ display: 'flex', justifyContent: 'right', marginTop: 15, flexWrap: 'wrap' }}>
 				{filterList.map((filter) => {
 					const { type, optionName } = filter;
-					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : '';
+					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';
 					return (
-						<Button
-							variant="outlined"
-							backgroundColor="white"
-							display="inline-flex"
-							style={{
-								marginRight: '10px',
-								marginBottom: '15px',
-								padding: '10px 15px',
-								backgroundColor: 'white',
-								color: 'rgb(28, 45, 101)',
-								height: 40,
-								ariaPressed: 'true',
-							}}
-							endIcon={<CloseIcon />}
-							onClick={() => {
-								handleFilterChange(optionName, state, dispatch, type);
-							}}
-						>
-							<span
+						<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
+							<Button
+								variant="outlined"
+								backgroundColor="white"
+								display="inline-flex"
 								style={{
-									fontFamily: 'Montserrat',
-									fontWeight: 300,
-									color: 'black',
-									width: '100%',
-									marginTop: '5px',
-									marginBottom: '5px',
+									marginRight: '10px',
+									marginBottom: '15px',
+									padding: '10px 15px',
+									backgroundColor: 'white',
+									color: 'rgb(28, 45, 101)',
+									height: 40,
+									maxWidth: 400,
+									ariaPressed: 'true',
+								}}
+								endIcon={<CloseIcon />}
+								onClick={() => {
+									handleFilterChange(optionName, state, dispatch, type);
 								}}
 							>
-								{`${typeText}${optionName}`}
-							</span>
-						</Button>
+								<span
+									style={{
+										fontFamily: 'Montserrat',
+										fontWeight: 300,
+										color: 'black',
+										textOverflow: 'ellipsis',
+										overflow: 'hidden',
+										whiteSpace: 'nowrap',
+									}}
+								>
+									{`${typeText}${optionName}`}
+								</span>
+							</Button>
+						</GCTooltip>
 					);
 				})}
 			</div>
