@@ -218,27 +218,13 @@ const EDADocumentsComparisonTool = ({
 			let sortFunc = {};
 			switch (sortType) {
 				case 'Alphabetically':
-					sortFunc = (docA, docB) => {
-						if (docA.title > docB.title) return order;
-						if (docA.title < docB.title) return -order;
-						return 0;
-					};
+					sortFunc = sortAlphabeticalFunc(order);
 					break;
 				case 'Date Published':
-					sortFunc = (docA, docB) => {
-						if (docA.publication_date_dt > docB.publication_date_dt) return -order;
-						if (docA.publication_date_dt < docB.publication_date_dt) return order;
-						if (!docA.publication_date_dt) return 1;
-						if (!docB.publication_date_dt) return -1;
-						return 0;
-					};
+					sortFunc = sortDatePublishedFunc(order);
 					break;
 				default:
-					sortFunc = (docA, docB) => {
-						if (docA.score > docB.score) return -order;
-						if (docA.score < docB.score) return order;
-						return 0;
-					};
+					sortFunc = defaultSortFunc(order);
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
@@ -249,6 +235,32 @@ const EDADocumentsComparisonTool = ({
 			setViewableDocs(sortedDocs);
 		}
 	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder, selectedParagraph]);
+
+	const sortAlphabeticalFunc = (order) => {
+		return (docA, docB) => {
+			if (docA.title > docB.title) return order;
+			if (docA.title < docB.title) return -order;
+			return 0;
+		};
+	};
+
+	const sortDatePublishedFunc = (order) => {
+		return (docA, docB) => {
+			if (docA.publication_date_dt > docB.publication_date_dt) return -order;
+			if (docA.publication_date_dt < docB.publication_date_dt) return order;
+			if (!docA.publication_date_dt) return 1;
+			if (!docB.publication_date_dt) return -1;
+			return 0;
+		};
+	};
+
+	const defaultSortFunc = (order) => {
+		return (docA, docB) => {
+			if (docA.score > docB.score) return -order;
+			if (docA.score < docB.score) return order;
+			return 0;
+		};
+	};
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
 		let undo = false;
