@@ -132,10 +132,8 @@ const JbookViewHeaderHandler = (props) => {
 	};
 
 	useEffect(() => {
-		console.log('state.jbookSearchSettings: ', jbookSearchSettings);
 		const cleanedSearchSettings = processFilters(jbookSearchSettings);
 		setFilterList(cleanedSearchSettings);
-		console.log('processed: ', cleanedSearchSettings);
 	}, [jbookSearchSettings]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
