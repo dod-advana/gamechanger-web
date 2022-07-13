@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import AdvanaFooter from '@dod-advana/advana-platform-ui/dist/AdvanaFooter';
 import { Button, Checkbox, FormControlLabel, FormGroup, Modal, TextField, Typography } from '@material-ui/core';
-import CDAOLogo from '../../images/logos/cdao_logo.png';
 import { getContext } from '../factories/contextFactory';
 import styled from 'styled-components';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -323,10 +322,6 @@ const GCFooter = (props) => {
 	return (
 		<>
 			<FooterDiv>
-				<div style={styles.footerStyle}>
-					<Typography style={styles.footerText}>in partnership with</Typography>
-					<img src={CDAOLogo} style={styles.logo} alt="jaic-title" id={'titleButton'} />
-				</div>
 				<AdvanaFooter extraLinks={getExtraLinks()} />
 			</FooterDiv>
 
@@ -396,24 +391,6 @@ const GCFooter = (props) => {
 			/>
 		</>
 	);
-};
-
-const styles = {
-	logo: {
-		width: 140,
-	},
-	footerStyle: {
-		display: 'flex',
-		position: 'absolute',
-	},
-	footerText: {
-		color: '#ffffff',
-		alignSelf: 'center',
-		margin: '0 10px 0 40px',
-		fontFamily: 'Montserrat',
-		fontWeight: 'bold',
-		fontSize: 16,
-	},
 };
 
 export default GCFooter;
