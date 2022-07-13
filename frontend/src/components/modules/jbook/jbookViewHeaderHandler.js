@@ -48,12 +48,16 @@ const filterNameMap = {
 const handleFilterChange = (option, state, dispatch, type) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 
-	const index = newSearchSettings[type].indexOf(option);
+	if (isArray(newSearchSettings[type])) {
+		const index = newSearchSettings[type].indexOf(option);
 
-	if (index !== -1) {
-		newSearchSettings[type].splice(index, 1);
+		if (index !== -1) {
+			newSearchSettings[type].splice(index, 1);
+		} else {
+			newSearchSettings[type].push(option);
+		}
 	} else {
-		newSearchSettings[type].push(option);
+		newSearchSettings[type] = '';
 	}
 
 	newSearchSettings.isFilterUpdate = true;
@@ -155,8 +159,8 @@ const JbookViewHeaderHandler = (props) => {
 		});
 		if (search) {
 			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
-			setState(dispatch, { runSearch: true });
 		}
+		setState(dispatch, { runSearch: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.selectedPortfolio, dispatch]);
 
