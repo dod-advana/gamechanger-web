@@ -144,9 +144,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
-		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
 		jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
