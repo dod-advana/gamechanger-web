@@ -388,7 +388,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetActivity')}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -499,7 +499,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
+					expanded={shouldBeExpanded(jbookSearchSettings, 'pocReviewer')}
 					header={<b>POC REVIEWER</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -694,7 +694,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetActivity')}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -718,7 +718,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
+					expanded={shouldBeExpanded(jbookSearchSettings, 'programElement')}
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
