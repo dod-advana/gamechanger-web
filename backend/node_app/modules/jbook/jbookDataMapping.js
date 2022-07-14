@@ -1929,6 +1929,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		lineNumber_s: {
+			newName: 'lineNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		missionDescBudgetJustification_t: {
 			newName: 'missionDescBudgetJustification',
 			defaultValue: '',
