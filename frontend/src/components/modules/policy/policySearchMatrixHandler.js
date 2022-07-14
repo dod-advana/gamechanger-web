@@ -801,7 +801,6 @@ const getSearchMatrixItems = (props) => {
 		<>
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={state.searchSettings.specificOrgsSelected}
 					header={'SOURCE'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -813,7 +812,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={state.searchSettings.specificTypesSelected}
 					header={'TYPE'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -825,7 +823,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={!state.searchSettings.publicationDateAllTime}
 					header={'PUBLICATION DATE'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -837,7 +834,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={state.searchSettings.includeRevoked}
 					header={'STATUS'}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
