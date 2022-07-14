@@ -1098,7 +1098,7 @@ const esData = {
 							appropriationTitle_t: 'Research, Development, Test & Evaluation, Air Force',
 							budgetActivityNumber_s: '07',
 							budgetActivityTitle_t: 'Operational Systems Development',
-							programElement_s: '0101122F',
+							programElement_t: '0101122F',
 							currentYearAmount_d: '0.453',
 							org_jbook_desc_s: 'Air Force (AF)',
 							org_code_s: 'AF',
@@ -1260,7 +1260,7 @@ const esData = {
 						_source: {
 							type_s: 'om',
 							key_s: 'om#None#01#2020A#120#13#132#ARMY',
-							programElement_s: '2020A',
+							programElement_t: '2020A',
 							accountTitle_s: 'Operation & Maintenance, Army',
 							serviceAgency_s: 'ARMY',
 							appropriationNumber_s: '01',
