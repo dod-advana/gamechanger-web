@@ -5,6 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import styled from 'styled-components';
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
+import MultiSelectFilter from '../../common/MultiSelectFilter';
 import _ from 'lodash';
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -77,29 +78,6 @@ const handleSelectAllOrgs = (state, dispatch, isPreSearch) => {
 	}
 };
 
-const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
-	newSearchSettings.orgFilter = {
-		...newSearchSettings.orgFilter,
-		[orgName]: event.target.checked,
-	};
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.orgUpdate = true;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'OrgFilterToggle',
-		event.target.name,
-		event.target.value ? 1 : 0
-	);
-};
-
 const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	let orgName = event.target.name;
@@ -121,10 +99,6 @@ const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 
 const renderSources = (state, dispatch, classes, searchbar = false) => {
 	const { originalOrgFilters, orgFilter } = state.searchSettings;
-	const betterOrgData = {};
-	for (let i = 0; i < originalOrgFilters.length; i++) {
-		betterOrgData[originalOrgFilters[i][0]] = originalOrgFilters[i][1];
-	}
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -219,81 +193,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					}
 				</>
 			) : (
-				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
-							name="All sources"
-							value="All sources"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllOrgs(state, dispatch, false)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.allOrgsSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="All sources"
-									style={styles.filterBox}
-								/>
-							}
-							label="All sources"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row>
-						<FormControlLabel
-							name="Specific source(s)"
-							value="Specific source(s)"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectSpecificOrgs(state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.specificOrgsSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="Specific source(s)"
-									style={styles.filterBox}
-								/>
-							}
-							label="Specific source(s)"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.searchSettings.specificOrgsSelected &&
-							Object.keys(betterOrgData).map((org) => {
-								return (
-									<FormControlLabel
-										disabled={!betterOrgData[org] && !state.searchSettings.orgFilter[org]}
-										key={`${org} (${betterOrgData[org]})`}
-										value={`${org} (${betterOrgData[org]})`}
-										classes={{
-											root: classes.rootLabel,
-											label: classes.checkboxPill,
-										}}
-										control={
-											<Checkbox
-												classes={{
-													root: classes.rootButton,
-													checked: classes.checkedButton,
-												}}
-												name={`${org} (${betterOrgData[org]})`}
-												checked={state.searchSettings.orgFilter[org]}
-												onClick={(event) =>
-													handleOrganizationFilterChange(event, state, dispatch)
-												}
-											/>
-										}
-										label={`${org} (${betterOrgData[org]})`}
-										labelPlacement="end"
-									/>
-								);
-							})}
-					</FormGroup>
-				</>
+				<MultiSelectFilter state={state} dispatch={dispatch} classes={classes} />
 			)}
 		</FormControl>
 	);
