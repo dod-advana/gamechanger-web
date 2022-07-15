@@ -1,7 +1,6 @@
 import React from 'react';
-import { createCopyTinyUrl } from '../../../utils/sharedFunctions';
+import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import _ from 'lodash';
-import { setState } from '../../../utils/sharedFunctions';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { gcOrange } from '../../common/gc-colors';
@@ -9,7 +8,7 @@ import { gcOrange } from '../../common/gc-colors';
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 
-const useStyles = makeStyles({
+export const useStyles = makeStyles({
 	root: {
 		paddingTop: '16px',
 		marginRight: '10px',

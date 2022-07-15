@@ -96,6 +96,7 @@ class JBookDataHandler extends DataHandler {
 				esQuery,
 				userId
 			);
+
 			const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			const data = docs[0];
@@ -287,9 +288,53 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getAllBYProjectData(req, userId) {
+		try {
+			const { id } = req.body;
+
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
+			);
+
+			const profilePageQueryData = this.jbookSearchUtility.getProfilePageQueryData(esResults, userId);
+
+			const pfpQuery = this.jbookSearchUtility.getESJBookProfilePageQuery(profilePageQueryData, userId);
+
+			const pfpESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				pfpQuery,
+				userId
+			);
+
+			const { docs } = this.jbookSearchUtility.cleanESResults(pfpESResults, userId);
+
+			let yearToDoc = {};
+
+			for (let doc of docs) {
+				doc.reviews = {};
+				await this.parseESReviews(doc);
+				yearToDoc[doc.budgetYear] = doc;
+			}
+
+			return yearToDoc;
+		} catch (err) {
+			console.log(err);
+			this.logger.error(err, 'HSGBFMB', userId);
+			return [];
+		}
+	}
+
 	async getESProjectData(req, userId) {
 		try {
 			const { id, portfolioName } = req.body;
+
+			await this.getAllBYProjectData(req, userId);
 
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
@@ -547,7 +592,6 @@ class JBookDataHandler extends DataHandler {
 	async storeBudgetReview(req, userId) {
 		try {
 			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
-
 			const permissions = req.permissions;
 			let wasUpdated = false;
 
@@ -1093,6 +1137,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.deletePortfolio(req, userId);
 				case 'createPortfolio':
 					return await this.createPortfolio(req, userId);
+				case 'getAllBYProjectData':
+					return await this.getAllBYProjectData(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,
