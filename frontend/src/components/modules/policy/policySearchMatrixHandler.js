@@ -60,6 +60,10 @@ const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 	);
 };
 
+const getSeeMoreText = (expanded) => {
+	return expanded ? 'See Less' : 'See More';
+};
+
 const renderSources = (state, dispatch, classes, searchbar = false) => {
 	const { originalOrgFilters, orgFilter } = state.searchSettings;
 
@@ -108,7 +112,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 								setState(dispatch, { seeMoreSources: !state.seeMoreSources });
 							}}
 						>
-							See {state.seeMoreSources ? 'Less' : 'More'}
+							{getSeeMoreText(state.seeMoreSources)}
 						</a> // jsx-a11y/anchor-is-valid
 					}
 				</>
@@ -231,7 +235,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 								setState(dispatch, { seeMoreTypes: !state.seeMoreTypes });
 							}}
 						>
-							See {state.seeMoreTypes ? 'Less' : 'More'}
+							{getSeeMoreText(state.seeMoreTypes)}
 						</a>
 					)}
 				</>
@@ -347,7 +351,7 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	});
 };
 
-const renderDates = (state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, searchbar = false) => {
+const renderDates = (state, dispatch, classes, searchbar = false) => {
 	const pubAllTime =
 		state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
 
@@ -649,7 +653,7 @@ const getSearchMatrixItems = (props) => {
 };
 
 export const getAdvancedOptions = (props) => {
-	const { state, dispatch, classes, handleSubmit, setDatePickerOpen, setDatePickerClosed } = props;
+	const { state, dispatch, classes, handleSubmit } = props;
 
 	return (
 		<>
@@ -668,7 +672,7 @@ export const getAdvancedOptions = (props) => {
 			<div style={styles.filterDiv}>
 				<strong style={styles.boldText}>PUBLICATION DATE</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				{renderDates(state, dispatch, classes, setDatePickerOpen, setDatePickerClosed, true)}
+				{renderDates(state, dispatch, classes, true)}
 			</div>
 
 			<div style={styles.filterDiv}>
