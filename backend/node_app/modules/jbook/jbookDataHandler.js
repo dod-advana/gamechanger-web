@@ -1241,16 +1241,18 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	// PROFILE PAGE COMMENTS SECTION
+
+	// get all comments ordered by createdAt, using docID and portfolioName
 	async getCommentThread(req, userId) {
 		try {
-			const { docID, portfolioID } = req.body;
+			const { docID, portfolioName } = req.body;
 
 			return await this.comments.findAll({
-				order: ['createdAt', 'DESC'],
+				order: [['createdAt', 'DESC']],
 				where: {
 					deleted: false,
 					docID,
-					portfolioID,
+					portfolioName,
 				},
 			});
 		} catch (err) {
@@ -1259,9 +1261,10 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// create comment, MUST have docID, portfolioName, and message
 	async createComment(req, userId) {
 		try {
-			await this.comments.create(req.body);
+			await this.comments.create({ ...req.body, deleted: false });
 			return true;
 		} catch (e) {
 			const { message } = e;
@@ -1270,6 +1273,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// set a comment to deleted:true using comment id
 	async deleteComment(req, userId) {
 		try {
 			const { id } = req.body;
@@ -1290,6 +1294,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// use comment id and which field (upvotes or downvotes) and properly update the vote lists
 	async voteComment(req, userId) {
 		try {
 			const { id, field } = req.body;
@@ -1298,16 +1303,46 @@ class JBookDataHandler extends DataHandler {
 
 			let comment = await this.comments.findOne({ where });
 
-			let votes = comment[field];
+			let otherVotedField = 'upvotes';
 
-			let index = votes.indexOf(userId);
-			if (index === -1) {
-				votes.push(userId);
-			} else {
-				votes.splice(index, 1);
+			if (field === 'upvotes') {
+				otherVotedField = 'downvotes';
 			}
 
-			let update = await this.comments.update({ [field]: votes }, { where });
+			let primaryVotes = comment[field];
+			let secondaryVotes = comment[otherVotedField];
+
+			// if you upvoted, you want to remove the downvote
+			let isAdded = false;
+
+			if (primaryVotes !== null && primaryVotes !== undefined) {
+				let index = primaryVotes.indexOf(userId);
+
+				if (index !== -1) {
+					primaryVotes.splice(index, 1);
+				} else {
+					primaryVotes.push(userId);
+
+					isAdded = true;
+				}
+			} else {
+				primaryVotes = [userId];
+				isAdded = true;
+			}
+
+			if (
+				isAdded &&
+				secondaryVotes !== null &&
+				secondaryVotes !== undefined &&
+				secondaryVotes.indexOf(userId) !== -1
+			) {
+				secondaryVotes.splice(secondaryVotes.indexOf(userId), 1);
+			}
+
+			let update = await this.comments.update(
+				{ [field]: primaryVotes, [otherVotedField]: secondaryVotes },
+				{ where }
+			);
 
 			if (!update || !update[0] || update[0] !== 1) {
 				throw new Error('Failed to update comment vote');
