@@ -167,6 +167,11 @@ module.exports = Object.freeze({
 		auxSearchFields: [''],
 		auxRetrieveFields: [''],
 	},
+	AMHS_ELASTIC_SEARCH_OPTS: {
+		index: process.env.AMHS_ELASTICSEARCH_INDEX,
+		auxSearchFields: [''],
+		auxRetrieveFields: [''],
+	},
 	CDO_ELASTIC_SEARCH_OPTS: {
 		index: process.env.CDO_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
