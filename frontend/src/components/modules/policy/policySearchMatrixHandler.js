@@ -193,7 +193,17 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					}
 				</>
 			) : (
-				<MultiSelectFilter state={state} dispatch={dispatch} classes={classes} />
+				<MultiSelectFilter
+					state={state}
+					dispatch={dispatch}
+					classes={classes}
+					filter={'orgFilter'}
+					originalFilters={originalOrgFilters}
+					allSelected={'allOrgsSelected'}
+					specificSelected={'specificOrgsSelected'}
+					update={'orgUpdate'}
+					trackingName={'OrgFilterToggle'}
+				/>
 			)}
 		</FormControl>
 	);
@@ -248,31 +258,16 @@ const handleSelectArchivedCongress = (event, state, dispatch) => {
 	});
 };
 
-const handleTypeFilterChangeLocal = (event, type, state, dispatch, searchbar) => {
+const handleTypeFilterChangeSearchbar = (event, type, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let typeName = event.target.name;
-	if (typeName.includes('(')) {
-		typeName = typeName.substring(0, event.target.name.lastIndexOf('(') - 1);
-	}
 	newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
 		[type]: event.target.checked,
 	};
-	if (searchbar) {
-		setState(dispatch, {
-			searchSettings: newSearchSettings,
-			metricsCounted: false,
-		});
-	} else {
-		newSearchSettings.isFilterUpdate = true;
-		newSearchSettings.typeUpdate = true;
-		setState(dispatch, {
-			searchSettings: newSearchSettings,
-			metricsCounted: false,
-			runSearch: true,
-			runGraphSearch: true,
-		});
-	}
+	setState(dispatch, {
+		searchSettings: newSearchSettings,
+		metricsCounted: false,
+	});
 
 	trackEvent(
 		getTrackingNameForFactory(state.cloneData.clone_name),
@@ -284,10 +279,6 @@ const handleTypeFilterChangeLocal = (event, type, state, dispatch, searchbar) =>
 
 const renderTypes = (state, dispatch, classes, searchbar = false) => {
 	const { originalTypeFilters, typeFilter } = state.searchSettings;
-	const betterTypeData = {};
-	for (let i = 0; i < originalTypeFilters.length; i++) {
-		betterTypeData[originalTypeFilters[i][0]] = originalTypeFilters[i][1];
-	}
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -375,7 +366,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 													name={`${typeString}`}
 													checked={state.searchSettings.typeFilter[type]}
 													onClick={(event) =>
-														handleTypeFilterChangeLocal(event, type, state, dispatch, true)
+														handleTypeFilterChangeSearchbar(event, type, state, dispatch)
 													}
 												/>
 											}
@@ -404,27 +395,6 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 				<>
 					<FormGroup row style={{ marginBottom: '10px' }}>
 						<FormControlLabel
-							name="All types"
-							value="All types"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAllTypes(state, dispatch, false)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.allTypesSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="All types"
-									style={styles.filterBox}
-								/>
-							}
-							label="All types"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
 							name="Archived Congress"
 							value="Archived Congress"
 							classes={{ label: classes.titleText }}
@@ -433,7 +403,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 									classes={{ root: classes.filterBox }}
 									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
 									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.archivedCongressSelected}
+									checked={state.searchSettings.archivedCongressSelected || false}
 									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 									name="Archived Congress"
 									style={styles.filterBox}
@@ -444,59 +414,18 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 							style={styles.titleText}
 						/>
 					</FormGroup>
-					<FormGroup row>
-						<FormControlLabel
-							name="Specific type(s)"
-							value="Specific type(s)"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectSpecificTypes(state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.specificTypesSelected}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="Specific type(s)"
-									style={styles.filterBox}
-								/>
-							}
-							label="Specific type(s)"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-						{state.searchSettings.specificTypesSelected &&
-							Object.keys(betterTypeData).map((type) => {
-								let typeString = Pluralize(type);
-								return (
-									<FormControlLabel
-										disabled={!betterTypeData[type] && !state.searchSettings.typeFilter[type]}
-										key={`${typeString} (${betterTypeData[type]})`}
-										value={`${typeString} (${betterTypeData[type]})`}
-										classes={{
-											root: classes.rootLabel,
-											label: classes.checkboxPill,
-										}}
-										control={
-											<Checkbox
-												classes={{
-													root: classes.rootButton,
-													checked: classes.checkedButton,
-												}}
-												name={`${typeString} (${betterTypeData[type]})`}
-												checked={state.searchSettings.typeFilter[type]}
-												onClick={(event) =>
-													handleTypeFilterChangeLocal(event, type, state, dispatch)
-												}
-											/>
-										}
-										label={`${typeString} (${betterTypeData[type]})`}
-										labelPlacement="end"
-									/>
-								);
-							})}
-					</FormGroup>
+
+					<MultiSelectFilter
+						state={state}
+						dispatch={dispatch}
+						classes={classes}
+						filter={'typeFilter'}
+						originalFilters={originalTypeFilters}
+						allSelected={'allTypesSelected'}
+						specificSelected={'specificTypesSelected'}
+						update={'typeUpdate'}
+						trackingName={'TypeFilterToggle'}
+					/>
 				</>
 			)}
 		</FormControl>

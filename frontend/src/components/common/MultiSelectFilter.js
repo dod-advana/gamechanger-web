@@ -62,8 +62,17 @@ const ButtonGroup = ({ state, dispatch, showSeeMore, showClear, showingAllOption
 	);
 };
 
-const MultiSelectFilter = ({ state, dispatch, classes }) => {
-	const { originalOrgFilters } = state.searchSettings;
+const MultiSelectFilter = ({
+	state,
+	dispatch,
+	classes,
+	filter,
+	originalFilters,
+	allSelected,
+	specificSelected,
+	update,
+	trackingName,
+}) => {
 	const [showSeeMore, setShowSeeMore] = useState(false);
 	const [showClear, setShowClear] = useState(false);
 	const [maxNumVisible, setMaxNumVisible] = useState();
@@ -71,37 +80,37 @@ const MultiSelectFilter = ({ state, dispatch, classes }) => {
 
 	const MAX_HEIGHT = 500;
 
-	const betterOrgData = {};
-	originalOrgFilters.forEach((org) => {
-		betterOrgData[org[0]] = org[1];
+	const betterData = {};
+	originalFilters.forEach((option) => {
+		betterData[option[0]] = option[1];
 	});
-	let visibleOrgs = Object.keys(betterOrgData);
+	let visibleOptions = Object.keys(betterData);
 	if (maxNumVisible && !showingAllOptions) {
-		visibleOrgs = Object.keys(betterOrgData).slice(0, maxNumVisible);
+		visibleOptions = Object.keys(betterData).slice(0, maxNumVisible);
 	}
 
 	const containerRef = useRef();
 	const checkboxRef = useRef();
 
-	const handleOrganizationFilterChange = (event, gcState, gcDispatch) => {
+	const handleFilterChange = (event, gcState, gcDispatch) => {
 		const newSearchSettings = structuredClone(gcState.searchSettings);
-		if (gcState.searchSettings.allOrgsSelected) {
-			newSearchSettings.allOrgsSelected = false;
-			newSearchSettings.specificOrgsSelected = true;
+		if (gcState.searchSettings[allSelected]) {
+			newSearchSettings[allSelected] = false;
+			newSearchSettings[specificSelected] = true;
 			setShowClear(true);
 		}
-		let orgName = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
-		newSearchSettings.orgFilter = {
-			...newSearchSettings.orgFilter,
-			[orgName]: event.target.checked,
+		let name = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
+		newSearchSettings[filter] = {
+			...newSearchSettings[filter],
+			[name]: event.target.checked,
 		};
-		if (Object.values(newSearchSettings.orgFilter).filter((value) => value).length === 0) {
-			newSearchSettings.allOrgsSelected = true;
-			newSearchSettings.specificOrgsSelected = false;
+		if (Object.values(newSearchSettings[filter]).filter((value) => value).length === 0) {
+			newSearchSettings[allSelected] = true;
+			newSearchSettings[specificSelected] = false;
 			setShowClear(false);
 		}
 		newSearchSettings.isFilterUpdate = true;
-		newSearchSettings.orgUpdate = true;
+		newSearchSettings[update] = true;
 		setState(gcDispatch, {
 			searchSettings: newSearchSettings,
 			metricsCounted: false,
@@ -110,7 +119,7 @@ const MultiSelectFilter = ({ state, dispatch, classes }) => {
 		});
 		trackEvent(
 			getTrackingNameForFactory(gcState.cloneData.clone_name),
-			'OrgFilterToggle',
+			trackingName,
 			event.target.name,
 			event.target.value ? 1 : 0
 		);
@@ -123,16 +132,16 @@ const MultiSelectFilter = ({ state, dispatch, classes }) => {
 	const handleClear = (gcState, gcDispatch) => {
 		const newSearchSettings = structuredClone(gcState.searchSettings);
 
-		// Set all orgs to false
-		const newOrgFilter = Object.keys(gcState.searchSettings.orgFilter).reduce((accumulator, key) => {
+		// Set all options to false
+		const newFilter = Object.keys(gcState.searchSettings[filter]).reduce((accumulator, key) => {
 			return { ...accumulator, [key]: false };
 		}, {});
 
-		newSearchSettings.orgFilter = newOrgFilter;
-		newSearchSettings.allOrgsSelected = true;
-		newSearchSettings.specificOrgsSelected = false;
+		newSearchSettings[filter] = newFilter;
+		newSearchSettings[allSelected] = true;
+		newSearchSettings[specificSelected] = false;
 		newSearchSettings.isFilterUpdate = true;
-		newSearchSettings.orgUpdate = true;
+		newSearchSettings[update] = true;
 		setShowClear(false);
 		setState(gcDispatch, {
 			searchSettings: newSearchSettings,
@@ -173,12 +182,12 @@ const MultiSelectFilter = ({ state, dispatch, classes }) => {
 	return (
 		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 			<div ref={containerRef} style={styles.checkboxContainer}>
-				{visibleOrgs.map((org) => {
+				{visibleOptions.map((option) => {
 					return (
 						<FormControlLabel
-							disabled={!betterOrgData[org] && !state.searchSettings.orgFilter[org]}
-							key={`${org} (${betterOrgData[org]})`}
-							value={`${org} (${betterOrgData[org]})`}
+							disabled={!betterData[option] && !state.searchSettings[filter][option]}
+							key={`${option} (${betterData[option]})`}
+							value={`${option} (${betterData[option]})`}
 							classes={{
 								root: classes.rootLabel,
 								label: classes.checkboxPill,
@@ -189,13 +198,13 @@ const MultiSelectFilter = ({ state, dispatch, classes }) => {
 										root: classes.rootButton,
 										checked: classes.checkedButton,
 									}}
-									name={`${org} (${betterOrgData[org]})`}
-									checked={state.searchSettings.orgFilter[org] || false}
-									onChange={(event) => handleOrganizationFilterChange(event, state, dispatch)}
-									key={`${org} (${betterOrgData[org]})`}
+									name={`${option} (${betterData[option]})`}
+									checked={state.searchSettings[filter][option] || false}
+									onChange={(event) => handleFilterChange(event, state, dispatch)}
+									key={`${option} (${betterData[option]})`}
 								/>
 							}
-							label={`${org} (${betterOrgData[org]})`}
+							label={`${option} (${betterData[option]})`}
 							labelPlacement="end"
 							ref={checkboxRef}
 						/>
@@ -235,6 +244,12 @@ MultiSelectFilter.propTypes = {
 	}),
 	dispatch: PropTypes.func,
 	classes: PropTypes.object,
+	filter: PropTypes.string,
+	originalFilters: PropTypes.object,
+	allSelected: PropTypes.string,
+	specificSelected: PropTypes.string,
+	update: PropTypes.string,
+	trackingName: PropTypes.string,
 };
 
 export default MultiSelectFilter;
