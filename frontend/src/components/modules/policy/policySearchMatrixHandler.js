@@ -280,31 +280,9 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 	);
 };
 
-const handleSelectPublicationDateAllTime = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	const runSearch = !state.publicationDateAllTime;
-	const runGraphSearch = !state.publicationDateAllTime;
-	newSearchSettings.publicationDateAllTime = true;
-	newSearchSettings.publicationDateFilter = [null, null];
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch,
-		runGraphSearch,
-	});
-};
-
-const handleSelectPublicationDateSpecificDates = (state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	newSearchSettings.publicationDateAllTime = false;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-	});
-};
-
 const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	newSearchSettings.publicationDateAllTime = false;
 	const { publicationDateFilter, accessDateFilter } = newSearchSettings;
 
 	if (Object.prototype.toString.call(date) === '[object Date]') {
@@ -351,171 +329,65 @@ const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) =
 	});
 };
 
-const renderDates = (state, dispatch, classes, searchbar = false) => {
-	const pubAllTime =
-		state.searchSettings.publicationDateAllTime === undefined ? true : state.searchSettings.publicationDateAllTime;
-
+const renderDates = (state, dispatch) => {
 	return (
 		<div style={{ padding: '10px' }}>
 			<ThemeProvider theme={themeDatePicker}>
-				<div>
-					<div style={{ display: 'flex' }}>
-						<FormControl>
-							{searchbar ? (
-								<FormGroup row style={{ marginBottom: '10px' }}>
-									<FormControlLabel
-										name="All time"
-										value="All time"
-										classes={{ label: classes.titleText }}
-										control={
-											<Checkbox
-												classes={{ root: classes.filterBox }}
-												onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
-												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-												checked={pubAllTime}
-												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-												name="All time"
-												style={styles.filterBox}
-											/>
-										}
-										label="All time"
-										labelPlacement="end"
-										style={styles.titleText}
-									/>
-									<FormControlLabel
-										name="Specific dates"
-										value="Specific dates"
-										classes={{ label: classes.titleText }}
-										control={
-											<Checkbox
-												classes={{ root: classes.filterBox }}
-												onClick={() =>
-													handleSelectPublicationDateSpecificDates(state, dispatch)
-												}
-												icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-												checked={!pubAllTime}
-												checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-												name="Specific dates"
-												style={styles.filterBox}
-											/>
-										}
-										label="Specific dates"
-										labelPlacement="end"
-										style={styles.titleText}
-									/>
-								</FormGroup>
-							) : (
-								<>
-									<FormGroup row style={{ marginBottom: '10px' }}>
-										<FormControlLabel
-											name="All time"
-											value="All time"
-											classes={{ label: classes.titleText }}
-											control={
-												<Checkbox
-													classes={{ root: classes.filterBox }}
-													onClick={() => handleSelectPublicationDateAllTime(state, dispatch)}
-													icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-													checked={pubAllTime}
-													checkedIcon={
-														<i style={{ color: '#E9691D' }} className="fa fa-check" />
-													}
-													name="All time"
-													style={styles.filterBox}
-												/>
-											}
-											label="All time"
-											labelPlacement="end"
-											style={styles.titleText}
-										/>
-									</FormGroup>
-									<FormGroup row>
-										<FormControlLabel
-											name="Specific dates"
-											value="Specific dates"
-											classes={{ label: classes.titleText }}
-											control={
-												<Checkbox
-													classes={{ root: classes.filterBox }}
-													onClick={() =>
-														handleSelectPublicationDateSpecificDates(state, dispatch)
-													}
-													icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-													checked={!pubAllTime}
-													checkedIcon={
-														<i style={{ color: '#E9691D' }} className="fa fa-check" />
-													}
-													name="Specific dates"
-													style={styles.filterBox}
-												/>
-											}
-											label="Specific dates"
-											labelPlacement="end"
-											style={styles.titleText}
-										/>
-									</FormGroup>
-								</>
-							)}
-						</FormControl>
-					</div>
-					{!pubAllTime && (
-						<div style={{ display: 'flex', flexWrap: 'wrap' }}>
-							<DatePickerWrapper>
-								<label>Start Date</label>
-								<DatePicker
-									selected={state.searchSettings.publicationDateFilter[0]}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter') {
-											handleDateRangeChange(
-												state.searchSettings.publicationDateFilter[0],
-												true,
-												'publication',
-												state,
-												dispatch
-											);
-										}
-									}}
-									onChange={(date) => {
-										const newSearchSettings = _.cloneDeep(state.searchSettings);
-										newSearchSettings.publicationDateFilter[0] = date;
-										setState(dispatch, {
-											searchSettings: newSearchSettings,
-										});
-									}}
-									onSelect={(date) => {
-										handleDateRangeChange(date, true, 'publication', state, dispatch);
-									}}
-								/>
-							</DatePickerWrapper>
-							<DatePickerWrapper>
-								<label>End Date</label>
-								<DatePicker
-									selected={state.searchSettings.publicationDateFilter[1]}
-									onKeyDown={(e) => {
-										if (e.key === 'Enter') {
-											handleDateRangeChange(
-												state.searchSettings.publicationDateFilter[1],
-												false,
-												'publication',
-												state,
-												dispatch
-											);
-										}
-									}}
-									onChange={(date) => {
-										const newSearchSettings = _.cloneDeep(state.searchSettings);
-										newSearchSettings.publicationDateFilter[1] = date;
-										setState(dispatch, {
-											searchSettings: newSearchSettings,
-										});
-									}}
-									onSelect={(date) => {
-										handleDateRangeChange(date, false, 'publication', state, dispatch);
-									}}
-								/>
-							</DatePickerWrapper>
-						</div>
-					)}
+				<div style={{ display: 'flex', flexWrap: 'wrap' }}>
+					<DatePickerWrapper>
+						<label>Start Date</label>
+						<DatePicker
+							selected={state.searchSettings.publicationDateFilter[0]}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									handleDateRangeChange(
+										state.searchSettings.publicationDateFilter[0],
+										true,
+										'publication',
+										state,
+										dispatch
+									);
+								}
+							}}
+							onChange={(date) => {
+								const newSearchSettings = _.cloneDeep(state.searchSettings);
+								newSearchSettings.publicationDateFilter[0] = date;
+								setState(dispatch, {
+									searchSettings: newSearchSettings,
+								});
+							}}
+							onSelect={(date) => {
+								handleDateRangeChange(date, true, 'publication', state, dispatch);
+							}}
+						/>
+					</DatePickerWrapper>
+					<DatePickerWrapper>
+						<label>End Date</label>
+						<DatePicker
+							selected={state.searchSettings.publicationDateFilter[1]}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									handleDateRangeChange(
+										state.searchSettings.publicationDateFilter[1],
+										false,
+										'publication',
+										state,
+										dispatch
+									);
+								}
+							}}
+							onChange={(date) => {
+								const newSearchSettings = _.cloneDeep(state.searchSettings);
+								newSearchSettings.publicationDateFilter[1] = date;
+								setState(dispatch, {
+									searchSettings: newSearchSettings,
+								});
+							}}
+							onSelect={(date) => {
+								handleDateRangeChange(date, false, 'publication', state, dispatch);
+							}}
+						/>
+					</DatePickerWrapper>
 				</div>
 			</ThemeProvider>
 		</div>
@@ -605,7 +477,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderDates(state, dispatch, classes)}
+					{renderDates(state, dispatch)}
 				</GCAccordion>
 			</div>
 
@@ -672,7 +544,7 @@ export const getAdvancedOptions = (props) => {
 			<div style={styles.filterDiv}>
 				<strong style={styles.boldText}>PUBLICATION DATE</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				{renderDates(state, dispatch, classes, true)}
+				{renderDates(state, dispatch)}
 			</div>
 
 			<div style={styles.filterDiv}>
