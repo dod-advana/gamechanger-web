@@ -340,13 +340,9 @@ export default () => {
 	 * @method getCloneData
 	 */
 	const getCloneData = async () => {
-		try {
-			const data = await gameChangerAPI.getClonesMatomo();
-			setCloneList(data.data.clones);
-			setCloneName(`${data.data.default.category_id}-${data.data.default.name}`);
-		} catch (e) {
-			console.error(e);
-		}
+		const data = await gameChangerAPI.getClonesMatomo();
+		setCloneList(data.data.clones);
+		setCloneName(`${data.data.default.category_id}-${data.data.default.name}`);
 	};
 
 	/**
@@ -355,26 +351,22 @@ export default () => {
 	 * @method exportData
 	 */
 	const exportData = async (name) => {
-		try {
-			const params = {
-				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-				table: name,
-				cloneName: cloneName.split('-')[1],
-				cloneID: cloneName.split('-')[0],
-			};
-			const data = await gameChangerAPI.exportUserData(params);
-			const url = window.URL.createObjectURL(
-				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-			);
-			const link = document.createElement('a');
-			link.href = url;
-			link.setAttribute('download', `${name}.xlsx`); //or any other extension
-			document.body.appendChild(link);
-			link.click();
-		} catch (e) {
-			console.error(e);
-		}
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			table: name,
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		const data = await gameChangerAPI.exportUserData(params);
+		const url = window.URL.createObjectURL(
+			new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+		);
+		const link = document.createElement('a');
+		link.href = url;
+		link.setAttribute('download', `${name}.xlsx`); //or any other extension
+		document.body.appendChild(link);
+		link.click();
 	};
 
 	/**
@@ -383,27 +375,23 @@ export default () => {
 	 * @method getSearchPdfMapping
 	 */
 	const getSearchPdfMapping = useCallback(() => {
-		try {
+		setLoading((prevState) => ({
+			...prevState,
+			searchMapping: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getSearchPdfMapping(params).then((data) => {
+			setMappingData(data.data.data);
 			setLoading((prevState) => ({
 				...prevState,
-				searchMapping: false,
+				searchMapping: true,
 			}));
-			const params = {
-				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-				cloneName: cloneName.split('-')[1],
-				cloneID: cloneName.split('-')[0],
-			};
-			gameChangerAPI.getSearchPdfMapping(params).then((data) => {
-				setMappingData(data.data.data);
-				setLoading((prevState) => ({
-					...prevState,
-					searchMapping: true,
-				}));
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		});
 	}, [startDate, endDate, cloneName]);
 
 	/**
@@ -412,13 +400,9 @@ export default () => {
 	 * @method getFeedbackData
 	 */
 	const getFeedbackData = useCallback(() => {
-		try {
-			gameChangerAPI.getFeedbackData().then((data) => {
-				setFeedbackData(data.data.results);
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		gameChangerAPI.getFeedbackData().then((data) => {
+			setFeedbackData(data.data.results);
+		});
 	}, []);
 
 	/**
@@ -427,14 +411,10 @@ export default () => {
 	 * @method getDocumentData
 	 */
 	const getDocumentData = useCallback(() => {
-		try {
-			const params = { startDate, endDate };
-			gameChangerAPI.getDocumentUsage(params).then((data) => {
-				setDocumentData(data.data);
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		const params = { startDate, endDate };
+		gameChangerAPI.getDocumentUsage(params).then((data) => {
+			setDocumentData(data.data);
+		});
 	}, [startDate, endDate]);
 
 	/**
@@ -443,27 +423,23 @@ export default () => {
 	 * @method getUserAggData
 	 */
 	const getUserAggData = useCallback(() => {
-		try {
+		setLoading((prevState) => ({
+			...prevState,
+			userData: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getUserAggregations(params).then((data) => {
+			setUserAggData(data.data.users);
 			setLoading((prevState) => ({
 				...prevState,
-				userData: false,
+				userData: true,
 			}));
-			const params = {
-				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-				cloneName: cloneName.split('-')[1],
-				cloneID: cloneName.split('-')[0],
-			};
-			gameChangerAPI.getUserAggregations(params).then((data) => {
-				setUserAggData(data.data.users);
-				setLoading((prevState) => ({
-					...prevState,
-					userData: true,
-				}));
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		});
 	}, [startDate, endDate, cloneName]);
 
 	/**
@@ -472,31 +448,27 @@ export default () => {
 	 * @method getUserGraphData
 	 */
 	const getUserGraphData = useCallback(() => {
-		try {
+		setLoading((prevState) => ({
+			...prevState,
+			userGraph: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getUserDashboard(params).then((data) => {
+			setGraphData({
+				searchBar: data.data.searchBar,
+				userBar: data.data.userBar,
+			});
+			setCardData(data.data.cards);
 			setLoading((prevState) => ({
 				...prevState,
-				userGraph: false,
+				userGraph: true,
 			}));
-			const params = {
-				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-				cloneName: cloneName.split('-')[1],
-				cloneID: cloneName.split('-')[0],
-			};
-			gameChangerAPI.getUserDashboard(params).then((data) => {
-				setGraphData({
-					searchBar: data.data.searchBar,
-					userBar: data.data.userBar,
-				});
-				setCardData(data.data.cards);
-				setLoading((prevState) => ({
-					...prevState,
-					userGraph: true,
-				}));
-			});
-		} catch (e) {
-			console.error(e);
-		}
+		});
 	}, [startDate, endDate, cloneName]);
 	/**
 	 * Takes in a set time to go back in the query
