@@ -303,10 +303,6 @@ const renderStats = (contractTotals) => {
 	);
 };
 
-const shouldBeExpanded = (jbookSearchSettings, setting) => {
-	return jbookSearchSettings[setting] && jbookSearchSettings[setting] !== '';
-};
-
 const getPortfolioMap = (portfolios) => {
 	const portfolioMap = {};
 	for (let item of portfolios) {
@@ -318,7 +314,6 @@ const getPortfolioMap = (portfolios) => {
 // search matrix for the AI Inventory portfolio
 const getSearchMatrixItemsAIInventory = (props) => {
 	const { state, dispatch, classes } = props;
-
 	const { contractTotals, jbookSearchSettings, selectedPortfolio, portfolios } = state;
 	const portfolioMap = getPortfolioMap(portfolios);
 	return (
@@ -388,7 +383,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetActivity')}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -400,7 +395,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetSubActivity')}
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -412,7 +406,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'programElement')}
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -424,7 +417,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'projectNum')}
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -436,10 +428,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={
-						shouldBeExpanded(jbookSearchSettings, 'minBY1Funding') ||
-						shouldBeExpanded(jbookSearchSettings, 'maxBY1Funding')
-					}
 					header={<b>BY1 FUNDING</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -451,7 +439,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'totalCost')}
 					header={<b>TOTAL FUNDING</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -464,7 +451,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			{!state.useElasticSearch && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
-						expanded={shouldBeExpanded(jbookSearchSettings, 'projectTitle')}
 						header={<b>PROJECT TITLE</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -694,7 +680,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.budgetActivity && jbookSearchSettings.budgetActivity !== ''}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -706,7 +692,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.budgetSubActivity && jbookSearchSettings.budgetSubActivity !== ''}
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -718,7 +703,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -730,7 +714,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.projectNum && jbookSearchSettings.projectNum !== ''}
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -742,10 +725,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={
-						(jbookSearchSettings.minBY1Funding && jbookSearchSettings.minBY1Funding !== '') ||
-						(jbookSearchSettings.maxBY1Funding && jbookSearchSettings.maxBY1Funding !== '')
-					}
 					header={<b>BY1 FUNDING</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -757,7 +736,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.totalCost && jbookSearchSettings.totalCost !== ''}
 					header={<b>TOTAL FUNDING</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -770,7 +748,6 @@ const getSearchMatrixItems = (props) => {
 			{!state.useElasticSearch && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
-						expanded={shouldBeExpanded(jbookSearchSettings, 'pocReviewer')}
 						header={<b>POC REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
