@@ -8,6 +8,7 @@ const REVIEWER = require('../../models').reviewer;
 const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
+const COMMENTS = require('../../models').comments;
 const constantsFile = require('../../config/constants');
 const GL = require('../../models').gl;
 const { Sequelize, Op } = require('sequelize');
@@ -44,6 +45,7 @@ class JBookDataHandler extends DataHandler {
 			jbook_classification = JBOOK_CLASSIFICATION,
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
+			comments = COMMENTS,
 		} = opts;
 
 		super({ ...opts });
@@ -65,6 +67,7 @@ class JBookDataHandler extends DataHandler {
 		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.jbook_classification = jbook_classification;
+		this.comments = comments;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -893,6 +896,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// CONTRACT TOTALS
 	async getContractTotals(req, userId) {
 		const { useElasticSearch = false } = req.body;
 		if (useElasticSearch) {
@@ -972,6 +976,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	// PORTFOLIO
 	async getPortfolios(userId) {
 		try {
 			return await this.portfolio.findAll({
@@ -1108,53 +1113,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async callFunctionHelper(req, userId) {
-		const { functionName } = req.body;
-
-		try {
-			switch (functionName) {
-				case 'getProjectData':
-					return await this.getESProjectData(req, userId);
-				case 'getBudgetDropdownData':
-					return await this.getBudgetDropdownData(userId);
-				case 'storeBudgetReview':
-					return await this.storeBudgetReview(req, userId);
-				case 'reenableForm':
-					return await this.reenableForm(req, userId);
-				case 'submitFeedbackForm':
-					return await this.submitFeedbackForm(req, userId);
-				case 'getUserSpecificReviews':
-					return await this.getUserSpecificReviews(req, userId);
-				case 'getContractTotals':
-					return await this.getContractTotals(req, userId);
-				case 'getPortfolios':
-					return await this.getPortfolios(userId);
-				case 'getPortfolio':
-					return await this.getPortfolio(req, userId);
-				case 'editPortfolio':
-					return await this.editPortfolio(req, userId);
-				case 'deletePortfolio':
-					return await this.deletePortfolio(req, userId);
-				case 'createPortfolio':
-					return await this.createPortfolio(req, userId);
-				case 'getAllBYProjectData':
-					return await this.getAllBYProjectData(req, userId);
-				default:
-					this.logger.error(
-						`There is no function called ${functionName} defined in the JBookDataHandler`,
-						'5YIUXOA',
-						userId
-					);
-					return {};
-			}
-		} catch (e) {
-			console.log(e);
-			const { message } = e;
-			this.logger.error(message, 'D03Z7K6', userId);
-			throw e;
-		}
-	}
-
+	// EMAIL
 	async sendPOCEmail(userId, toName, email, organization, phoneNumber) {
 		try {
 			// First check to make sure an email has not already been sent for this user.
@@ -1278,6 +1237,177 @@ class JBookDataHandler extends DataHandler {
 			);
 		} catch (err) {
 			this.logger.error(err, 'B4E39XB', userId);
+		}
+	}
+
+	// PROFILE PAGE COMMENTS SECTION
+
+	// get all comments ordered by createdAt, using docID and portfolioName
+	async getCommentThread(req, userId) {
+		try {
+			const { docID, portfolioName } = req.body;
+
+			return await this.comments.findAll({
+				order: [['createdAt', 'DESC']],
+				where: {
+					deleted: false,
+					docID,
+					portfolioName,
+				},
+			});
+		} catch (err) {
+			console.log(err);
+			this.logger.error(err, 'H1M5LW0', userId);
+		}
+	}
+
+	// create comment, MUST have docID, portfolioName, and message
+	async createComment(req, userId) {
+		try {
+			await this.comments.create({ ...req.body, deleted: false });
+			return true;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'DQJQC7Z', userId);
+			return false;
+		}
+	}
+
+	// set a comment to deleted:true using comment id
+	async deleteComment(req, userId) {
+		try {
+			const { id } = req.body;
+
+			let where = { id };
+
+			let update = await this.comments.update({ deleted: true }, { where });
+
+			if (!update || !update[0] || update[0] !== 1) {
+				throw new Error('Failed to delete comment');
+			} else {
+				return { deleted: true };
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'UUZCA00', userId);
+			return { deleted: false };
+		}
+	}
+
+	// use comment id and which field (upvotes or downvotes) and properly update the vote lists
+	async voteComment(req, userId) {
+		try {
+			const { id, field } = req.body;
+
+			let where = { id };
+
+			let comment = await this.comments.findOne({ where });
+
+			let otherVotedField = 'upvotes';
+
+			if (field === 'upvotes') {
+				otherVotedField = 'downvotes';
+			}
+
+			let primaryVotes = comment[field];
+			let secondaryVotes = comment[otherVotedField];
+
+			// if you upvoted, you want to remove the downvote
+			let isAdded = false;
+
+			if (primaryVotes !== null && primaryVotes !== undefined) {
+				let index = primaryVotes.indexOf(userId);
+
+				if (index !== -1) {
+					primaryVotes.splice(index, 1);
+				} else {
+					primaryVotes.push(userId);
+
+					isAdded = true;
+				}
+			} else {
+				primaryVotes = [userId];
+				isAdded = true;
+			}
+
+			if (
+				isAdded &&
+				secondaryVotes !== null &&
+				secondaryVotes !== undefined &&
+				secondaryVotes.indexOf(userId) !== -1
+			) {
+				secondaryVotes.splice(secondaryVotes.indexOf(userId), 1);
+			}
+
+			let update = await this.comments.update(
+				{ [field]: primaryVotes, [otherVotedField]: secondaryVotes },
+				{ where }
+			);
+
+			if (!update || !update[0] || update[0] !== 1) {
+				throw new Error('Failed to update comment vote');
+			} else {
+				return { updated: true };
+			}
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'UUZCA00', userId);
+			return { updated: false };
+		}
+	}
+
+	async callFunctionHelper(req, userId) {
+		const { functionName } = req.body;
+
+		try {
+			switch (functionName) {
+				case 'getProjectData':
+					return await this.getESProjectData(req, userId);
+				case 'getBudgetDropdownData':
+					return await this.getBudgetDropdownData(userId);
+				case 'storeBudgetReview':
+					return await this.storeBudgetReview(req, userId);
+				case 'reenableForm':
+					return await this.reenableForm(req, userId);
+				case 'submitFeedbackForm':
+					return await this.submitFeedbackForm(req, userId);
+				case 'getUserSpecificReviews':
+					return await this.getUserSpecificReviews(req, userId);
+				case 'getContractTotals':
+					return await this.getContractTotals(req, userId);
+				case 'getPortfolios':
+					return await this.getPortfolios(userId);
+				case 'getPortfolio':
+					return await this.getPortfolio(req, userId);
+				case 'editPortfolio':
+					return await this.editPortfolio(req, userId);
+				case 'deletePortfolio':
+					return await this.deletePortfolio(req, userId);
+				case 'createPortfolio':
+					return await this.createPortfolio(req, userId);
+				case 'getAllBYProjectData':
+					return await this.getAllBYProjectData(req, userId);
+				case 'getCommentThread':
+					return await this.getCommentThread(req, userId);
+				case 'createComment':
+					return await this.createComment(req, userId);
+				case 'deleteComment':
+					return await this.deleteComment(req, userId);
+				case 'voteComment':
+					return await this.voteComment(req, userId);
+				default:
+					this.logger.error(
+						`There is no function called ${functionName} defined in the JBookDataHandler`,
+						'5YIUXOA',
+						userId
+					);
+					return {};
+			}
+		} catch (e) {
+			console.log(e);
+			const { message } = e;
+			this.logger.error(message, 'D03Z7K6', userId);
+			throw e;
 		}
 	}
 }
