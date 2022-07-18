@@ -74,7 +74,7 @@ const getQueryAndSearchTerms = (searchText) => {
 
 const findQuoted = (searchText) => {
 	// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-	return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>'|").*?\k<quote>)/g) || [];
+	return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>['"]).*?\k<quote>)/g) || [];
 };
 
 const findLowerCaseWordsOrAcronyms = (searchText) => {
@@ -166,7 +166,7 @@ export const getConvertedType = (budgetType) => {
 	return budgetType;
 };
 
-export const processSearchSettings = (state, dispatch) => {
+export const processSearchSettings = (state, _dispatch) => {
 	const searchSettings = _.cloneDeep(state.jbookSearchSettings);
 
 	for (const optionType in state.defaultOptions) {
@@ -191,7 +191,7 @@ export const processSearchSettings = (state, dispatch) => {
 };
 
 export const formatNum = (num) => {
-	const parsed = parseInt(num);
+	const parsed = num >= 5 ? parseInt(num) : parseFloat(num).toFixed(2);
 	if (parsed > 999) {
 		return `$${(parsed / 1000).toFixed(2)} B`;
 	}
@@ -200,4 +200,13 @@ export const formatNum = (num) => {
 		return `$${(parsed / 1000000).toFixed(2)} T`;
 	}
 	return `$${parsed} M`;
+};
+
+export const getTableFormattedCost = (cost) => {
+	return cost ? `${formatNum(cost)}` : 'N/A';
+};
+
+export const getFormattedTotalCost = (projectData) => {
+	if (projectData.continuing) return 'Continuing';
+	return projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A';
 };
