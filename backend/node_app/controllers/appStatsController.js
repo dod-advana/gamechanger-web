@@ -1456,10 +1456,10 @@ class AppStatsController {
 			});
 			connection.connect();
 
-			const cardPromise = await this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
-			const userCardPromise = await this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
-			const searchBarPromise = await this.getSearchGraphData(cloneName, connection);
-			const userBarPromise = await this.getUserGraphData(cloneID, connection);
+			const cardPromise = this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
+			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
+			const searchBarPromise = this.getSearchGraphData(cloneName, connection);
+			const userBarPromise = this.getUserGraphData(cloneID, connection);
 
 			let cards, userCards, searchBar, userBar;
 
