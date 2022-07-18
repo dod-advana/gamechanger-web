@@ -909,7 +909,10 @@ class JBookSearchUtility {
 		if (jbookSearchSettings.oaccts) {
 			mainAcct.bool.should.push({
 				bool: {
-					must: [{ term: { type_s: 'om' } }, { terms: { programElement_s: jbookSearchSettings.oaccts } }],
+					must: [
+						{ term: { type_s: 'om' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.oaccts } },
+					],
 				},
 			});
 		}

@@ -239,12 +239,12 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'Program Element',
-			Value: projectData.programElement,
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
 			Key: 'Project Number',
-			Value: projectData.projectNum,
+			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
@@ -613,6 +613,8 @@ const cardHandler = {
 			let displayTitleBot = '';
 			switch (item.budgetType) {
 				case 'odoc':
+					displayTitleTop = `BLI: ${item.lineNumber ?? ''} | Title: ${item.budgetActivityTitle}`;
+					break;
 				case 'pdoc':
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
 					break;
@@ -688,7 +690,7 @@ const cardHandler = {
 					: '';
 
 				if (item.budgetType === 'odoc') {
-					appropriationTitle = item.accountTitle;
+					appropriationTitle = item.appropriationTitle;
 				}
 
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
