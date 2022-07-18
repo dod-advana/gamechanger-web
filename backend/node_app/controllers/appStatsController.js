@@ -255,7 +255,7 @@ class AppStatsController {
 					documenttime desc,
 					idvisit
 				
-				`+ (limit ? `limit ${limit};` : ';'),
+				` + (limit ? `limit ${limit};` : ';'),
 				[startDate, endDate],
 				(error, results) => {
 					if (error) {
@@ -314,7 +314,8 @@ class AppStatsController {
 	 */
 	async querySearches(startDate, endDate, cloneName, limit, connection) {
 		return new Promise((resolve) => {
-			connection.query(`
+			connection.query(
+				`
 			select
 				a.idvisit as idvisit,
 				idaction_name,
@@ -336,7 +337,7 @@ class AppStatsController {
 				idvisit,
 				searchtime desc
 			
-			` + (limit ? `limit ${limit*3};` : ';'),
+			` + (limit ? `limit ${limit * 3};` : ';'),
 				[cloneName + '_combined', cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
@@ -446,7 +447,7 @@ class AppStatsController {
 					llva.server_time desc,
 					idvisit
 				
-				`+ (limit ? `limit ${limit};` : ';'),
+				` + (limit ? `limit ${limit};` : ';'),
 				[cloneName, startDate, endDate],
 				(error, results) => {
 					if (error) {
@@ -542,9 +543,8 @@ class AppStatsController {
 			}
 			if (searchMap[event.idvisit]) {
 				searchMap[event.idvisit].push({ ...event, value: search });
-			}
-			else{
-				searchMap[event.idvisit] = [event]
+			} else {
+				searchMap[event.idvisit] = [event];
 			}
 		}
 	}
@@ -573,9 +573,8 @@ class AppStatsController {
 						break;
 					}
 				}
-			}
-			else{
-				searchMap[document.idvisit] = [{...document, visited: undefined, action: 'OpenDocument'}]
+			} else {
+				searchMap[document.idvisit] = [{ ...document, visited: undefined, action: 'OpenDocument' }];
 			}
 		}
 		return searchMap;
@@ -662,7 +661,7 @@ class AppStatsController {
 			connection.connect();
 			const clones = await this.queryClones(connection);
 			const defaultClone = await this.getDefualtClone(connection);
-			res.status(200).send({clones:clones, default:defaultClone[0]});
+			res.status(200).send({ clones: clones, default: defaultClone[0] });
 		} catch (err) {
 			this.logger.error(err, '12OASMZ');
 			res.status(500).send(err);
@@ -1356,13 +1355,11 @@ class AppStatsController {
 		const openedPromise = this.queryPdfOpend(opts.startDate, opts.endDate, null, connection);
 		let searches, documents, opened;
 
-		await Promise.all([searchPromise, documentPromise, openedPromise]).then(
-			(data) => {
-				searches = data[0];
-				documents = data[1];
-				opened = data[2];
-			}
-		);
+		await Promise.all([searchPromise, documentPromise, openedPromise]).then((data) => {
+			searches = data[0];
+			documents = data[1];
+			opened = data[2];
+		});
 
 		let addSearches = this.addSearches(visitIDMap, documentMap, searches);
 		visitIDMap = addSearches[0];
@@ -1466,14 +1463,12 @@ class AppStatsController {
 
 			let cards, userCards, searchBar, userBar;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise]).then(
-				(data) => {
-					cards = data[0];
-					userCards = data[1];
-					searchBar = data[2];
-					userBar = data[3];
-				}
-			);
+			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise]).then((data) => {
+				cards = data[0];
+				userCards = data[1];
+				searchBar = data[2];
+				userBar = data[3];
+			});
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 
