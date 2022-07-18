@@ -303,7 +303,7 @@ const getCardViewPanel = (props) => {
 												);
 											}}
 										>
-											Qlik Dashboard
+											Budget Insights & Dashboards
 										</GCButton>
 									</GCTooltip>
 								</div>
