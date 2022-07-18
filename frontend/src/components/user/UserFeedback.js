@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import html2canvas from 'html2canvas';
 import EmailValidator from 'email-validator';
-import styled from 'styled-components';
 import { TextField, FormControl, Typography, MenuItem } from '@mui/material';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
@@ -12,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import GCButton from '../common/GCButton';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import GameChangerAPI from '../api/gameChanger-service-api';
+import GCCloseButton from '../common/GCCloseButton';
 
 import { setState } from '../../utils/sharedFunctions';
 
@@ -24,21 +24,6 @@ const getHeight = () => window.innerHeight;
 const buttonStyle = {
 	margin: '10px',
 };
-const CloseButton = styled.div`
-	padding: 6px;
-	background-color: white;
-	border-radius: 5px;
-	color: #8091a5 !important;
-	border: 1px solid #b0b9be;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex: 0.4;
-	position: absolute;
-	right: 15px;
-	top: 15px;
-`;
 
 export default function UserFeedback(props) {
 	const { state, dispatch } = props.context;
@@ -139,12 +124,7 @@ export default function UserFeedback(props) {
 				setErrorFlag(true);
 			}
 		} else {
-			html2canvas(document.querySelector('#app')).then(async (canvas) => {
-				/*
-                 base64 image url. It's too big to send directly to backend.
-                */
-				// const imgSrc = canvas.toDataURL('image/png');
-
+			html2canvas(document.querySelector('#app')).then(async () => {
 				try {
 					const imgSrc = ' ';
 					await gameChangerAPI.sendFeedbackPOST({
@@ -259,12 +239,15 @@ export default function UserFeedback(props) {
 		);
 	};
 
+	const emailLabel =
+		!userEmail || userEmail === '' ? 'Entering your email address will help us respond directly to you!' : '';
+
 	const renderForm = () => {
 		return (
 			<>
-				<CloseButton onClick={closeModal}>
+				<GCCloseButton onClick={closeModal}>
 					<CloseIcon fontSize="large" />
-				</CloseButton>
+				</GCCloseButton>
 				<Typography
 					variant="h2"
 					sx={{
@@ -275,17 +258,17 @@ export default function UserFeedback(props) {
 				>
 					User Feedback
 				</Typography>
-				<div style={{ height: 75 }}>
+				<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 					<TextField
 						id={'feedback-options'}
 						select
 						onChange={handleTypeChange}
 						value={feedbackType}
-						sx={{ width: '30%', m: '0 0 0 20px' }}
+						sx={{ width: '30%', m: '0 0 20px 20px' }}
 						label={!feedbackType || feedbackType === '' ? 'Select feedback type...' : ''}
 						InputLabelProps={{ shrink: false }}
 					>
-						<MenuItem value="Report a technical issue">Report a technical issue</MenuItem>*/}
+						<MenuItem value="Report a technical issue">Report a technical issue</MenuItem>
 						<MenuItem value="Request new data sources">Request new data sources</MenuItem>
 						<MenuItem value="Ask a question">Ask a question</MenuItem>
 						<MenuItem value="Request training or related materials">
@@ -301,23 +284,21 @@ export default function UserFeedback(props) {
 						onBlur={() => setEmailTextFocus(false)}
 						variant="outlined"
 						error={emailError}
-						sx={{ m: '0 0 0 20px', width: '700px' }}
+						sx={{ m: '0 75px 0 20px', width: '700px' }}
 						placeholder="Entering your email address will help us respond directly to you!"
 						value={userEmail}
 						onChange={(e) => handleEmailChange(e.target.value)}
 						helperText={emailError && !emailTextFocus ? 'Please enter a valid email address.' : ''}
 						label={
-							emailError && !emailTextFocus && (!userEmail || userEmail === '')
+							emailError && !emailTextFocus && userEmail === ''
 								? 'Please enter a valid email address.'
-								: !userEmail || userEmail === ''
-								? 'Entering your email address will help us respond directly to you!'
-								: ''
+								: emailLabel
 						}
 						InputLabelProps={{ shrink: false }}
 					/>
 				</div>
 
-				<FormControl style={{ width: '97.5%', margin: '20px 20px 10px 20px' }}>
+				<FormControl style={{ width: 'calc(100% - 40px)', margin: '20px 20px 10px 20px' }}>
 					<TextField
 						variant="outlined"
 						placeholder="Provide feedback here..."
@@ -327,7 +308,7 @@ export default function UserFeedback(props) {
 						value={feedbackText}
 						onChange={(e) => handleTextChange(e.target.value)}
 						label={!feedbackText || feedbackText === '' ? 'Provide feedback here...' : ''}
-						InputLabelProps={{ shrink: false }}
+						InputLabelProps={{ shrink: false, disabled: true }}
 					/>
 				</FormControl>
 				<div
@@ -344,7 +325,7 @@ export default function UserFeedback(props) {
 						id={'feedbackSubmit'}
 						disabled={feedbackText === '' || emailError ? true : false}
 						onClick={() => handleSubmit()}
-						style={{ margin: '10px 20px 10px 10px' }}
+						style={{ margin: '10px 20px 20px 10px' }}
 					>
 						Submit
 					</GCButton>
@@ -358,19 +339,21 @@ export default function UserFeedback(props) {
 			isOpen={state.showFeedbackModal}
 			onRequestClose={closeModal}
 			className="feedback-modal"
-			overlayClassName="feedback-modal-overlay"
 			id="feedback-modal"
 			closeTimeoutMS={300}
 			style={{
-				margin: 'auto',
-				marginTop: '30px',
-				minWidth: '80%',
-				maxWidth: '90%',
-				display: 'flex',
-				flexDirection: 'column',
-				border: '1px solid gray',
-				boxShadow: '1px 1px gray',
-				borderRadius: '2px',
+				overlay: {
+					backgroundColor: 'rgb(0,0,0,0.5)',
+					zIndex: 9999,
+				},
+				content: {
+					margin: '30px auto auto',
+					height: 'fit-content',
+					minWidth: '80%',
+					boxShadow:
+						'0px 11px 15px -7px rgb(0 0 0 / 20%), 0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%)',
+					borderRadius: '4px',
+				},
 			}}
 		>
 			{!successFlag && !errorFlag && !loading && renderForm()}
