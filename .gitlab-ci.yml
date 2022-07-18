@@ -177,6 +177,7 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/results.json
       - frontend/cypress/screenshots
       - frontend/cypress/videos
+  allow_failure: true
 
 deploy-job:       # This job runs the build for dev.
   stage: deploy

@@ -28,7 +28,7 @@ describe('Tests multiple types of policy searches.', () => {
 		cy.get('[data-cy="results-Documents"]').find('[data-cy="searchCard"]').should('have.length.greaterThan', 1);
 
 		// First result should have the correct name
-		cy.get('[data-cy="results-Documents"]')
+		cy.get('[data-cy="results-Documents"]', { timeout: 10000 })
 			.find('[data-cy="searchCard"]')
 			.first()
 			.should('contain', 'AFI 16-1301 SURVIVAL EVASION RESISTANCE AND ESCAPE (SERE) PROGRAM');
