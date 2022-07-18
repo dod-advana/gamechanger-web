@@ -179,6 +179,9 @@ class GlobalSearchHandler extends SearchHandler {
 				or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
 			if (isForFavorites) {
 				const tmpFavorites = favoriteApps.filter((app) => !isNaN(app));
+				if (tmpFavorites.length <= 0) {
+					return { hits: [], totalCount: 0, count: 0 };
+				}
 				hitQuery = `select description, permission, href, link_label, id
           from megamenu_links
           where id in (${tmpFavorites.join(',')})`;
@@ -292,7 +295,7 @@ class GlobalSearchHandler extends SearchHandler {
 			assetsResults.forEach((assetResult) => {
 				if (assetResult.status === 'fulfilled') {
 					const asset = assetResult.value.data;
-					if (searchTypeIds.includes(asset.type.id)) {
+					if (searchTypeIds?.includes(asset.type.id)) {
 						combinedAssetResults[asset.id] = asset;
 						userIds.add(asset['lastModifiedBy']);
 						results.push({ id: asset.id, resource: asset });

@@ -61,7 +61,12 @@ const HermesCardHandler = LoadableVisibility({
 		return <LoadingIndicator />;
 	},
 });
-
+const AmhsCardHandler = LoadableVisibility({
+	loader: () => import('../modules/amhs/amhsCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
 const JBookCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookCardHandler'),
 	loading: () => {
@@ -839,6 +844,8 @@ function GCCard(props) {
 				return <PolicyCardHandler {...thisProps} />;
 			case 'hermes/hermesCardHandler':
 				return <HermesCardHandler {...thisProps} />;
+			case 'amhs/amhsCardHandler':
+				return <AmhsCardHandler {...thisProps} />;
 			case 'cdo/cdoCardHandler':
 				return <CDOCardHandler {...thisProps} />;
 			case 'globalSearch/globalSearchCardHandler':
