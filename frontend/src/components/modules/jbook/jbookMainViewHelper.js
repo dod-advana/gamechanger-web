@@ -132,7 +132,12 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
+
 		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgencyES
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
@@ -144,9 +149,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
-		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
+
 		jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
@@ -155,10 +158,11 @@ export const populateDropDowns = async (state, _dispatch) => {
 			.sort(filterSortFunction);
 
 		if (jbookSearchSettings.budgetYearES) {
-			defaultOptions.budgetYear = jbookSearchSettings.budgetYearES;
+			defaultOptions.budgetYear = jbookSearchSettings.budgetYear = jbookSearchSettings.budgetYearES;
 		}
-		if (jbookSearchSettings.serviceAgencyES) {
-			defaultOptions.serviceAgency = jbookSearchSettings.serviceAgencyES;
+		if (jbookSearchSettings.appropriationNumberES) {
+			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
+				jbookSearchSettings.appropriationNumberES;
 		}
 		if (jbookSearchSettings.appropriationNumberES) {
 			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumberES;
