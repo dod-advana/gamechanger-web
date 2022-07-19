@@ -323,7 +323,7 @@ export default function UserFeedback(props) {
 					</GCButton>
 					<GCButton
 						id={'feedbackSubmit'}
-						disabled={feedbackText === '' || emailError ? true : false}
+						disabled={feedbackText === '' || emailError || userEmail === '' ? true : false}
 						onClick={() => handleSubmit()}
 						style={{ margin: '10px 20px 20px 10px' }}
 					>
