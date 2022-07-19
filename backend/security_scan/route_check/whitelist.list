@@ -59,13 +59,11 @@
 .* /api/gamechanger/appSettings/intelligentAnswers .*
 .* /api/gamechanger/appSettings/entitySearch .*
 .* /api/gamechanger/appSettings/userFeedback .*
-.* /api/gamechanger/appSettings/jiraFeedback .*
 .* /api/gamechanger/appSettings/topicSearch .*
 .* /api/gamechanger/appSettings/ltr .*
 .* /api/gamechanger/sendFeedback/intelligentSearch .*
 .* /api/gamechanger/sendFeedback/QA .*
 .* /api/gamechanger/sendFeedback/getFeedbackData .*
-.* /api/gamechanger/sendFeedback/jira .*
 .* /api/gamechanger/sendFeedback/requestDoc .*
 .* /api/matomo .*
 .* /api/matomo/user .*

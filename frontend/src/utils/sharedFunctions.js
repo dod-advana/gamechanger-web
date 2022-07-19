@@ -248,10 +248,6 @@ export const setCurrentTime = (dispatch) => {
 	return currentTime;
 };
 
-export const sendJiraFeedback = (data) => {
-	return gameChangerAPI.sendJiraFeedback(data);
-};
-
 export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => {
 	return (
 		<div>

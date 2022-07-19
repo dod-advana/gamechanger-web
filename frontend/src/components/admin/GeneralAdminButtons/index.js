@@ -17,7 +17,6 @@ export default () => {
 	const [combinedSearch, setCombinedSearch] = useState(true);
 	const [intelligentAnswers, setIntelligentAnswers] = useState(true);
 	const [entitySearch, setEntitySearch] = useState(true);
-	const [jiraFeedback, setJiraFeedback] = useState(true);
 	const [topicSearch, setTopicSearch] = useState(true);
 	const [ltr, setLTR] = useState(true);
 
@@ -179,20 +178,6 @@ export default () => {
 		}
 	};
 
-	const toggleJiraFeedback = async () => {
-		const title = 'Request Jira Feedback: ';
-		createAlert(title, 'info', 'Started');
-		try {
-			await gameChangerAPI.toggleJiraFeedbackMode().then((res) => {
-				createAlert('Toggling Jira feedback value', 'success', 'updated Jira feedback mode');
-				getJiraFeedback();
-			});
-		} catch (e) {
-			console.log(e);
-			createAlert('Toggling Jira feedback value', 'error', 'failed updating Jira feedback mode');
-		}
-	};
-
 	const toggleLTR = async () => {
 		const title = 'Toggling LTR: ';
 		createAlert(title, 'info', 'Started');
@@ -237,16 +222,6 @@ export default () => {
 		}
 	};
 
-	const getJiraFeedback = async () => {
-		try {
-			const { data } = await gameChangerAPI.getJiraFeedbackMode();
-			const value = data.value === 'true';
-			setJiraFeedback(value);
-		} catch (e) {
-			console.error('Error getting jira feedback mode', e);
-		}
-	};
-
 	const getLTR = async () => {
 		try {
 			const { data } = await gameChangerAPI.getLTRMode();
@@ -280,7 +255,6 @@ export default () => {
 		getIntelligentAnswers();
 		getEntitySearch();
 		getTopicSearch();
-		getJiraFeedback();
 		getLTR();
 	}, []);
 
@@ -440,19 +414,6 @@ export default () => {
 								<i style={styles.image} className="fa fa-id-badge fa-2x" />
 								<h2 style={styles.featureName}>
 									<span style={styles.featureNameLink}>Toggle Topic Search</span>
-								</h2>
-							</Link>
-						</Paper>
-					</div>
-					<div style={styles.feature}>
-						<Paper
-							style={jiraFeedback ? styles.paper : { ...styles.paper, backgroundColor: 'rgb(181 52 82)' }}
-							zDepth={2}
-						>
-							<Link to="#" onClick={toggleJiraFeedback} style={{ textDecoration: 'none' }}>
-								<i style={styles.image} className="fa fa-id-card-o fa-2x" />
-								<h2 style={styles.featureName}>
-									<span style={styles.featureNameLink}>Toggle Jira User Feedback</span>
 								</h2>
 							</Link>
 						</Paper>
