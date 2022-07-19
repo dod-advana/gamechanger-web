@@ -701,10 +701,10 @@ class JBookSearchUtility {
 				appropriationTitle_t: 1,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
-				programElement_t: 6,
+				programElement_t: 15,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
-				budgetLineItem_t: 6,
+				budgetLineItem_t: 15,
 			};
 
 			Object.keys(wildcardList).forEach((wildCardKey) => {
