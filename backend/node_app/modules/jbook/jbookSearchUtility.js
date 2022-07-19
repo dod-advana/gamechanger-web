@@ -751,6 +751,8 @@ class JBookSearchUtility {
 					break;
 			}
 
+			console.log(JSON.stringify(query));
+
 			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
@@ -924,6 +926,31 @@ class JBookSearchUtility {
 			let settingKeys = Object.keys(jbookSearchSettings);
 			for (const key of settingKeys) {
 				switch (key) {
+					//Has Keywords
+					case 'hasKeywords':
+						console.log('jbookSearchSettings.hasKeywords: ', jbookSearchSettings.hasKeywords);
+						const mustOrNot = jbookSearchSettings.hasKeywords[0] === 'Yes' ? 'must' : 'must_not';
+						filterQueries.push({
+							bool: {
+								[mustOrNot]: [
+									{
+										nested: {
+											path: 'keyword_n',
+											query: {
+												bool: {
+													filter: {
+														exists: {
+															field: 'keyword_n',
+														},
+													},
+												},
+											},
+										},
+									},
+								],
+							},
+						});
+						break;
 					// Review Status
 					case 'reviewStatus':
 						filterQueries.push({
