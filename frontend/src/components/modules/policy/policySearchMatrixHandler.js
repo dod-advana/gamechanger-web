@@ -42,12 +42,20 @@ const DatePickerWrapper = styled.div`
 `;
 
 const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	const newSearchSettings = structuredClone(state.searchSettings);
+	if (state.searchSettings.allOrgsSelected) {
+		newSearchSettings.allOrgsSelected = false;
+		newSearchSettings.specificOrgsSelected = true;
+	}
 	let orgName = event.target.name;
 	newSearchSettings.orgFilter = {
 		...newSearchSettings.orgFilter,
 		[orgName]: event.target.checked,
 	};
+	if (Object.values(newSearchSettings.orgFilter).filter((value) => value).length === 0) {
+		newSearchSettings.allOrgsSelected = true;
+		newSearchSettings.specificOrgsSelected = false;
+	}
 	setState(dispatch, {
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -134,7 +142,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 };
 
 const handleSelectArchivedCongress = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	const newSearchSettings = structuredClone(state.searchSettings);
 	newSearchSettings.archivedCongressSelected = event.target.checked;
 	newSearchSettings.isFilterUpdate = true;
 	setState(dispatch, {
@@ -146,11 +154,19 @@ const handleSelectArchivedCongress = (event, state, dispatch) => {
 };
 
 const handleTypeFilterChangeSearchbar = (event, type, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
+	const newSearchSettings = structuredClone(state.searchSettings);
+	if (state.searchSettings.allTypesSelected) {
+		newSearchSettings.allTypesSelected = false;
+		newSearchSettings.specificTypesSelected = true;
+	}
 	newSearchSettings.typeFilter = {
 		...newSearchSettings.typeFilter,
 		[type]: event.target.checked,
 	};
+	if (Object.values(newSearchSettings.typeFilter).filter((value) => value).length === 0) {
+		newSearchSettings.allTypesSelected = true;
+		newSearchSettings.specificTypesSelected = false;
+	}
 	setState(dispatch, {
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
@@ -227,7 +243,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 							}
 						})}
 					</FormGroup>
-					{state.searchSettings.specificTypesSelected && (
+					{
 						// eslint-disable-next-line
 						<a
 							style={{ cursor: 'pointer', fontSize: '16px' }}
@@ -237,7 +253,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 						>
 							{getSeeMoreText(state.seeMoreTypes)}
 						</a>
-					)}
+					}
 				</>
 			) : (
 				<>
