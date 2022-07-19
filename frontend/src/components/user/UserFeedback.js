@@ -161,7 +161,7 @@ export default function UserFeedback(props) {
 						closeModal();
 						setLoading(false);
 					}}
-					style={{ marginTop: '20px', width: '10%', alignSelf: 'center' }}
+					style={{ margin: '20px', width: '10%', alignSelf: 'end' }}
 				>
 					Close
 				</GCButton>
@@ -181,21 +181,23 @@ export default function UserFeedback(props) {
 				<CheckCircleOutlinedIcon
 					style={{
 						alignSelf: 'center',
-						marginTop: '150px',
+						marginTop: '100px',
 						height: '75px',
 						width: '75px',
 						filter: 'invert(26%) sepia(49%) saturate(1486%) hue-rotate(146deg) brightness(72%) contrast(103%)',
 					}}
 				/>
 
-				<h1 style={{ marginTop: '50px', alignSelf: 'center' }}>Thank You! We appreciate the feedback.</h1>
+				<h1 style={{ marginTop: '15px', marginBottom: 50, alignSelf: 'center' }}>
+					Thank You! We appreciate the feedback.
+				</h1>
 				<GCButton
 					id={'feedbackClose'}
 					onClick={() => {
 						closeModal();
 						setSuccessFlag(false);
 					}}
-					style={{ marginTop: '20px', width: '10%', alignSelf: 'center' }}
+					style={{ margin: '20px', width: '10%', alignSelf: 'end' }}
 				>
 					Close
 				</GCButton>
@@ -215,14 +217,14 @@ export default function UserFeedback(props) {
 				<ErrorOutlineIcon
 					style={{
 						alignSelf: 'center',
-						marginTop: '150px',
+						marginTop: '100px',
 						height: '75px',
 						width: '75px',
 						color: 'red',
 					}}
 				/>
 
-				<h1 style={{ marginTop: '50px', alignSelf: 'center' }}>
+				<h1 style={{ marginTop: '25px', marginBottom: 50, alignSelf: 'center' }}>
 					Sorry there seems to be an issue on our end. Please try again later
 				</h1>
 				<GCButton
@@ -231,7 +233,7 @@ export default function UserFeedback(props) {
 						closeModal();
 						setErrorFlag(false);
 					}}
-					style={{ marginTop: '20px', width: '10%', alignSelf: 'center' }}
+					style={{ margin: '20px', width: '10%', alignSelf: 'end' }}
 				>
 					Close
 				</GCButton>
