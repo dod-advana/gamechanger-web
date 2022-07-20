@@ -387,6 +387,7 @@ const GCUserDashboard = React.memo((props) => {
 							style={{
 								marginTop: '30px',
 								marginLeft: '10px',
+								marginRight: '15px',
 								cursor: 'pointer',
 								color: 'rgb(6, 159, 217)',
 							}}
@@ -430,14 +431,8 @@ const GCUserDashboard = React.memo((props) => {
 							<div style={{ display: 'flex', justifyContent: 'center' }}>
 								<GCButton
 									onClick={() => {
-										const element = document.createElement('textarea');
-										element.value = userData.api_key;
-										element.setAttribute('readonly', '');
-										element.style = { position: 'absolute', left: '-9999px' };
-										document.body.appendChild(element);
-										element.select();
-										document.execCommand('copy');
-										document.body.removeChild(element);
+										navigator.clipboard.writeText(userData.api_key);
+										setAPIKeyPopperOpen(false);
 									}}
 								>
 									Copy Key

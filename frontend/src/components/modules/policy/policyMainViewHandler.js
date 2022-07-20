@@ -226,7 +226,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		}));
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, dispatch, cancelToken);
+		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -248,7 +248,7 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, 
 		setState(dispatch, { lastOpened: filteredPubs });
 		setState(dispatch, { loadingLastOpened: false });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, dispatch, cancelToken);
+		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
 	} catch (e) {
 		//Do nothing
 		console.log(e);

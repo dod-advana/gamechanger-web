@@ -192,14 +192,15 @@ export const createTinyUrl = async (cloneData) => {
 };
 
 export const getUserData = async (dispatch) => {
-	try {
-		gcUserManagementAPI.getUserData().then((data) => {
+	gcUserManagementAPI
+		.getUserData()
+		.then((data) => {
 			setState(dispatch, { userData: data.data, userDataSet: true });
+		})
+		.catch((err) => {
+			console.log(err);
+			console.log(err.message);
 		});
-	} catch (err) {
-		console.log(err);
-		console.log(err.message);
-	}
 };
 
 export const getSearchObjectFromString = (searchString = '') => {
