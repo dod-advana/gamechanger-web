@@ -541,8 +541,12 @@ const getMetadataTableData = (
 			Hidden: budgetType !== 'RDT&E',
 		},
 		{
-			Key: 'Service Agency Name',
+			Key: 'Department',
 			Value: projectData.serviceAgency || 'N/A',
+		},
+		{
+			Key: 'Agency',
+			Value: projectData.org_jbook_desc_s || 'N/A',
 		},
 		{
 			Key: 'To Complete',
