@@ -751,8 +751,6 @@ class JBookSearchUtility {
 					break;
 			}
 
-			console.log(JSON.stringify(query));
-
 			return query;
 		} catch (e) {
 			console.log('Error making ES query for jbook');
@@ -928,7 +926,7 @@ class JBookSearchUtility {
 				switch (key) {
 					//Has Keywords
 					case 'hasKeywords':
-						console.log('jbookSearchSettings.hasKeywords: ', jbookSearchSettings.hasKeywords);
+						if (jbookSearchSettings.hasKeywords.length > 1) break;
 						const mustOrNot = jbookSearchSettings.hasKeywords[0] === 'Yes' ? 'must' : 'must_not';
 						filterQueries.push({
 							bool: {
