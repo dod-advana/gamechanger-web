@@ -6,6 +6,7 @@ const constants = require('../config/constants');
 const https = require('https');
 const fs = require('fs');
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
+const { JIRA_CONFIG } = constants;
 const axios = require('axios').default;
 
 class FeedbackController {
@@ -19,6 +20,7 @@ class FeedbackController {
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
+		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
 		this.requestDocIngest = this.requestDocIngest.bind(this);
 	}
 
@@ -86,6 +88,53 @@ class FeedbackController {
 		} catch (err) {
 			this.logger.error(err, '9FCQYV2', userId);
 			res.status(500).send(err);
+		}
+	}
+
+	async sendJiraFeedback(req, res) {
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		try {
+			const { name, email, feedback, rating } = req.body;
+			console.log('(JIRA FEEDBACK) req.body: ', req.body);
+			const authConfig = {
+				httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+				auth: {
+					username: JIRA_CONFIG.username,
+					password: JIRA_CONFIG.password,
+				},
+			};
+
+			const url = `https://${JIRA_CONFIG.domain}/rest/api/2/issue/`;
+			console.log('(JIRA FEEDBACK) url: ', url);
+
+			const data = {
+				fields: {
+					project: {
+						key: JIRA_CONFIG.project_key,
+					},
+					summary: 'User Submitted Feedback',
+					description: `${feedback}. \n *Reporter*: ${name} \n *E-mail*: [mailto:${email}]`,
+					[JIRA_CONFIG.rating_id]: {
+						value: rating + '',
+					},
+					[JIRA_CONFIG.advana_product]: {
+						value: 'GAMECHANGER',
+					},
+					issuetype: {
+						name: JIRA_CONFIG.feedbackType,
+					},
+				},
+			};
+			console.log('(JIRA FEEDBACK) data: ', data);
+
+			const result = await axios.post(url, data, authConfig);
+			console.log('(JIRA FEEDBACK) result.data: ', result.data);
+
+			res.status(201).send(result.data);
+		} catch (err) {
+			console.log('(JIRA FEEDBACK) error response ', err.response);
+			this.logger.error(err, '0KYXA1V', userId);
+			res.status(500).send({ error: true });
 		}
 	}
 

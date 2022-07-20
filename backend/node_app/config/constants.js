@@ -242,6 +242,15 @@ module.exports = Object.freeze({
 		ENVIRONMENT: process.env.SERVICE_ACCOUNT_ENV,
 	},
 	REQUEST_TYPE_ID: 113,
+	JIRA_CONFIG: {
+		username: process.env.JIRA_USERNAME,
+		password: process.env.JIRA_PASSWORD,
+		domain: process.env.JIRA_DOMAIN,
+		project_key: process.env.JIRA_PROJECT_KEY,
+		rating_id: process.env.JIRA_RATING_ID,
+		advana_product: process.env.JIRA_ADVANA_PRODUCT,
+		feedbackType: process.env.JIRA_FEEDBACK_TYPE,
+	},
 	GRAPH_CONFIG: {
 		PULL_NODES_FROM_NEO4J_MAX_LIMIT: process.env.PULL_NODES_FROM_NEO4J_MAX_LIMIT,
 		GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT: process.env.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT,

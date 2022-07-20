@@ -213,6 +213,8 @@ router.get('/appSettings/intelligentAnswers', appSettings.getIntelligentAnswersM
 router.post('/appSettings/intelligentAnswers', appSettings.setIntelligentAnswersMode);
 router.get('/appSettings/entitySearch', appSettings.getEntitySearchMode);
 router.post('/appSettings/entitySearch', appSettings.setEntitySearchMode);
+router.get('/appSettings/jiraFeedback', appSettings.getJiraFeedbackMode);
+router.post('/appSettings/jiraFeedback', appSettings.toggleJiraFeedbackMode);
 router.get('/appSettings/topicSearch', appSettings.getTopicSearchMode);
 router.post('/appSettings/topicSearch', appSettings.setTopicSearchMode);
 router.get('/appSettings/ltr', appSettings.getLTRMode);
@@ -222,6 +224,7 @@ router.post('/sendFrontendError', appSettings.logFrontendError);
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
+router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 router.post('/sendFeedback/requestDoc', feedback.requestDocIngest);
 
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
