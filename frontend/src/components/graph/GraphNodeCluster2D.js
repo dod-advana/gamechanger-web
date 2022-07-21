@@ -88,49 +88,49 @@ const CloseButton = styled.div`
 `;
 
 const StyledMenu = styled.nav`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
-  opacity: ${({ open }) => (open ? '1' : '0')};
-  visibility: ${({ open }) => (open ? 'visible' : 'hidden')}
-  text-align: left;
-  padding: 2rem;
-  position: absolute;
-  right: 5%;
-  margin-top: 5px;
-  transition: opacity 0.3s ease-in-out;
-  z-index: 98;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.9);
+	opacity: ${({ open }) => (open ? '1' : '0')};
+	visibility: ${({ open }) => (open ? 'visible' : 'hidden')};
+	text-align: left;
+	padding: 2rem;
+	position: absolute;
+	right: 5%;
+	margin-top: 5px;
+	transition: opacity 0.3s ease-in-out;
+	z-index: 98;
 
-  @media (max-width: 576px) {
-      width: 100rem;
-    }
-    
-  Input {
-  	width: 140px;
-  }
+	@media (max-width: 576px) {
+		width: 100rem;
+	}
 
-  i {
-    font-size: 1.5rem;
-    text-transform: uppercase;
-    padding: 2rem 0;
-    font-weight: bold;
-    color: #0D0C1D;
-    text-decoration: none;
+	Input {
+		width: 140px;
+	}
 
-    @media (max-width: 576px) {
-      font-size: 1.5rem;
-      text-align: left;
-    }
-  }
-  
-  .settings-item {
-  	margin: 5px 0;
-  }
-  
-  .form-item-width {
-  	min-width: 160px;
-  }
+	i {
+		font-size: 1.5rem;
+		text-transform: uppercase;
+		padding: 2rem 0;
+		font-weight: bold;
+		color: #0d0c1d;
+		text-decoration: none;
+
+		@media (max-width: 576px) {
+			font-size: 1.5rem;
+			text-align: left;
+		}
+	}
+
+	.settings-item {
+		margin: 5px 0;
+	}
+
+	.form-item-width {
+		min-width: 160px;
+	}
 `;
 
 const StyledBurger = styled.button`
