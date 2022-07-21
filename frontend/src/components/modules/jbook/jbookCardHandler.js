@@ -693,9 +693,9 @@ const cardHandler = {
 
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
 				let cycle = item.budgetCycle ?? 'PB';
-				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
+				budgetPrefix = cycle + year + (item.by1Request ? ': ' : '');
 
-				budgetAmount = item.currentYearAmount ? '$' + item.currentYearAmount + ' M' : '';
+				budgetAmount = item.by1Request ? '$' + item.by1Request + ' M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
