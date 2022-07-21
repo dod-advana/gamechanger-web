@@ -72,7 +72,7 @@ const initState = {
 			'OSD CIO|NSCAI',
 			'OSD CIO',
 		],
-		hasKeywords: ['Yes', 'No'],
+		hasKeywords: [],
 
 		minBY1Funding: '',
 		maxBY1Funding: '',
@@ -166,7 +166,7 @@ const initState = {
 		projectNum: '',
 		projectTitle: '',
 		sort: [],
-		hasKeywords: ['Yes', 'No'],
+		hasKeywords: [],
 		secondaryReviewer: [
 			'Vicki Belleau',
 			'Robert Brooks',
