@@ -84,6 +84,7 @@ const JBookProfilePage = (props) => {
 		profilePageBudgetYear,
 		serviceValidation,
 		pocValidation,
+		commentThread,
 	} = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
@@ -231,12 +232,29 @@ const JBookProfilePage = (props) => {
 		}
 	};
 
+	const getCommentThread = async (id, portfolioName) => {
+		const commentThreadData = await gameChangerAPI.callDataFunction({
+			functionName: 'getCommentThread',
+			cloneName: 'jbook',
+			options: {
+				docID: id,
+				portfolioName,
+			},
+		});
+
+		if (commentThreadData) {
+			setState(dispatch, { commentThread: commentThreadData.data });
+		}
+	};
+
+	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
 
 		try {
 			setProfileLoading(true);
 
+			// get profile page data for all budget years
 			allBYProjectData = await gameChangerAPI.callDataFunction({
 				functionName: 'getAllBYProjectData',
 				cloneName: cloneData.clone_name,
@@ -253,10 +271,12 @@ const JBookProfilePage = (props) => {
 
 				setProfileLoading(false);
 
-				selectBudgetYearProjectData(allBYProjectData, year, portfolioName);
+				await selectBudgetYearProjectData(allBYProjectData, year, portfolioName);
 			}
 
-			getDropdownData();
+			await getDropdownData();
+
+			await getCommentThread(id, portfolioName);
 		} catch (err) {
 			console.log(err);
 		}
@@ -943,6 +963,15 @@ const JBookProfilePage = (props) => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
+		await gameChangerAPI.callDataFunction({
+			functionName: 'createComment',
+			cloneName: 'jbook',
+			options: {
+				docID,
+				portfolioName: selectedPortfolio,
+				message: 'just another super cool comment',
+			},
+		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
@@ -1294,7 +1323,14 @@ const JBookProfilePage = (props) => {
 						/>
 					</div>
 					{selectedPortfolio !== 'General' && (
-						<ClassificationScoreCard scores={scorecardData(projectData.classification)} />
+						<ClassificationScoreCard
+							scores={scorecardData(projectData.classification)}
+							commentThread={commentThread}
+							gameChangerAPI={gameChangerAPI}
+							docID={docID}
+							portfolioName={selectedPortfolio}
+							getCommentThread={getCommentThread}
+						/>
 					)}
 				</StyledLeftContainer>
 				<StyledMainContainer>

@@ -1248,7 +1248,7 @@ class JBookDataHandler extends DataHandler {
 			const { docID, portfolioName } = req.body;
 
 			return await this.comments.findAll({
-				order: [['createdAt', 'DESC']],
+				order: [['createdAt', 'ASC']],
 				where: {
 					deleted: false,
 					docID,
@@ -1264,7 +1264,7 @@ class JBookDataHandler extends DataHandler {
 	// create comment, MUST have docID, portfolioName, and message
 	async createComment(req, userId) {
 		try {
-			await this.comments.create({ ...req.body, deleted: false });
+			await this.comments.create({ ...req.body, author: userId, deleted: false });
 			return true;
 		} catch (e) {
 			const { message } = e;
