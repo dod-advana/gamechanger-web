@@ -232,6 +232,19 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
+	let showPrediction = false;
+	let predictionString = '';
+	if (
+		selectedPortfolio !== 'General' &&
+		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions[selectedPortfolio].confidence &&
+		projectData.ai_predictions[selectedPortfolio].top_class
+	) {
+		showPrediction = true;
+		let num = projectData.ai_predictions[selectedPortfolio].confidence;
+		num = Math.round(num * 100);
+		predictionString = `"${projectData.ai_predictions[selectedPortfolio].top_class}" - ${num}%`;
+	}
 	return [
 		{
 			Key: 'Project',
@@ -342,6 +355,14 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 									: 'None'}
 							</div>
 						),
+					},
+			  ]
+			: []),
+		...(showPrediction
+			? [
+					{
+						Key: 'Predicted Tag',
+						Value: predictionString,
 					},
 			  ]
 			: []),
