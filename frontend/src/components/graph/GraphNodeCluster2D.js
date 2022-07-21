@@ -14,12 +14,11 @@ import {
 } from '../../utils/graphUtils';
 import { convertHexToRgbA, getLinkColor, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import styled from 'styled-components';
-import { FormControl, Input, InputLabel, Popper } from '@material-ui/core';
+import { FormControl, Input, InputLabel, Popper, SvgIcon } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 import GCTooltip from '../common/GCToolTip';
-import { SvgIcon } from '@material-ui/core';
 import { trackEvent } from '../telemetry/Matomo';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';
@@ -237,7 +236,7 @@ const EdgeLegendItem = (props) => {
 
 export default function GraphNodeCluster2D(props) {
 	const {
-		renderContextMenu = () => {},
+		renderContextMenu = () => undefined,
 		runningQuery = false,
 		graph = { nodes: [], edges: [] },
 		graphRefProp = null,
@@ -279,14 +278,12 @@ export default function GraphNodeCluster2D(props) {
 		shouldShowLegend = true,
 		showBasic = false,
 		showSettingsMenu = true,
-		showCommunities = false,
-		handleSetCommunityView = null,
 		cloneData,
 		zoom = 1,
 		nodeGroupMenuOpenProp = undefined,
 		nodeGroupMenuTargetProp = undefined,
 		nodeGroupMenuLabelProp = undefined,
-		setNodeGroupMenuLabelProp = () => {},
+		setNodeGroupMenuLabelProp = () => undefined,
 		closeGroupNodeMenu = undefined,
 		orgTypesSelected = [],
 		nodePointerAreaPaint,
@@ -341,43 +338,39 @@ export default function GraphNodeCluster2D(props) {
 	}, []);
 
 	useEffect(() => {
-		const legendData = {};
-		const edgeLabels = {};
+		const newLegendData = {};
+		const newEdgeLabels = {};
 		if (graph.labels) {
-			const nodeLabelColors = {};
+			const newNodeLabelColors = {};
 			graph.labels.forEach((label) => {
-				nodeLabelColors[label] = { color: '', textColor: '' };
+				newNodeLabelColors[label] = { color: '', textColor: '' };
 				const count = graph.nodes.filter((node) => {
 					return node.label === label;
 				}).length;
-				legendData[label] = { name: label, count: count };
+				newLegendData[label] = { name: label, count: count };
 			});
 
-			setNodeLabelColors(nodeLabelColors);
-			setLegendData(legendData);
+			setNodeLabelColors(newNodeLabelColors);
+			setLegendData(newLegendData);
 		}
-
-		// Object.keys(edgeLabels).forEach(label => {
-		// 	edgeLabels[label] = 0;
-		// });
 
 		if (graph.edges) {
 			graph.edges.forEach((edge) => {
-				if (!Object.keys(edgeLabels).includes(edge.label)) {
-					edgeLabels[edge.label] = 1;
+				if (!Object.keys(newEdgeLabels).includes(edge.label)) {
+					newEdgeLabels[edge.label] = 1;
 				} else {
-					edgeLabels[edge.label] += 1;
+					newEdgeLabels[edge.label] += 1;
 				}
 			});
 
 			const tmpEdgeLabelPatterns = {};
-			Object.keys(edgeLabels).forEach((label, idx) => {
+			Object.keys(newEdgeLabels).forEach((label, idx) => {
 				tmpEdgeLabelPatterns[label] = {
 					label: label,
 					pattern: edgePatterns[idx] || [],
 				};
 			});
-			setEdgeLabels(edgeLabels);
+			setEdgeLabels(newEdgeLabels);
 			setEdgeLabelPatterns(tmpEdgeLabelPatterns);
 		}
 	}, [graph]);
@@ -427,7 +420,27 @@ export default function GraphNodeCluster2D(props) {
 				}
 		  };
 
-	const highlightSelectedNodes = (node, edges) => {
+	const processEdgesForHighlight = (selectedEdges, tmpNode, alreadyVisitedNodes, tmpNewNodes, index) => {
+		selectedEdges.forEach((edge) => {
+			if (edge.source === tmpNode) {
+				if (!alreadyVisitedNodes.includes(edge.target) && !tmpNewNodes.includes(edge.target)) {
+					tmpNewNodes.push(edge.target);
+					alreadyVisitedNodes.push(edge.target);
+					highlightNodes.add(edge.target);
+					degreeConnected[index].push(edge.target);
+				}
+			} else if (edge.target === tmpNode) {
+				if (!alreadyVisitedNodes.includes(edge.source) && !tmpNewNodes.includes(edge.source)) {
+					tmpNewNodes.push(edge.source);
+					alreadyVisitedNodes.push(edge.source);
+					highlightNodes.add(edge.source);
+					degreeConnected[index].push(edge.source);
+				}
+			}
+		});
+	};
+
+	const highlightSelectedNodes = (node, selectedEdges) => {
 		highlightNodes.clear();
 
 		// Get nth degree relationships
@@ -437,23 +450,7 @@ export default function GraphNodeCluster2D(props) {
 			degreeConnected[i] = [];
 			const tmpNewNodes = [];
 			newNodes.forEach((tmpNode) => {
-				edges.forEach((edge) => {
-					if (edge.source === tmpNode) {
-						if (!alreadyVisitedNodes.includes(edge.target) && !tmpNewNodes.includes(edge.target)) {
-							tmpNewNodes.push(edge.target);
-							alreadyVisitedNodes.push(edge.target);
-							highlightNodes.add(edge.target);
-							degreeConnected[i].push(edge.target);
-						}
-					} else if (edge.target === tmpNode) {
-						if (!alreadyVisitedNodes.includes(edge.source) && !tmpNewNodes.includes(edge.source)) {
-							tmpNewNodes.push(edge.source);
-							alreadyVisitedNodes.push(edge.source);
-							highlightNodes.add(edge.source);
-							degreeConnected[i].push(edge.source);
-						}
-					}
-				});
+				processEdgesForHighlight(selectedEdges, tmpNode, alreadyVisitedNodes, tmpNewNodes, i);
 			});
 			newNodes = tmpNewNodes;
 		}
@@ -461,7 +458,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleNodeClick = onNodeClick
 		? onNodeClick
-		: async (node, event) => {
+		: async (node, _event) => {
 				trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNode', 'onClick', node.name);
 				if (selectedNodeID !== node.id) {
 					setSelectedNodeID(node.id);
@@ -472,7 +469,7 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleNodeDrag = onNodeDrag
 		? onNodeDrag
-		: (node, translate) => {
+		: (_node, _translate) => {
 				setShouldRunSimulation(true);
 		  };
 
@@ -488,18 +485,16 @@ export default function GraphNodeCluster2D(props) {
 
 	const handleBackgroundClick = onBackgroundClick
 		? onBackgroundClick
-		: (event) => {
+		: (_event) => {
 				setSelectedNodeID(-1);
 		  };
 
 	const handleOnZoom = onZoom
 		? onZoom
 		: (event) => {
-				// trackEvent('Graph', 'onZoom', 'zoom', event.k);
 				if (event.k > zoomLimit) {
 					const ref = graphRefProp ? graphRefProp : graphRef;
 					ref.current.zoom(zoomLimit);
-				} else {
 				}
 		  };
 
@@ -764,6 +759,59 @@ export default function GraphNodeCluster2D(props) {
 		setNodeGroupMenuLabelProp(tab);
 	};
 
+	const renderFilterTabs = (filterTab2dArray, activeFilterTab) => {
+		return filterTab2dArray.map((row) => (
+			<div style={legendStyles.tabsContainer}>
+				{row.map((tab) => (
+					<GCTooltip title={tab} enterDelay={30}>
+						<Typography
+							key={tab}
+							style={
+								activeFilterTab === tab
+									? { ...legendStyles.tab, ...legendStyles.activeTab }
+									: { ...legendStyles.tab }
+							}
+							variant="body1"
+							onClick={() => setActiveTab(tab)}
+						>
+							{tab}
+						</Typography>
+					</GCTooltip>
+				))}
+			</div>
+		));
+	};
+
+	const renderNodesList = (nodesInGroup) => {
+		return nodesInGroup.map((node) => {
+			let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
+			return (
+				<GCTooltip
+					title={isTopicOrEntityNode || node.label === 'UKN_Document' ? '' : node.display_title_s}
+					arrow
+					style={{ zIndex: 99999 }}
+				>
+					<StyledNodeGroupNode
+						onClick={() => {
+							handleNodeClick(node, null);
+							handleCloseGroupNodeMenu();
+						}}
+						onMouseEnter={() => {
+							const ref = graphRefProp ? graphRefProp : graphRef;
+							ref.current.centerAt(node.x, node.y, 500);
+							handleNodeHover(node);
+						}}
+						onMouseLeave={() => {
+							handleNodeHover(null);
+						}}
+					>
+						{isTopicOrEntityNode ? node.name : `${node.doc_type} ${node.doc_num}`}
+					</StyledNodeGroupNode>
+				</GCTooltip>
+			);
+		});
+	};
+
 	const renderNodeGroupMenu = () => {
 		const activeFilterTab =
 			nodeGroupMenuLabel ||
@@ -810,26 +858,7 @@ export default function GraphNodeCluster2D(props) {
 									borderTop: '1px solid lightgray',
 								}}
 							>
-								{filterTab2dArray.map((row) => (
-									<div style={legendStyles.tabsContainer}>
-										{row.map((tab) => (
-											<GCTooltip title={tab} enterDelay={30}>
-												<Typography
-													key={tab}
-													style={
-														activeFilterTab === tab
-															? { ...legendStyles.tab, ...legendStyles.activeTab }
-															: { ...legendStyles.tab }
-													}
-													variant="body1"
-													onClick={() => setActiveTab(tab)}
-												>
-													{tab}
-												</Typography>
-											</GCTooltip>
-										))}
-									</div>
-								))}
+								{renderFilterTabs(filterTab2dArray, activeFilterTab)}
 							</div>
 							<div
 								style={{
@@ -840,37 +869,7 @@ export default function GraphNodeCluster2D(props) {
 									overflow: 'auto',
 								}}
 							>
-								{nodesInGroup.map((node) => {
-									let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
-									return (
-										<GCTooltip
-											title={
-												isTopicOrEntityNode || node.label === 'UKN_Document'
-													? ''
-													: node.display_title_s
-											}
-											arrow
-											style={{ zIndex: 99999 }}
-										>
-											<StyledNodeGroupNode
-												onClick={() => {
-													handleNodeClick(node, null);
-													handleCloseGroupNodeMenu();
-												}}
-												onMouseEnter={() => {
-													const ref = graphRefProp ? graphRefProp : graphRef;
-													ref.current.centerAt(node.x, node.y, 500);
-													handleNodeHover(node);
-												}}
-												onMouseLeave={() => {
-													handleNodeHover(null);
-												}}
-											>
-												{isTopicOrEntityNode ? node.name : `${node.doc_type} ${node.doc_num}`}
-											</StyledNodeGroupNode>
-										</GCTooltip>
-									);
-								})}
+								{renderNodesList(nodesInGroup)}
 							</div>
 						</div>
 					</div>
@@ -896,6 +895,28 @@ export default function GraphNodeCluster2D(props) {
 		: (node) => {
 				return node.name;
 		  };
+
+	const drawNode = (ctx, node, nodeColor, outlineColor, outlineThickness, nodeTextColor, globalScale) => {
+		ctx.beginPath();
+
+		ctx.fillStyle = nodeColor;
+		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
+		ctx.fill();
+		ctx.strokeStyle = outlineColor;
+		ctx.lineWidth = outlineThickness / globalScale;
+		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
+		ctx.stroke();
+
+		// Selected/Hovered Outline
+		if (node.id === selectedNodeID || node.id === nodeHoverID) {
+			ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
+			ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
+			ctx.arc(node.x, node.y, node.value * nodeRelativeSize + 0.2, 0, 2 * Math.PI, false);
+			ctx.stroke();
+		}
+
+		handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
+	};
 
 	const handleCreateGraphNode = createGraphNode
 		? createGraphNode
@@ -925,26 +946,44 @@ export default function GraphNodeCluster2D(props) {
 						? getNodeOutlineColors(node, hiddenNodeAlpha, nodeHexColor, connectedLevel)
 						: getNodeOutlineColors(node, nodeAlpha, nodeHexColor, connectedLevel);
 
-				ctx.beginPath();
-
-				ctx.fillStyle = nodeColor;
-				ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
-				ctx.fill();
-				ctx.strokeStyle = outlineColor;
-				ctx.lineWidth = outlineThickness / globalScale;
-				ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
-				ctx.stroke();
-
-				// Selected/Hovered Outline
-				if (node.id === selectedNodeID || node.id === nodeHoverID) {
-					ctx.strokeStyle = convertHexToRgbA('#6ac6ff', nodeAlpha);
-					ctx.lineWidth = (outlineThickness + 0.5) / globalScale;
-					ctx.arc(node.x, node.y, node.value * nodeRelativeSize + 0.2, 0, 2 * Math.PI, false);
-					ctx.stroke();
-				}
-
-				handleCreateNodeText(node, ctx, globalScale, nodeTextColor);
+				drawNode(ctx, node, nodeColor, outlineColor, outlineThickness, nodeTextColor, globalScale);
 		  };
+
+	const drawTextEvenLines = (ctx, line, lines, node, fontSize, i, mid) => {
+		// Even so no middle
+		if (i <= mid) {
+			ctx.fillText(
+				line,
+				node.x,
+				node.y - fontSize * Math.floor(mid - i) + (lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
+			);
+		} else {
+			ctx.fillText(
+				line,
+				node.x,
+				node.y + fontSize * Math.floor(i - mid) + (lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
+			);
+		}
+	};
+
+	const drawTextOddLines = (ctx, line, lines, node, fontSize, i, mid) => {
+		// Odd So middle
+		if (i < mid) {
+			ctx.fillText(
+				line,
+				node.x,
+				node.y - fontSize * Math.floor(mid - i) + (lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
+			);
+		} else {
+			ctx.fillText(
+				line,
+				node.x,
+				node.y +
+					fontSize * Math.floor(i + 1 - mid) +
+					(lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
+			);
+		}
+	};
 
 	const handleCreateNodeText = (node, ctx, globalScale, nodeTextColor) => {
 		const label = handleCreateNodeLabel(node);
@@ -962,46 +1001,30 @@ export default function GraphNodeCluster2D(props) {
 
 				const mid = lines.lines.length / 2;
 				if (lines.lines.length % 2 === 0) {
-					// Even so no middle
-					if (i <= mid) {
-						ctx.fillText(
-							line,
-							node.x,
-							node.y -
-								fontSize * Math.floor(mid - i) +
-								(lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
-						);
-					} else {
-						ctx.fillText(
-							line,
-							node.x,
-							node.y +
-								fontSize * Math.floor(i - mid) +
-								(lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
-						);
-					}
+					drawTextEvenLines(ctx, line, lines, node, fontSize, i, mid);
 				} else {
-					// Odd So middle
-					if (i < mid) {
-						ctx.fillText(
-							line,
-							node.x,
-							node.y -
-								fontSize * Math.floor(mid - i) +
-								(lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
-						);
-					} else {
-						ctx.fillText(
-							line,
-							node.x,
-							node.y +
-								fontSize * Math.floor(i + 1 - mid) +
-								(lines.lines.length > 1 ? fontSize / lines.lines.length : 0)
-						);
-					}
+					drawTextOddLines(ctx, line, lines, node, fontSize, i, mid);
 				}
 			});
 		}
+	};
+
+	const drawLink = (ctx, link, lineWidth, start, end, globalScale) => {
+		ctx.beginPath();
+		ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
+		ctx.lineWidth = lineWidth / globalScale;
+		ctx.moveTo(start.x, start.y);
+
+		const controlPoints = link.__controlPoints;
+
+		if (!controlPoints) {
+			// Straight line
+			ctx.lineTo(end.x, end.y);
+		} else {
+			// Use quadratic curves for regular lines and bezier for loops
+			ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
+		}
+		ctx.stroke();
 	};
 
 	const handleCreateGraphLink = createGraphLink
@@ -1028,26 +1051,7 @@ export default function GraphNodeCluster2D(props) {
 
 				ctx.save();
 
-				// Draw link
-				ctx.beginPath();
-				ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
-				ctx.lineWidth = lineWidth / globalScale;
-				ctx.moveTo(start.x, start.y);
-
-				const controlPoints = link.__controlPoints;
-
-				if (!controlPoints) {
-					// Straight line
-					ctx.lineTo(end.x, end.y);
-				} else {
-					// Use quadratic curves for regular lines and bezier for loops
-					ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](
-						...controlPoints,
-						end.x,
-						end.y
-					);
-				}
-				ctx.stroke();
+				drawLink(ctx, link, lineWidth, start, end, globalScale);
 
 				if (globalScale > 5) {
 					// Draw Arrow
@@ -1061,7 +1065,7 @@ export default function GraphNodeCluster2D(props) {
 				ctx.restore();
 		  };
 
-	const handleCreateGraphLinkText = (link, ctx, globalScale) => {
+	const handleCreateGraphLinkText = (link, ctx, _globalScale) => {
 		const MAX_FONT_SIZE = 4;
 		const LABEL_NODE_MARGIN = nodeRelativeSize * 1.5;
 
@@ -1123,6 +1127,37 @@ export default function GraphNodeCluster2D(props) {
 				return getLinkColor(link, linkAlpha);
 		  };
 
+	const processGraphEdges = (centralNode) => {
+		const newNodes = {};
+		let count = 0;
+		graph.edges.forEach((edge) => {
+			const end = edge.target;
+			const start = edge.source;
+
+			if (newNodes.hasOwnProperty(end.id)) {
+				newNodes[end.id] += 1;
+			} else {
+				newNodes[end.id] = 1;
+			}
+
+			if (newNodes.hasOwnProperty(start.id)) {
+				newNodes[start.id] += 1;
+			} else {
+				newNodes[start.id] = 1;
+			}
+
+			if (newNodes[end.id] > count) {
+				count = newNodes[end.id];
+				centralNode = end;
+			} else if (newNodes[start.id] > count) {
+				count = newNodes[start.id];
+				centralNode = start;
+			} else if (!centralNode) {
+				centralNode = end;
+			}
+		});
+	};
+
 	const handleSimulationStop = onSimulationStop
 		? onSimulationStop
 		: () => {
@@ -1139,7 +1174,6 @@ export default function GraphNodeCluster2D(props) {
 
 				if (!shouldCenter) setShouldCenter(true);
 
-				const nodes = {};
 				let centralNode = null;
 
 				graph.nodes.forEach((node) => {
@@ -1148,33 +1182,7 @@ export default function GraphNodeCluster2D(props) {
 					node.fz = null;
 				});
 
-				let count = 0;
-				graph.edges.forEach((edge) => {
-					const end = edge.target;
-					const start = edge.source;
-
-					if (nodes.hasOwnProperty(end.id)) {
-						nodes[end.id] += 1;
-					} else {
-						nodes[end.id] = 1;
-					}
-
-					if (nodes.hasOwnProperty(start.id)) {
-						nodes[start.id] += 1;
-					} else {
-						nodes[start.id] = 1;
-					}
-
-					if (nodes[end.id] > count) {
-						count = nodes[end.id];
-						centralNode = end;
-					} else if (nodes[start.id] > count) {
-						count = nodes[start.id];
-						centralNode = start;
-					} else if (!centralNode) {
-						centralNode = end;
-					}
-				});
+				processGraphEdges(centralNode);
 
 				if (centralNode) {
 					centralNode.fx = centralNode?.x;
@@ -1195,6 +1203,30 @@ export default function GraphNodeCluster2D(props) {
 		setNodeRelativeSize(size);
 	};
 
+	const processEdgesForN = (atLeastN, edgeCount, numEdges, edgeSource, edgeTarget) => {
+		if (!atLeastN.includes(edgeSource)) {
+			if (edgeCount[edgeSource]) {
+				edgeCount[edgeSource] += 1;
+				if (edgeCount[edgeSource] >= numEdges) {
+					atLeastN.push(edgeSource);
+				}
+			} else {
+				edgeCount[edgeSource] = 1;
+			}
+		}
+
+		if (!atLeastN.includes(edgeTarget)) {
+			if (edgeCount[edgeTarget]) {
+				edgeCount[edgeTarget] += 1;
+				if (edgeCount[edgeTarget] >= numEdges) {
+					atLeastN.push(edgeTarget);
+				}
+			} else {
+				edgeCount[edgeTarget] = 1;
+			}
+		}
+	};
+
 	const getNodesWithNEdges = (numEdges) => {
 		const edgeCount = {};
 		const atLeastN = [];
@@ -1203,27 +1235,7 @@ export default function GraphNodeCluster2D(props) {
 			const edgeSource = edge.source.id ?? edge.source;
 			const edgeTarget = edge.target.id ?? edge.target;
 
-			if (!atLeastN.includes(edgeSource)) {
-				if (edgeCount[edgeSource]) {
-					edgeCount[edgeSource] += 1;
-					if (edgeCount[edgeSource] >= numEdges) {
-						atLeastN.push(edgeSource);
-					}
-				} else {
-					edgeCount[edgeSource] = 1;
-				}
-			}
-
-			if (!atLeastN.includes(edgeTarget)) {
-				if (edgeCount[edgeTarget]) {
-					edgeCount[edgeTarget] += 1;
-					if (edgeCount[edgeTarget] >= numEdges) {
-						atLeastN.push(edgeTarget);
-					}
-				} else {
-					edgeCount[edgeTarget] = 1;
-				}
-			}
+			processEdgesForN(atLeastN, edgeCount, numEdges, edgeSource, edgeTarget);
 		});
 
 		if (atLeastN.length <= 0) {
@@ -1320,30 +1332,6 @@ export default function GraphNodeCluster2D(props) {
 				<div>
 					<i>Node Settings</i>
 					<form noValidate autoComplete="off">
-						{false && (
-							<div className={'settings-item'}>
-								<div>Show Communities</div>
-								<UOTToggleSwitch
-									id="community-mode"
-									rightActive={showCommunities}
-									leftLabel={'Off'}
-									rightLabel={'On'}
-									customColor={gcOrange}
-									onClick={() => {
-										trackEvent(
-											getTrackingNameForFactory(cloneData.clone_name),
-											'graphView',
-											'showCommunities',
-											!showCommunities ? 1 : 0
-										);
-										handleSetCommunityView(!showCommunities);
-										setShouldRunSimulation(true);
-									}}
-									leftLabelStyle={{ marginBottom: 0 }}
-									rightLabelStyle={{ marginBottom: 0 }}
-								/>
-							</div>
-						)}
 						<div className={'settings-item'}>
 							<FormControl className={'form-item-width'}>
 								<InputLabel htmlFor="node-size">Node Size</InputLabel>
@@ -1483,7 +1471,7 @@ export default function GraphNodeCluster2D(props) {
 				nodePointerAreaPaint={nodePointerAreaPaint}
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
-				linkPointerAreaPaint={() => {}}
+				linkPointerAreaPaint={() => undefined}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}
