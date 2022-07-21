@@ -196,13 +196,13 @@ const JBookProfilePage = (props) => {
 
 	const selectBudgetYearProjectData = (allBYProjectData, year, portfolioName) => {
 		try {
-			console.log('budget year project data:');
 			let newProjectData = allBYProjectData[year] || {};
 
 			setBudgetLineItem(newProjectData.budgetLineItem || '');
 			setProgramElement(newProjectData.programElement || '');
 			setProjectNum(newProjectData.projectNum || '');
 			setAppropriationNumber(newProjectData.appropriationNumber || '');
+			setDocID(newProjectData.id || '');
 
 			let tempMapping = setContractData(newProjectData);
 
@@ -211,7 +211,10 @@ const JBookProfilePage = (props) => {
 			}
 
 			setBudgetYear(year);
+
 			setState(dispatch, { projectData: newProjectData, profilePageBudgetYear: year });
+
+			return newProjectData.id;
 		} catch (err) {
 			console.log('Error setting budget year project data');
 			console.log(err);
@@ -1310,6 +1313,8 @@ const JBookProfilePage = (props) => {
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}
 							projectData={projectData}
+							docID={docID}
+							getCommentThread={getCommentThread}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>
@@ -1320,6 +1325,7 @@ const JBookProfilePage = (props) => {
 							selectBudgetYearProjectData={selectBudgetYearProjectData}
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}
+							getCommentThread={getCommentThread}
 						/>
 					</div>
 					{selectedPortfolio !== 'General' && (

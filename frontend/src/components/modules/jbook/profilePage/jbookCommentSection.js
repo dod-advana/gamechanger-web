@@ -26,13 +26,14 @@ const CommentTitle = styled.div`
 `;
 
 const CommentThreadContainer = styled.div`
-	height: 400px;
+	height: ${({ isExpanded }) => (isExpanded ? '400px' : '100%')};
 	overflow: auto;
 `;
 
 const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfolioName, getCommentThread }) => {
 	const [text, setText] = useState('');
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [showExpandButton, setShowExpandButton] = useState(false);
 	const bottomRef = useRef(null);
 
 	useEffect(() => {
@@ -41,13 +42,17 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 		}
 	}, [isExpanded]);
 
+	useEffect(() => {
+		setShowExpandButton(!isExpanded && commentThread && commentThread.length > 3);
+	}, [isExpanded, commentThread]);
+
 	const renderComments = () => {
 		try {
 			const comments = [];
 
 			let thread = commentThread;
 
-			if (thread.length > 3 && !isExpanded) {
+			if (showExpandButton) {
 				thread = thread.slice(thread.length - 3);
 			}
 
@@ -83,20 +88,22 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 
 	const addComment = async () => {
 		try {
-			await gameChangerAPI.callDataFunction({
-				functionName: 'createComment',
-				cloneName: 'jbook',
-				options: {
-					message: text,
-					docID,
-					portfolioName,
-				},
-			});
+			if (text && text !== '') {
+				await gameChangerAPI.callDataFunction({
+					functionName: 'createComment',
+					cloneName: 'jbook',
+					options: {
+						message: text,
+						docID,
+						portfolioName,
+					},
+				});
 
-			await getCommentThread(docID, portfolioName);
+				await getCommentThread(docID, portfolioName);
 
-			setText('');
-			bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+				setText('');
+				bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
 		} catch (err) {
 			console.log('Error while adding new comment');
 			console.log(err);
@@ -120,8 +127,8 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 			<GCButton onClick={addComment} style={{ width: '100%', textAlign: 'center', margin: '10px 0' }}>
 				Add Comment
 			</GCButton>
-			<CommentThreadContainer>{renderComments()}</CommentThreadContainer>
-			{!isExpanded && (
+			<CommentThreadContainer isExpanded={isExpanded}>{renderComments()}</CommentThreadContainer>
+			{showExpandButton && (
 				<GCButton
 					isSecondaryBtn
 					onClick={() => {
