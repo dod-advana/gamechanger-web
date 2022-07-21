@@ -280,7 +280,13 @@ function reducer(state, action) {
 		case 'RESET_PRESEARCH_SETTINGS':
 			return {
 				...state,
-				searchSettings: initState.searchSettings,
+				searchSettings: {
+					...initState.searchSettings,
+					...(state.presearchSources &&
+						Object.keys(state.presearchSources).length !== 0 && { orgFilter: state.presearchSources }),
+					...(state.presearchTypes &&
+						Object.keys(state.presearchTypes).length !== 0 && { typeFilter: state.presearchTypes }),
+				},
 			};
 		case 'RESET_SEARCH_SETTINGS':
 			return {

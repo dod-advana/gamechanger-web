@@ -450,7 +450,7 @@ const JBookProfilePage = (props) => {
 
 				aggregatedDescriptions = highlightSearchTextDescriptions(terms, aggregatedDescriptions);
 
-				accomp = highlightSearchTextAccomps(terms, aggregatedDescriptions);
+				accomp = highlightSearchTextAccomps(terms, accomp);
 			}
 
 			return [aggregatedDescriptions, accomp];
