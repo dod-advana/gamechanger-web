@@ -455,6 +455,26 @@ const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	};
 };
 
+const getReviewerNames = (projectData) => {
+	const reviewers = { primary: new Set(), service: new Set(), poc: new Set() };
+	if (projectData.review_n) {
+		projectData.review_n.forEach((review) => {
+			if (review.primary_reviewer_s) {
+				reviewers.primary.add(review.primary_reviewer_s);
+			}
+			if (review.service_reviewer_s) {
+				reviewers.service.add(review.service_reviewer_s);
+			}
+			if (review.service_poc_name_s) {
+				reviewers.poc.add(review.service_poc_name_s);
+			} else if (review.alternate_poc_name_s) {
+				reviewers.poc.add(review.alternate_poc_name_s);
+			}
+		});
+	}
+	return reviewers;
+};
+
 // sub-components
 const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
 	if (item.pageHits && item.pageHits.length > 0) {
@@ -818,6 +838,21 @@ const cardHandler = {
 								: 'None'}
 						</div>
 					),
+				});
+
+				const reviewersSets = getReviewerNames(projectData);
+
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: Array.from(reviewersSets.primary).join('; '),
+				});
+				metadata.push({
+					Key: 'Service Reviewer',
+					Value: Array.from(reviewersSets.service).join('; '),
+				});
+				metadata.push({
+					Key: 'POC Reviewer',
+					Value: Array.from(reviewersSets.poc).join('; '),
 				});
 			}
 
