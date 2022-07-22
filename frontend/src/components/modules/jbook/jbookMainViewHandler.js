@@ -384,12 +384,19 @@ const getCardViewPanel = (props) => {
 												<div style={styles.panelContainer}>
 													<TabPanel>
 														{runningSearch && (
-															<div style={{ margin: '0 auto' }}>
+															<div
+																style={{ margin: '0 auto' }}
+																data-cy="jbook-search-load"
+															>
 																<LoadingIndicator customColor={GC_COLORS.primary} />
 															</div>
 														)}
 														{!runningSearch && (
-															<div className="row" style={{ padding: 5 }}>
+															<div
+																className="row"
+																style={{ padding: 5 }}
+																data-cy="jbook-search-results"
+															>
 																{getSearchResults(
 																	rawSearchResults ? rawSearchResults : [],
 																	state,
