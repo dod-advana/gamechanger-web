@@ -56,7 +56,7 @@ class EDASearchUtility {
 
 			let query = {
 				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*'],
+					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*', 'fpds*','clins_parsed_n','clins_parsed_successfully_b'],
 				},
 				stored_fields: storedFields,
 				from: offset,
@@ -912,8 +912,12 @@ class EDASearchUtility {
 	}
 
 	getExtractedFields(source, result) {
-		const { extracted_data_eda_n, fpds_ng_n } = source;
+		const { extracted_data_eda_n, fpds_ng_n, clins_parsed_n, clins_parsed_successfully_b } = source;
 		const data = extracted_data_eda_n;
+
+        result.clins_parsed_successfully_b = clins_parsed_successfully_b;
+		result.clins = clins_parsed_n;
+
 
 		// temporarily pull in all fpds data
 		if (fpds_ng_n) {
