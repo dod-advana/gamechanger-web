@@ -231,7 +231,7 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 	window.open(url);
 };
 
-const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
+const getMetadataTable = (projectData, budgetType) => {
 	return [
 		{
 			Key: 'Project',
@@ -323,28 +323,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Key: 'Budget Sub Activity',
 			Value: getBudgetSubActivity(projectData),
 		},
-		...(selectedPortfolio === 'AI Inventory'
-			? [
-					{
-						Key: 'Category',
-						Value: getClassLabel(projectData),
-					},
-			  ]
-			: []),
-		...(selectedPortfolio === 'AI Inventory'
-			? [
-					{
-						Key: 'Keywords',
-						Value: (
-							<div>
-								{projectData.keywords && projectData.keywords.length > 0
-									? projectData.keywords.map((keyword) => <p>{keyword}</p>)
-									: 'None'}
-							</div>
-						),
-					},
-			  ]
-			: []),
 	];
 };
 
@@ -597,10 +575,6 @@ const ListViewFrontCardContent = ({
 	);
 };
 
-const ProjectKeywords = (keywords) => {
-	return <>{keywords && keywords.length > 0 ? keywords.map((keyword) => <p>{keyword}</p>) : 'None'}</>;
-};
-
 // main card handler
 const cardHandler = {
 	document: {
@@ -828,7 +802,7 @@ const cardHandler = {
 				}
 			}
 
-			const metadata = getMetadataTable(projectData, budgetType, selectedPortfolio);
+			const metadata = getMetadataTable(projectData, budgetType);
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
@@ -839,7 +813,9 @@ const cardHandler = {
 					Key: 'Keywords',
 					Value: (
 						<div>
-							<ProjectKeywords keywords={projectData.keywords} />
+							{projectData.keywords && projectData.keywords.length > 0
+								? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+								: 'None'}
 						</div>
 					),
 				});
