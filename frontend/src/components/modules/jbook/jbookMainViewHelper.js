@@ -107,7 +107,7 @@ export const filterSortFunction = (a, b) => {
 
 const getName = (reviewer) => {
 	if (reviewer !== null && reviewer.name !== null) {
-		return `${reviewer.name}${reviewer.organization ? ' ' + reviewer.organization : ''}`;
+		return `${reviewer.name}${reviewer.organization ? ' (' + reviewer.organization + ')' : ''}`;
 	}
 	return 'Blank';
 };
