@@ -854,6 +854,12 @@ const cardHandler = {
 					Key: 'POC Reviewer',
 					Value: Array.from(reviewersSets.poc).join('; '),
 				});
+			} else if (selectedPortfolio !== 'General') {
+				const reviewerSet = getReviewerNames(projectData);
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: Array.from(reviewerSet.primary).join('; '),
+				});
 			}
 
 			if (modifiedSearchSettings.length > 0) {
