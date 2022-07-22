@@ -204,6 +204,9 @@ const metadataNameToSearchFilterName = {
 	'Main Account': 'appropriationNumber',
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
+	'Primary Reviewer': 'primaryReviewer',
+	'Service Reviewer': 'serviceReviewer',
+	'POC Reviewer': 'pocReviewer',
 };
 
 // helper functions
