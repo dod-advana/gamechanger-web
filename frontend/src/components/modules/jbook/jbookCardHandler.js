@@ -847,21 +847,21 @@ const cardHandler = {
 
 				metadata.push({
 					Key: 'Primary Reviewer',
-					Value: Array.from(reviewersSets.primary).join('; '),
+					Value: Array.from(reviewersSets.primary).join('; ') || 'None',
 				});
 				metadata.push({
 					Key: 'Service Reviewer',
-					Value: Array.from(reviewersSets.service).join('; '),
+					Value: Array.from(reviewersSets.service).join('; ') || 'None',
 				});
 				metadata.push({
 					Key: 'POC Reviewer',
-					Value: Array.from(reviewersSets.poc).join('; '),
+					Value: Array.from(reviewersSets.poc).join('; ') || 'None',
 				});
 			} else if (selectedPortfolio !== 'General') {
 				const reviewerSet = getReviewerNames(projectData);
 				metadata.push({
 					Key: 'Primary Reviewer',
-					Value: Array.from(reviewerSet.primary).join('; '),
+					Value: Array.from(reviewerSet.primary).join('; ') || 'None',
 				});
 			}
 
