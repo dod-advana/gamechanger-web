@@ -234,7 +234,20 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 	window.open(url);
 };
 
-const getMetadataTable = (projectData, budgetType) => {
+const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
+	let showPrediction = false;
+	let predictionString = '';
+	if (
+		selectedPortfolio !== 'General' &&
+		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions[selectedPortfolio].confidence &&
+		projectData.ai_predictions[selectedPortfolio].top_class
+	) {
+		showPrediction = true;
+		let num = projectData.ai_predictions[selectedPortfolio].confidence;
+		num = Math.round(num * 100);
+		predictionString = `"${projectData.ai_predictions[selectedPortfolio].top_class}" - ${num}%`;
+	}
 	return [
 		{
 			Key: 'Project',
@@ -326,6 +339,14 @@ const getMetadataTable = (projectData, budgetType) => {
 			Key: 'Budget Sub Activity',
 			Value: getBudgetSubActivity(projectData),
 		},
+		...(showPrediction
+			? [
+					{
+						Key: 'Predicted Tag',
+						Value: predictionString,
+					},
+			  ]
+			: []),
 	];
 };
 
@@ -825,7 +846,7 @@ const cardHandler = {
 				}
 			}
 
-			const metadata = getMetadataTable(projectData, budgetType);
+			const metadata = getMetadataTable(projectData, budgetType, selectedPortfolio);
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
