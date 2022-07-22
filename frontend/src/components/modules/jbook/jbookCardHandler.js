@@ -826,7 +826,7 @@ const cardHandler = {
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
-					Key: 'Category',
+					Key: 'Tags',
 					Value: getClassLabel(projectData),
 				});
 				metadata.push({
