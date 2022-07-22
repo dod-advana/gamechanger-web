@@ -194,7 +194,7 @@ class EdaExportHandler extends ExportHandler {
 				'Unit Price',
 				'Purchase Request Number',
 				'Supply Services',
-				//'NAICS',
+				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
 			];
@@ -229,7 +229,7 @@ class EdaExportHandler extends ExportHandler {
                             item.unit_price_eda_ext,
                             item.purchase_request_number_eda_ext,
                             item.supplies_services_eda_ext,
-                            //item.clin_naics_eda_ext,
+                            item.naics_code_clin_eda_ext,
                         ];
                         stringifier.write(line_item);
                     }
