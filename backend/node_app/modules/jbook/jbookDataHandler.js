@@ -1264,7 +1264,7 @@ class JBookDataHandler extends DataHandler {
 	// create comment, MUST have docID, portfolioName, and message
 	async createComment(req, userId) {
 		try {
-			await this.comments.create({ ...req.body, author: userId, deleted: false });
+			await this.comments.create({ ...req.body, deleted: false });
 			return true;
 		} catch (e) {
 			const { message } = e;

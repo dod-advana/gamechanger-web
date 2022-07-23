@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import GCButton from '../../../common/GCButton';
+import JBookUserNameModal from './jbookUserNameModal';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -30,10 +31,20 @@ const CommentThreadContainer = styled.div`
 	overflow: auto;
 `;
 
-const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfolioName, getCommentThread }) => {
+const JBookCommentSection = ({
+	commentThread = [],
+	gameChangerAPI,
+	docID,
+	portfolioName,
+	getCommentThread,
+	userData = {},
+	updateUserProfileData,
+	dispatch,
+}) => {
 	const [text, setText] = useState('');
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [showExpandButton, setShowExpandButton] = useState(false);
+	const [showUserModal, setShowUserModal] = useState(false);
 	const bottomRef = useRef(null);
 
 	useEffect(() => {
@@ -89,6 +100,18 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 	const addComment = async () => {
 		try {
 			if (text && text !== '') {
+				let first = '';
+				let last = '';
+
+				if (userData) {
+					first = userData.first_name ? userData.first_name + ' ' : '';
+					last = userData.last_name ?? '';
+
+					if (last.length > 1) {
+						last = last[0] + '.';
+					}
+				}
+
 				await gameChangerAPI.callDataFunction({
 					functionName: 'createComment',
 					cloneName: 'jbook',
@@ -96,6 +119,7 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 						message: text,
 						docID,
 						portfolioName,
+						author: first + last,
 					},
 				});
 
@@ -110,8 +134,25 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 		}
 	};
 
+	const checkUserData = () => {
+		if (!userData.first_name || !userData.last_name) {
+			setShowUserModal(true);
+		}
+	};
+
+	const handleTextChange = (e) => {
+		setText(e.target.value);
+	};
+
 	return (
 		<StyledCard>
+			<JBookUserNameModal
+				showUserModal={showUserModal}
+				userData={userData}
+				dispatch={dispatch}
+				setShowUserModal={setShowUserModal}
+				updateUserProfileData={updateUserProfileData}
+			/>
 			<TextField
 				label="Comment"
 				variant="outlined"
@@ -120,9 +161,8 @@ const JBookCommentSection = ({ commentThread = [], gameChangerAPI, docID, portfo
 				style={{ width: '100%' }}
 				color="secondary"
 				value={text}
-				onChange={(e) => {
-					setText(e.target.value);
-				}}
+				onChange={handleTextChange}
+				onFocus={checkUserData}
 			/>
 			<GCButton onClick={addComment} style={{ width: '100%', textAlign: 'center', margin: '10px 0' }}>
 				Add Comment

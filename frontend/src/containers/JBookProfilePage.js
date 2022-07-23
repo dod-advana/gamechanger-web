@@ -45,12 +45,14 @@ import {
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import GameChangerUserAPI from '../components/api/GamechangerUserManagement';
 import JBookPortfolioSelector from '../components/modules/jbook/portfolioBuilder/jbookPortfolioSelector';
 import JBookBudgetYearSelector from '../components/modules/jbook/profilePage/jbookBudgetYearSelector';
 
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GameChangerUserAPI();
 
 const GCFooter = LoadableVisibility({
 	loader: () => import('../components/navigation/GCFooter'),
@@ -85,6 +87,7 @@ const JBookProfilePage = (props) => {
 		serviceValidation,
 		pocValidation,
 		commentThread,
+		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
@@ -131,6 +134,10 @@ const JBookProfilePage = (props) => {
 			data.data.users.forEach((user) => {
 				newMap[user.id] = user;
 			});
+
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
+
 			setUserMap(newMap);
 		};
 
@@ -138,7 +145,7 @@ const JBookProfilePage = (props) => {
 			getUserData();
 			setInit(true);
 		}
-	}, [init, setInit]);
+	}, [init, setInit, dispatch]);
 
 	const setContractData = (newProjectData) => {
 		// set the contract data based on the current project data
@@ -1336,6 +1343,9 @@ const JBookProfilePage = (props) => {
 							docID={docID}
 							portfolioName={selectedPortfolio}
 							getCommentThread={getCommentThread}
+							userData={userData}
+							updateUserProfileData={gameChangerUserAPI.updateUserProfileData}
+							dispatch={dispatch}
 						/>
 					)}
 				</StyledLeftContainer>

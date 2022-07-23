@@ -117,7 +117,17 @@ const BasicData = (props) => {
 };
 
 const ClassificationScoreCard = (props) => {
-	const { scores, commentThread, gameChangerAPI, docID, portfolioName, getCommentThread } = props;
+	const {
+		scores,
+		commentThread,
+		gameChangerAPI,
+		docID,
+		portfolioName,
+		getCommentThread,
+		userData,
+		updateUserProfileData,
+		dispatch,
+	} = props;
 
 	return (
 		<StyledLeftContainer>
@@ -183,6 +193,9 @@ const ClassificationScoreCard = (props) => {
 					docID={docID}
 					portfolioName={portfolioName}
 					getCommentThread={getCommentThread}
+					userData={userData}
+					updateUserProfileData={updateUserProfileData}
+					dispatch={dispatch}
 				/>
 			</div>
 		</StyledLeftContainer>
