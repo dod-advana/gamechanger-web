@@ -34,6 +34,7 @@ class EdaExportHandler extends ExportHandler {
 				orgFilter,
 				typeFilter,
 				operator,
+				selectedDocuments,
 				offset,
 				...rest
 			} = req.body;
@@ -188,6 +189,12 @@ class EdaExportHandler extends ExportHandler {
 				// 'Base',
 				// 'Type',
 				'Obligated Amount',
+				'Clin Number',
+				'Unit',
+				'Unit Price',
+				'Purchase Request Number',
+				'Supply Services',
+				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
 			];
@@ -204,25 +211,27 @@ class EdaExportHandler extends ExportHandler {
 				];
 				stringifier.write(item);
 
-				// for (const item of doc.line_items) {
-				// 	const line_item = [
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		item.prod_or_svc,
-				// 		item.prod_or_svc_desc,
-				// 		item.li_base,
-				// 		item.li_type,
-				// 		item.obligated_amount,
-				// 		item.obligated_amount_cin,
-				// 		item.row_id,
-				// 	];
-				// 	stringifier.write(line_item);
-				// }
+                //
+                if(doc.clins){
+                    for (const item of doc.clins) {
+                        const line_item = [
+                            'see previous filename*',
+                            '',
+                            '',
+                            '',
+                            doc.fpds_psc_eda_ext,
+                            '',
+                            '',
+                            item.clin_num_eda_ext,
+                            item.unit_eda_ext,
+                            item.unit_price_eda_ext,
+                            item.purchase_request_number_eda_ext,
+                            item.supplies_services_eda_ext,
+                            item.naics_code_clin_eda_ext,
+                        ];
+                        stringifier.write(line_item);
+                    }
+                }
 			});
 		}
 	}
