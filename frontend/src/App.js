@@ -149,7 +149,7 @@ const styles = {
 		height: 'calc(100% - 6px)',
 	},
 	newContainer: {
-		minHeight: 'calc(100% - 30px)',
+		minHeight: 'calc(100vh - 30px)',
 		marginLeft: '50px',
 		paddingTop: '2em',
 		background: '#ffffff',
@@ -305,6 +305,8 @@ const App = () => {
 	const [gameChangerCloneRoutes, setGameChangerCloneRoutes] = useState([]);
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
+	const [unauthed, setUnauthed] = useState(false);
+	const [initializationAttemps, setInitializationAttempts] = useState(0);
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
@@ -322,37 +324,51 @@ const App = () => {
 	useEffect(() => {
 		const initialize = async () => {
 			Auth.refreshUserToken(
-				() => setTokenLoaded(true),
+				async () => {
+					setTokenLoaded(true);
+					setInitialized(true);
+
+					// fetch tutorial overlay data
+					let tutorialData = [];
+					const doTutorial =
+						window?.__env__?.REACT_APP_ENABLE_TUTORIAL === 'true' ||
+						process.env.REACT_APP_ENABLE_TUTORIAL === 'true';
+					if (doTutorial) {
+						try {
+							const data = await tutorialOverlayAPI.tutorialOverlaysGET();
+							tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
+						} catch (err) {
+							console.log(err);
+							console.log('Failed to retrieve Tutorial Overlay data');
+						}
+					}
+					await getGamechangerClones(tutorialData, setGameChangerCloneRoutes);
+
+					setInitializationAttempts(initializationAttemps + 1);
+				},
 				() => {
 					console.log('Error getting token');
 					setTokenLoaded(false);
+					setInitialized(false);
+					if (initializationAttemps < 5) {
+						setTimeout(() => {
+							setInitializationAttempts(initializationAttemps + 1);
+						}, 1000);
+					} else {
+						setUnauthed(true);
+						window.location.href = '#/unauthorized';
+					}
 				}
 			);
-
-			// fetch tutorial overlay data
-			let tutorialData = [];
-			const doTutorial =
-				window?.__env__?.REACT_APP_ENABLE_TUTORIAL === 'true' ||
-				process.env.REACT_APP_ENABLE_TUTORIAL === 'true';
-			if (doTutorial) {
-				try {
-					const data = await tutorialOverlayAPI.tutorialOverlaysGET();
-					tutorialData = tutorialOverlayAPI.setupTutorialOverlay(data.data);
-				} catch (err) {
-					console.log(err);
-					console.log('Failed to retrieve Tutorial Overlay data');
-				}
-			}
-			await getGamechangerClones(tutorialData, setGameChangerCloneRoutes);
 		};
+
 		if (!initialized) {
-			setInitialized(true);
 			initialize();
 		}
 		// eslint-disable-next-line
-	}, [initialized]);
+	}, [initialized, initializationAttemps]);
 
-	if (!initialized || !tokenLoaded) {
+	if (!initialized && !tokenLoaded && !unauthed) {
 		return <LoadingIndicator />;
 	}
 
@@ -427,11 +443,25 @@ const App = () => {
 													exact
 													path="/unauthorized"
 													component={() => (
-														<div data-cy={'unauthorized-page'}>{UnauthorizedPage()}</div>
+														<div
+															style={{ height: 'calc(100vh - 30px)' }}
+															data-cy={'unauthorized-page'}
+														>
+															{UnauthorizedPage()}
+														</div>
 													)}
 													location={location}
 												/>
-												<Route path="*" component={NotFoundPage} />
+												<Route
+													path="*"
+													component={() => {
+														if (unauthed) {
+															window.location.reload(true);
+														} else {
+															return <NotFoundPage />;
+														}
+													}}
+												/>
 											</Switch>
 										</ErrorBoundary>
 									</>
