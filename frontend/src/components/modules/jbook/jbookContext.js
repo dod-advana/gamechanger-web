@@ -60,7 +60,7 @@ const initState = {
 		],
 		pocReviewer: '',
 		sort: [],
-		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
+		classLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
 		sourceTag: [
 			'Unknown',
 			'JAIC 2021 Review',
@@ -109,8 +109,8 @@ const initState = {
 		hasKeywordsSpecificSelected: false,
 		hasKeywordsAllSelected: true,
 
-		primaryClassLabelSpecificSelected: false,
-		primaryClassLabelAllSelected: true,
+		classLabelSpecificSelected: false,
+		classLabelAllSelected: true,
 
 		sourceTagSpecificSelected: false,
 		sourceTagAllSelected: true,
@@ -150,7 +150,7 @@ const initState = {
 			'Unknown',
 		],
 		pocReviewer: '',
-		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
+		classLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
 		sourceTag: [
 			'Unknown',
 			'JAIC 2021 Review',
@@ -319,7 +319,7 @@ const initState = {
 	primaryReviewerDropdown: false,
 	serviceReviewerDropdown: false,
 	// pocReviewerDropdown: false,
-	primaryClassLabelDropdown: false,
+	classLabelDropdown: false,
 	sourceTagDropdown: false,
 	hasKeywordsDropdown: false,
 	JAICModelOpen: false,
@@ -481,8 +481,8 @@ function reducer(state, action) {
 					hasKeywordsSpecificSelected: false,
 					hasKeywordsAllSelected: true,
 
-					primaryClassLabelSpecificSelected: false,
-					primaryClassLabelAllSelected: true,
+					classLabelSpecificSelected: false,
+					classLabelAllSelected: true,
 
 					sourceTagSpecificSelected: false,
 					sourceTagAllSelected: true,
@@ -504,7 +504,7 @@ function reducer(state, action) {
 					pocReviewer: state.defaultOptions.pocReviewer,
 					sourceTag: state.defaultOptions.sourceTag,
 					hasKeyword: state.defaultOptions.hasKeyword,
-					primaryClassLabel: state.defaultOptions.primaryClassLabel,
+					classLabel: state.defaultOptions.classLabel,
 				},
 				modifiedSearchSettings: [],
 			};

@@ -539,7 +539,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+					expanded={jbookSearchSettings.classLabelSpecificSelected}
 					header={<b>TAGS</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -549,8 +549,8 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						state,
 						dispatch,
 						classes,
-						'primaryClassLabel',
-						'primary class tag',
+						'classLabel',
+						'tag',
 						false,
 						portfolioMap[selectedPortfolio].tags
 					)}
@@ -798,7 +798,7 @@ const getSearchMatrixItems = (props) => {
 			{selectedPortfolio !== 'General' && (
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
-						expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+						expanded={jbookSearchSettings.classLabelSpecificSelected}
 						header={<b>TAGS</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -808,8 +808,8 @@ const getSearchMatrixItems = (props) => {
 							state,
 							dispatch,
 							classes,
-							'primaryClassLabel',
-							'primary class tag',
+							'classLabel',
+							'tag',
 							false,
 							portfolioMap[selectedPortfolio].tags
 						)}
