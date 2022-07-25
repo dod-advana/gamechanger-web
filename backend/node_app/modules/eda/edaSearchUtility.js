@@ -207,6 +207,7 @@ class EDASearchUtility {
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
 			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);

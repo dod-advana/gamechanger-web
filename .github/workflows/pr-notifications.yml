@@ -1,0 +1,55 @@
+
+# Controls when the workflow will run 
+on:
+  # Triggers the workflow on push or pull request events but only for the "dev" branch
+  pull_request:
+    types: [opened, reopened]
+    branches: ["dev", "main"]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
+      # This will echo "Your PR is 7", or be skipped if there is no current PR.
+      - run: |
+              echo ${PR}
+              curl -v \
+               -H "Content-Type: application/json" \
+               -X POST \
+               -d "{
+                \"blocks\": [
+                  {
+                    \"type\": \"context\",
+                    \"elements\": [
+                      {
+                        \"type\": \"image\",
+                        \"image_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+                        \"alt_text\": \"GitHub Icon\"
+                      },
+                      {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \"<!subteam^S0179NL6066|gc-web> ${GITHUB_ACTOR} Made a GitHub Pull Request.\"
+                      }
+                    ]
+                  },
+                  {
+                    \"type\": \"context\",
+                    \"elements\": [
+                      {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \":git-pull-request: PR <https://github.com/${GITHUB_REPOSITORY}/pull/${PR}|Pull Request Link>\"
+                      }
+                    ]
+                  }
+                ]
+              }" \
+              ${{secrets.SLACK_WEBHOOK_URL}}
+        if: success() && steps.findPr.outputs.number
+        env:
+          PR: ${{ steps.findPr.outputs.pr }}

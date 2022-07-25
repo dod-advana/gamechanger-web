@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Checkbox, FormControlLabel, Tooltip, Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import {
 	StyledTableContainer,
@@ -17,7 +16,12 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
 import SideNavigation from '../../../navigation/SideNavigation';
-import { getClassLabel, getTotalCost } from '../../../../utils/jbookUtilities';
+import {
+	getClassLabel,
+	formatNum,
+	getTableFormattedCost,
+	getFormattedTotalCost,
+} from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 
 const firstColWidth = {
@@ -34,21 +38,7 @@ const boldKeys = (data) => {
 	});
 };
 
-const formatNum = (num) => {
-	const parsed = parseInt(num);
-	if (parsed > 999) {
-		return `${(parsed / 1000).toFixed(2)} $B`;
-	}
-
-	if (parsed > 999999) {
-		return `${(parsed / 1000000).toFixed(2)} $T`;
-	}
-	return `${parsed} $M`;
-};
-
-const SideNav = (props) => {
-	const { budgetType, budgetYear, context } = props;
-
+const SideNav = ({ budgetType, budgetYear, context }) => {
 	return (
 		<>
 			<StyledNavBar id="The Basics">
@@ -191,9 +181,7 @@ const ClassificationScoreCard = (props) => {
 	);
 };
 
-const Metadata = (props) => {
-	const { budgetType, projectNum, keywordCheckboxes, setKeywordCheck } = props;
-
+const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
@@ -207,7 +195,6 @@ const Metadata = (props) => {
 					? getMetadataTableData(
 							projectData,
 							budgetType,
-							projectNum,
 							reviewData,
 							keywordsChecked,
 							keywordCheckboxes,
@@ -218,7 +205,7 @@ const Metadata = (props) => {
 			height={'auto'}
 			dontScroll={true}
 			disableWrap={true}
-			title={'Metadata'}
+			title={`Budget Year (FY) ${projectData.budgetYear || ''}`}
 			headerExtraStyle={{
 				backgroundColor: '#313541',
 				color: 'white',
@@ -229,8 +216,7 @@ const Metadata = (props) => {
 	);
 };
 
-const ProjectDescription = (props) => {
-	const { profileLoading, projectData, programElement, projectNum, projectDescriptions } = props;
+const ProjectDescription = ({ profileLoading, projectData, programElement, projectNum, projectDescriptions }) => {
 	return (
 		<>
 			{profileLoading ? (
@@ -239,12 +225,6 @@ const ProjectDescription = (props) => {
 				<>
 					<Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>
 						{renderTitle(projectData, programElement, projectNum)}
-					</Typography>
-					<Typography variant="h3" style={{ fontWeight: 'bold', width: '100%', marginBottom: '20px' }}>
-						{(projectData.projectMissionDescription || projectData.programDescription) ??
-						projectData.projectMissionDescription
-							? 'Project Description'
-							: 'Program Description'}
 					</Typography>
 					<div style={{ overflow: 'auto' }}>
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
@@ -277,8 +257,7 @@ const ProjectDescription = (props) => {
 	);
 };
 
-const Accomplishments = (props) => {
-	const { accomplishments } = props;
+const Accomplishments = ({ accomplishments }) => {
 	return (
 		<StyledTableContainer>
 			{accomplishments.map((accomp) => {
@@ -315,18 +294,19 @@ const aggregateProjectDescriptions = (projectData) => {
 
 	const titleMapping = {
 		// both or rdoc
-		programElementTitle: { title: 'Program Element Title' },
-		projectTitle: { title: 'Project Title' },
-		projectMissionDescription: { title: 'Project Mission Description' },
-		missionDescBudgetJustification: { title: 'Project Description' },
+		appropriationTitle: { title: 'Appropriation Title' },
 		budgetActivityTitle: { title: 'Budget Activity Title' },
+		programElementTitle: { title: 'Program Element Title' },
+		projectMissionDescription: {
+			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
+		},
+		missionDescBudgetJustification: { title: 'Project Description' },
 		SubProj_Title: { title: 'Sub-project Title' },
 		Adj_OtherAdj_Title: { title: 'Other Title' },
 		CongAdds_Title: { title: 'CongAdds Title' },
 		Event_Title: { title: 'Event Title' },
 		JointFund_Title: { title: 'Joint Funding Title' },
 		OthProgFund_Title: { title: 'Other Program Title' },
-		appropriationTitle: { title: 'Appropriation Title' },
 
 		//acomp
 		Accomp_Fund_PY_Text: { title: 'Accomp Fund PY Text' },
@@ -337,12 +317,11 @@ const aggregateProjectDescriptions = (projectData) => {
 
 		// pdoc
 		projectTitle2: { title: 'Project Title 2' },
-		budgetLineItem: { title: 'Budget Line Item (Description)' },
 		programDescription: { title: 'Program Description' },
 		'P3a-16_Title': { title: 'P3a-16 Title' },
 		'P3a-19_ModItem_Title': { title: 'P3a-19 ModItem Title' },
 		'P40-13_BSA_Title': { title: 'P40-13_BSA Title' },
-		'P40-15_Justification': { title: 'P40-15_Justification' },
+		'P40-15_Justification': { title: 'Justification' },
 		'P40a-14_Title': { title: 'P40a-14 Title' },
 		'P40a-16_Title': { title: 'P40a-16 Title' },
 		'P5-14_Item_Title': { title: 'P5-14 Item Title' },
@@ -386,27 +365,27 @@ const Contracts = (props) => {
 		const contractCols = [
 			{
 				Key: 'Parent Award',
-				Value: contract.parentAward,
+				Value: contract.parent_award_s,
 			},
 			{
 				Key: 'PIIN',
-				Value: contract.piin,
+				Value: contract.piin_s,
 			},
 			{
 				Key: 'Award Description',
-				Value: contract.awardDesc,
+				Value: contract.award_desc_s,
 			},
 			{
 				Key: 'Product or Service Description',
-				Value: contract.productDesc,
+				Value: contract.product_desc_s,
 			},
 			{
 				Key: 'Total Base and All Options Value',
-				Value: contract.totalObligatedAmount,
+				Value: contract.total_oblig_amount_s,
 			},
 			{
 				Key: 'Mod Number',
-				Value: contract.modNumber,
+				Value: contract.modification_number_s,
 			},
 		];
 
@@ -420,8 +399,8 @@ const Contracts = (props) => {
 				disableWrap={true}
 				title={
 					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-						<div>Vendor: {contract.vendorName}</div>
-						<div>Fiscal Year: {contract.fiscalYear ?? 'N/A'}</div>
+						<div>Vendor: {contract.vendor_name_s}</div>
+						<div>Fiscal Year: {contract.fiscal_year_s ?? 'N/A'}</div>
 					</div>
 				}
 				headerExtraStyle={{
@@ -437,7 +416,7 @@ const Contracts = (props) => {
 	return <StyledTableContainer>{contractTables}</StyledTableContainer>;
 };
 
-const NavButtons = (props) => {
+const NavButtons = () => {
 	const buttonNames = [
 		'The Basics',
 		'Accomplishment',
@@ -510,67 +489,64 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 const getMetadataTableData = (
 	projectData,
 	budgetType,
-	projectNum,
 	reviewData,
 	keywordsChecked,
 	keywordCheckboxes,
 	setKeywordCheck
 ) => {
-	const metadata = [
+	return [
 		{
-			Key: 'Project',
-			Value: projectData.projectTitle || 'N/A',
+			Key: 'Budget Year 1 Requested',
+			Value: getTableFormattedCost(projectData.by1Request),
 		},
 		{
-			Key: 'Program Element',
-			Value: projectData.programElement || 'N/A',
-			Hidden: budgetType === 'Procurement',
+			Key: 'Current Year Amount',
+			Value: getTableFormattedCost(projectData.currentYearAmount),
+		},
+		{
+			Key: 'Prior Year Amount',
+			Value: getTableFormattedCost(projectData.priorYearAmount),
+		},
+		{
+			Key: 'All Prior Years Amount',
+			Value: getTableFormattedCost(projectData.allPriorYearsAmount),
+		},
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
+		},
+		{
+			Key: 'BY2',
+			Value: getTableFormattedCost(projectData.p4082_toa_by2_d || projectData.proj_fund_by2_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY3',
+			Value: getTableFormattedCost(projectData.p4083_toa_by3_d || projectData.proj_fund_by3_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY4',
+			Value: getTableFormattedCost(projectData.p4084_toa_by4_d || projectData.proj_fund_by4_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'BY5',
+			Value: getTableFormattedCost(projectData.p4085_toa_by5_d || projectData.proj_fund_by5_d),
+			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: 'Project Number',
+			Value: projectData.projectNum,
+			Hidden: budgetType !== 'RDT&E',
 		},
 		{
 			Key: 'Service Agency Name',
 			Value: projectData.serviceAgency || 'N/A',
 		},
 		{
-			Key: 'Project Number',
-			Value: projectNum || 'N/A',
-			Hidden: budgetType === 'Procurement',
-		},
-		{
-			Key: 'All Prior Years Amount',
-			Value:
-				projectData.allPriorYearsAmount !== null && projectData.allPriorYearsAmount !== undefined
-					? `${formatNum(projectData.allPriorYearsAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Prior Year Amount',
-			Value:
-				projectData.priorYearAmount !== null && projectData.priorYearAmount !== undefined
-					? `${formatNum(projectData.priorYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Current Year Amount',
-			Value:
-				projectData.currentYearAmount !== null && projectData.currentYearAmount !== undefined
-					? `${formatNum(projectData.currentYearAmount)}`
-					: 'N/A',
-		},
-		{
-			Key: 'Fiscal Year',
-			Value: projectData.budgetYear || 'N/A',
-		},
-		{
 			Key: 'To Complete',
 			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
-		},
-		{
-			Key: 'Total Cost',
-			Value: getTotalCost(projectData) ? `${formatNum(getTotalCost(projectData))}` : 'N/A',
-		},
-		{
-			Key: 'Budget Year (FY)',
-			Value: projectData.budgetYear || 'N/A',
 		},
 		{
 			Key: 'Budget Cycle',
@@ -606,47 +582,18 @@ const getMetadataTableData = (
 				</div>
 			),
 		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Obligations
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeObligations / 1000000).toLocaleString('en-US')} $M`
-					: 'N/A',
-		},
-		{
-			Key: (
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					Cumulative Expenditures
-					<Tooltip title={'Metadata above reflects data at the BLI level'}>
-						<InfoOutlinedIcon style={{ margin: '-2px 6px' }} />
-					</Tooltip>
-				</div>
-			),
-			Value:
-				projectData.obligations && projectData.obligations[0]
-					? `${(projectData.obligations[0].cumulativeDisbursements / 1000000).toLocaleString('en-US')} $M`
-					: 'N/A',
-		},
 	];
-
-	return metadata;
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
 	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
-	const service = projectData.serviceAgency;
-	return `${projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : ''} ${
-		programElement && programElement !== 'undefined' ? `${programElement} ` : ''
-	} ${service && service !== 'undefined' ? `${service}` : ''} ${
-		projectNum && projectNum !== 'undefined' ? `${projectNum} ` : ''
-	}`;
+	const title = projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : '';
+	const element = programElement && programElement !== 'undefined' ? `${programElement} ` : '';
+	const service =
+		projectData.serviceAgency && projectData.serviceAgency !== 'undefined' ? `${projectData.serviceAgency}` : '';
+	const num = projectNum && projectNum !== 'undefined' ? `${projectNum} ` : '';
+	const budgetLineItem = projectData.budgetLineItem ? `${projectData.budgetLineItem}:` : '';
+	return `${budgetLineItem} ${title} ${element} ${service} ${num}`;
 };
 
 export {

@@ -61,7 +61,12 @@ const HermesCardHandler = LoadableVisibility({
 		return <LoadingIndicator />;
 	},
 });
-
+const AmhsCardHandler = LoadableVisibility({
+	loader: () => import('../modules/amhs/amhsCardHandler'),
+	loading: () => {
+		return <LoadingIndicator />;
+	},
+});
 const JBookCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookCardHandler'),
 	loading: () => {
@@ -86,16 +91,25 @@ const PolicyCardHandler = LoadableVisibility({
 const CARD_HEIGHT = 412;
 
 // Internet Explorer 6-11
-var IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
-var IS_EDGE = !IS_IE && !!window.StyleMedia;
+const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
 const gameChangerAPI = new GameChangerAPI();
 
 const StyledCardContainer = styled.div`
-	width: ${({ listView, showSideFilters, graphView }) =>
-		listView ? '100%' : graphView ? '414px' : showSideFilters ? '33.33% !important' : '25% !important'};
+	width: ${({ listView, showSideFilters, graphView }) => {
+		if (graphView) {
+			return listView ? '100%' : '414px';
+		} else {
+			if (showSideFilters) {
+				return listView ? '100%' : '33.33% !important';
+			} else {
+				return listView ? '100%' : '25% !important';
+			}
+		}
+	}};
 	min-width: ${({ listView }) => (listView ? '' : '351px')};
 	padding-right: 5px !important;
 	padding-left: 5px !important;
@@ -120,16 +134,24 @@ const StyledCardContainer = styled.div`
 			background-color: transparent;
 			border-radius: 5px;
 			display: flex;
-			border: ${({ listView, isRevoked, selected }) =>
-				listView
-					? 'none'
-					: selected
-					? '2px solid #386F94'
-					: isRevoked
-					? '2px solid #e50000'
-					: '2px solid rgb(224, 224, 224)'};
-			box-shadow: ${({ listView, selected }) =>
-				listView ? 'none' : selected ? '#386F94 0px 0px 2px 2px' : 'none'};
+			border: ${({ listView, isRevoked, selected }) => {
+				if (listView) {
+					return 'none';
+				} else {
+					if (isRevoked) {
+						return selected ? '2px solid #386F94' : '2px solid #e50000';
+					} else {
+						return selected ? '2px solid #386F94' : '2px solid rgb(224, 224, 224)';
+					}
+				}
+			}};
+			box-shadow: ${({ listView, selected }) => {
+				if (listView) {
+					return 'none';
+				} else {
+					return !selected ? 'none' : '#386F94 0px 0px 2px 2px';
+				}
+			}};
 			transition: ${({ listView }) =>
 				listView ? 'transform .5s !important;' : 'box-shadow .2s, transform .5s !important'};
 			transform: ${({ toggledMore }) => (toggledMore ? 'rotateY(180deg)' : '')};
@@ -155,8 +177,13 @@ const StyledCardContainer = styled.div`
 					flex-direction: column;
 					border-radius: 5px;
 					overflow: auto;
-					background-color: ${({ listView, intelligentSearch }) =>
-						listView ? (intelligentSearch ? '#9BB1C8' : 'white') : 'rgb(238,241,242)'};
+					background-color: ${({ listView, intelligentSearch }) => {
+						if (intelligentSearch) {
+							return listView ? '#9BB1C8' : 'rgb(238,241,242)';
+						} else {
+							return listView ? 'white' : 'rgb(238,241,242)';
+						}
+					}};
 
 					.styled-card-front-content {
 						font-size: ${CARD_FONT_SIZE}px;
@@ -372,6 +399,284 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+const FavoriteComponent = (props) => {
+	const { cardType, state, dispatch, filename, item, idx, displayTitle, classes } = props;
+
+	const [favorite, setFavorite] = useState(false);
+	const [favoriteSummary, setFavoriteSummary] = useState('');
+	const [favorite_id, setFavoriteId] = useState(null);
+	const [popperIsOpen, setPopperIsOpen] = useState(false);
+	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
+
+	useEffect(() => Function.prototype, [popperIsOpen, popperAnchorEl, favorite]);
+
+	useEffect(() => {
+		let isFavorite = false;
+		let temp_id = null;
+		let favApps;
+		switch (cardType) {
+			case 'document':
+				const faveDocs = state.userData ? state.userData.favorite_documents : [];
+				const favDocInfo = _.find(faveDocs, (doc) => {
+					return doc.id === item.id;
+				});
+				temp_id = favDocInfo?.favorite_id;
+				isFavorite =
+					_.find(faveDocs, (doc) => {
+						return doc.id === item.id;
+					}) !== undefined;
+				break;
+			case 'topic':
+				const faveTopics = state.userData ? state.userData.favorite_topics : [];
+				isFavorite =
+					_.find(faveTopics, (topic) => {
+						return topic.topic_name.toLowerCase() === item.name.toLowerCase();
+					}) !== undefined;
+				break;
+			case 'organization':
+				const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
+				isFavorite =
+					_.find(faveOrganizations, (organization) => {
+						return organization.organization_name.toLowerCase() === item.name.toLowerCase();
+					}) !== undefined;
+				break;
+			case 'applications':
+			case 'dashboards':
+				favApps = state.favoriteApps || [];
+				isFavorite = favApps?.includes(item.id.toString()) || false;
+				temp_id = item.id.toString();
+				break;
+			case 'dataSources':
+			case 'databases':
+			case 'models':
+				favApps = state.favoriteApps || [];
+				isFavorite = favApps?.includes(item.resource.id.toString()) || false;
+				temp_id = item.resource.id.toString();
+				break;
+			default:
+				break;
+		}
+
+		setFavoriteId(temp_id);
+		setFavorite(isFavorite);
+	}, [cardType, item, state.favoriteApps, state.userData]);
+
+	const handleSaveFavorite = (isFavorite = false) => {
+		switch (cardType) {
+			case 'document':
+				const documentData = {
+					filename: filename,
+					favorite_summary: favoriteSummary,
+					favorite_id: favorite_id,
+					favorite_name: '',
+					is_favorite: isFavorite,
+				};
+				handleSaveFavoriteDocument(documentData, state, dispatch);
+				break;
+			case 'organization':
+				handleSaveFavoriteOrganization(item.name, favoriteSummary, isFavorite, dispatch);
+				break;
+			case 'topic':
+				handleSaveFavoriteTopic(item.name, favoriteSummary, isFavorite, dispatch);
+				break;
+			case 'applications':
+			case 'dashboards':
+			case 'dataSources':
+			case 'databases':
+			case 'models':
+				let favApps = state.favoriteApps || [];
+				if (isFavorite) {
+					favApps.push(favorite_id);
+				} else {
+					favApps = favApps.filter((app) => app !== favorite_id);
+				}
+				gameChangerAPI.putUserFavoriteHomeApps({ favorite_apps: favApps });
+				setState(dispatch, { favoriteApps: favApps, updateSearchFavorites: true });
+				break;
+			default:
+				break;
+		}
+		setFavorite(isFavorite);
+		setPopperAnchorEl(null);
+		setPopperIsOpen(false);
+		setFavoriteSummary('');
+	};
+
+	const openFavoritePopper = (target) => {
+		if (popperIsOpen) {
+			setPopperIsOpen(false);
+			setPopperAnchorEl(null);
+		} else {
+			setPopperIsOpen(true);
+			setPopperAnchorEl(target);
+		}
+	};
+
+	const handleCancelFavorite = () => {
+		setPopperIsOpen(false);
+		setPopperAnchorEl(null);
+	};
+
+	return (
+		<>
+			<Popover
+				onClose={() => handleCancelFavorite()}
+				id={idx}
+				open={popperIsOpen}
+				anchorEl={popperAnchorEl}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+			>
+				{favorite ? (
+					<div style={{ padding: '0px 15px 10px' }}>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<CloseButton onClick={() => handleCancelFavorite()}>
+								<CloseIcon fontSize="small" />
+							</CloseButton>
+						</div>
+						<div style={{ width: 350, margin: 5 }}>
+							<div style={{ margin: '65px 15px 0' }}>
+								Are you sure you want to delete this favorite? You will lose any comments made.
+							</div>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+									isSecondaryBtn={true}
+								>
+									No
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										handleSaveFavorite(false);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_cancel_favorite_document',
+											displayTitle,
+											state.searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'CancelFavorite',
+											filename,
+											`search : ${state.searchText}`
+										);
+									}}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 10px 0px',
+										marginRight: 10,
+									}}
+								>
+									Yes
+								</GCButton>
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className={classes.paper}>
+						<div style={{ width: 330, margin: 5 }}>
+							<TextField
+								label={'Favorite Summary'}
+								value={favoriteSummary}
+								onChange={(event) => {
+									setFavoriteSummary(event.target.value);
+								}}
+								className={classes.textArea}
+								margin="none"
+								size="small"
+								variant="outlined"
+								multiline={true}
+								rows={8}
+							/>
+							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+								<GCButton
+									onClick={() => handleCancelFavorite()}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+									isSecondaryBtn={true}
+								>
+									Cancel
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										handleSaveFavorite(true);
+										gameChangerAPI.sendIntelligentSearchFeedback(
+											'intelligent_search_favorite_document',
+											displayTitle,
+											state.searchText
+										);
+										trackEvent(
+											getTrackingNameForFactory(state.cloneData.clone_name),
+											'Favorite',
+											filename,
+											`search : ${state.searchText}`
+										);
+									}}
+									style={{
+										height: 40,
+										minWidth: 40,
+										padding: '2px 8px 0px',
+										fontSize: 14,
+										margin: '16px 0px 0px 10px',
+									}}
+								>
+									Save
+								</GCButton>
+							</div>
+						</div>
+					</div>
+				)}
+			</Popover>
+			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
+				<i
+					onClick={(event) => {
+						switch (cardType) {
+							case 'applications':
+							case 'dashboards':
+							case 'dataSources':
+							case 'databases':
+							case 'models':
+								handleSaveFavorite(!favorite);
+								break;
+							default:
+								openFavoritePopper(event.target);
+								break;
+						}
+					}}
+					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
+					style={{
+						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
+						marginLeft: 'auto',
+						cursor: 'pointer',
+						fontSize: 26,
+						alignSelf: 'center',
+					}}
+				/>
+			</GCTooltip>
+		</>
+	);
+};
+
 function GCCard(props) {
 	const {
 		id,
@@ -380,7 +685,7 @@ function GCCard(props) {
 		dispatch,
 		item,
 		graphView = false,
-		closeGraphCard = () => {},
+		closeGraphCard,
 		collection = [],
 		detailPage = false,
 		card_module = null,
@@ -389,37 +694,6 @@ function GCCard(props) {
 	const cardType = item.type;
 	const selected = state.selectedDocuments.has(item.filename);
 
-	let isFavorite = false;
-	let favorite_id = null;
-	switch (cardType) {
-		case 'document':
-			const faveDocs = state.userData ? state.userData.favorite_documents : [];
-			const favDocInfo = _.find(faveDocs, (doc) => {
-				return doc.id === item.id;
-			});
-			favorite_id = favDocInfo?.favorite_id;
-			isFavorite =
-				_.find(faveDocs, (doc) => {
-					return doc.id === item.id;
-				}) !== undefined;
-			break;
-		case 'topic':
-			const faveTopics = state.userData ? state.userData.favorite_topics : [];
-			isFavorite =
-				_.find(faveTopics, (topic) => {
-					return topic.topic_name.toLowerCase() === item.name.toLowerCase();
-				}) !== undefined;
-			break;
-		case 'organization':
-			const faveOrganizations = state.userData ? state.userData.favorite_organizations : [];
-			isFavorite =
-				_.find(faveOrganizations, (organization) => {
-					return organization.organization_name.toLowerCase() === item.name.toLowerCase();
-				}) !== undefined;
-			break;
-		default:
-			break;
-	}
 	const isRevoked = item.is_revoked_b;
 	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
 	const allowScroll = true;
@@ -430,9 +704,7 @@ function GCCard(props) {
 	const [metadataExpanded, setMetadataExpanded] = useState(false);
 	const [hitsExpanded, setHitsExpanded] = useState(false);
 	const [hoveredHit, setHoveredHit] = useState(0);
-	const [favorite, setFavorite] = useState(isFavorite);
-	const [popperIsOpen, setPopperIsOpen] = useState(false);
-	const [popperAnchorEl, setPopperAnchorEl] = useState(null);
+	const [favorite, setFavorite] = useState(false);
 	const [favoriteSummary, setFavoriteSummary] = useState('');
 	const [feedback, setFeedback] = useState('');
 	const [loaded, setLoaded] = useState(false);
@@ -452,8 +724,6 @@ function GCCard(props) {
 		}
 	}, [state, loaded, cardType, item, card_module]);
 
-	useEffect(() => {}, [popperIsOpen, popperAnchorEl, favorite]);
-
 	useEffect(() => {
 		if (state.listView) {
 			setToggledMore(false);
@@ -462,74 +732,12 @@ function GCCard(props) {
 
 	let searchText = state.searchText;
 
-	const openFavoritePopper = (target) => {
-		if (popperIsOpen) {
-			setPopperIsOpen(false);
-			setPopperAnchorEl(null);
-		} else {
-			setPopperIsOpen(true);
-			setPopperAnchorEl(target);
-		}
-	};
-
-	const handleSaveFavorite = (favorite = false) => {
-		switch (cardType) {
-			case 'document':
-				const documentData = {
-					filename: filename,
-					favorite_summary: favoriteSummary,
-					favorite_id: favorite_id,
-					favorite_name: '',
-					is_favorite: favorite,
-				};
-				handleSaveFavoriteDocument(documentData, state, dispatch);
-				break;
-			case 'organization':
-				handleSaveFavoriteOrganization(item.name, favoriteSummary, favorite, dispatch);
-				break;
-			case 'topic':
-				handleSaveFavoriteTopic(item.name, favoriteSummary, favorite, dispatch);
-				break;
-			default:
-				break;
-		}
-		setFavorite(favorite);
-		setPopperAnchorEl(null);
-		setPopperIsOpen(false);
-		setFavoriteSummary('');
-	};
-
-	const handleCancelFavorite = () => {
-		setPopperIsOpen(false);
-		setPopperAnchorEl(null);
-	};
-
-	const favoriteComponent = () => {
-		return (
-			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
-				<i
-					onClick={(event) => {
-						openFavoritePopper(event.target);
-					}}
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						marginLeft: 'auto',
-						cursor: 'pointer',
-						fontSize: 26,
-						alignSelf: 'center',
-					}}
-				/>
-			</GCTooltip>
-		);
-	};
-
-	const checkboxComponent = (key, value, id) => {
+	const checkboxComponent = (key, value, tmpId) => {
 		return (
 			<GCTooltip title={'Select a document for export'} placement="top" arrow>
 				<Checkbox
 					style={styles.checkbox}
-					onChange={() => handleCheckbox(key, value, id)}
+					onChange={() => handleCheckbox(key, value, tmpId)}
 					color="primary"
 					icon={
 						<CheckBoxOutlineBlankIcon
@@ -546,17 +754,17 @@ function GCCard(props) {
 		);
 	};
 
-	const handleCheckbox = (key, value, id) => {
+	const handleCheckbox = (key, value, tmpId) => {
 		const { selectedDocuments, selectedDocumentsForGraph = [] } = state;
 		let newDocArray = [...selectedDocumentsForGraph];
 
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
-			newDocArray = newDocArray.filter((item) => item !== id);
+			newDocArray = newDocArray.filter((tmpItem) => tmpItem !== tmpId);
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
 		} else {
 			selectedDocuments.set(key, value);
-			newDocArray.push(id);
+			newDocArray.push(tmpId);
 			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
 		}
 
@@ -628,26 +836,28 @@ function GCCard(props) {
 		</div>
 	);
 
-	const getCardComponent = (props) => {
+	const getCardComponent = (thisProps) => {
 		const module_name = card_module ?? state.cloneData.card_module;
 
 		switch (module_name) {
 			case 'policy/policyCardHandler':
-				return <PolicyCardHandler {...props} />;
+				return <PolicyCardHandler {...thisProps} />;
 			case 'hermes/hermesCardHandler':
-				return <HermesCardHandler {...props} />;
+				return <HermesCardHandler {...thisProps} />;
+			case 'amhs/amhsCardHandler':
+				return <AmhsCardHandler {...thisProps} />;
 			case 'cdo/cdoCardHandler':
-				return <CDOCardHandler {...props} />;
+				return <CDOCardHandler {...thisProps} />;
 			case 'globalSearch/globalSearchCardHandler':
-				return <GlobalSearchCardHandler {...props} />;
+				return <GlobalSearchCardHandler {...thisProps} />;
 			case 'eda/edaCardHandler':
-				return <EDACardHandler {...props} />;
+				return <EDACardHandler {...thisProps} />;
 			case 'jbook/jbookCardHandler':
-				return <JBookCardHandler {...props} />;
+				return <JBookCardHandler {...thisProps} />;
 			case 'jexnet/jexnetCardHandler':
-				return <JexnetCardHandler {...props} />;
+				return <JexnetCardHandler {...thisProps} />;
 			default:
-				return <DefaultCardHandler {...props} />;
+				return <DefaultCardHandler {...thisProps} />;
 		}
 	};
 
@@ -661,136 +871,8 @@ function GCCard(props) {
 			showSideFilters={state.showSideFilters}
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}
+			data-cy={'searchCard'}
 		>
-			<Popover
-				onClose={() => handleCancelFavorite()}
-				id={idx}
-				open={popperIsOpen}
-				anchorEl={popperAnchorEl}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'right',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'right',
-				}}
-			>
-				{isFavorite ? (
-					<div style={{ padding: '0px 15px 10px' }}>
-						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-							<CloseButton onClick={() => handleCancelFavorite()}>
-								<CloseIcon fontSize="small" />
-							</CloseButton>
-						</div>
-						<div style={{ width: 350, margin: 5 }}>
-							<div style={{ margin: '65px 15px 0' }}>
-								Are you sure you want to delete this favorite? You will lose any comments made.
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-									isSecondaryBtn={true}
-								>
-									No
-								</GCButton>
-								<GCButton
-									onClick={() => {
-										handleSaveFavorite(false);
-										gameChangerAPI.sendIntelligentSearchFeedback(
-											'intelligent_search_cancel_favorite_document',
-											displayTitle,
-											searchText
-										);
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'CancelFavorite',
-											filename,
-											`search : ${searchText}`
-										);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 10px 0px',
-										marginRight: 10,
-									}}
-								>
-									Yes
-								</GCButton>
-							</div>
-						</div>
-					</div>
-				) : (
-					<div className={classes.paper}>
-						<div style={{ width: 330, margin: 5 }}>
-							<TextField
-								label={'Favorite Summary'}
-								value={favoriteSummary}
-								onChange={(event) => {
-									setFavoriteSummary(event.target.value);
-								}}
-								className={classes.textArea}
-								margin="none"
-								size="small"
-								variant="outlined"
-								multiline={true}
-								rows={8}
-							/>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<GCButton
-									onClick={() => handleCancelFavorite()}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-									isSecondaryBtn={true}
-								>
-									Cancel
-								</GCButton>
-								<GCButton
-									onClick={() => {
-										handleSaveFavorite(true);
-										gameChangerAPI.sendIntelligentSearchFeedback(
-											'intelligent_search_favorite_document',
-											displayTitle,
-											searchText
-										);
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'Favorite',
-											filename,
-											`search : ${searchText}`
-										);
-									}}
-									style={{
-										height: 40,
-										minWidth: 40,
-										padding: '2px 8px 0px',
-										fontSize: 14,
-										margin: '16px 0px 0px 10px',
-									}}
-								>
-									Save
-								</GCButton>
-							</div>
-						</div>
-					</div>
-				)}
-			</Popover>
-
 			{getCardComponent({
 				id,
 				IS_EDGE,
@@ -799,7 +881,8 @@ function GCCard(props) {
 				item,
 				idx,
 				checkboxComponent,
-				favoriteComponent,
+				favoriteComponent: () =>
+					FavoriteComponent({ cardType, state, dispatch, filename, item, idx, displayTitle, classes }),
 				graphView,
 				intelligentSearch,
 				toggledMore,

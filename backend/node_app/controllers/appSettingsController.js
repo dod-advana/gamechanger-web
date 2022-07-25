@@ -116,8 +116,13 @@ class AppSettingsController {
 		}
 	}
 
-	async logFrontendError(req) {
-		this.logger.error(`[FRONTEND] ${JSON.stringify(req.body)}`);
+	async logFrontendError(req, res) {
+		try {
+			this.logger.error(`[FRONTEND] ${JSON.stringify(req.body)}`);
+			res.status(200).send();
+		} catch (err) {
+			res.status(500).send(err);
+		}
 	}
 }
 

@@ -40,12 +40,14 @@ class AppStatsController {
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.exportUserData = this.exportUserData.bind(this);
+		this.getClones = this.getClones.bind(this);
 		this.getRecentlyOpenedDocs = this.getRecentlyOpenedDocs.bind(this);
 		this.getAvgSearchesPerSession = this.getAvgSearchesPerSession.bind(this);
 		this.getTopSearches = this.getTopSearches.bind(this);
 		this.getDateNDaysAgo = this.getDateNDaysAgo.bind(this);
 		this.getDocumentUsageData = this.getDocumentUsageData.bind(this);
 		this.getUserAggregations = this.getUserAggregations.bind(this);
+		this.getDashboardData = this.getDashboardData.bind(this);
 		this.getUserLastOpened = this.getUserLastOpened.bind(this);
 	}
 	/**
@@ -68,8 +70,8 @@ class AppStatsController {
 	 * @param {Number} daysAgo
 	 * @returns
 	 */
-	async getAvgSearchesPerSession(daysAgo = 3, connection) {
-		return new Promise((resolve, reject) => {
+	async getAvgSearchesPerSession(connection, daysAgo = 3) {
+		return new Promise((resolve) => {
 			const startDate = this.getDateNDaysAgo(daysAgo);
 			connection.query(
 				`select SUM(search_count)/COUNT(search_count) as avg_search_count from (select distinct idvisit, 0 as search_count
@@ -80,7 +82,7 @@ class AppStatsController {
 					where a.idaction_name = b.idaction and a.idvisit = c.idvisit and c.visit_last_action_time > ? and a.search_cat like 'GAMECHANGER%' 
 					group by a.idvisit, c.user_id)x;`,
 				[`${startDate}`, `${startDate}`],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error(error, '5LR23WU');
 						throw error;
@@ -98,8 +100,8 @@ class AppStatsController {
 	 * @param {Boolean} isClone
 	 * @returns
 	 */
-	async getTopSearches(cloneData = {}, daysAgo = 3, excluding = [], blacklist = [], topN = 10, connection) {
-		return new Promise((resolve, reject) => {
+	async getTopSearches(connection, cloneData = {}, daysAgo = 3, excluding = [], blacklist = [], topN = 10) {
+		return new Promise((resolve) => {
 			let cloneNameAdd = cloneData.clone_name.toLowerCase();
 
 			let excludeValues = ['totallyfakethisisnotrealyesiwanttomergethis'];
@@ -136,7 +138,7 @@ class AppStatsController {
 			queryValues.push(topN);
 
 			const query = `select trim(lower(b.name)) as search, count(b.name) as count from matomo_log_link_visit_action a, matomo_log_action b, matomo_log_visit c where a.idaction_name = b.idaction and a.idvisit = c.idvisit and lower(search_cat) like ? and a.server_time > ? and c.user_id not in (${excludingString}) and ${blacklistString} group by b.name order by count desc limit ?;`;
-			connection.query(query, queryValues, (error, results, fields) => {
+			connection.query(query, queryValues, (error, results) => {
 				if (error) {
 					this.logger.error(error, 'BAP9ZIP');
 					throw error;
@@ -147,8 +149,8 @@ class AppStatsController {
 	}
 
 	htmlDecode(encodedString) {
-		var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
-		var translate = {
+		let translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+		let translate = {
 			nbsp: ' ',
 			amp: '&',
 			quot: '"',
@@ -156,11 +158,11 @@ class AppStatsController {
 			gt: '>',
 		};
 		return encodedString
-			.replace(translate_re, function (match, entity) {
+			.replace(translate_re, function (entity) {
 				return translate[entity];
 			})
-			.replace(/&#(\d+);/gi, function (match, numStr) {
-				var num = parseInt(numStr, 10);
+			.replace(/&#(\d+);/gi, function (numStr) {
+				let num = parseInt(numStr, 10);
 				return String.fromCharCode(num);
 			});
 	}
@@ -196,14 +198,14 @@ class AppStatsController {
 					blacklist: blacklist,
 				},
 			};
-			results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(3, connection);
+			results.data.avgSearchesPerSession = await this.getAvgSearchesPerSession(connection, 3);
 			results.data.topSearches.data = await this.getTopSearches(
+				connection,
 				cloneData,
 				daysAgo,
 				internalUsers,
 				blacklist,
-				10,
-				connection
+				10
 			);
 			let cleanedTopSearches = [];
 			results.data.topSearches.data.forEach((d) => {
@@ -230,7 +232,7 @@ class AppStatsController {
 	 * @returns
 	 */
 	async queryPdfOpend(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			const self = this;
 			connection.query(
 				`
@@ -243,19 +245,19 @@ class AppStatsController {
 					DATE_FORMAT(CONVERT_TZ(a.server_time,'UTC','EST'),'%Y-%m-%d %H:%i') as documenttime_formatted
 				from 
 					matomo_log_link_visit_action a, 
-					matomo_log_action b 
+					matomo_log_action b
 				where 
-					a.idaction_name = b.idaction  
+					a.idaction_name = b.idaction
 					and b.name like 'PDFViewer%'
 					and a.server_time >= ?
 					and a.server_time <= ?
 				order by 
 					documenttime desc,
 					idvisit;`,
-				[`${startDate}`, endDate],
-				(error, results, fields) => {
+				[startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP1');
 						throw error;
 					}
 					resolve(self.cleanFilePath(results));
@@ -272,8 +274,7 @@ class AppStatsController {
 	 *
 	 */
 	async queryPDFOpenedByUserId(userId, connection) {
-		return new Promise((resolve, reject) => {
-			const self = this;
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select 
@@ -290,7 +291,7 @@ class AppStatsController {
 					documenttime desc
 				limit 10`,
 				[userId],
-				(error, results, fields) => {
+				(error, results) => {
 					if (error) {
 						this.logger.error('No userids found', 'B07IQHT');
 						resolve([]);
@@ -309,8 +310,8 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async querySearches(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async querySearches(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 			select
@@ -327,17 +328,17 @@ class AppStatsController {
 				matomo_log_action b
 			where
 				a.idaction_name = b.idaction
-				and (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
+				and (search_cat = ? or search_cat = ?)
 				and a.server_time > ?
-				and server_time <= ?
+				and a.server_time <= ?
 			order by
 				idvisit,
 				searchtime desc
 			`,
-				[`${startDate}`, endDate],
-				(error, results, fields) => {
+				[cloneName + '_combined', cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP2');
 						throw error;
 					}
 					resolve(results);
@@ -347,28 +348,61 @@ class AppStatsController {
 	}
 
 	/**
-	 * This method gets the visitorID tied to a userid
+	 * This method gets the visitorID tied to one userid
+	 * @method getOneUserVisitorID
+	 * @param {String} userID
+	 * @returns
+	 *
+	 */
+	async getOneUserVisitorID(userID, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				select 
+					distinct hex(a.idvisitor) as idvisitor,
+					a.user_id as user_id
+				from matomo_log_visit a
+				where
+					a.user_id = ?
+				`,
+				[userID],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP3');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method gets the visitorID tied all userid
 	 * @method getUserVisitorID
 	 * @param {String} userID
 	 * @returns
 	 *
 	 */
-	async getUserVisitorID(userID, connection) {
-		return new Promise((resolve, reject) => {
+	async getUserVisitorID(cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
-			select
-				distinct hex(c.idvisitor) as idvisitor,
-				c.user_id as user_id
-			from
-				matomo_log_visit c
-			where 
-				c.user_id in (?)
-			`,
-				[userID],
-				(error, results, fields) => {
+				select 
+					distinct hex(a.idvisitor) as idvisitor,
+					a.user_id as user_id
+				from matomo_log_visit a
+				where a.idvisitor in (
+					select distinct idvisitor
+					from matomo_log_link_visit_action
+					where idaction_event_category=?
+				)
+				`,
+				[cloneName],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP4');
 						resolve([]);
 					} else {
 						resolve(results);
@@ -385,8 +419,8 @@ class AppStatsController {
 	 * @param {Date} startDate
 	 * @returns
 	 */
-	async queryEvents(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async queryEvents(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				SELECT 
@@ -396,19 +430,21 @@ class AppStatsController {
 					hex(llva.idvisitor) as idvisitor,
 					la_names.name as document,
 					la.name as action
-				FROM matomo_log_link_visit_action llva
-				JOIN matomo_log_action as la
-				JOIN matomo_log_action as la_names
+				FROM 
+					matomo_log_link_visit_action llva,
+				 	matomo_log_action as la,
+				 	matomo_log_action as la_names
 				WHERE llva.idaction_event_action = la.idaction
 				AND llva.idaction_name = la_names.idaction
 				AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument' OR la.name LIKE 'Highlight')
+				AND llva.idaction_event_category = ?
 				AND server_time >= ?
 				AND server_time <= ?
 			`,
-				[`${startDate}`, endDate],
-				(error, results, fields) => {
+				[cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP5');
 						throw error;
 					}
 					resolve(results);
@@ -418,45 +454,78 @@ class AppStatsController {
 	}
 
 	/**
-	 * This method takes in options from the endpoint and queries matomo with those parameters.
-	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
-	 * @returns an array of data from Matomo.
+	 * This method gets the visitorID tied to a userid
+	 * @method queryClones
+	 * @param {String} userID
+	 * @returns
+	 *
 	 */
-	async querySearchPdfMapping(opts, connection) {
-		const { userId } = opts;
-		const searches = await this.querySearches(opts.startDate, opts.endDate, connection);
-		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		const events = await this.queryEvents(opts.startDate, opts.endDate, connection);
-		const searchMap = {};
-		const eventMap = {};
-		const searchPdfMapping = [];
+	async queryClones(connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+			select
+				distinct a.name as name,
+				a.idaction as category_id
+			from
+				matomo_log_action a,
+				matomo_log_link_visit_action b
+			where a.idaction = b.idaction_event_category
+			and a.name LIKE 'GAMECHANGER_%'
+			`,
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, 'BAP9ZIP6');
+						resolve([]);
+					} else {
+						resolve(results);
+					}
+				}
+			);
+		});
+	}
 
-		for (let search of searches) {
-			if (!searchMap[search.idvisit]) {
-				searchMap[search.idvisit] = [];
-			}
-			search = { ...search, value: this.htmlDecode(search.value) };
-			searchMap[search.idvisit].push(search);
-		}
+	/**
+	 * helper to map events for search pdf mappings
+	 *
+	 * @returns a dictionary to map events to searches
+	 */
+	mapEventsMappings(searchMap, events) {
 		const tempSearch = { ...searchMap };
+		const eventMap = {};
 		for (let event of events) {
 			if (!eventMap[event.idvisit]) {
 				eventMap[event.idvisit] = [];
 			}
+			let search = '';
 			if (tempSearch[event.idvisit]) {
 				let i = 0;
-				let search = '';
 				let tempSearchList = tempSearch[event.idvisit].map((a) => a).reverse();
 				while (i < tempSearchList.length && tempSearchList[i].searchtime < event.searchtime) {
 					search = tempSearchList[i].value;
 					i++;
 				}
-				event = { ...event, value: search };
 			}
 			if (searchMap[event.idvisit]) {
-				searchMap[event.idvisit].push(event);
+				searchMap[event.idvisit].push({ ...event, value: search });
 			}
 		}
+	}
+
+	/**
+	 * helper to map search documents for the pdf mappings
+	 *
+	 * @returns a dictionary to map searches
+	 */
+	mapSearchMappings(searches, documents, events, searchPdfMapping) {
+		const searchMap = {};
+		for (let search of searches) {
+			if (!searchMap[search.idvisit]) {
+				searchMap[search.idvisit] = [];
+			}
+			searchMap[search.idvisit].push({ ...search, value: this.htmlDecode(search.value) });
+		}
+		this.mapEventsMappings(searchMap, events);
 		for (let document of documents) {
 			if (searchMap[document.idvisit]) {
 				const idSearches = searchMap[document.idvisit];
@@ -469,7 +538,23 @@ class AppStatsController {
 				}
 			}
 		}
-		for (const [key, value] of Object.entries(searchMap)) {
+		return searchMap;
+	}
+
+	/**
+	 * This method takes in options from the endpoint and queries matomo with those parameters.
+	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
+	 * @returns an array of data from Matomo.
+	 */
+	async querySearchPdfMapping(opts, connection) {
+		const { userId } = opts;
+		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
+		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, connection);
+
+		const searchPdfMapping = [];
+		const searchMap = this.mapSearchMappings(searches, documents, events, searchPdfMapping);
+		for (const [, value] of Object.entries(searchMap)) {
 			for (let search of value) {
 				if (search.visited === undefined) {
 					searchPdfMapping.push(search);
@@ -520,14 +605,40 @@ class AppStatsController {
 	}
 
 	/**
+	 * This method is called to get a list of clones and there ids to pass into a select
+	 * It first makes the connection with matomo then populates the data for the results into an excel file.
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	async getClones(_req, res) {
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database,
+			});
+			connection.connect();
+			const clones = await this.queryClones(connection);
+			res.status(200).send(clones);
+		} catch (err) {
+			this.logger.error(err, '12OASMZ');
+			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
+	/**
 	 * This method is called to export Matomo data into an excel document.
 	 * It first makes the connection with matomo then populates the data for the results into an excel file.
 	 * @param {*} req
 	 * @param {*} res
 	 */
 	async exportUserData(req, res) {
-		const { startDate, endDate, table, daysBack } = req.query;
-		const opts = { startDate, endDate, daysBack };
+		const { startDate, endDate, table, daysBack, cloneName, cloneID } = req.query;
+		const opts = { startDate, endDate, daysBack, cloneName, cloneID };
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 		let connection;
@@ -603,8 +714,7 @@ class AppStatsController {
 					{ header: 'Viewer List', key: 'user_list' },
 					{ header: 'Searches', key: 'searches' },
 				];
-				const docDate = this.getDateNDaysAgo(opts.daysBack);
-				const docData = await this.createDocumentUsageData(docDate, userId, connection);
+				const docData = await this.createDocumentUsageData(opt.startDate, opts.endDate, userId, connection);
 				sendExcelFile(res, 'Documents', columns, docData);
 			}
 		} catch (err) {
@@ -623,9 +733,9 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
+		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
 
-		const opts = { startDate, endDate, offset, filters, sorting, pageSize, userId };
+		const opts = { startDate, endDate, cloneName, cloneID, offset, filters, sorting, pageSize, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -656,11 +766,8 @@ class AppStatsController {
 	 * @param {*} res
 	 */
 	async getRecentlyOpenedDocs(req, res) {
-		let userId = 'Unknown';
 		let connection;
-
 		try {
-			const { clone_name } = req.body;
 			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -684,8 +791,8 @@ class AppStatsController {
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-	async queryDocumentUsageData(startDate, connection) {
-		return new Promise((resolve, reject) => {
+	async queryDocumentUsageData(startDate, endDate, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select 
@@ -700,15 +807,16 @@ class AppStatsController {
 				where 
 					b.name LIKE 'PDFViewer%gamechanger' 
 					AND b.idaction = a.idaction_name
-					and a.server_time > ?
+					AND a.server_time >= ?
+					AND a.server_time <= ? 
 				group by
 					b.name
 				order by
 					visit_count DESC;`,
-				[`${startDate}`],
-				(error, results, fields) => {
+				[startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP7');
 						throw error;
 					}
 					resolve(results);
@@ -722,8 +830,8 @@ class AppStatsController {
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-	async getSearchesAndPdfs(startDate, connection) {
-		return new Promise((resolve, reject) => {
+	async getSearchesAndPdfs(startDate, endDate, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 			select 
@@ -737,13 +845,14 @@ class AppStatsController {
 				( b.name LIKE 'PDFViewer%gamechanger'
 				OR (a.search_cat = 'GAMECHANGER_gamechanger_combined' or a.search_cat = 'GAMECHANGER_gamechanger'))
 				AND b.idaction = a.idaction_name
-				AND server_time > ?
+				AND server_time >= ?
+				AND server_time <= ?
 			order by 
 				server_time asc;`,
-				[`${startDate}`],
-				(error, results, fields) => {
+				[startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP8');
 						throw error;
 					}
 					resolve(results);
@@ -752,22 +861,10 @@ class AppStatsController {
 		});
 	}
 
-	async createDocumentUsageData(startDate, userId, connection) {
-		const searches = await this.getSearchesAndPdfs(startDate, connection);
-		const docData = await this.queryDocumentUsageData(startDate, connection);
-
-		// create search map, grouping searches by visit ID, ordered by time.
-		const searchMap = {};
-		for (let search of searches) {
-			if (!searchMap[search.idvisit]) {
-				searchMap[search.idvisit] = [];
-			}
-			searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
-		}
-
-		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
+	mapDocumentsUsage(searchMap) {
 		const docMap = {};
-		for (const [visitID, arr] of Object.entries(searchMap)) {
+
+		for (const [, arr] of Object.entries(searchMap)) {
 			let currentSearch = '';
 			for (const search_doc of arr) {
 				const currItem = this.htmlDecode(search_doc.search_doc);
@@ -784,16 +881,33 @@ class AppStatsController {
 				}
 			}
 		}
+		return docMap;
+	}
 
+	async createDocumentUsageData(startDate, endDate, userId, connection) {
+		const searches = await this.getSearchesAndPdfs(startDate, endDate, connection);
+		const docData = await this.queryDocumentUsageData(startDate, endDate, connection);
+
+		// create search map, grouping searches by visit ID, ordered by time.
+		const searchMap = {};
+		for (let search of searches) {
+			if (!searchMap[search.idvisit]) {
+				searchMap[search.idvisit] = [];
+			}
+			searchMap[search.idvisit].push({ search_doc: search.search_doc, time: search.server_time });
+		}
+
+		// creates docMap, mapping documents to search terms. documents are mapped to the most recent search in that visitID
+		const docMap = this.mapDocumentsUsage(searchMap);
 		// updates docData, cleans 'PDFViewer - ' and ' - gamechanger' document name; joins all the searches + frequency into top 5
 		for (const doc of docData) {
-			const searches = docMap[doc.document];
-			if (searches !== undefined) {
-				const sortSearches = Object.keys(searches)
+			const search = docMap[doc.document];
+			if (search !== undefined) {
+				const sortSearches = Object.keys(search)
 					.sort(function (a, b) {
-						return searches[b] - searches[a];
+						return search[b] - search[a];
 					})
-					.map((item) => item + ' (' + searches[item] + ')')
+					.map((item) => item + ' (' + search[item] + ')')
 					.slice(0, 5);
 				const strSearches = sortSearches.join(', ');
 				doc.searches = strSearches;
@@ -831,9 +945,7 @@ class AppStatsController {
 	async getDocumentUsageData(req, res) {
 		let connection;
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { daysBack = 3, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { daysBack, offset, filters, sorting, pageSize };
-		const startDate = this.getDateNDaysAgo(opts.daysBack);
+		const { startDate, endDate } = req.query;
 		try {
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
@@ -846,11 +958,11 @@ class AppStatsController {
 				data: [],
 			};
 
-			const docData = await this.createDocumentUsageData(startDate, userId, connection);
+			const docData = await this.createDocumentUsageData(startDate, endDate, userId, connection);
 			results.data = docData;
 			res.status(200).send(results);
 		} catch (err) {
-			this.logger.error(err, '88ZHUHU');
+			this.logger.error(err, '88ZHUHF');
 			res.status(500).send(err);
 		} finally {
 			connection.end();
@@ -861,30 +973,30 @@ class AppStatsController {
 	 * This method takes gets user aggregated data
 	 * @returns an array of data from Matomo.
 	 */
-	async getUserAggregationsQuery(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async getUserAggregationsQuery(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select
 					hex(a.idvisitor) as idvisitor,
 					SUM(IF(b.name LIKE 'PDFViewer%gamechanger', 1, 0)) as docs_opened,
-					SUM(IF(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger', 1, 0)) as searches_made,
+					SUM(IF((search_cat = ? or search_cat = ?), 1, 0)) as searches_made,
 					max(server_time) as last_search,
 					date_format(max(server_time),'%Y-%m-%d %H:%i') as last_search_formatted
 				from 
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger'))
+					(b.name LIKE 'PDFViewer%gamechanger' OR (search_cat = ? or search_cat = ?))
 					AND b.idaction = a.idaction_name
 					AND server_time >= ?
 					AND server_time <= ?
 				group by
 					a.idvisitor;`,
-				[startDate, endDate],
-				(error, results, fields) => {
+				[cloneName + '_combined', cloneName, cloneName + '_combined', cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIP9');
 						throw error;
 					}
 					resolve(results);
@@ -897,22 +1009,27 @@ class AppStatsController {
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
 	 */
-	async getCardUsersAggregationQuery(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async getCardUsersAggregationQuery(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select
-					count(distinct c.user_id) as unique_users
+					count(distinct b.user_id) as unique_users
 				from
-					matomo_log_visit c
+					matomo_log_action a,
+					matomo_log_visit b,
+					matomo_log_link_visit_action c
 				where
-					c.visit_last_action_time >= ?
-					AND c.visit_last_action_time <= ?
+					c.idvisitor = b.idvisitor
+					AND c.idaction_name = a.idaction
+					AND c.idaction_event_category = ?
+					AND b.visit_last_action_time >= ?
+					AND b.visit_last_action_time <= ?
 				`,
-				[startDate, endDate],
-				(error, results, fields) => {
+				[cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, '1FGM919');
 						throw error;
 					}
 					resolve(results);
@@ -925,8 +1042,8 @@ class AppStatsController {
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
 	 */
-	async getCardSearchAggregationQuery(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async getCardSearchAggregationQuery(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select
@@ -936,15 +1053,15 @@ class AppStatsController {
 					matomo_log_link_visit_action a,
 					matomo_log_action b
 				where 
-					(search_cat = 'GAMECHANGER_gamechanger_combined' or search_cat = 'GAMECHANGER_gamechanger')
-					AND b.idaction = a.idaction_name
+					b.idaction = a.idaction_name
+					AND (search_cat = ? or search_cat = ?)
 					AND server_time >= ?
 					AND server_time <= ?
 				`,
-				[startDate, endDate],
-				(error, results, fields) => {
+				[cloneName + '_combined', cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, '1FGM91C');
 						throw error;
 					}
 					resolve(results);
@@ -952,12 +1069,13 @@ class AppStatsController {
 			);
 		});
 	}
+
 	/**
 	 * This method takes gets user aggregated data
 	 * @returns an array of data from Matomo.
 	 */
-	async getUserDocuments(startDate, endDate, connection) {
-		return new Promise((resolve, reject) => {
+	async getUserDocuments(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
 			connection.query(
 				`
 				select
@@ -973,15 +1091,16 @@ class AppStatsController {
 					a.idaction_event_action = b.idaction
 					AND a.idaction_name = c.idaction
 					AND (b.name LIKE 'Favorite' OR b.name LIKE 'ExportDocument')
+					and a.idaction_event_category = ?
 					AND server_time >= ?
 					AND server_time <= ?
 				order by 
 					documenttime desc,
 					idvisitor;`,
-				[startDate, endDate],
-				(error, results, fields) => {
+				[cloneName, startDate, endDate],
+				(error, results) => {
 					if (error) {
-						this.logger.error(error, 'BAP9ZIP');
+						this.logger.error(error, 'BAP9ZIPA');
 						throw error;
 					}
 					resolve(results);
@@ -998,8 +1117,8 @@ class AppStatsController {
 	 */
 	async getUserAggregations(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, offset = 0, filters, sorting, pageSize } = req.query;
-		const opts = { startDate, endDate, offset, filters, sorting, pageSize };
+		const { startDate, endDate, cloneName, cloneID, offset = 0, filters, sorting, pageSize } = req.query;
+		const opts = { startDate, endDate, cloneName, cloneID, offset, filters, sorting, pageSize };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -1010,6 +1129,7 @@ class AppStatsController {
 			});
 			connection.connect();
 			const userData = await this.queryUserAggregations(opts, connection);
+			console.log(userData);
 			res.status(200).send(userData);
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userId);
@@ -1019,15 +1139,162 @@ class AppStatsController {
 		}
 	}
 
-	async queryUserAggregations(opts, connection) {
-		const documentMap = {};
-		const vistitIDMap = {};
-		const users = await this.user.findAll();
-		const visitorIDs = await this.getUserVisitorID(
-			users.map((x) => this.sparkMD5.hash(x.user_id)),
-			connection
-		);
+	addSearches(visitMap, docMap, searches) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+		for (let search of searches) {
+			if (visitIDMap[search.idvisitor]) {
+				if (documentMap[visitIDMap[search.idvisitor]]) {
+					documentMap[visitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[visitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[visitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[visitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[visitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[visitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[visitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
+					}
+				} else {
+					documentMap[visitIDMap[search.idvisitor]] = {
+						user_id: visitIDMap[search.idvisitor],
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
+				}
+			}
+		}
 
+		return [visitIDMap, documentMap];
+	}
+
+	addDocs(visitMap, docMap, documents) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+		for (let doc of documents) {
+			if (visitIDMap[doc.idvisitor]) {
+				if (
+					!documentMap[visitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].length < 5
+				) {
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+				} else {
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					documentMap[visitIDMap[doc.idvisitor]][doc.action].shift();
+				}
+			}
+		}
+		return [visitIDMap, documentMap];
+	}
+
+	addOpened(visitMap, docMap, opened) {
+		let visitIDMap = { ...visitMap };
+		let documentMap = { ...docMap };
+
+		for (let open of opened) {
+			if (visitIDMap[open.idvisitor]) {
+				if (
+					!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+					documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
+				) {
+					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+				} else {
+					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+					documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+				}
+			}
+		}
+		return [visitIDMap, documentMap];
+	}
+
+	/**
+	 * helper to map searches to the document mapper
+	 */
+	mapSearchVisitIDs(searches, documentMap, vistitIDMap) {
+		for (let search of searches) {
+			if (vistitIDMap[search.idvisitor]) {
+				if (documentMap[vistitIDMap[search.idvisitor]]) {
+					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
+						documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
+					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
+						documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
+					if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
+						documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
+						documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] =
+							search.last_search_formatted;
+					}
+				} else {
+					documentMap[vistitIDMap[search.idvisitor]] = {
+						user_id: vistitIDMap[search.idvisitor],
+						docs_opened: search.docs_opened,
+						searches_made: search.searches_made,
+						last_search: search.last_search,
+						last_search_formatted: search.last_search_formatted,
+						Favorite: [],
+						ExportDocument: [],
+						opened: [],
+					};
+				}
+			}
+		}
+	}
+
+	/**
+	 * helper to map documents to the document mapper
+	 */
+	mapDocumentVisitIDs(documents, documentMap, vistitIDMap) {
+		for (let doc of documents) {
+			if (vistitIDMap[doc.idvisitor]) {
+				if (
+					!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
+				) {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+				} else {
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
+					documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
+				}
+			}
+		}
+	}
+
+	/**
+	 * helper to map opened documents to the document mapper
+	 */
+	mapOpenedVisitIDs(opened, documentMap, vistitIDMap) {
+		for (let open of opened) {
+			if (vistitIDMap[open.idvisitor] && vistitIDMap[open.idvisitor] in documentMap) {
+				if (
+					!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
+				) {
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+				} else {
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
+					documentMap[vistitIDMap[open.idvisitor]]['opened'].shift();
+				}
+			}
+		}
+	}
+
+	/**
+	 * This method gets the user aggregation table for the frontend
+	 * by a user
+	 * @param {*} opts
+	 * @param {*} connection
+	 */
+	async queryUserAggregations(opts, connection) {
+		let documentMap = {};
+		let visitIDMap = {};
+		const users = await this.user.findAll();
+		const visitorIDs = await this.getUserVisitorID(opts.cloneID, connection);
+		for (let visit of visitorIDs) {
+			visitIDMap[visit.idvisitor] = visit.user_id;
+		}
 		for (let user of users) {
 			documentMap[this.sparkMD5.hash(user.user_id)] = {
 				opened: [],
@@ -1043,57 +1310,121 @@ class AppStatsController {
 				last_search_formatted: '',
 			};
 		}
-		for (let visit of visitorIDs) {
-			vistitIDMap[visit.idvisitor] = visit.user_id;
-		}
 
-		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, connection);
-		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, connection);
+		const searches = await this.getUserAggregationsQuery(opts.startDate, opts.endDate, opts.cloneName, connection);
+		const documents = await this.getUserDocuments(opts.startDate, opts.endDate, opts.cloneID, connection);
 		const opened = await this.queryPdfOpend(opts.startDate, opts.endDate, connection);
-		const cards = await this.getCardSearchAggregationQuery(opts.startDate, opts.endDate, connection);
-		const userCards = await this.getCardUsersAggregationQuery(opts.startDate, opts.endDate, connection);
-		cards[0]['unique_users'] = userCards[0]['unique_users'];
 
-		for (let search of searches) {
-			if (vistitIDMap[search.idvisitor]) {
-				documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] =
-					documentMap[vistitIDMap[search.idvisitor]]['docs_opened'] + search.docs_opened;
-				documentMap[vistitIDMap[search.idvisitor]]['searches_made'] =
-					documentMap[vistitIDMap[search.idvisitor]]['searches_made'] + search.searches_made;
-				if (documentMap[vistitIDMap[search.idvisitor]]['last_search'] < search.last_search) {
-					documentMap[vistitIDMap[search.idvisitor]]['last_search'] = search.last_search;
-					documentMap[vistitIDMap[search.idvisitor]]['last_search_formatted'] = search.last_search_formatted;
-				}
-			}
-		}
-		for (let doc of documents) {
-			if (vistitIDMap[doc.idvisitor]) {
-				if (
-					!documentMap[vistitIDMap[doc.idvisitor]][doc.action].includes(doc.document) &&
-					documentMap[vistitIDMap[doc.idvisitor]][doc.action].length < 5
-				) {
-					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
-				} else {
-					documentMap[vistitIDMap[doc.idvisitor]][doc.action].push(doc.document);
-					documentMap[vistitIDMap[doc.idvisitor]][doc.action].shift();
-				}
-			}
-		}
-		for (let open of opened) {
-			if (vistitIDMap[open.idvisitor]) {
-				if (
-					!documentMap[vistitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
-					documentMap[vistitIDMap[open.idvisitor]]['opened'].length < 5
-				) {
-					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
-				} else {
-					documentMap[vistitIDMap[open.idvisitor]]['opened'].push(open.document);
-					documentMap[vistitIDMap[open.idvisitor]]['opened'].shift();
-				}
-			}
-		}
-		return { users: Object.values(documentMap), cards: cards[0] };
+		let addSearches = this.addSearches(visitIDMap, documentMap, searches);
+		visitIDMap = addSearches[0];
+		documentMap = addSearches[1];
+
+		let addDocs = this.addDocs(visitIDMap, documentMap, documents);
+		visitIDMap = addDocs[0];
+		documentMap = addDocs[1];
+
+		let addOpened = this.addOpened(visitIDMap, documentMap, opened);
+		documentMap = addOpened[1];
+
+		return { users: Object.values(documentMap) };
 	}
+
+	/**
+	 * This method gets graph data for searches by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getSearchGraphData(cloneName, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				select
+					DATE_FORMAT(server_time, '%Y-%m') as date,
+					COUNT(search_cat) as count
+				from 
+					matomo_log_link_visit_action a
+				where 
+					search_cat = ? or search_cat = ?
+				group by
+					DATE_FORMAT(server_time, '%Y-%m')
+				`,
+				[cloneName + '_combined', cloneName],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM91D');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method gets graph data for users by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getUserGraphData(cloneID, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				select
+					COUNT(distinct user_id) as count,
+					DATE_FORMAT(visit_last_action_time, '%Y-%m') as date
+				from matomo_log_visit a
+				where a.idvisitor in (
+					select distinct idvisitor
+					from matomo_log_link_visit_action
+					where idaction_event_category=?
+				)
+				GROUP BY
+					DATE_FORMAT(visit_last_action_time, '%Y-%m')
+
+				`,
+				[cloneID],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+
+	/**
+	 * This method is called by an endpoint to get the card and graph data
+	 * @param {*} req
+	 * @param {*} res
+	 */
+	async getDashboardData(req, res) {
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const { startDate, endDate, cloneName, cloneID } = req.query;
+		let connection;
+		try {
+			connection = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database,
+			});
+			connection.connect();
+			const cards = await this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
+			const userCards = await this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
+			cards[0]['unique_users'] = userCards[0]['unique_users'];
+
+			const searchBar = await this.getSearchGraphData(cloneName, connection);
+			const userBar = await this.getUserGraphData(cloneID, connection);
+
+			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
+		} catch (err) {
+			this.logger.error(err, '1FGM91B', userId);
+			res.status(500).send(err);
+		} finally {
+			connection.end();
+		}
+	}
+
 	/**
 	 *
 	 * @param {*} userdID
@@ -1108,12 +1439,11 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const visitorID = await this.getUserVisitorID([userdID], connection);
-			const opened = await this.queryPDFOpenedByUserId(
+			const visitorID = await this.getOneUserVisitorID(userdID, connection);
+			return await this.queryPDFOpenedByUserId(
 				visitorID.map((x) => x.idvisitor),
 				connection
 			);
-			return opened;
 		} catch (err) {
 			this.logger.error(err, '1CZPASK', userdID);
 			return [];

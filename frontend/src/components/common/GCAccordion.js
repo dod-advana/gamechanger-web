@@ -134,7 +134,7 @@ const GCAccordion = (props) => {
 			onClick={onClick}
 		>
 			<StyledAccordionSummary
-				style={{ backgroundColor: headerBackground }}
+				style={{ backgroundColor: headerBackground, height: 'fit-content' }}
 				aria-controls="accordion-content"
 				id="accordion-header"
 				expandIcon={
