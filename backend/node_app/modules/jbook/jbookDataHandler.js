@@ -1248,7 +1248,7 @@ class JBookDataHandler extends DataHandler {
 			const { docID, portfolioName } = req.body;
 
 			return await this.comments.findAll({
-				order: [['createdAt', 'DESC']],
+				order: [['createdAt', 'ASC']],
 				where: {
 					deleted: false,
 					docID,
