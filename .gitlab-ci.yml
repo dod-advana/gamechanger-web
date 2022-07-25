@@ -1,31 +1,60 @@
 stages:          # List of stages for jobs, and their order of execution.
+  - prepare
   - static-test
   - security-test
   - setup-test-server
   - integration-test
   - deploy
 
+cache: &global_cache
+  untracked: true
+  key:
+    files:
+      - backend/yarn.lock
+      - frontend/yarn.lock
+  paths:
+    - frontend/node_modules
+    - backend/node_modules
+    - .yarn-cache
+  policy: pull
+
 .setup-github-npm:
   before_script:   # Setups the npm vars
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
+prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
+  image: node:14
+  stage: prepare
+  cache:
+    <<: *global_cache
+    policy: pull-push
+  extends: .setup-github-npm
+  rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: $DAILY_SCAN == "true"
+  script:
+    - |
+      if [[ -d frontend/node_modules ]]; then
+        exit 0
+      fi
+    - cd frontend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - cd ../backend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  cache:
-    key:
-      files:
-        - backend/package-lock.json
-    paths:
-    - .npm/
   script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npm run test:gitlab
+    - cd backend && npm run test:gitlab
   artifacts:
     paths:
       - backend/coverage/lcov.info
@@ -36,45 +65,19 @@ unit-backend-test-job:    # Job for the unit tests
         - backend/junit.xml
       cobertura: backend/coverage/cobertura-coverage.xml
 
-lint-frontend-test-job:  # front end lint job
+lint-test-job:  # lint-job
   image: node:14
   stage: static-test
-  extends: .setup-github-npm
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  cache:
-    key: 
-      files:
-        - frontend/package-lock.json
-    paths:
-    - .npm/
   script:
-    - cd frontend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
-  artifacts:
-    paths:
-      - frontend/eslintReport.json
-
-lint-backend-test-job:  # backend lint job
-  image: node:14
-  stage: static-test
-  extends: .setup-github-npm
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  cache:
-    key: 
-      files:
-        - backend/package-lock.json
-    paths:
-    - .npm/
-  script:
-    - cd backend && npm ci --cache ../.npm --prefer-offline
-    - npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - cd backend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
+    - cd ../frontend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
   artifacts:
     paths:
       - backend/eslintReport.json
+      - frontend/eslintReport.json
 
 sonar_scan-job:  # Run code through sonar scanner
   stage: security-test
@@ -106,11 +109,11 @@ sonar_scan-job:  # Run code through sonar scanner
     - |
       sonar-scanner \
         -Dsonar.qualitygate.wait=true \
+        -Dsonar.exclusions=backend/node_app/sql/* \
         -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
         -Dsonar.junit.reportPaths=backend/junit.xml \
         -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
         -Dsonar.language=js \
-        -Dsonar.exclusions=backend/node_app/sql/* \
         -Dsonar.projectName="${PROJECTNAME}" \
         -Dsonar.projectKey="${PROJECTKEY}" \
         -Dsonar.links.ci="${PROJECTURL}/pipelines" \
@@ -145,19 +148,35 @@ setup-server:  # build dev server with the commit branch
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
-integration-testing-job:  # Start the integration testing
+integration-testing-cypress-job:  # Start the integration testing
+  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: integration-test
-  variables:
-    AWS_SERVER: "88"
-    DO_INTEGRATION_TEST: "true"
-    DO_DEPLOY: "true"
   rules:
     - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-ci-cd"
-    branch: "main"
+  variables:
+    AWS_SERVER: "88"
+    CYPRESS_BASE_URL: "http://10.194.9.${AWS_SERVER}:8080"
+    CYPRESS_API_URL: "http://10.194.9.${AWS_SERVER}:8990"
+    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
+    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
+  script:
+    - npm install -g cypress
+    - curl ${CYPRESS_BASE_URL}
+    - cd frontend && npm run cy:test
+  after_script:
+    - |
+      echo "Cypress tests finished"
+      cd frontend
+      npm run report:merge
+      npm run report:send
+  artifacts:
+    when: always
+    expire_in: 1 days
+    paths:
+      - frontend/results.json
+      - frontend/cypress/screenshots
+      - frontend/cypress/videos
   allow_failure: true
 
 deploy-job:       # This job runs the build for dev.

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { styles } from '../../mainView/commonStyles';
 import { renderHideTabs, getAboutUs } from '../../mainView/commonFunctions';
 import { trackEvent } from '../../telemetry/Matomo';
 import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
 import SearchSection from '../globalSearch/SearchSection';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { backgroundWhite, gcOrange } from '../../common/gc-colors';
+import { backgroundWhite } from '../../common/gc-colors';
 import { Card } from '../../cards/GCCard';
 import Pagination from 'react-js-pagination';
 import {
@@ -16,7 +15,7 @@ import {
 	StyledCenterContainer,
 } from '../../../utils/gamechangerUtils';
 import { Typography } from '@material-ui/core';
-import '../../../containers/gamechanger.css';
+import './globalSearch.css';
 import ResultView from '../../mainView/ResultView';
 import AppsIcon from '@material-ui/icons/Apps';
 import ListIcon from '@material-ui/icons/List';
@@ -27,60 +26,125 @@ import DatabasesIcon from '../../../images/icon/slideout-menu/database icon.png'
 import DataSourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 
-const getViewHeader = (state, dispatch) => {
+const PRIMARY_COLOR = '#13A792';
+
+const dataLoading = (extras) => {
+	const { applications, dashboards, dataSources, databases, models } = extras;
+
+	return applications.loading || dashboards.loading || dataSources.loading || databases.loading || models.loading;
+};
+
+const getHeaderStyles = (view) => {
+	return {
+		textStyle: { color: view ? backgroundWhite : '#8091A5' },
+		buttonColor: view ? PRIMARY_COLOR : backgroundWhite,
+		borderColor: view ? PRIMARY_COLOR : '#B0B9BE',
+	};
+};
+
+const getViewHeader = (state, dispatch, extras) => {
+	let gridView, listView;
+
+	if (state.listView) {
+		gridView = false;
+		listView = true;
+	} else {
+		gridView = true;
+		listView = false;
+	}
+
+	let disableFavoritesButton = true;
+
+	Object.keys(state.favorites || {}).forEach((key) => {
+		if (state.favorites[key].searchResults.length > 0) {
+			disableFavoritesButton = false;
+		}
+	});
+
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText &&
-				(!state.applicationsLoading ||
-					!state.dashboardsLoading ||
-					!state.dataSourcesLoading ||
-					!state.databasesLoading ||
-					!state.modelsLoading) && (
-					<>
-						<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
-							Showing results for <b>{state.searchText}</b>
-						</Typography>
-						<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
-							<div style={{ ...styles.container, margin: '0px 25px' }}>
-								<GCButton
-									onClick={() => setState(dispatch, { listView: false })}
-									style={{
-										...styles.buttons,
-										...(!state.listView ? styles.unselectedButton : {}),
-									}}
-									textStyle={{ color: !state.listView ? backgroundWhite : '#8091A5' }}
-									buttonColor={!state.listView ? gcOrange : backgroundWhite}
-									borderColor={!state.listView ? gcOrange : '#B0B9BE'}
-								>
-									<div style={{ marginTop: 5 }}>
-										<AppsIcon style={styles.icon} />
-									</div>
-								</GCButton>
+			{state.searchText && !dataLoading(extras) && (
+				<>
+					<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
+						{state.showFavorites ? 'Showing' : 'Showing results for'}{' '}
+						<b>{state.showFavorites ? 'favorites' : state.searchText}</b>
+					</Typography>
+					<div className={`tutorial-step-${state.componentStepNumbers['Tile Buttons']}`}>
+						<div style={{ ...styles.container, margin: '0px 25px' }}>
+							<GCButton
+								onClick={() => setState(dispatch, { listView: false })}
+								style={{
+									...styles.buttons,
+									...(!gridView ? styles.unselectedButton : {}),
+								}}
+								textStyle={getHeaderStyles(gridView)['textStyle']}
+								buttonColor={getHeaderStyles(gridView)['buttonColor']}
+								borderColor={getHeaderStyles(gridView)['borderColor']}
+							>
+								<div>
+									<AppsIcon style={styles.icon} />
+								</div>
+							</GCButton>
 
-								<GCButton
-									onClick={() => setState(dispatch, { listView: true })}
-									style={{
-										...styles.buttons,
-										...(!state.listView ? {} : styles.unselectedButton),
-									}}
-									textStyle={{ color: !state.listView ? '#8091A5' : backgroundWhite }}
-									buttonColor={!state.listView ? backgroundWhite : gcOrange}
-									borderColor={!state.listView ? '#B0B9BE' : gcOrange}
-								>
-									<div style={{ marginTop: 5 }}>
-										<ListIcon style={styles.icon} />
-									</div>
-								</GCButton>
-							</div>
+							<GCButton
+								onClick={() => setState(dispatch, { listView: true })}
+								style={{
+									...styles.buttons,
+									...(!listView ? styles.unselectedButton : {}),
+								}}
+								textStyle={getHeaderStyles(listView)['textStyle']}
+								buttonColor={getHeaderStyles(listView)['buttonColor']}
+								borderColor={getHeaderStyles(listView)['borderColor']}
+							>
+								<div>
+									<ListIcon style={styles.icon} />
+								</div>
+							</GCButton>
+
+							<GCButton
+								onClick={() => setState(dispatch, { showFavorites: !state.showFavorites })}
+								style={{
+									...styles.buttons,
+									...(!state.showFavorites ? styles.unselectedButton : {}),
+									width: 170,
+								}}
+								textStyle={getHeaderStyles(state.showFavorites)['textStyle']}
+								buttonColor={getHeaderStyles(state.showFavorites)['buttonColor']}
+								borderColor={getHeaderStyles(state.showFavorites)['borderColor']}
+								disabled={disableFavoritesButton}
+							>
+								<div style={{ display: 'flex' }}>
+									<Typography
+										style={{
+											fontSize: 14,
+											fontWeight: state.showFavorites ? 'bold' : 500,
+											color: state.showFavorites ? backgroundWhite : '#8091A5',
+										}}
+									>
+										Show Favorites
+									</Typography>
+									<i
+										className={state.showFavorites ? 'fa fa-star' : 'fa fa-star-o'}
+										style={{
+											color: state.showFavorites ? backgroundWhite : '#B0B9BE',
+											marginLeft: '5px',
+											cursor: 'pointer',
+											fontSize: 26,
+											alignSelf: 'center',
+										}}
+									/>
+								</div>
+							</GCButton>
 						</div>
-					</>
-				)}
+					</div>
+				</>
+			)}
 		</div>
 	);
 };
 
 const getSearchResults = (searchResultData, state, dispatch) => {
-	return _.map(searchResultData, (item, idx) => {
+	return searchResultData.map((item, idx) => {
 		return <Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />;
 	});
 };
@@ -91,36 +155,51 @@ const handlePageLoad = async (props) => {
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
 	const parsedURL = searchHandler.parseSearchURL(state);
+
 	if (parsedURL.searchText) {
 		const newState = { ...state, ...parsedURL, runSearch: true };
 		setState(dispatch, newState);
 
 		searchHandler.setSearchURL(newState);
 	}
+
+	// Get User Favorites from home App
+	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
+		const favoriteApps = data.favorite_apps || [];
+
+		setState(dispatch, { favoriteApps });
+		searchHandler.handleGetUserFavorites(favoriteApps, state).then((favorites) => {
+			setState(dispatch, { favorites });
+		});
+	});
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, pageLoaded, getViewPanels, renderHideTabs } = props;
-
 	const {
-		loading,
-		viewNames,
-		applicationsTotalCount,
-		dashboardsTotalCount,
-		dataSourcesTotalCount,
-		databasesTotalCount,
-		modelsTotalCount,
-		pageDisplayed,
-	} = state;
+		state,
+		dispatch,
+		pageLoaded,
+		getViewPanels,
+		renderHideTabs: renderHideTabsInner,
+		applications,
+		dashboards,
+		dataSources,
+		databases,
+		models,
+	} = props;
+
+	const { loading, viewNames, searchText } = state;
 
 	const noResults = Boolean(
-		!applicationsTotalCount &&
-			!dashboardsTotalCount &&
-			!dataSourcesTotalCount &&
-			!databasesTotalCount &&
-			!modelsTotalCount
+		!applications.totalCount &&
+			!dashboards.totalCount &&
+			!dataSources.totalCount &&
+			!databases.totalCount &&
+			!models.totalCount
 	);
-	const hideSearchResults = noResults && !loading && !pageDisplayed.includes('keywords=');
+
+	const hideSearchResults = noResults && !loading && !searchText;
+	const noSearchResults = noResults && !loading && searchText;
 
 	return (
 		<div style={styles.tabButtonContainer}>
@@ -130,16 +209,33 @@ const getMainView = (props) => {
 						<div id="game-changer-content-top" />
 						<StyledCenterContainer showSideFilters={false}>
 							<div className={'right-container'}>
-								{hideSearchResults && renderHideTabs(props)}
-								{!hideSearchResults &&
+								{hideSearchResults && renderHideTabsInner(props)}
+								{noSearchResults && (
+									<>
+										<div style={{ margin: '40px auto', width: '67%' }}>
+											<Typography>
+												No results found for: <strong>{searchText}</strong>. Try refining your
+												search terms.
+											</Typography>
+										</div>
+										{renderHideTabsInner(props)}
+									</>
+								)}
+								{!(hideSearchResults || noSearchResults) &&
 									pageLoaded &&
-									(applicationsTotalCount > 0 ||
-									dashboardsTotalCount > 0 ||
-									dataSourcesTotalCount > 0 ||
-									databasesTotalCount > 0 ||
-									modelsTotalCount > 0 ? (
+									(applications.totalCount > 0 ||
+									dashboards.totalCount > 0 ||
+									dataSources.totalCount > 0 ||
+									databases.totalCount > 0 ||
+									models.totalCount > 0 ? (
 										<>
-											{getViewHeader(state, dispatch)}
+											{getViewHeader(state, dispatch, {
+												applications,
+												dashboards,
+												dataSources,
+												databases,
+												models,
+											})}
 											<div style={{ margin: '0 15px 0 5px' }}>
 												<ResultView
 													context={{ state, dispatch }}
@@ -151,7 +247,7 @@ const getMainView = (props) => {
 										</>
 									) : (
 										<div className="col-xs-12">
-											<LoadingIndicator customColor={gcOrange} />
+											<LoadingIndicator customColor={PRIMARY_COLOR} />
 										</div>
 									))}
 							</div>
@@ -163,56 +259,78 @@ const getMainView = (props) => {
 	);
 };
 
-const getViewNames = (props) => {
+const getViewNames = (_props) => {
 	return [];
 };
 
-const getExtraViewPanels = (props) => {
+const getExtraViewPanels = (_props) => {
 	return [];
+};
+
+const getListViewStyle = (listView) => {
+	return listView ? styles.listViewContainer : styles.containerDiv;
+};
+
+const renderItems = (items, dispatch, itemCategory, stateCategoryName, categoryColor, categoryIcon, state) => {
+	const { cloneData, activeCategoryTab, selectedCategories, listView } = state;
+	const { loading, page: tmpPage, pagination, totalCount, searchResults } = items;
+
+	return (
+		<>
+			{searchResults?.length > 0 &&
+				(activeCategoryTab === itemCategory || activeCategoryTab === 'all') &&
+				selectedCategories[itemCategory] && (
+					<div className={'col-xs-12'} style={getListViewStyle(listView)}>
+						<SearchSection section={itemCategory} color={categoryColor} icon={categoryIcon}>
+							{!loading && !pagination ? (
+								getSearchResults(searchResults, state, dispatch)
+							) : (
+								<div className="col-xs-12">
+									<LoadingIndicator customColor={PRIMARY_COLOR} />
+								</div>
+							)}
+							<div className="gcPagination col-xs-12 text-center">
+								<Pagination
+									activePage={tmpPage}
+									itemsCountPerPage={RESULTS_PER_PAGE}
+									totalItemsCount={totalCount}
+									pageRangeDisplayed={8}
+									onChange={async (page) => {
+										trackEvent(
+											getTrackingNameForFactory(cloneData.clone_name),
+											'PaginationChanged',
+											'page',
+											page
+										);
+										setState(dispatch, {
+											[stateCategoryName]: {
+												...items,
+												loading: true,
+												page: page,
+												pagination: true,
+												totalCount,
+											},
+										});
+									}}
+								/>
+							</div>
+						</SearchSection>
+					</div>
+				)}
+		</>
+	);
 };
 
 const getCardViewPanel = (props) => {
-	const { context } = props;
+	const { context, applications, dashboards, dataSources, databases, models } = props;
 	const { state, dispatch } = context;
-	const {
-		activeCategoryTab,
-		componentStepNumbers,
-		iframePreviewLink,
-		selectedCategories,
-		applicationsSearchResults,
-		applicationsPage,
-		applicationsLoading,
-		applicationsPagination,
-		dashboardsSearchResults,
-		dashboardsPage,
-		dashboardsLoading,
-		dashboardsPagination,
-		dataSourcesSearchResults,
-		dataSourcesPage,
-		dataSourcesLoading,
-		dataSourcesPagination,
-		databasesSearchResults,
-		databasesPage,
-		databasesLoading,
-		databasesPagination,
-		modelsSearchResults,
-		modelsPage,
-		modelsLoading,
-		modelsPagination,
-		modelsTotalCount,
-		loading,
-	} = state;
+	const { componentStepNumbers, iframePreviewLink, loading } = state;
 
-	const applications = applicationsSearchResults;
-	const dashboards = dashboardsSearchResults;
-	const dataSources = dataSourcesSearchResults;
-	const databases = databasesSearchResults;
-	const models = modelsSearchResults;
-
-	let sideScroll = {
-		height: '72vh',
-	};
-	if (!iframePreviewLink) sideScroll = {};
+	let sideScroll = !iframePreviewLink
+		? {}
+		: {
+				height: '72vh',
+		  };
 
 	return (
 		<div
@@ -220,209 +338,51 @@ const getCardViewPanel = (props) => {
 			style={{ marginTop: 0 }}
 		>
 			<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-				{applications?.length > 0 &&
-					(activeCategoryTab === 'Applications' || activeCategoryTab === 'all') &&
-					selectedCategories['Applications'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Applications'} color={'rgb(50, 18, 77)'} icon={ApplicationsIcon}>
-								{!applicationsLoading && !applicationsPagination ? (
-									getSearchResults(applications, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={applicationsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.applicationsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												applicationsLoading: true,
-												applicationsPage: page,
-												applicationsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems(
+					applications,
+					dispatch,
+					'Applications',
+					'applicationsSearchResults',
+					'rgb(50, 18, 77)',
+					ApplicationsIcon,
+					state
+				)}
 
-				{dashboards?.length > 0 &&
-					(activeCategoryTab === 'Dashboards' || activeCategoryTab === 'all') &&
-					selectedCategories['Dashboards'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Dashboards'} color={'rgb(11, 167, 146)'} icon={DashboardsIcon}>
-								{!dashboardsLoading && !dashboardsPagination ? (
-									getSearchResults(dashboards, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={dashboardsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.dashboardsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												dashboardsLoading: true,
-												dashboardsPage: page,
-												dashboardsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems(
+					dashboards,
+					dispatch,
+					'Dashboards',
+					'dashboardsSearchResults',
+					'rgb(11, 167, 146)',
+					DashboardsIcon,
+					state
+				)}
 
-				{dataSources?.length > 0 &&
-					(activeCategoryTab === 'DataSources' || activeCategoryTab === 'all') &&
-					selectedCategories['DataSources'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Data Sources'} color={'rgb(5, 159, 217)'} icon={DataSourcesIcon}>
-								{!dataSourcesLoading && !dataSourcesPagination ? (
-									getSearchResults(dataSources, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={dataSourcesPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.dataSourcesTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												dataSourcesLoading: true,
-												dataSourcesPage: page,
-												dataSourcesPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems(
+					dataSources,
+					dispatch,
+					'DataSources',
+					'dataSourcesSearchResults',
+					'rgb(5, 159, 217)',
+					DataSourcesIcon,
+					state
+				)}
 
-				{databases?.length > 0 &&
-					(activeCategoryTab === 'Databases' || activeCategoryTab === 'all') &&
-					selectedCategories['Databases'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Databases'} color={'rgb(233, 105, 29)'} icon={DatabasesIcon}>
-								{!databasesLoading && !databasesPagination ? (
-									getSearchResults(databases, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={databasesPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={state.databasesTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												databasesLoading: true,
-												databasesPage: page,
-												databasesPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems(
+					databases,
+					dispatch,
+					'Databases',
+					'databasesSearchResults',
+					'rgb(233, 105, 29)',
+					DatabasesIcon,
+					state
+				)}
 
-				{models?.length > 0 &&
-					(activeCategoryTab === 'Models' || activeCategoryTab === 'all') &&
-					selectedCategories['Models'] && (
-						<div
-							className={'col-xs-12'}
-							style={state.listView ? styles.listViewContainer : styles.containerDiv}
-						>
-							<SearchSection section={'Models'} color={'#131E43'} icon={DatabasesIcon}>
-								{!modelsLoading && !modelsPagination ? (
-									getSearchResults(models, state, dispatch)
-								) : (
-									<div className="col-xs-12">
-										<LoadingIndicator customColor={gcOrange} />
-									</div>
-								)}
-								<div className="gcPagination col-xs-12 text-center">
-									<Pagination
-										activePage={modelsPage}
-										itemsCountPerPage={RESULTS_PER_PAGE}
-										totalItemsCount={modelsTotalCount}
-										pageRangeDisplayed={8}
-										onChange={async (page) => {
-											trackEvent(
-												getTrackingNameForFactory(state.cloneData.clone_name),
-												'PaginationChanged',
-												'page',
-												page
-											);
-											setState(dispatch, {
-												modelsLoading: true,
-												modelsPage: page,
-												modelsPagination: true,
-											});
-										}}
-									/>
-								</div>
-							</SearchSection>
-						</div>
-					)}
+				{renderItems(models, dispatch, 'Models', 'modelsSearchResults', '#131E43', DatabasesIcon, state)}
 
 				{loading && (
 					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} containerStyle={{ paddingTop: 100 }} />
+						<LoadingIndicator customColor={PRIMARY_COLOR} containerStyle={{ paddingTop: 100 }} />
 					</div>
 				)}
 			</div>
@@ -430,29 +390,122 @@ const getCardViewPanel = (props) => {
 	);
 };
 
+const handlePagination = (state, dispatch, searchHandler) => {
+	if (searchHandler) {
+		if (state.applicationsSearchResults.pagination) {
+			searchHandler.handleApplicationsPagination(state, dispatch);
+		}
+		if (state.dashboardsSearchResults.pagination) {
+			searchHandler.handleDashboardsPagination(state, dispatch);
+		}
+		if (state.dataSourcesSearchResults.pagination) {
+			searchHandler.handleDataSourcesPagination(state, dispatch);
+		}
+		if (state.databasesSearchResults.pagination) {
+			searchHandler.handleDatabasesPagination(state, dispatch);
+		}
+		if (state.modelsSearchResults.pagination) {
+			searchHandler.handleModelsPagination(state, dispatch);
+		}
+	}
+};
+
+const checkFinishedLoading = (state, dispatch, applications, dashboards, dataSources, databases, models) => {
+	if (
+		state.runningSearch &&
+		!applications.loading &&
+		!dashboards.loading &&
+		!dataSources.loading &&
+		!databases.loading &&
+		!models.loading
+	) {
+		setState(dispatch, {
+			runningSearch: false,
+			loading: false,
+		});
+	}
+};
+
+const setMetaData = (state, dispatch, applications, dashboards, dataSources, databases, models) => {
+	const tmpMeta = structuredClone(state.categoryMetadata);
+
+	if (!applications.loading) {
+		tmpMeta['Applications'] = { total: applications.totalCount };
+	}
+
+	if (!dashboards.loading) {
+		tmpMeta['Dashboards'] = { total: dashboards.totalCount };
+	}
+	if (!dataSources.loading) {
+		tmpMeta['DataSources'] = { total: dataSources.totalCount };
+	}
+	if (!databases.loading) {
+		tmpMeta['Databases'] = { total: databases.totalCount };
+	}
+	if (!models.loading) {
+		tmpMeta['Models'] = { total: models.totalCount };
+	}
+
+	setState(dispatch, { categoryMetadata: tmpMeta });
+};
+
+const updateSearchFavorites = (gameChangerAPI, dispatch, state, searchHandler) => {
+	// Get User Favorites from home App
+	gameChangerAPI.getUserFavoriteHomeApps().then(({ data }) => {
+		const favoriteApps = data.favorite_apps || [];
+
+		setState(dispatch, { favoriteApps });
+		searchHandler.handleGetUserFavorites(favoriteApps, state).then((tmpFavorites) => {
+			setState(dispatch, { favorites: tmpFavorites, updateSearchFavorites: false });
+		});
+	});
+};
+
 const GlobalSearchMainViewHandler = (props) => {
 	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
+	const [applications, setApplications] = useState(state.applicationsSearchResults);
+	const [dashboards, setDashboards] = useState(state.dashboardsSearchResults);
+	const [dataSources, setDataSources] = useState(state.dataSourcesSearchResults);
+	const [databases, setDatabases] = useState(state.databasesSearchResults);
+	const [models, setModels] = useState(state.modelsSearchResults);
+
+	const [showFavorites, setShowFavorites] = useState(state.showFavorites);
+	const [favorites, setFavorites] = useState(state.favorites);
 
 	useEffect(() => {
-		if (state.applicationsPagination && searchHandler) {
-			searchHandler.handleApplicationsPagination(state, dispatch);
+		if (state.updateSearchFavorites) {
+			updateSearchFavorites(gameChangerAPI, dispatch, state, searchHandler);
 		}
-		if (state.dashboardsPagination && searchHandler) {
-			searchHandler.handleDashboardsPagination(state, dispatch);
-		}
-		if (state.dataSourcesPagination && searchHandler) {
-			searchHandler.handleDataSourcesPagination(state, dispatch);
-		}
-		if (state.databasesPagination && searchHandler) {
-			searchHandler.handleDatabasesPagination(state, dispatch);
-		}
-		if (state.modelsPagination && searchHandler) {
-			searchHandler.handleModelsPagination(state, dispatch);
-		}
-	}, [state, dispatch, searchHandler]);
+	}, [dispatch, gameChangerAPI, searchHandler, state]);
+
+	useEffect(() => {
+		setFavorites(state.favorites);
+		setShowFavorites(state.showFavorites);
+	}, [state.showFavorites, state.favorites]);
+
+	useEffect(() => {
+		// if pagination is true in any of the pagination values then true
+		const pagination =
+			state.applicationsSearchResults.pagination ||
+			state.dashboardsSearchResults.pagination ||
+			state.dataSourcesSearchResults.pagination ||
+			state.databasesSearchResults.pagination ||
+			state.modelsSearchResults.pagination;
+
+		if (pagination) handlePagination(state, dispatch, searchHandler);
+	}, [
+		state,
+		dispatch,
+		searchHandler,
+		state.applicationsSearchResults.pagination,
+		state.dashboardsSearchResults.pagination,
+		state.dataSourcesSearchResults.pagination,
+		state.databasesSearchResults.pagination,
+		state.modelsSearchResults.pagination,
+	]);
 
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
@@ -475,47 +528,57 @@ const GlobalSearchMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	useEffect(() => {
-		if (
-			state.runningSearch &&
-			!state.applicationsLoading &&
-			!state.dashboardsLoading &&
-			!state.dataSourcesLoading &&
-			!state.databasesLoading &&
-			!state.modelsLoading
-		) {
-			setState(dispatch, {
-				categoryMetadata: {
-					Applications: { total: state.applicationsTotalCount },
-					Dashboards: { total: state.dashboardsTotalCount },
-					DataSources: { total: state.dataSourcesTotalCount },
-					Databases: { total: state.databasesTotalCount },
-					Models: { total: state.modelsTotalCount },
-					Documentation: { total: 0 },
-					Organizations: { total: 0 },
-					Services: { total: 0 },
-				},
-				runningSearch: false,
-				loading: false,
-			});
+		let tmpApplications, tmpDashboards, tmpDataSources, tmpDatabases, tmpModels;
+
+		if (showFavorites) {
+			tmpApplications = favorites.applicationsSearchResults;
+			tmpDashboards = favorites.dashboardsSearchResults;
+			tmpDataSources = favorites.dataSourcesSearchResults;
+			tmpDatabases = favorites.databasesSearchResults;
+			tmpModels = favorites.modelsSearchResults;
+		} else {
+			tmpApplications = state.applicationsSearchResults;
+			tmpDashboards = state.dashboardsSearchResults;
+			tmpDataSources = state.dataSourcesSearchResults;
+			tmpDatabases = state.databasesSearchResults;
+			tmpModels = state.modelsSearchResults;
 		}
+
+		setApplications(tmpApplications);
+		setDashboards(tmpDashboards);
+		setDataSources(tmpDataSources);
+		setDatabases(tmpDatabases);
+		setModels(tmpModels);
 	}, [
 		state.runningSearch,
-		state.applicationsLoading,
-		state.dashboardsLoading,
-		state.dataSourcesLoading,
-		state.databasesLoading,
-		state.modelsLoading,
-		state.applicationsTotalCount,
-		state.dashboardsTotalCount,
-		state.dataSourcesTotalCount,
-		state.databasesTotalCount,
-		state.modelsTotalCount,
 		state.loading,
 		dispatch,
+		favorites,
+		showFavorites,
+		state.applicationsSearchResults,
+		state.dashboardsSearchResults,
+		state.dataSourcesSearchResults,
+		state.databasesSearchResults,
+		state.modelsSearchResults,
 	]);
 
+	useEffect(() => {
+		setMetaData(state, dispatch, applications, dashboards, dataSources, databases, models);
+		checkFinishedLoading(state, dispatch, applications, dashboards, dataSources, databases, models);
+		// eslint-disable-next-line
+	}, [applications, dashboards, dataSources, databases, dispatch, models]);
+
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
+		const viewPanels = {
+			Card: getCardViewPanel({
+				context: { state, dispatch },
+				applications,
+				dashboards,
+				dataSources,
+				databases,
+				models,
+			}),
+		};
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -537,6 +600,11 @@ const GlobalSearchMainViewHandler = (props) => {
 				renderHideTabs,
 				pageLoaded,
 				getViewPanels,
+				applications,
+				dashboards,
+				dataSources,
+				databases,
+				models,
 			});
 	}
 };

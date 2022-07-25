@@ -2,25 +2,14 @@ const assert = require('assert');
 const JBookDataHandler = require('../../../node_app/modules/jbook/jbookDataHandler');
 const { constructorOptionsMock } = require('../../resources/testUtility');
 
-const {
-	profileData,
-	keywordData,
-	reviewData,
-	esData,
-	portfolioData,
-} = require('../../resources/mockResponses/jbookMockData');
+const { keywordData, esData, portfolioData, reviewData } = require('../../resources/mockResponses/jbookMockData');
 
 describe('JBookDataHandler', function () {
 	describe('#getProjectData', () => {
-		const docs = profileData;
-		let keywords = keywordData['pdoc'];
 		let review = reviewData['pdoc'];
+		let keywords = keywordData['pdoc'];
 		let esReturn = esData['pdoc'];
 		let portfolios = portfolioData;
-
-		const findOneFromDocs = (id, type) => {
-			return docs[type][id];
-		};
 
 		const opts = {
 			...constructorOptionsMock,
@@ -30,33 +19,18 @@ describe('JBookDataHandler', function () {
 				EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 			},
 			pdoc: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'pdoc') });
+				findAll() {
+					return Promise.resolve();
 				},
 			},
 			rdoc: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'rdoc') });
+				findAll() {
+					return Promise.resolve();
 				},
 			},
 			om: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'odoc') });
-				},
-			},
-			gl_contracts: {
 				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			obligations: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			accomp: {
-				findAll() {
-					return Promise.resolve([]);
+					return Promise.resolve();
 				},
 			},
 			db: {
@@ -66,37 +40,16 @@ describe('JBookDataHandler', function () {
 					},
 				},
 			},
-			review: {
-				findOne() {
-					return Promise.resolve({ dataValues: review });
-				},
-				findAll() {
-					return Promise.resolve([{ dataValues: review }]);
-				},
-				create() {
-					return Promise.resolve({});
-				},
-			},
 			reviewer: {
 				findOne() {
 					return Promise.resolve([]);
 				},
 			},
-			vendors: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			keyword: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
 			dataLibrary: {
-				queryElasticSearch(name, index, query, userId) {
+				queryElasticSearch() {
 					return Promise.resolve(esReturn);
 				},
-				updateDocument(clientName, index, updatedDoc, docId, userId) {
+				updateDocument() {
 					return Promise.resolve(true);
 				},
 			},
@@ -116,15 +69,19 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve([1]);
 				},
 			},
+			review: {
+				findAll() {
+					return Promise.resolve(review);
+				},
+			},
+			gl: {},
+			userRequest: {},
+			feedback: {},
 		};
 
 		it('should get the pdoc project data for ES', async (done) => {
-			review = reviewData['pdoc'];
-
 			const req = {
 				body: {
-					useElasticSearch: true,
-					type: 'Procurement',
 					id: 'pdoc#000075#2022#3010#07#Air%20Force%20(AF)',
 					portfolioName: 'AI Inventory',
 				},
@@ -183,6 +140,12 @@ describe('JBookDataHandler', function () {
 				pageHits: [],
 				classification: {},
 				reviews: {
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
 						id: 233170,
@@ -221,22 +184,15 @@ describe('JBookDataHandler', function () {
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
-					'Test AI Inventory': {
-						portfolioName: 'Test AI Inventory',
-						primaryReviewerEmail: null,
-						serviceReviewerEmail: null,
-						serviceSecondaryReviewerEmail: null,
-					},
 				},
 			};
+
 			const actual = await target.getESProjectData(req, 'Test');
-			assert.deepStrictEqual(actual, expected);
+			assert.deepEqual(actual, expected);
 			done();
 		});
 
 		it('should get the rdoc project data for ES', async (done) => {
-			review = reviewData['rdoc'];
-
 			const req = {
 				body: {
 					useElasticSearch: true,
@@ -351,8 +307,6 @@ describe('JBookDataHandler', function () {
 		});
 
 		it('should get the odoc project data for ES', async (done) => {
-			review = reviewData['odoc'];
-
 			const req = {
 				body: {
 					useElasticSearch: true,
@@ -537,7 +491,7 @@ describe('JBookDataHandler', function () {
 					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 				},
 				dataLibrary: {
-					queryElasticSearch(name, index, query, userId) {
+					queryElasticSearch() {
 						return Promise.resolve(esReturn);
 					},
 					getESRequestConfig() {

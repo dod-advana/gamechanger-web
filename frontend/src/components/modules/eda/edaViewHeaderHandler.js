@@ -3,54 +3,18 @@ import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
+import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from '../../common/gc-colors';
+import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
-
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
 
 const EDAViewHeaderHandler = (props) => {
 	const classes = useStyles();
@@ -77,6 +41,28 @@ const EDAViewHeaderHandler = (props) => {
 			setState(dispatch, { currentViewName: 'Card', listView: true });
 		}
 	}, [dispatch]);
+
+	const setDrawer = (open) => {
+		setState(dispatch, { docsDrawerOpen: open });
+	};
+
+	const setDrawerReady = (ready) => {
+		setState(dispatch, { isDrawerReady: ready });
+	};
+
+	const setStepIndex = (stepIndex) => {
+		setState(dispatch, { stepIndex: stepIndex });
+	};
+
+	const removeSelectedDocument = (key) => {
+		const { selectedDocuments } = state;
+
+		if (selectedDocuments.has(key)) {
+			selectedDocuments.delete(key);
+		}
+
+		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
+	};
 
 	const handleChangeView = (event) => {
 		const {
@@ -282,6 +268,21 @@ const EDAViewHeaderHandler = (props) => {
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCTooltip>
 				</GCButton>
+				<SelectedDocsDrawer
+					selectedDocuments={state.selectedDocuments}
+					docsDrawerOpen={state.docsDrawerOpen}
+					setDrawer={setDrawer}
+					clearSelections={() => setState(dispatch, { selectedDocuments: new Map() })}
+					openExport={() => setState(dispatch, { exportDialogVisible: true })}
+					removeSelection={(doc) => removeSelectedDocument(doc)}
+					componentStepNumbers={state.componentStepNumbers}
+					isDrawerReady={state.isDrawerReady}
+					setDrawerReady={setDrawerReady}
+					setShowTutorial={(showTutorial) => setState(dispatch, { showTutorial: showTutorial })}
+					setStepIndex={setStepIndex}
+					showTutorial={state.showTutorial}
+					rawSearchResults={state.rawSearchResults}
+				/>
 			</div>
 		</div>
 	);

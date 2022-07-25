@@ -1894,7 +1894,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		budgetLineItem_s: {
+		budgetLineItem_t: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1911,6 +1911,16 @@ module.exports = {
 		},
 		by1BaseYear_d: {
 			newName: 'by1BaseYear',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		by1_request_d: {
+			newName: 'by1Request',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		continuing_b: {
+			newName: 'continuing',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -2074,7 +2084,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		totalCost_s: {
+		totalCost_d: {
 			newName: 'totalCost',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -2094,6 +2104,16 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		gl_contract_n: {
+			newName: 'contracts',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		r_2a_accomp_pp_n: {
+			newName: 'accomplishments',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	esTopLevelFields: [
@@ -2109,7 +2129,9 @@ module.exports = {
 		'P40-13_BSA_Title_t',
 		'P40-15_Justification_t',
 		'projectTitle_s',
-		'budgetActivityTitle_s',
+		'budgetActivityTitle_t',
+		'budgetLineItem_t',
+		'programElement_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -2129,7 +2151,8 @@ module.exports = {
 		p3a_contract_data_n: 'Contracts',
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
-		budgetActivityTitle_s: 'Activity Title',
+		budgetLineItem_t: 'BLI',
+		programElement_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
 		// p3a_rdte_n
@@ -2204,6 +2227,7 @@ module.exports = {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'DEPARTMENT OF THE DEFENSE': 'Department of Defense (DOD)',
 		ARMY: 'Army',
 		NAVY: 'Navy',
 		AF: 'Air Force (AF)',

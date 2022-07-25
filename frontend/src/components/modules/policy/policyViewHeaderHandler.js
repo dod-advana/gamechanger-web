@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
-import { getCurrentView } from '../../../utils/gamechangerUtils';
+import { getCurrentView, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
-import { Button } from '@material-ui/core';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from '../../common/gc-colors';
+import { FormControl, InputLabel, MenuItem, Select, Button } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { useStyles } from '../default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
@@ -67,42 +64,6 @@ const handleOrganizationFilterChange = (event, state, dispatch) => {
 		event.currentTarget.ariaPressed ? 1 : 0
 	);
 };
-
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
 
 const PolicyViewHeaderHandler = (props) => {
 	const classes = useStyles();
@@ -232,6 +193,9 @@ const PolicyViewHeaderHandler = (props) => {
 				params.set('view', 'graph');
 				break;
 			case 'Explorer':
+				setState(dispatch, { currentViewName: value });
+				params.set('view', value);
+				break;
 			default:
 				setState(dispatch, { currentViewName: value });
 				params.delete('view');

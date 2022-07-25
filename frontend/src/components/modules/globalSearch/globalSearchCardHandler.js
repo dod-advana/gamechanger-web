@@ -4,11 +4,9 @@ import styled from 'styled-components';
 import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
 import { trackEvent } from '../../telemetry/Matomo';
-import { Link } from '@material-ui/core';
 import _ from 'underscore';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import CONFIG from '../../../config/config';
-import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import BetaModal from '../../common/BetaModal';
 import QLIKICON from '../../../images/icon/QLIK.svg';
 import { colWidth, getDefaultComponent, styles } from '../default/defaultCardHandler';
@@ -21,6 +19,8 @@ import PropTypes from 'prop-types';
 const MAX_KEYS = 8;
 
 const MODELS_HITS_KEY_NOT_ALLOWED = ['Hyperparameter Selection', 'Metrics'];
+
+const PRIMARY_COLOR = '#13A792';
 
 const StyledFrontCardHeader = styled.div`
 	font-size: 1.2em;
@@ -90,7 +90,6 @@ const StyledFrontCardContent = styled.div`
 
 	.image-container {
 		text-align: center;
-		margin-top: 5px;
 	}
 
 	img {
@@ -264,13 +263,13 @@ const getUrl = (item, restricted, type) => {
 	if (restricted) return `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5`;
 	else {
 		switch (type) {
-			case 'application':
+			case 'applications':
 				return item.href;
-			case 'dataSource':
-			case 'database':
+			case 'dataSources':
+			case 'databases':
 			case 'models':
 				return `${CONFIG.DATA_CATALOG_LINK}/asset/${item.resource.id}`;
-			case 'dashboard':
+			case 'dashboards':
 				return `${CONFIG.QLIK_URL}/sense/app/${item.id}`;
 			default:
 				return '';
@@ -280,17 +279,17 @@ const getUrl = (item, restricted, type) => {
 
 const getRestricted = (item, type) => {
 	switch (type) {
-		case 'application':
+		case 'applications':
 			if (!_.isNull(item.permission)) {
 				return !Permissions?.[item.permission]?.();
 			} else {
 				return false;
 			}
-		case 'dataSource':
-		case 'database':
+		case 'dataSources':
+		case 'databases':
 		case 'models':
 			return false;
-		case 'dashboard':
+		case 'dashboards':
 			return item.restricted;
 		default:
 			return false;
@@ -299,13 +298,13 @@ const getRestricted = (item, type) => {
 
 const getDisplayTitle = (item, type) => {
 	switch (type) {
-		case 'application':
+		case 'applications':
 			return item.link_label;
-		case 'dataSource':
-		case 'database':
+		case 'dataSources':
+		case 'databases':
 		case 'models':
-			return item.resource.name;
-		case 'dashboard':
+			return item.resource.displayName;
+		case 'dashboards':
 			return item.name;
 		default:
 			return 'UKN';
@@ -313,28 +312,108 @@ const getDisplayTitle = (item, type) => {
 };
 
 const cleanHighlightFieldName = (field) => {
-	switch (field) {
-		case 'displayName':
-			return 'Display Name';
-		default:
-			return field.charAt(0).toUpperCase() + field.slice(1);
+	if (field === 'displayName') {
+		return 'Display Name';
+	} else {
+		return field.charAt(0).toUpperCase() + field.slice(1);
 	}
 };
 
 const getType = (item, type) => {
 	switch (type) {
-		case 'dataSource':
+		case 'dataSources':
+		case 'databases':
+		case 'models':
 			return item.resource?.type || capitalizeFirst(type);
 		default:
 			return capitalizeFirst(type);
 	}
 };
 
-const getMetadataForPropertyTable = (item, type) => {
+const dataTableForCollibra = (item) => {
 	const data = [];
+	data.push({
+		Key: 'Created At',
+		Value: `${item.resource.createdOn}`,
+	});
+	if (item.resource?.createdBy?.firstName && item.resource.createdBy?.lastName) {
+		data.push({
+			Key: 'Created By Name',
+			Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
+		});
+	}
+	if (item.resource?.createdBy?.emailAddress) {
+		data.push({
+			Key: 'Created By Email',
+			Value: `${item.resource.createdBy['emailAddress']}`,
+		});
+	}
+	if (item.resource.lastModifiedOn) {
+		data.push({
+			Key: 'Modified At',
+			Value: `${item.resource.lastModifiedOn}`,
+		});
+	}
+	if (item.resource?.lastModifiedBy?.firstName && item.resource?.lastModifiedBy?.lastName) {
+		data.push({
+			Key: 'Modified By Name',
+			Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
+		});
+	}
+	if (item.resource?.lastModifiedBy?.emailAddress) {
+		data.push({
+			Key: 'Modified By Email',
+			Value: `${item.resource.lastModifiedBy['emailAddress']}`,
+		});
+	}
+
+	if (item.resource.domain) {
+		data.push({
+			Key: 'Domain',
+			Value: `${item.resource.domain}`,
+		});
+	}
+	if (item.resource.name) {
+		data.push({
+			Key: 'Name',
+			Value: `${item.resource.name}`,
+		});
+	}
+	if (item.resource.status) {
+		data.push({
+			Key: 'Status',
+			Value: `${item.resource.status}`,
+		});
+	}
+	if (item.resource.type) {
+		data.push({
+			Key: 'Type',
+			Value: `${item.resource.type}`,
+		});
+	}
+	if (item.resource.tags) {
+		data.push({
+			Key: 'Tags',
+			Value: item.resource.tags.join(', '),
+		});
+	}
+	if (item.attributes) {
+		item.attributes.forEach((attr) => {
+			data.push({
+				Key: attr.field,
+				Value: attr.value,
+			});
+		});
+	}
+
+	return data;
+};
+
+const getMetadataForPropertyTable = (item, type) => {
+	let data = [];
 
 	switch (type) {
-		case 'dashboard':
+		case 'dashboards':
 			data.push({
 				Key: 'Name',
 				Value: `${item.name}`,
@@ -368,86 +447,10 @@ const getMetadataForPropertyTable = (item, type) => {
 				Value: `${item.tags}`,
 			});
 			break;
-		case 'dataSource':
+		case 'dataSources':
 		case 'models':
-		case 'database':
-			data.push({
-				Key: 'Created At',
-				Value: `${item.resource.createdOn}`,
-			});
-			if (item.resource.createdBy) {
-				if (item.resource.createdBy['firstName'] && item.resource.createdBy['lastName']) {
-					data.push({
-						Key: 'Created By Name',
-						Value: `${item.resource.createdBy['firstName']} ${item.resource.createdBy['lastName']}`,
-					});
-				}
-				if (item.resource.createdBy['emailAddress']) {
-					data.push({
-						Key: 'Created By Email',
-						Value: `${item.resource.createdBy['emailAddress']}`,
-					});
-				}
-			}
-			if (item.resource.lastModifiedOn) {
-				data.push({
-					Key: 'Modified At',
-					Value: `${item.resource.lastModifiedOn}`,
-				});
-			}
-			if (item.resource.lastModifiedBy) {
-				if (item.resource.lastModifiedBy['firstName'] && item.resource.lastModifiedBy['lastName']) {
-					data.push({
-						Key: 'Modified By Name',
-						Value: `${item.resource.lastModifiedBy['firstName']} ${item.resource.lastModifiedBy['lastName']}`,
-					});
-				}
-				if (item.resource.lastModifiedBy['emailAddress']) {
-					data.push({
-						Key: 'Modified By Email',
-						Value: `${item.resource.lastModifiedBy['emailAddress']}`,
-					});
-				}
-			}
-
-			if (item.resource.domain) {
-				data.push({
-					Key: 'Domain',
-					Value: `${item.resource.domain}`,
-				});
-			}
-			if (item.resource.name) {
-				data.push({
-					Key: 'Name',
-					Value: `${item.resource.name}`,
-				});
-			}
-			if (item.resource.status) {
-				data.push({
-					Key: 'Status',
-					Value: `${item.resource.status}`,
-				});
-			}
-			if (item.resource.type) {
-				data.push({
-					Key: 'Type',
-					Value: `${item.resource.type}`,
-				});
-			}
-			if (item.resource.tags) {
-				data.push({
-					Key: 'Tags',
-					Value: item.resource.tags.join(', '),
-				});
-			}
-			if (item.attributes) {
-				item.attributes.forEach((attr) => {
-					data.push({
-						Key: attr.field,
-						Value: attr.value,
-					});
-				});
-			}
+		case 'databases':
+			data = dataTableForCollibra(item);
 			break;
 		default:
 			break;
@@ -456,12 +459,12 @@ const getMetadataForPropertyTable = (item, type) => {
 	return data;
 };
 
-const cardSubHeaderHandler = (props) => {
+const cardSubHeaderHandler = (_props) => {
 	return <></>;
 };
 
 const getCardHeaderHandler = (props) => {
-	const { item, state, type, graphView } = props;
+	const { item, state, type, graphView, favoriteComponent } = props;
 
 	const docListView = state.listView && !graphView;
 	const restricted = getRestricted(item, type);
@@ -487,19 +490,165 @@ const getCardHeaderHandler = (props) => {
 							<p> {getType(item, type)} </p>
 						</div>
 					)}
-					{/*<div className={'selected-favorite'}>*/}
-					{/*	<div style={{ display: 'flex' }}>{favoriteComponent()}</div>*/}
-					{/*</div>*/}
+					<div className={'selected-favorite'}>
+						<div style={{ display: 'flex' }}>{favoriteComponent()}</div>
+					</div>
 				</div>
 			</div>
 		</StyledFrontCardHeader>
 	);
 };
 
+const getCollibraHighlights = (item, showFavorites) => {
+	const tmpHighlights = [];
+
+	if (showFavorites) {
+		item.attributes?.forEach((attr) => {
+			if (attr.field && attr.field.indexOf('attribute') < 0) {
+				tmpHighlights.push({ ...attr, fragment: attr.value });
+			}
+		});
+	} else {
+		item.highlights?.forEach((highlight) => {
+			if (highlight.field && highlight.field.indexOf('attribute') < 0) {
+				tmpHighlights.push(highlight);
+			}
+		});
+	}
+	return tmpHighlights;
+};
+
+const handleToggleMore = (toggledMore, setToggledMore, cloneName) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
+	setToggledMore(!toggledMore);
+};
+
+const pageHits = (highlights, hoveredHit, setHoveredHit, field = 'title') => {
+	return _.chain(highlights)
+		.map((highlight, key) => {
+			if (highlight[field] || key < MAX_KEYS) {
+				return (
+					<div
+						className={'page-hit'}
+						key={key}
+						style={{
+							...(hoveredHit === key && {
+								backgroundColor: PRIMARY_COLOR,
+								color: 'white',
+							}),
+						}}
+						onMouseEnter={() => setHoveredHit(key)}
+						onClick={(e) => {
+							e.preventDefault();
+						}}
+					>
+						{highlight[field] && <span>{cleanHighlightFieldName(highlight[field])}</span>}
+						<i
+							className="fa fa-chevron-right"
+							style={{
+								color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+							}}
+						/>
+					</div>
+				);
+			}
+			return '';
+		})
+		.value();
+};
+
+const getDataSourcesDatabasesFrontView = (props) => {
+	const { item, state, hoveredHit, setHoveredHit, backBody } = props;
+	let tmpHighlights, contextHtml;
+
+	tmpHighlights = getCollibraHighlights(item, state.showFavorites);
+	contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
+
+	const getDSDBPageHits = () => {
+		return _.chain(tmpHighlights)
+			.map((highlight, key) => {
+				if (highlight.field || key < MAX_KEYS) {
+					return (
+						<div
+							className={'page-hit'}
+							key={key}
+							style={{
+								...(hoveredHit === key && {
+									backgroundColor: PRIMARY_COLOR,
+									color: 'white',
+								}),
+							}}
+							onMouseEnter={() => setHoveredHit(key)}
+							onClick={(e) => {
+								e.preventDefault();
+							}}
+						>
+							{highlight.field && <span>{cleanHighlightFieldName(highlight.field)}</span>}
+							<i
+								className="fa fa-chevron-right"
+								style={{
+									color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+								}}
+							/>
+						</div>
+					);
+				}
+				return '';
+			})
+			.value();
+	};
+
+	if (state.listView) {
+		return (
+			<StyledListViewFrontCardContent>
+				<GCAccordion
+					header={state.showFavorites ? 'KEY METADATA' : 'KEYWORD HITS'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					<div className={'expanded-hits'}>
+						<div className={'page-hits'}>{getDSDBPageHits()}</div>
+						<div className={'expanded-metadata'}>
+							<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+						</div>
+					</div>
+				</GCAccordion>
+				<GCAccordion
+					header={'METADATA'}
+					headerBackground={'rgb(238,241,242)'}
+					headerTextColor={'black'}
+					headerTextWeight={'normal'}
+				>
+					<div className={'metadata'}>
+						<div className={'inner-scroll-container'}>{backBody}</div>
+					</div>
+				</GCAccordion>
+			</StyledListViewFrontCardContent>
+		);
+	} else {
+		return (
+			<StyledFrontCardContent className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}>
+				<div className={'hits-container'}>
+					<div className={'page-hits'}>{getDSDBPageHits()}</div>
+					<div className={'expanded-metadata'}>
+						<blockquote
+							className="searchdemo-blockquote"
+							dangerouslySetInnerHTML={{
+								__html: sanitizeHtml(contextHtml),
+							}}
+						/>
+					</div>
+				</div>
+			</StyledFrontCardContent>
+		);
+	}
+};
+
 const cardHandler = {
-	application: {
+	applications: {
 		getCardHeader: (props) => {
-			return getCardHeaderHandler({ ...props, type: 'application' });
+			return getCardHeaderHandler({ ...props, type: 'applications' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -507,75 +656,77 @@ const cardHandler = {
 		},
 
 		getCardFront: (props) => {
-			const { item } = props;
+			const { item, state } = props;
 
 			let { description } = item;
 
-			return (
-				<StyledFrontCardContent isWideCard={true}>
-					{description && (
-						<div className={'body-container'} style={{ margin: 10 }}>
-							<div className={'body-text'}>{description}</div>
+			if (state.listView) {
+				return <StyledListViewFrontCardContent>{item.description}</StyledListViewFrontCardContent>;
+			} else {
+				return (
+					<StyledFrontCardContent>
+						<div className={'image-container'}>
+							<img src={QLIKICON} style={styles.image} alt={item.link_label} />
+							<div className={'body-container'}>
+								<div className={'body-text'}>{description}</div>
+							</div>
 						</div>
-					)}
-				</StyledFrontCardContent>
-			);
+					</StyledFrontCardContent>
+				);
+			}
 		},
 
-		getCardBack: (props) => {
+		getCardBack: (_props) => {
 			return <></>;
 		},
 
 		getFooter: (props) => {
-			const { item, state } = props;
+			const { item, cloneName } = props;
 
-			let { permission, href, type } = item;
+			let { permission, href } = item;
 			if (!_.isNull(permission)) {
 				permission = Permissions?.[permission]?.();
 			} else permission = true;
 
-			const url = !permission ? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
+			const restricted = !permission;
 
-			const RestrictedLink = (
-				<Link href={url} onClick={() => clickFn(state.cloneData.clone_name, url, type)} style={styles.link}>
-					Request Access
-					<KeyboardArrowRightIcon style={styles.linkIcon} />
-				</Link>
-			);
+			const url = restricted ? `${CONFIG.HELP_DESK_LINK}/servicedesk/customer/portal/5` : href;
 
 			return (
-				<>
-					{!permission ? (
-						RestrictedLink
-					) : (
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
-							href={url}
-						>
-							Open
-						</CardButton>
-					)}
-				</>
+				<CardButton
+					href={url}
+					onClick={() => {
+						trackEvent(
+							getTrackingNameForFactory(cloneName),
+							'CardInteraction',
+							restricted ? 'Application Card Request Access' : 'Application Card Launch',
+							url
+						);
+					}}
+					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
+					target="_blank"
+				>
+					{restricted ? 'Request Access' : 'Launch'}
+				</CardButton>
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 
-		getDisplayTitle: (item) => {
+		getDisplayTitle: (_item) => {
 			return '';
 		},
 	},
 
-	dashboard: {
+	dashboards: {
 		getCardHeader: (props) => {
-			return getCardHeaderHandler({ ...props, type: 'dashboard' });
+			return getCardHeaderHandler({ ...props, type: 'dashboards' });
 		},
 
 		getCardSubHeader: (props) => {
@@ -586,62 +737,37 @@ const cardHandler = {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
 			const { highlights, thumbnail, name } = item;
 
-			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
-			}
-			const contextHtml = hoveredSnippet;
+			const contextHtml = highlights[hoveredHit]?.fragment || '';
+
+			const getThumbnail = () => {
+				if (thumbnail) {
+					return (
+						`${CONFIG.API_URL}/api/gameChanger/getThumbnail?` +
+						new URLSearchParams({ location: thumbnail }).toString()
+					);
+				}
+				return QLIKICON;
+			};
 
 			if (state.listView) {
 				return (
 					<StyledListViewFrontCardContent>
 						<GCAccordion
-							header={'KEYWORD HITS'}
+							header={state.showFavorites ? 'DESCRIPTION' : 'KEYWORD HITS'}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(highlights)
-										.map((highlight, key) => {
-											if (highlight.title || key < MAX_KEYS) {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-														}}
-													>
-														{highlight.title && (
-															<span>{cleanHighlightFieldName(highlight.title)}</span>
-														)}
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											}
-											return '';
-										})
-										.value()}
+							{state.showFavorites ? (
+								<div className={'description'}>{item.description}</div>
+							) : (
+								<div className={'expanded-hits'}>
+									<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
+									<div className={'expanded-metadata'}>
+										<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+									</div>
 								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
+							)}
 						</GCAccordion>
 						<GCAccordion
 							header={'METADATA'}
@@ -661,63 +787,24 @@ const cardHandler = {
 						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
 					>
 						<div className={'image-container'}>
-							<img
-								src={
-									thumbnail
-										? `${CONFIG.API_URL}/api/gameChanger/getThumbnail?` +
-										  new URLSearchParams({ location: thumbnail }).toString()
-										: QLIKICON
-								}
-								style={styles.image}
-								alt={name}
-							/>
+							<img src={getThumbnail()} style={styles.image} alt={name} />
 						</div>
-						<div className={'hits-container'}>
-							<div className={'page-hits'}>
-								{_.chain(highlights)
-									.map((highlight, key) => {
-										if (highlight.title || key < MAX_KEYS) {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-													}}
-												>
-													{highlight.title && (
-														<span>{cleanHighlightFieldName(highlight.title)}</span>
-													)}
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										}
-										return '';
-									})
-									.value()}
+						{state.showFavorites ? (
+							<div className={'description'}>{item.description}</div>
+						) : (
+							<div className={'hits-container'}>
+								<div className={'page-hits'}>{pageHits(highlights, hoveredHit, setHoveredHit)}</div>
+								<div className={'expanded-metadata'}>
+									<blockquote
+										className="searchdemo-blockquote"
+										style={{ maxHeight: 90 }}
+										dangerouslySetInnerHTML={{
+											__html: sanitizeHtml(contextHtml),
+										}}
+									/>
+								</div>
 							</div>
-							<div className={'expanded-metadata'}>
-								<blockquote
-									className="searchdemo-blockquote"
-									style={{ maxHeight: 90 }}
-									dangerouslySetInnerHTML={{
-										__html: sanitizeHtml(contextHtml),
-									}}
-								/>
-							</div>
-						</div>
+						)}
 					</StyledFrontCardContent>
 				);
 			}
@@ -726,7 +813,7 @@ const cardHandler = {
 		getCardBack: (props) => {
 			const { item, state } = props;
 
-			const metaData = getMetadataForPropertyTable(item, 'dashboard');
+			const metaData = getMetadataForPropertyTable(item, 'dashboards');
 
 			return (
 				<div>
@@ -749,11 +836,11 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { item, toggledMore, setToggledMore, cloneName, setModalOpen } = props;
 
-			let { restricted, betaAvailable, id } = item;
+			let { restricted, betaAvailable } = item;
 
 			const PreparedLink = (
 				<CardButton
-					href={getUrl(id, restricted)}
+					href={getUrl(item, restricted, 'dashboards')}
 					onClick={(e) => {
 						if (!restricted && betaAvailable) {
 							e.preventDefault();
@@ -763,7 +850,7 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
-							getUrl(id, restricted)
+							getUrl(item, restricted, 'dashboards')
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -777,7 +864,7 @@ const cardHandler = {
 				<>
 					{PreparedLink}
 					<div
-						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
+						style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -790,7 +877,7 @@ const cardHandler = {
 					>
 						{toggledMore ? 'Overview' : 'More'}
 						<i
-							style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+							style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 							className="fa fa-chevron-right"
 							aria-hidden="true"
 						/>
@@ -826,156 +913,30 @@ const cardHandler = {
 			);
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 
-		getDisplayTitle: (item) => {
+		getDisplayTitle: (_item) => {
 			return '';
 		},
 	},
 
-	dataSource: {
+	dataSources: {
 		getCardHeader: (props) => {
-			return getCardHeaderHandler({ ...props, type: 'dataSource' });
+			return getCardHeaderHandler({ ...props, type: 'dataSources' });
 		},
 
 		getCardSubHeader: (props) => {
 			return cardSubHeaderHandler(props);
 		},
 
-		getCardFront: (props) => {
-			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
-
-			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
-			}
-			const contextHtml = hoveredSnippet;
-
-			if (state.listView) {
-				return (
-					<StyledListViewFrontCardContent>
-						<GCAccordion
-							header={'KEYWORD HITS'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(highlights)
-										.map((highlight, key) => {
-											if (highlight.field || key < MAX_KEYS) {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-														}}
-													>
-														{highlight.field && (
-															<span>{cleanHighlightFieldName(highlight.field)}</span>
-														)}
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											}
-											return '';
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
-						</GCAccordion>
-						<GCAccordion
-							header={'METADATA'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
-							</div>
-						</GCAccordion>
-					</StyledListViewFrontCardContent>
-				);
-			} else {
-				return (
-					<StyledFrontCardContent
-						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
-					>
-						<div className={'hits-container'}>
-							<div className={'page-hits'}>
-								{_.chain(highlights)
-									.map((highlight, key) => {
-										if (highlight.field || key < MAX_KEYS) {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-													}}
-												>
-													{highlight.field && (
-														<span>{cleanHighlightFieldName(highlight.field)}</span>
-													)}
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										}
-										return '';
-									})
-									.value()}
-							</div>
-							<div className={'expanded-metadata'}>
-								<blockquote
-									className="searchdemo-blockquote"
-									dangerouslySetInnerHTML={{
-										__html: sanitizeHtml(contextHtml),
-									}}
-								/>
-							</div>
-						</div>
-					</StyledFrontCardContent>
-				);
-			}
-		},
+		getCardFront: (props) => getDataSourcesDatabasesFrontView(props),
 
 		getCardBack: (props) => {
 			const { item, state } = props;
 
-			const metaData = getMetadataForPropertyTable(item, 'dataSource');
+			const metaData = getMetadataForPropertyTable(item, 'dataSources');
 
 			return (
 				<div>
@@ -998,7 +959,7 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			const url = getUrl(item, getRestricted(item, 'dataSource'), 'dataSource');
+			const url = getUrl(item, getRestricted(item, 'dataSources'), 'dataSources');
 
 			return (
 				<>
@@ -1016,20 +977,12 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
-								onClick={() => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'flipCard',
-										toggledMore ? 'Overview' : 'More'
-									);
-									setToggledMore(!toggledMore);
-								}}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
+								onClick={() => handleToggleMore(toggledMore, setToggledMore, cloneName)}
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>
@@ -1040,160 +993,34 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (props) => {
+		getFilename: (_props) => {
 			return '';
 		},
 
 		getDisplayTitle: (item) => {
-			return getDisplayTitle(item, 'dataSource');
+			return getDisplayTitle(item, 'dataSources');
 		},
 	},
 
-	database: {
+	databases: {
 		getCardHeader: (props) => {
-			return getCardHeaderHandler({ ...props, type: 'database' });
+			return getCardHeaderHandler({ ...props, type: 'databases' });
 		},
 
 		getCardSubHeader: (props) => {
 			return cardSubHeaderHandler(props);
 		},
 
-		getCardFront: (props) => {
-			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
-
-			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
-			}
-			const contextHtml = hoveredSnippet;
-
-			if (state.listView) {
-				return (
-					<StyledListViewFrontCardContent>
-						<GCAccordion
-							header={'KEYWORD HITS'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(highlights)
-										.map((highlight, key) => {
-											if (highlight.field || key < MAX_KEYS) {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-														}}
-													>
-														{highlight.field && (
-															<span>{cleanHighlightFieldName(highlight.field)}</span>
-														)}
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											}
-											return '';
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-								</div>
-							</div>
-						</GCAccordion>
-						<GCAccordion
-							header={'METADATA'}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
-							</div>
-						</GCAccordion>
-					</StyledListViewFrontCardContent>
-				);
-			} else {
-				return (
-					<StyledFrontCardContent
-						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
-					>
-						<div className={'hits-container'}>
-							<div className={'page-hits'}>
-								{_.chain(highlights)
-									.map((highlight, key) => {
-										if (highlight.field || key < MAX_KEYS) {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-													}}
-												>
-													{highlight.field && (
-														<span>{cleanHighlightFieldName(highlight.field)}</span>
-													)}
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										}
-										return '';
-									})
-									.value()}
-							</div>
-							<div className={'expanded-metadata'}>
-								<blockquote
-									className="searchdemo-blockquote"
-									dangerouslySetInnerHTML={{
-										__html: sanitizeHtml(contextHtml),
-									}}
-								/>
-							</div>
-						</div>
-					</StyledFrontCardContent>
-				);
-			}
-		},
+		getCardFront: (props) => getDataSourcesDatabasesFrontView(props),
 
 		getCardBack: (props) => {
 			const { item, state } = props;
 
-			const metaData = getMetadataForPropertyTable(item, 'database');
+			const metaData = getMetadataForPropertyTable(item, 'databases');
 
 			return (
 				<div>
@@ -1216,7 +1043,7 @@ const cardHandler = {
 		getFooter: (props) => {
 			const { cloneName, toggledMore, setToggledMore, item, state } = props;
 
-			const url = getUrl(item, getRestricted(item, 'models'), 'database');
+			const url = getUrl(item, getRestricted(item, 'models'), 'databases');
 
 			return (
 				<>
@@ -1234,20 +1061,12 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
-								onClick={() => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'flipCard',
-										toggledMore ? 'Overview' : 'More'
-									);
-									setToggledMore(!toggledMore);
-								}}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
+								onClick={() => handleToggleMore(toggledMore, setToggledMore, cloneName)}
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>
@@ -1258,16 +1077,16 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (props) => {
+		getFilename: (_props) => {
 			return '';
 		},
 
 		getDisplayTitle: (item) => {
-			return getDisplayTitle(item, 'database');
+			return getDisplayTitle(item, 'databases');
 		},
 	},
 
@@ -1282,64 +1101,61 @@ const cardHandler = {
 
 		getCardFront: (props) => {
 			const { item, state, hoveredHit, setHoveredHit, backBody } = props;
-			const { highlights } = item;
 
-			let hoveredSnippet = '';
-			if (Array.isArray(highlights) && highlights.length > 0 && highlights[hoveredHit]) {
-				hoveredSnippet = highlights[hoveredHit]?.fragment ?? '';
-			}
-			const contextHtml = hoveredSnippet;
+			let tmpHighlights, contextHtml;
+
+			tmpHighlights = getCollibraHighlights(item, state.showFavorites);
+			contextHtml = tmpHighlights[hoveredHit]?.fragment || '';
+
+			const modelPageHits = () => {
+				return _.chain(tmpHighlights)
+					.map((highlight, key) => {
+						if (
+							highlight.field &&
+							key < MAX_KEYS &&
+							!MODELS_HITS_KEY_NOT_ALLOWED.includes(highlight.field)
+						) {
+							return (
+								<div
+									className={'page-hit'}
+									key={key}
+									style={{
+										...(hoveredHit === key && {
+											backgroundColor: PRIMARY_COLOR,
+											color: 'white',
+										}),
+									}}
+									onMouseEnter={() => setHoveredHit(key)}
+									onClick={(e) => {
+										e.preventDefault();
+									}}
+								>
+									{highlight.field && <span>{cleanHighlightFieldName(highlight.field)}</span>}
+									<i
+										className="fa fa-chevron-right"
+										style={{
+											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+										}}
+									/>
+								</div>
+							);
+						}
+						return '';
+					})
+					.value();
+			};
 
 			if (state.listView) {
 				return (
 					<StyledListViewFrontCardContent>
 						<GCAccordion
-							header={'KEYWORD HITS'}
+							header={state.showFavorites ? 'KEY METADATA' : 'KEYWORD HITS'}
 							headerBackground={'rgb(238,241,242)'}
 							headerTextColor={'black'}
 							headerTextWeight={'normal'}
 						>
 							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(highlights)
-										.map((highlight, key) => {
-											if (
-												highlight.field &&
-												key < MAX_KEYS &&
-												!MODELS_HITS_KEY_NOT_ALLOWED.includes(highlight.field)
-											) {
-												return (
-													<div
-														className={'page-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-														}}
-													>
-														{highlight.field && (
-															<span>{cleanHighlightFieldName(highlight.field)}</span>
-														)}
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											}
-											return '';
-										})
-										.value()}
-								</div>
+								<div className={'page-hits'}>{modelPageHits()}</div>
 								<div className={'expanded-metadata'}>
 									<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
 								</div>
@@ -1363,45 +1179,7 @@ const cardHandler = {
 						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
 					>
 						<div className={'hits-container'}>
-							<div className={'page-hits'}>
-								{_.chain(highlights)
-									.map((highlight, key) => {
-										if (
-											highlight.field &&
-											key < MAX_KEYS &&
-											!MODELS_HITS_KEY_NOT_ALLOWED.includes(highlight.field)
-										) {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-													}}
-												>
-													{highlight.field && (
-														<span>{cleanHighlightFieldName(highlight.field)}</span>
-													)}
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										}
-										return '';
-									})
-									.value()}
-							</div>
+							<div className={'page-hits'}>{modelPageHits()}</div>
 							<div className={'expanded-metadata'}>
 								<blockquote
 									className="searchdemo-blockquote"
@@ -1460,20 +1238,12 @@ const cardHandler = {
 								Open
 							</CardButton>
 							<div
-								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
-								onClick={() => {
-									trackEvent(
-										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'flipCard',
-										toggledMore ? 'Overview' : 'More'
-									);
-									setToggledMore(!toggledMore);
-								}}
+								style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
+								onClick={() => handleToggleMore(toggledMore, setToggledMore, cloneName)}
 							>
 								{toggledMore ? 'Overview' : 'More'}
 								<i
-									style={{ ...styles.viewMoreChevron, color: '#1E88E5' }}
+									style={{ ...styles.viewMoreChevron, color: PRIMARY_COLOR }}
 									className="fa fa-chevron-right"
 									aria-hidden="true"
 								/>
@@ -1484,11 +1254,11 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (props) => {
+		getFilename: (_props) => {
 			return '';
 		},
 

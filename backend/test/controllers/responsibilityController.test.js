@@ -58,56 +58,6 @@ const esRawResults= {
 };
 
 describe('ResponsibilityController', function () {
-	describe('#getOtherEntResponsibilityFilterList', () => {
-		let responsibilities =  [
-			{otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency|Defense Intelligence Agency'},
-			{otherOrganizationPersonnel: null},
-			{otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency|Defense Intelligence Agency'},
-			{otherOrganizationPersonnel: null},
-			{otherOrganizationPersonnel: 'National Geospatial-Intelligence Agency|Defense Intelligence Agency'},
-		];
-		const opts = {
-			...constructorOptionsMock,
-			responsibilities: {
-				findAndCountAll(data) {
-					return Promise.resolve(responsibilities);
-				},
-				findAll(data) {
-					return Promise.resolve(responsibilities);
-				}
-			}
-		};
-
-		it('should get the other ent responsibilities filter list', async () => {
-			const target = new ResponsibilityController(opts);
-
-			const req = {
-				...reqMock,
-				body: {}
-			};
-
-			let resCode;
-			let resMsg;
-
-			const res = {
-				status(code) {
-					resCode = code;
-					return this;
-				},
-				send(msg) {
-					resMsg = msg;
-					return this;
-				}
-			};
-
-			await target.getOtherEntResponsibilityFilterList(req, res);
-
-			const expected = ['Defense Intelligence Agency', 'National Geospatial-Intelligence Agency', 'null'];
-			assert.deepStrictEqual(resMsg, expected);
-
-		});
-	});
-	
 	describe('#getResponsibilityData', () => {
 		let responsibilities = [];
 		const opts = {

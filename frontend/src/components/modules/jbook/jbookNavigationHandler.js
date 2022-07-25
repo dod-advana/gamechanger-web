@@ -5,14 +5,15 @@ import { HoverNavItem } from '../../navigation/NavItems';
 import GCTooltip from '../../common/GCToolTip';
 import { getNotifications } from '../../notifications/Notifications';
 import { trackEvent } from '../../telemetry/Matomo';
+// eslint-disable-next-line no-unused-vars
 import { getTrackingNameForFactory, PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
 import BellIcon from '../../../images/icon/NewNotificationsIcon.png';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import { setState } from '../../../utils/sharedFunctions';
-import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
+// eslint-disable-next-line no-unused-vars
 import UserIcon from '../../../images/icon/UserIcon.png';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
@@ -72,28 +73,6 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="About Us" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
-						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showAboutUs'
-						);
-					}}
-					active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={AboutUsIcon} />
-				</HoverNavItem>
-			</GCTooltip>
 			<GCTooltip title="User Feedback" placement="right" arrow>
 				<HoverNavItem
 					centered
@@ -110,7 +89,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserFeedbackIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="User Dashboard" placement="right" arrow>
+			{/* <GCTooltip title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -131,7 +110,7 @@ const generateClosedContentArea = (state, dispatch) => {
 				>
 					<ConstrainedIcon src={UserIcon} />
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			{Permissions.hasPermission('JBOOK Admin') && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
@@ -180,28 +159,6 @@ const generateOpenedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="About Us" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
-						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showAboutUs'
-						);
-					}}
-					active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={AboutUsIcon} />
-					<span style={{ marginLeft: '10px' }}>About Us</span>
-				</HoverNavItem>
-			</GCTooltip>
 			<GCTooltip title="Tell us what you think!" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
@@ -218,7 +175,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<span style={{ marginLeft: '10px' }}>User Feedback</span>
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="User Dashboard" placement="right" arrow>
+			{/* <GCTooltip title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -239,7 +196,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserIcon} />
 					<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			{Permissions.hasPermission('JBOOK Admin') && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`}>
