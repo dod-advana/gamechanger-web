@@ -70,7 +70,11 @@ const AmhsCardHandler = LoadableVisibility({
 const JBookCardHandler = LoadableVisibility({
 	loader: () => import('../modules/jbook/jbookCardHandler'),
 	loading: () => {
-		return <LoadingIndicator customColor={'#1C2D65'} />;
+		return (
+			<div data-cy="jbook-card-load">
+				<LoadingIndicator customColor={'#1C2D65'} />{' '}
+			</div>
+		);
 	},
 });
 
