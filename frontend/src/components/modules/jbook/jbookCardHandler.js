@@ -653,7 +653,7 @@ const cardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
