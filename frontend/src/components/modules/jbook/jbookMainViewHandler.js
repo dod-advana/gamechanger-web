@@ -278,7 +278,7 @@ const getCardViewPanel = (props) => {
 		  };
 
 	return (
-		<div key={'cardView'}>
+		<div key={'cardView'} className={'jbook-main-view'}>
 			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 				<div>
 					<div id="game-changer-content-top" />
@@ -287,8 +287,8 @@ const getCardViewPanel = (props) => {
 						{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
 
 						<div className={'right-container'}>
-							<div className={'top-container'}>
-								<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<div className={'top-container'} style={{ marginLeft: 10 }}>
+								<div>
 									{!hideTabs && (
 										<ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />
 									)}
@@ -310,7 +310,7 @@ const getCardViewPanel = (props) => {
 										>
 											<GCButton
 												buttonColor={'rgb(28, 45, 101)'}
-												style={{ position: 'absolute', right: 25, top: 5 }}
+												style={{ position: 'absolute', right: 15, top: 5 }}
 												onClick={() => {
 													window.open(
 														'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
