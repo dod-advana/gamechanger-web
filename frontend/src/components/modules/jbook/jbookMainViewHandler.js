@@ -186,7 +186,7 @@ const getSideFilters = (context, cloneData, showSideFilters, expansionDict) => {
 	return (
 		showSideFilters && (
 			<div className={'left-container'}>
-				<div className={'side-bar-container'}>
+				<div className={'side-bar-container'} data-cy="jbook-filters">
 					<GameChangerSearchMatrix context={context} />
 					{expansionDict && Object.keys(expansionDict).length > 0 && (
 						<>
