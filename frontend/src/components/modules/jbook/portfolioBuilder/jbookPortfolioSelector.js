@@ -1,49 +1,11 @@
 import React, { useCallback } from 'react';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from '../../../common/gc-colors';
 import { setState } from '../../../../utils/sharedFunctions';
+import { useStyles } from '../../default/defaultViewHeaderHandler.js';
 
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
-
-const PortfolioSelector = ({
+const JBookPortfolioSelector = ({
 	portfolios,
 	selectedPortfolio,
-	setPortfolio,
 	dispatch,
 	formControlStyle,
 	width,
@@ -56,7 +18,6 @@ const PortfolioSelector = ({
 		(event) => {
 			try {
 				const name = event.target.value;
-				setPortfolio(name);
 				setState(dispatch, {
 					selectedPortfolio: name,
 					reviewData:
@@ -69,7 +30,7 @@ const PortfolioSelector = ({
 				console.log(err);
 			}
 		},
-		[dispatch, setPortfolio, projectData]
+		[dispatch, projectData]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {
@@ -117,4 +78,4 @@ const PortfolioSelector = ({
 	);
 };
 
-export default PortfolioSelector;
+export default JBookPortfolioSelector;

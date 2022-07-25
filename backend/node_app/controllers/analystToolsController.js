@@ -77,7 +77,7 @@ class AnalystToolsController {
 			} else {
 				// ML API Call Goes Here
 				const paragraphSearches = paragraphs.map((paragraph) =>
-					this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, userId, paragraph.id)
+					this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, paragraph.id, userId)
 				);
 				const paragraphResults = await Promise.all(paragraphSearches);
 

@@ -26,6 +26,7 @@ const { AboutGcController } = require('../controllers/aboutGcController');
 const { AnalystToolsController } = require('../controllers/analystToolsController');
 const { ReviewController } = require('../controllers/reviewController');
 const { ReviewerController } = require('../controllers/reviewerController');
+const { MlApiController } = require('../controllers/mlApiController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -50,6 +51,7 @@ const aboutGc = new AboutGcController();
 const analyticsTools = new AnalystToolsController();
 const reviewController = new ReviewController();
 const reviewer = new ReviewerController();
+const mlApi = new MlApiController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -93,7 +95,6 @@ router.post('/responsibilities/getDocLink', responsibility.getFileLink);
 router.post('/responsibilities/setRejectionStatus', responsibility.rejectResponsibility);
 router.post('/responsibilities/updateResponsibility', responsibility.updateResponsibility);
 router.post('/responsibilities/updateResponsibilityReport', responsibility.updateResponsibilityReport);
-router.get('/responsibilities/getOtherEntityFilterList', responsibility.getOtherEntResponsibilityFilterList);
 router.post('/responsibilities/storeReport', responsibility.storeResponsibilityReports);
 router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpdates);
 
@@ -171,13 +172,14 @@ router.post('/sendClassificationAlert', user.sendClassificationAlert);
 router.post('/clearDashboardNotification', user.clearDashboardNotification);
 router.get('/updateUserAPIRequestLimit', user.updateUserAPIRequestLimit);
 router.post('/getRecentSearches', user.getRecentSearches);
+router.get('/user/profile/current-user', user.getCurrentUserAdvana);
+router.put('/user/profile/current-user', user.putCurrentUserAdvana);
 
 router.get('/admin/getReviewerData', reviewer.getReviewerData);
 router.post('/admin/createUpdateReviewer', reviewer.updateOrCreateReviewer);
 router.post('/admin/deleteReviewerData', reviewer.deleteReviewerData);
 
 router.post('/textSuggestion', textSuggest.getTextSuggestion);
-// router.post('/presearchSuggestion', presearchSuggest.getpresearchSuggestion);
 
 router.get('/admin/getAPIKeyRequests', apiController.getAPIKeyRequests);
 router.post('/admin/approveRejectAPIKeyRequest', apiController.approveRejectAPIKeyRequest);
@@ -190,9 +192,20 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
 	router.get('/admin/exportUserData', appStatsController.exportUserData);
+	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
 	router.get('/admin/getUserAggregations', appStatsController.getUserAggregations);
+	router.get('/admin/getUserDashboard', appStatsController.getDashboardData);
 }
+
+router.post('/mlApi/expandTerms', mlApi.requestExpandedSearchTerms);
+router.post('/mlApi/queryExpansion', mlApi.requestQueryExpansion);
+router.post('/mlApi/questionAnswer', mlApi.requestIntelAnswer);
+router.post('/mlApi/textExtractions', mlApi.requestTextExtractions);
+router.post('/mlApi/transSentenceSearch', mlApi.requestSentenceTransformerResults);
+router.post('/mlApi/documentCompare', mlApi.requestSentenceTransformerResultsForCompare);
+router.post('/mlApi/transformResults', mlApi.requestTransformResults);
+router.post('/mlApi/recommender', mlApi.requestRecommender);
 
 router.get('/appSettings/combinedSearch', appSettings.getCombinedSearchMode);
 router.post('/appSettings/combinedSearch', appSettings.setCombinedSearchMode);

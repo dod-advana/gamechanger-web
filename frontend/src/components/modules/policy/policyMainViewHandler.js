@@ -388,13 +388,17 @@ const handlePageLoad = async (props) => {
 		// Do nothing
 		console.log(e);
 	}
-	setState(
-		dispatch,
-		getQueryVariable('view', window.location.hash.toString()) === 'graph'
-			? { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true }
-			: { adminTopics: topics }
-	);
-	// handlePubs(pubs, state, dispatch);
+	const view = getQueryVariable('view', window.location.hash.toString());
+	if (view) {
+		if (view === 'graph') {
+			setState(dispatch, { adminTopics: topics, currentViewName: 'Graph', runGraphSearch: true });
+		} else {
+			setState(dispatch, { adminTopics: topics, currentViewName: view });
+		}
+	} else {
+		setState(dispatch, { adminTopics: topics });
+	}
+
 	handleSources(state, dispatch, cancelToken, gameChangerAPI);
 	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI);
 	handleRecDocs(rec_docs, state, dispatch, cancelToken, gameChangerAPI);
@@ -1069,7 +1073,6 @@ const getCardViewPanel = (props) => {
 																		'page',
 																		page
 																	);
-																	// setState(dispatch, {entitiesLoading: true, entityPage: page, entityPagination: true });
 																}}
 															/>
 														</div>
