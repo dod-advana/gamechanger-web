@@ -165,7 +165,7 @@ integration-testing-cypress-job:  # Start the integration testing
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache cypress
+    - yarn add --cache-folder ../.yarn-cache cypress
     - npm run cy:test
   after_script:
     - |
