@@ -64,6 +64,7 @@ class EDASearchUtility {
 						'fpds*',
 						'sow_pws_text_eda_ext_t',
 						'clins_text_n',
+					    'clins_parsed_n',
 					],
 				},
 				stored_fields: storedFields,
@@ -947,8 +948,12 @@ class EDASearchUtility {
 	}
 
 	getExtractedFields(source, result) {
-		const { extracted_data_eda_n, fpds_ng_n } = source;
+		const { extracted_data_eda_n, fpds_ng_n, clins_parsed_n, clins_parsed_successfully_b } = source;
 		const data = extracted_data_eda_n;
+
+        result.clins_parsed_successfully_b = clins_parsed_successfully_b;
+		result.clins = clins_parsed_n;
+
 
 		// temporarily pull in all fpds data
 		if (fpds_ng_n) {
