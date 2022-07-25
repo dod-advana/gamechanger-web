@@ -204,6 +204,9 @@ const metadataNameToSearchFilterName = {
 	'Main Account': 'appropriationNumber',
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
+	'Primary Reviewer': 'primaryReviewer',
+	'Service Reviewer': 'serviceReviewer',
+	'POC Reviewer': 'pocReviewer',
 };
 
 // helper functions
@@ -336,28 +339,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Key: 'Budget Sub Activity',
 			Value: getBudgetSubActivity(projectData),
 		},
-		...(selectedPortfolio === 'AI Inventory'
-			? [
-					{
-						Key: 'Category',
-						Value: getClassLabel(projectData),
-					},
-			  ]
-			: []),
-		...(selectedPortfolio === 'AI Inventory'
-			? [
-					{
-						Key: 'Keywords',
-						Value: (
-							<div>
-								{projectData.keywords && projectData.keywords.length > 0
-									? projectData.keywords.map((keyword) => <p>{keyword}</p>)
-									: 'None'}
-							</div>
-						),
-					},
-			  ]
-			: []),
 		...(showPrediction
 			? [
 					{
@@ -498,6 +479,30 @@ const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	};
 };
 
+const getReviewerNames = (projectData) => {
+	const reviewersSets = { primary: new Set(), service: new Set(), poc: new Set() };
+	if (projectData.review_n) {
+		projectData.review_n.forEach((review) => {
+			if (review.primary_reviewer_s) {
+				reviewersSets.primary.add(review.primary_reviewer_s);
+			}
+			if (review.service_reviewer_s) {
+				reviewersSets.service.add(review.service_reviewer_s);
+			}
+			if (review.service_poc_name_s) {
+				reviewersSets.poc.add(review.service_poc_name_s);
+			} else if (review.alternate_poc_name_s) {
+				reviewersSets.poc.add(review.alternate_poc_name_s);
+			}
+		});
+	}
+	return {
+		primary: Array.from(reviewersSets.primary).join('; ') || 'None',
+		service: Array.from(reviewersSets.service).join('; ') || 'None',
+		poc: Array.from(reviewersSets.poc).join('; ') || 'None',
+	};
+};
+
 // sub-components
 const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
 	if (item.pageHits && item.pageHits.length > 0) {
@@ -618,10 +623,6 @@ const ListViewFrontCardContent = ({
 	);
 };
 
-const ProjectKeywords = (keywords) => {
-	return <>{keywords && keywords.length > 0 ? keywords.map((keyword) => <p>{keyword}</p>) : 'None'}</>;
-};
-
 // main card handler
 const cardHandler = {
 	document: {
@@ -652,7 +653,7 @@ const cardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={displayTitleTop} placement="top" arrow>
 							<div
@@ -853,16 +854,39 @@ const cardHandler = {
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
-					Key: 'Category',
+					Key: 'Tags',
 					Value: getClassLabel(projectData),
 				});
 				metadata.push({
 					Key: 'Keywords',
 					Value: (
 						<div>
-							<ProjectKeywords keywords={projectData.keywords} />
+							{projectData.keywords && projectData.keywords.length > 0
+								? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+								: 'None'}
 						</div>
 					),
+				});
+
+				const reviewers = getReviewerNames(projectData);
+
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: reviewers.primary,
+				});
+				metadata.push({
+					Key: 'Service Reviewer',
+					Value: reviewers.service,
+				});
+				metadata.push({
+					Key: 'POC Reviewer',
+					Value: reviewers.poc,
+				});
+			} else if (selectedPortfolio !== 'General') {
+				const reviewers = getReviewerNames(projectData);
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: reviewers.primary,
 				});
 			}
 
