@@ -31,6 +31,12 @@ const CommentThreadContainer = styled.div`
 	overflow: auto;
 `;
 
+const CommentBody = styled.p`
+	overflow: auto;
+	max-width: 280px;
+	max-height: 170px;
+`;
+
 const JBookCommentSection = ({
 	commentThread = [],
 	gameChangerAPI,
@@ -78,7 +84,7 @@ const JBookCommentSection = ({
 							<div style={{ color: 'gray' }}>{date.toDateString()}</div>
 						</CommentTitle>
 
-						<p>{comment.message}</p>
+						<CommentBody>{comment.message}</CommentBody>
 					</CommentContainer>
 				);
 
@@ -163,6 +169,7 @@ const JBookCommentSection = ({
 				value={text}
 				onChange={handleTextChange}
 				onFocus={checkUserData}
+				inputProps={{ maxLength: 350 }}
 			/>
 			<GCButton onClick={addComment} style={{ width: '100%', textAlign: 'center', margin: '10px 0' }}>
 				Add Comment
