@@ -215,7 +215,7 @@ class EdaExportHandler extends ExportHandler {
                 if(doc.clins){
                     for (const item of doc.clins) {
                         const line_item = [
-                            'see previous filename*',
+                            doc.filename,
                             '',
                             '',
                             '',
