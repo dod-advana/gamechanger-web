@@ -211,11 +211,9 @@ class EdaExportHandler extends ExportHandler {
 				];
 				stringifier.write(item);
 
-
-                if(doc.clins_parsed_successfully_b==false){
+                //
+                if(doc.clins){
                     for (const item of doc.clins) {
-
-                        //var unit_price_eda_ext= item.unit_price_eda_ext.toString();
                         const line_item = [
                             'see previous filename*',
                             '',
