@@ -123,6 +123,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								className={classes.textField}
 								margin="dense"
 								helperText={'Last, First'}
+								required
 							/>
 							<TextField
 								label="Organization"
@@ -150,11 +151,12 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
 								defaultValue={editReviewerData ? editReviewerData.type : null}
-								onChange={(event, value) => {
+								onChange={(_event, value) => {
 									handleTextChange(value, 'type');
 								}}
 								disableClearable
 								helperText={' '}
+								required
 							/>
 							{/*<TextField*/}
 							{/*	label="Type"*/}
@@ -173,6 +175,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								required
 							/>
 							<TextField
 								label="Title"
@@ -200,6 +203,9 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 					id={'editReviewerSubmit'}
 					onClick={() => storeReviewerData()}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
+					disabled={
+						!editReviewerData?.name?.trim() || !editReviewerData?.type || !editReviewerData?.email?.trim()
+					}
 				>
 					Submit
 				</GCButton>
