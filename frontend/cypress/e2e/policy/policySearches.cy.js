@@ -4,7 +4,7 @@ describe('Tests multiple types of policy searches.', () => {
 	});
 
 	beforeEach(() => {
-		cy.visitPage('gamechanger');
+		cy.visit_accept_consent('gamechanger');
 	});
 
 	it('Should be able to search for a policy by name.', () => {
