@@ -195,7 +195,7 @@ class EdaExportHandler extends ExportHandler {
 				'Amount',
 				'Purchase Request Number',
 				'Supply Services',
-				'Clin PCS Code'
+				'Clin PCS Code',
 				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
