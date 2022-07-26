@@ -108,7 +108,7 @@ const renderHideTabs = () => {
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, getViewPanels, pageLoaded, setCurrentTime, searchHandler } = props;
+	const { state, dispatch, getViewPanels, setCurrentTime, searchHandler } = props;
 
 	const {
 		exportDialogVisible,
@@ -116,7 +116,6 @@ const getMainView = (props) => {
 		prevSearchText,
 		selectedDocuments,
 		loading,
-		rawSearchResults,
 		viewNames,
 		edaSearchSettings,
 		currentSort,
@@ -124,9 +123,6 @@ const getMainView = (props) => {
 		currentViewName,
 	} = state;
 	const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
-
-	const noResults = Boolean(!rawSearchResults || rawSearchResults?.length === 0);
-	const hideSearchResults = noResults && loading;
 	const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 	return (
@@ -164,12 +160,10 @@ const getMainView = (props) => {
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
-			{!hideSearchResults && pageLoaded && (
-				<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
-					<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
-					<div style={styles.spacer} />
-				</div>
-			)}
+			<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
+				<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
+				<div style={styles.spacer} />
+			</div>
 		</>
 	);
 };
@@ -317,7 +311,7 @@ const getCardViewPanel = (props) => {
 													);
 												}}
 											>
-												Qlik Dashboard
+												Budget Insights & Dashboards
 											</GCButton>
 										</GCTooltip>
 										<Tabs selectedIndex={mainTabSelected ?? 0}>
