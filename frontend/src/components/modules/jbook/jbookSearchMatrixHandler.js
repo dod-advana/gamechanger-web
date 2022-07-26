@@ -428,7 +428,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={<b>BY1 FUNDING</b>}
+					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -439,7 +439,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={<b>TOTAL FUNDING</b>}
+					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -725,7 +725,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={<b>BY1 FUNDING</b>}
+					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -736,7 +736,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={<b>TOTAL FUNDING</b>}
+					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -854,26 +854,22 @@ const renderFundingMinMaxInput = (min, max) => {
 					Min
 				</div>
 
-				<div style={{ flex: 3 }}>
-					<InputFilter
-						style={{ width: 200, marginRight: 10 }}
-						setJBookSetting={handleFilterInputChange}
-						field={min}
-					/>
-					M
+				<div style={{ display: 'flex', flex: 3 }}>
+					<InputFilter setJBookSetting={handleFilterInputChange} field={min} />
+					<span>
+						<pre> M</pre>
+					</span>
 				</div>
 			</div>
 			<div style={{ display: 'flex', margin: '10px 0' }}>
 				<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
 					Max
 				</div>
-				<div style={{ flex: 3 }}>
-					<InputFilter
-						style={{ width: 200, marginRight: 10 }}
-						setJBookSetting={handleFilterInputChange}
-						field={max}
-					/>
-					M
+				<div style={{ display: 'flex', flex: 3 }}>
+					<InputFilter setJBookSetting={handleFilterInputChange} field={max} />
+					<span>
+						<pre> M</pre>
+					</span>
 				</div>
 			</div>
 		</div>
