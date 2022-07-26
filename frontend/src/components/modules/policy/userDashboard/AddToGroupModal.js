@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Typography, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import GameChangerAPI from '../api/gameChanger-service-api';
-import GCTooltip from '../common/GCToolTip';
-import GCCloseButton from '../common/GCCloseButton';
-import GCButton from '../common/GCButton';
+import GameChangerAPI from '../../../api/gameChanger-service-api';
+import GCTooltip from '../../../common/GCToolTip';
+import GCCloseButton from '../../../common/GCCloseButton';
+import GCButton from '../../../common/GCButton';
 import Modal from 'react-modal';
 import _ from 'lodash';
 

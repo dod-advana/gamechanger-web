@@ -705,8 +705,10 @@ class JBookDataHandler extends DataHandler {
 				projectNum,
 				appropriationNumber,
 				portfolioName,
-				id,
+				docID,
 			} = req.body;
+
+			const id = docID;
 
 			const query = {
 				budget_type: types[budgetType],
