@@ -29,20 +29,30 @@ require('typeface-noto-sans');
 require('typeface-montserrat');
 require('./favicon.ico');
 
-const emptyPage = () => {
-	return (
-		<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
-			<LoadingIndicator />
-		</div>
-	);
-};
-
 const ConsentAgreement = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/ConsentAgreement'),
 	loading: () => {
 		return <></>;
 	},
 });
+
+// const SlideOutMenu = LoadableVisibility({
+// 	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenu'),
+// 	loading: () => {
+// 		return (
+// 			<div
+// 				style={{
+// 					position: 'fixed',
+// 					left: 0,
+// 					top: '2em',
+// 					bottom: 0,
+// 					zIndex: 500,
+// 					backgroundColor: '#171A23',
+// 				}}
+// 			/>
+// 		);
+// 	},
+// });
 
 const SlideOutMenuContextHandler = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-side-nav/dist/SlideOutMenuContext'),
@@ -64,22 +74,46 @@ const SlideOutMenuContextHandler = LoadableVisibility({
 
 const ErrorPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/GenericErrorPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<LoadingIndicator />
+			</div>
+		);
+	},
 });
 
 const NotFoundPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/NotFoundPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<></>
+			</div>
+		);
+	},
 });
 
 const UnauthorizedPage = LoadableVisibility({
 	loader: () => import('@dod-advana/advana-platform-ui/dist/containers/UnauthorizedPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<></>
+			</div>
+		);
+	},
 });
 
 const JBookProfilePage = LoadableVisibility({
 	loader: () => import('./containers/JBookProfilePage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 30px)' }}>
+				<></>
+			</div>
+		);
+	},
 });
 
 const GamechangerPage = LoadableVisibility({
@@ -97,27 +131,57 @@ const GamechangerPage = LoadableVisibility({
 
 const GamechangerAdminPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerAdminPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container" style={{ minHeight: 'calc(100vh - 220px)' }}>
+				<></>
+			</div>
+		);
+	},
 });
 
 const GamechangerEsPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerEsPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<></>
+			</div>
+		);
+	},
 });
 
 const GameChangerDetailsPage = LoadableVisibility({
 	loader: () => import('./containers/GameChangerDetailsPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<></>
+			</div>
+		);
+	},
 });
 
 const GamechangerPdfViewer = LoadableVisibility({
 	loader: () => import('./components/documentViewer/PDFViewer'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<></>
+			</div>
+		);
+	},
 });
 
 const GamechangerLiteAdminPage = LoadableVisibility({
 	loader: () => import('./containers/GamechangerLiteAdminPage'),
-	loading: () => emptyPage(),
+	loading: () => {
+		return (
+			<div className="main-container">
+				<></>
+			</div>
+		);
+	},
 });
 
 const instance = createInstance({
@@ -125,7 +189,7 @@ const instance = createInstance({
 	siteId: Config.MATOMO_SITE_ID || 2,
 });
 
-const browserHistory = createBrowserHistory();
+const history = createBrowserHistory();
 
 const tutorialOverlayAPI = new TutorialOverlayAPI();
 const gameChangerAPI = new GameChangerAPI();
@@ -205,113 +269,143 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	return <Route {...rest} render={(props) => <RenderComponent {...rest} {...props} />} />;
 };
 
-const getGamechangerRoute = (clone, tutorialData) => {
-	const cloneRoutes = [];
-	const name = clone.clone_name;
-	const GamechangerProvider = getProvider(name);
-
-	const url = new URL(window.location.href).hostname;
-	if (clone.available_at === null) {
-		clone.available_at = []; // if there's nothing at all, set as empty array
-	}
-	if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
-		cloneRoutes.push((location) => (
-			<PrivateTrackedRoute
-				key={`${clone.url}-admin-lite`}
-				path={`/${clone.url}/admin`}
-				render={(props) => (
-					<GamechangerProvider>
-						<GamechangerLiteAdminPage {...props} cloneData={clone} jupiter={false} location={location} />
-					</GamechangerProvider>
-				)}
-				pageName={clone.display_name}
-				allowFunction={() => {
-					return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
-				}}
-			/>
-		));
-		if (clone.clone_name === 'jbook') {
-			cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
-		}
-		cloneRoutes.push((location) => (
-			<PrivateTrackedRoute
-				key={`${clone.url}-main`}
-				path={`/${clone.url}`}
-				render={(props) => (
-					<GamechangerProvider>
-						<GamechangerPage
-							{...props}
-							tutorialData={tutorialData?.[name]?.newUserTutorial || null}
-							history={browserHistory}
-							isClone={true}
-							cloneData={clone}
-							location={location}
-						/>
-					</GamechangerProvider>
-				)}
-				pageName={clone.display_name}
-				allowFunction={() => {
-					if (clone.permissions_required) {
-						Permissions.allowGCClone(clone.clone_name) ||
-							Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
-					} else {
-						return true;
-					}
-				}}
-			/>
-		));
-	}
-
-	return cloneRoutes;
-};
-
-const getGamechangerClones = async (tutorialData, setGameChangerCloneRoutes) => {
-	try {
-		const data = await gameChangerAPI.getCloneData();
-		const cloneRoutes = [];
-		_.forEach(data.data, (clone) => {
-			if (clone.is_live) {
-				cloneRoutes.push(...getGamechangerRoute(clone, tutorialData));
-			}
-		});
-		setGameChangerCloneRoutes(cloneRoutes);
-	} catch (err) {
-		console.log(err);
-		console.log('Failed to retrieve GC Clones.');
-	}
-};
-
-const getJBookProfileRoute = (cloneData, location) => {
-	const JBookProvider = getProvider('jbook');
-
-	return (
-		<PrivateTrackedRoute
-			key={`jbook-profile`}
-			path={`/jbook/profile`}
-			render={(props) => (
-				<JBookProvider>
-					<JBookProfilePage {...props} cloneData={cloneData} location={location} />
-				</JBookProvider>
-			)}
-			pageName={'JBookProfilePage'}
-			allowFunction={() => {
-				return true;
-			}}
-		/>
-	);
-};
-
 const App = () => {
 	const [gameChangerCloneRoutes, setGameChangerCloneRoutes] = useState([]);
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
+
+	const getGamechangerClones = async (tutorialData) => {
+		try {
+			const data = await gameChangerAPI.getCloneData();
+			const cloneRoutes = [];
+			_.forEach(data.data, (clone, idx) => {
+				if (clone.is_live) {
+					const name = clone.clone_name;
+					const GamechangerProvider = getProvider(name);
+
+					const url = new URL(window.location.href).hostname;
+					if (clone.available_at === null) {
+						clone.available_at = []; // if there's nothing at all, set as empty array
+					}
+					if (clone.available_at.some((v) => v.includes(url) || v === 'all')) {
+						cloneRoutes.push((location) => (
+							<PrivateTrackedRoute
+								key={`${clone.url}-admin-lite`}
+								path={`/${clone.url}/admin`}
+								render={(props) => (
+									<GamechangerProvider>
+										<GamechangerLiteAdminPage
+											{...props}
+											cloneData={clone}
+											jupiter={false}
+											location={location}
+										/>
+									</GamechangerProvider>
+								)}
+								pageName={clone.display_name}
+								allowFunction={() => {
+									return Permissions.permissionValidator(`${clone.clone_name} Admin`, true);
+								}}
+							/>
+						));
+						if (clone.permissions_required) {
+							cloneRoutes.push((location) => (
+								<PrivateTrackedRoute
+									key={`${clone.url}-main`}
+									path={`/${clone.url}`}
+									render={(props) => (
+										<GamechangerProvider>
+											<GamechangerPage
+												{...props}
+												tutorialData={
+													tutorialData && tutorialData[name]
+														? tutorialData[name].newUserTutorial
+														: null
+												}
+												history={history}
+												isClone={true}
+												cloneData={clone}
+												location={location}
+											/>
+										</GamechangerProvider>
+									)}
+									pageName={clone.display_name}
+									allowFunction={() => {
+										return (
+											Permissions.allowGCClone(clone.clone_name) ||
+											Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
+										);
+									}}
+								/>
+							));
+						} else {
+							// if clone name is jbook, then push jbook route + cloneData
+							if (clone.clone_name === 'jbook') {
+								cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
+							}
+							cloneRoutes.push((location) => (
+								<PrivateTrackedRoute
+									key={`${clone.url}-main`}
+									path={`/${clone.url}`}
+									render={(props) => (
+										<GamechangerProvider>
+											<GamechangerPage
+												{...props}
+												tutorialData={
+													tutorialData && tutorialData[name]
+														? tutorialData[name].newUserTutorial
+														: null
+												}
+												history={history}
+												isClone={true}
+												cloneData={clone}
+												location={location}
+											/>
+										</GamechangerProvider>
+									)}
+									pageName={clone.display_name}
+									allowFunction={() => {
+										return true;
+									}}
+								/>
+							));
+						}
+					}
+				}
+			});
+			setGameChangerCloneRoutes(cloneRoutes);
+		} catch (err) {
+			console.log(err);
+			console.log('Failed to retrieve GC Clones.');
+		}
+	};
+
+	const getJBookProfileRoute = (cloneData, location) => {
+		const JBookProvider = getProvider('jbook');
+
+		return (
+			<PrivateTrackedRoute
+				key={`jbook-profile`}
+				path={`/jbook/profile`}
+				render={(props) => (
+					<JBookProvider>
+						<JBookProfilePage {...props} cloneData={cloneData} location={location} />
+					</JBookProvider>
+				)}
+				pageName={'JBookProfilePage'}
+				allowFunction={() => {
+					return true;
+				}}
+			/>
+		);
+	};
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
 		return includePaths.includes(location.pathname);
 	};
 
-	const getStyleType = (location) => {
+	const getStyleType = (match, location) => {
 		let style = styles.newContainer;
 		if (isShowNothingButComponent(location)) {
 			style = styles.emptyContainer;
@@ -343,7 +437,7 @@ const App = () => {
 					console.log('Failed to retrieve Tutorial Overlay data');
 				}
 			}
-			await getGamechangerClones(tutorialData, setGameChangerCloneRoutes);
+			await getGamechangerClones(tutorialData);
 		};
 		if (!initialized) {
 			setInitialized(true);
@@ -369,13 +463,13 @@ const App = () => {
 			<MatomoProvider value={instance}>
 				<MuiThemeProvider theme={ThemeDefault}>
 					<ClassificationBanner />
-					<ConsentAgreement id={'consent-agreement'} />
+					<ConsentAgreement />
 
 					<Route
 						exact
 						path="/"
-						children={({ location }) => (
-							<div style={getStyleType(location)}>
+						children={({ match, location, history }) => (
+							<div style={getStyleType(match, location)}>
 								<SlideOutMenuContextHandler>
 									<>
 										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
@@ -426,9 +520,7 @@ const App = () => {
 												<Route
 													exact
 													path="/unauthorized"
-													component={() => (
-														<div data-cy={'unauthorized-page'}>{UnauthorizedPage()}</div>
-													)}
+													component={UnauthorizedPage}
 													location={location}
 												/>
 												<Route path="*" component={NotFoundPage} />

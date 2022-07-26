@@ -2,9 +2,10 @@ FROM node:14
 # RUN apt-get update && apt-get install -y vim
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
-COPY yarn.lock /usr/src/app
 COPY .npmrc /usr/src/app
-RUN yarn install --frozen-lockfile
+RUN npm install
 COPY . /usr/src/app
 EXPOSE 8080
-CMD npm run dev
+# EXPOSE 5860
+CMD PORT=8080 yarn start
+# CMD sleep 600000
