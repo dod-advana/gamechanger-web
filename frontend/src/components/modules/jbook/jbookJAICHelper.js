@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, CircularProgress } from '@material-ui/core';
+import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
-import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { StyledFooterDiv } from './profilePage/profilePageStyles';
-import { ButtonStyles } from './profilePage/profilePageStyles';
+import { StyledFooterDiv, ButtonStyles } from './profilePage/profilePageStyles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((_theme) => ({
 	customWidth: {
 		maxWidth: 1050,
 		padding: '15px 10px 15px 0',
@@ -24,27 +22,31 @@ const ReviewersValue = React.memo((props) => {
 		setReviewData,
 	} = props;
 
-	const primaryReviewers =
-		dropdownData && dropdownData.reviewers
-			? dropdownData.reviewers
-					.map((reviewer) => {
-						return `${reviewer.name}${
-							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
-								? ` (${reviewer.organization})`
-								: ''
-						}`;
-					})
-					.sort()
-			: [];
+	const reviewers = {};
+
+	if (dropdownData.reviewers) {
+		dropdownData.reviewers.forEach((reviewer) => {
+			const display = `${reviewer.name}${
+				reviewer?.organization?.length > 1 ? ` (${reviewer.organization})` : ''
+			}`;
+			reviewers[display] = {
+				display,
+				...reviewer,
+			};
+		});
+	}
 
 	return (
 		<Autocomplete
 			size="small"
-			options={primaryReviewers}
+			options={Object.keys(reviewers)}
 			style={{ width: 300 }}
 			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
 			value={primaryReviewer ?? null}
-			onChange={(event, value) => setReviewData('primaryReviewer', value)}
+			onChange={(_e, value) => {
+				setReviewData('primaryReviewer', value);
+				setReviewData('primaryReviewerEmail', reviewers[value].email);
+			}}
 			disabled={finished} //|| roleDisabled}
 			disableClearable
 		/>

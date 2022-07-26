@@ -555,6 +555,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		primary_reviewer_email: {
+			newName: 'primaryReviewerEmail', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		service_reviewer: {
 			newName: 'serviceReviewer',
 			defaultValue: '',
@@ -944,6 +949,11 @@ module.exports = {
 		},
 		primary_reviewer_s: {
 			newName: 'primaryReviewer', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primaryReviewerEmail: {
+			newName: 'primaryReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
