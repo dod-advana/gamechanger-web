@@ -308,22 +308,33 @@ class DataLibrary {
 				req.query.isClone &&
 				req.query.clone_name === 'eda'
 			) {
-				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL + req.baseUrl + req.path + 
-				'?path='+req.query.filekey+'&dest='+req.query.dest+'&filekey='+req.query.filekey +
-				'&isClone=false&clone_name=edaReRoute';
+				const edaUrl =
+					this.constants.GAMECHANGER_BACKEND_EDA_URL +
+					req.baseUrl +
+					req.path +
+					'?path=' +
+					req.query.filekey +
+					'&dest=' +
+					req.query.dest +
+					'&filekey=' +
+					req.query.filekey +
+					'&isClone=false&clone_name=edaReRoute';
 				// console.log(edaUrl)
-				
+
 				const token = await this.redisDB.get(`${getUserIdFromSAMLUserId(req)}-token`);
-				const signature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.baseUrl+req.path, token ? token : 'NoToken'));
-				
+				const signature = CryptoJS.enc.Base64.stringify(
+					CryptoJS.HmacSHA256(req.baseUrl + req.path, token ? token : 'NoToken')
+				);
+
 				this.axios({
 					method: 'get',
 					url: edaUrl,
 					headers: {
-						'host': this.constants.GAMECHANGER_BACKEND_EDA_URL,
+						host: this.constants.GAMECHANGER_BACKEND_EDA_URL,
 						'X-UA-SIGNATURE': signature,
-						'SSL_CLIENT_S_DN_CN': req.session.user.id,
-						'x-env-ssl_client_certificate': req.headers['x-env-ssl_client_certificate']},
+						SSL_CLIENT_S_DN_CN: req.session.user.id,
+						'x-env-ssl_client_certificate': req.headers['x-env-ssl_client_certificate'],
+					},
 					responseType: 'stream',
 				})
 					.then((response) => {
