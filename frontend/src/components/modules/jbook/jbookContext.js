@@ -439,6 +439,7 @@ const initState = {
 
 	// profile page
 	profilePageBudgetYear: '2023',
+	commentThread: [],
 };
 
 const init = (initialState) => {
