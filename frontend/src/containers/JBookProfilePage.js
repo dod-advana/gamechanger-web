@@ -1064,14 +1064,13 @@ const JBookProfilePage = (props) => {
 
 	const scorecardData = (classification) => {
 		let data = [];
-
 		if (
 			selectedPortfolio === 'AI Inventory' &&
 			classification &&
-			classification.modelPredictionProbability &&
-			classification.modelPrediction
+			classification.confidence &&
+			classification.top_class
 		) {
-			let num = classification.modelPredictionProbability;
+			let num = classification.confidence;
 			num = num.toString(); //If it's not already a String
 			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
 			Number(num); //If you need it back as a Number
@@ -1080,7 +1079,7 @@ const JBookProfilePage = (props) => {
 				name: 'Predicted Tag',
 				description:
 					'The AI tool classified the BLI as "' +
-					classification.modelPrediction +
+					classification.top_class +
 					'" with a confidence score of ' +
 					num,
 				value: num,
@@ -1345,7 +1344,7 @@ const JBookProfilePage = (props) => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.classification)}
+							scores={scorecardData(projectData.ai_predictions[selectedPortfolio])}
 							commentThread={commentThread}
 							gameChangerAPI={gameChangerAPI}
 							docID={docID}
