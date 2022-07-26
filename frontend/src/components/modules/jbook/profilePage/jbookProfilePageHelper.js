@@ -23,6 +23,7 @@ import {
 	getFormattedTotalCost,
 } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
+import JBookCommentSection from './jbookCommentSection';
 
 const firstColWidth = {
 	maxWidth: 150,
@@ -116,7 +117,17 @@ const BasicData = (props) => {
 };
 
 const ClassificationScoreCard = (props) => {
-	const { scores } = props;
+	const {
+		scores,
+		commentThread,
+		gameChangerAPI,
+		docID,
+		portfolioName,
+		getCommentThread,
+		userData,
+		updateUserProfileData,
+		dispatch,
+	} = props;
 
 	return (
 		<StyledLeftContainer>
@@ -176,6 +187,16 @@ const ClassificationScoreCard = (props) => {
 						</div>
 					);
 				})}
+				<JBookCommentSection
+					commentThread={commentThread}
+					gameChangerAPI={gameChangerAPI}
+					docID={docID}
+					portfolioName={portfolioName}
+					getCommentThread={getCommentThread}
+					userData={userData}
+					updateUserProfileData={updateUserProfileData}
+					dispatch={dispatch}
+				/>
 			</div>
 		</StyledLeftContainer>
 	);

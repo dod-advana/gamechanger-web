@@ -10,6 +10,8 @@ const JBookPortfolioSelector = ({
 	formControlStyle,
 	width,
 	projectData = null,
+	docID,
+	getCommentThread,
 }) => {
 	const classes = useStyles();
 
@@ -25,12 +27,14 @@ const JBookPortfolioSelector = ({
 							? projectData.reviews[name]
 							: {},
 				});
+
+				getCommentThread(docID, name);
 			} catch (err) {
 				console.log('Error setting portfolio');
 				console.log(err);
 			}
 		},
-		[dispatch, projectData]
+		[dispatch, projectData, docID, getCommentThread]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {
