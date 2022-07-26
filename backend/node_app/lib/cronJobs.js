@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { CacheController } = require('../controllers/cacheController');
+const { ElasticSearchController } = require('../controllers/elasticSearchController');
 const { FavoritesController } = require('../controllers/favoritesController');
 const { UserController } = require('../controllers/userController');
 const constantsFile = require('../config/constants');
@@ -10,14 +11,16 @@ class CronJobs {
 	constructor(opts = {}) {
 		const {
 			constants = constantsFile,
-			cacheController = new CacheController(),
-			favoritesController = new FavoritesController(),
-			userController = new UserController(),
+			cacheController = new CacheController(opts),
+			elasticSearchController = new ElasticSearchController(opts),
+			favoritesController = new FavoritesController(opts),
+			userController = new UserController(opts),
 			logger = LOGGER,
 		} = opts;
 
 		this.constants = constants;
 		this.cacheController = cacheController;
+		this.elasticSearchController = elasticSearchController;
 		this.favoritesController = favoritesController;
 		this.userController = userController;
 		this.logger = logger;
@@ -28,6 +31,8 @@ class CronJobs {
 
 	init() {
 		this.cacheController.setStartupSearchHistoryCacheKeys();
+		this.cacheController.setStartupQlikFullAppCacheKeys();
+		this.cacheController.setStartupCollibraCacheKeys();
 	}
 
 	getReloadJob() {
@@ -109,6 +114,50 @@ class CronJobs {
 					);
 				} else {
 					this.logger.info('Polling for favorite search updates disabled.');
+				}
+			},
+		};
+	}
+
+	getQlikAppsFullListJob() {
+		return {
+			start: () => {
+				const qlikAppsFullPollInterval = parseInt(
+					this.constants.GLOBAL_SEARCH_OPTS.FULL_APPS_POLL_INTERVAL,
+					10
+				);
+				if (!this.constants.GAME_CHANGER_OPTS.isDecoupled && qlikAppsFullPollInterval > 0) {
+					this.logger.info(`Polling for qlik app full list updates every ${qlikAppsFullPollInterval}ms.`);
+					this.elasticSearchController.cacheStoreQlikApps();
+					distributedPoll(
+						this.elasticSearchController.cacheStoreQlikApps,
+						qlikAppsFullPollInterval,
+						'locks.qlikFullAppsPollList'
+					);
+				} else {
+					this.logger.info('Polling for full apps list updates disabled.');
+				}
+			},
+		};
+	}
+
+	cacheCollibraInfoJob() {
+		return {
+			start: () => {
+				const collibraCachePollInterval = parseInt(
+					this.constants.GLOBAL_SEARCH_OPTS.COLLIBRA_CACHE_POLL_INTERVAL,
+					10
+				);
+				if (!this.constants.GAME_CHANGER_OPTS.isDecoupled && collibraCachePollInterval > 0) {
+					this.logger.info(`Polling for collibra cache updates every ${collibraCachePollInterval}ms.`);
+					this.cacheController.cacheCollibraData();
+					distributedPoll(
+						this.cacheController.cacheCollibraData,
+						collibraCachePollInterval,
+						'locks.collibraCachePollList'
+					);
+				} else {
+					this.logger.info('Polling for collibra cache updates disabled.');
 				}
 			},
 		};

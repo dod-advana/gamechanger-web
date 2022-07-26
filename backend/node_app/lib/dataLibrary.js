@@ -92,22 +92,8 @@ class DataLibrary {
 		this.getFilePDF = this.getFilePDF.bind(this);
 		this.queryGraph = this.queryGraph.bind(this);
 		this.putDocument = this.putDocument.bind(this);
+		this.updateDocument = this.updateDocument.bind(this);
 	}
-
-	// async queryElasticSearch(esQuery, esIndex, userId, options, isClone = false, cloneData = {}, multiSearch = false) {
-	// 	try {
-	// 		const esUrl = this.getElasticsearchSearchUrl(userId, esIndex, isClone, cloneData, multiSearch);
-	//
-	// 		let configOpts = options || this.esRequestConfig;
-	//
-	// 		return await this.axios.post(esUrl, esQuery, configOpts);
-	//
-	// 	} catch (err) {
-	// 		const msg = (err && err.message) ? `${err.message}` : `${err}`;
-	// 		this.logger.error(msg, '9VAHLY9', userId);
-	// 		throw msg;
-	// 	}
-	// }
 
 	async queryLineItemPostgres(columns, tables, filenames) {
 		try {
@@ -187,6 +173,17 @@ class DataLibrary {
 			throw err;
 		}
 	}
+
+	async updateDocument(clientName, index, updatedDoc, docId, userId) {
+		try {
+			return await this.esSearchLib.updateDocument(clientName, index, updatedDoc, docId, userId);
+		} catch (err) {
+			const msg = err && err.message ? `${err.message}` : `${err}`;
+			this.logger.error(msg, 'P7DD1AW');
+			throw err;
+		}
+	}
+
 	async getElasticSearchFields(esIndex, userId) {
 		try {
 			let opts = Object.assign({}, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);

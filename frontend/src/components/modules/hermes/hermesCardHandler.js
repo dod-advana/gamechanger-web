@@ -1,71 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
-import styled from 'styled-components';
 import {
 	capitalizeFirst,
 	CARD_FONT_SIZE,
-	getSubTypes,
 	getTrackingNameForFactory,
 	getTypeDisplay,
 } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
-import { primary } from '../../../components/common/gc-colors';
+import { primary } from '../../common/gc-colors';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
-
-const colWidth = {
-	maxWidth: '900px',
-	whiteSpace: 'nowrap',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-};
-
-const styles = {
-	footerButtonBack: {
-		margin: '0 10px 0 0 ',
-		padding: '8px 12px',
-	},
-	viewMoreChevron: {
-		fontSize: 14,
-		color: primary,
-		fontWeight: 'normal',
-		marginLeft: 5,
-	},
-	viewMoreButton: {
-		fontSize: 16,
-		color: primary,
-		fontWeight: 'bold',
-		cursor: 'pointer',
-		minWidth: 60,
-	},
-	collectionContainer: {
-		margin: '1em',
-		overflow: 'auto',
-	},
-	bodyImg: {
-		width: 75,
-		margin: '10px',
-	},
-	bodyText: {
-		margin: '10px',
-		fontSize: '14px',
-	},
-	row: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		flexWrap: 'wrap',
-	},
-	bodyContainer: {
-		display: 'flex',
-		height: '100%',
-		flex: 1,
-		flexDirection: 'column',
-		backgroundColor: 'rgb(238, 241, 242)',
-		padding: '10px 0',
-	},
-};
+import {
+	getDefaultComponent,
+	styles,
+	colWidth,
+	StyledFrontCardHeader,
+	StyledFrontCardSubHeader,
+	makeRows,
+} from '../default/defaultCardHandler';
 
 const auxDisplayBackFields = [
 	'precedence',
@@ -101,94 +55,6 @@ const auxDisplayFieldJSONMap = {
 const auxDisplayLeftSubtitleText = 'precedence';
 const auxDisplayRightSubtitleField = 'DTG';
 
-const StyledFrontCardHeader = styled.div`
-	font-size: 1.2em;
-	display: inline-block;
-	color: black;
-	margin-bottom: 0px;
-	background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
-	font-weight: bold;
-	font-family: Montserrat;
-	height: ${({ listView }) => (listView ? 'fit-content' : '59px')};
-	padding: ${({ listView }) => (listView ? '0px' : '5px')};
-	margin-left: ${({ listView }) => (listView ? '10px' : '0px')};
-	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
-
-	.title-text-selected-favorite-div {
-		max-height: ${({ listView }) => (listView ? '' : '50px')};
-		height: ${({ listView }) => (listView ? '35px' : '')};
-		overflow: hidden;
-		display: flex;
-		justify-content: space-between;
-
-		.title-text {
-			cursor: pointer;
-			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
-			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
-			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
-
-			.text {
-				margin-top: ${({ listView }) => (listView ? '10px' : '0px')};
-				-webkit-line-clamp: 2;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
-			}
-
-			.list-view-arrow {
-				display: inline-block;
-				margin-top: 7px;
-			}
-		}
-
-		.selected-favorite {
-			display: inline-block;
-			font-family: 'Noto Sans';
-			font-weight: 400;
-			font-size: ${CARD_FONT_SIZE}px;
-			margin-top: ${({ listView }) => (listView ? '2px' : '0px')};
-		}
-	}
-
-	.list-view-sub-header {
-		font-size: 0.8em;
-		display: flex;
-		color: black;
-		margin-bottom: 0px;
-		margin-top: 0px;
-		background-color: ${({ intelligentSearch }) => (intelligentSearch ? '#9BB1C8' : 'white')};
-		font-family: Montserrat;
-		height: 24px;
-		justify-content: space-between;
-	}
-`;
-
-const StyledFrontCardSubHeader = styled.div`
-	display: flex;
-	position: relative;
-
-	.sub-header-one {
-		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
-		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
-		width: 50%;
-		padding: 8px;
-		display: flex;
-		align-items: center;
-
-		img {
-			width: 25px;
-			margin: 0px 10px 0px 0px;
-		}
-	}
-
-	.sub-header-two {
-		width: 50%;
-		color: white;
-		padding: 10px 8px 8px;
-		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
-	}
-`;
-
 const clickFn = (body) => {
 	let data = `<pre> ${body} </pre>`;
 	let myWindow = window.open('data:text/html,', '_blank', '');
@@ -196,48 +62,7 @@ const clickFn = (body) => {
 	myWindow.focus();
 };
 
-const Row = ({ label, value, minWidth = 'inherit' }) => {
-	return (
-		<div style={styles.row}>
-			<div style={{ fontWeight: 'bold', minWidth }}>{label}</div>
-			<div style={{ marginLeft: '12px', flex: 1 }}>{value}</div>
-		</div>
-	);
-};
-
-const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
-	const rows = [];
-	for (const fieldName of fieldsArr) {
-		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
-		const displayName = displayNameMap?.[fieldName] ?? fieldName;
-		let value = itemWithValues[cleanFieldName] ?? 'Unknown';
-
-		if (cleanFieldName === 'body') {
-			let splitValue = value.split('-----');
-			value = splitValue[splitValue.length - 1];
-		}
-
-		// shorten text longer than x length
-		if (value.length > 230) {
-			value = value.substring(0, 230) + '...';
-		}
-
-		if (value) {
-			if (forTable) {
-				const row = {};
-				row['Key'] = displayName.replace(/:/g, '');
-				row['Value'] = value;
-				rows.push(row);
-			} else {
-				rows.push(<Row key={cleanFieldName} label={displayName} value={value} minWidth={40} />);
-			}
-		}
-	}
-
-	return rows;
-};
-
-const renderHighlights = (highlights, capitalizeFirst, hoveredHit, setHoveredHit) => {
+const renderHighlights = (highlights, hoveredHit, setHoveredHit) => {
 	const fontSize = 12;
 	const highlightList = [];
 
@@ -280,12 +105,11 @@ const renderHighlights = (highlights, capitalizeFirst, hoveredHit, setHoveredHit
 							setHoveredHit(highlightLabel);
 						}}
 					>
-						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label}`}</span>
+						<span style={{ fontSize }}>{`${capitalizeFirst(field)} ${label++}`}</span>
 						<i className="fa fa-chevron-right" style={{ marginLeft: 10, fontSize, color: 'white' }} />
 					</div>
 				</>
 			);
-			label += 1;
 		}
 	}
 	if (hoveredHit === 0) {
@@ -299,11 +123,12 @@ const getDisplayTitle = (item) => {
 	return `${item[auxDisplayTitleField]}`;
 };
 
-const HermesCardHandler = {
+const cardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
 			return getDisplayTitle(item);
 		},
+
 		getCardHeader: (props) => {
 			const { state, item, graphView } = props;
 
@@ -320,7 +145,10 @@ const HermesCardHandler = {
 				<StyledFrontCardHeader listView={state.listView} docListView={docListView} intelligentSearch={false}>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={title} placement="top" arrow>
-							<div className={'title-text'} onClick={docListView ? () => clickFn(item.body) : () => {}}>
+							<div
+								className={'title-text'}
+								onClick={docListView ? () => clickFn(item.body) : () => Function.prototype}
+							>
 								<div className={'text'}>{title}</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
@@ -334,7 +162,7 @@ const HermesCardHandler = {
 						<div className={'list-view-sub-header'}>
 							<p>
 								{' '}
-								{getSubTypes(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
+								{getTypeDisplay(type.toLowerCase())} | {getTypeDisplay(org)}{' '}
 							</p>
 						</div>
 					)}
@@ -372,7 +200,7 @@ const HermesCardHandler = {
 							docTypeColor={typeColor}
 							docOrgColor={orgColor}
 						>
-							<div className={'sub-header-one'}>{getSubTypes(type)}</div>
+							<div className={'sub-header-one'}>{getTypeDisplay(type)}</div>
 							<div className={'sub-header-two'}>{getTypeDisplay(org)}</div>
 						</StyledFrontCardSubHeader>
 					)}
@@ -417,7 +245,7 @@ const HermesCardHandler = {
 									overflow: 'scroll',
 								}}
 							>
-								{renderHighlights(item.highlight, capitalizeFirst, hoveredHit, setHoveredHit)}
+								{renderHighlights(item.highlight, hoveredHit, setHoveredHit)}
 							</div>
 							<div
 								style={{
@@ -487,7 +315,7 @@ const HermesCardHandler = {
 						Open
 					</CardButton>
 					<div
-						style={{ ...styles.viewMoreButton }}
+						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
 							trackEvent(
 								getTrackingNameForFactory(cloneName),
@@ -499,110 +327,35 @@ const HermesCardHandler = {
 						}}
 					>
 						{toggledMore ? 'Overview' : 'More'}
-						<i style={styles.viewMoreChevron} className="fa fa-chevron-right" aria-hidden="true" />
+						<i
+							style={{ ...styles.viewMoreChevron, color: primary }}
+							className="fa fa-chevron-right"
+							aria-hidden="true"
+						/>
 					</div>
 				</>
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 	},
+};
 
-	publication: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
+const HermesCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	entity: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
-
-	topic: {
-		getCardHeader: (props) => {
-			return <></>;
-		},
-
-		getCardSubHeader: (props) => {
-			return <></>;
-		},
-
-		getCardFront: (props) => {
-			return <></>;
-		},
-
-		getCardBack: (props) => {
-			return <></>;
-		},
-
-		getFooter: (props) => {
-			return <></>;
-		},
-
-		getCardExtras: (props) => {
-			return <></>;
-		},
-
-		getFilename: (item) => {
-			return '';
-		},
-	},
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default HermesCardHandler;

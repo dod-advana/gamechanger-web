@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import Paper from '@material-ui/core/Paper';
@@ -46,8 +46,12 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, se
 		});
 };
 
+const emptyObject = {};
+
 const DocumentDetailsPage = (props) => {
 	const { document, cloneData, userData, rawSearchResults } = props;
+
+	const defaultFunction = useCallback(() => {}, []);
 
 	const ref = useRef(null);
 
@@ -96,10 +100,13 @@ const DocumentDetailsPage = (props) => {
 		if (document) {
 			const data = getMetadataForPropertyTable(document);
 			let favoritableData = policyMetadata(document);
-			favoritableData = [...favoritableData, ...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '')];
+			favoritableData = [
+				...favoritableData,
+				...addFavoriteTopicToMetadata(data, userData, {}, cloneData, '', '150px'),
+			];
 			setMetadata(favoritableData);
 		}
-	}, [document]);
+	}, [cloneData, document, userData]);
 
 	useEffect(() => {
 		if (document) {
@@ -335,7 +342,7 @@ const DocumentDetailsPage = (props) => {
 						)}
 					</div>
 				</div>
-				<div className="row" style={{ marginLeft: -45, marginRight: -15, width: 'unset' }}>
+				<div className="row" style={{ width: 'unset', marginLeft: 0 }}>
 					{runningQuery ? (
 						<div style={{ margin: '0 auto' }}>
 							<LoadingIndicator customColor={gcColors.buttonColor2} />
@@ -442,11 +449,11 @@ const DocumentDetailsPage = (props) => {
 								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
 								runningSearchProp={runningQuery}
-								setDocumentsFound={() => {}}
-								setTimeFound={() => {}}
+								setDocumentsFound={defaultFunction}
+								setTimeFound={defaultFunction}
 								cloneData={cloneData}
-								setNumOfEdges={() => {}}
-								dispatch={{}}
+								setNumOfEdges={defaultFunction}
+								dispatch={emptyObject}
 								showBasic={false}
 								searchText={''}
 								detailsView={true}

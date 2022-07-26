@@ -37,23 +37,6 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 			break;
 		case 'serviceAgency':
 		case 'reviewStatus':
-			if (value === 'all') {
-				jbookSearchSettings[field] = state.defaultOptions[field];
-			} else if (value === 'none') {
-				jbookSearchSettings[field] = [];
-			} else if (filteredList) {
-				jbookSearchSettings[field] = value;
-				runSearch = true;
-				resultsPage = 1;
-			} else {
-				const typeIndex = jbookSearchSettings[field].indexOf(value);
-				if (typeIndex !== -1) {
-					jbookSearchSettings[field].splice(typeIndex, 1);
-				} else {
-					jbookSearchSettings[field].push(value);
-				}
-			}
-			break;
 		case 'hasKeywords':
 		case 'primaryReviewer':
 		case 'serviceReviewer':
@@ -91,7 +74,8 @@ export const setJBookSetting = (field, value, state, dispatch, filteredList = fa
 	setState(dispatch, { jbookSearchSettings, dataSources, runSearch, searchText, resultsPage, loading: runSearch });
 };
 
-export const handleTabClicked = (dispatch, state, tab) => {
+// when jbookMainViewHandler gets cleaned, remove _state from here + that file
+export const handleTabClicked = (dispatch, _state, tab) => {
 	setState(dispatch, { mainTabSelected: tab });
 };
 
@@ -121,31 +105,72 @@ export const filterSortFunction = (a, b) => {
 	}
 };
 
-export const populateDropDowns = async (state, dispatch) => {
+const getName = (reviewer) => {
+	if (reviewer !== null && reviewer.name !== null) {
+		return `${reviewer.name}${reviewer.organization ? ' ' + reviewer.organization : ''}`;
+	}
+	return 'Blank';
+};
+
+const itemOrBlank = (item) => {
+	if (item !== null) {
+		return item;
+	}
+	return 'Blank';
+};
+
+export const populateDropDowns = async (state, _dispatch) => {
 	const jbookSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 	const defaultOptions = _.cloneDeep(state.defaultOptions);
-
 	const { data } = await gamechangerAPI.callSearchFunction({
 		functionName: 'getDataForFilters',
 		cloneName: state.cloneData.clone_name,
 		options: {},
 	});
 
-	jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
-		.map((year) => (year !== null ? year : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
-		.map((status) => (status !== null ? status : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
-		.map((agency) => (agency !== null ? agency : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
-		.map((label) => (label !== null ? label : 'Blank'))
-		.sort(filterSortFunction);
-	jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
-		.map((tag) => (tag !== null ? tag : 'Blank'))
-		.sort(filterSortFunction);
+	try {
+		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgencyES
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.appropriationNumberES = defaultOptions.appropriationNumberES = data.appropriationNumberES;
+
+		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		jbookSearchSettings.primaryClassLabel = defaultOptions.primaryClassLabel = data.primaryclasslabel
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+		jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
+			.map(itemOrBlank)
+			.sort(filterSortFunction);
+
+		if (jbookSearchSettings.budgetYearES) {
+			defaultOptions.budgetYear = jbookSearchSettings.budgetYear = jbookSearchSettings.budgetYearES;
+		}
+		if (jbookSearchSettings.appropriationNumberES) {
+			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
+				jbookSearchSettings.appropriationNumberES;
+		}
+		if (jbookSearchSettings.appropriationNumberES) {
+			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumberES;
+		}
+	} catch (err) {
+		console.log('Error setting dropdown data');
+		console.log(err);
+	}
 
 	let dropdownData;
 	try {
@@ -160,25 +185,11 @@ export const populateDropDowns = async (state, dispatch) => {
 			dropdownData.serviceReviewers.push({ name: 'Blank' });
 
 			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = dropdownData.reviewers
-				.map((reviewer) =>
-					reviewer !== null && reviewer.name !== null
-						? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
-						: 'Blank'
-				)
+				.map(getName)
 				.sort(filterSortFunction);
 			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = dropdownData.serviceReviewers
-				.map((reviewer) =>
-					reviewer !== null && reviewer.name !== null
-						? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
-						: 'Blank'
-				)
-				.concat(
-					dropdownData.secondaryReviewers.map((reviewer) =>
-						reviewer !== null && reviewer.name !== null
-							? `${reviewer.name}${reviewer.organization ? ` (${reviewer.organization})` : ''}`
-							: 'Blank'
-					)
-				)
+				.map(getName)
+				.concat(dropdownData.secondaryReviewers.map(getName))
 				.sort(filterSortFunction);
 
 			jbookSearchSettings.primaryReviewer.push('Unknown');
@@ -188,10 +199,10 @@ export const populateDropDowns = async (state, dispatch) => {
 			defaultOptions.serviceReviewer.push('Blank');
 		} else {
 			jbookSearchSettings.primaryReviewer = defaultOptions.primaryReviewer = data.primaryreviewer
-				.map((reviewer) => (reviewer !== null ? reviewer : 'Blank'))
+				.map(itemOrBlank)
 				.sort(filterSortFunction);
 			jbookSearchSettings.serviceReviewer = defaultOptions.serviceReviewer = data.servicereviewer
-				.map((reviewer) => (reviewer !== null ? reviewer : 'Blank'))
+				.map(itemOrBlank)
 				.sort(filterSortFunction);
 		}
 	} catch (err) {
@@ -200,12 +211,6 @@ export const populateDropDowns = async (state, dispatch) => {
 	}
 
 	return { defaultOptions, jbookSearchSettings, dropdownData };
-
-	// if (initial) {
-	// 	setState(dispatch, {loading: true, runSearch: true, defaultOptions, jbookSearchSettings, dropdownData });
-	// } else {
-	// 	setState(dispatch, {defaultOptions, dropdownData });
-	// }
 };
 
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {

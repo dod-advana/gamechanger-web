@@ -23,6 +23,7 @@ export const StyledNavBar = styled.div`
 	background-color: #eff2f6;
 	align-items: center;
 	justify-content: center;
+	padding-left: 30px;
 `;
 
 export const StyledNavContainer = styled.div`
@@ -41,17 +42,17 @@ export const StyledSideNavContainer = styled.div`
 `;
 
 export const StyledNavButton = styled.div`
-    background-color: ${({ selected }) => (selected ? '#1C2D64' : '')};
-    color: ${({ selected }) => (selected ? 'white' : '#8A9AAD')};
-    padding: 5px 18px
-    font-weight: 600;
-    border-left: ${({ first }) => (first ? '' : '2px solid white')}
-    border-right: ${({ last }) => (last ? '' : '2px solid white')}
-    text-align: center;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 13px;
+	background-color: ${({ selected }) => (selected ? '#1C2D64' : '')};
+	color: ${({ selected }) => (selected ? 'white' : '#8A9AAD')};
+	padding: 5px 18px;
+	font-weight: 600;
+	border-left: ${({ first }) => (first ? '' : '2px solid white')};
+	border-right: ${({ last }) => (last ? '' : '2px solid white')};
+	text-align: center;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 13px;
 `;
 
 export const StyledContainer = styled.div`
@@ -72,6 +73,7 @@ export const StyledMainContainer = styled.div`
 	flex: 2;
 	flex-direction: column;
 	padding: 20px;
+	max-height: 1165px;
 `;
 
 export const StyledRightContainer = styled.div`
@@ -145,9 +147,11 @@ export const StyledInlineContainer = styled.div`
 `;
 
 export const StyledFooterDiv = styled.div`
+	margin: 20px 0 0 0;
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
+	margin-top: 10px;
 `;
 
 export const StyledAccordionHeader = styled.div`
@@ -156,3 +160,8 @@ export const StyledAccordionHeader = styled.div`
 	justify-content: space-between;
 	width: 100%;
 `;
+
+export const ButtonStyles = {
+	main: { color: '#515151', backgroundColor: '#E0E0E0', borderColor: '#E0E0E0', height: '35px', fontSize: 14 },
+	submit: { color: 'white', backgroundColor: '#1C2D64', borderColor: '#1C2D64', height: '35px', fontSize: 14 },
+};

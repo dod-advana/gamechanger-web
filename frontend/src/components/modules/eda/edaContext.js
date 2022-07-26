@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { orgFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
 	edaSearchSettings: {
@@ -40,6 +41,8 @@ const initState = {
 		fundingAgencyName: null,
 		naicsCode: null,
 		duns: null,
+		contractSOW: null,
+		clinText: null,
 	},
 	contractAwards: {},
 	showDialog: false,
@@ -62,6 +65,25 @@ const initState = {
 	searchSettings: {
 		allCategoriesSelected: true,
 		specificCategoriesSelected: false,
+	},
+	analystToolsSearchSettings: {
+		isFilterUpdate: false,
+		orgUpdate: false,
+		orgFilter: orgFilters,
+		orgCount: {},
+		organizations: [],
+		majcoms: {
+			'air force': [],
+			army: [],
+			defense: [],
+			navy: [],
+		},
+		fiscalYears: [],
+		allYearsSelected: true,
+		contractsOrMods: 'both',
+		idvPIID: '',
+		allOrgsSelected: true,
+		specificOrgsSelected: false,
 	},
 	rawSearchResults: [],
 	userData: {
@@ -93,6 +115,14 @@ function reducer(state, action) {
 			return {
 				...initState,
 			};
+		case 'RESET_ANALYST_TOOLS_SEARCH_SETTINGS':
+			const newState = {
+				...state,
+				analystToolsSearchSettings: initState.analystToolsSearchSettings,
+			};
+			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
+			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
+			return newState;
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,

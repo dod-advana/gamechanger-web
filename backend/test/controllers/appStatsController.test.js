@@ -967,13 +967,7 @@ describe('AppStatsController', function () {
 						document: 'PDFViewer - test7.pdf - gamechanger',
 						clone_name: 'gamechanger',
 					},
-				],
-				[
-					{
-						unique_users: 5,
-						total_searches: 20,
-					},
-				],
+				]
 			];
 
 			const expectedData = {
@@ -989,11 +983,7 @@ describe('AppStatsController', function () {
 						ExportDocument: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
 						Favorite: ['test2.pdf', 'test3.pdf', 'test4.pdf', 'test5.pdf', 'test6.pdf'],
 					},
-				],
-				cards: {
-					unique_users: 5,
-					total_searches: 20,
-				},
+				]
 			};
 			const target = new AppStatsController(tmpOpts);
 			await target.getUserAggregations(req, res);
@@ -1042,4 +1032,111 @@ describe('AppStatsController', function () {
 			done();
 		});
 	});
+	describe('#getDashboardData', () => {
+		jest.setTimeout(10000);
+		it('should get users dashboard data', async (done) => {
+			let mysqlParams = null;
+			const mySqlConnection = {
+				connect: () => {
+					connectCalled = true;
+				},
+				end: () => {
+					endCalled = true;
+				},
+				query: (query, params, callback) => {
+					queries.push(query);
+					let response = expectedResponses[counter];
+					counter++;
+					callback(null, response, []);
+				}
+			};
+			const tmpOpts = {
+				...opts,
+				mysql_lib: {
+					createConnection: (params) => {
+						mysqlParams = params;
+						return mySqlConnection;
+					},
+				},
+				sparkMD5:{
+					hash(id){
+						return id
+					}
+				}
+			};
+			let queries = [];
+			let counter = 0;
+			const req = {
+				query: {
+					startDate: '2022-03-14+04:00',
+					endDate: '2022-03-17+19:21',
+				},
+				get: (header) => 'test',
+			};
+			let passedCode = null;
+			let sentData = null;
+			const res = {
+				status: (code) => {
+					passedCode = code;
+					return {
+						send: (data) => {
+							sentData = data;
+						},
+					};
+				},
+			};
+			const expectedResponses = [
+				[
+					{
+						unique_searches: 5,
+						total_searches: 20,
+					},
+				],
+				[
+					{
+						unique_users: 5,
+					},
+				],
+				[
+					{ count: 3311, date: '2021-01' },
+					{ count: 4202, date: '2021-02' },
+					{ count: 1511, date: '2021-03' },
+					{ count: 2783, date: '2021-04' }
+				],
+				[
+					{ count: 3, date: '2021-01' },
+					{ count: 7, date: '2021-02' },
+					{ count: 30, date: '2021-03' },
+					{ count: 19, date: '2021-04' }
+				],
+			];
+	
+			const expectedData = {
+				cards: {
+					unique_users: 5,
+					unique_searches: 5,
+					total_searches: 20,
+				},
+				searchBar : [
+					{ count: 3311, date: '2021-01' },
+					{ count: 4202, date: '2021-02' },
+					{ count: 1511, date: '2021-03' },
+					{ count: 2783, date: '2021-04' }
+				],
+				userBar: [
+					{ count: 3, date: '2021-01' },
+					{ count: 7, date: '2021-02' },
+					{ count: 30, date: '2021-03' },
+					{ count: 19, date: '2021-04' }
+				],
+			};
+			const target = new AppStatsController(tmpOpts);
+			await target.getDashboardData(req, res);
+			assert.equal(passedCode, 200);
+			assert.deepEqual(sentData, expectedData);
+			done();
+		});
+	});
 });
+
+	

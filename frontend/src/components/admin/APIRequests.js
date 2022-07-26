@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 import Popover from '@material-ui/core/Popover';
 import CloseIcon from '@material-ui/icons/Close';
 import styled from 'styled-components';

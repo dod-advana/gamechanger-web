@@ -91,7 +91,7 @@ module.exports = Object.freeze({
 		isDemoDeployment: (process.env.GAMECHANGER_DEMO_DEPLOYMENT?.trim() || 'false') === 'true',
 		demoUser: process.env.GAMECHANGER_DEMO_USER?.trim() || '007',
 		disableStatsAPI: (process.env.GAMECHANGER_DISABLE_STATS_API?.trim() || 'false') === 'true',
-		isDecoupled: process.env.REACT_APP_GC_DECOUPLED === 'true',
+		isDecoupled: process.env.IS_DECOUPLED === 'true',
 		rootClone: process.env.REACT_APP_ROOT_CLONE,
 		version: 'game_changer',
 		impalaTable: 'policy_analytics.gc_history',
@@ -164,6 +164,11 @@ module.exports = Object.freeze({
 	},
 	HERMES_ELASTIC_SEARCH_OPTS: {
 		index: process.env.HERMES_ELASTICSEARCH_INDEX,
+		auxSearchFields: [''],
+		auxRetrieveFields: [''],
+	},
+	AMHS_ELASTIC_SEARCH_OPTS: {
+		index: process.env.AMHS_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
 		auxRetrieveFields: [''],
 	},
@@ -462,4 +467,130 @@ module.exports = Object.freeze({
 		"why's",
 		'would',
 	],
+	REDIS_CONFIG: {
+		GLOBAL_SEARCH_CACHE_DB: 10,
+	},
+	GLOBAL_SEARCH_OPTS: {
+		FULL_APPS_POLL_INTERVAL: process.env.QLIK_APP_FULL_LIST_POLL_INTERVAL,
+		COLLIBRA_CACHE_POLL_INTERVAL: process.env.COLLIBRA_CACHE_POLL_INTERVAL,
+		ES_MAPPING: {
+			settings: {
+				index: {
+					number_of_shards: 3,
+					number_of_replicas: 2,
+				},
+			},
+			mappings: {
+				dynamic_templates: [
+					{
+						string: {
+							match_mapping_type: 'string',
+							match: '*_s',
+							mapping: {
+								type: 'keyword',
+								ignore_above: 256,
+							},
+						},
+					},
+					{
+						text: {
+							match: '*_t',
+							match_mapping_type: 'string',
+							mapping: { type: 'text' },
+						},
+					},
+					{
+						string_and_text: {
+							match: '*_ks',
+							match_mapping_type: 'string',
+							mapping: {
+								type: 'keyword',
+								ignore_above: 256,
+								fields: {
+									search: { type: 'text' },
+								},
+							},
+						},
+					},
+					{
+						integer: {
+							match: '*_i',
+							match_mapping_type: 'string',
+							mapping: { type: 'integer' },
+						},
+					},
+					{
+						integer: {
+							match: '*_l',
+							match_mapping_type: 'string',
+							mapping: { type: 'long' },
+						},
+					},
+					{
+						boolean: {
+							match: '*_b',
+							match_mapping_type: 'string',
+							mapping: { type: 'boolean' },
+						},
+					},
+					{
+						double: {
+							match: '*_d',
+							match_mapping_type: 'string',
+							mapping: { type: 'double' },
+						},
+					},
+					{
+						float: {
+							match: '*_f',
+							match_mapping_type: 'string',
+							mapping: { type: 'float' },
+						},
+					},
+					{
+						date: {
+							match: '*_dt',
+							match_mapping_type: 'string',
+							mapping: { type: 'date', format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" },
+						},
+					},
+					{
+						date_year_only: {
+							match: '*_year_only',
+							match_mapping_type: 'string',
+							mapping: { type: 'date', format: 'yyyy' },
+						},
+					},
+					{
+						date_year_month_only: {
+							match: '*_year_month_only',
+							match_mapping_type: 'string',
+							mapping: { type: 'date', format: 'yyyy-MM' },
+						},
+					},
+					{
+						rank_feature: {
+							match: '*_r',
+							match_mapping_type: 'string',
+							mapping: { type: 'rank_feature' },
+						},
+					},
+					{
+						rank_features: {
+							match: '*_rs',
+							match_mapping_type: 'string',
+							mapping: { type: 'rank_features' },
+						},
+					},
+					{
+						nested_object: {
+							match: '*_n',
+							mapping: { type: 'nested' },
+						},
+					},
+				],
+			},
+		},
+		ES_INDEX: 'global_search_qlik',
+	},
 });

@@ -12,6 +12,7 @@ jest_0/
 jest/
 *.snap
 
+
 # production
 /build
 
@@ -22,6 +23,7 @@ jest/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log
 
 uotapp-react.out
 src/sonar-project.properties
@@ -32,8 +34,6 @@ sh.exe.stackdump
 .vscode/launch.json
 .editorconfig
 dump.rdb
-yarn.lock
-yarn.lock
 .idea
 
 .npmrc

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import GCTooltip from '../../common/GCToolTip';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
@@ -21,18 +21,40 @@ import { trackEvent } from '../../telemetry/Matomo';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import sanitizeHtml from 'sanitize-html';
+import { setState } from '../../../utils/sharedFunctions';
+import { Divider } from '@material-ui/core';
 
-const colWidth = {
+export const colWidth = {
 	maxWidth: '900px',
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
 };
 
-const styles = {
+export const styles = {
+	container: {
+		marginBottom: 15,
+	},
 	footerButtonBack: {
 		margin: '0 10px 0 0 ',
 		padding: '8px 12px',
+	},
+	button: {
+		height: 50,
+		width: 120,
+		margin: 'auto 0px auto auto',
+	},
+	link: {
+		fontSize: 16,
+		fontFamily: 'Montserrat',
+		color: '#386F94',
+		letter: '-0.4px',
+		fontWeight: '600',
+		margin: 'auto 0px',
+	},
+	linkIcon: {
+		fontSize: 19,
+		verticalAlign: 'middle',
 	},
 	viewMoreChevron: {
 		fontSize: 14,
@@ -59,6 +81,45 @@ const styles = {
 		margin: '10px',
 		fontSize: '14px',
 	},
+	row: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		flexWrap: 'wrap',
+	},
+	bodyContainer: {
+		display: 'flex',
+		height: '100%',
+		flex: 1,
+		flexDirection: 'column',
+		backgroundColor: 'rgb(238, 241, 242)',
+		padding: '10px 0',
+	},
+
+	title: (restricted) => ({
+		backgroundColor: restricted ? '#F1F5F9' : 'rgba(223,230,238,0.5)',
+		border: '1px solid #9BB1C8',
+		borderRadius: '5px 5px 0 0',
+		borderBottom: 0,
+		height: 70,
+		padding: 15,
+	}),
+	body: (restricted) => ({
+		border: '1px solid #9BB1C8',
+		padding: 15,
+		height: 330,
+		backgroundColor: restricted ? '#B6C6D8' : 'white',
+		textAlign: 'left',
+	}),
+	footer: (restricted) => ({
+		border: '1px solid #9BB1C8',
+		borderTop: 0,
+		padding: 8,
+		borderRadius: '0 0 12px 12px ',
+		height: 80,
+		display: 'flex',
+		backgroundColor: restricted ? '#B6C6D8' : 'white',
+		justifyContent: 'flex-end',
+	}),
 };
 
 export const StyledListViewFrontCardContent = styled.div`
@@ -120,7 +181,8 @@ export const StyledListViewFrontCardContent = styled.div`
 				font-size: ${CARD_FONT_SIZE}px;
 				line-height: 20px;
 
-				background: #dde1e0;
+				background: ${({ expandedDataBackground }) =>
+					expandedDataBackground ? expandedDataBackground : '#dde1e0'};
 				margin-bottom: 0;
 				height: 165px;
 				border-left: 0;
@@ -358,15 +420,24 @@ export const StyledFrontCardContent = styled.div`
 	}
 `;
 
-const getCardHeaderHandler = ({
-	item,
-	state,
-	idx,
-	checkboxComponent,
-	favoriteComponent,
-	graphView,
-	intelligentSearch,
-}) => {
+export const RevokedTag = styled.div`
+	font-size: 11px;
+	font-weight: 600;
+	border: none;
+	height: 25px;
+	border-radius: 15px;
+	background-color: #e50000;
+	color: white;
+	white-space: nowrap;
+	text-align: center;
+	display: inline-block;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+`;
+
+const getCardHeaderHandler = ({ item, state, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
 	// const isRevoked = item.is_revoked_b;
 
@@ -454,19 +525,18 @@ const getDisplayTitle = (item) => {
 	return item.title;
 };
 
-const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
+export const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
 	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&prevSearchText=${searchText.replace(
-			/"/gi,
-			''
-		)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
+			searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''
+		}&pageNumber=${pageNumber}&cloneIndex=${cloneName}${sourceUrl ? `&sourceUrl=${sourceUrl}` : ''}`
 	);
 };
 
-const Row = ({ label, value, minWidth = 'inherit' }) => {
+export const Row = ({ label, value, minWidth = 'inherit' }) => {
 	return (
 		<div style={styles.row}>
 			<div style={{ fontWeight: 'bold', minWidth }}>{label}</div>
@@ -475,7 +545,7 @@ const Row = ({ label, value, minWidth = 'inherit' }) => {
 	);
 };
 
-const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
+export const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable = false) => {
 	const rows = [];
 	for (const fieldName of fieldsArr) {
 		let cleanFieldName = fieldName.replace(/_1|_2/g, '');
@@ -510,7 +580,7 @@ const makeRows = (fieldsArr = [], itemWithValues = {}, displayNameMap, forTable 
 	return rows;
 };
 
-const DefaultCardHandler = {
+const cardHandler = {
 	document: {
 		getDisplayTitle: (item) => {
 			return getDisplayTitle(item);
@@ -1140,6 +1210,198 @@ const DefaultCardHandler = {
 			return '';
 		},
 	},
+};
+
+export const getDefaultComponent = (props, cardHandler) => {
+	const {
+		id,
+		IS_EDGE,
+		state,
+		cardType,
+		item,
+		idx,
+		checkboxComponent,
+		favoriteComponent,
+		graphView,
+		intelligentSearch,
+		toggledMore,
+		detailPage,
+		hitsExpanded,
+		setHitsExpanded,
+		hoveredHit,
+		setHoveredHit,
+		metadataExpanded,
+		setMetadataExpanded,
+		intelligentFeedbackComponent,
+		collection,
+		filename,
+		searchText,
+		setToggledMore,
+		closeGraphCard,
+		setModalOpen,
+		dispatch,
+		setFavorite,
+		favorite,
+		favoriteSummary,
+		setFavoriteSummary,
+		classes,
+		modalOpen,
+	} = props;
+
+	return (
+		<div className={'styled-card-container'} id={id}>
+			<div
+				className={'styled-card-inner'}
+				ref={(node) => {
+					if (node && IS_EDGE) {
+						node.style.setProperty('transform-style', 'flat', 'important');
+					}
+				}}
+			>
+				{/* START CARD FRONT */}
+				<div
+					className={`styled-card-inner-front tutorial-step-${state.componentStepNumbers['Search Result Card']}`}
+				>
+					<div className={'styled-card-inner-wrapper'}>
+						{/* START CARD HEADER */}
+						{cardHandler[cardType].getCardHeader({
+							item,
+							state,
+							idx,
+							checkboxComponent,
+							favoriteComponent,
+							graphView,
+							intelligentSearch,
+						})}
+						{/* END CARD HEADER */}
+
+						{/* START CARD SUBHEADER */}
+						{cardHandler[cardType].getCardSubHeader({ item, state, toggledMore })}
+						{/* END CARD SUBHEADER */}
+
+						{/* START CARD CONTENT */}
+						<div className={`styled-card-front-content`}>
+							{cardHandler[cardType].getCardFront({
+								item,
+								state,
+								backBody: cardHandler[cardType].getCardBack({
+									item,
+									state,
+									detailPage,
+								}),
+								hitsExpanded,
+								setHitsExpanded,
+								hoveredHit,
+								setHoveredHit,
+								metadataExpanded,
+								setMetadataExpanded,
+								intelligentSearch,
+								intelligentFeedbackComponent,
+								collection,
+							})}
+						</div>
+						{/* END CARD CONTENT */}
+
+						{/* START CARD FRONT FOOTER */}
+						{!state.listView && (
+							<div className={'styled-card-front-buttons'}>
+								<div className={'styled-action-buttons-group'}>
+									{intelligentSearch && intelligentFeedbackComponent()}
+									{cardHandler[cardType].getFooter({
+										toggledMore,
+										graphView,
+										cloneName: state.cloneData.clone_name,
+										filename,
+										searchText,
+										setToggledMore,
+										closeGraphCard,
+										name: item.title,
+										item,
+										setModalOpen,
+										showEsDoc: () => {
+											console.log(item);
+											setState(dispatch, { selectedDoc: item, showEsDocDialog: true });
+										},
+										state,
+									})}
+								</div>
+							</div>
+						)}
+						{/* END CARD FRONT FOOTER */}
+					</div>
+				</div>
+				{/* END CARD FRONT */}
+
+				{/* START CARD BACK */}
+				<div className={'styled-card-inner-back'}>
+					<div className={'styled-card-inner-wrapper'}>
+						{/* CARD BACK CONTENT */}
+						<div className={'styled-card-back-content'}>
+							{cardHandler[cardType].getCardBack({
+								item,
+								state,
+								dispatch,
+								setFavorite,
+								detailPage,
+							})}
+						</div>
+
+						{/* CARD BACK FOOTER */}
+						<div className={'styled-card-back-buttons'}>
+							<div className={'styled-action-buttons-group'}>
+								{cardHandler[cardType].getFooter({
+									toggledMore,
+									graphView,
+									cloneName: state.cloneData.clone_name,
+									filename,
+									searchText,
+									setToggledMore,
+									closeGraphCard,
+									name: item.title,
+									item,
+									setModalOpen,
+									showEsDoc: () => {
+										console.log(item);
+										setState(dispatch, {
+											selectedDoc: item,
+											showEsDocDialog: true,
+										});
+									},
+									state,
+								})}
+							</div>
+						</div>
+					</div>
+				</div>
+				{/* END CARD BACK */}
+
+				{/* START CARD EXTRAS */}
+				{cardHandler[cardType].getCardExtras({
+					isFavorite: favorite,
+					favoriteSummary,
+					setFavoriteSummary,
+					classes,
+					modalOpen,
+					setModalOpen,
+					item,
+				})}
+				{/* END CARD EXTRAS */}
+			</div>
+
+			{state.listView && <Divider flexItem />}
+		</div>
+	);
+};
+
+const DefaultCardHandler = (props) => {
+	const { setFilename, setDisplayTitle, item, cardType } = props;
+
+	useEffect(() => {
+		setFilename(cardHandler[cardType].getFilename(item));
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
+
+	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
 
 export default DefaultCardHandler;

@@ -29,6 +29,38 @@ export const getEDAMetadataForPropertyTable = (edaFieldJSONMap, edaFields, item,
 	return rows;
 };
 
+export const getEDAMetadataForCard = (edaFieldJSONMap, edaFields, item, edaFPDSMap, edaNumberFields) => {
+	const rows = [];
+
+	// need to use numberWithCommas only on fields that are costs
+
+	if (edaFields) {
+		for (const fieldName of edaFields) {
+			let name = edaFieldJSONMap[fieldName] ?? '';
+			let fpds = item?.[edaFPDSMap[fieldName]] ?? 'Data Not Available';
+			let eda = item[fieldName] ?? 'Data Not Available';
+
+			// add commas if it's a number
+			if (edaNumberFields.indexOf(name) !== -1) {
+				fpds = numberWithCommas(fpds);
+				eda = numberWithCommas(eda);
+			}
+
+			if (fieldName.slice(0, 5) === 'fpds_') {
+				fpds = eda;
+				eda = 'Data Not Available';
+			}
+			rows.push({
+				name,
+				fpds,
+				eda,
+			});
+		}
+	}
+
+	return rows;
+};
+
 export const getDisplayTitle = (item) => {
 	if (item.title && item.title !== 'NA') {
 		return item.title.replaceAll('-empty', '').replaceAll('empty-', '');

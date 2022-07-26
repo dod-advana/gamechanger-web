@@ -93,6 +93,10 @@ html {
 	.font-size-rem {
 		font-size: 1rem !important;
 	}
+
+	.font-size-14 {
+		font-size: 14px !important;
+	}
   
   .react-tabs__tab {
 	text-transform: uppercase;
@@ -1107,5 +1111,9 @@ html {
   .slick-slider:hover .custom-carousel-arrows {
 	  display: flex;
   }
+
+	.MuiMenu-list > li {
+		display: block !important;
+	}
   
   /** End data-mil styles **/

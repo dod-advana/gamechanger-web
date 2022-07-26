@@ -5,20 +5,15 @@ const __ = require('lodash');
 const lunrSearchUtils = require('../../utils/lunrSearchUtils');
 const constantsFile = require('../../config/constants');
 const axios = require('axios');
-const fs = require('fs');
-const https = require('https');
 const _ = require('lodash');
 const dataCatalogUtils = require('../../utils/DataCatalogUtils');
 const Sequelize = require('sequelize');
 const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
+const { getQlikApps, getElasticSearchQueryForQlikApps, cleanQlikESResults } = require('./globalSearchUtils');
+const { DataLibrary } = require('../../lib/dataLibrary');
 
 const redisAsyncClientDB = 7;
-
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
-
-const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
-const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
 class GlobalSearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -27,6 +22,7 @@ class GlobalSearchHandler extends SearchHandler {
 			constants = constantsFile,
 			database = databaseFile,
 			dcUtils = dataCatalogUtils,
+			dataLibrary = new DataLibrary(opts),
 		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
@@ -34,6 +30,7 @@ class GlobalSearchHandler extends SearchHandler {
 		this.constants = constants;
 		this.database = database;
 		this.dcUtils = dcUtils;
+		this.dataLibrary = dataLibrary;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -51,20 +48,20 @@ class GlobalSearchHandler extends SearchHandler {
 
 		const {
 			useGCCache,
-			forCacheReload = false,
 			showTutorial,
-			getApplications,
-			getDashboards,
-			getDataSources,
-			getDatabases,
 			tiny_url,
 			cloneName,
 			searchType,
 			searchVersion,
+			searchText,
+			limit,
+			offset,
+			category,
+			favoriteApps,
+			isForFavorites,
 		} = req.body;
 
 		try {
-			const { searchText, limit, offset } = req.body;
 			historyRec.searchText = searchText;
 			historyRec.showTutorial = showTutorial;
 			historyRec.tiny_url = tiny_url;
@@ -75,43 +72,66 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const cloneSpecificObject = {};
 
-			// if (!forCacheReload && useGCCache && offset === 0) {
-			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
-			// }
-			const searchResults = { applications: {}, dashboards: {}, dataSources: {}, databases: {}, totalCount: 0 };
-			const searchesToRun = {};
+			const searchResults = { totalCount: 0 };
+			searchResults[category] = {};
 
-			// Applications
-			if (getApplications) {
-				searchesToRun['applications'] = this.getApplicationResults(searchText, offset, limit, userId);
+			switch (category) {
+				case 'applications':
+					searchResults[category] = await this.getApplicationResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId
+					);
+					break;
+				case 'dashboards':
+					searchResults[category] = await this.getDashboardResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId
+					);
+					break;
+				case 'dataSources':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId,
+						'Data Source'
+					);
+					break;
+				case 'databases':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId,
+						'Database'
+					);
+					break;
+				case 'models':
+					searchResults[category] = await this.getDataCatalogResults(
+						searchText,
+						offset,
+						limit,
+						favoriteApps,
+						isForFavorites,
+						userId,
+						'AI/ML Model'
+					);
+					break;
+				default:
+					break;
 			}
-
-			// Dashboards
-			if (getDashboards) {
-				searchesToRun['dashboards'] = this.getDashboardResults(searchText, offset, limit, userId);
-			}
-
-			// Data Sources
-			if (getDataSources) {
-				searchesToRun['dataSources'] = this.getDataCatalogResults(
-					searchText,
-					offset,
-					limit,
-					'Data Source',
-					userId
-				);
-			}
-
-			// Databases
-			if (getDatabases) {
-				searchesToRun['databases'] = this.getDataCatalogResults(searchText, offset, limit, 'Database', userId);
-			}
-
-			const results = await Promise.all(Object.values(searchesToRun));
-
-			Object.keys(searchesToRun).forEach((searchKey, index) => {
-				searchResults[searchKey] = results[index];
-			});
 
 			// try to store to cache
 			if (useGCCache && searchResults) {
@@ -140,55 +160,186 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async callFunctionHelper(req, userId, res) {
+	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
-		switch (functionName) {
-			default:
-				this.logger.error(
-					`There is no function called ${functionName} defined in the policySearchHandler`,
-					'4BC876D',
-					userId
-				);
-		}
+		this.logger.error(
+			`There is no function called ${functionName} defined in the policySearchHandler`,
+			'4BC876D',
+			userId
+		);
 	}
 
-	async getApplicationResults(searchText, offset, limit, userId) {
+	async getApplicationResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
 		try {
-			const hitQuery = `select description, permission, href, link_label, id
-							  from megamenu_links
-							  where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
-								 or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
-			const results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
-			const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
-			return this.generateRespData(apps, appResults, offset, limit);
+			const t0 = new Date().getTime();
+			let hitQuery = `select description, permission, href, link_label, id
+				from megamenu_links
+				where (section = 'Applications' and link_label not like '%Overview%' and href is not null)
+				or (href like 'https://covid-status.data.mil%' and section = 'Analytics')`;
+			if (isForFavorites) {
+				const tmpFavorites = favoriteApps.filter((app) => !isNaN(app));
+				if (tmpFavorites.length <= 0) {
+					return { hits: [], totalCount: 0, count: 0 };
+				}
+				hitQuery = `select description, permission, href, link_label, id
+          from megamenu_links
+          where id in (${tmpFavorites.join(',')})`;
+			}
+			let results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
+			let tmpReturn;
+			if (isForFavorites) {
+				tmpReturn = {
+					totalCount: results.length,
+					count: results.length,
+					results,
+				};
+			} else {
+				const [apps, appResults] = this.performApplicationSearch(results, lunrSearchUtils.parse(searchText));
+				tmpReturn = this.generateRespData(apps, appResults, offset, limit);
+			}
+
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Application Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'MJ2D6VGTime', userId);
+			return tmpReturn;
 		} catch (err) {
 			this.logger.error(err, 'MJ2D6VG', userId);
 			return { hits: [], totalCount: 0, count: 0 };
 		}
 	}
 
-	async getDashboardResults(searchText, offset, limit, userId) {
+	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
 		try {
-			let results = await Promise.all([
-				this.getQlikApps(),
-				this.getQlikApps({}, userId.substring(0, userId.length - 4)),
-			]);
-			const [apps, searchResults] = this.performSearch(
-				this.mergeUserApps(results[0].data || [], results[1].data || []),
-				lunrSearchUtils.parse(searchText)
+			const t0 = new Date().getTime();
+			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX };
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms({ searchText });
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+			const body = {
+				searchText,
+				parsedQuery,
+				searchTerms,
+				plainQuery,
+				limit,
+				offset,
+				favoriteApps,
+				isForFavorites,
+			};
+			const esQuery = getElasticSearchQueryForQlikApps(body, userId, this.logger);
+
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
 			);
-			return this.generateRespData(apps, searchResults, offset, limit);
+
+			const returnData = cleanQlikESResults(esResults, userId, this.logger);
+
+			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, false, {});
+
+			returnData.results = this.mergeUserApps(returnData.hits, userApps.data || []);
+
+			const t1 = new Date().getTime();
+			this.logger.info(`Get Dashboard Results Time: ${((t1 - t0) / 1000).toFixed(2)}`, 'WS18EKRTime', userId);
+			return returnData;
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
 		}
 	}
 
-	async getDataCatalogResults(searchText, offset, limit, searchType = 'all', userId) {
-		const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
-		const qStatus = await this.dcUtils.getQueryableStatuses();
+	async getDataCatalogResults(searchText, offset, limit, favoriteApps, isForFavorites, userId, searchType = 'all') {
+		const t0 = new Date().getTime();
+
 		try {
+			let cleanedData;
+
+			if (isForFavorites) {
+				cleanedData = this.getDataCatalogResultsForFavorites(favoriteApps, userId, searchType);
+			} else {
+				cleanedData = this.getDataCatalogResultsSearch(searchText, offset, limit, userId, searchType);
+			}
+
+			const t1 = new Date().getTime();
+
+			this.logger.info(
+				`Get Data Catalog Results Time for ${searchType}: ${((t1 - t0) / 1000).toFixed(2)}`,
+				'FE656U9Time',
+				userId
+			);
+
+			return cleanedData;
+		} catch (err) {
+			this.logger.error(err, 'FE656U9', userId);
+			return { total: 0, results: [] };
+		}
+	}
+
+	async getDataCatalogResultsForFavorites(favoriteApps, userId, searchType) {
+		try {
+			let tempUrl;
+			const userIds = new Set();
+			const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+
+			// Get all assets
+			const assetCalls = favoriteApps.map((app) => {
+				tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + app;
+				return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			});
+
+			const assetsResults = await Promise.allSettled(assetCalls);
+			const combinedAssetResults = {};
+			const results = [];
+
+			assetsResults.forEach((assetResult) => {
+				if (assetResult.status === 'fulfilled') {
+					const asset = assetResult.value.data;
+					if (searchTypeIds?.includes(asset.type.id)) {
+						combinedAssetResults[asset.id] = asset;
+						userIds.add(asset['lastModifiedBy']);
+						results.push({ id: asset.id, resource: asset });
+					}
+				}
+			});
+
+			// Get Attributes
+			const assetAttributeCalls = results.map((result) => {
+				tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
+				return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			});
+
+			const assetAttributesResults = await Promise.allSettled(assetAttributeCalls);
+			const { combinedAttributeResults, attributeIdMap } = this.handleAttributeResults(assetAttributesResults);
+
+			// Get Users Info
+			tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
+			userIds.forEach((usrId) => (tempUrl += '&userId=' + usrId));
+			const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
+			const combinedUserData = {};
+			userData.results.forEach((data) => {
+				combinedUserData[data.id] = data;
+			});
+
+			return await this.cleanDataCatalogResults(
+				{ results },
+				combinedAssetResults,
+				combinedAttributeResults,
+				attributeIdMap,
+				combinedUserData,
+				userId
+			);
+		} catch (err) {
+			this.logger.error(err, 'KL86OV6', userId);
+			return { total: 0, results: [] };
+		}
+	}
+
+	async getDataCatalogResultsSearch(searchText, offset, limit, userId, searchType) {
+		try {
+			const searchTypeIds = await this.dcUtils.getSearchTypeId(searchType);
+			const qStatus = await this.dcUtils.getQueryableStatuses();
+
 			const defaultSearchOptions = {
 				keywords: this.dcUtils.cleanSearchText(searchText),
 				filters: [
@@ -202,24 +353,154 @@ class GlobalSearchHandler extends SearchHandler {
 					},
 				],
 				highlights: {
-					preTag: '<highlight>',
-					postTag: '</highlight>',
+					preTag: '<em>',
+					postTag: '</em>',
 				},
 				limit,
 				offset,
 			};
 
-			if (!searchText) throw new Error('keywords is required in the request body');
-
 			const url = this.dcUtils.getCollibraUrl() + '/search';
 			const fullSearch = { ...defaultSearchOptions, limit, offset, searchText, searchType };
 			const response = await axios.post(url, fullSearch, this.dcUtils.getAuthConfig());
 
-			return response.data || { total: 0, results: [] };
+			let cleanedData = { total: 0, results: [] };
+
+			if (response.data.results) {
+				// Get all the user ids
+				const userIds = new Set(response.data.results.map((result) => result.resource.createdBy));
+				let tempUrl;
+
+				// Get all assets
+				const assetCalls = response.data.results.map((result) => {
+					tempUrl = this.dcUtils.getCollibraUrl() + '/assets/' + result.resource.id;
+					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				});
+				const assetsResults = await Promise.allSettled(assetCalls);
+				const combinedAssetResults = {};
+				assetsResults.forEach((assetResult) => {
+					if (assetResult.status === 'fulfilled') {
+						const data = assetResult.value.data;
+						combinedAssetResults[data.id] = data;
+						userIds.add(data['lastModifiedBy']);
+					}
+				});
+
+				// Get Attributes
+				const assetAttributeCalls = response.data.results.map((result) => {
+					tempUrl = this.dcUtils.getCollibraUrl() + '/attributes?assetId=' + result.resource.id;
+					return axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				});
+				const assetAttributesResults = await Promise.allSettled(assetAttributeCalls);
+				const { combinedAttributeResults, attributeIdMap } =
+					this.handleAttributeResults(assetAttributesResults);
+
+				// Get Users Info
+				tempUrl = this.dcUtils.getCollibraUrl() + '/users?offset=0';
+				userIds.forEach((usrId) => (tempUrl += '&userId=' + usrId));
+				const { data: userData } = await axios.get(tempUrl, this.dcUtils.getAuthConfig());
+				const combinedUserData = {};
+				userData.results.forEach((data) => {
+					combinedUserData[data.id] = data;
+				});
+				cleanedData = await this.cleanDataCatalogResults(
+					response.data,
+					combinedAssetResults,
+					combinedAttributeResults,
+					attributeIdMap,
+					combinedUserData,
+					userId
+				);
+			}
+
+			return cleanedData;
 		} catch (err) {
-			this.logger.error(err, 'FE656U9', userId);
+			this.logger.error(err, 'HEDFA5A', userId);
 			return { total: 0, results: [] };
 		}
+	}
+
+	handleAttributeResults(assetAttributesResults) {
+		const combinedAttributeResults = {};
+		const attributeIdMap = {};
+		assetAttributesResults.forEach((attributeResult) => {
+			if (attributeResult.status === 'fulfilled') {
+				const attributeData = attributeResult.value.data;
+				if (attributeData.results.length > 0) {
+					combinedAttributeResults[attributeData.results[0].asset.id] = attributeData.results.map(
+						(attrResult) => {
+							attributeIdMap[attrResult.id] = attrResult.type.name;
+							return {
+								field: attrResult.type.name,
+								value: attrResult.value,
+							};
+						}
+					);
+				}
+			}
+		});
+
+		return { combinedAttributeResults, attributeIdMap };
+	}
+
+	async cleanDataCatalogResults(
+		data,
+		fullAssetDetails,
+		combinedAttributeResults,
+		attributeIdMap,
+		fullUserData,
+		userId
+	) {
+		const attributeTypes = attributeIdMap;
+
+		try {
+			data.results.forEach((result) => {
+				result.resource['domain'] = fullAssetDetails[result.resource.id]['domain'];
+				result.resource['lastModifiedBy'] = fullAssetDetails[result.resource.id]['lastModifiedBy'];
+				result.attributes = combinedAttributeResults[result.resource.id];
+
+				Object.keys(result.resource).forEach((resourceKey) => {
+					switch (resourceKey) {
+						case 'createdOn':
+						case 'lastModifiedOn':
+							const newDate = new Date(result.resource[resourceKey]);
+							result.resource[resourceKey] = newDate.toLocaleString();
+							break;
+						case 'status':
+						case 'type':
+						case 'domain':
+							result.resource[resourceKey] = result.resource[resourceKey]['name'];
+							break;
+						case 'createdBy':
+						case 'lastModifiedBy':
+							const tempUser = fullUserData[result.resource[resourceKey]];
+							result.resource[resourceKey] = {
+								firstName: tempUser?.['firstName'],
+								lastName: tempUser?.['lastName'],
+								emailAddress: tempUser?.['emailAddress'],
+							};
+							break;
+						default:
+							break;
+					}
+				});
+
+				if (result.highlights) {
+					result.highlights.forEach((highlight) => {
+						if (highlight.id) {
+							highlight.field = attributeTypes[highlight.id];
+						} else if (highlight.field.indexOf('attribute') !== -1) {
+							const attId = highlight.field.split(':')[1];
+							highlight.field = attributeTypes[attId];
+						}
+					});
+				}
+			});
+		} catch (e) {
+			this.logger.error(e, 'YCD2HPY', userId);
+		}
+
+		return data;
 	}
 
 	performApplicationSearch(allApps, searchText) {
@@ -255,83 +536,11 @@ class GlobalSearchHandler extends SearchHandler {
 				ret.push({ ...apps[res.ref], score: res.score });
 			}
 
-			return { hits: ret, totalCount: searchResults.length, count: ret.length };
+			return { results: ret, totalCount: searchResults.length, count: ret.length };
 		} catch (e) {
 			this.logger.error(e, 'QW8UGJM');
-			return { hits: [], totalCount: 0, count: 0 };
+			return { results: [], totalCount: 0, count: 0 };
 		}
-	}
-
-	async getQlikApps(params = {}, userId) {
-		try {
-			let url = `${QLIK_URL}/qrs/app/full`;
-			let result = await axios.get(url, this.getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
-			return result;
-		} catch (err) {
-			if (!userId)
-				// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
-				this.logger.error(err, 'O799J51', userId);
-
-			return {};
-		}
-	}
-
-	getRequestConfigs(params = {}, userid = QLIK_SYS_ACCOUNT) {
-		return {
-			params: {
-				Xrfkey: 1234567890123456,
-				...params,
-			},
-			headers: {
-				'content-type': 'application/json',
-				'X-Qlik-xrfkey': '1234567890123456',
-				'X-Qlik-user': this.getUserHeader(userid),
-			},
-			httpsAgent: new https.Agent({
-				rejectUnauthorized: false,
-				ca: CA,
-				key: KEY,
-				cert: CERT,
-			}),
-		};
-	}
-
-	getUserHeader(userid = QLIK_SYS_ACCOUNT) {
-		return `UserDirectory=${AD_DOMAIN}; UserId=${userid}`;
-	}
-
-	performSearch(allApps, searchText) {
-		// create a map of apps keyed by id field so that we can reference them from the search results
-		let apps = _.keyBy(allApps, 'id');
-
-		// create lunr search index
-		let idx = lunr(function () {
-			// key field in our data that search results will be keyed by
-			this.ref('id');
-			// fields to search
-			this.field('name');
-			this.field('description');
-			this.field('stream', { extractor: ({ stream: { name } }) => name });
-
-			this.field('customProperties', {
-				extractor: ({ customProperties }) =>
-					customProperties.reduce((prev, curr) => {
-						return prev.concat([curr?.value, curr?.schemaPath, curr?.definition?.name]);
-					}, []),
-			});
-
-			this.field('tags', { extractor: ({ tags: { name } }) => name });
-
-			// data to search
-			allApps.forEach(function (app) {
-				this.add(app);
-			}, this);
-		});
-
-		// perform search
-		let searchResults = idx.search(searchText);
-
-		return [apps, searchResults];
 	}
 
 	mergeUserApps(apps, userApps) {

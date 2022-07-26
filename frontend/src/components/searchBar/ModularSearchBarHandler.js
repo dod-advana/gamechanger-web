@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AccessTime, Search } from '@material-ui/icons';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import { handleSaveFavoriteSearch, setState, checkUserInfo } from '../../utils/sharedFunctions';
+import { handleSaveFavoriteSearch, setState } from '../../utils/sharedFunctions';
 import SearchBarFactory from '../factories/searchBarFactory';
 
 const useStyles = makeStyles((theme) => ({
@@ -232,9 +232,6 @@ const ModularSearchBarHandler = (props) => {
 		}
 
 		if (!searchFavoritePopperOpen) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
 			setSearchFavoritePopperOpen(true);
 			setSearchFavoritePopperAnchorEl(anchorEL);
 		} else {

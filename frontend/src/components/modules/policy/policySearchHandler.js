@@ -14,14 +14,7 @@ import {
 	displayBackendError,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
@@ -86,12 +79,6 @@ const PolicySearchHandler = {
 			cancelToken = axios.CancelToken.source();
 		}
 
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9 && !showTutorial) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
-
 		let favSearchUrls = [];
 		if (userData !== undefined && userData.favorite_searches !== undefined) {
 			favSearchUrls = userData.favorite_searches.map((search) => {
@@ -114,7 +101,6 @@ const PolicySearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: '',
 			infiniteScrollPage: 1,
 		});
 
@@ -337,7 +323,6 @@ const PolicySearchHandler = {
 					const newSearchSettings = _.cloneDeep(searchSettings);
 
 					if (doc_types && doc_orgs) {
-						// get doc types (memorandum, issuance, etc.). also get top org.
 						let orgCountMap = new Map();
 						let docTypeMap = new Map();
 
@@ -346,15 +331,6 @@ const PolicySearchHandler = {
 							docTypeMap[docTypeName] = docTypeMap[docTypeName]
 								? docTypeMap[docTypeName] + element.doc_count
 								: element.doc_count;
-
-							// const { docOrg } = getDocTypeStyles(element.key);
-							// let docName = getTypeDisplay(docOrg);
-
-							// if (docName === "" || docName === " ") {
-							// 	docName = "Uncategorized ";
-							// }
-
-							// orgCountMap[docName] = orgCountMap[docName] ? orgCountMap[docName] + element.doc_count : element.doc_count;
 						});
 
 						doc_orgs.forEach((element) => {
@@ -428,7 +404,6 @@ const PolicySearchHandler = {
 						if (searchSettings.orgUpdate) {
 							const typeFilterObject = {};
 							newSearchSettings.originalTypeFilters.forEach((type) => (typeFilterObject[type[0]] = 0));
-
 							sidebarTypes.forEach((type) => {
 								typeFilterObject[type[0]] = type[1];
 							});
@@ -456,7 +431,6 @@ const PolicySearchHandler = {
 						newSearchSettings.orgUpdate = false;
 						newSearchSettings.typeUpdate = false;
 						newSearchSettings.isFilterUpdate = false;
-
 						setState(dispatch, {
 							sidebarDocTypes: sidebarTypes,
 							sidebarOrgs: sidebarOrgData,
@@ -734,6 +708,13 @@ const PolicySearchHandler = {
 			const newSearchSettings = _.cloneDeep(state.searchSettings);
 			newSearchSettings.orgFilter = orgFilters;
 			newSearchSettings.typeFilter = typeFilters;
+
+			//initiallize original org and type filters to revert counts to.
+			if (!newSearchSettings?.originalOrgFilters?.length)
+				newSearchSettings.originalOrgFilters = Object.keys(orgFilters).map((org) => [org, 0]);
+			if (!newSearchSettings?.originalTypeFilters?.length)
+				newSearchSettings.originalTypeFilters = Object.keys(typeFilters).map((type) => [type, 0]);
+
 			if (_.isEmpty(state.presearchSources)) {
 				setState(dispatch, { presearchSources: orgFilters });
 			}
@@ -771,14 +752,14 @@ const PolicySearchHandler = {
 		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const orgFilterText = !allOrgsSelected
-			? Object.keys(_.pickBy(orgFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(orgFilter, (value) => value)).join('_')
 			: undefined;
 
 		const typeFilterText = !allTypesSelected
-			? Object.keys(_.pickBy(typeFilter, (value, key) => value)).join('_')
+			? Object.keys(_.pickBy(typeFilter, (value) => value)).join('_')
 			: undefined;
 
-		const searchFieldText = Object.keys(_.pickBy(searchFields, (value, key) => value.field))
+		const searchFieldText = Object.keys(_.pickBy(searchFields, (value) => value.field))
 			.map((key) => `${searchFields[key].field.display_name}-${searchFields[key].input}`)
 			.join('_');
 
@@ -800,18 +781,21 @@ const PolicySearchHandler = {
 			window.location.hash.replace(`#/${state.cloneData.url.toLowerCase()}`, '')
 		);
 
+		const appendParams = (parameters, field, paramName) => {
+			if (field) parameters.append(paramName, field);
+		};
 		const params = new URLSearchParams();
-		if (searchText) params.append('q', searchText);
-		if (offset) params.append('offset', String(offset)); // 0 is default
-		if (searchType) params.append('searchType', searchType);
-		if (orgFilterText) params.append('orgFilter', orgFilterText);
-		if (typeFilterText) params.append('typeFilter', typeFilterText);
-		if (searchFieldText) params.append('searchFields', searchFieldText);
-		if (accessDateText) params.append('accessDate', accessDateText);
-		if (pubDateText) params.append('pubDate', pubDateText);
-		if (includeRevoked) params.append('revoked', String(includeRevoked)); // false is default
+		appendParams(params, searchText, 'q');
+		appendParams(params, offset, 'offset');
+		appendParams(params, searchType, 'searchType');
+		appendParams(params, orgFilterText, 'orgFilter');
+		appendParams(params, typeFilterText, 'typeFilter');
+		appendParams(params, searchFieldText, 'searchFields');
+		appendParams(params, accessDateText, 'accessDate');
+		appendParams(params, pubDateText, 'pubDate');
+		appendParams(params, includeRevoked, 'revoked');
+		appendParams(params, currentParams.get('view'), 'view');
 		if (categoriesText !== undefined) params.append('categories', categoriesText); // '' is different than undefined
-		if (currentParams.get('view') === 'graph') params.append('view', 'graph');
 
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 

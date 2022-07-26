@@ -3,9 +3,8 @@ import { Input, IconButton } from '@material-ui/core';
 import { TableRow, BorderDiv } from './util/styledDivs';
 import { CloudDownload } from '@material-ui/icons';
 import moment from 'moment';
-import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
-
+import DatePicker from 'react-datepicker';
+import styled from 'styled-components';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import ReactTable from 'react-table';
 import GCPrimaryButton from '../../common/GCButton';
@@ -19,6 +18,29 @@ const gameChangerAPI = new GameChangerAPI();
 
 const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 
+const DatePickerWrapper = styled.div`
+	margin-right: 10px;
+	display: flex;
+	flex-direction: column;
+	> label {
+		text-align: left;
+		margin-bottom: 2px;
+		color: #3f4a56;
+		font-size: 15px;
+		font-family: Noto Sans;
+	}
+	> .react-datepicker-wrapper {
+		> .react-datepicker__input-container {
+			> input {
+				width: 225px;
+				border: 0;
+				outline: 0;
+				border-bottom: 1px solid black;
+			}
+		}
+	}
+`;
+
 /**
  * This class queries the ml api information and provides controls
  * for the different endpoints
@@ -28,8 +50,8 @@ export default (props) => {
 	// Set state variables
 	const [s3List, setS3List] = useState([]);
 	const [s3DataList, setS3DataList] = useState([]);
-	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 }));
-	const [endDate, setEndDate] = useState(moment());
+	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
+	const [endDate, setEndDate] = useState(moment()._d);
 	const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
 
 	// flags that parameters have been changed and on
@@ -165,9 +187,10 @@ export default (props) => {
 			props.updateLogs('Error downloading corpus: ' + e.toString(), 2);
 		}
 	};
-	const checkCorpusDownloading = () => {
-		return checkFlag('corpus:');
-	};
+
+	// const checkCorpusDownloading = () => {
+	// 	return checkFlag('corpus:');
+	// };
 
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
@@ -182,34 +205,37 @@ export default (props) => {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 			};
-			const { data = {} } = await gameChangerAPI.getUserAggregations(params);
+			const userData = await gameChangerAPI.getUserAggregations(params);
+			const searchData = await gameChangerAPI.getSearchPdfMapping(params);
 			const mlParams = {
-				data: data.users,
+				searchData: searchData.data.data,
+				userData: userData.data.users,
 			};
 			gameChangerAPI.sendUserAggregations(mlParams);
 		} catch (e) {
 			console.error(e);
 		}
 	};
-	/**
-	 * Takes a String and checks if it is in any of the flag keys and checks
-	 * those values. If any of them are true it returns true
-	 * @method checkFlag
-	 * @param {String} flag
-	 * @returns boolean
-	 */
-	const checkFlag = (flag) => {
-		let flagged = false;
-		if (props.processes.process_status && props.processes.process_status.flags) {
-			const flags = props.processes.process_status.flags;
-			for (const key in flags) {
-				if (key.includes(flag) && flags[key]) {
-					flagged = true;
-				}
-			}
-		}
-		return flagged;
-	};
+
+	// /**
+	//  * Takes a String and checks if it is in any of the flag keys and checks
+	//  * those values. If any of them are true it returns true
+	//  * @method checkFlag
+	//  * @param {String} flag
+	//  * @returns boolean
+	//  */
+	// const checkFlag = (flag) => {
+	// 	let flagged = false;
+	// 	if (props.processes.process_status && props.processes.process_status.flags) {
+	// 		const flags = props.processes.process_status.flags;
+	// 		for (const key in flags) {
+	// 			if (key.includes(flag) && flags[key]) {
+	// 				flagged = true;
+	// 			}
+	// 		}
+	// 	}
+	// 	return flagged;
+	// };
 
 	useEffect(() => {
 		getS3List();
@@ -318,34 +344,24 @@ export default (props) => {
 						}}
 					>
 						<b>Send User Data to ML-API</b>
-						<MuiPickersUtilsProvider utils={DateFnsUtils}>
-							<KeyboardDateTimePicker
-								margin="normal"
-								format="MM/dd/yyyy hh:mm"
-								InputProps={{
-									style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
-								}}
-								value={startDate}
-								label="Start Date"
+						<DatePickerWrapper>
+							<label>Start Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={startDate || ''}
 								onChange={(date) => handleDateChange(date, setStartDate)}
-								// onOpen={setDatePickerOpen}
-								// onClose={setDatePickerClosed}
-								style={{ flex: '110px', margin: '5px' }}
+								dateFormat="yyyy-MM-dd HH:mm"
 							/>
-							<KeyboardDateTimePicker
-								margin="normal"
-								format="MM/dd/yyyy hh:mm"
-								InputProps={{
-									style: { backgroundColor: 'white', padding: '5px', fontSize: '14px' },
-								}}
-								value={endDate}
-								label="End Date"
+						</DatePickerWrapper>
+						<DatePickerWrapper>
+							<label>End Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={endDate || ''}
 								onChange={(date) => handleDateChange(date, setEndDate)}
-								// onOpen={setDatePickerOpen}
-								// onClose={setDatePickerClosed}
-								style={{ flex: '110px', margin: '5px' }}
+								dateFormat="yyyy-MM-dd HH:mm"
 							/>
-						</MuiPickersUtilsProvider>
+						</DatePickerWrapper>
 						<GCPrimaryButton
 							onClick={() => {
 								sendUserAggData(startDate, endDate);
@@ -372,7 +388,6 @@ export default (props) => {
 							onClick={() => {
 								triggerDownloadCorpus();
 							}}
-							disabled={checkCorpusDownloading()}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Download
