@@ -145,6 +145,13 @@ const StyledFrontCardHeader = styled.div`
 			}
 		}
 
+		.text-nowrap-ellipsis {
+			width: 100%;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+
 		.selected-favorite {
 			display: inline-block;
 			font-family: 'Noto Sans';
@@ -610,16 +617,33 @@ const cardHandler = {
 			const { cloneData, searchText, selectedPortfolio } = state;
 
 			let displayTitleTop = '';
+			let displayTitleBottom = '';
 			let displayTitleBot = '';
+			let tooltipTitle = '';
+			let title = <></>;
 			switch (item.budgetType) {
 				case 'odoc':
 					displayTitleTop = `BLI: ${item.lineNumber ?? ''} | Title: ${item.budgetActivityTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
 					break;
 				case 'pdoc':
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
 					break;
 				case 'rdoc':
-					displayTitleTop = `BLI: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
+					displayTitleTop = `PE: ${item.programElement ?? ''} - ${item.programElementTitle}`;
+					displayTitleBottom = `Proj: ${item.projectNum} - ${item.projectTitle}`;
+					tooltipTitle = (
+						<span style={{ whiteSpace: 'pre-line' }}>{displayTitleTop + '\n' + displayTitleBottom}</span>
+					);
+					title = (
+						<>
+							<div className="text-nowrap-ellipsis">{displayTitleTop}</div>
+							<div className="text-nowrap-ellipsis">{displayTitleBottom}</div>
+						</>
+					);
 					break;
 				default:
 					break;
@@ -635,7 +659,7 @@ const cardHandler = {
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
 					<div className={'title-text-selected-favorite-div'}>
-						<GCTooltip title={displayTitleTop} placement="top" arrow>
+						<GCTooltip title={tooltipTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
 								onClick={(e) => {
@@ -651,7 +675,9 @@ const cardHandler = {
 								}}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitleTop} <br /> {displayTitleBot}
+									{title}
+									<br />
+									{displayTitleBot}
 								</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
