@@ -331,10 +331,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dod-advana/advana-api-auth@0.0.45":
-  version "0.0.45"
-  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-api-auth/0.0.45/5f1f946e41849050b2d9a8f079de23fd8088c917c9c8ee4addca6bc0517ae98a#66a0533b973b1a69f5ac8b8b521bdf9e3f4ba900"
-  integrity sha512-meyJEHJYrmHWHY4ApBpwG3+Mv1thSC3T7/qTVc/VHM7+xjp1BQEsyTp0SECxYABfFdiSDPJgfkwamYE42r6+og==
+"@dod-advana/advana-api-auth@0.0.47":
+  version "0.0.47"
+  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-api-auth/0.0.47/aa8082b5b0214e0d653f57820a6e6345cf74b7285386b5c99e6d0f821f22fb7e#abfd072ca1c1e73266775aaf43fe9bd1952d2edd"
+  integrity sha512-RH0kva2f+lBq81GNWJS4mMksTqdapnBmDTiYCvOhBQ1N7yF0JlTpFBRABRfyShpI7Z+/IyJEmBGVXkDae9cHBw==
   dependencies:
     connect-redis "6.0.0"
     crypto-js "4.0.0"
@@ -4660,10 +4660,10 @@ node-releases@^2.0.5:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.5.tgz#280ed5bc3eba0d96ce44897d8aee478bfb3d9666"
   integrity sha512-U9h1NLROZTq9uE1SNffn6WuPDg8icmi3ns4rEl/oTfIle4iLjTliCzgTsbaIFMq/Xn078/lfY/BL0GWZ+psK4Q==
 
-node@14.19.3:
-  version "14.19.3"
-  resolved "https://registry.yarnpkg.com/node/-/node-14.19.3.tgz#b821c41e984c351afda2d37ddbd907a938d7689f"
-  integrity sha512-DS65cq8ueBsV7vnpECY/ge/lTwjXPp96dmiXGi2jUqSIO7BLS9vE+MGUqeZdcfUTwV0m/PTmFniJrjUQyzlxcg==
+node@14.17.6:
+  version "14.17.6"
+  resolved "https://registry.yarnpkg.com/node/-/node-14.17.6.tgz#4834aaf50da41740a88e15408baf5e793d4f3127"
+  integrity sha512-bnXk1lBs8Gh/Md5MP4ziojLOMBU05QLc16Ie7/rNORpLf1K5+2OdEl4KbMfllE3cDWM//qQXyvN59ZSZdFnBaQ==
   dependencies:
     node-bin-setup "^1.0.0"
 
