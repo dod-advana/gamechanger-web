@@ -1208,7 +1208,7 @@ class JBookSearchUtility {
 		}
 
 		// Primary Class Label
-		if (jbookSearchSettings.primaryClassLabel) {
+		if (jbookSearchSettings.classLabel) {
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
@@ -1217,17 +1217,7 @@ class JBookSearchUtility {
 							should: [
 								{
 									terms: {
-										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
-									},
-								},
-								{
-									terms: {
-										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
-									},
-								},
-								{
-									terms: {
-										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+										'review_n.latest_class_label_s': jbookSearchSettings.classLabel,
 									},
 								},
 							],

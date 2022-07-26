@@ -4,21 +4,20 @@ import Modal from 'react-modal';
 import _ from 'lodash';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import { Typography, Checkbox, FormControlLabel } from '@material-ui/core';
-import { TextField } from '@material-ui/core';
+import { Typography, Checkbox, FormControlLabel, TextField } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { getOrgToOrgQuery, getTypeQuery } from '../../utils/gamechangerUtils';
-import ExportResultsDialog from '../export/ExportResultsDialog';
-import GCGroupCard from '../../components/cards/GCGroupCard';
-import GCButton from '../common/GCButton';
+import { getOrgToOrgQuery, getTypeQuery } from '../../../../utils/gamechangerUtils';
+import ExportResultsDialog from '../../../export/ExportResultsDialog';
+import GCGroupCard from '../../../cards/GCGroupCard';
+import GCButton from '../../../common/GCButton';
 import {
 	handleGenerateGroup,
 	getSearchObjectFromString,
 	setCurrentTime,
 	getUserData,
 	setState,
-} from '../../utils/sharedFunctions';
-import GCCloseButton from '../common/GCCloseButton';
+} from '../../../../utils/sharedFunctions';
+import GCCloseButton from '../../../common/GCCloseButton';
 
 const StyledPlaceHolder = styled.div`
 	font-family: Montserrat;
@@ -172,7 +171,7 @@ export default function GroupsPanel(props) {
 			group_description: groupDescription,
 			create: true,
 		};
-		if (documentGroups.filter((group) => group.group_name === groupName).length > 0) {
+		if (documentGroups.filter((grp) => grp.group_name === groupName).length > 0) {
 			return setCreateGroupError('A group with that name already exists');
 		}
 		handleGenerateGroup(group, state, dispatch);
