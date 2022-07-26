@@ -192,8 +192,10 @@ class EdaExportHandler extends ExportHandler {
 				'Clin Number',
 				'Unit',
 				'Unit Price',
+				'Amount',
 				'Purchase Request Number',
 				'Supply Services',
+				'Clin PCS Code'
 				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
@@ -208,6 +210,7 @@ class EdaExportHandler extends ExportHandler {
 					doc.fpds_psc_eda_ext,
 					doc.fpds_psc_desc_eda_ext,
 					doc.obligated_amounts_eda_ext,
+
 				];
 				stringifier.write(item);
 
@@ -216,7 +219,7 @@ class EdaExportHandler extends ExportHandler {
                     for (const item of doc.clins) {
                         const line_item = [
                             doc.filename,
-                            '',
+                            this.getDisplayTitle(doc),
                             '',
                             '',
                             doc.fpds_psc_eda_ext,
@@ -225,8 +228,10 @@ class EdaExportHandler extends ExportHandler {
                             item.clin_num_eda_ext,
                             item.unit_eda_ext,
                             item.unit_price_eda_ext,
+                            item.amount_eda_ext,
                             item.purchase_request_number_eda_ext,
                             item.supplies_services_eda_ext,
+                            item.psc_code_eda_ext,
                             item.naics_code_clin_eda_ext,
                         ];
                         stringifier.write(line_item);
