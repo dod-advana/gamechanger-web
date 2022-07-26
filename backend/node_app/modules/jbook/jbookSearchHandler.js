@@ -455,7 +455,7 @@ class JBookSearchHandler extends SearchHandler {
 					oaccts: {
 						filter: { term: { type_s: 'om' } },
 						aggs: {
-							proc_accts: { terms: { field: 'programElement_s', size: 500 } },
+							proc_accts: { terms: { field: 'appropriationNumber_s', size: 500 } },
 						},
 					},
 				},

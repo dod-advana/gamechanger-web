@@ -164,9 +164,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
 				jbookSearchSettings.appropriationNumberES;
 		}
-		if (jbookSearchSettings.appropriationNumberES) {
-			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumberES;
-		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
 		console.log(err);
