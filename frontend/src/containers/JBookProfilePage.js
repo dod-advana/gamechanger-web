@@ -950,6 +950,14 @@ const JBookProfilePage = (props) => {
 			getClassLabel(reviewData) === 'Not AI'
 		) {
 			setState(dispatch, { [loading]: true });
+
+			reviewData.latest_class_label_s = reviewData.primaryClassLabel;
+			if (reviewData.serviceAgreeLabel === 'No') {
+				reviewData.latest_class_label_s = reviewData.serviceClassLabel;
+			}
+			if (reviewData.pocAgreeLabel === 'No') {
+				reviewData.latest_class_label_s = reviewData.pocClassLabel;
+			}
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
 				cloneName: cloneData.clone_name,
