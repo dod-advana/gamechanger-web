@@ -5,8 +5,13 @@ const asyncRedisLib = require('async-redis');
 const { SearchController } = require('./searchController');
 const Sequelize = require('sequelize');
 const abbreviations = require('./abbcounts.json');
+const constants = require('../config/constants');
+const { getCollibraUrl, getAuthConfig } = require('../utils/DataCatalogUtils');
+const axios = require('axios');
 
 const CACHE_RELOAD_KEY = 'gcCacheReloadingStatus';
+const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
+const CACHE_COLLIBRA_RELOAD_KEY = 'collibraCacheReloadingStatus';
 const ABB_RELOAD_KEY = 'gcAbbreviationsReloadingStatus';
 const ABB_ACTIVE_STATUS_KEY = 'gcAbbreviationsStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
@@ -63,10 +68,22 @@ class CacheController {
 		this.clearGraphDataCacheHelper = this.clearGraphDataCacheHelper.bind(this);
 		this.createGraphDataCache = this.createGraphDataCache.bind(this);
 		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
+		this.createGraphDataCacheHelper = this.createGraphDataCacheHelper.bind(this);
+		this.setStartupQlikFullAppCacheKeys = this.setStartupQlikFullAppCacheKeys.bind(this);
+		this.cacheCollibraData = this.cacheCollibraData.bind(this);
+		this.setStartupCollibraCacheKeys = this.setStartupCollibraCacheKeys.bind(this);
 	}
 
 	async setStartupSearchHistoryCacheKeys() {
 		this.redisAsyncClient.set(CACHE_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+	}
+
+	async setStartupQlikFullAppCacheKeys() {
+		this.redisAsyncClient.set(CACHE_QLIK_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+	}
+
+	async setStartupCollibraCacheKeys() {
+		this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 	}
 
 	async createSearchHistoryCache(req, res) {
@@ -131,12 +148,13 @@ class CacheController {
 
 			const searches = [];
 			const cloneLimit = Math.floor((projects.length + 1) / 2);
+			let data, bodies;
 
 			// check clone histories
 			if (projects.length > 0) {
 				// get distinct clone searches for each clone
 				for (const name of projects) {
-					const data = await this.gcHistory.findAll({
+					data = await this.gcHistory.findAll({
 						raw: true,
 						attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 						where: {
@@ -150,14 +168,14 @@ class CacheController {
 						limit: cloneLimit,
 					});
 
-					const bodies = data.map(({ request_body }) => request_body);
+					bodies = data.map(({ request_body }) => request_body);
 					searches.push(...bodies);
 				}
 			}
 
 			// fill remaining searches with default gamechanger history
 			const mainLimit = 1000 - searches.length;
-			const data = await this.gcHistory.findAll({
+			data = await this.gcHistory.findAll({
 				raw: true,
 				attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 				where: {
@@ -171,7 +189,7 @@ class CacheController {
 				limit: mainLimit,
 			});
 
-			const bodies = data.map(({ request_body }) => request_body);
+			bodies = data.map(({ request_body }) => request_body);
 			searches.push(...bodies);
 
 			let hadError = false;
@@ -187,7 +205,6 @@ class CacheController {
 				}
 				try {
 					body.forCacheReload = true;
-					//await this.search.documentSearchHelper({body}, userId);
 				} catch (e) {
 					hadError = true;
 					this.logger.error(`Error re-creating a search for cache reload: ${e.message}`, 'P93QCCD', userId);
@@ -338,7 +355,6 @@ class CacheController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			let useGCCache = await this.redisAsyncClient.get(CACHE_ACTIVE_STATUS_KEY);
-			useGCCache = false;
 
 			if (useGCCache === null) {
 				await this.redisAsyncClient.set(CACHE_ACTIVE_STATUS_KEY, true);
@@ -468,12 +484,13 @@ class CacheController {
 
 			const searches = [];
 			const cloneLimit = Math.floor((projects.length + 1) / 2);
+			let data, bodies;
 
 			// check clone histories
 			if (projects.length > 0) {
 				// get distinct clone searches for each clone
 				for (const name of projects) {
-					const data = await this.gcHistory.findAll({
+					data = await this.gcHistory.findAll({
 						raw: true,
 						attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 						where: {
@@ -487,14 +504,14 @@ class CacheController {
 						limit: cloneLimit,
 					});
 
-					const bodies = data.map(({ request_body }) => request_body);
+					bodies = data.map(({ request_body }) => request_body);
 					searches.push(...bodies);
 				}
 			}
 
 			// fill remaining searches with default gamechanger history
 			const mainLimit = 1000 - searches.length;
-			const data = await this.gcHistory.findAll({
+			data = await this.gcHistory.findAll({
 				raw: true,
 				attributes: [Sequelize.fn('DISTINCT', Sequelize.col('request_body'))],
 				where: {
@@ -508,7 +525,7 @@ class CacheController {
 				limit: mainLimit,
 			});
 
-			const bodies = data.map(({ request_body }) => request_body);
+			bodies = data.map(({ request_body }) => request_body);
 			searches.push(...bodies);
 
 			let hadError = false;
@@ -524,7 +541,6 @@ class CacheController {
 				}
 				try {
 					body.forCacheReload = true;
-					// await this.graph.graphFilterHelper({body}, userId);
 				} catch (e) {
 					hadError = true;
 					this.logger.error(`Error re-creating a search for cache reload: ${e.message}`, 'QCCDEDC', userId);
@@ -541,6 +557,75 @@ class CacheController {
 			this.logger.error(message, 'FDQ9EDC', userId);
 		} finally {
 			await this.redisAsyncClient.set(CACHE_GRAPH_RELOAD_KEY, CACHE_GRAPH_IS_NOT_RELOADING);
+		}
+	}
+
+	async cacheCollibraData() {
+		try {
+			await this.redisAsyncClient.select(constants.REDIS_CONFIG.GLOBAL_SEARCH_CACHE_DB);
+			const isReloading = await this.redisAsyncClient.get(CACHE_COLLIBRA_RELOAD_KEY);
+			if (isReloading === CACHE_IS_RELOADING) {
+				throw new Error('Will not create collibra data cache - cache is already reloading');
+			}
+			this.logger.info('START collibra cache');
+
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_RELOADING);
+
+			let url;
+			let data;
+			const assetTypes = {};
+			const queryableStatuses = [];
+			const attributeTypes = {};
+
+			try {
+				url =
+					getCollibraUrl() +
+					'/assetTypes?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((assetType) => {
+						assetTypes[assetType['name']] = assetType['id'];
+					});
+				}
+
+				url =
+					getCollibraUrl() +
+					'/statuses?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((status) => {
+						queryableStatuses.push(status.id);
+					});
+				}
+
+				url =
+					getCollibraUrl() +
+					'/attributeTypes?offset=0&limit=0&nameMatchMode=ANYWHERE&excludeMeta=true&topLevel=false';
+				data = await axios.get(url, getAuthConfig());
+				if (data.data.results.length > 0) {
+					data.data.results.forEach((atrributeType) => {
+						attributeTypes[atrributeType['id']] = atrributeType['name'];
+					});
+				}
+			} catch (error) {
+				console.log(error);
+			}
+
+			// Store in redis
+			await this.redisAsyncClient.set(
+				'dataCatalogSettings',
+				JSON.stringify({
+					assetTypes,
+					queryableStatuses,
+					attributeTypes,
+				})
+			);
+
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
+			this.logger.info('FINISHED collibra cache');
+		} catch (e) {
+			this.logger.error(e, '4N98V3A', 'Collibra Cache Function');
+			await this.redisAsyncClient.set(CACHE_COLLIBRA_RELOAD_KEY, CACHE_IS_NOT_RELOADING);
 		}
 	}
 }

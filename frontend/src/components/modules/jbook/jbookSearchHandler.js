@@ -21,13 +21,13 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
 
-const getAndSetDidYouMean = (index, searchText, dispatch) => {
-	// jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-	// 	setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
-	// }).catch(_ => {
-	// 	//do nothing
-	// })
-};
+// const getAndSetDidYouMean = (index, searchText, dispatch) => {
+// 	jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
+// 		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
+// 	}).catch(_ => {
+// 		//do nothing
+// 	})
+// };
 
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
@@ -56,6 +56,8 @@ const JBookSearchHandler = {
 				options: {
 					searchVersion: 1,
 					jbookSearchSettings: cleanSearchSettings,
+					portfolio: state.selectedPortfolio || 'AI Inventory',
+					sortSelected: state.sortSelected,
 					exportSearch: true,
 				},
 			});
@@ -89,7 +91,8 @@ const JBookSearchHandler = {
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
-						useElasticSearch: state.useElasticSearch,
+						portfolio: state.selectedPortfolio || 'AI Inventory',
+						sortSelected: state.sortSelected,
 					},
 				},
 				cancelToken
@@ -116,7 +119,7 @@ const JBookSearchHandler = {
 			options: {
 				searchText: state.searchText ?? '',
 				jbookSearchSettings: cleanSearchSettings,
-				useElasticSearch: state.useElasticSearch,
+				portfolio: state.portfolio || 'AI Inventory',
 			},
 		});
 		return data;
@@ -126,112 +129,121 @@ const JBookSearchHandler = {
 		const { searchText = '', resultsPage, urlSearch, paginationSearch, edaPaginationSearch, runningSearch } = state;
 
 		if (edaPaginationSearch) {
-			this.handleEDASearch(state, dispatch);
-		} else {
-			if (!urlSearch) {
-				this.setSearchURL(state);
+			return this.handleEDASearch(state, dispatch);
+		}
+		if (!urlSearch) {
+			this.setSearchURL(state);
+		}
+
+		this.updateRecentSearches(searchText);
+
+		setState(dispatch, {
+			runSearch: false,
+			budgetTypeDropdown: false,
+			serviceAgencyDropdown: false,
+			serviceReviewStatusDropdown: false,
+			reviewStatusDropdown: false,
+			budgetYearDropdown: false,
+			primaryReviewerDropdown: false,
+			serviceReviewerDropdown: false,
+			primaryClassLabelDropdown: false,
+			sourceTagDropdown: false,
+			hasKeywordsDropdown: false,
+			noResultsMessage: null,
+			count: 0,
+			timeFound: 0.0,
+			iframePreviewLink: null,
+			runningSearch: true,
+			edaRunningSearch: true,
+			urlSearch: false,
+			initial: false,
+			expansionDict: {},
+			statsLoading: true,
+		});
+
+		try {
+			const t0 = new Date().getTime();
+
+			// run these simultaneously
+			if (!paginationSearch) {
+				this.handleEDASearch(state, dispatch);
 			}
 
-			this.updateRecentSearches(searchText);
+			const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
+			const t1 = new Date().getTime();
 
-			setState(dispatch, {
-				runSearch: false,
-				budgetTypeDropdown: false,
-				serviceAgencyDropdown: false,
-				serviceReviewStatusDropdown: false,
-				reviewStatusDropdown: false,
-				budgetYearDropdown: false,
-				primaryReviewerDropdown: false,
-				serviceReviewerDropdown: false,
-				primaryClassLabelDropdown: false,
-				sourceTagDropdown: false,
-				hasKeywordsDropdown: false,
-				noResultsMessage: null,
-				count: 0,
-				timeFound: 0.0,
-				iframePreviewLink: null,
-				runningSearch: true,
-				edaRunningSearch: true,
-				urlSearch: false,
-				initial: false,
-				expansionDict: {},
-			});
-
-			try {
-				const t0 = new Date().getTime();
-
-				// run these simultaneously
-				if (!paginationSearch) {
-					this.handleEDASearch(state, dispatch);
-				}
-
-				const results = await this.performQuery(state, searchText, resultsPage, dispatch, runningSearch);
-				const { contractTotals } = await this.getContractTotals(state, dispatch);
-				const t1 = new Date().getTime();
-
-				if (results === null || !results.docs || results.docs.length <= 0) {
-					setState(dispatch, {
-						prevSearchText: null,
-						loading: false,
-						searchResultsCount: 0,
-						noResultsMessage: NO_RESULTS_MESSAGE,
-						runningSearch: false,
-						loadingTinyUrl: false,
-						rawSearchResults: [],
-						hasExpansionTerms: false,
-						paginationSearch: false,
-					});
-				} else {
-					let { docs, totalCount, query, expansionDict } = results;
-
-					let hasExpansionTerms = false;
-					if (expansionDict) {
-						Object.keys(expansionDict).forEach((key) => {
-							if (expansionDict[key].length > 0) hasExpansionTerms = true;
-						});
-					}
-
-					setState(dispatch, {
-						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						activeCategoryTab: 'jbook',
-						prevSearchText: searchText,
-						loading: false,
-						loadingTinyUrl: false,
-						count: totalCount,
-						query: query,
-						rawSearchResults: docs,
-						hideTabs: false,
-						resetSettingsSwitch: false,
-						runningSearch: false,
-						contractTotals: contractTotals,
-						expansionDict,
-						hasExpansionTerms,
-						paginationSearch: false,
-					});
-				}
-
-				if (resultsPage < 2) {
-					trackSearch(searchText, `${getTrackingNameForFactory('jbook')}`, results.totalCount, false);
-				}
-				// this.setSearchURL({...state, searchText, resultsPage, tabName});
-			} catch (e) {
-				console.log(e);
+			if (results === null || !results.docs || results.docs.length <= 0) {
 				setState(dispatch, {
 					prevSearchText: null,
-					unauthorizedError: true,
 					loading: false,
-					autocompleteItems: [],
 					searchResultsCount: 0,
+					noResultsMessage: NO_RESULTS_MESSAGE,
 					runningSearch: false,
 					loadingTinyUrl: false,
+					rawSearchResults: [],
 					hasExpansionTerms: false,
 					paginationSearch: false,
-					runSearch: false,
+					contractTotals: [],
+				});
+			} else {
+				let { docs, totalCount, query, expansionDict, contractTotalCounts = {} } = results;
+				let hasExpansionTerms = false;
+				if (expansionDict) {
+					Object.keys(expansionDict).forEach((key) => {
+						if (expansionDict[key].length > 0) hasExpansionTerms = true;
+					});
+				}
+
+				// temporarily add review data
+				// docs.map((doc) => {
+				// 	doc.reviews = {
+				// 		General: {
+				// 			tags: ['Generic Tag'],
+				// 		},
+				// 		'AI Inventory': {
+				// 			tags: ['AI Enabled', 'AI Enabling', 'Not AI', 'AI', 'Very Cool AI'],
+				// 		},
+				// 	};
+				// 	return doc;
+				// });
+
+				setState(dispatch, {
+					timeFound: ((t1 - t0) / 1000).toFixed(2),
+					activeCategoryTab: 'jbook',
+					prevSearchText: searchText,
+					loading: false,
+					loadingTinyUrl: false,
+					count: totalCount,
+					query: query,
+					rawSearchResults: docs,
+					hideTabs: false,
+					resetSettingsSwitch: false,
+					runningSearch: false,
+					expansionDict,
+					hasExpansionTerms,
+					paginationSearch: false,
+					contractTotals: contractTotalCounts,
 				});
 			}
 
-			const index = 'gamechanger';
-			getAndSetDidYouMean(index, searchText, dispatch);
+			if (resultsPage < 2) {
+				trackSearch(searchText, `${getTrackingNameForFactory('jbook')}`, results.totalCount, false);
+			}
+		} catch (e) {
+			console.log(e);
+			setState(dispatch, {
+				prevSearchText: null,
+				unauthorizedError: true,
+				loading: false,
+				autocompleteItems: [],
+				searchResultsCount: 0,
+				runningSearch: false,
+				loadingTinyUrl: false,
+				hasExpansionTerms: false,
+				paginationSearch: false,
+				runSearch: false,
+				contractTotals: [],
+			});
 		}
 	},
 
@@ -351,14 +363,18 @@ const JBookSearchHandler = {
 
 	processSearchSettings(state, dispatch) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
+		searchSettings.selectedPortfolio = state.selectedPortfolio;
 		const sortDesc = state.currentOrder === 'desc';
 
 		switch (state.currentSort) {
+			case 'Relevance':
+				searchSettings.sort = [{ id: 'relevance', desc: sortDesc }];
+				break;
 			case 'Program Element':
 				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
 				break;
 			case 'Budget Line Item':
-				searchSettings.sort = [{ id: 'programElement', desc: sortDesc }];
+				searchSettings.sort = [{ id: 'budgetLineItem', desc: sortDesc }];
 				break;
 			case 'Project #':
 				searchSettings.sort = [{ id: 'projectNum', desc: sortDesc }];

@@ -3,7 +3,7 @@ import React, { useReducer } from 'react';
 const initState = {
 	runSearch: false,
 	runningSearch: false,
-	useElasticSearch: false,
+	useElasticSearch: true,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
 	feedbackText: '',
@@ -41,6 +41,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		programElement: '',
@@ -73,6 +74,22 @@ const initState = {
 		],
 		hasKeywords: ['Yes', 'No'],
 
+		minBY1Funding: '',
+		maxBY1Funding: '',
+
+		budgetActivity: '',
+
+		minTotalCost: '',
+		maxTotalCost: '',
+
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+		paccts: [],
+		raccts: [],
+		oaccts: [],
+
+		budgetSubActivity: '',
+
 		// v --- all and selected --- v
 		budgetTypeSpecificSelected: false,
 		budgetTypeAllSelected: true,
@@ -100,6 +117,12 @@ const initState = {
 
 		reviewStatusSpecificSelected: false,
 		reviewStatusAllSelected: true,
+
+		primaryReviewStatusSpecificSelected: false,
+		primaryReviewStatusAllSelected: true,
+
+		budgetActivitySpecificSelected: false,
+		budgetActivityAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -111,6 +134,8 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		budgetActivity: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
@@ -177,7 +202,17 @@ const initState = {
 			'Matt Poe',
 			'Erik Kirk',
 		],
+		minBY1Funding: '',
+		maxBY1Funding: '',
+		minTotalCost: '',
+		maxTotalCost: '',
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		paccts: [],
+		raccts: [],
+		oaccts: [],
+		budgetSubActivity: '',
 	},
+	modifiedSearchSettings: [],
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
 	projectData: {},
@@ -348,6 +383,7 @@ const initState = {
 	resetSettingsSwitch: false,
 	categorySorting: {
 		jbook: [
+			'Relevance',
 			'Budget Year',
 			'Program Element',
 			'Budget Line Item',
@@ -361,6 +397,7 @@ const initState = {
 		],
 	},
 	currentSort: 'Budget Year',
+	sortSelected: false,
 	currentOrder: 'desc',
 	activeCategoryTab: 'jbook',
 
@@ -385,6 +422,7 @@ const initState = {
 
 	// contract totals
 	contractTotals: {},
+	statsLoading: false,
 
 	paginationSearch: false,
 
@@ -394,6 +432,13 @@ const initState = {
 	edaLoading: false,
 	edaResultsPage: 1,
 	edaPaginationSearch: false,
+
+	// jbook portfolios
+	portfolios: [],
+	selectedPortfolio: 'General',
+
+	// profile page
+	profilePageBudgetYear: '2023',
 };
 
 const init = (initialState) => {
@@ -419,6 +464,49 @@ function reducer(state, action) {
 			return {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
+				modifiedSearchSettings: [],
+			};
+		case 'RESET_PORTFOLIO_FILTERS':
+			return {
+				...state,
+				jbookSearchSettings: {
+					...state.jbookSearchSettings,
+
+					primaryReviewerSpecificSelected: false,
+					primaryReviewerAllSelected: true,
+
+					serviceReviewerSpecificSelected: false,
+					serviceReviewerAllSelected: true,
+
+					hasKeywordsSpecificSelected: false,
+					hasKeywordsAllSelected: true,
+
+					primaryClassLabelSpecificSelected: false,
+					primaryClassLabelAllSelected: true,
+
+					sourceTagSpecificSelected: false,
+					sourceTagAllSelected: true,
+
+					reviewStatusSpecificSelected: false,
+					reviewStatusAllSelected: true,
+
+					primaryReviewStatusSpecificSelected: false,
+					primaryReviewStatusAllSelected: true,
+
+					budgetType:
+						state.selectedPortfolio !== 'AI Inventory'
+							? state.defaultOptions.budgetType.filter((item) => item !== 'O&M')
+							: state.defaultOptions.budgetType,
+					reviewStatus: state.defaultOptions.reviewStatus,
+					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
+					primaryReviewer: state.defaultOptions.primaryReviewer,
+					serviceReviewer: state.defaultOptions.serviceReviewer,
+					pocReviewer: state.defaultOptions.pocReviewer,
+					sourceTag: state.defaultOptions.sourceTag,
+					hasKeyword: state.defaultOptions.hasKeyword,
+					primaryClassLabel: state.defaultOptions.primaryClassLabel,
+				},
+				modifiedSearchSettings: [],
 			};
 		default:
 			return state;

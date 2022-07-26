@@ -14,17 +14,8 @@ try {
 		url: MATOMO_LINK,
 		siteId: 2,
 	});
-	// matomo = {
-	// 	push: (data) => { console.log(data) },
-	// 	trackError: (data) => { console.log(data) },
-	// 	setUserId: (data) => { console.log(data) }
-	// };
 } catch (e) {
-	matomo = {
-		push: () => {},
-		trackError: () => {},
-		setUserId: () => {},
-	};
+	console.log('Cannot find Matomo');
 }
 
 /***
@@ -96,7 +87,6 @@ export function trackPageView(documentTitle, customDimensions) {
 
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
-
 		// Track the new page
 		matomo.push(['trackPageView']);
 

@@ -9,14 +9,7 @@ import {
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import {
-	checkUserInfo,
-	createTinyUrl,
-	getSearchObjectFromString,
-	getUserData,
-	isDecoupled,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -57,13 +50,7 @@ const EdaSearchHandler = {
 			edaSearchSettings,
 		} = state;
 
-		if (isDecoupled && userData && userData.search_history && userData.search_history.length > 9) {
-			if (checkUserInfo(state, dispatch)) {
-				return;
-			}
-		}
-
-		const favSearchUrls = userData.favorite_searches.map((search) => {
+		const favSearchUrls = userData?.favorite_searches?.map((search) => {
 			return search.url;
 		});
 
@@ -72,7 +59,7 @@ const EdaSearchHandler = {
 		let url = window.location.hash.toString();
 		url = url.replace('#/', '');
 
-		const searchFavorite = favSearchUrls.includes(url);
+		const searchFavorite = favSearchUrls?.includes(url) || false;
 
 		setState(dispatch, {
 			isFavoriteSearch: searchFavorite,
@@ -82,7 +69,6 @@ const EdaSearchHandler = {
 			isCachedResult: false,
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
-			trending: '',
 		});
 
 		const trimmed = searchText.trim();
@@ -291,31 +277,8 @@ const EdaSearchHandler = {
 				.then((resp) => {
 					if (_.isObject(resp.data)) {
 						const docs = resp.data.docs;
-						const issuingOrgs = {
-							'Air Force': 0,
-							Army: 0,
-							'Department of Defense': 0,
-							Navy: 0,
-						};
 
-						const orgNames = {
-							'DEPT OF THE AIR FORCE': 'Air Force',
-							'DEPT OF THE ARMY': 'Army',
-							'DEPARTMENT OF DEFENSE': 'Department of Defense',
-							'DEPT OF THE NAVY': 'Navy',
-						};
-
-						let totalObligatedAmount = 0;
-						for (const doc of docs) {
-							const org = orgNames[doc.issuing_organization_eda_ext];
-							if (org && issuingOrgs[org] !== undefined) {
-								issuingOrgs[org] += 1;
-							}
-
-							if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
-								totalObligatedAmount += doc.obligated_amounts_eda_ext;
-							}
-						}
+						const { issuingOrgs, totalObligatedAmount } = this.countOrgData(docs);
 
 						setState(dispatch, {
 							issuingOrgs,
@@ -345,6 +308,81 @@ const EdaSearchHandler = {
 
 		const index = 'gamechanger';
 		getAndSetDidYouMean(index, searchText, dispatch);
+	},
+
+	countOrgData(docs) {
+		try {
+			const issuingOrgs = {
+				'Air Force': {
+					count: 0,
+					obligatedAmount: 0,
+				},
+				Army: {
+					count: 0,
+					obligatedAmount: 0,
+				},
+				DOD: {
+					count: 0,
+					obligatedAmount: 0,
+				},
+				Navy: {
+					count: 0,
+					obligatedAmount: 0,
+				},
+				DLA: {
+					count: 0,
+					obligatedAmount: 0,
+				},
+				ODA: {
+					count: 0,
+					obligatedAmount: 0,
+				},
+			};
+
+			const orgNames = {
+				'DEPT OF THE AIR FORCE': 'Air Force',
+				'DEPT OF THE ARMY': 'Army',
+				'DEPARTMENT OF DEFENSE': 'DOD',
+				'DEPT OF THE NAVY': 'Navy',
+				'DEFENSE LOGISTICS AGENCY': 'DLA',
+			};
+
+			let totalObligatedAmount = 0;
+
+			// doc.issuing_organization_eda_ext which is set in edaSearchUtility > getExtractedFields is no longer being used
+			// fpds_contracting_agency_name_eda_ext could work, but not every doc has fpds
+
+			for (const doc of docs) {
+				// if we have a name for the org, we will use that name
+				const orgField = doc.issuing_organization_eda_ext ?? doc.fpds_contracting_agency_name_eda_ext;
+				let org = orgNames[orgField] ?? orgField;
+
+				if (org !== 'undefined') {
+					if (!(org in issuingOrgs)) {
+						org = 'ODA';
+					}
+					issuingOrgs[org].count += 1;
+					if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
+						totalObligatedAmount += doc.obligated_amounts_eda_ext;
+						issuingOrgs[org].obligatedAmount += doc.obligated_amounts_eda_ext;
+					}
+				}
+			}
+
+			for (const org of Object.keys(issuingOrgs)) {
+				if (issuingOrgs[org].count === 0) {
+					delete issuingOrgs[org];
+				} else {
+					issuingOrgs[org].obligatedAmount = Math.floor(issuingOrgs[org].obligatedAmount);
+				}
+			}
+
+			return { totalObligatedAmount, issuingOrgs };
+		} catch (err) {
+			console.log('Error calculating EDA org data');
+			console.log(err);
+			return { totalObligatedAmount: 0, issuingOrgs: {} };
+		}
 	},
 
 	parseSearchURL(defaultState, url) {

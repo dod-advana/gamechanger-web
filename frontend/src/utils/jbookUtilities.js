@@ -1,4 +1,4 @@
-import { orgColorMap, typeColorMap } from './gamechangerUtils';
+import { orgColorMap } from './gamechangerUtils';
 import _ from 'lodash';
 
 export const getClassLabel = (reviewData) => {
@@ -74,7 +74,7 @@ const getQueryAndSearchTerms = (searchText) => {
 
 const findQuoted = (searchText) => {
 	// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-	return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>'|").*?\k<quote>)/g) || [];
+	return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>['"]).*?\k<quote>)/g) || [];
 };
 
 const findLowerCaseWordsOrAcronyms = (searchText) => {
@@ -89,47 +89,57 @@ const convertPhraseToSequence = (phrase) => {
 	return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
 };
 
-export const getDocTypeStyles = (docType) => {
+export const jbookDocTypeColors = {
+	Procurement: 'red',
+	'RDT&E': 'blue',
+	'O&M': 'green',
+};
+
+export const getSubHeaderStyles = (docType = '', serviceAgency = '') => {
 	if (!docType) {
-		return { docTypeColor: '', docOrg: '', docOrgColor: '' };
+		return { docTypeColor: '', serviceAgencyColor: '' };
 	}
 
-	const docTypeColor = typeColorMap['document'];
+	const docTypeColor = jbookDocTypeColors[docType];
 
-	switch (docType) {
+	let serviceAgencyType = '';
+
+	switch (serviceAgency) {
 		case 'Air Force (AF)':
-			docType = 'Dept. of the Air Force';
+			serviceAgencyType = 'Dept. of the Air Force';
 			break;
 		case 'Army':
-			docType = 'US Army';
+			serviceAgencyType = 'US Army';
 			break;
 		case 'Navy':
-			docType = 'US Navy';
+			serviceAgencyType = 'US Navy';
 			break;
 		case 'The Joint Staff (TJS)':
-			docType = 'Joint Chiefs of Staff';
+			serviceAgencyType = 'Joint Chiefs of Staff';
 			break;
 		case 'United States Special Operations Command (SOCOM)':
-			docType = 'US Army';
+			serviceAgencyType = 'US Army';
 			break;
 		case 'US Marine Corp (USMC)':
-			docType = 'US Marine Corps';
+			serviceAgencyType = 'US Marine Corps';
 			break;
 		default:
-			//console.log(docType)
-			docType = 'Dept. of Defense';
+			serviceAgencyType = 'Dept. of Defense';
 			break;
 	}
 
-	const docOrgColor = orgColorMap[docType] ?? '#964B00'; // brown
+	const serviceAgencyColor = orgColorMap[serviceAgencyType] ?? '#964B00'; // brown
 
-	return { docTypeColor, docOrgColor };
+	return { docTypeColor, serviceAgencyColor };
 };
 
 export const getConvertedName = (orgName) => {
 	switch (orgName) {
 		case 'United States Special Operations Command (SOCOM)':
 			orgName = 'USSOCOM';
+			break;
+		case 'Chemical and Biological Defense Program (CBDP)':
+			orgName = 'CBDP';
 			break;
 		default:
 			break;
@@ -156,7 +166,7 @@ export const getConvertedType = (budgetType) => {
 	return budgetType;
 };
 
-export const processSearchSettings = (state, dispatch) => {
+export const processSearchSettings = (state, _dispatch) => {
 	const searchSettings = _.cloneDeep(state.jbookSearchSettings);
 
 	for (const optionType in state.defaultOptions) {
@@ -178,4 +188,25 @@ export const processSearchSettings = (state, dispatch) => {
 	}
 
 	return searchSettings;
+};
+
+export const formatNum = (num) => {
+	const parsed = num >= 5 ? parseInt(num) : parseFloat(num).toFixed(2);
+	if (parsed > 999) {
+		return `$${(parsed / 1000).toFixed(2)} B`;
+	}
+
+	if (parsed > 999999) {
+		return `$${(parsed / 1000000).toFixed(2)} T`;
+	}
+	return `$${parsed} M`;
+};
+
+export const getTableFormattedCost = (cost) => {
+	return cost ? `${formatNum(cost)}` : 'N/A';
+};
+
+export const getFormattedTotalCost = (projectData) => {
+	if (projectData.continuing) return 'Continuing';
+	return projectData.totalCost ? `${formatNum(projectData.totalCost)}` : 'N/A';
 };

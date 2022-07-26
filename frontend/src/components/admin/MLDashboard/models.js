@@ -66,6 +66,9 @@ export default (props) => {
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
+	const [currentDocCompareSimModel, setCurrentDocCompareSim] = useState('');
+	const [currentDocCompareEncoder, setCurrentDocCompareEncoder] = useState('');
+	const [currentDocCompareIndex, setCurrentDocCompareIndex] = useState('');
 	const [currentQexp, setCurrentQexp] = useState('');
 	const [currentQa, setCurrentQa] = useState('');
 	const [currentJbook, setCurrentJbook] = useState('');
@@ -75,6 +78,7 @@ export default (props) => {
 	const [corpusCount, setCorpusCount] = useState(0);
 
 	const [selectedSentence, setSelectedSentence] = useState('');
+	const [docCompareSelectedSentence, setDocCompareSelectedSentence] = useState('');
 	const [selectedQEXP, setSelectedQEXP] = useState('');
 	const [selectedJbookQEXP, setSelectedJbookQEXP] = useState('');
 	const [selectedTopicModel, setSelectedTopicModel] = useState('');
@@ -127,6 +131,19 @@ export default (props) => {
 			setCurrentSim(current.data.sim_model ? current.data.sim_model.replace(/^.*[\\/]/, '') : '');
 			setCurrentSentenceIndex(
 				current.data.sentence_index ? current.data.sentence_index.replace(/^.*[\\/]/, '') : ''
+			);
+			setCurrentDocCompareEncoder(
+				current.data.doc_compare_encoder_model
+					? current.data.doc_compare_encoder_model.replace(/^.*[\\/]/, '')
+					: ''
+			);
+			setCurrentDocCompareSim(
+				current.data.doc_compare_sim_model ? current.data.doc_compare_sim_model.replace(/^.*[\\/]/, '') : ''
+			);
+			setCurrentDocCompareIndex(
+				current.data.doc_compare_sentence_index
+					? current.data.doc_compare_sentence_index.replace(/^.*[\\/]/, '')
+					: ''
 			);
 			setCurrentQexp(current.data.qexp_model ? current.data.qexp_model.replace(/^.*[\\/]/, '') : '');
 			setCurrentQa(current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : '');
@@ -337,6 +354,9 @@ export default (props) => {
 			if (selectedSentence) {
 				params['sentence'] = selectedSentence;
 			}
+			if (docCompareSelectedSentence) {
+				params['doc_compare_sentence'] = docCompareSelectedSentence;
+			}
 			if (selectedQEXP) {
 				params['qexp'] = selectedQEXP;
 			}
@@ -516,10 +536,13 @@ export default (props) => {
 								<div style={{ paddingLeft: '15px' }}>Question Answer:</div>
 								<div style={{ paddingLeft: '15px' }}>Jbook QExp:</div>
 								<div style={{ paddingLeft: '15px' }}>Word Similarity:</div>
+								<div style={{ paddingLeft: '15px' }}>Doc Compare Sentence Index:</div>
 								<div style={{ paddingLeft: '15px' }}>Topic Model:</div>
 								<div style={{ paddingLeft: '15px' }}>Transformer:</div>
 								<div style={{ paddingLeft: '30px' }}>Encoder:</div>
 								<div style={{ paddingLeft: '30px' }}>Sim:</div>
+								<div style={{ paddingLeft: '30px' }}>Doc Compare Encoder:</div>
+								<div style={{ paddingLeft: '30px' }}>Doc Compare Sim:</div>
 							</div>
 							<div style={{ width: '65%' }} className="half">
 								<br />
@@ -531,11 +554,16 @@ export default (props) => {
 								{currentQa} <br />
 								{currentJbook} <br />
 								{currentWordSim} <br />
+								{currentDocCompareIndex} <br />
 								{currentTopicModel} <br />
 								<br />
 								{currentEncoder.replace(/^.*[\\/]/, '')}
 								<br />
 								{currentSimModel.replace(/^.*[\\/]/, '')}
+								<br />
+								{currentDocCompareEncoder.replace(/^.*[\\/]/, '')}
+								<br />
+								{currentDocCompareSimModel.replace(/^.*[\\/]/, '')}
 							</div>
 						</div>
 					</fieldset>
@@ -632,7 +660,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.sentence).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -654,7 +682,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.qexp).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -675,7 +703,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -696,7 +724,7 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.topic_models).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);
@@ -717,7 +745,30 @@ export default (props) => {
 								>
 									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
-											<MenuItem style={{ fontSize: 'small' }} value={name}>
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+												{name}
+											</MenuItem>
+										);
+									})}
+								</Select>
+							</div>
+							<div>
+								<div style={{ width: '120px', display: 'inline-block' }}>
+									DOC COMPARE SENTENCE EMBEDDINGS:
+								</div>
+								<Select
+									value={docCompareSelectedSentence}
+									onChange={(e) => setDocCompareSelectedSentence(e.target.value)}
+									name="labels"
+									style={{
+										fontSize: 'small',
+										minWidth: '200px',
+										margin: '10px',
+									}}
+								>
+									{Object.keys(downloadedModelsList.sentence).map((name) => {
+										return (
+											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
 												{name}
 											</MenuItem>
 										);

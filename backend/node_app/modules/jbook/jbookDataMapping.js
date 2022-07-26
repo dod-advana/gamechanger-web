@@ -52,7 +52,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title': {
-			newName: 'P40-13_BSA_Title',
+			newName: 'budgetSubActivity',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -421,12 +421,12 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		program_element: {
-			newName: 'revProgramElement', // these mainly act as foreign keys
+			newName: 'programElement', // these mainly act as foreign keys
 			defaultValue: '',
 			processValue: (value) => value,
 		},
 		budget_line_item: {
-			newName: 'revBudgetLineItems',
+			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -780,6 +780,398 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		budget_activity: {
+			newName: 'budgetActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		portfolio_name: {
+			newName: 'portfolioName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+	},
+
+	reviewESMapping: {
+		portfolio_name_s: {
+			newName: 'portfolioName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		id_s: {
+			newName: 'id',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		doc_id_s: {
+			newName: 'docID',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		source_tag_s: {
+			newName: 'sourceTag',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		program_element_s: {
+			newName: 'programElement', // these mainly act as foreign keys
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_line_item_s: {
+			newName: 'budgetLineItem',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_year_s: {
+			newName: 'budgetYear',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_type_s: {
+			newName: 'budgetType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_agree_label_s: {
+			newName: 'serviceAgreeLabel', //'aiLabelAgreement',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_ptp_agree_label_s: {
+			newName: 'servicePTPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_class_label_s: {
+			newName: 'serviceClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_trans_known_s: {
+			newName: 'serviceTransKnown', //'transitionPartnerKnown',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_trans_type_s: {
+			newName: 'serviceTransType', //'transitionType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_ptp_s: {
+			newName: 'servicePlannedTransitionPartner', //'plannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_mp_list_n: {
+			newName: 'serviceMissionPartnersList', //'missionPartnersList',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					value = value.filter((partner) => {
+						return partner !== null && partner !== 'null';
+					});
+					return value.join(', ');
+				} else {
+					if (value === null || value === 'null') value = '';
+					return value;
+				}
+			},
+		},
+		service_mp_checklist_s: {
+			newName: 'serviceMissionPartnersChecklist', //'missionPartnersList',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_mp_add_s: {
+			newName: 'serviceAdditionalMissionPartners', //'additionalMissionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		review_status_s: {
+			newName: 'reviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_title_s: {
+			newName: 'servicePOCTitle', //'pocTitle',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_name_s: {
+			newName: 'servicePOCName', //'pocName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_email_s: {
+			newName: 'servicePOCEmail', //'pocEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_poc_org_s: {
+			newName: 'servicePOCOrg', //'pocOrg',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_phone_number_s: {
+			newName: 'servicePOCPhoneNumber', //'pocPhoneNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_review_notes_s: {
+			newName: 'pocReviewNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_review_status_s: {
+			newName: 'primaryReviewStatus', //'jaicReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_review_notes_s: {
+			newName: 'primaryReviewNotes', //'reviewNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_review_status_s: {
+			newName: 'serviceReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_review_status_s: {
+			newName: 'pocReviewStatus',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_reviewer_s: {
+			newName: 'primaryReviewer', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_s: {
+			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_reviewer_s: {
+			newName: 'pocReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		other_mission_partners_s: {
+			newName: 'otherMissionPartners',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_review_notes_s: {
+			newName: 'serviceReviewerNotes',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_dollars_attributed_category_s: {
+			newName: 'pocDollarsAttributedCategory', //'dollarsAttributedCategory',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_dollars_attributed_s: {
+			newName: 'pocDollarsAttributed', //'dollarsAttributed',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_percentage_attributed_category_s: {
+			newName: 'pocPercentageAttributedCategory', //'percentageAttributedCategory',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_percentage_attributed_s: {
+			newName: 'pocPercentageAttributed', //'percentageAttributed',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ai_type_s: {
+			newName: 'pocAIType', //'aiType',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_joint_capability_area_s: {
+			newName: 'pocJointCapabilityArea', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_joint_capability_area2_n: {
+			newName: 'pocJointCapabilityArea2', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		poc_joint_capability_area3_n: {
+			newName: 'pocJointCapabilityArea3', //'jointCapabilityArea',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		poc_ai_role_description_s: {
+			newName: 'pocAIRoleDescription', //'aiRoleDescription',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ai_type_description_s: {
+			newName: 'pocAITypeDescription', //'aiTypeDescription',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		createdAt_s: {
+			newName: 'createdAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		updatedAt_s: {
+			newName: 'updatedAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		deletedAt_s: {
+			newName: 'deletedAt',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_service_reviewer_s: {
+			newName: 'primaryServiceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		// reviewer: {
+		// 	newName: 'reviewer',
+		// 	defaultValue: '',
+		// 	processValue: (value) => value
+		// },
+		primary_class_label_s: {
+			newName: 'primaryClassLabel', //'coreAILabel'
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_secondary_reviewer_s: {
+			newName: 'serviceSecondaryReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		primary_ptp_s: {
+			newName: 'primaryPlannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		domain_task_s: {
+			newName: 'domainTask',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		domain_task_secondary_n: {
+			newName: 'domainTaskSecondary',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value.split(', ');
+				}
+			},
+		},
+		robotics_system_agree_s: {
+			newName: 'roboticsSystemAgree',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_title_s: {
+			newName: 'altPOCTitle',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_name_s: {
+			newName: 'altPOCName',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_email_s: {
+			newName: 'altPOCEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_org_s: {
+			newName: 'altPOCOrg',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		alternate_poc_phone_number_s: {
+			newName: 'altPOCPhoneNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_agree_label_s: {
+			newName: 'pocAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_class_label_s: {
+			newName: 'pocClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ptp_agree_label_s: {
+			newName: 'pocPTPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_ptp_s: {
+			newName: 'pocPlannedTransitionPartner', //'plannedTransitionPartner',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_mp_agree_label_s: {
+			newName: 'pocMPAgreeLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		poc_mp_list_n: {
+			newName: 'pocMissionPartnersList',
+			defaultValue: '',
+			processValue: (value) => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				} else {
+					return value;
+				}
+			},
+		},
+		poc_mp_checklist_s: {
+			newName: 'pocMissionPartnersChecklist',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		intelligent_systems_agree_s: {
+			newName: 'intelligentSystemsAgree',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		appn_num_s: {
+			newName: 'appropriationNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		agency_s: {
+			newName: 'serviceAgency',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budget_activity_s: {
 			newName: 'budgetActivityNumber',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1502,7 +1894,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		budgetLineItem_s: {
+		budgetLineItem_t: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1519,6 +1911,16 @@ module.exports = {
 		},
 		by1BaseYear_d: {
 			newName: 'by1BaseYear',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		by1_request_d: {
+			newName: 'by1Request',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		continuing_b: {
+			newName: 'continuing',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -1583,7 +1985,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title_t': {
-			newName: 'P40-13_BSA_Title',
+			newName: 'budgetSubActivity',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -1682,7 +2084,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		totalCost_s: {
+		totalCost_d: {
 			newName: 'totalCost',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1692,13 +2094,23 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		key_review_s: {
+		key_s: {
 			newName: 'id',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
 		keyword_n: {
 			newName: 'keywords',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		gl_contract_n: {
+			newName: 'contracts',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		r_2a_accomp_pp_n: {
+			newName: 'accomplishments',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -1717,7 +2129,9 @@ module.exports = {
 		'P40-13_BSA_Title_t',
 		'P40-15_Justification_t',
 		'projectTitle_s',
-		'budgetActivityTitle_s',
+		'budgetActivityTitle_t',
+		'budgetLineItem_t',
+		'programElement_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -1737,7 +2151,13 @@ module.exports = {
 		p3a_contract_data_n: 'Contracts',
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
-		budgetActivityTitle_s: 'Activity Title',
+		budgetLineItem_t: 'BLI',
+		programElement_t: 'BLI',
+		// unaccounted for (and ignored for now):
+		// r2a_other_program_funding_n
+		// p3a_rdte_n
+		// p5_cost_elements_n
+		// p5_res_sum_optional_rows_n
 	},
 
 	esInnerHitFields: [
@@ -1807,6 +2227,7 @@ module.exports = {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'DEPARTMENT OF THE DEFENSE': 'Department of Defense (DOD)',
 		ARMY: 'Army',
 		NAVY: 'Navy',
 		AF: 'Air Force (AF)',

@@ -2,11 +2,9 @@
 
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const fs = require('fs');
-const https = require('https'); // module for https
+const spdy = require('spdy');
 const bodyParser = require('body-parser');
-const secureRandom = require('secure-random');
 const RSAkeyDecrypt = require('ssh-key-decrypt');
 const jwt = require('jsonwebtoken');
 const asyncRedisLib = require('async-redis');
@@ -14,7 +12,6 @@ const CryptoJS = require('crypto-js');
 const Base64 = require('crypto-js/enc-base64');
 const constants = require('./node_app/config/constants');
 const models = require('./node_app/models');
-const User = require('./node_app/models').user;
 const Admin = models.admin;
 const LOGGER = require('@dod-advana/advana-logger');
 const path = require('path');
@@ -26,21 +23,18 @@ const ApiKey = models.api_key;
 const CloneMeta = models.clone_meta;
 const { SwaggerDefinition, SwaggerOptions } = require('./node_app/controllers/externalAPI/externalAPIController');
 const AAA = require('@dod-advana/advana-api-auth');
-const { UserController } = require('./node_app/controllers/userController');
 const { getUserIdFromSAMLUserId } = require('./node_app/utils/userUtility');
-const moment = require('moment');
 const startupUtils = require('./node_app/utils/startupUtils');
+const { checkUser, checkOldTokens, checkHash } = require('./node_app/utils/startupUtils');
 
 const app = express();
 const jsonParser = bodyParser.json();
 const logger = LOGGER;
 const port = 8990;
 const securePort = 8443;
-const userController = new UserController();
 
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 
-// var keyFileData = fs.readFileSync(constants.TLS_KEY_FILEPATH, 'ascii');
 const keyFileData = constants.TLS_KEY;
 const private_key =
 	'-----BEGIN RSA PRIVATE KEY-----\n' +
@@ -72,12 +66,40 @@ thes.waitForLoad().then(() => {
 });
 
 startupUtils.copyConfigToBuild();
-startupUtils.storeDataCatalogInfo(redisAsyncClient);
 
 if (constants.EXPRESS_TRUST_PROXY) {
 	// https://expressjs.com/en/guide/behind-proxies.html
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
+
+app.get('*.js', function (req, res, next) {
+	if (req.url === '/config.js') {
+		next();
+	} else {
+		const encodeHeaders = req.get('accept-encoding');
+		if (encodeHeaders.includes('br')) {
+			req.url = req.url + '.br';
+			res.set('Content-Encoding', 'br');
+		} else {
+			req.url = req.url + '.gz';
+			res.set('Content-Encoding', 'gzip');
+		}
+		res.set('Content-Type', 'text/javascript');
+		next();
+	}
+});
+app.get('*.css', function (req, res, next) {
+	const encodeHeaders = req.get('accept-encoding');
+	if (encodeHeaders.includes('br')) {
+		req.url = req.url + '.br';
+		res.set('Content-Encoding', 'br');
+	} else {
+		req.url = req.url + '.gz';
+		res.set('Content-Encoding', 'gzip');
+	}
+	res.set('Content-Type', 'text/css');
+	next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(jsonParser);
@@ -85,7 +107,7 @@ app.use(express.static(__dirname + '/build'));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
-	app.use(async function (req, res, next) {
+	app.use(async function (req, _res, next) {
 		req.headers['x-env-ssl_client_certificate'] =
 			req.get('x-env-ssl_client_certificate') || `CN=${constants.GAME_CHANGER_OPTS.demoUser}`;
 		next();
@@ -96,7 +118,7 @@ app.use(AAA.redisSession());
 AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);
 
-app.use(async function (req, res, next) {
+app.use(async function (req, _res, next) {
 	let user_id;
 	if (req.session.user) {
 		user_id = getUserIdFromSAMLUserId(req);
@@ -174,14 +196,7 @@ app.post('/api/auth/token', async function (req, res) {
 
 	try {
 		cn = req.session.user.cn;
-
-		let user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-
-		if (!user || user === null) {
-			await userController.updateOrCreateUserHelper(sessUser);
-			user = await User.findOne({ where: { user_id: getUserIdFromSAMLUserId(req) }, raw: true });
-		}
-
+		let user = await checkUser(req, sessUser);
 		// Remove once we feel like most admins have used the new system
 		const admin = await Admin.findOne({ where: { username: getUserIdFromSAMLUserId(req) } });
 
@@ -189,9 +204,9 @@ app.post('/api/auth/token', async function (req, res) {
 			perms.push('Gamechanger Super Admin');
 		}
 
-		if (user) {
-			if (user.is_super_admin) perms.push('Gamechanger Super Admin');
+		if (user?.is_super_admin) perms.push('Gamechanger Super Admin');
 
+		if (user) {
 			let isAdminLite = false;
 
 			// Other attributes in extra_fields other than clone specific
@@ -209,30 +224,13 @@ app.post('/api/auth/token', async function (req, res) {
 			if (isAdminLite) perms.push('Gamechanger Admin Lite');
 		}
 
-		sessUser.perms = sessUser.perms.concat(perms);
+		sessUser.perms = sessUser?.perms?.concat(perms) || [];
 		sessUser.extra_fields = user.extra_fields;
 
 		const userTokenOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
 		let tokenTimeoutOld = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`);
-		let csrfHash;
-
-		if (userTokenOld && tokenTimeoutOld) {
-			tokenTimeoutOld = moment(tokenTimeoutOld);
-			if (tokenTimeoutOld <= moment()) {
-				csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-				const tokenTimeout = moment().add(2, 'days').format();
-				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-				await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-			} else {
-				csrfHash = userTokenOld;
-			}
-		} else {
-			csrfHash = CryptoJS.SHA256(secureRandom(10)).toString(CryptoJS.enc.Hex);
-			const tokenTimeout = moment().add(2, 'days').format();
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-token`, csrfHash);
-			await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-tokenExpiration`, tokenTimeout);
-		}
-
+		let csrfHash = userTokenOld;
+		csrfHash = await checkOldTokens(userTokenOld, tokenTimeoutOld, csrfHash, req, redisAsyncClient);
 		await redisAsyncClient.set(`${getUserIdFromSAMLUserId(req)}-perms`, JSON.stringify(sessUser.perms));
 
 		const jwtClaims = { ...sessUser };
@@ -256,19 +254,21 @@ app.use(async function (req, res, next) {
 		'/api/gamechanger/modular/getAllCloneMeta',
 		'/api/tutorialOverlay',
 		'/api/userAppVersion',
+		'/api/gameChanger/mlApi/expandTerms',
+		'/api/gameChanger/mlApi/queryExpansion',
+		'/api/gameChanger/mlApi/questionAnswer',
+		'/api/gameChanger/mlApi/textExtractions',
+		'/api/gameChanger/mlApi/transSentenceSearch',
+		'/api/gameChanger/mlApi/documentCompare',
+		'/api/gameChanger/mlApi/transformResults',
+		'/api/gameChanger/mlApi/recommender',
 	];
-
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();
 	} else {
 		const signatureFromApp = req.get('x-ua-signature');
 		await redisAsyncClient.select(12);
-		let csrfHash = '';
-		if (req.get('SSL_CLIENT_S_DN_CN') === 'ml-api') {
-			csrfHash = process.env.ML_WEB_TOKEN || 'Add The Token';
-		} else {
-			csrfHash = await redisAsyncClient.get(`${getUserIdFromSAMLUserId(req)}-token`);
-		}
+		let csrfHash = await checkHash(req, redisAsyncClient);
 		if (!csrfHash || csrfHash === '') csrfHash = 'Add The Token';
 		const calculatedSignature = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(req.path, csrfHash));
 		if (signatureFromApp === calculatedSignature) {
@@ -337,6 +337,22 @@ try {
 	logger.error(`Error initializing update favorited searches cron job: ${e.message}`, 'Y6DWTX4', 'Startup Process');
 }
 
+try {
+	// start qlik search full app cache
+	const qlikAppFullList = cron.getQlikAppsFullListJob();
+	qlikAppFullList.start();
+} catch (e) {
+	logger.error(`Error initializing update qlik app full app cron job: ${e.message}`, 'ZY0KRIN', 'Startup Process');
+}
+
+try {
+	// start collibra cache
+	const collibraCacheList = cron.cacheCollibraInfoJob();
+	collibraCacheList.start();
+} catch (e) {
+	logger.error(`Error initializing collibra cron job: ${e.message}`, 'Y3MB8DA', 'Startup Process');
+}
+
 const options = {
 	// key: fs.readFileSync(constants.TLS_KEY_FILEPATH),
 	key: constants.TLS_KEY,
@@ -347,8 +363,8 @@ const options = {
 	rejectUnauthorized: false,
 };
 
-https.createServer(options, app).listen(securePort);
-http.createServer(app).listen(port);
+spdy.createServer(options, app).listen(securePort);
+spdy.createServer({ spdy: { plain: true, ssl: false } }, app).listen(port);
 
 // shoutout to the user
 logger.boot(`
