@@ -273,6 +273,7 @@ const initState = {
 		serviceReviewStatus: null,
 		pocReviewStatus: null,
 		primaryReviewer: null,
+		primaryReviewerEmail: null,
 		serviceReviewer: null,
 		pocReviewer: null,
 		otherMissionPartners: null,

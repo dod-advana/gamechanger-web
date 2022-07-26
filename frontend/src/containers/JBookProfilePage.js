@@ -1234,7 +1234,9 @@ const JBookProfilePage = (props) => {
 						setReviewData={setReviewData}
 						dropdownData={{
 							reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
+								id: userMap[item].id,
 								name: userMap[item].last_name + ', ' + userMap[item].first_name,
+								email: userMap[item].email,
 							})),
 							primaryClassLabel: pMap[selectedPortfolio].tags.map((item) => ({
 								primary_class_label: item,
