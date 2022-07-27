@@ -919,6 +919,16 @@ class JBookSearchUtility {
 		return mainAcct;
 	}
 
+	handleOmDefault(filters, jbookSearchSettings = {}) {
+		if (jbookSearchSettings.selectedPortfolio !== 'AI Inventory' && !jbookSearchSettings.budgetType) {
+			filters.push({
+				terms: {
+					type_s: ['rdte', 'procurement'],
+				},
+			});
+		}
+	}
+
 	handleHasKeywords(jbookSearchSettings) {
 		const mustOrNot = jbookSearchSettings.hasKeywords[0] === 'Yes' ? 'must' : 'must_not';
 		return {
@@ -975,6 +985,7 @@ class JBookSearchUtility {
 		let filterQueries = [];
 		try {
 			let settingKeys = Object.keys(jbookSearchSettings);
+			this.handleOmDefault(filterQueries, jbookSearchSettings);
 			for (const key of settingKeys) {
 				switch (key) {
 					//Has Keywords
