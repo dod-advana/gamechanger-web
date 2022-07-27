@@ -445,7 +445,7 @@ class Reports {
 							marginBottom: 5,
 						},
 						{
-							text: `Annual Artificial Intelligence Inventory Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
+							text: `JBook Search Results Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
 							alignment: 'center',
 							marginTop: 4,
 							marginBottom: 5,
