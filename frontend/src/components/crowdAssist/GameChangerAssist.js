@@ -640,7 +640,7 @@ class GameChangerAssist extends Component {
 							Your Assists this Week: <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
 						</Typography>
 					</div>
-					<CloseButton onClick={() => this.handleSave(true)}>
+					<CloseButton onClick={() => this.closeModal()}>
 						<CloseIcon fontSize="large" />
 					</CloseButton>
 				</DialogTitle>
