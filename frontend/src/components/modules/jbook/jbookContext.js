@@ -494,10 +494,7 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
-					budgetType:
-						state.selectedPortfolio !== 'AI Inventory'
-							? state.defaultOptions.budgetType.filter((item) => item !== 'O&M')
-							: state.defaultOptions.budgetType,
+					budgetType: state.defaultOptions.budgetType,
 					reviewStatus: state.defaultOptions.reviewStatus,
 					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
 					primaryReviewer: state.defaultOptions.primaryReviewer,
