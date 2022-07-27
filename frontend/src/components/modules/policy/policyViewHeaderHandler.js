@@ -205,6 +205,96 @@ const PolicyViewHeaderHandler = (props) => {
 		window.history.pushState(null, document.title, linkString);
 	};
 
+	const renderAscDescButtons = (sortType) => {
+		switch (sortType) {
+			case 'Alphabetical':
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-alpha-asc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('asc');
+							}}
+						/>
+						<i
+							className="fa fa-sort-alpha-desc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('desc');
+							}}
+						/>
+					</div>
+				);
+			case 'Relevance':
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-amount-desc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+						/>
+						<i
+							className="fa fa-sort-amount-asc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							disabled
+						/>
+					</div>
+				);
+			default:
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-amount-desc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('desc');
+							}}
+						/>
+						<i
+							className="fa fa-sort-amount-asc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('asc');
+							}}
+						/>
+					</div>
+				);
+		}
+	};
+
 	return (
 		<div className={'results-count-view-buttons-container'} style={extraStyle}>
 			<div className={'view-filters-container'}>
@@ -296,7 +386,7 @@ const PolicyViewHeaderHandler = (props) => {
 				style={
 					cloneData.clone_name !== 'gamechanger'
 						? { marginRight: 35, zIndex: 99 }
-						: { marginRight: 15, zIndex: 99 }
+						: { marginRight: 20, zIndex: 99 }
 				}
 			>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
@@ -328,63 +418,7 @@ const PolicyViewHeaderHandler = (props) => {
 								})}
 							</Select>
 						</FormControl>
-						{currentSort !== 'Alphabetical' ? (
-							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
-								<i
-									className="fa fa-sort-amount-desc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								/>
-								<i
-									className="fa fa-sort-amount-asc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								/>
-							</div>
-						) : (
-							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
-								<i
-									className="fa fa-sort-alpha-asc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								/>
-								<i
-									className="fa fa-sort-alpha-desc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								/>
-							</div>
-						)}
+						{renderAscDescButtons(currentSort)}
 					</>
 				)}
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
