@@ -246,7 +246,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	let predictionString = '';
 	if (
 		selectedPortfolio !== 'General' &&
-		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions?.[selectedPortfolio] &&
 		projectData.ai_predictions[selectedPortfolio].confidence &&
 		projectData.ai_predictions[selectedPortfolio].top_class
 	) {
