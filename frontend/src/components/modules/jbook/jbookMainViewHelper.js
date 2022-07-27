@@ -107,7 +107,7 @@ export const filterSortFunction = (a, b) => {
 
 const getName = (reviewer) => {
 	if (reviewer !== null && reviewer.name !== null) {
-		return `${reviewer.name}${reviewer.organization ? ' ' + reviewer.organization : ''}`;
+		return `${reviewer.name}${reviewer.organization ? ' (' + reviewer.organization + ')' : ''}`;
 	}
 	return 'Blank';
 };
@@ -163,9 +163,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 		if (jbookSearchSettings.appropriationNumberES) {
 			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
 				jbookSearchSettings.appropriationNumberES;
-		}
-		if (jbookSearchSettings.appropriationNumberES) {
-			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumberES;
 		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
