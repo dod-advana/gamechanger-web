@@ -108,7 +108,7 @@ const renderHideTabs = () => {
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, getViewPanels, pageLoaded, setCurrentTime, searchHandler } = props;
+	const { state, dispatch, getViewPanels, setCurrentTime, searchHandler } = props;
 
 	const {
 		exportDialogVisible,
@@ -116,7 +116,6 @@ const getMainView = (props) => {
 		prevSearchText,
 		selectedDocuments,
 		loading,
-		rawSearchResults,
 		viewNames,
 		edaSearchSettings,
 		currentSort,
@@ -124,9 +123,6 @@ const getMainView = (props) => {
 		currentViewName,
 	} = state;
 	const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
-
-	const noResults = Boolean(!rawSearchResults || rawSearchResults?.length === 0);
-	const hideSearchResults = noResults && loading;
 	const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 	return (
@@ -164,12 +160,10 @@ const getMainView = (props) => {
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
-			{!hideSearchResults && pageLoaded && (
-				<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
-					<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
-					<div style={styles.spacer} />
-				</div>
-			)}
+			<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
+				<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
+				<div style={styles.spacer} />
+			</div>
 		</>
 	);
 };
@@ -185,8 +179,8 @@ const getExtraViewPanels = (_props) => {
 const getSideFilters = (context, cloneData, showSideFilters, expansionDict) => {
 	return (
 		showSideFilters && (
-			<div className={'left-container'} style={{ marginTop: -130 }}>
-				<div className={'side-bar-container'}>
+			<div className={'left-container'}>
+				<div className={'side-bar-container'} data-cy="jbook-filters">
 					<GameChangerSearchMatrix context={context} />
 					{expansionDict && Object.keys(expansionDict).length > 0 && (
 						<>
@@ -278,46 +272,48 @@ const getCardViewPanel = (props) => {
 		  };
 
 	return (
-		<div key={'cardView'}>
+		<div key={'cardView'} className={'jbook-main-view'}>
 			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 				<div>
 					<div id="game-changer-content-top" />
 
 					<StyledCenterContainer showSideFilters={showSideFilters}>
-						<div className={'top-container'}>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
-							</div>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<div style={{ paddingTop: 0, zIndex: 99, marginRight: '20px' }}>
-									<GCTooltip
-										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
-										placement="bottom"
-										arrow
-									>
-										<GCButton
-											buttonColor={'rgb(28, 45, 101)'}
-											onClick={() => {
-												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
-												);
-											}}
-										>
-											Qlik Dashboard
-										</GCButton>
-									</GCTooltip>
-								</div>
-							</div>
-						</div>
 						{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
 
-						<div className={'right-container'} style={{ marginTop: '-50px' }}>
+						<div className={'right-container'}>
+							<div className={'top-container'} style={{ marginLeft: 10 }}>
+								<div>
+									{!hideTabs && (
+										<ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />
+									)}
+								</div>
+							</div>
 							<div
 								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 								style={{ padding: 0 }}
 							>
 								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+									<div
+										className={'col-xs-12'}
+										style={{ ...sideScroll, padding: 0, position: 'relative' }}
+									>
+										<GCTooltip
+											title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
+											placement="bottom"
+											arrow
+										>
+											<GCButton
+												buttonColor={'rgb(28, 45, 101)'}
+												style={{ position: 'absolute', right: 15, top: 5 }}
+												onClick={() => {
+													window.open(
+														'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													);
+												}}
+											>
+												Budget Insights & Dashboards
+											</GCButton>
+										</GCTooltip>
 										<Tabs selectedIndex={mainTabSelected ?? 0}>
 											<div
 												style={{
@@ -382,12 +378,19 @@ const getCardViewPanel = (props) => {
 												<div style={styles.panelContainer}>
 													<TabPanel>
 														{runningSearch && (
-															<div style={{ margin: '0 auto' }}>
+															<div
+																style={{ margin: '0 auto' }}
+																data-cy="jbook-search-load"
+															>
 																<LoadingIndicator customColor={GC_COLORS.primary} />
 															</div>
 														)}
 														{!runningSearch && (
-															<div className="row" style={{ padding: 5 }}>
+															<div
+																className="row"
+																style={{ padding: 5 }}
+																data-cy="jbook-search-results"
+															>
 																{getSearchResults(
 																	rawSearchResults ? rawSearchResults : [],
 																	state,
