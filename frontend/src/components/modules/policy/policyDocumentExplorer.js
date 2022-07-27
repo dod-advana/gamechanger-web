@@ -22,7 +22,7 @@ import sanitizeHtml from 'sanitize-html';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
-const SIDEBAR_TOGGLE_WIDTH = 20;
+const SIDEBAR_TOGGLE_WIDTH = 25;
 const LEFT_PANEL_COL_WIDTH = 3;
 const RIGHT_PANEL_COL_WIDTH = 3;
 const styles = {
@@ -267,7 +267,7 @@ export default function DocumentExplorer({
 					paddingRight: 0,
 					borderRight: '1px solid lightgrey',
 					height: '100%',
-					overflow: 'scroll',
+					overflow: 'auto',
 				}}
 			>
 				<div
@@ -540,7 +540,7 @@ export default function DocumentExplorer({
 					paddingLeft: 0,
 					borderLeft: '1px solid lightgrey',
 					height: '100%',
-					overflow: 'scroll',
+					overflow: 'auto',
 				}}
 			>
 				<SimpleTable
