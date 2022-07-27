@@ -341,8 +341,6 @@ class JBookDataHandler extends DataHandler {
 
 			const { doc, portfolio } = await this.getPortfolioAndDocument(id, portfolioName, userId);
 
-			await this.setDocClassification(doc);
-
 			// Only return a review for the current portfolio
 			let tmpReview;
 			let updateESReview_n = false;
@@ -531,8 +529,8 @@ class JBookDataHandler extends DataHandler {
 				secondaryReviewers,
 			};
 			data.secondaryReviewers.sort(function (a, b) {
-				var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-				var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+				let nameA = a.name.toUpperCase(); // ignore upper and lowercase
+				let nameB = b.name.toUpperCase(); // ignore upper and lowercase
 				if (nameA < nameB) {
 					return -1;
 				}

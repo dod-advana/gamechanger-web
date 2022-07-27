@@ -59,11 +59,6 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve(true);
 				},
 			},
-			jbook_classification: {
-				findOne() {
-					return Promise.resolve({ dataValues: {} });
-				},
-			},
 			portfolio: {
 				findOne() {
 					return Promise.resolve(portfolios[0]);
@@ -144,7 +139,6 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
 					'Test AI Inventory': {
 						portfolioName: 'Test AI Inventory',
@@ -259,7 +253,6 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
@@ -373,7 +366,6 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
