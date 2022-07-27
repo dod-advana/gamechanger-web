@@ -106,6 +106,7 @@ const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) 
 						root: classes.rootLabel,
 						label: classes.checkboxPill,
 					}}
+					data-cy={`filter-option-${option}`}
 					control={
 						<Checkbox
 							classes={{
@@ -212,6 +213,7 @@ const renderFilterCheckboxes = (
 							name={specificText}
 							value={specificText}
 							classes={{ label: classes.titleText }}
+							data-cy="filter-checkbox"
 							control={
 								<Checkbox
 									classes={{ root: classes.filterBox }}
@@ -318,7 +320,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 	const portfolioMap = getPortfolioMap(portfolios);
 	return (
 		<div style={{ marginLeft: 15 }}>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetYear-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetYearSpecificSelected}
 					header={<b>BUDGET YEAR (FY)</b>}
@@ -329,7 +331,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetTypeSpecificSelected}
 					header={<b>PL TITLE</b>}
@@ -350,7 +352,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					)}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="serviceAgency-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.serviceAgencySpecificSelected}
 					header={<b>SERVICE / AGENCY</b>}
@@ -362,7 +364,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="appropriationNumber-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.appropriationNumberSpecificSelected}
 					header={<b>MAIN ACCOUNT</b>}
@@ -381,7 +383,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetActivity-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
@@ -393,7 +395,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetSubActivity-filter">
 				<GCAccordion
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -404,7 +406,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="programElement-filter">
 				<GCAccordion
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -415,7 +417,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectNum-filter">
 				<GCAccordion
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -426,7 +428,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="BY1Funding-filter">
 				<GCAccordion
 					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -437,7 +439,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="totalCost-filter">
 				<GCAccordion
 					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -449,7 +451,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			</div>
 
 			{!state.useElasticSearch && (
-				<div style={{ width: '100%', marginBottom: 10 }}>
+				<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectTitle-filter">
 					<GCAccordion
 						header={<b>PROJECT TITLE</b>}
 						headerBackground={'rgb(238,241,242)'}
@@ -461,7 +463,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</div>
 			)}
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryReviewer-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
 					header={<b>PRIMARY REVIEWER</b>}
@@ -472,7 +474,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="serviceReviewer-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
 					header={<b>SERVICE REVIEWER</b>}
@@ -483,7 +485,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="pocReviewer-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.pocReviewer && jbookSearchSettings.pocReviewer !== ''}
 					header={<b>POC REVIEWER</b>}
@@ -498,7 +500,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					/>
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="reviewStatus-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.reviewStatusSpecificSelected}
 					header={<b>REVIEW STATUS</b>}
@@ -509,7 +511,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="hasKeywords-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.hasKeywordsSpecificSelected}
 					header={<b>HAS KEYWORDS</b>}
@@ -523,7 +525,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryClassLabel-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.classLabelSpecificSelected}
 					header={<b>TAGS</b>}
@@ -543,7 +545,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="source-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.sourceSpecificSelected}
 					header={<b>SOURCE</b>}
@@ -615,7 +617,7 @@ const getSearchMatrixItems = (props) => {
 	const portfolioMap = getPortfolioMap(portfolios);
 	return (
 		<div style={{ marginLeft: 15 }}>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetYear-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetYearSpecificSelected}
 					header={<b>BUDGET YEAR (FY)</b>}
@@ -626,7 +628,7 @@ const getSearchMatrixItems = (props) => {
 					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetTypeSpecificSelected}
 					header={<b>PL TITLE</b>}
@@ -647,7 +649,7 @@ const getSearchMatrixItems = (props) => {
 					)}
 				</GCAccordion>
 			</div>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="serviceAgency-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.serviceAgencySpecificSelected}
 					header={<b>SERVICE / AGENCY</b>}
@@ -659,7 +661,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="appropriationNumber-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.appropriationNumberSpecificSelected}
 					header={<b>MAIN ACCOUNT</b>}
@@ -678,7 +680,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetActivity-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
@@ -690,7 +692,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetSubActivity-filter">
 				<GCAccordion
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -701,7 +703,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="programElement-filter">
 				<GCAccordion
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -712,7 +714,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectNum-filter">
 				<GCAccordion
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -723,7 +725,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="BY1Funding-filter">
 				<GCAccordion
 					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -734,7 +736,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div style={{ width: '100%', marginBottom: 10 }} data-cy="totalCost-filter">
 				<GCAccordion
 					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
@@ -746,7 +748,7 @@ const getSearchMatrixItems = (props) => {
 			</div>
 
 			{!state.useElasticSearch && (
-				<div style={{ width: '100%', marginBottom: 10 }}>
+				<div style={{ width: '100%', marginBottom: 10 }} data-cy="pocReviewer-filter">
 					<GCAccordion
 						header={<b>POC REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
@@ -759,7 +761,7 @@ const getSearchMatrixItems = (props) => {
 			)}
 
 			{selectedPortfolio !== 'General' && (
-				<div style={{ width: '100%', marginBottom: 10 }}>
+				<div style={{ width: '100%', marginBottom: 10 }} data-cy="reviewStatus-filter">
 					<GCAccordion
 						expanded={jbookSearchSettings.reviewStatusSpecificSelected}
 						header={<b>REVIEW STATUS</b>}
@@ -773,7 +775,7 @@ const getSearchMatrixItems = (props) => {
 			)}
 
 			{selectedPortfolio !== 'General' && (
-				<div style={{ width: '100%', marginBottom: 10 }}>
+				<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryClass-filter">
 					<GCAccordion
 						expanded={jbookSearchSettings.classLabelSpecificSelected}
 						header={<b>TAGS</b>}

@@ -71,6 +71,7 @@ const JBookPortfolioSelector = ({
 				labelId="portfolio-name"
 				label="Portfolio"
 				id="portfolio-name-select"
+				data-cy="portfolio-select"
 				value={selectedPortfolio}
 				onChange={handleChangePortfolio}
 				classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
