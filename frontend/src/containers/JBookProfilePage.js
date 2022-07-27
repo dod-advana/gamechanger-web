@@ -45,12 +45,14 @@ import {
 } from '../components/modules/jbook/profilePage/profilePageStyles';
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import GameChangerAPI from '../components/api/gameChanger-service-api';
+import GameChangerUserAPI from '../components/api/GamechangerUserManagement';
 import JBookPortfolioSelector from '../components/modules/jbook/portfolioBuilder/jbookPortfolioSelector';
 import JBookBudgetYearSelector from '../components/modules/jbook/profilePage/jbookBudgetYearSelector';
 
 const _ = require('lodash');
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GameChangerUserAPI();
 
 const GCFooter = LoadableVisibility({
 	loader: () => import('../components/navigation/GCFooter'),
@@ -84,6 +86,8 @@ const JBookProfilePage = (props) => {
 		profilePageBudgetYear,
 		serviceValidation,
 		pocValidation,
+		commentThread,
+		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
 		is_primary_reviewer: false,
@@ -130,6 +134,10 @@ const JBookProfilePage = (props) => {
 			data.data.users.forEach((user) => {
 				newMap[user.id] = user;
 			});
+
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
+
 			setUserMap(newMap);
 		};
 
@@ -137,7 +145,7 @@ const JBookProfilePage = (props) => {
 			getUserData();
 			setInit(true);
 		}
-	}, [init, setInit]);
+	}, [init, setInit, dispatch]);
 
 	const setContractData = (newProjectData) => {
 		// set the contract data based on the current project data
@@ -195,13 +203,13 @@ const JBookProfilePage = (props) => {
 
 	const selectBudgetYearProjectData = (allBYProjectData, year, portfolioName) => {
 		try {
-			console.log('budget year project data:');
 			let newProjectData = allBYProjectData[year] || {};
 
 			setBudgetLineItem(newProjectData.budgetLineItem || '');
 			setProgramElement(newProjectData.programElement || '');
 			setProjectNum(newProjectData.projectNum || '');
 			setAppropriationNumber(newProjectData.appropriationNumber || '');
+			setDocID(newProjectData.id || '');
 
 			let tempMapping = setContractData(newProjectData);
 
@@ -210,7 +218,10 @@ const JBookProfilePage = (props) => {
 			}
 
 			setBudgetYear(year);
+
 			setState(dispatch, { projectData: newProjectData, profilePageBudgetYear: year });
+
+			return newProjectData.id;
 		} catch (err) {
 			console.log('Error setting budget year project data');
 			console.log(err);
@@ -231,12 +242,29 @@ const JBookProfilePage = (props) => {
 		}
 	};
 
+	const getCommentThread = async (id, portfolioName) => {
+		const commentThreadData = await gameChangerAPI.callDataFunction({
+			functionName: 'getCommentThread',
+			cloneName: 'jbook',
+			options: {
+				docID: id,
+				portfolioName,
+			},
+		});
+
+		if (commentThreadData) {
+			setState(dispatch, { commentThread: commentThreadData.data });
+		}
+	};
+
+	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
 
 		try {
 			setProfileLoading(true);
 
+			// get profile page data for all budget years
 			allBYProjectData = await gameChangerAPI.callDataFunction({
 				functionName: 'getAllBYProjectData',
 				cloneName: cloneData.clone_name,
@@ -253,10 +281,12 @@ const JBookProfilePage = (props) => {
 
 				setProfileLoading(false);
 
-				selectBudgetYearProjectData(allBYProjectData, year, portfolioName);
+				await selectBudgetYearProjectData(allBYProjectData, year, portfolioName);
 			}
 
-			getDropdownData();
+			await getDropdownData();
+
+			await getCommentThread(id, portfolioName);
 		} catch (err) {
 			console.log(err);
 		}
@@ -450,7 +480,7 @@ const JBookProfilePage = (props) => {
 
 				aggregatedDescriptions = highlightSearchTextDescriptions(terms, aggregatedDescriptions);
 
-				accomp = highlightSearchTextAccomps(terms, aggregatedDescriptions);
+				accomp = highlightSearchTextAccomps(terms, accomp);
 			}
 
 			return [aggregatedDescriptions, accomp];
@@ -943,6 +973,15 @@ const JBookProfilePage = (props) => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
+		await gameChangerAPI.callDataFunction({
+			functionName: 'createComment',
+			cloneName: 'jbook',
+			options: {
+				docID,
+				portfolioName: selectedPortfolio,
+				message: 'just another super cool comment',
+			},
+		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
@@ -950,6 +989,14 @@ const JBookProfilePage = (props) => {
 			getClassLabel(reviewData) === 'Not AI'
 		) {
 			setState(dispatch, { [loading]: true });
+
+			reviewData.latest_class_label_s = reviewData.primaryClassLabel;
+			if (reviewData.serviceAgreeLabel === 'No') {
+				reviewData.latest_class_label_s = reviewData.serviceClassLabel;
+			}
+			if (reviewData.pocAgreeLabel === 'No') {
+				reviewData.latest_class_label_s = reviewData.pocClassLabel;
+			}
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
 				cloneName: cloneData.clone_name,
@@ -1017,14 +1064,13 @@ const JBookProfilePage = (props) => {
 
 	const scorecardData = (classification) => {
 		let data = [];
-
 		if (
 			selectedPortfolio === 'AI Inventory' &&
 			classification &&
-			classification.modelPredictionProbability &&
-			classification.modelPrediction
+			classification.confidence &&
+			classification.top_class
 		) {
-			let num = classification.modelPredictionProbability;
+			let num = classification.confidence;
 			num = num.toString(); //If it's not already a String
 			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
 			Number(num); //If you need it back as a Number
@@ -1033,7 +1079,7 @@ const JBookProfilePage = (props) => {
 				name: 'Predicted Tag',
 				description:
 					'The AI tool classified the BLI as "' +
-					classification.modelPrediction +
+					classification.top_class +
 					'" with a confidence score of ' +
 					num,
 				value: num,
@@ -1281,6 +1327,8 @@ const JBookProfilePage = (props) => {
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}
 							projectData={projectData}
+							docID={docID}
+							getCommentThread={getCommentThread}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>
@@ -1291,10 +1339,21 @@ const JBookProfilePage = (props) => {
 							selectBudgetYearProjectData={selectBudgetYearProjectData}
 							formControlStyle={{ margin: '10px 0', width: '100%' }}
 							width={'100%'}
+							getCommentThread={getCommentThread}
 						/>
 					</div>
 					{selectedPortfolio !== 'General' && (
-						<ClassificationScoreCard scores={scorecardData(projectData.classification)} />
+						<ClassificationScoreCard
+							scores={scorecardData(projectData.ai_predictions[selectedPortfolio])}
+							commentThread={commentThread}
+							gameChangerAPI={gameChangerAPI}
+							docID={docID}
+							portfolioName={selectedPortfolio}
+							getCommentThread={getCommentThread}
+							userData={userData}
+							updateUserProfileData={gameChangerUserAPI.updateUserProfileData}
+							dispatch={dispatch}
+						/>
 					)}
 				</StyledLeftContainer>
 				<StyledMainContainer>

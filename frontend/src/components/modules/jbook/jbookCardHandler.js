@@ -145,6 +145,13 @@ const StyledFrontCardHeader = styled.div`
 			}
 		}
 
+		.text-nowrap-ellipsis {
+			width: 100%;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+
 		.selected-favorite {
 			display: inline-block;
 			font-family: 'Noto Sans';
@@ -204,6 +211,9 @@ const metadataNameToSearchFilterName = {
 	'Main Account': 'appropriationNumber',
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
+	'Primary Reviewer': 'primaryReviewer',
+	'Service Reviewer': 'serviceReviewer',
+	'POC Reviewer': 'pocReviewer',
 };
 
 // helper functions
@@ -232,6 +242,19 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
+	let showPrediction = false;
+	let predictionString = '';
+	if (
+		selectedPortfolio !== 'General' &&
+		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions[selectedPortfolio].confidence &&
+		projectData.ai_predictions[selectedPortfolio].top_class
+	) {
+		showPrediction = true;
+		let num = projectData.ai_predictions[selectedPortfolio].confidence;
+		num = Math.round(num * 100);
+		predictionString = `"${projectData.ai_predictions[selectedPortfolio].top_class}" - ${num}%`;
+	}
 	return [
 		{
 			Key: 'Project',
@@ -239,12 +262,12 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'Program Element',
-			Value: projectData.programElement,
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
 			Key: 'Project Number',
-			Value: projectData.projectNum,
+			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
@@ -323,25 +346,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Key: 'Budget Sub Activity',
 			Value: getBudgetSubActivity(projectData),
 		},
-		...(selectedPortfolio === 'AI Inventory'
+		...(showPrediction
 			? [
 					{
-						Key: 'Category',
-						Value: getClassLabel(projectData),
-					},
-			  ]
-			: []),
-		...(selectedPortfolio === 'AI Inventory'
-			? [
-					{
-						Key: 'Keywords',
-						Value: (
-							<div>
-								{projectData.keywords && projectData.keywords.length > 0
-									? projectData.keywords.map((keyword) => <p>{keyword}</p>)
-									: 'None'}
-							</div>
-						),
+						Key: 'Predicted Tag',
+						Value: predictionString,
 					},
 			  ]
 			: []),
@@ -477,6 +486,30 @@ const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	};
 };
 
+const getReviewerNames = (projectData) => {
+	const reviewersSets = { primary: new Set(), service: new Set(), poc: new Set() };
+	if (projectData.review_n) {
+		projectData.review_n.forEach((review) => {
+			if (review.primary_reviewer_s) {
+				reviewersSets.primary.add(review.primary_reviewer_s);
+			}
+			if (review.service_reviewer_s) {
+				reviewersSets.service.add(review.service_reviewer_s);
+			}
+			if (review.service_poc_name_s) {
+				reviewersSets.poc.add(review.service_poc_name_s);
+			} else if (review.alternate_poc_name_s) {
+				reviewersSets.poc.add(review.alternate_poc_name_s);
+			}
+		});
+	}
+	return {
+		primary: Array.from(reviewersSets.primary).join('; ') || 'None',
+		service: Array.from(reviewersSets.service).join('; ') || 'None',
+		poc: Array.from(reviewersSets.poc).join('; ') || 'None',
+	};
+};
+
 // sub-components
 const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded }) => {
 	if (item.pageHits && item.pageHits.length > 0) {
@@ -597,10 +630,6 @@ const ListViewFrontCardContent = ({
 	);
 };
 
-const ProjectKeywords = (keywords) => {
-	return <>{keywords && keywords.length > 0 ? keywords.map((keyword) => <p>{keyword}</p>) : 'None'}</>;
-};
-
 // main card handler
 const cardHandler = {
 	document: {
@@ -610,14 +639,33 @@ const cardHandler = {
 			const { cloneData, searchText, selectedPortfolio } = state;
 
 			let displayTitleTop = '';
+			let displayTitleBottom = '';
 			let displayTitleBot = '';
+			let tooltipTitle = '';
+			let title = <></>;
 			switch (item.budgetType) {
 				case 'odoc':
+					displayTitleTop = `BLI: ${item.lineNumber ?? ''} | Title: ${item.budgetActivityTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
+					break;
 				case 'pdoc':
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
 					break;
 				case 'rdoc':
-					displayTitleTop = `BLI: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
+					displayTitleTop = `PE: ${item.programElement ?? ''} - ${item.programElementTitle}`;
+					displayTitleBottom = `Proj: ${item.projectNum} - ${item.projectTitle}`;
+					tooltipTitle = (
+						<span style={{ whiteSpace: 'pre-line' }}>{displayTitleTop + '\n' + displayTitleBottom}</span>
+					);
+					title = (
+						<>
+							<div className="text-nowrap-ellipsis">{displayTitleTop}</div>
+							<div className="text-nowrap-ellipsis">{displayTitleBottom}</div>
+						</>
+					);
 					break;
 				default:
 					break;
@@ -631,9 +679,9 @@ const cardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView}>
+				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
 					<div className={'title-text-selected-favorite-div'}>
-						<GCTooltip title={displayTitleTop} placement="top" arrow>
+						<GCTooltip title={tooltipTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
 								onClick={(e) => {
@@ -649,7 +697,9 @@ const cardHandler = {
 								}}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitleTop} <br /> {displayTitleBot}
+									{title}
+									<br />
+									{displayTitleBot}
 								</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
@@ -688,14 +738,14 @@ const cardHandler = {
 					: '';
 
 				if (item.budgetType === 'odoc') {
-					appropriationTitle = item.accountTitle;
+					appropriationTitle = item.appropriationTitle;
 				}
 
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
 				let cycle = item.budgetCycle ?? 'PB';
-				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
+				budgetPrefix = cycle + year + (item.by1Request ? ': ' : '');
 
-				budgetAmount = item.currentYearAmount ? '$' + item.currentYearAmount + ' M' : '';
+				budgetAmount = item.by1Request ? '$' + item.by1Request + ' M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
@@ -832,16 +882,39 @@ const cardHandler = {
 
 			if (selectedPortfolio === 'AI Inventory') {
 				metadata.push({
-					Key: 'Category',
+					Key: 'Tags',
 					Value: getClassLabel(projectData),
 				});
 				metadata.push({
 					Key: 'Keywords',
 					Value: (
 						<div>
-							<ProjectKeywords keywords={projectData.keywords} />
+							{projectData.keywords && projectData.keywords.length > 0
+								? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+								: 'None'}
 						</div>
 					),
+				});
+
+				const reviewers = getReviewerNames(projectData);
+
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: reviewers.primary,
+				});
+				metadata.push({
+					Key: 'Service Reviewer',
+					Value: reviewers.service,
+				});
+				metadata.push({
+					Key: 'POC Reviewer',
+					Value: reviewers.poc,
+				});
+			} else if (selectedPortfolio !== 'General') {
+				const reviewers = getReviewerNames(projectData);
+				metadata.push({
+					Key: 'Primary Reviewer',
+					Value: reviewers.primary,
 				});
 			}
 
