@@ -30,7 +30,7 @@ const getToolTheme = (cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href="#/">
+			<PageLink href="#/jbook">
 				<img src={JAICLogo} alt="tool logo" />
 			</PageLink>
 		),
