@@ -1100,7 +1100,6 @@ const JBookProfilePage = (props) => {
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
 		}
-
 		return data;
 	};
 
