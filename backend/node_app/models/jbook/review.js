@@ -227,6 +227,12 @@ module.exports = (sequelize, DataTypes) => {
 			primary_reviewer_email: {
 				type: DataTypes.TEXT,
 			},
+			service_reviewer_email: {
+				type: DataTypes.TEXT,
+			},
+			service_secondary_reviewer_email: {
+				type: DataTypes.TEXT,
+			},
 		},
 		{
 			freezeTableName: true,

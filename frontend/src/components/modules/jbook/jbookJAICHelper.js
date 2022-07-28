@@ -14,18 +14,11 @@ const useStyles = makeStyles((_theme) => ({
 	},
 }));
 
-const ReviewersValue = React.memo((props) => {
-	const {
-		primaryReviewer, // from reviewData
-		finished,
-		dropdownData,
-		setReviewData,
-	} = props;
-
+const createReviewersObject = (dropdownData, reviewerType) => {
 	const reviewers = {};
 
-	if (dropdownData.reviewers) {
-		dropdownData.reviewers.forEach((reviewer) => {
+	if (dropdownData[reviewerType]) {
+		dropdownData[reviewerType].forEach((reviewer) => {
 			const display = `${reviewer.name}${
 				reviewer?.organization?.length > 1 ? ` (${reviewer.organization})` : ''
 			}`;
@@ -36,6 +29,19 @@ const ReviewersValue = React.memo((props) => {
 		});
 	}
 
+	return reviewers;
+};
+
+const ReviewersValue = React.memo((props) => {
+	const {
+		primaryReviewer, // from reviewData
+		finished,
+		dropdownData,
+		setReviewDataMultiple,
+	} = props;
+
+	const reviewers = createReviewersObject(dropdownData, 'reviewers');
+
 	return (
 		<Autocomplete
 			size="small"
@@ -44,8 +50,7 @@ const ReviewersValue = React.memo((props) => {
 			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
 			value={primaryReviewer ?? null}
 			onChange={(_e, value) => {
-				setReviewData('primaryReviewer', value);
-				setReviewData('primaryReviewerEmail', reviewers[value].email);
+				setReviewDataMultiple({ primaryReviewer: value, primaryReviewerEmail: reviewers[value].email });
 			}}
 			disabled={finished} //|| roleDisabled}
 			disableClearable
@@ -108,7 +113,7 @@ const CoreAIAnalysisValue = React.memo((props) => {
 			getOptionLabel={(option) => option.primary_class_label ?? ''}
 			getOptionSelected={(option, value) => option.primary_class_label === value.primary_class_label}
 			style={{ width: 300, backgroundColor: 'white' }}
-			onChange={(event, value) => setReviewData('primaryClassLabel', value.primary_class_label)}
+			onChange={(_event, value) => setReviewData('primaryClassLabel', value.primary_class_label)}
 			renderInput={(params) => <TextField {...params} label="Analysis" variant="outlined" />}
 			value={primaryClassLabel ? { primary_class_label: primaryClassLabel } : null}
 			disabled={finished} //|| roleDisabled}
@@ -118,29 +123,20 @@ const CoreAIAnalysisValue = React.memo((props) => {
 });
 
 const ServiceComponentReviewerValue = React.memo((props) => {
-	const { serviceReviewer, finished, dropdownData, setReviewData } = props;
+	const { serviceReviewer, finished, dropdownData, setReviewDataMultiple } = props;
 
-	const serviceReviewers =
-		dropdownData && dropdownData.serviceReviewers
-			? dropdownData.serviceReviewers
-					.map((reviewer) => {
-						return `${reviewer.name}${
-							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
-								? ` (${reviewer.organization})`
-								: ''
-						}`;
-					})
-					.sort()
-			: [];
+	const reviewers = createReviewersObject(dropdownData, 'serviceReviewers');
 
 	return (
 		<Autocomplete
 			size="small"
-			options={serviceReviewers}
+			options={Object.keys(reviewers)}
 			style={{ width: 300, backgroundColor: 'white' }}
 			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
 			value={serviceReviewer ?? null}
-			onChange={(event, value) => setReviewData('serviceReviewer', value)}
+			onChange={(_e, value) => {
+				setReviewDataMultiple({ serviceReviewer: value, serviceReviewerEmail: reviewers[value].email });
+			}}
 			disabled={finished} //|| roleDisabled}
 			disableClearable
 		/>
