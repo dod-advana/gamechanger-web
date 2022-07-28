@@ -677,6 +677,21 @@ const JBookProfilePage = (props) => {
 		[pocValidation, serviceValidation]
 	);
 
+	const setReviewDataMultiple = useCallback(
+		(updates) => {
+			let newReviewData = _.cloneDeep(reviewData);
+			Object.keys(updates).forEach((field) => {
+				newReviewData[field] = updates[field];
+			});
+
+			const stateObject = {};
+			stateObject.reviewData = newReviewData;
+
+			setState(dispatch, stateObject);
+		},
+		[dispatch, reviewData]
+	);
+
 	const setReviewData = useCallback(
 		(field, value) => {
 			let newReviewData = _.cloneDeep(reviewData);
@@ -1090,6 +1105,7 @@ const JBookProfilePage = (props) => {
 						}
 						finished={reviewData.primaryReviewStatus === 'Finished Review'}
 						submitReviewForm={submitReviewForm}
+						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						dropdownData={dropdownData}
 						reviewerProp={projectData.reviewer}
@@ -1135,6 +1151,7 @@ const JBookProfilePage = (props) => {
 						reviewStatus={reviewData.serviceReviewStatus ?? 'Needs Review'}
 						finished={reviewData.serviceReviewStatus === 'Finished Review'}
 						submitReviewForm={submitReviewForm}
+						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						vendorData={projectData.vendors}
 						dropdownData={dropdownData}
@@ -1231,6 +1248,7 @@ const JBookProfilePage = (props) => {
 						}
 						finished={reviewData.primaryReviewStatus === 'Finished Review'}
 						submitReviewForm={submitReviewForm}
+						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						dropdownData={{
 							reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
@@ -1296,7 +1314,7 @@ const JBookProfilePage = (props) => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.ai_predictions[selectedPortfolio])}
+							scores={scorecardData(projectData.ai_predictions?.[selectedPortfolio])}
 						/>
 					)}
 				</StyledLeftContainer>
