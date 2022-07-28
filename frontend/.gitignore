@@ -12,6 +12,7 @@ jest_0/
 jest/
 *.snap
 
+
 # production
 /build
 
@@ -33,8 +34,6 @@ sh.exe.stackdump
 .vscode/launch.json
 .editorconfig
 dump.rdb
-yarn.lock
-yarn.lock
 .idea
 
 .npmrc

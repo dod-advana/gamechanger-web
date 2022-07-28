@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -11,6 +11,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { gcOrange } from '../common/gc-colors';
 import TabStyles from '../common/TabStyles';
 import GameChangerAPI from '../api/gameChanger-service-api';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GCPrimaryButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { encode } from '../../utils/gamechangerUtils';
@@ -141,17 +142,6 @@ const columns = [
 ];
 
 const userAggColumns = [
-	// {
-	// 	Header: 'Name',
-	// 	accessor: 'name',
-	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
-	// },
-	// {
-	// 	Header: 'Email',
-	// 	accessor: 'email',
-	// 	Cell: (row) => <TableRow>{row.value}</TableRow>,
-	// },
-
 	{
 		Header: 'User ID',
 		accessor: 'user_id',
@@ -251,97 +241,70 @@ const documentUsageColumns = [
 ];
 
 /**
- * This method queries Matomo for documents based on search.
- * The query is handled in gamechanger-api.
- * @method getSearchPdfMapping
+ * This method renders the documents for react table
+ * @method subComponent
  */
-const getSearchPdfMapping = async (startDate, endDate, cloneName, setMappingData) => {
-	try {
-		const params = {
-			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			cloneName: cloneName.split('-')[1],
-			cloneID: cloneName.split('-')[0],
-		};
-		const { data = {} } = await gameChangerAPI.getSearchPdfMapping(params);
-		setMappingData(data.data);
-	} catch (e) {
-		console.error(e);
-	}
+const subComponent = (row) => {
+	return (
+		<div>
+			<Grid container spacing={2}>
+				<Grid item xs={1}></Grid>
+				<Grid item xs={4}>
+					<p>Opened:</p>
+					<ol>
+						{row.original.opened.map((o) => (
+							<li>
+								<a
+									target={'_blank'}
+									rel="noreferrer"
+									href={`/#/pdfviewer/gamechanger?filename=${encode(o)}`}
+								>
+									{' '}
+									{o}{' '}
+								</a>
+							</li>
+						))}
+					</ol>
+				</Grid>
+				<Grid item xs={3}>
+					<p>Exported:</p>
+					<ol>
+						{row.original.ExportDocument.map((e) => (
+							<li>
+								<a
+									target={'_blank'}
+									rel="noreferrer"
+									href={`/#/pdfviewer/gamechanger?filename=${encode(e)}`}
+								>
+									{' '}
+									{e}{' '}
+								</a>
+							</li>
+						))}
+					</ol>
+				</Grid>
+				<Grid item xs={4}>
+					<p>Favorited:</p>
+					<ol>
+						{row.original.Favorite.map((f) => (
+							<li>
+								<a
+									target={'_blank'}
+									rel="noreferrer"
+									href={`/#/pdfviewer/gamechanger?filename=${encode(f)}`}
+								>
+									{' '}
+									{f}{' '}
+								</a>
+							</li>
+						))}
+					</ol>
+				</Grid>
+			</Grid>
+		</div>
+	);
 };
 
-/**
- * This method queries postgres for feedback data.
- * The query is handled in gamechanger-api.
- * @method getFeedbackData
- */
-const getFeedbackData = async (setFeedbackData) => {
-	try {
-		const data = await gameChangerAPI.getFeedbackData();
-		setFeedbackData(data.data.results);
-	} catch (e) {
-		console.error(e);
-	}
-};
-
-/**
- * This method queries postgres for feedback data.
- * The query is handled in gamechanger-api.
- * @method getDocumentData
- */
-const getDocumentData = async (startDate, endDate, setDocumentData) => {
-	try {
-		const params = { startDate, endDate };
-		const { data = {} } = await gameChangerAPI.getDocumentUsage(params);
-		setDocumentData(data.data);
-	} catch (e) {
-		console.error(e);
-	}
-};
-
-/**
- * This method queries postgres for user aggregations.
- * The query is handled in gamechanger-api.
- * @method getUserAggData
- */
-const getUserAggData = async (startDate, endDate, cloneName, setUserAggData) => {
-	try {
-		const params = {
-			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			cloneName: cloneName.split('-')[1],
-			cloneID: cloneName.split('-')[0],
-		};
-		const { data = {} } = await gameChangerAPI.getUserAggregations(params);
-		setUserAggData(data.users);
-	} catch (e) {
-		console.error(e);
-	}
-};
-
-/**
- * This method queries postgres for graph data.
- * The query is handled in gamechanger-api.
- * @method getUserGraphData
- */
-const getUserGraphData = async (startDate, endDate, cloneName, setGraphData, setCardData) => {
-	try {
-		const params = {
-			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			cloneName: cloneName.split('-')[1],
-			cloneID: cloneName.split('-')[0],
-		};
-		const { data = {} } = await gameChangerAPI.getUserDashboard(params);
-		setGraphData({
-			searchBar: data.searchBar,
-			userBar: data.userBar,
-		});
-		setCardData(data.cards);
-	} catch (e) {
-		console.error(e);
-	}
-};
 /**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
@@ -359,8 +322,13 @@ export default () => {
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
 	const [tabIndex, setTabIndex] = useState('userAgg');
-	const [cloneName, setCloneName] = useState({ name: '', id: 0 });
+	const [cloneName, setCloneName] = useState('');
 	const [cloneList, setCloneList] = useState([]);
+	const [loaded, setLoading] = useState({
+		userGraph: false,
+		userData: false,
+		searchMapping: false,
+	});
 
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
@@ -372,77 +340,9 @@ export default () => {
 	 * @method getCloneData
 	 */
 	const getCloneData = async () => {
-		try {
-			const data = await gameChangerAPI.getClonesMatomo();
-			setCloneList(data.data);
-		} catch (e) {
-			console.error(e);
-		}
-	};
-
-	/**
-	 * This method renders the documents for react table
-	 * @method subComponent
-	 */
-	const subComponent = (row) => {
-		return (
-			<div>
-				<Grid container spacing={2}>
-					<Grid item xs={1}></Grid>
-					<Grid item xs={4}>
-						<p>Opened:</p>
-						<ol>
-							{row.original.opened.map((o) => (
-								<li>
-									<a
-										target={'_blank'}
-										rel="noreferrer"
-										href={`/#/pdfviewer/gamechanger?filename=${encode(o)}`}
-									>
-										{' '}
-										{o}{' '}
-									</a>
-								</li>
-							))}
-						</ol>
-					</Grid>
-					<Grid item xs={3}>
-						<p>Exported:</p>
-						<ol>
-							{row.original.ExportDocument.map((e) => (
-								<li>
-									<a
-										target={'_blank'}
-										rel="noreferrer"
-										href={`/#/pdfviewer/gamechanger?filename=${encode(e)}`}
-									>
-										{' '}
-										{e}{' '}
-									</a>
-								</li>
-							))}
-						</ol>
-					</Grid>
-					<Grid item xs={4}>
-						<p>Favorited:</p>
-						<ol>
-							{row.original.Favorite.map((f) => (
-								<li>
-									<a
-										target={'_blank'}
-										rel="noreferrer"
-										href={`/#/pdfviewer/gamechanger?filename=${encode(f)}`}
-									>
-										{' '}
-										{f}{' '}
-									</a>
-								</li>
-							))}
-						</ol>
-					</Grid>
-				</Grid>
-			</div>
-		);
+		const data = await gameChangerAPI.getClonesMatomo();
+		setCloneList(data.data.clones);
+		setCloneName(`${data.data.default.category_id}-${data.data.default.name}`);
 	};
 
 	/**
@@ -451,27 +351,125 @@ export default () => {
 	 * @method exportData
 	 */
 	const exportData = async (name) => {
-		try {
-			const params = {
-				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-				endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-				table: name,
-				cloneName: cloneName.split('-')[1],
-				cloneID: cloneName.split('-')[0],
-			};
-			const data = await gameChangerAPI.exportUserData(params);
-			const url = window.URL.createObjectURL(
-				new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-			);
-			const link = document.createElement('a');
-			link.href = url;
-			link.setAttribute('download', `${name}.xlsx`); //or any other extension
-			document.body.appendChild(link);
-			link.click();
-		} catch (e) {
-			console.error(e);
-		}
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			table: name,
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		const data = await gameChangerAPI.exportUserData(params);
+		const url = window.URL.createObjectURL(
+			new Blob([data.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+		);
+		const link = document.createElement('a');
+		link.href = url;
+		link.setAttribute('download', `${name}.xlsx`); //or any other extension
+		document.body.appendChild(link);
+		link.click();
 	};
+
+	/**
+	 * This method queries Matomo for documents based on search.
+	 * The query is handled in gamechanger-api.
+	 * @method getSearchPdfMapping
+	 */
+	const getSearchPdfMapping = useCallback(() => {
+		setLoading((prevState) => ({
+			...prevState,
+			searchMapping: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getSearchPdfMapping(params).then((data) => {
+			setMappingData(data.data.data);
+			setLoading((prevState) => ({
+				...prevState,
+				searchMapping: true,
+			}));
+		});
+	}, [startDate, endDate, cloneName]);
+
+	/**
+	 * This method queries postgres for feedback data.
+	 * The query is handled in gamechanger-api.
+	 * @method getFeedbackData
+	 */
+	const getFeedbackData = useCallback(() => {
+		gameChangerAPI.getFeedbackData().then((data) => {
+			setFeedbackData(data.data.results);
+		});
+	}, []);
+
+	/**
+	 * This method queries postgres for feedback data.
+	 * The query is handled in gamechanger-api.
+	 * @method getDocumentData
+	 */
+	const getDocumentData = useCallback(() => {
+		const params = { startDate, endDate };
+		gameChangerAPI.getDocumentUsage(params).then((data) => {
+			setDocumentData(data.data);
+		});
+	}, [startDate, endDate]);
+
+	/**
+	 * This method queries postgres for user aggregations.
+	 * The query is handled in gamechanger-api.
+	 * @method getUserAggData
+	 */
+	const getUserAggData = useCallback(() => {
+		setLoading((prevState) => ({
+			...prevState,
+			userData: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getUserAggregations(params).then((data) => {
+			setUserAggData(data.data.users);
+			setLoading((prevState) => ({
+				...prevState,
+				userData: true,
+			}));
+		});
+	}, [startDate, endDate, cloneName]);
+
+	/**
+	 * This method queries postgres for graph data.
+	 * The query is handled in gamechanger-api.
+	 * @method getUserGraphData
+	 */
+	const getUserGraphData = useCallback(() => {
+		setLoading((prevState) => ({
+			...prevState,
+			userGraph: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneName: cloneName.split('-')[1],
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI.getUserDashboard(params).then((data) => {
+			setGraphData({
+				searchBar: data.data.searchBar,
+				userBar: data.data.userBar,
+			});
+			setCardData(data.data.cards);
+			setLoading((prevState) => ({
+				...prevState,
+				userGraph: true,
+			}));
+		});
+	}, [startDate, endDate, cloneName]);
 	/**
 	 * Takes in a set time to go back in the query
 	 * @param {string} back
@@ -497,23 +495,29 @@ export default () => {
 	};
 
 	useEffect(() => {
-		switch (tabIndex) {
-			case 'pdfMapping':
-				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-				getUserAggData(startDate, endDate, cloneName, setUserAggData);
-				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
-				break;
-			case 'userTracking':
-				getDocumentData(startDate, endDate, setDocumentData);
-				break;
-			default:
-				getSearchPdfMapping(startDate, endDate, cloneName, setMappingData);
-				getFeedbackData(setFeedbackData);
-				getUserAggData(startDate, endDate, cloneName, setUserAggData);
-				getUserGraphData(startDate, endDate, cloneName, setGraphData, setCardData);
-				getDocumentData(startDate, endDate, setDocumentData);
+		if (cloneName !== '') {
+			switch (tabIndex) {
+				case 'pdfMapping':
+					getSearchPdfMapping();
+					break;
+				case 'userAgg':
+					getUserAggData();
+					getUserGraphData();
+					break;
+				case 'userTracking':
+					getDocumentData();
+					break;
+				case 'feedback':
+					getFeedbackData();
+					break;
+				default:
+					console.log('no tab selected');
+					getUserAggData();
+					getUserGraphData();
+					break;
+			}
 		}
-	}, [tabIndex, startDate, endDate, cloneName]);
+	}, [tabIndex, cloneName, getUserGraphData, getUserAggData, getDocumentData, getFeedbackData, getSearchPdfMapping]);
 
 	useEffect(() => {
 		getCloneData();
@@ -684,108 +688,112 @@ export default () => {
 								margin: '10px 80px',
 							}}
 						>
-							<Grid container spacing={2}>
-								<Grid item xs={2}>
-									<Card>
-										<CardContent>
-											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-												Total Searches
-											</p>
-											{cardData.total_searches}
-										</CardContent>
-									</Card>
+							{loaded.userGraph ? (
+								<Grid container spacing={2}>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Total Searches
+												</p>
+												{cardData.total_searches}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Unique Searches
+												</p>
+												{cardData.unique_searches}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Unique Users
+												</p>
+												{cardData.unique_users}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={3}></Grid>
+									<Grid item lg={2} xs={3}>
+										<GCPrimaryButton
+											onClick={() => {
+												trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
+												exportData('UserData');
+											}}
+											style={{ minWidth: 'unset' }}
+										>
+											Export User Data
+										</GCPrimaryButton>
+									</Grid>
+									<Grid item xs={12} lg={6}>
+										<div
+											style={{
+												font: 'normal normal 600 14px Noto Sans',
+												color: '#666666',
+												marginBottom: 10,
+											}}
+										>
+											USERS BY MONTH
+										</div>
+										<div style={{ height: 250 }}>
+											<ResponsiveContainer width="100%" height="100%">
+												<BarChart
+													data={graphData.userBar}
+													margin={{
+														top: 15,
+														right: 30,
+														left: 20,
+														bottom: 5,
+													}}
+												>
+													<XAxis dataKey="date" />
+													<YAxis allowDataOverflow={true} type="number" width={35} />
+													<Tooltip />
+													<Bar dataKey="count" fill={gcOrange} />
+												</BarChart>
+											</ResponsiveContainer>
+										</div>
+									</Grid>
+									<Grid item xs={12} lg={6}>
+										<div
+											style={{
+												font: 'normal normal 600 14px Noto Sans',
+												color: '#666666',
+												marginBottom: 10,
+											}}
+										>
+											SEARCHES BY MONTH
+										</div>
+										<div style={{ height: 250 }}>
+											<ResponsiveContainer width="100%" height="100%">
+												<BarChart
+													data={graphData.searchBar}
+													margin={{
+														top: 15,
+														right: 30,
+														left: 20,
+														bottom: 5,
+													}}
+												>
+													<XAxis dataKey="date" />
+													<YAxis allowDataOverflow={true} type="number" width={35} />
+													<Tooltip />
+													<Bar dataKey="count" fill={gcOrange} />
+												</BarChart>
+											</ResponsiveContainer>
+										</div>
+									</Grid>
 								</Grid>
-								<Grid item xs={2}>
-									<Card>
-										<CardContent>
-											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-												Unique Searches
-											</p>
-											{cardData.unique_searches}
-										</CardContent>
-									</Card>
-								</Grid>
-								<Grid item xs={2}>
-									<Card>
-										<CardContent>
-											<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-												Unique Users
-											</p>
-											{cardData.unique_users}
-										</CardContent>
-									</Card>
-								</Grid>
-								<Grid item xs={3}></Grid>
-								<Grid item lg={2} xs={3}>
-									<GCPrimaryButton
-										onClick={() => {
-											trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
-											exportData('UserData');
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										Export User Data
-									</GCPrimaryButton>
-								</Grid>
-								<Grid item xs={12} lg={6}>
-									<div
-										style={{
-											font: 'normal normal 600 14px Noto Sans',
-											color: '#666666',
-											marginBottom: 10,
-										}}
-									>
-										USERS BY MONTH
-									</div>
-									<div style={{ height: 250 }}>
-										<ResponsiveContainer width="100%" height="100%">
-											<BarChart
-												data={graphData.userBar}
-												margin={{
-													top: 15,
-													right: 30,
-													left: 20,
-													bottom: 5,
-												}}
-											>
-												<XAxis dataKey="date" />
-												<YAxis allowDataOverflow={true} type="number" width={35} />
-												<Tooltip />
-												<Bar dataKey="count" fill={gcOrange} />
-											</BarChart>
-										</ResponsiveContainer>
-									</div>
-								</Grid>
-								<Grid item xs={12} lg={6}>
-									<div
-										style={{
-											font: 'normal normal 600 14px Noto Sans',
-											color: '#666666',
-											marginBottom: 10,
-										}}
-									>
-										SEARCHES BY MONTH
-									</div>
-									<div style={{ height: 250 }}>
-										<ResponsiveContainer width="100%" height="100%">
-											<BarChart
-												data={graphData.searchBar}
-												margin={{
-													top: 15,
-													right: 30,
-													left: 20,
-													bottom: 5,
-												}}
-											>
-												<XAxis dataKey="date" />
-												<YAxis allowDataOverflow={true} type="number" width={35} />
-												<Tooltip />
-												<Bar dataKey="count" fill={gcOrange} />
-											</BarChart>
-										</ResponsiveContainer>
-									</div>
-								</Grid>
-							</Grid>
+							) : (
+								<LoadingIndicator customColor={gcOrange} />
+							)}
 						</div>
 						<div
 							style={{
@@ -796,13 +804,17 @@ export default () => {
 						>
 							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>User Data</p>
 						</div>
-						<ReactTable
-							data={userAggData}
-							columns={userAggColumns}
-							defaultSorted={[{ id: 'searches_made', desc: true }]}
-							style={{ margin: '0 80px 20px 80px', height: 700 }}
-							SubComponent={subComponent}
-						/>
+						{loaded.userData ? (
+							<ReactTable
+								data={userAggData}
+								columns={userAggColumns}
+								defaultSorted={[{ id: 'searches_made', desc: true }]}
+								style={{ margin: '0 80px 20px 80px', height: 700 }}
+								SubComponent={subComponent}
+							/>
+						) : (
+							<LoadingIndicator customColor={gcOrange} />
+						)}
 					</TabPanel>
 					<TabPanel>
 						<div
@@ -825,13 +837,16 @@ export default () => {
 								Export Mapping
 							</GCPrimaryButton>
 						</div>
-
-						<ReactTable
-							data={mappingData}
-							columns={columns}
-							style={{ margin: '0 80px 20px 80px', height: 1000 }}
-							defaultSorted={[{ id: 'searchtime', desc: true }]}
-						/>
+						{loaded.searchMapping ? (
+							<ReactTable
+								data={mappingData}
+								columns={columns}
+								style={{ margin: '0 80px 20px 80px', height: 1000 }}
+								defaultSorted={[{ id: 'searchtime', desc: true }]}
+							/>
+						) : (
+							<LoadingIndicator customColor={gcOrange} />
+						)}
 					</TabPanel>
 					<TabPanel>
 						<div

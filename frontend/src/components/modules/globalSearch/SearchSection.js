@@ -16,7 +16,7 @@ export default function SearchSection(props) {
 				</span>
 			</div>
 
-			<div className="row" style={styles.childContainer}>
+			<div className="row" style={styles.childContainer} data-cy={`results-${section}`}>
 				{children}
 			</div>
 		</div>
