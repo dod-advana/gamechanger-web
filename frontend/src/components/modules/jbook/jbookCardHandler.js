@@ -967,10 +967,21 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(cloneName, searchText, item, selectedPortfolio);
+								// LINK TO PDF PAGE
 							}}
 						>
 							Open
+						</CardButton>
+						<CardButton
+							target={'_blank'}
+							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+							href={'#'}
+							onClick={(e) => {
+								e.preventDefault();
+								clickFn(cloneName, searchText, item, selectedPortfolio);
+							}}
+						>
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton
