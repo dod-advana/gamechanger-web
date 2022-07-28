@@ -611,7 +611,10 @@ const getMetadataTableData = (
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
-	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
+	const projectTitle =
+		projectData.budgetType === 'odoc'
+			? projectData.budgetActivityTitle
+			: projectData.projectTitle ?? projectData.budgetLineItemTitle;
 	const title = projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : '';
 	const element = programElement && programElement !== 'undefined' ? `${programElement} ` : '';
 	const service =
