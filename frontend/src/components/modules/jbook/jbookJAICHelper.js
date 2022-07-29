@@ -29,7 +29,13 @@ const createReviewersObject = (dropdownData, reviewerType) => {
 		});
 	}
 
-	return reviewers;
+	//sorts reviewers
+	return Object.keys(reviewers)
+		.sort()
+		.reduce((obj, key) => {
+			obj[key] = reviewers[key];
+			return obj;
+		}, {});
 };
 
 const ReviewersValue = React.memo((props) => {
