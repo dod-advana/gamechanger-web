@@ -281,7 +281,7 @@ const JbookViewHeaderHandler = (props) => {
 	return (
 		<div
 			className={'results-count-view-buttons-container'}
-			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 10px 0px 0px' }}
+			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 0px 0px 0px' }}
 		>
 			<div className={'view-buttons-container'} style={{ marginRight: 10, zIndex: 99, justifyContent: 'right' }}>
 				<JBookPortfolioSelector
@@ -465,7 +465,7 @@ const JbookViewHeaderHandler = (props) => {
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'right', marginTop: 15, flexWrap: 'wrap' }}>
+			<div style={{ display: 'flex', justifyContent: 'left', marginTop: 15, flexWrap: 'wrap' }}>
 				{filterList.map((filter) => {
 					const { type, optionName } = filter;
 					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';

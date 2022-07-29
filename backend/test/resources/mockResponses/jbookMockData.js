@@ -1461,6 +1461,32 @@ const userReviews = {
 		aborted: false,
 	},
 };
+const commentData = [
+	{
+		author: null,
+		createdAt: '2022-07-15T18:51:39.669Z',
+		deleted: false,
+		docID: 'pdoc#2023#PB#05#F03500#57#N/A#3010',
+		downvotes: ['test'],
+		id: 3,
+		message: 'test message',
+		portfolioName: 'AI Inventory',
+		updatedAt: '2022-07-15T21:44:52.984Z',
+		upvotes: [],
+	},
+	{
+		author: null,
+		createdAt: '2022-07-15T18:55:39.669Z',
+		deleted: false,
+		docID: 'pdoc#2023#PB#05#F03500#57#N/A#3010',
+		downvotes: [],
+		id: 4,
+		message: 'test message 2',
+		portfolioName: 'AI Inventory',
+		updatedAt: '2022-07-15T21:44:55.984Z',
+		upvotes: [],
+	},
+];
 
 module.exports = {
 	profileData,
@@ -1469,4 +1495,5 @@ module.exports = {
 	esData,
 	portfolioData,
 	userReviews,
+	commentData,
 };
