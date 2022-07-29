@@ -877,7 +877,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		service_mp_list_n: {
+		service_mp_list_s: {
 			newName: 'serviceMissionPartnersList', //'missionPartnersList',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1022,7 +1022,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		poc_joint_capability_area2_n: {
+		poc_joint_capability_area2_s: {
 			newName: 'pocJointCapabilityArea2', //'jointCapabilityArea',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1033,7 +1033,7 @@ module.exports = {
 				}
 			},
 		},
-		poc_joint_capability_area3_n: {
+		poc_joint_capability_area3_s: {
 			newName: 'pocJointCapabilityArea3', //'jointCapabilityArea',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1104,7 +1104,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		domain_task_secondary_n: {
+		domain_task_secondary_s: {
 			newName: 'domainTaskSecondary',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1170,7 +1170,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		poc_mp_list_n: {
+		poc_mp_list_s: {
 			newName: 'pocMissionPartnersList',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1956,6 +1956,11 @@ module.exports = {
 		},
 		currentYearAmount_d: {
 			newName: 'currentYearAmount',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		lineNumber_s: {
+			newName: 'lineNumber',
 			defaultValue: '',
 			processValue: (value) => value,
 		},

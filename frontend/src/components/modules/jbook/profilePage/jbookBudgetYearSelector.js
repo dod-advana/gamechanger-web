@@ -9,22 +9,26 @@ const JBookBudgetYearSelector = ({
 	selectBudgetYearProjectData,
 	formControlStyle,
 	width,
+	getCommentThread,
 }) => {
 	const classes = useStyles();
 
 	// handle budget year selector change
 	const handleChangeBudgetYear = useCallback(
-		(event) => {
+		async (event) => {
 			try {
 				const year = event.target.value;
 
-				selectBudgetYearProjectData(budgetYearProjectData, year, selectedPortfolio);
+				const docID = await selectBudgetYearProjectData(budgetYearProjectData, year, selectedPortfolio);
+
+				// get this doc/portfolio comment thread
+				await getCommentThread(docID, selectedPortfolio);
 			} catch (err) {
 				console.log('Error setting profile page budget year');
 				console.log(err);
 			}
 		},
-		[budgetYearProjectData, selectedPortfolio, selectBudgetYearProjectData]
+		[budgetYearProjectData, selectedPortfolio, selectBudgetYearProjectData, getCommentThread]
 	);
 
 	const renderBudgetYearOptions = useCallback(() => {

@@ -8,6 +8,7 @@ const {
 	portfolioData,
 	reviewData,
 	userReviews,
+	commentData,
 } = require('../../resources/mockResponses/jbookMockData');
 
 describe('JBookDataHandler', function () {
@@ -479,7 +480,7 @@ describe('JBookDataHandler', function () {
 		});
 	});
 
-	describe('#getPortfolios', () => {
+	describe('#portfolios', () => {
 		it('should get all portfolios', async (done) => {
 			const opts = {
 				...constructorOptionsMock,
@@ -525,6 +526,119 @@ describe('JBookDataHandler', function () {
 			};
 			const actual = await target.getPortfolios(req, 'Test');
 			assert.deepStrictEqual(expected, actual);
+			done();
+		});
+	});
+
+	// just for cog complexity..
+	const updateForVote = ({ upvotes, downvotes }, { where }) => {
+		if (upvotes && upvotes[0] === 'test' && downvotes && downvotes.length === 0 && where.id) {
+			return [1];
+		}
+		return [0];
+	};
+
+	describe('#comments', () => {
+		it('should get all comments of a specific thread', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					findAll: ({ where: { docID, portfolioName } }) => {
+						if (docID && portfolioName) {
+							return Promise.resolve({
+								data: commentData,
+							});
+						}
+						return Promise.resolve('missing a field to get comment thread');
+					},
+				},
+			};
+			const req = { body: { docID: 3, portfolioName: 'AI Inventory' } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = { data: commentData };
+			const actual = await target.getCommentThread(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should get create a comment with docID, portfolioName, and message', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					create: ({ docID, portfolioName, message, deleted }) => {
+						return docID && portfolioName && message && deleted === false;
+					},
+				},
+			};
+			const req = { body: { docID: 3, portfolioName: 'AI Inventory', message: 'test message' } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = true;
+			const actual = await target.createComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should get delete a comment (set deleted to true) using comment ID', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					update: ({ deleted }, { where }) => {
+						if (deleted === true && where.id) {
+							return [1];
+						}
+						return [0];
+					},
+				},
+			};
+			const req = { body: { id: 3 } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = { deleted: true };
+			const actual = await target.deleteComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should vote on a comment depending on comment ID and field (upvotes or downvotes)', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					findOne: ({ where }) => {
+						if (where.id) {
+							return commentData[0];
+						}
+					},
+					update: updateForVote,
+				},
+			};
+			const req = { body: { id: 3, field: 'upvotes' } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = { updated: true };
+			const actual = await target.voteComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
 			done();
 		});
 	});
