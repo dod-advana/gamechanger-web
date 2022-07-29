@@ -324,7 +324,7 @@ class JBookSearchUtility {
 
 				hit.inner_hits.review_n.hits.hits.forEach((review) => {
 					const parsedReview = this.parseFields(review._source, false, 'reviewES');
-
+					parsedReview.id = hit._id;
 					results.push({ ...result, ...parsedReview });
 				});
 			});
