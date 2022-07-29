@@ -155,6 +155,16 @@ const columns = [
 		id: 'serviceAgency',
 	},
 	{
+		Header: () => <p style={styles.tableColumn}>PORTFOLIO</p>,
+		accessor: 'portfolioName',
+		width: 130,
+		Cell: (row) => <TableData data={row.value} />,
+		headerStyle: {
+			overflow: 'visible',
+		},
+		id: 'portfolioName',
+	},
+	{
 		Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER</p>,
 		accessor: 'primaryReviewer',
 		width: 130,
@@ -262,6 +272,22 @@ const columns = [
 	},
 ];
 
+const getTbodyProps = () => {
+	return {
+		style: {
+			overflowY: 'auto',
+			overflowX: 'hidden',
+		},
+		id: 'list-view-tbody',
+	};
+};
+
+const getTdProps = () => ({
+	style: {
+		whiteSpace: 'unset',
+	},
+});
+
 const JBookUserDashboard = (props) => {
 	const [toDoList, setToDoList] = useState([]);
 	const [completedList, setCompletedList] = useState([]);
@@ -343,46 +369,25 @@ const JBookUserDashboard = (props) => {
 					defaultFilterMethod={(filter, row) =>
 						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
 					}
-					getTbodyProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								overflowY: 'auto',
-								overflowX: 'hidden',
-							},
-							id: 'list-view-tbody',
-						};
-					}}
-					getTdProps={(state, rowInfo, column) => ({
-						style: {
-							whiteSpace: 'unset',
-						},
-					})}
-					getTheadThProps={(state, rowInfo, column) => {
+					getTbodyProps={getTbodyProps}
+					getTdProps={getTdProps}
+					getTheadThProps={() => {
 						return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
 					}}
-					getTheadTrProps={(state, rowInfo, column) => {
+					getTheadTrProps={() => {
 						return { style: { overflow: 'visible' } };
 					}}
-					getTrProps={(state, rowInfo, column) => {
+					getTrProps={(_state, rowInfo, _column) => {
 						return {
 							style: { cursor: 'pointer' },
 							onClick: () => {
 								const row = rowInfo.row;
-								const {
-									projectTitle,
-									projectNum,
-									budgetLineItem,
-									budgetType,
-									keywords,
-									budgetYear,
-									id,
-									appropriationNumber,
-								} = row;
+								const { budgetType, keywords, budgetYear, id, appropriationNumber, portfolioName } =
+									row;
 								// I do not understand why row changes programElement into BLI
-								const programElement = rowInfo.original.programElement;
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?type=${encodeURIComponent(
 									budgetType
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								)}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
 								if (keywords && keywords.length) {
 									url += `&keywords=${keywords}`;
 								}
@@ -407,46 +412,25 @@ const JBookUserDashboard = (props) => {
 					defaultFilterMethod={(filter, row) =>
 						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
 					}
-					getTbodyProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								overflowY: 'auto',
-								overflowX: 'hidden',
-							},
-							id: 'list-view-tbody',
-						};
-					}}
-					getTdProps={(state, rowInfo, column) => ({
-						style: {
-							whiteSpace: 'unset',
-						},
-					})}
-					getTheadThProps={(state, rowInfo, column) => {
+					getTbodyProps={getTbodyProps}
+					getTdProps={getTdProps}
+					getTheadThProps={() => {
 						return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
 					}}
-					getTheadTrProps={(state, rowInfo, column) => {
+					getTheadTrProps={() => {
 						return { style: { overflow: 'visible' } };
 					}}
-					getTrProps={(state, rowInfo, column) => {
+					getTrProps={(_state, rowInfo, _column) => {
 						return {
 							style: { cursor: 'pointer' },
 							onClick: () => {
 								const row = rowInfo.row;
-								const {
-									projectTitle,
-									projectNum,
-									budgetLineItem,
-									budgetType,
-									keywords,
-									budgetYear,
-									id,
-									appropriationNumber,
-								} = row;
+								const { budgetType, keywords, budgetYear, id, appropriationNumber, portfolioName } =
+									row;
 								// I do not understand why row changes programElement into BLI
-								const programElement = rowInfo.original.programElement;
-								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?type=${encodeURIComponent(
 									budgetType
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								)}&&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
 								if (keywords && keywords.length) {
 									url += `&keywords=${keywords}`;
 								}
