@@ -308,6 +308,27 @@ const JBookUserDashboard = (props) => {
 	}, []);
 
 	useEffect(() => {
+		const checkIfFinished = (doc, finished) => {
+			let returnBool = false;
+			if (permissions.primary) {
+				returnBool = doc.primaryReviewStatus === 'Finished Review';
+			}
+
+			if (permissions.service) {
+				returnBool = doc.serviceReviewStatus === 'Finished Review';
+			}
+
+			if (permissions.poc) {
+				returnBool = doc.pocReviewStatus === 'Finished Review';
+			}
+
+			if (doc.reviewStatus) {
+				returnBool = doc.reviewStatus === 'Finished Review';
+			}
+
+			if (finished) return returnBool;
+			return !returnBool;
+		};
 		if (permissions && email) {
 			gameChangerAPI
 				.callDataFunction({
@@ -318,37 +339,11 @@ const JBookUserDashboard = (props) => {
 				.then((data) => {
 					const docs = data.data.docs;
 					const toDo = docs.filter((doc) => {
-						let returnBool = false;
-						if (permissions.primary) {
-							returnBool = doc.primaryReviewStatus !== 'Finished Review';
-						}
-
-						if (permissions.service) {
-							returnBool = doc.serviceReviewStatus !== 'Finished Review';
-						}
-
-						if (permissions.poc) {
-							returnBool = doc.pocReviewStatus !== 'Finished Review';
-						}
-
-						return returnBool;
+						return checkIfFinished(doc, false);
 					});
 
 					const finished = docs.filter((doc) => {
-						let returnBool = false;
-						if (permissions.primary) {
-							returnBool = doc.primaryReviewStatus === 'Finished Review';
-						}
-
-						if (permissions.service) {
-							returnBool = doc.serviceReviewStatus === 'Finished Review';
-						}
-
-						if (permissions.poc) {
-							returnBool = doc.pocReviewStatus === 'Finished Review';
-						}
-
-						return returnBool;
+						return checkIfFinished(doc, true);
 					});
 
 					setToDoList(toDo);
