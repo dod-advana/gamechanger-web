@@ -80,16 +80,21 @@ const styles = {
 	},
 };
 
+const TableData = (props) => {
+	const { data } = props;
+	return (
+		<div style={{ textAlign: 'center' }}>
+			<p>{data}</p>
+		</div>
+	);
+};
+
 const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>ID</p>,
 		accessor: 'id',
 		width: 190,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -99,13 +104,9 @@ const columns = [
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>BUDGET TYPE</p>,
-		accessor: 'type',
+		accessor: 'budgetType',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -116,11 +117,7 @@ const columns = [
 		Header: () => <p style={styles.tableColumn}>BUDGET YEAR (FY)</p>,
 		accessor: 'budgetYear',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -130,33 +127,21 @@ const columns = [
 		Header: () => <p style={styles.tableColumn}>PROGRAM ELEMENT / BUDGET LINE ITEM</p>,
 		accessor: (row) => (row.budgetLineItem && row.budgetLineItem !== '-' ? row.budgetLineItem : row.programElement),
 		width: 180,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'programElement',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
 		accessor: 'projectNum',
 		width: 155,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'projectNum',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
 		accessor: 'projectTitle',
 		width: 190,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'projectTitle',
 	},
 	{
@@ -166,22 +151,14 @@ const columns = [
 		headerStyle: {
 			overflow: 'visible',
 		},
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'serviceAgency',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER</p>,
 		accessor: 'primaryReviewer',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -194,11 +171,7 @@ const columns = [
 				? row.serviceSecondaryReviewer
 				: row.serviceReviewer,
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -215,11 +188,7 @@ const columns = [
 				? `${row.servicePOCName} (${row.servicePOCOrg})`
 				: row.servicePOCName,
 		width: 120,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -230,11 +199,7 @@ const columns = [
 		accessor: (row) => row.keywords,
 		width: 150,
 		show: false,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'keywords',
 	},
 	{
@@ -274,11 +239,7 @@ const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>SOURCE</p>,
 		accessor: 'sourceTag',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -288,22 +249,14 @@ const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>BUDGET LINE ITEM #</p>,
 		accessor: 'budgetLineItem',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'budgetLineItem',
 		show: false,
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>APPROPRIATION NUMBER</p>,
 		accessor: 'appropriationNumber',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'appropriationNumber',
 		show: false,
 	},
@@ -427,7 +380,7 @@ const JBookUserDashboard = (props) => {
 								} = row;
 								// I do not understand why row changes programElement into BLI
 								const programElement = rowInfo.original.programElement;
-								let url = `#/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
 									budgetType
 								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
 								if (keywords && keywords.length) {
@@ -491,7 +444,7 @@ const JBookUserDashboard = (props) => {
 								} = row;
 								// I do not understand why row changes programElement into BLI
 								const programElement = rowInfo.original.programElement;
-								let url = `#/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
 									budgetType
 								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
 								if (keywords && keywords.length) {
