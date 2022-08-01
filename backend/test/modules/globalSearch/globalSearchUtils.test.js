@@ -1,14 +1,6 @@
-const assert = require('assert');
-const rewire = require('rewire');
-const globalSearchUtils = rewire('../../../node_app/modules/globalSearch/globalSearchUtils');
+const globalSearchUtils = require('../../../node_app/modules/globalSearch/globalSearchUtils');
 
-const processQlikApps = globalSearchUtils.__get__('processQlikApps');
-
-globalSearchUtils.__set__({
-	QLIK_EXCLUDE_CUST_PROP_NAME: 'excludeName',
-	QLIK_EXCLUDE_CUST_PROP_VAL: 'boop',
-	QLIK_BUSINESS_DOMAIN_PROP_NAME: 'businessDomain',
-});
+const processQlikApps = globalSearchUtils.processQlikApps;
 
 const APP_TO_BE_EXCLUDED = {
 	id: '7ef0bc64-40bf-41ad-a046-c58a84504bf9',
@@ -317,7 +309,11 @@ const qlikStreamRes = [STREAM_TO_BE_EXCLUDED, STREAM_WITH_OTHER_CUSTOM_PROP, STR
 
 describe('GlobalSearchUtils', function () {
 	describe('#processQlikApps', () => {
-		const processedApps = processQlikApps(qlikAppRes, qlikStreamRes);
+		const processedApps = processQlikApps(qlikAppRes, qlikStreamRes, {
+			QLIK_EXCLUDE_CUST_PROP_NAME: 'excludeName',
+			QLIK_EXCLUDE_CUST_PROP_VAL: 'boop',
+			QLIK_BUSINESS_DOMAIN_PROP_NAME: 'businessDomain',
+		});
 
 		it(`excludes apps based on app's business domain`, async () => {
 			const hasAppWithExcludedProperties = processedApps.some(
