@@ -49,8 +49,6 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 		const tmpData = { ...editReviewerData };
 		tmpData[key] = value;
 
-		console.log(key);
-
 		if (key === 'type') {
 			switch (value) {
 				case 'primary':
@@ -118,7 +116,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Name"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.name : null}
+								defaultValue={editReviewerData?.name}
 								onChange={(event) => handleTextChange(event.target.value, 'name')}
 								className={classes.textField}
 								margin="dense"
@@ -128,7 +126,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Organization"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.organization : null}
+								defaultValue={editReviewerData?.organization}
 								onChange={(event) => handleTextChange(event.target.value, 'organization')}
 								className={classes.textField}
 								margin="dense"
@@ -137,7 +135,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Phone Number"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.phone_number : null}
+								defaultValue={editReviewerData?.phone_number}
 								onChange={(event) => handleTextChange(event.target.value, 'phone_number')}
 								className={classes.textField}
 								margin="dense"
@@ -150,7 +148,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								options={['primary', 'service', 'secondary']}
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
-								defaultValue={editReviewerData ? editReviewerData.type : null}
+								defaultValue={editReviewerData?.type}
 								onChange={(_event, value) => {
 									handleTextChange(value, 'type');
 								}}
@@ -170,7 +168,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Email"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.email : null}
+								defaultValue={editReviewerData?.email}
 								onChange={(event) => handleTextChange(event.target.value, 'email')}
 								className={classes.textField}
 								margin="dense"
@@ -180,7 +178,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Title"
 								id="margin-dense"
-								value={editReviewerData ? editReviewerData.title : null}
+								value={editReviewerData?.title}
 								onChange={(event) => handleTextChange(event.target.value, 'title')}
 								className={classes.textField}
 								margin="dense"
