@@ -129,12 +129,14 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					state={state}
 					dispatch={dispatch}
 					classes={classes}
+					searchSettingsName={'searchSettings'}
 					filter={'orgFilter'}
 					originalFilters={originalOrgFilters}
 					allSelected={'allOrgsSelected'}
 					specificSelected={'specificOrgsSelected'}
 					update={'orgUpdate'}
 					trackingName={'OrgFilterToggle'}
+					showNumResultsPerOption
 				/>
 			)}
 		</FormControl>
@@ -283,12 +285,14 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 						state={state}
 						dispatch={dispatch}
 						classes={classes}
+						searchSettingsName={'searchSettings'}
 						filter={'typeFilter'}
 						originalFilters={originalTypeFilters}
 						allSelected={'allTypesSelected'}
 						specificSelected={'specificTypesSelected'}
 						update={'typeUpdate'}
 						trackingName={'TypeFilterToggle'}
+						showNumResultsPerOption
 					/>
 				</>
 			)}
