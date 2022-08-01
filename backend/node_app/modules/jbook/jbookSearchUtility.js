@@ -335,7 +335,7 @@ class JBookSearchUtility {
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, '9V1IZLH', userId);
-			return results;
+			return searchResults;
 		}
 	}
 
