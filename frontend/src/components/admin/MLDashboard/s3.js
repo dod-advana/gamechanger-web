@@ -273,6 +273,34 @@ export default (props) => {
 		},
 	];
 
+	const s3ColumnsData = [
+		{
+			Header: 'Tar File',
+			accessor: 'file',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Upload Time',
+			accessor: 'upload',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Download',
+			accessor: '',
+			Cell: (row) => (
+				<TableRow>
+					<IconButton
+						onClick={() => {
+							downloadS3File(row, 'ml-data');
+						}}
+						style={{ color: 'white' }}
+					>
+						<CloudDownload fontSize="large" />
+					</IconButton>
+				</TableRow>
+			),
+		},
+	];
 	return (
 		<div>
 			<div
@@ -436,7 +464,7 @@ export default (props) => {
 						<div className="info-container">
 							<ReactTable
 								data={s3DataList}
-								columns={s3Columns}
+								columns={s3ColumnsData}
 								className="striped -highlight"
 								defaultPageSize={5}
 							/>

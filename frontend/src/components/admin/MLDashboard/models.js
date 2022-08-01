@@ -1119,7 +1119,7 @@ export default (props) => {
 								defaultPageSize={10}
 								SubComponent={(row) => {
 									return (
-										<div className="code-container" style={{ padding: '15px' }}>
+										<div className="code-container" style={{ padding: '15px', color: 'black' }}>
 											Files
 											<ul>
 												{row.original.files.map((d) => (
