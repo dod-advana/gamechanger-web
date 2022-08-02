@@ -139,20 +139,12 @@ export const EDASummaryView = (props) => {
 		} else if (field === 'issueDateRange') {
 			let newDate = new moment(value).format('YYYY-MM-DD');
 			if (isStartDate) {
-				if (newDate === 'Invalid date') {
-					edaSettings.startDate = null;
-				} else {
-					edaSettings.startDate = newDate;
-				}
+				edaSettings.startDate = newDate === 'Invalid date' ? null : newDate;
 			} else {
-				if (newDate === 'Invalid date') {
-					edaSettings.endDate = null;
-				} else {
-					edaSettings.endDate = newDate;
-				}
+				edaSettings.endDate = newDate === 'Invalid date' ? null : newDate;
 			}
 
-			if (value && value.toString() !== 'Invalid Date') {
+			if (value?.toString() !== 'Invalid Date') {
 				doSearch = runSearch;
 			}
 		} else if (field === 'contractIssueAgency') {
@@ -160,6 +152,39 @@ export const EDASummaryView = (props) => {
 			edaSettings.issueAgency = value;
 		}
 		setState(dispatch, { edaSearchSettings: edaSettings, runSearch: doSearch });
+	};
+
+	const getTbodyProps = () => {
+		return {
+			style: {
+				overflow: 'auto',
+			},
+		};
+	};
+
+	const getTdProps = () => ({
+		style: {
+			whiteSpace: 'unset',
+		},
+	});
+
+	const getTheadTrProps = () => {
+		return { style: styles.tableHeaderRow };
+	};
+
+	const getTheadThProps = () => {
+		return {
+			style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' },
+		};
+	};
+
+	const getTableProps = () => {
+		return {
+			style: {
+				borderTopRightRadius: 5,
+				borderTopLeftRadius: 5,
+			},
+		};
 	};
 
 	const renderDetailTable = () => {
@@ -176,47 +201,88 @@ export const EDASummaryView = (props) => {
 				multiSort={false}
 				showPageSizeOptions={false}
 				showPagination={false}
-				getTbodyProps={(state, rowInfo, column) => {
-					return {
-						style: {
-							overflow: 'auto',
-						},
-					};
-				}}
-				getTdProps={(state, rowInfo, column) => ({
-					style: {
-						whiteSpace: 'unset',
-					},
-				})}
-				getTrGroupProps={(state, rowInfo) => {
+				getTbodyProps={getTbodyProps}
+				getTdProps={getTdProps}
+				getTrGroupProps={() => {
 					return {
 						style: { maxHeight: 72 },
 					};
 				}}
-				getTheadTrProps={(state, rowInfo, column) => {
-					return { style: styles.tableHeaderRow };
-				}}
-				getTheadThProps={(state, rowInfo, column) => {
-					return {
-						style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' },
-					};
-				}}
+				getTheadTrProps={getTheadTrProps}
+				getTheadThProps={getTheadThProps}
 				style={{
 					height: '100%',
 					borderTopRightRadius: 5,
 					borderTopLeftRadius: 5,
 					width: 1160,
 				}}
-				getTableProps={(state, rowInfo, column) => {
-					return {
-						style: {
-							borderTopRightRadius: 5,
-							borderTopLeftRadius: 5,
-						},
-					};
-				}}
+				getTableProps={getTableProps}
 			/>
 		);
+	};
+
+	const renderRow = (row) => {
+		return (
+			<div style={{ textAlign: 'left' }}>
+				<p>{row.value}</p>
+			</div>
+		);
+	};
+
+	const getSummaryDetailTitle = (resultData) => {
+		let title = '';
+
+		for (const agg of edaSearchSettings.aggregations) {
+			if (resultData && resultData.length > 0 && resultData[0]) {
+				title += '[' + resultData[0][agg] + ']';
+				if (edaSearchSettings.aggregations.indexOf(agg) !== edaSearchSettings.aggregations.length - 1) {
+					title += ' - ';
+				}
+			}
+		}
+
+		return title;
+	};
+
+	const getProcurementInstrumentList = () => {
+		return {
+			Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
+			filterable: false,
+			accessor: 'procurementList',
+			width: 250,
+			Cell: (row) => (
+				<div style={{ textAlign: 'left' }}>
+					<p>{row.value}</p>
+				</div>
+			),
+			aggregate: (vals) => vals,
+			Aggregated: (row) => {
+				let subRows = row.row._subRows;
+				let resultData = [];
+				subRows.forEach((subRow) => {
+					for (let j = 0; j < edaSearchSettings.aggregations.length - 1; j++) {
+						subRow = subRow._subRows[0];
+					}
+					resultData.push(subRow);
+				});
+				resultData = resultData.map((r) => r._original);
+
+				return (
+					<Link
+						onClick={() => {
+							setShowDialog(true);
+							setSummaryDetailData(resultData);
+							setSummaryDetailTitle(getSummaryDetailTitle(resultData));
+						}}
+						style={{ color: '#386F94', cursor: 'pointer' }}
+					>
+						<div style={{ textAlign: 'left' }}>
+							<p>Open</p>
+						</div>
+					</Link>
+				);
+			},
+		};
 	};
 
 	const getSummaryColumns = (isDetailColumns = false) => {
@@ -226,11 +292,7 @@ export const EDASummaryView = (props) => {
 				filterable: false,
 				accessor: 'contract_issue_name_eda_ext',
 				width: 250,
-				Cell: (row) => (
-					<div style={{ textAlign: 'left' }}>
-						<p>{row.value}</p>
-					</div>
-				),
+				Cell: renderRow,
 				aggregate: (vals) => [...new Set(vals)],
 				id: 'contract_issue_name_eda_ext',
 				Aggregated: (row) => {
@@ -242,11 +304,7 @@ export const EDASummaryView = (props) => {
 				filterable: false,
 				accessor: 'contract_issue_dodaac_eda_ext',
 				width: 250,
-				Cell: (row) => (
-					<div style={{ textAlign: 'left' }}>
-						<p>{row.value}</p>
-					</div>
-				),
+				Cell: renderRow,
 				aggregate: (vals) => [...new Set(vals)].join(','),
 				Aggregated: (row) => {
 					return <span>{row.value} </span>;
@@ -258,11 +316,7 @@ export const EDASummaryView = (props) => {
 				filterable: false,
 				accessor: 'issuing_organization_eda_ext',
 				width: 200,
-				Cell: (row) => (
-					<div style={{ textAlign: 'left' }}>
-						<p>{row.value}</p>
-					</div>
-				),
+				Cell: renderRow,
 				aggregate: (vals) => [...new Set(vals)],
 				Aggregated: (row) => {
 					return <span>{row.value} </span>;
@@ -274,11 +328,7 @@ export const EDASummaryView = (props) => {
 				filterable: false,
 				accessor: 'vendor_name_eda_ext',
 				width: 250,
-				Cell: (row) => (
-					<div style={{ textAlign: 'left' }}>
-						<p>{row.value}</p>
-					</div>
-				),
+				Cell: renderRow,
 				aggregate: (vals) => [...new Set(vals)],
 				Aggregated: (row) => {
 					return <span>{row.value} </span>;
@@ -290,11 +340,7 @@ export const EDASummaryView = (props) => {
 				filterable: false,
 				accessor: 'reference_idv_eda_ext',
 				width: 200,
-				Cell: (row) => (
-					<div style={{ textAlign: 'left' }}>
-						<p>{row.value}</p>
-					</div>
-				),
+				Cell: renderRow,
 				aggregate: (vals) => [...new Set(vals)],
 				Aggregated: (row) => {
 					return <span>{row.value} </span>;
@@ -310,15 +356,15 @@ export const EDASummaryView = (props) => {
 					filterable: false,
 					accessor: 'procurement',
 					width: 150,
-					Cell: (row) => (
+					Cell: () => (
 						<div style={{ textAlign: 'left' }}>
 							<p>1</p>
 						</div>
 					),
-					aggregate: (vals, rows) => {
+					aggregate: (_vals, rows) => {
 						return rows.length;
 					},
-					Aggregated: (row, item) => {
+					Aggregated: (row) => {
 						return <span>{row.value}</span>;
 					},
 					id: 'totalProcurementInstruments',
@@ -383,58 +429,7 @@ export const EDASummaryView = (props) => {
 				// },
 			]);
 			if (edaSearchSettings.aggregations.length > 0) {
-				summaryColumns.push({
-					Header: () => <p style={styles.tableColumn}>Procurement Instrument List</p>,
-					filterable: false,
-					accessor: 'procurementList',
-					width: 250,
-					Cell: (row) => (
-						<div style={{ textAlign: 'left' }}>
-							<p>{row.value}</p>
-						</div>
-					),
-					aggregate: (vals) => vals,
-					Aggregated: (row) => {
-						let subRows = row.row._subRows;
-						let resultData = [];
-						for (let i = 0; i < subRows.length; i++) {
-							let subRow = subRows[i];
-							for (let j = 0; j < edaSearchSettings.aggregations.length - 1; j++) {
-								subRow = subRow._subRows[0];
-							}
-							resultData.push(subRow);
-						}
-						resultData = resultData.map((row) => row._original);
-
-						return (
-							<Link
-								onClick={(event) => {
-									setShowDialog(true);
-									setSummaryDetailData(resultData);
-									let title = '';
-									for (const agg of edaSearchSettings.aggregations) {
-										if (resultData && resultData.length > 0 && resultData[0]) {
-											title += '[' + resultData[0][agg] + ']';
-											if (
-												edaSearchSettings.aggregations.indexOf(agg) !==
-												edaSearchSettings.aggregations.length - 1
-											) {
-												title += ' - ';
-											}
-										}
-									}
-
-									setSummaryDetailTitle(title);
-								}}
-								style={{ color: '#386F94', cursor: 'pointer' }}
-							>
-								<div style={{ textAlign: 'left' }}>
-									<p>Open</p>
-								</div>
-							</Link>
-						);
-					},
-				});
+				summaryColumns.push(getProcurementInstrumentList());
 			}
 		} else {
 			// summary detail columns
@@ -454,33 +449,21 @@ export const EDASummaryView = (props) => {
 					filterable: false,
 					accessor: 'vendor_duns_eda_ext',
 					width: 200,
-					Cell: (row) => (
-						<div style={{ textAlign: 'left' }}>
-							<p>{row.value}</p>
-						</div>
-					),
+					Cell: renderRow,
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>Vendor Name</p>,
 					filterable: false,
 					accessor: 'vendor_name_eda_ext',
 					width: 200,
-					Cell: (row) => (
-						<div style={{ textAlign: 'left' }}>
-							<p>{row.value}</p>
-						</div>
-					),
+					Cell: renderRow,
 				},
 				{
 					Header: () => <p style={styles.tableColumn}>Obligated Amount ($)</p>,
 					filterable: false,
 					accessor: 'obligated_amounts_eda_ext',
 					width: 250,
-					Cell: (row) => (
-						<div style={{ textAlign: 'left' }}>
-							<p>{row.value}</p>
-						</div>
-					),
+					Cell: renderRow,
 				},
 			]);
 		}
@@ -651,7 +634,7 @@ export const EDASummaryView = (props) => {
 									style={{ backgroundColor: 'white', width: 300 }}
 									value={edaSearchSettings && edaSearchSettings.issueAgency}
 									default
-									onChange={(event, value) => setEDASearchSetting('contractIssueAgency', value)}
+									onChange={(_event, value) => setEDASearchSetting('contractIssueAgency', value)}
 								/>
 							</div>
 						</div>
@@ -730,40 +713,17 @@ export const EDASummaryView = (props) => {
 					multiSort={false}
 					showPageSizeOptions={false}
 					showPagination={false}
-					getTbodyProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								overflow: 'auto',
-							},
-						};
-					}}
-					getTdProps={(state, rowInfo, column) => ({
-						style: {
-							whiteSpace: 'unset',
-						},
-					})}
-					getTheadTrProps={(state, rowInfo, column) => {
-						return { style: styles.tableHeaderRow };
-					}}
-					getTheadThProps={(state, rowInfo, column) => {
-						return {
-							style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' },
-						};
-					}}
+					getTbodyProps={getTbodyProps}
+					getTdProps={getTdProps}
+					getTheadTrProps={getTheadTrProps}
+					getTheadThProps={getTheadThProps}
 					style={{
 						height: 'calc(100vh - 300px)',
 						borderTopRightRadius: 5,
 						borderTopLeftRadius: 5,
 						marginBottom: 10,
 					}}
-					getTableProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								borderTopRightRadius: 5,
-								borderTopLeftRadius: 5,
-							},
-						};
-					}}
+					getTableProps={getTableProps}
 				/>
 			</div>
 		</div>
