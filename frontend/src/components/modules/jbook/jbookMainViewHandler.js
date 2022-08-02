@@ -269,7 +269,6 @@ const getCardViewPanel = (props) => {
 		edaCount,
 		expansionDict,
 		cloneData,
-		loading,
 	} = state;
 
 	const sideScroll = !iframePreviewLink
