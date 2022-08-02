@@ -130,6 +130,7 @@ const JBookProfilePage = (props) => {
 	useEffect(() => {
 		const getUserData = async () => {
 			const data = await gameChangerAPI.getUserData('jbook');
+			// const pdf = await gameChangerAPI.dataStorageDownloadGET()
 			const newMap = {};
 			data.data.users.forEach((user) => {
 				newMap[user.id] = user;
@@ -1099,7 +1100,6 @@ const JBookProfilePage = (props) => {
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
 		}
-
 		return data;
 	};
 
@@ -1366,6 +1366,19 @@ const JBookProfilePage = (props) => {
 					/>
 				</StyledMainContainer>
 				<StyledRightContainer>
+					<GCPrimaryButton
+						style={{
+							color: 'white',
+							backgroundColor: '#1C2D64',
+							borderColor: '#1C2D64',
+							height: '35px',
+							marginBottom: '15px',
+							marginLeft: '0',
+						}}
+						onClick={() => undefined}
+					>
+						OPEN DOCUMENT
+					</GCPrimaryButton>
 					<Metadata
 						budgetType={budgetType}
 						projectNum={projectNum}
