@@ -424,7 +424,7 @@ const initState = {
 	listView: false,
 
 	// contract totals
-	contractTotals: {},
+	contractTotals: [],
 	statsLoading: false,
 
 	paginationSearch: false,
