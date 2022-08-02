@@ -1,57 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="24" failures="0" errors="0" time="4.247">
-  <testsuite name="EDASearchUtility" errors="0" failures="0" skipped="0" timestamp="2022-08-02T18:49:09" time="2.356" tests="14">
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included" time="0.06">
+<testsuites name="jest tests" tests="12" failures="0" errors="0" time="4.711">
+  <testsuite name="JBookDataHandler" errors="0" failures="0" skipped="0" timestamp="2022-08-02T19:29:32" time="2.349" tests="9">
+    <testcase classname="JBookDataHandler #getProjectData should get the pdoc project data for ES" name="JBookDataHandler #getProjectData should get the pdoc project data for ES" time="0.005">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Fiscal Year and EDA Contract Data filters" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Fiscal Year and EDA Contract Data filters" time="0.001">
+    <testcase classname="JBookDataHandler #getProjectData should get the rdoc project data for ES" name="JBookDataHandler #getProjectData should get the rdoc project data for ES" time="0.003">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Issue Office DoDAAC and Obligated Amount filters" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the Issue Office DoDAAC and Obligated Amount filters" time="0.002">
+    <testcase classname="JBookDataHandler #getProjectData should get the odoc project data for ES" name="JBookDataHandler #getProjectData should get the odoc project data for ES" time="0.003">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the contract filter" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the contract filter" time="0.001">
+    <testcase classname="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" name="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" time="0">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue org and majcom filter" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue org and majcom filter" time="0.001">
+    <testcase classname="JBookDataHandler #portfolios should get all portfolios" name="JBookDataHandler #portfolios should get all portfolios" time="0">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue office dodaac and issue office name" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query based on the issue office dodaac and issue office name" time="0.001">
+    <testcase classname="JBookDataHandler #comments should get all comments of a specific thread" name="JBookDataHandler #comments should get all comments of a specific thread" time="0.066">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with just majcoms and not their org included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with just majcoms and not their org included" time="0.002">
+    <testcase classname="JBookDataHandler #comments should get create a comment with docID, portfolioName, and message" name="JBookDataHandler #comments should get create a comment with docID, portfolioName, and message" time="0.001">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with exclude terms included" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with exclude terms included" time="0">
+    <testcase classname="JBookDataHandler #comments should get delete a comment (set deleted to true) using comment ID" name="JBookDataHandler #comments should get delete a comment (set deleted to true) using comment ID" time="0.001">
     </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchPagesQuery should return an ES query with vendor name, funding office code, idv piid, mod num, psc description, piid, desc of req, psc, funding agency name, naics, and duns" name="EDASearchUtility getElasticsearchPagesQuery should return an ES query with vendor name, funding office code, idv piid, mod num, psc description, piid, desc of req, psc, funding agency name, naics, and duns" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchUtility getElasticsearchStatsQuery should return an ES query for a search with filters included" name="EDASearchUtility getElasticsearchStatsQuery should return an ES query for a search with filters included" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchUtility cleanUpEsResults should return cleaned up ES results to frontend" name="EDASearchUtility cleanUpEsResults should return cleaned up ES results to frontend" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchUtility getEDAContractQuery should return a query just to retrieve related contract mods" name="EDASearchUtility getEDAContractQuery should return a query just to retrieve related contract mods" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchUtility getEDAContractQuery should return a query just to retrieve a base award and its data" name="EDASearchUtility getEDAContractQuery should return a query just to retrieve a base award and its data" time="0">
-    </testcase>
-    <testcase classname="EDASearchUtility splitAwardID should return an id and idv" name="EDASearchUtility splitAwardID should return an id and idv" time="0">
+    <testcase classname="JBookDataHandler #comments should vote on a comment depending on comment ID and field (upvotes or downvotes)" name="JBookDataHandler #comments should vote on a comment depending on comment ID and field (upvotes or downvotes)" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="EDASearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-08-02T18:49:09" time="2.613" tests="9">
-    <testcase classname="EDASearchHandler #searchHelper should return data for a search" name="EDASearchHandler #searchHelper should return data for a search" time="0.005">
+  <testsuite name="JBookSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-08-02T19:29:32" time="3.475" tests="3">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for an ES search" name="JBookSearchHandler #searchHelper should return data for an ES search" time="0.002">
     </testcase>
-    <testcase classname="EDASearchHandler #searchHelper should not store history when requested" name="EDASearchHandler #searchHelper should not store history when requested" time="0.001">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for filters" name="JBookSearchHandler #searchHelper should return data for filters" time="0.063">
     </testcase>
-    <testcase classname="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" name="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" name="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchHandler queryContractMods should return ES error" name="EDASearchHandler queryContractMods should return ES error" time="0">
-    </testcase>
-    <testcase classname="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" name="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" name="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" time="0.001">
-    </testcase>
-    <testcase classname="EDASearchHandler callFunctionHelper should not find the function" name="EDASearchHandler callFunctionHelper should not find the function" time="0">
-    </testcase>
-    <testcase classname="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" name="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" time="0.011">
-    </testcase>
-  </testsuite>
-  <testsuite name="EDAExportHandler" errors="0" failures="0" skipped="0" timestamp="2022-08-02T18:49:09" time="2.963" tests="1">
-    <testcase classname="EDAExportHandler #exportHandler should export a file based on search data" name="EDAExportHandler #exportHandler should export a file based on search data" time="0.002">
+    <testcase classname="JBookSearchHandler #searchHelper should return excel data for review status" name="JBookSearchHandler #searchHelper should return excel data for review status" time="0.007">
     </testcase>
   </testsuite>
 </testsuites>

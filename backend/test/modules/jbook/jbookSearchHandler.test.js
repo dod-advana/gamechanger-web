@@ -963,10 +963,9 @@ describe('JBookSearchHandler', function () {
 			try {
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
-					budgetYearES: ['2020', '2021', '2022'],
-					budgetYear: ['2015', '2016', '2020', '2021', '2022'],
+					budgetYear: ['2020', '2021', '2022'],
 					reviewstatus: [null],
-					serviceAgencyES: [
+					serviceAgency: [
 						'Air Force (AF)',
 						'Defense Contract Management Agency (DCMA)',
 						'Court of Appeals for the Armed Forces (CAAF)',
@@ -974,7 +973,7 @@ describe('JBookSearchHandler', function () {
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
-					appropriationNumberES: {
+					appropriationNumber: {
 						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
 						paccts: [
 							'2035',
