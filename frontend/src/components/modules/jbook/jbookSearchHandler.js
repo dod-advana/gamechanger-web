@@ -361,7 +361,7 @@ const JBookSearchHandler = {
 
 	getPresearchData(state) {},
 
-	processSearchSettings(state, dispatch) {
+	processSearchSettings(state) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
 		searchSettings.selectedPortfolio = state.selectedPortfolio;
 		const sortDesc = state.currentOrder === 'desc';
@@ -415,7 +415,6 @@ const JBookSearchHandler = {
 			}
 
 			if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
-				console.log('empty search setting detected');
 				delete searchSettings[optionType];
 			}
 		}

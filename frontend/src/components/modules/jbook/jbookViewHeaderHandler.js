@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
+import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 import ExportIcon from '../../../images/icon/Export.svg';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
@@ -28,6 +29,93 @@ const PORTFOLIO_FILTERS = [
 	'primaryClassLabel',
 	'budgetType',
 ];
+
+const filterNameMap = {
+	budgetYear: 'Budget Year',
+	budgetType: 'PL Title',
+	serviceAgency: 'Service/Agency',
+	raccts: 'Main Account',
+	budgetActivity: 'Budget Activity',
+	budgetSubActivity: 'Budget Sub Activity',
+	programElement: 'BLI',
+	projectNum: 'Project #',
+	minBY1Funding: 'BY1 Fund Min',
+	maxBY1Funding: 'BY1 Fund Max',
+	minTotalCost: 'Total Fund Min',
+	maxTotalCost: 'Total Fund Max',
+	primaryReviewer: 'Primary Reviewer',
+	serviceReviewer: 'Service Reviewer',
+	pocReviewer: 'POC Reviewer',
+	reviewStatus: 'Review Status',
+	hasKeywords: 'Keywords',
+	primaryClassLabel: 'Tag',
+	sourceTag: 'Source',
+};
+
+const handleFilterChange = (option, state, dispatch, type) => {
+	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+	if (isArray(newSearchSettings[type])) {
+		const index = newSearchSettings[type].indexOf(option);
+
+		if (index !== -1) {
+			newSearchSettings[type].splice(index, 1);
+		} else {
+			newSearchSettings[type].push(option);
+		}
+	} else {
+		newSearchSettings[type] = '';
+	}
+
+	newSearchSettings.isFilterUpdate = true;
+	newSearchSettings[`${type}Update`] = true;
+	setState(dispatch, {
+		jbookSearchSettings: newSearchSettings,
+		metricsCounted: false,
+		runSearch: true,
+		runGraphSearch: true,
+	});
+};
+
+const createFilterArray = (settings, options) => {
+	const processedFilters = [];
+	Object.keys(settings).forEach((type) => {
+		if (Object.keys(options).includes(type) && type !== 'sort') {
+			if (isArray(settings[type])) {
+				settings[type].forEach((option) => {
+					processedFilters.push({ type, optionName: option });
+				});
+			} else {
+				processedFilters.push({ type, optionName: settings[type] });
+			}
+		}
+	});
+	return processedFilters;
+};
+
+const processFilters = (settings, options) => {
+	const searchSettings = _.cloneDeep(settings);
+	for (const optionType in options) {
+		if (
+			options[optionType] &&
+			searchSettings[optionType] &&
+			options[optionType].length === searchSettings[optionType].length
+		) {
+			delete searchSettings[optionType];
+		}
+
+		if (searchSettings?.[optionType]?.length === 0) {
+			delete searchSettings[optionType];
+		}
+	}
+
+	for (const setting in searchSettings) {
+		if (!searchSettings[setting]) {
+			delete searchSettings[setting];
+		}
+	}
+	return createFilterArray(searchSettings, options);
+};
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
@@ -74,8 +162,8 @@ const JbookViewHeaderHandler = (props) => {
 		});
 		if (search) {
 			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
-			setState(dispatch, { runSearch: true });
 		}
+		setState(dispatch, { runSearch: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.selectedPortfolio, dispatch]);
 
@@ -181,8 +269,11 @@ const JbookViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'} style={extraStyle}>
-			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
+		<div
+			className={'results-count-view-buttons-container'}
+			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 0px 0px 0px' }}
+		>
+			<div className={'view-buttons-container'} style={{ marginRight: 10, zIndex: 99, justifyContent: 'right' }}>
 				<JBookPortfolioSelector
 					portfolios={portfolios}
 					selectedPortfolio={state.selectedPortfolio}
@@ -364,6 +455,14 @@ const JbookViewHeaderHandler = (props) => {
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
 			</div>
+			<FilterList
+				filterNameMap={filterNameMap}
+				state={state}
+				dispatch={dispatch}
+				searchSettings={jbookSearchSettings}
+				handleFilterChange={handleFilterChange}
+				processFilters={processFilters}
+			/>
 		</div>
 	);
 };

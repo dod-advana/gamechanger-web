@@ -66,6 +66,10 @@
   outline: 0;
 }
 
+.feedback-modal legend {
+    display: none;
+}
+
 .feedback-overlay {
   position: fixed;
   top: 0;

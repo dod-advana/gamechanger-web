@@ -36,3 +36,27 @@
 //   }
 // }
 import '@testing-library/cypress/add-commands';
+import CypressHelper, { BASE_URL } from './CypressHelper';
+
+// jbook commands
+import './jbook-commands';
+// policy commands
+import './policy-commands';
+
+/* ************* GENERAL ************** */
+
+// this handles setting up your cookies and headers
+Cypress.Commands.add('setup', () => {
+	CypressHelper.setupHeaders(cy);
+	// Clear cookies
+	cy.clearCookies();
+});
+
+// this visits a page and clicks the consent agreement
+Cypress.Commands.add('visit_accept_consent', (page) => {
+	// Visit the main page
+	cy.visit(`${BASE_URL}/#/${page}`);
+
+	// Click the okay button
+	cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
+});
