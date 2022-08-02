@@ -464,7 +464,7 @@ const getSearchMatrixItems = (props) => {
 
 	return (
 		<>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div data-cy={'source-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					header={'SOURCE'}
 					headerBackground={'rgb(238,241,242)'}
@@ -475,7 +475,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div data-cy={'type-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					header={'TYPE'}
 					headerBackground={'rgb(238,241,242)'}
