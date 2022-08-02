@@ -142,7 +142,7 @@ export default (props) => {
 				}
 			}
 		}
-		if (props.processes && props.processes.completed_process) {
+		if (props.processes.completed_process) {
 			for (const completed of props.processes.completed_process) {
 				const completed_process = completed.process.split(': ');
 				if (['s3', 'corpus'].includes(completed_process[0])) {
@@ -188,9 +188,6 @@ export default (props) => {
 		}
 	};
 
-	// const checkCorpusDownloading = () => {
-	// 	return checkFlag('corpus:');
-	// };
 
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
@@ -199,7 +196,7 @@ export default (props) => {
 	 * Get user aggregations data and sends that to the ml-api
 	 * @method sendUserAggData
 	 */
-	const sendUserAggData = async (startDate, endDate) => {
+	const sendUserAggData = async () => {
 		try {
 			const params = {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
@@ -217,25 +214,6 @@ export default (props) => {
 		}
 	};
 
-	// /**
-	//  * Takes a String and checks if it is in any of the flag keys and checks
-	//  * those values. If any of them are true it returns true
-	//  * @method checkFlag
-	//  * @param {String} flag
-	//  * @returns boolean
-	//  */
-	// const checkFlag = (flag) => {
-	// 	let flagged = false;
-	// 	if (props.processes.process_status && props.processes.process_status.flags) {
-	// 		const flags = props.processes.process_status.flags;
-	// 		for (const key in flags) {
-	// 			if (key.includes(flag) && flags[key]) {
-	// 				flagged = true;
-	// 			}
-	// 		}
-	// 	}
-	// 	return flagged;
-	// };
 
 	useEffect(() => {
 		getS3List();
@@ -392,7 +370,7 @@ export default (props) => {
 						</DatePickerWrapper>
 						<GCPrimaryButton
 							onClick={() => {
-								sendUserAggData(startDate, endDate);
+								sendUserAggData();
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>

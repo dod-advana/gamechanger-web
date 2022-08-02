@@ -5,7 +5,6 @@ import Modal from 'react-modal';
 import { BorderDiv, TableRow } from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
-import GCButton from '../../common/GCButton';
 
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
@@ -62,7 +61,6 @@ export default (props) => {
 	});
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([]);
-	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
@@ -408,12 +406,6 @@ export default (props) => {
 		let downloading = checkFlag('corpus:');
 		return ('' + downloading).toUpperCase();
 	};
-	// const checkTraining = () => {
-	// 	return checkFlag('training:') || checkFlag('corpus:');
-	// };
-	// const checkReloading = () => {
-	// 	return checkFlag('models:');
-	// };
 	/**
 	 * Takes a String and checks if it is in any of the flag keys and checks
 	 * those values. If any of them are true it returns true
