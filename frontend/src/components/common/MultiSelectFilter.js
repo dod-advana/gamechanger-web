@@ -74,6 +74,7 @@ const MultiSelectFilter = ({
 	update,
 	trackingName,
 	showNumResultsPerOption = false,
+	preventSearchOnChange = false,
 }) => {
 	const [showSeeMore, setShowSeeMore] = useState(false);
 	const [showClear, setShowClear] = useState(false);
@@ -118,8 +119,8 @@ const MultiSelectFilter = ({
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
-			runSearch: showNumResultsPerOption,
-			runGraphSearch: showNumResultsPerOption,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
 		});
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
@@ -150,8 +151,8 @@ const MultiSelectFilter = ({
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
-			runSearch: showNumResultsPerOption,
-			runGraphSearch: showNumResultsPerOption,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
 		});
 	};
 
@@ -266,6 +267,7 @@ MultiSelectFilter.propTypes = {
 	update: PropTypes.string,
 	trackingName: PropTypes.string,
 	showNumResultsPerOption: PropTypes.bool,
+	preventSearchOnChange: PropTypes.bool,
 };
 
 export default MultiSelectFilter;
