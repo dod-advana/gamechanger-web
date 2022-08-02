@@ -246,7 +246,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	let predictionString = '';
 	if (
 		selectedPortfolio !== 'General' &&
-		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions?.[selectedPortfolio] &&
 		projectData.ai_predictions[selectedPortfolio].confidence &&
 		projectData.ai_predictions[selectedPortfolio].top_class
 	) {
@@ -258,7 +258,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	return [
 		{
 			Key: 'Project',
-			Value: projectData.projectTitle,
+			Value: budgetType === 'ODOC' ? projectData.budgetActivityTitle : projectData.projectTitle,
 		},
 		{
 			Key: 'Program Element',
