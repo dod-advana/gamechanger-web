@@ -188,7 +188,6 @@ export default (props) => {
 		}
 	};
 
-
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
@@ -213,7 +212,6 @@ export default (props) => {
 			console.error(e);
 		}
 	};
-
 
 	useEffect(() => {
 		getS3List();

@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import { BorderDiv, TableRow } from './util/styledDivs';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
+import GCButton from '../../common/GCButton';
 
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
