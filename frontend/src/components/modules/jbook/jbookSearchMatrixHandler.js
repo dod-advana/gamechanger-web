@@ -328,7 +328,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
