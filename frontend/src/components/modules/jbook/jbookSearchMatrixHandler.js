@@ -166,22 +166,15 @@ const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) 
 	);
 };
 
-const renderFilterCheckboxes = (
-	state,
-	dispatch,
-	classes,
-	type,
-	displayName,
-	useES = false,
-	customOptions = undefined
-) => {
+const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, customOptions = undefined) => {
 	const allSelected = `${type}AllSelected`;
 	const allText = `All ${Pluralize(displayName)}`;
 	const specificText = `Specific ${Pluralize(displayName)}`;
 	const specificSelected = `${type}SpecificSelected`;
 
-	let optionType = useES ? type + 'ES' : type;
-	const options = customOptions || state.defaultOptions[optionType];
+	const options = customOptions || state.defaultOptions[type];
+
+	console.log(options);
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
@@ -333,7 +326,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -350,7 +343,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						classes,
 						'budgetType',
 						'budget type',
-						false,
 						selectedPortfolio !== 'AI Inventory'
 							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
 							: undefined
@@ -365,7 +357,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
 				</GCAccordion>
 			</div>
 
@@ -377,14 +369,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
-						state,
-						dispatch,
-						classes,
-						'appropriationNumber',
-						'appropriation number',
-						true
-					)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'appropriationNumber', 'appropriation number')}
 				</GCAccordion>
 			</div>
 
@@ -553,7 +538,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						classes,
 						'primaryClassLabel',
 						'primary class tag',
-						false,
 						portfolioMap[selectedPortfolio].tags
 					)}
 				</GCAccordion>
@@ -639,7 +623,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -656,7 +640,6 @@ const getSearchMatrixItems = (props) => {
 						classes,
 						'budgetType',
 						'budget type',
-						false,
 						selectedPortfolio !== 'AI Inventory'
 							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
 							: undefined
@@ -671,7 +654,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
 				</GCAccordion>
 			</div>
 
@@ -683,14 +666,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
-						state,
-						dispatch,
-						classes,
-						'appropriationNumber',
-						'appropriation number',
-						true
-					)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'appropriationNumber', 'appropriation number')}
 				</GCAccordion>
 			</div>
 
@@ -812,7 +788,6 @@ const getSearchMatrixItems = (props) => {
 							classes,
 							'primaryClassLabel',
 							'primary class tag',
-							false,
 							portfolioMap[selectedPortfolio].tags
 						)}
 					</GCAccordion>

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import EDASummaryView from './edaSummaryView';
-import JumpButton from '../globalSearch/JumpButton';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { styles } from '../../mainView/commonStyles';
-import { renderHideTabs, getAboutUs, getUserProfilePage } from '../../mainView/commonFunctions';
+import { getAboutUs, getUserProfilePage } from '../../mainView/commonFunctions';
 import Pagination from 'react-js-pagination';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import {
@@ -18,12 +17,11 @@ import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFun
 import { Card } from '../../cards/GCCard';
 import ViewHeader from '../../mainView/ViewHeader';
 import { getMainView, getViewNames as defaultGetViewNames, handlePageLoad } from '../default/defaultMainViewHandler';
-import { Typography } from '@material-ui/core';
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { gcOrange } from '../../common/gc-colors';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { numberWithCommas } from '../../../utils/gamechangerUtils';
+import MagellanTrendingLinkList from '../../common/MagellanTrendingLinkList';
 
 const _ = require('lodash');
 
@@ -42,15 +40,7 @@ const AnalystTools = LoadableVisibility({
 });
 
 const getViewNames = (props) => {
-	const viewNames = defaultGetViewNames(props);
-	viewNames.push({
-		name: 'Summary',
-		title: 'Summary View',
-		className: '',
-		id: 'edaSummaryView',
-	});
-
-	return viewNames;
+	return defaultGetViewNames(props);
 };
 
 const getExtraViewPanels = (props) => {
@@ -130,6 +120,12 @@ const getExtraViewPanels = (props) => {
 	return viewPanels;
 };
 
+const getSearchResults = (searchResultData, state, dispatch) => {
+	return _.map(searchResultData, (item, idx) => {
+		return <Card key={item.doc_num} item={item} idx={idx} state={state} dispatch={dispatch} />;
+	});
+};
+
 const getCardViewPanel = (props) => {
 	const { context } = props;
 
@@ -142,11 +138,10 @@ const getCardViewPanel = (props) => {
 		iframePreviewLink,
 		resultsPage,
 		componentStepNumbers,
-		hideTabs,
 		summaryCardView,
-		summaryCardData,
 		resultsText,
-		timeFound,
+		runningSearch,
+		searchText,
 	} = state;
 
 	let sideScroll = {
@@ -154,67 +149,37 @@ const getCardViewPanel = (props) => {
 	};
 	if (!iframePreviewLink) sideScroll = {};
 
-	const getSearchResults = (searchResultData) => {
-		return _.map(searchResultData, (item, idx) => {
-			return <Card key={item.doc_num} item={item} idx={idx} state={state} dispatch={dispatch} />;
-		});
-	};
-
-	const searchResults = summaryCardView ? summaryCardData : rawSearchResults;
+	const searchTextPresent = searchText && searchText.length > 0;
 
 	return (
-		<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
+		<div key={'cardView'}>
 			<div id="game-changer-content-top" />
-			{!loading && searchResults && searchResults.length > 0 && (
+			{searchTextPresent && (
 				<StyledCenterContainer showSideFilters={true}>
 					<div className={'left-container'} style={summaryCardView ? styles.leftContainerSummary : {}}>
 						<div className={'side-bar-container'}>
-							{summaryCardView ? (
-								<div>
-									<JumpButton
-										style={{ marginTop: 0 }}
-										reverse={false}
-										label="Back to Summary View"
-										action={() => {
-											setState(dispatch, {
-												currentViewName: 'Summary',
-												summaryCardData: [],
-												resultsText: '',
-											});
-										}}
-									/>
-								</div>
-							) : (
-								<GameChangerSearchMatrix context={context} />
-							)}
+							<GameChangerSearchMatrix context={context} />
 						</div>
 					</div>
 					<div className={'right-container'} style={summaryCardView ? styles.rightContainerSummary : {}}>
-						<div
-							style={{
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								padding: '0 0 0 10px',
-							}}
-						>
-							<Typography variant="h3" display="inline">{`${
-								searchResults ? numberWithCommas(count) : '0'
-							} results found in ${timeFound} seconds`}</Typography>
-
-							{!hideTabs && <ViewHeader resultsText={resultsText} {...props} />}
-						</div>
-
+						<ViewHeader resultsText={resultsText} {...props} />
 						<div
 							className={`tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
 						>
 							<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-								<div
-									className="row"
-									style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
-								>
-									{!loading && getSearchResults(searchResults)}
-								</div>
+								{runningSearch && (
+									<div style={{ margin: '0 auto' }} data-cy="jbook-search-load">
+										<LoadingIndicator />
+									</div>
+								)}
+								{!runningSearch && (
+									<div
+										className="row"
+										style={{ marginLeft: 0, marginRight: 0, paddingRight: 0, paddingLeft: 0 }}
+									>
+										{getSearchResults(rawSearchResults, state, dispatch)}
+									</div>
+								)}
 							</div>
 						</div>
 					</div>
@@ -260,6 +225,38 @@ const displayUserRelatedItems = () => {
 
 const getAnalystTools = (context) => {
 	return <AnalystTools context={context} showResponsibilityExplorer={false} />;
+};
+
+export const renderHideTabs = (props) => {
+	const { state, dispatch } = props;
+	const { componentStepNumbers, cloneData, prevSearchText, searchText } = state;
+	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+
+	const handleLinkListItemClick = (searchText) => {
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
+		setState(dispatch, {
+			searchText,
+			autoCompleteItems: [],
+			metricsCounted: false,
+			runSearch: true,
+		});
+	};
+
+	return (
+		<div style={{ marginTop: '40px' }}>
+			{(!searchText || searchText === '') && (
+				<div style={{ margin: '10px auto', width: '67%' }}>
+					<div className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}>
+						<MagellanTrendingLinkList
+							onLinkClick={handleLinkListItemClick}
+							links={JSON.parse(latestLinks)}
+							title="Recent Searches"
+						/>
+					</div>
+				</div>
+			)}
+		</div>
+	);
 };
 
 const EdaMainViewHandler = (props) => {

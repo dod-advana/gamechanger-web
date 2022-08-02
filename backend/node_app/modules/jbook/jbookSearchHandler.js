@@ -4,12 +4,9 @@ const CONSTANTS = require('../../config/constants');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
-const PDOC = require('../../models').pdoc;
-const RDOC = require('../../models').rdoc;
-const OM = require('../../models').om;
 const ACCOMP = require('../../models').accomp;
 const KEYWORD = require('../../models').keyword;
-const KEYWORD_ASSOC = require('../../models').keyword_assoc;
+const KEYWORD_ASSOC = require('../../models').keyword_assoc_archive;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
 const { Reports } = require('../../lib/reports');
@@ -51,9 +48,6 @@ class JBookSearchHandler extends SearchHandler {
 			constants = CONSTANTS,
 			searchUtility = new SearchUtility(opts),
 			jbookSearchUtility = new JBookSearchUtility(opts),
-			pdoc = PDOC,
-			rdoc = RDOC,
-			om = OM,
 			accomp = ACCOMP,
 			review = REVIEW,
 			db = DB,
@@ -67,9 +61,6 @@ class JBookSearchHandler extends SearchHandler {
 		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 
-		this.pdocs = pdoc;
-		this.rdocs = rdoc;
-		this.om = om;
 		this.accomp = accomp;
 		this.review = review;
 		this.db = db;
@@ -209,8 +200,6 @@ class JBookSearchHandler extends SearchHandler {
 					return await this.getDataForFilters(req, userId);
 				case 'getDataForReviewStatus':
 					return await this.getExcelDataForReviewStatus(req, userId, res);
-				case 'getDataForFullPDFExport':
-					return await this.getDataForFullPDFExport(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookSearchHandler`,
@@ -256,61 +245,6 @@ class JBookSearchHandler extends SearchHandler {
 		return giantQuery;
 	}
 
-	async getDataForFullPDFExport(req, userId) {
-		try {
-			const { jbookSearchSettings = { budgetYear: ['2022'] } } = req.body;
-			let keywordIds = undefined;
-
-			keywordIds = { pdoc: [], rdoc: [], om: [] };
-			const assoc_query = `SELECT ARRAY_AGG(distinct pdoc_id) filter (where pdoc_id is not null) as pdoc_ids,
-								ARRAY_AGG(distinct rdoc_id) filter (where rdoc_id is not null) as rdoc_ids,
-								ARRAY_AGG(distinct om_id) filter (where om_id is not null) as om_ids FROM keyword_assoc`;
-			const assoc_results = await this.keyword_assoc.sequelize.query(assoc_query);
-			keywordIds.pdoc = assoc_results[0][0].pdoc_ids ? assoc_results[0][0].pdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.rdoc = assoc_results[0][0].rdoc_ids ? assoc_results[0][0].rdoc_ids.map((i) => Number(i)) : [0];
-			keywordIds.om = assoc_results[0][0].om_ids ? assoc_results[0][0].om_ids.map((i) => Number(i)) : [0];
-
-			const keywordIdsParam =
-				jbookSearchSettings.hasKeywords !== undefined && jbookSearchSettings.hasKeywords.length !== 0
-					? keywordIds
-					: null;
-
-			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQueryForFullPDF();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQuery(
-				jbookSearchSettings,
-				false,
-				keywordIdsParam,
-				[],
-				userId
-			);
-			const pQuery = pSelect + pWhere;
-			const rQuery = rSelect + rWhere;
-			const oQuery = oSelect + oWhere;
-
-			const giantQuery = getGiantQuery(pQuery, rQuery, oQuery);
-
-			const data = await this.db.jbook.query(giantQuery, { replacements: { searchText: '' } });
-
-			let returnData = data[0];
-
-			returnData.map((doc) => {
-				const typeMap = {
-					Procurement: 'pdoc',
-					'RDT&E': 'rdoc',
-					'O&M': 'om',
-				};
-				doc.hasKeywords = keywordIds[typeMap[doc.type]].indexOf(doc.id) !== -1;
-				return doc;
-			});
-
-			return returnData;
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, '8', userId);
-			return [];
-		}
-	}
-
 	// retrieving the data used to populate the filter options on the frontend
 	async getDataForFilters(_req, userId) {
 		let returnData = {};
@@ -330,28 +264,7 @@ class JBookSearchHandler extends SearchHandler {
 		}
 
 		returnData.budgetYear = [];
-		returnData.serviceAgencyES = [];
-
-		const pdocQuery = `SELECT array_agg(DISTINCT "P40-04_BudgetYear") as budgetYear, array_agg(DISTINCT "P40-06_Organization") as serviceAgency FROM pdoc`;
-		const odocQuery = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
-		const rdocQuery = `SELECT array_agg(DISTINCT "BudgetYear") as budgetYear, array_agg(DISTINCT "Organization") as serviceAgency FROM rdoc`;
-
-		const mainQuery = `${pdocQuery} UNION ALL ${odocQuery} UNION ALL ${rdocQuery};`;
-
-		const agencyYearData = await this.db.jbook.query(mainQuery, { replacements: {} });
-
-		returnData.budgetYear = [];
-
-		if (agencyYearData[0].length > 0) {
-			agencyYearData[0].forEach((data) => {
-				returnData.budgetYear = [
-					...new Set([
-						...returnData.budgetYear,
-						...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : []),
-					]),
-				];
-			});
-		}
+		returnData.serviceAgency = [];
 
 		const serviceReviewers = Array.from(
 			new Set([...returnData.servicereviewer, ...returnData.servicesecondaryreviewer])
@@ -364,7 +277,6 @@ class JBookSearchHandler extends SearchHandler {
 		}
 		returnData.servicereviewer = serviceReviewers;
 
-		returnData.budgetYear.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 		returnData.reviewstatus.push(null);
 
 		returnData = await this.getESDataForFilters(returnData, userId);
@@ -415,7 +327,7 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYearES = processESResults(budgetYearESResults);
+				returnData.budgetYear = processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
@@ -431,7 +343,7 @@ class JBookSearchHandler extends SearchHandler {
 			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgencyES = _.uniq(
+				returnData.serviceAgency = _.uniq(
 					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}
@@ -469,8 +381,10 @@ class JBookSearchHandler extends SearchHandler {
 			);
 
 			if (mainAccountESResults && mainAccountESResults.body.aggregations) {
-				returnData.appropriationNumberES = processMainAccountResults(mainAccountESResults);
+				returnData.appropriationNumber = processMainAccountResults(mainAccountESResults);
 			}
+
+			console.log(returnData);
 
 			return returnData;
 		} catch (e) {
