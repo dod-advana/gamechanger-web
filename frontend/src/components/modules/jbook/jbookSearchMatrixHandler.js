@@ -294,10 +294,6 @@ const renderStats = (contractTotals) => {
 	);
 };
 
-const shouldBeExpanded = (jbookSearchSettings, setting) => {
-	return jbookSearchSettings[setting] && jbookSearchSettings[setting] !== '';
-};
-
 const getPortfolioMap = (portfolios) => {
 	const portfolioMap = {};
 	for (let item of portfolios) {
@@ -309,7 +305,6 @@ const getPortfolioMap = (portfolios) => {
 // search matrix for the AI Inventory portfolio
 const getSearchMatrixItemsAIInventory = (props) => {
 	const { state, dispatch, classes } = props;
-
 	const { contractTotals, jbookSearchSettings, selectedPortfolio, portfolios } = state;
 	const portfolioMap = getPortfolioMap(portfolios);
 	return (
@@ -371,7 +366,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetActivity-filter">
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetActivity')}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -383,7 +378,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetSubActivity-filter">
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'budgetSubActivity')}
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -395,7 +389,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="programElement-filter">
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'programElement')}
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -407,7 +400,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectNum-filter">
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'projectNum')}
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -419,11 +411,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="BY1Funding-filter">
 				<GCAccordion
-					expanded={
-						shouldBeExpanded(jbookSearchSettings, 'minBY1Funding') ||
-						shouldBeExpanded(jbookSearchSettings, 'maxBY1Funding')
-					}
-					header={<b>BY1 FUNDING</b>}
+					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -434,8 +422,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="totalCost-filter">
 				<GCAccordion
-					expanded={shouldBeExpanded(jbookSearchSettings, 'totalCost')}
-					header={<b>TOTAL FUNDING</b>}
+					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -447,7 +434,6 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			{!state.useElasticSearch && (
 				<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectTitle-filter">
 					<GCAccordion
-						expanded={shouldBeExpanded(jbookSearchSettings, 'projectTitle')}
 						header={<b>PROJECT TITLE</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -522,7 +508,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryClassLabel-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+					expanded={jbookSearchSettings.classLabelSpecificSelected}
 					header={<b>TAGS</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -532,8 +518,8 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						state,
 						dispatch,
 						classes,
-						'primaryClassLabel',
-						'primary class tag',
+						'classLabel',
+						'tag',
 						portfolioMap[selectedPortfolio].tags
 					)}
 				</GCAccordion>
@@ -668,7 +654,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetActivity-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.budgetActivity && jbookSearchSettings.budgetActivity !== ''}
+					expanded={jbookSearchSettings.budgetActivitySpecificSelected}
 					header={<b>BUDGET ACTIVITY</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -680,7 +666,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetSubActivity-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.budgetSubActivity && jbookSearchSettings.budgetSubActivity !== ''}
 					header={<b>BUDGET SUB ACTIVITY (PROC only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -692,7 +677,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="programElement-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.programElement && jbookSearchSettings.programElement !== ''}
 					header={<b>BUDGET LINE ITEM (PE)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -704,7 +688,6 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="projectNum-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.projectNum && jbookSearchSettings.projectNum !== ''}
 					header={<b>PROJECT # (RDT&E only)</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
@@ -716,11 +699,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="BY1Funding-filter">
 				<GCAccordion
-					expanded={
-						(jbookSearchSettings.minBY1Funding && jbookSearchSettings.minBY1Funding !== '') ||
-						(jbookSearchSettings.maxBY1Funding && jbookSearchSettings.maxBY1Funding !== '')
-					}
-					header={<b>BY1 FUNDING</b>}
+					header={<b>BY1 REQUEST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -731,8 +710,7 @@ const getSearchMatrixItems = (props) => {
 
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="totalCost-filter">
 				<GCAccordion
-					expanded={jbookSearchSettings.totalCost && jbookSearchSettings.totalCost !== ''}
-					header={<b>TOTAL FUNDING</b>}
+					header={<b>TOTAL COST</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -744,7 +722,6 @@ const getSearchMatrixItems = (props) => {
 			{!state.useElasticSearch && (
 				<div style={{ width: '100%', marginBottom: 10 }} data-cy="pocReviewer-filter">
 					<GCAccordion
-						expanded={shouldBeExpanded(jbookSearchSettings, 'pocReviewer')}
 						header={<b>POC REVIEWER</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -772,7 +749,7 @@ const getSearchMatrixItems = (props) => {
 			{selectedPortfolio !== 'General' && (
 				<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryClass-filter">
 					<GCAccordion
-						expanded={jbookSearchSettings.primaryClassLabelSpecificSelected}
+						expanded={jbookSearchSettings.classLabelSpecificSelected}
 						header={<b>TAGS</b>}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
@@ -782,8 +759,8 @@ const getSearchMatrixItems = (props) => {
 							state,
 							dispatch,
 							classes,
-							'primaryClassLabel',
-							'primary class tag',
+							'classLabel',
+							'tag',
 							portfolioMap[selectedPortfolio].tags
 						)}
 					</GCAccordion>
@@ -850,26 +827,22 @@ const renderFundingMinMaxInput = (min, max) => {
 					Min
 				</div>
 
-				<div style={{ flex: 3 }}>
-					<InputFilter
-						style={{ width: 200, marginRight: 10 }}
-						setJBookSetting={handleFilterInputChange}
-						field={min}
-					/>
-					M
+				<div style={{ display: 'flex', flex: 3 }}>
+					<InputFilter setJBookSetting={handleFilterInputChange} field={min} />
+					<span>
+						<pre> M</pre>
+					</span>
 				</div>
 			</div>
 			<div style={{ display: 'flex', margin: '10px 0' }}>
 				<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
 					Max
 				</div>
-				<div style={{ flex: 3 }}>
-					<InputFilter
-						style={{ width: 200, marginRight: 10 }}
-						setJBookSetting={handleFilterInputChange}
-						field={max}
-					/>
-					M
+				<div style={{ display: 'flex', flex: 3 }}>
+					<InputFilter setJBookSetting={handleFilterInputChange} field={max} />
+					<span>
+						<pre> M</pre>
+					</span>
 				</div>
 			</div>
 		</div>

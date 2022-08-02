@@ -1,4 +1,4 @@
-var path = require('path');
+const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const https = require('https');

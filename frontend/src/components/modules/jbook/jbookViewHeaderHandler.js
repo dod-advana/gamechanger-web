@@ -138,7 +138,6 @@ const JbookViewHeaderHandler = (props) => {
 		sortSelected,
 		searchText,
 		exportLoading,
-		// runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));

@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="8" failures="0" errors="0" time="6.642">
-	<testsuite name="JBookDataHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-28T20:04:56" time="4.414" tests="5">
-		<testcase classname="JBookDataHandler #getProjectData should get the pdoc project data for ES" name="JBookDataHandler #getProjectData should get the pdoc project data for ES" time="0.014">
-		</testcase>
-		<testcase classname="JBookDataHandler #getProjectData should get the rdoc project data for ES" name="JBookDataHandler #getProjectData should get the rdoc project data for ES" time="0.002">
-		</testcase>
-		<testcase classname="JBookDataHandler #getProjectData should get the odoc project data for ES" name="JBookDataHandler #getProjectData should get the odoc project data for ES" time="0.002">
-		</testcase>
-		<testcase classname="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" name="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" time="0.001">
-		</testcase>
-		<testcase classname="JBookDataHandler #getPortfolios should get all portfolios" name="JBookDataHandler #getPortfolios should get all portfolios" time="0.001">
-		</testcase>
-	</testsuite>
-	<testsuite name="JBookSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-06-28T20:04:56" time="5.638" tests="3">
-		<testcase classname="JBookSearchHandler #searchHelper should return data for an ES search" name="JBookSearchHandler #searchHelper should return data for an ES search" time="0.005">
-		</testcase>
-		<testcase classname="JBookSearchHandler #searchHelper should return data for filters" name="JBookSearchHandler #searchHelper should return data for filters" time="0.043">
-		</testcase>
-		<testcase classname="JBookSearchHandler #searchHelper should return excel data for review status" name="JBookSearchHandler #searchHelper should return excel data for review status" time="0.016">
-		</testcase>
-	</testsuite>
+<testsuites name="jest tests" tests="12" failures="0" errors="0" time="6.489">
+  <testsuite name="JBookDataHandler" errors="0" failures="0" skipped="0" timestamp="2022-07-23T00:41:25" time="3.939" tests="9">
+    <testcase classname="JBookDataHandler #getProjectData should get the pdoc project data for ES" name="JBookDataHandler #getProjectData should get the pdoc project data for ES" time="0.006">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should get the rdoc project data for ES" name="JBookDataHandler #getProjectData should get the rdoc project data for ES" time="0.009">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should get the odoc project data for ES" name="JBookDataHandler #getProjectData should get the odoc project data for ES" time="0.002">
+    </testcase>
+    <testcase classname="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" name="JBookDataHandler #getProjectData should utilize the portfolio APIs (create, delete, get all, get one, restore" time="0">
+    </testcase>
+    <testcase classname="JBookDataHandler #portfolios should get all portfolios" name="JBookDataHandler #portfolios should get all portfolios" time="0">
+    </testcase>
+    <testcase classname="JBookDataHandler #comments should get all comments of a specific thread" name="JBookDataHandler #comments should get all comments of a specific thread" time="0.069">
+    </testcase>
+    <testcase classname="JBookDataHandler #comments should get create a comment with docID, portfolioName, and message" name="JBookDataHandler #comments should get create a comment with docID, portfolioName, and message" time="0.001">
+    </testcase>
+    <testcase classname="JBookDataHandler #comments should get delete a comment (set deleted to true) using comment ID" name="JBookDataHandler #comments should get delete a comment (set deleted to true) using comment ID" time="0.001">
+    </testcase>
+    <testcase classname="JBookDataHandler #comments should vote on a comment depending on comment ID and field (upvotes or downvotes)" name="JBookDataHandler #comments should vote on a comment depending on comment ID and field (upvotes or downvotes)" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="JBookSearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-07-23T00:41:25" time="5.304" tests="3">
+    <testcase classname="JBookSearchHandler #searchHelper should return data for an ES search" name="JBookSearchHandler #searchHelper should return data for an ES search" time="0.003">
+    </testcase>
+    <testcase classname="JBookSearchHandler #searchHelper should return data for filters" name="JBookSearchHandler #searchHelper should return data for filters" time="0.05">
+    </testcase>
+    <testcase classname="JBookSearchHandler #searchHelper should return excel data for review status" name="JBookSearchHandler #searchHelper should return excel data for review status" time="0.01">
+    </testcase>
+  </testsuite>
 </testsuites>

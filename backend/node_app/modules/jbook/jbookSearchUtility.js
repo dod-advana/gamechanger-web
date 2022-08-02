@@ -701,10 +701,10 @@ class JBookSearchUtility {
 				appropriationTitle_t: 1,
 				budgetActivityTitle_t: 6,
 				budgetActivityTitle_s: 6,
-				programElement_t: 6,
+				programElement_t: 15,
 				accountTitle_s: 1,
 				budgetLineItemTitle_s: 1,
-				budgetLineItem_t: 6,
+				budgetLineItem_t: 15,
 			};
 
 			Object.keys(wildcardList).forEach((wildCardKey) => {
@@ -909,7 +909,10 @@ class JBookSearchUtility {
 		if (jbookSearchSettings.oaccts) {
 			mainAcct.bool.should.push({
 				bool: {
-					must: [{ term: { type_s: 'om' } }, { terms: { programElement_s: jbookSearchSettings.oaccts } }],
+					must: [
+						{ term: { type_s: 'om' } },
+						{ terms: { appropriationNumber_s: jbookSearchSettings.oaccts } },
+					],
 				},
 			});
 		}
@@ -926,6 +929,56 @@ class JBookSearchUtility {
 		}
 	}
 
+	handleHasKeywords(jbookSearchSettings) {
+		const mustOrNot = jbookSearchSettings.hasKeywords[0] === 'Yes' ? 'must' : 'must_not';
+		return {
+			bool: {
+				[mustOrNot]: [
+					{
+						nested: {
+							path: 'keyword_n',
+							query: {
+								bool: {
+									filter: {
+										exists: {
+											field: 'keyword_n',
+										},
+									},
+								},
+							},
+						},
+					},
+				],
+			},
+		};
+	}
+
+	handleBudgetType(jbookSearchSettings) {
+		const budgetTypesTemp = [];
+
+		jbookSearchSettings.budgetType.forEach((budgetType) => {
+			switch (budgetType) {
+				case 'RDT&E':
+					budgetTypesTemp.push('rdte');
+					break;
+				case 'O&M':
+					budgetTypesTemp.push('om');
+					break;
+				case 'Procurement':
+					budgetTypesTemp.push('procurement');
+					break;
+				default:
+					break;
+			}
+		});
+
+		return {
+			terms: {
+				type_s: budgetTypesTemp,
+			},
+		};
+	}
+
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
 	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
@@ -935,6 +988,11 @@ class JBookSearchUtility {
 			this.handleOmDefault(filterQueries, jbookSearchSettings);
 			for (const key of settingKeys) {
 				switch (key) {
+					//Has Keywords
+					case 'hasKeywords':
+						if (jbookSearchSettings.hasKeywords.length > 1) break;
+						filterQueries.push(this.handleHasKeywords(jbookSearchSettings));
+						break;
 					// Review Status
 					case 'reviewStatus':
 						filterQueries.push({
@@ -1001,29 +1059,7 @@ class JBookSearchUtility {
 
 					// Budget Type
 					case 'budgetType':
-						const budgetTypesTemp = [];
-
-						jbookSearchSettings.budgetType.forEach((budgetType) => {
-							switch (budgetType) {
-								case 'RDT&E':
-									budgetTypesTemp.push('rdte');
-									break;
-								case 'O&M':
-									budgetTypesTemp.push('om');
-									break;
-								case 'Procurement':
-									budgetTypesTemp.push('procurement');
-									break;
-								default:
-									break;
-							}
-						});
-
-						filterQueries.push({
-							terms: {
-								type_s: budgetTypesTemp,
-							},
-						});
+						filterQueries.push(this.handleBudgetType(jbookSearchSettings));
 						break;
 
 					// Budget Year
@@ -1183,7 +1219,7 @@ class JBookSearchUtility {
 		}
 
 		// Primary Class Label
-		if (jbookSearchSettings.primaryClassLabel) {
+		if (jbookSearchSettings.classLabel) {
 			nestedMustObjects.push({
 				nested: {
 					path: 'review_n',
@@ -1192,17 +1228,7 @@ class JBookSearchUtility {
 							should: [
 								{
 									terms: {
-										'review_n.primary_class_label_s': jbookSearchSettings.primaryClassLabel,
-									},
-								},
-								{
-									terms: {
-										'review_n.service_class_label_s': jbookSearchSettings.primaryClassLabel,
-									},
-								},
-								{
-									terms: {
-										'review_n.poc_class_label_s': jbookSearchSettings.primaryClassLabel,
+										'review_n.latest_class_label_s': jbookSearchSettings.classLabel,
 									},
 								},
 							],
