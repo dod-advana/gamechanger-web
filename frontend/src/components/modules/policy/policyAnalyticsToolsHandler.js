@@ -60,6 +60,7 @@ const renderSources = (state, dispatch, classes, results) => {
 				update={'orgUpdate'}
 				trackingName={'OrgFilterToggle'}
 				showNumResultsPerOption={results.length > 0}
+				preventSearchOnChange
 			/>
 		</FormControl>
 	);
@@ -88,6 +89,7 @@ const renderTypes = (state, dispatch, classes, results) => {
 				update={'typeUpdate'}
 				trackingName={'TypeFilterToggle'}
 				showNumResultsPerOption={results.length > 0}
+				preventSearchOnChange
 			/>
 		</FormControl>
 	);
