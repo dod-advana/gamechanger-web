@@ -272,7 +272,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'Service Agency Name',
-			Value: projectData.serviceAgency,
+			Value: projectData.org_jbook_desc_s,
 		},
 		{
 			Key: 'Appropriation Title',
