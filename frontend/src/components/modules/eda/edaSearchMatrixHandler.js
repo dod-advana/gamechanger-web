@@ -102,11 +102,12 @@ const styles = {
 };
 
 const setEDASearchSetting = (field, value, state, dispatch) => {
-	const edaSettings = _.cloneDeep(state.edaSearchSettings);
+	const edaSettings = structuredClone(state.edaSearchSettings);
 
 	switch (field) {
 		case 'allOrgs':
 			edaSettings.allOrgsSelected = true;
+			edaSettings.organizations = [];
 			break;
 		case 'specOrgs':
 			edaSettings.allOrgsSelected = false;
@@ -133,6 +134,7 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 			break;
 		case 'allYears':
 			edaSettings.allYearsSelected = true;
+			edaSettings.fiscalYears = [];
 			break;
 		case 'specYears':
 			edaSettings.allYearsSelected = false;
@@ -147,6 +149,12 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 			break;
 		case 'allData':
 			edaSettings.allDataSelected = true;
+			edaSettings.contractData = {
+				pds: false,
+				syn: false,
+				fpds: false,
+				none: false,
+			};
 			break;
 		case 'specData':
 			edaSettings.allDataSelected = false;
@@ -495,10 +503,10 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 		<TextField
 			placeholder={displayName}
 			variant="outlined"
-			defaultValue={state.edaSearchSettings[fieldName]}
+			value={state.edaSearchSettings[fieldName]}
 			style={{ backgroundColor: 'white', width: '100%' }}
 			fullWidth={true}
-			onBlur={(event) => setEDASearchSetting(fieldName, event.target.value, state, dispatch)}
+			onChange={(event) => setEDASearchSetting(fieldName, event.target.value, state, dispatch)}
 			inputProps={{
 				style: {
 					height: 19,
@@ -731,14 +739,14 @@ const renderObligatedAmountFilter = (state, dispatch) => {
 				placeholder="Min"
 				variant="outlined"
 				type="number"
-				defaultValue={state.edaSearchSettings && state.edaSearchSettings.minObligatedAmount}
+				value={state.edaSearchSettings && state.edaSearchSettings.minObligatedAmount}
 				style={{
 					backgroundColor: 'white',
 					width: '100%',
 					margin: '0 0 15px 0',
 				}}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('minObligatedAmount', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('minObligatedAmount', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
@@ -750,10 +758,10 @@ const renderObligatedAmountFilter = (state, dispatch) => {
 				placeholder="Max"
 				variant="outlined"
 				type="number"
-				defaultValue={state.edaSearchSettings && state.edaSearchSettings.maxObligatedAmount}
+				value={state.edaSearchSettings && state.edaSearchSettings.maxObligatedAmount}
 				style={{ backgroundColor: 'white', width: '100%' }}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('maxObligatedAmount', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('maxObligatedAmount', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
@@ -835,10 +843,10 @@ const renderExcludeTerms = (state, dispatch) => {
 			<TextField
 				placeholder="Enter Text to Exclude"
 				variant="outlined"
-				defaultValue={state.edaSearchSettings.excludeTerms}
+				value={state.edaSearchSettings.excludeTerms}
 				style={{ backgroundColor: 'white', width: '100%' }}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('excludeTerms', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('excludeTerms', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
@@ -952,7 +960,7 @@ const EDASearchMatrixHandler = (props) => {
 
 	return (
 		<div>
-			<div className={'sidebar-section-title'} style={{ paddingTop: 20 }}>
+			<div className={'sidebar-section-title'} style={{ paddingTop: 10 }}>
 				FILTERS
 				<p style={{ fontSize: 10, color: 'gray', margin: '5px 0px' }}>Data sources: PDS, SYN, FPDS</p>
 			</div>
@@ -1088,7 +1096,7 @@ const EDASearchMatrixHandler = (props) => {
 			<GCAccordion
 				contentPadding={15}
 				expanded={edaSearchSettings.duns}
-				header={'UEI'}
+				header={'DUNS'}
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}

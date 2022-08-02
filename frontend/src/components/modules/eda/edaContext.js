@@ -94,6 +94,7 @@ const initState = {
 	componentStepNumbers: [],
 	selectedDocuments: [],
 	totalObligatedAmount: 0,
+	loading: false,
 };
 
 const init = (initialState) => {

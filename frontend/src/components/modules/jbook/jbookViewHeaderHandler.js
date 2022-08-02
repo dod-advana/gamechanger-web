@@ -5,6 +5,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _, { isArray } from 'lodash';
+import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -138,20 +139,20 @@ const JbookViewHeaderHandler = (props) => {
 		sortSelected,
 		searchText,
 		exportLoading,
-		runSearch,
+		// runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [portfolios, setPortfolios] = useState([]);
-	const [filterList, setFilterList] = useState([]);
+	// const [filterList, setFilterList] = useState([]);
 
-	//Processes the search settings to find which filters are applied for displaying at the top
-	useEffect(() => {
-		if (runSearch) {
-			const cleanedSearchSettings = processFilters(jbookSearchSettings, defaultOptions);
-			setFilterList(cleanedSearchSettings);
-		}
-	}, [defaultOptions, jbookSearchSettings, runSearch]);
+	// //Processes the search settings to find which filters are applied for displaying at the top
+	// useEffect(() => {
+	// 	if (runSearch) {
+	// 		const cleanedSearchSettings = processFilters(jbookSearchSettings, defaultOptions);
+	// 		setFilterList(cleanedSearchSettings);
+	// 	}
+	// }, [defaultOptions, jbookSearchSettings, runSearch]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
 	useEffect(() => {
@@ -465,48 +466,14 @@ const JbookViewHeaderHandler = (props) => {
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
 			</div>
-			<div style={{ display: 'flex', justifyContent: 'left', marginTop: 15, flexWrap: 'wrap' }}>
-				{filterList.map((filter) => {
-					const { type, optionName } = filter;
-					const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';
-					return (
-						<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
-							<Button
-								variant="outlined"
-								backgroundColor="white"
-								display="inline-flex"
-								style={{
-									marginRight: '10px',
-									marginBottom: '15px',
-									padding: '10px 15px',
-									backgroundColor: 'white',
-									color: 'rgb(28, 45, 101)',
-									height: 40,
-									maxWidth: 400,
-									ariaPressed: 'true',
-								}}
-								endIcon={<CloseIcon />}
-								onClick={() => {
-									handleFilterChange(optionName, state, dispatch, type);
-								}}
-							>
-								<span
-									style={{
-										fontFamily: 'Montserrat',
-										fontWeight: 300,
-										color: 'black',
-										textOverflow: 'ellipsis',
-										overflow: 'hidden',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{`${typeText}${optionName}`}
-								</span>
-							</Button>
-						</GCTooltip>
-					);
-				})}
-			</div>
+			<FilterList
+				filterNameMap={filterNameMap}
+				state={state}
+				dispatch={dispatch}
+				searchSettings={jbookSearchSettings}
+				handleFilterChange={handleFilterChange}
+				processFilters={processFilters}
+			/>
 		</div>
 	);
 };

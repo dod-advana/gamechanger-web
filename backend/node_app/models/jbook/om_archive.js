@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const OM = sequelize.define(
-		'om',
+	return sequelize.define(
+		'om_archive',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -64,8 +64,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'om',
+			tableName: 'om_arxv',
 		}
 	);
-	return OM;
 };
