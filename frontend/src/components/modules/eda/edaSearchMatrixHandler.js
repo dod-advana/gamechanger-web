@@ -13,8 +13,6 @@ import GCButton from '../../common/GCButton';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
 
-const _ = require('lodash');
-
 const styles = {
 	titleText: {
 		fontWeight: 900,

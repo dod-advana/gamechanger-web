@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Button, FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _, { isArray } from 'lodash';
@@ -144,15 +143,6 @@ const JbookViewHeaderHandler = (props) => {
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 	const [portfolios, setPortfolios] = useState([]);
-	// const [filterList, setFilterList] = useState([]);
-
-	// //Processes the search settings to find which filters are applied for displaying at the top
-	// useEffect(() => {
-	// 	if (runSearch) {
-	// 		const cleanedSearchSettings = processFilters(jbookSearchSettings, defaultOptions);
-	// 		setFilterList(cleanedSearchSettings);
-	// 	}
-	// }, [defaultOptions, jbookSearchSettings, runSearch]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
 	useEffect(() => {

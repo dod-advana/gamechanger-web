@@ -229,11 +229,11 @@ const getAnalystTools = (context) => {
 
 export const renderHideTabs = (props) => {
 	const { state, dispatch } = props;
-	const { componentStepNumbers, cloneData, prevSearchText, searchText } = state;
+	const { componentStepNumbers, cloneData, searchText } = state;
 	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 
-	const handleLinkListItemClick = (searchText) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
+	const handleLinkListItemClick = (text) => {
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', text);
 		setState(dispatch, {
 			searchText,
 			autoCompleteItems: [],
