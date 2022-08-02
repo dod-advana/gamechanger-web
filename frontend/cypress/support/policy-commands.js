@@ -5,7 +5,7 @@ Cypress.Commands.add('login', (clone) => {
 });
 
 Cypress.Commands.add('search', (searchTerm) => {
-    cy.get('#gcSearchInput').type(`${searchTerm}`);
+    cy.get('#gcSearchInput', { timeout: 10000 }).type(`${searchTerm}`);
     cy.get('#gcSearchButton').click();
     cy.getDataCy('searchCard', { timeout: 60000 }).should('exist');
 });

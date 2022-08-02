@@ -26,7 +26,7 @@ describe('Tests multiple types of policy searches.', () => {
             .first().get('em').should('contain', searchTerm);
     });
     
-    it.only('Runs a question search and verifies the answer box exists', () => {
+    it('Runs a question search and verifies the answer box exists', () => {
         const searchTerm = "who is sergeant major of the army?";
         cy.search(searchTerm);
         cy.getDataCy('qa-result-card', {timeout: 10000});
