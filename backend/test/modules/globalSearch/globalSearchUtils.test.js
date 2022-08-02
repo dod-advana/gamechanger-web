@@ -310,9 +310,9 @@ const qlikStreamRes = [STREAM_TO_BE_EXCLUDED, STREAM_WITH_OTHER_CUSTOM_PROP, STR
 describe('GlobalSearchUtils', function () {
 	describe('#processQlikApps', () => {
 		const processedApps = processQlikApps(qlikAppRes, qlikStreamRes, {
-			QLIK_EXCLUDE_CUST_PROP_NAME: 'excludeName',
-			QLIK_EXCLUDE_CUST_PROP_VAL: 'boop',
-			QLIK_BUSINESS_DOMAIN_PROP_NAME: 'businessDomain',
+			excludeName: 'excludeName',
+			excludeValue: 'boop',
+			businessDomainPropName: 'businessDomain',
 		});
 
 		it(`excludes apps based on app's business domain`, async () => {

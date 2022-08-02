@@ -72,28 +72,21 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 	}
 };
 
-const determineIfExcluded = (
-	app,
-	{
-		QLIK_EXCLUDE_CUST_PROP_NAME = QLIK_EXCLUDE_CUST_PROP_NAME,
-		QLIK_EXCLUDE_CUST_PROP_VAL = QLIK_EXCLUDE_CUST_PROP_VAL,
-	}
-) => {
+const determineIfExcluded = (app, { excludeName, excludeValue }) => {
 	return app.customProperties.some(
-		(property) =>
-			property.definition.name === QLIK_EXCLUDE_CUST_PROP_NAME && property.value === QLIK_EXCLUDE_CUST_PROP_VAL
+		(property) => property.definition.name === excludeName && property.value === excludeValue
 	);
 };
 
 const separateBusinessDomainsAndCustomProps = (
 	customProperties = [],
-	{ QLIK_BUSINESS_DOMAIN_PROP_NAME = QLIK_BUSINESS_DOMAIN_PROP_NAME }
+	businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME
 ) => {
 	const businessDomains = [];
 	const otherCustomProps = [];
 
 	for (const customProp of customProperties) {
-		if (customProp.definition.name === QLIK_BUSINESS_DOMAIN_PROP_NAME) {
+		if (customProp.definition.name === businessDomainPropName) {
 			businessDomains.push(customProp.value);
 		} else {
 			otherCustomProps.push(customProp.value);
@@ -107,15 +100,20 @@ const processQlikApps = (
 	apps,
 	streams,
 	{
-		QLIK_EXCLUDE_CUST_PROP_NAME = QLIK_EXCLUDE_CUST_PROP_NAME,
-		QLIK_EXCLUDE_CUST_PROP_VAL = QLIK_EXCLUDE_CUST_PROP_VAL,
-		QLIK_BUSINESS_DOMAIN_PROP_NAME = QLIK_BUSINESS_DOMAIN_PROP_NAME,
+		excludeName = QLIK_EXCLUDE_CUST_PROP_NAME,
+		excludeValue = QLIK_EXCLUDE_CUST_PROP_VAL,
+		businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME,
 	}
 ) => {
 	try {
 		const processedApps = [];
 		for (const app of apps) {
-			if (!determineIfExcluded(app, { QLIK_EXCLUDE_CUST_PROP_NAME, QLIK_EXCLUDE_CUST_PROP_VAL })) {
+			if (
+				!determineIfExcluded(app, {
+					excludeName,
+					excludeValue,
+				})
+			) {
 				const appsFullStreamData = _.find(streams, (stream) => {
 					return stream.id === app.stream.id;
 				});
@@ -123,15 +121,13 @@ const processQlikApps = (
 				app.stream.customProperties = [];
 
 				const { businessDomains: streamBDs, otherCustomProps: streamOtherProps } =
-					separateBusinessDomainsAndCustomProps(appsFullStreamData?.customProperties, {
-						QLIK_BUSINESS_DOMAIN_PROP_NAME,
-					});
+					separateBusinessDomainsAndCustomProps(appsFullStreamData?.customProperties, businessDomainPropName);
 
 				allBusinessDomains = allBusinessDomains.concat(streamBDs);
 				app.stream.customProperties = app.stream.customProperties.concat(streamOtherProps);
 
 				const { businessDomains: appBDs, otherCustomProps: appOtherProps } =
-					separateBusinessDomainsAndCustomProps(app.customProperties, { QLIK_BUSINESS_DOMAIN_PROP_NAME });
+					separateBusinessDomainsAndCustomProps(app.customProperties, businessDomainPropName);
 
 				allBusinessDomains = allBusinessDomains.concat(appBDs);
 
