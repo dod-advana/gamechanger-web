@@ -145,6 +145,13 @@ const StyledFrontCardHeader = styled.div`
 			}
 		}
 
+		.text-nowrap-ellipsis {
+			width: 100%;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+
 		.selected-favorite {
 			display: inline-block;
 			font-family: 'Noto Sans';
@@ -239,7 +246,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	let predictionString = '';
 	if (
 		selectedPortfolio !== 'General' &&
-		projectData.ai_predictions[selectedPortfolio] &&
+		projectData.ai_predictions?.[selectedPortfolio] &&
 		projectData.ai_predictions[selectedPortfolio].confidence &&
 		projectData.ai_predictions[selectedPortfolio].top_class
 	) {
@@ -251,16 +258,16 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	return [
 		{
 			Key: 'Project',
-			Value: projectData.projectTitle,
+			Value: budgetType === 'ODOC' ? projectData.budgetActivityTitle : projectData.projectTitle,
 		},
 		{
 			Key: 'Program Element',
-			Value: projectData.programElement,
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
 			Key: 'Project Number',
-			Value: projectData.projectNum,
+			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
 		},
 		{
@@ -632,14 +639,33 @@ const cardHandler = {
 			const { cloneData, searchText, selectedPortfolio } = state;
 
 			let displayTitleTop = '';
+			let displayTitleBottom = '';
 			let displayTitleBot = '';
+			let tooltipTitle = '';
+			let title = <></>;
 			switch (item.budgetType) {
 				case 'odoc':
+					displayTitleTop = `BLI: ${item.lineNumber ?? ''} | Title: ${item.budgetActivityTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
+					break;
 				case 'pdoc':
 					displayTitleTop = `BLI: ${item.budgetLineItem ?? ''} | Title: ${item.projectTitle}`;
+					title = <span>{displayTitleTop}</span>;
+					tooltipTitle = displayTitleTop;
 					break;
 				case 'rdoc':
-					displayTitleTop = `BLI: ${item.programElement ?? ''} | Title: ${item.projectTitle}`;
+					displayTitleTop = `PE: ${item.programElement ?? ''} - ${item.programElementTitle}`;
+					displayTitleBottom = `Proj: ${item.projectNum} - ${item.projectTitle}`;
+					tooltipTitle = (
+						<span style={{ whiteSpace: 'pre-line' }}>{displayTitleTop + '\n' + displayTitleBottom}</span>
+					);
+					title = (
+						<>
+							<div className="text-nowrap-ellipsis">{displayTitleTop}</div>
+							<div className="text-nowrap-ellipsis">{displayTitleBottom}</div>
+						</>
+					);
 					break;
 				default:
 					break;
@@ -655,7 +681,7 @@ const cardHandler = {
 			return (
 				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
 					<div className={'title-text-selected-favorite-div'}>
-						<GCTooltip title={displayTitleTop} placement="top" arrow>
+						<GCTooltip title={tooltipTitle} placement="top" arrow>
 							<div
 								className={'title-text'}
 								onClick={(e) => {
@@ -671,7 +697,9 @@ const cardHandler = {
 								}}
 							>
 								<div className={'text'} style={{ width: '90%' }}>
-									{displayTitleTop} <br /> {displayTitleBot}
+									{title}
+									<br />
+									{displayTitleBot}
 								</div>
 								{docListView && (
 									<div className={'list-view-arrow'}>
@@ -710,14 +738,14 @@ const cardHandler = {
 					: '';
 
 				if (item.budgetType === 'odoc') {
-					appropriationTitle = item.accountTitle;
+					appropriationTitle = item.appropriationTitle;
 				}
 
 				let year = item.budgetYear ? item.budgetYear.slice(2) : '';
 				let cycle = item.budgetCycle ?? 'PB';
-				budgetPrefix = cycle + year + (item.currentYearAmount ? ': ' : '');
+				budgetPrefix = cycle + year + (item.by1Request ? ': ' : '');
 
-				budgetAmount = item.currentYearAmount ? '$' + item.currentYearAmount + ' M' : '';
+				budgetAmount = item.by1Request ? '$' + item.by1Request + ' M' : '';
 			} catch (e) {
 				console.log('Error setting card subheader');
 				console.log(e);
