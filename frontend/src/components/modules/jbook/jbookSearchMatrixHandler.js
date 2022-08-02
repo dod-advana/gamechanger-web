@@ -63,8 +63,6 @@ const handleFilterChange = (event, state, dispatch, type) => {
 		newSearchSettings[type].push(optionName);
 	}
 
-	console.log(newSearchSettings);
-
 	newSearchSettings.isFilterUpdate = true;
 	newSearchSettings[`${type}Update`] = true;
 
@@ -173,8 +171,6 @@ const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, cus
 	const specificSelected = `${type}SpecificSelected`;
 
 	const options = customOptions || state.defaultOptions[type];
-
-	console.log(options);
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
