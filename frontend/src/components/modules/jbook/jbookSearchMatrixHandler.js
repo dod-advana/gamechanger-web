@@ -520,7 +520,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						classes,
 						'classLabel',
 						'tag',
-						portfolioMap[selectedPortfolio].tags
+						portfolioMap?.[selectedPortfolio]?.tags
 					)}
 				</GCAccordion>
 			</div>
@@ -761,7 +761,7 @@ const getSearchMatrixItems = (props) => {
 							classes,
 							'classLabel',
 							'tag',
-							portfolioMap[selectedPortfolio].tags
+							portfolioMap?.[selectedPortfolio]?.tags
 						)}
 					</GCAccordion>
 				</div>

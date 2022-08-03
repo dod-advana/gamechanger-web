@@ -785,19 +785,6 @@ describe('JBookSearchHandler', function () {
 				],
 			];
 
-			const mockAgencyYearData = [
-				[
-					{
-						budgetyear: ['2020', '2021', '2022'],
-						serviceagency: ['Army', 'Air Force'],
-					},
-					{
-						budgetyear: ['2015', '2016'],
-						serviceagency: ['Navy', 'Marine Corp'],
-					},
-				],
-			];
-
 			const mockESBudgetYear = {
 				body: {
 					aggregations: {
@@ -934,7 +921,6 @@ describe('JBookSearchHandler', function () {
 							if (query.indexOf('primary_reviewer') !== -1) {
 								return mockPGResults;
 							}
-							return mockAgencyYearData;
 						},
 					},
 				},
