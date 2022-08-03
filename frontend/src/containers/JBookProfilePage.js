@@ -1,5 +1,4 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
-import SearchBar from '../components/searchBar/SearchBar';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -11,13 +10,11 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
-import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { getQueryVariable } from '../utils/gamechangerUtils';
 import './gamechanger.css';
 import './jbook.css';
 import './jbook-styles.css';
 import { setState } from '../utils/sharedFunctions';
-import Notifications from '../components/notifications/Notifications';
 import { getClassLabel, getSearchTerms, formatNum } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
@@ -28,7 +25,6 @@ import {
 	Contracts,
 	Metadata,
 	ProjectDescription,
-	SideNav,
 	ClassificationScoreCard,
 } from '../components/modules/jbook/profilePage/jbookProfilePageHelper';
 import {
@@ -54,25 +50,7 @@ const _ = require('lodash');
 const gameChangerAPI = new GameChangerAPI();
 const gameChangerUserAPI = new GameChangerUserAPI();
 
-const GCFooter = LoadableVisibility({
-	loader: () => import('../components/navigation/GCFooter'),
-	loading: () => {
-		return (
-			<div
-				style={{
-					display: 'flex',
-					height: '90px',
-					width: '100%',
-					backgroundColor: 'black',
-				}}
-			/>
-		);
-	},
-});
-
-const JBookProfilePage = (props) => {
-	const { cloneData, location } = props;
-
+const JBookProfilePage = () => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const {
@@ -80,7 +58,7 @@ const JBookProfilePage = (props) => {
 		reviewData,
 		keywordsChecked,
 		selectedPortfolio,
-		cloneDataSet,
+		cloneData,
 		domainTasks,
 		portfolios,
 		profilePageBudgetYear,
@@ -94,12 +72,6 @@ const JBookProfilePage = (props) => {
 		is_service_reviewer: false,
 		is_poc_reviewer: false,
 	});
-
-	useEffect(() => {
-		if (!cloneDataSet) {
-			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
-		}
-	}, [cloneData, dispatch, cloneDataSet]);
 
 	const [profileLoading, setProfileLoading] = useState(false);
 	const [dropdownData, setDropdownData] = useState({});
@@ -1334,9 +1306,6 @@ const JBookProfilePage = (props) => {
 
 	return (
 		<div>
-			<Notifications context={context} />
-			<SearchBar context={context} />
-			<SideNav context={context} budgetType={budgetType} budgetYear={budgetYear} />
 			<StyledContainer>
 				<StyledLeftContainer>
 					<div style={{ paddingLeft: 20 }}>
@@ -1432,8 +1401,6 @@ const JBookProfilePage = (props) => {
 				</StyledReviewLeftContainer>
 				<StyledReviewRightContainer></StyledReviewRightContainer>
 			</StyledReviewContainer>
-			{/* Footer */}
-			{<GCFooter location={location} cloneName="jbook" />}
 		</div>
 	);
 };
