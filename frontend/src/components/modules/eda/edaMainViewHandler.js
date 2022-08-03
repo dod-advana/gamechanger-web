@@ -233,9 +233,10 @@ export const renderHideTabs = (props) => {
 	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 
 	const handleLinkListItemClick = (text) => {
+		console.log(text);
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', text);
 		setState(dispatch, {
-			searchText,
+			searchText: text,
 			autoCompleteItems: [],
 			metricsCounted: false,
 			runSearch: true,
