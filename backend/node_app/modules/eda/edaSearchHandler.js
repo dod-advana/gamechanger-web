@@ -1,16 +1,9 @@
 const SearchUtility = require('../../utils/searchUtility');
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
-// const asyncRedisLib = require('async-redis');
-// const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
-// const separatedRedisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
-// const {Thesaurus} = require('../../lib/thesaurus');
-
-// const redisAsyncClientDB = 4;
-// const abbreviationRedisAsyncClientDB = 9;
 
 const SearchHandler = require('../base/searchHandler');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
@@ -33,9 +26,6 @@ class EdaSearchHandler extends SearchHandler {
 		this.constants = constants;
 		this.mlApi = mlApi;
 		this.searchUtility = searchUtility;
-		// this.thesaurus = thesaurus;
-		// this.async_redis = async_redis;
-		// this.sep_async_redis = sep_async_redis;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -134,11 +124,11 @@ class EdaSearchHandler extends SearchHandler {
 
 	async documentSearch(req, body, clientObj, userId) {
 		try {
-			let permissions = req.permissions
-				? typeof req.permissions === 'string'
-					? [req.permissions]
-					: req.permissions
-				: [];
+			let permissions = [];
+
+			if (req.permissions) {
+				permissions = typeof req.permissions === 'string' ? [req.permissions] : req.permissions;
+			}
 			permissions = permissions.map((permission) => permission.toLowerCase());
 
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, forStats = false } = body;
@@ -162,19 +152,12 @@ class EdaSearchHandler extends SearchHandler {
 					esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 				}
 			} else {
-				throw 'Unauthorized';
+				throw new Error('Unauthorized');
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
-			if (
-				results &&
-				results.body &&
-				results.body.hits &&
-				results.body.hits.total &&
-				results.body.hits.total.value &&
-				results.body.hits.total.value > 0
-			) {
+			if (results?.body?.hits?.total?.value > 0) {
 				if (getIdList) {
 					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
@@ -204,6 +187,21 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
+	sortContractMod(a, b) {
+		if (!a.modNumber) {
+			return 1;
+		}
+		if (!b.modNumber) {
+			return -1;
+		}
+
+		if (a.modNumber < b.modNumber) {
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+
 	async queryContractMods(req, userId) {
 		try {
 			const clientObj = { esClientName: 'eda', esIndex: this.constants.EDA_ELASTIC_SEARCH_OPTS.index };
@@ -214,52 +212,31 @@ class EdaSearchHandler extends SearchHandler {
 
 			let esQuery = '';
 			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
-				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, false, isSearch, userId);
+				esQuery = this.edaSearchUtility.getEDAContractQuery(userId, id, idv, false, isSearch);
 			} else {
-				throw 'Unauthorized';
+				throw new Error('Unauthorized');
 			}
 
 			// use the award ID to get the related mod numbers
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (
-				results &&
-				results.body &&
-				results.body.hits &&
-				results.body.hits.total &&
-				results.body.hits.total.value &&
-				results.body.hits.total.value > 0
-			) {
+			if (results?.body?.hits?.total?.value > 0) {
 				const hits = results.body.hits.hits;
 
 				if (isSearch) {
 					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], [], esIndex, esQuery);
-				} else {
-					const contractMods = [];
-					// grab the contract modification number
-					for (let hit of hits) {
-						contractMods.push({
-							modNumber: hit._source.extracted_data_eda_n.modification_number_eda_ext ?? null,
-							signatureDate: hit._source.extracted_data_eda_n.signature_date_eda_ext_dt ?? null,
-							effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null,
-						});
-					}
-					contractMods.sort((a, b) => {
-						if (!a.modNumber) {
-							return 1;
-						}
-						if (!b.modNumber) {
-							return -1;
-						}
-
-						if (a.modNumber < b.modNumber) {
-							return -1;
-						} else {
-							return 1;
-						}
-					});
-
-					return contractMods;
 				}
+				const contractMods = [];
+				// grab the contract modification number
+				for (let hit of hits) {
+					contractMods.push({
+						modNumber: hit._source.extracted_data_eda_n.modification_number_eda_ext ?? null,
+						signatureDate: hit._source.extracted_data_eda_n.signature_date_eda_ext_dt ?? null,
+						effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null,
+					});
+				}
+				contractMods.sort(sortContractMod);
+
+				return contractMods;
 			} else {
 				this.logger.error('Error with contract mods Elasticsearch results', '3ZCEAYJ', userId);
 				return [];
@@ -282,21 +259,14 @@ class EdaSearchHandler extends SearchHandler {
 
 			let esQuery = '';
 			if (permissions.includes('view eda') || permissions.includes('eda admin')) {
-				esQuery = this.edaSearchUtility.getEDAContractQuery(id, idv, true, false, userId);
+				esQuery = this.edaSearchUtility.getEDAContractQuery(userId, id, idv, true, false);
 			} else {
-				throw 'Unauthorized';
+				throw new Error('Unauthorized');
 			}
 
 			// use the award ID to get the base award data only
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (
-				results &&
-				results.body &&
-				results.body.hits &&
-				results.body.hits.total &&
-				results.body.hits.total.value &&
-				results.body.hits.total.value > 0
-			) {
+			if (results?.body?.hits?.total?.value > 0) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					const data = hits[0];
@@ -334,7 +304,7 @@ class EdaSearchHandler extends SearchHandler {
 					userId
 				);
 			} else {
-				throw 'Unauthorized';
+				throw new Error('Unauthorized');
 			}
 
 			// use the award ID to get the base award data only
@@ -350,8 +320,7 @@ class EdaSearchHandler extends SearchHandler {
 			) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
-					let data = this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
-					return data;
+					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
 				} else {
 					return {};
 				}
