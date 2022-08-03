@@ -555,8 +555,18 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		primary_reviewer_email: {
+			newName: 'primaryReviewerEmail', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		service_reviewer: {
 			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_email: {
+			newName: 'serviceReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -669,6 +679,11 @@ module.exports = {
 		},
 		service_secondary_reviewer: {
 			newName: 'serviceSecondaryReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_secondary_reviewer_email: {
+			newName: 'serviceSecondaryReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -947,8 +962,18 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		primary_reviewer_email_s: {
+			newName: 'primaryReviewerEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		service_reviewer_s: {
 			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_email_s: {
+			newName: 'serviceReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -1061,6 +1086,11 @@ module.exports = {
 		},
 		service_secondary_reviewer_s: {
 			newName: 'serviceSecondaryReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_secondary_reviewer_email_s: {
+			newName: 'serviceSecondaryReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
