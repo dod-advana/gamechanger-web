@@ -956,6 +956,11 @@ const EDASearchMatrixHandler = (props) => {
 
 	const { edaSearchSettings, totalObligatedAmount, issuingOrgs } = state;
 
+	const resetSearchSettings = () => {
+		dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+		setState(dispatch, { runSearch: true });
+	};
+
 	return (
 		<div>
 			<div className={'sidebar-section-title'} style={{ paddingTop: 10 }}>
@@ -1214,6 +1219,13 @@ const EDASearchMatrixHandler = (props) => {
 				}}
 			>
 				Update Search
+			</GCButton>
+			<GCButton
+				style={{ width: '100%', marginBottom: '10px', marginLeft: '-1px' }}
+				onClick={resetSearchSettings}
+				isSecondaryBtn
+			>
+				Clear Filters
 			</GCButton>
 
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 5 }}>
