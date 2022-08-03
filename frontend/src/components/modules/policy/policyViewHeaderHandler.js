@@ -206,10 +206,13 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'} style={extraStyle}>
+		<div
+			className={'results-count-view-buttons-container'}
+			style={{ ...extraStyle, justifyContent: 'space-between' }}
+		>
 			<div className={'view-filters-container'}>
 				{state.searchSettings.specificOrgsSelected &&
-					Object.keys(orgFilter).map((org, index) => {
+					Object.keys(orgFilter).map((org) => {
 						if (state.searchSettings.orgFilter[org]) {
 							return (
 								<Button
@@ -220,6 +223,7 @@ const PolicyViewHeaderHandler = (props) => {
 									value={org}
 									style={{
 										marginRight: '10px',
+										marginBottom: '5px',
 										padding: '10px 15px',
 										backgroundColor: 'white',
 										color: 'orange',
@@ -251,7 +255,7 @@ const PolicyViewHeaderHandler = (props) => {
 					})}
 
 				{state.searchSettings.specificTypesSelected &&
-					Object.keys(typeFilter).map((type, index) => {
+					Object.keys(typeFilter).map((type) => {
 						if (state.searchSettings.typeFilter[type]) {
 							return (
 								<Button
@@ -260,6 +264,7 @@ const PolicyViewHeaderHandler = (props) => {
 									display="inline-flex"
 									style={{
 										marginRight: '10px',
+										marginBottom: '5px',
 										padding: '10px 15px',
 										backgroundColor: 'white',
 										color: 'orange',
