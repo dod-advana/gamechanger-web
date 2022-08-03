@@ -125,17 +125,21 @@ export const EDASummaryView = (props) => {
 		}
 	}, [currentViewName, dispatch, summaryCardView]);
 
+	const handleAggregations = (edaSettings, value) => {
+		const index = edaSettings.aggregations.indexOf(value);
+		if (index !== -1) {
+			edaSettings.aggregations.splice(index, 1);
+		} else {
+			edaSettings.aggregations.push(value);
+		}
+	};
+
 	const setEDASearchSetting = (field, value, isStartDate, runSearch = true) => {
 		const edaSettings = _.cloneDeep(edaSearchSettings);
 		let doSearch = false;
 
 		if (field === 'aggregations') {
-			const index = edaSettings.aggregations.indexOf(value);
-			if (index !== -1) {
-				edaSettings.aggregations.splice(index, 1);
-			} else {
-				edaSettings.aggregations.push(value);
-			}
+			handleAggregations(edaSettings, value);
 		} else if (field === 'issueDateRange') {
 			let newDate = new moment(value).format('YYYY-MM-DD');
 			if (isStartDate) {
