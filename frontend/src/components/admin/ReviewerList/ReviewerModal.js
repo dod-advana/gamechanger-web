@@ -122,6 +122,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								margin="dense"
 								helperText={'Last, First'}
 								required
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Organization"
@@ -131,6 +132,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Phone Number"
@@ -140,6 +142,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 						</Grid>
 						<Grid item xs={6}>
@@ -174,15 +177,18 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								margin="dense"
 								helperText={' '}
 								required
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Title"
 								id="margin-dense"
+								InputLabelProps={{ shrink: editReviewerData?.title }}
 								value={editReviewerData?.title}
 								onChange={(event) => handleTextChange(event.target.value, 'title')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 						</Grid>
 					</Grid>
