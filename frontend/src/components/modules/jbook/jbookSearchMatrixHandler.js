@@ -328,7 +328,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -360,7 +360,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
 				</GCAccordion>
 			</div>
 
@@ -540,7 +540,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 						'classLabel',
 						'tag',
 						false,
-						portfolioMap[selectedPortfolio].tags
+						portfolioMap?.[selectedPortfolio]?.tags
 					)}
 				</GCAccordion>
 			</div>
@@ -625,7 +625,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -657,7 +657,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency', true)}
+					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
 				</GCAccordion>
 			</div>
 
@@ -790,7 +790,7 @@ const getSearchMatrixItems = (props) => {
 							'classLabel',
 							'tag',
 							false,
-							portfolioMap[selectedPortfolio].tags
+							portfolioMap?.[selectedPortfolio]?.tags
 						)}
 					</GCAccordion>
 				</div>
