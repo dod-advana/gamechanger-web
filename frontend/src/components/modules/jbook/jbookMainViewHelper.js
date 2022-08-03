@@ -129,10 +129,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 	});
 
 	try {
-		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-
 		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
@@ -142,6 +138,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
+
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
 			.map(itemOrBlank)
 			.sort(filterSortFunction);

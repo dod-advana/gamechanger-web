@@ -149,11 +149,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
-			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
-				req.body,
-				userId,
-				this.jbookSearchUtility.getMapping('esServiceAgency', false)
-			);
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId);
 
 			let expansionDict = {};
 
@@ -331,7 +327,7 @@ class JBookSearchHandler extends SearchHandler {
 			}
 
 			// get service agency data
-			query.aggs.values.terms.field = 'serviceAgency_s';
+			query.aggs.values.terms.field = 'org_jbook_desc_s';
 
 			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
