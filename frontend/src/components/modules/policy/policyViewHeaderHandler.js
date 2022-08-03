@@ -13,7 +13,7 @@ import { trackEvent } from '../../telemetry/Matomo';
 import { useStyles } from '../default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
@@ -75,12 +75,8 @@ const PolicyViewHeaderHandler = (props) => {
 		activeCategoryTab,
 		cloneData,
 		componentStepNumbers,
-		count,
 		currentViewName,
-		entityCount,
 		listView,
-		selectedCategories,
-		topicCount,
 		viewNames,
 		categorySorting,
 		currentSort,
@@ -88,10 +84,6 @@ const PolicyViewHeaderHandler = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	// eslint-disable-next-line
-	const [displayCount, setDisplayCount] = useState(
-		activeCategoryTab === 'all' ? count + entityCount + topicCount : count
-	);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -99,27 +91,6 @@ const PolicyViewHeaderHandler = (props) => {
 			setState(dispatch, { currentViewName: 'Card', listView: true });
 		}
 	}, [dispatch]);
-
-	useEffect(() => {
-		let tempCount;
-		switch (activeCategoryTab) {
-			case 'all':
-				tempCount =
-					(selectedCategories['Documents'] === true ? count : 0) +
-					(selectedCategories['Organizations'] === true ? entityCount : 0) +
-					(selectedCategories['Topics'] === true ? topicCount : 0);
-				break;
-			case 'Organizations':
-				tempCount = entityCount;
-				break;
-			case 'Topics':
-				tempCount = topicCount;
-				break;
-			default:
-				tempCount = count;
-		}
-		setDisplayCount(tempCount);
-	}, [activeCategoryTab, count, entityCount, topicCount, selectedCategories]);
 
 	const setDrawer = (open) => {
 		setState(dispatch, { docsDrawerOpen: open });
@@ -203,6 +174,96 @@ const PolicyViewHeaderHandler = (props) => {
 		setDropdownValue(value);
 		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
 		window.history.pushState(null, document.title, linkString);
+	};
+
+	const renderAscDescButtons = (sortType) => {
+		switch (sortType) {
+			case 'Alphabetical':
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-alpha-asc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('asc');
+							}}
+						/>
+						<i
+							className="fa fa-sort-alpha-desc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('desc');
+							}}
+						/>
+					</div>
+				);
+			case 'Relevance':
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-amount-desc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+						/>
+						<i
+							className="fa fa-sort-amount-asc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							disabled
+						/>
+					</div>
+				);
+			default:
+				return (
+					<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
+						<i
+							className="fa fa-sort-amount-desc"
+							style={{
+								marginTop: '80%',
+								marginRight: '5px',
+								cursor: 'pointer',
+								color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('desc');
+							}}
+						/>
+						<i
+							className="fa fa-sort-amount-asc"
+							style={{
+								marginTop: '80%',
+								cursor: 'pointer',
+								color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
+							}}
+							aria-hidden="true"
+							onClick={() => {
+								handleChangeOrder('asc');
+							}}
+						/>
+					</div>
+				);
+		}
 	};
 
 	return (
@@ -301,7 +362,7 @@ const PolicyViewHeaderHandler = (props) => {
 				style={
 					cloneData.clone_name !== 'gamechanger'
 						? { marginRight: 35, zIndex: 99 }
-						: { marginRight: 15, zIndex: 99 }
+						: { marginRight: 20, zIndex: 99 }
 				}
 			>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
@@ -333,63 +394,7 @@ const PolicyViewHeaderHandler = (props) => {
 								})}
 							</Select>
 						</FormControl>
-						{currentSort !== 'Alphabetical' ? (
-							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
-								<i
-									className="fa fa-sort-amount-desc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								/>
-								<i
-									className="fa fa-sort-amount-asc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								/>
-							</div>
-						) : (
-							<div style={{ width: '40px', marginRight: '6px', display: 'flex' }}>
-								<i
-									className="fa fa-sort-alpha-asc"
-									style={{
-										marginTop: '80%',
-										marginRight: '5px',
-										cursor: 'pointer',
-										color: currentOrder === 'asc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('asc');
-									}}
-								/>
-								<i
-									className="fa fa-sort-alpha-desc"
-									style={{
-										marginTop: '80%',
-										cursor: 'pointer',
-										color: currentOrder === 'desc' ? 'rgb(233, 105, 29)' : 'grey',
-									}}
-									aria-hidden="true"
-									onClick={() => {
-										handleChangeOrder('desc');
-									}}
-								/>
-							</div>
-						)}
+						{renderAscDescButtons(currentSort)}
 					</>
 				)}
 				<FormControl variant="outlined" classes={{ root: classes.root }}>
