@@ -138,21 +138,25 @@ class EdaSearchHandler extends SearchHandler {
 
 			const { esClientName, esIndex } = clientObj;
 			let esQuery = '';
+
 			if (
-				permissions.includes('view eda') ||
-				permissions.includes('eda admin') ||
-				permissions.includes('view gamechanger')
+				!(
+					permissions.includes('view eda') ||
+					permissions.includes('eda admin') ||
+					permissions.includes('view gamechanger')
+				)
 			) {
-				const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
-				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
-				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
-				if (forStats) {
-					esQuery = this.edaSearchUtility.getElasticsearchStatsQuery(body, userId);
-				} else {
-					esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
-				}
-			} else {
 				throw new Error('Unauthorized');
+			}
+
+			const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
+			body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
+			body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
+
+			if (forStats) {
+				esQuery = this.edaSearchUtility.getElasticsearchStatsQuery(body, userId);
+			} else {
+				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
@@ -164,17 +168,17 @@ class EdaSearchHandler extends SearchHandler {
 
 				if (forGraphCache) {
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
-				} else {
-					return this.edaSearchUtility.cleanUpEsResults(
-						results,
-						searchTerms,
-						userId,
-						selectedDocuments,
-						expansionDict,
-						esIndex,
-						esQuery
-					);
 				}
+
+				return this.edaSearchUtility.cleanUpEsResults(
+					results,
+					searchTerms,
+					userId,
+					selectedDocuments,
+					expansionDict,
+					esIndex,
+					esQuery
+				);
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
 				return { totalCount: 0, docs: [] };
