@@ -485,12 +485,6 @@ module.exports = (sequelize, DataTypes) => {
 			OthProgFund_Summary_Remarks: {
 				type: DataTypes.TEXT,
 			},
-			Proj_Fund_BY1: {
-				type: DataTypes.TEXT,
-			},
-			Proj_Fund_APY: {
-				type: DataTypes.TEXT,
-			},
 
 			Accomp_Fund_PY_Text_Search: {
 				type: DataTypes.TSVECTOR,
