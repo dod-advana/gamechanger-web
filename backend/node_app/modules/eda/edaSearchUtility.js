@@ -745,8 +745,6 @@ class EDASearchUtility {
 				});
 			}
 
-			console.log(settings);
-
 			// CLIN TEXT
 			if (settings.clinText && settings.clinText.length > 0) {
 				filterQueries.push({
@@ -771,8 +769,8 @@ class EDASearchUtility {
 		const matches = fieldValue.match(regex);
 
 		if (matches) {
-			for (let i = 0; i < matches.length; i++) {
-				fieldValue = fieldValue.replace(matches[i], `\\${matches[i]}`);
+			for (const match of matches) {
+				fieldValue = fieldValue.replace(match, `\\${match}`);
 			}
 		}
 
@@ -846,7 +844,6 @@ class EDASearchUtility {
 						if (r.inner_hits.pages) {
 							r.inner_hits.pages.hits.hits.forEach((phit) => {
 								const pageIndex = phit._nested.offset;
-								// const snippet =  phit.fields["pages.p_raw_text"][0];
 								let pageNumber = pageIndex + 1;
 								// one hit per page max
 								if (!pageSet.has(pageNumber)) {
@@ -947,14 +944,14 @@ class EDASearchUtility {
 		}
 	}
 
-	setMajcoms(dodaac, result) {
-		if (dodaac === result.contract_issue_dodaac_eda_ext) {
+	setMajcoms(org, result, adminPresent) {
+		if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) {
 			// match issue office
 			result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-		} else if (dodaac === result.paying_office_dodaac_eda_ext) {
+		} else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) {
 			// match paying office
 			result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-		} else if (adminPresent && dodaac === result.contract_admin_name_eda_ext) {
+		} else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) {
 			// match admin office
 			result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
 		}
@@ -1028,7 +1025,7 @@ class EDASearchUtility {
 
 			for (const org of orgData) {
 				if (org.dodaac_eda_ext) {
-					result = setMajcoms(org.dodaac_eda_ext, result);
+					result = this.setMajcoms(org, result, adminPresent);
 				}
 			}
 		}

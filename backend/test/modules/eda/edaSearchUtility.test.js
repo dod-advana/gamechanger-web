@@ -2725,7 +2725,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, false, false, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, false, false);
 				const expected = {
 					_source: {
 						includes: [
@@ -2795,7 +2795,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, true, true, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, true, true);
 				const expected = {
 					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
 					from: 0,
