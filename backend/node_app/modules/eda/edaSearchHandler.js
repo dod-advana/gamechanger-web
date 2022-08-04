@@ -234,7 +234,7 @@ class EdaSearchHandler extends SearchHandler {
 						effectiveDate: hit._source.extracted_data_eda_n.effective_date_eda_ext_dt ?? null,
 					});
 				}
-				contractMods.sort(sortContractMod);
+				contractMods.sort(this.sortContractMod);
 
 				return contractMods;
 			} else {
