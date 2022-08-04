@@ -4,18 +4,10 @@ import SimpleTable from '../../../common/SimpleTable';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import {
-	StyledTableContainer,
-	StyledNavButton,
-	StyledNavBar,
-	StyledNavContainer,
-	StyledLeftContainer,
-	StyledSideNavContainer,
-} from './profilePageStyles';
+import { StyledTableContainer, StyledNavButton, StyledLeftContainer } from './profilePageStyles';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import sanitizeHtml from 'sanitize-html';
-import SideNavigation from '../../../navigation/SideNavigation';
 import {
 	getClassLabel,
 	formatNum,
@@ -37,27 +29,6 @@ const boldKeys = (data) => {
 		pair.Key = <strong>{pair.Key}</strong>;
 		return pair;
 	});
-};
-
-const SideNav = ({ budgetType, budgetYear, context }) => {
-	return (
-		<>
-			<StyledNavBar id="The Basics">
-				<StyledSideNavContainer>
-					<Typography variant="h3" style={{ fontWeight: 'bold' }}>
-						{(budgetType ?? '') + ' ' + (budgetYear ?? '')}
-					</Typography>
-				</StyledSideNavContainer>
-
-				<StyledNavContainer>
-					<NavButtons />
-				</StyledNavContainer>
-
-				<StyledSideNavContainer></StyledSideNavContainer>
-			</StyledNavBar>
-			<SideNavigation context={context} />
-		</>
-	);
 };
 
 const BasicData = (props) => {
@@ -637,6 +608,5 @@ export {
 	BasicData,
 	Metadata,
 	ProjectDescription,
-	SideNav,
 	ClassificationScoreCard,
 };

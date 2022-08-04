@@ -1,50 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, CircularProgress } from '@material-ui/core';
+import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
-import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { StyledFooterDiv } from './profilePage/profilePageStyles';
-import { ButtonStyles } from './profilePage/profilePageStyles';
+import { StyledFooterDiv, ButtonStyles } from './profilePage/profilePageStyles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((_theme) => ({
 	customWidth: {
 		maxWidth: 1050,
 		padding: '15px 10px 15px 0',
 	},
 }));
 
+const createReviewersObject = (dropdownData, reviewerType) => {
+	const reviewers = {};
+
+	if (dropdownData[reviewerType]) {
+		dropdownData[reviewerType].forEach((reviewer) => {
+			const display = `${reviewer.name}${
+				reviewer?.organization?.length > 1 ? ` (${reviewer.organization})` : ''
+			}`;
+			reviewers[display] = {
+				display,
+				...reviewer,
+			};
+		});
+	}
+
+	//sorts reviewers
+	return Object.keys(reviewers)
+		.sort()
+		.reduce((obj, key) => {
+			obj[key] = reviewers[key];
+			return obj;
+		}, {});
+};
+
 const ReviewersValue = React.memo((props) => {
 	const {
 		primaryReviewer, // from reviewData
 		finished,
 		dropdownData,
-		setReviewData,
+		setReviewDataMultiple,
 	} = props;
 
-	const primaryReviewers =
-		dropdownData && dropdownData.reviewers
-			? dropdownData.reviewers
-					.map((reviewer) => {
-						return `${reviewer.name}${
-							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
-								? ` (${reviewer.organization})`
-								: ''
-						}`;
-					})
-					.sort()
-			: [];
+	const reviewers = createReviewersObject(dropdownData, 'reviewers');
 
 	return (
 		<Autocomplete
 			size="small"
-			options={primaryReviewers}
+			options={Object.keys(reviewers)}
 			style={{ width: 300 }}
 			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
 			value={primaryReviewer ?? null}
-			onChange={(event, value) => setReviewData('primaryReviewer', value)}
+			onChange={(_e, value) => {
+				setReviewDataMultiple({ primaryReviewer: value, primaryReviewerEmail: reviewers[value].email });
+			}}
 			disabled={finished} //|| roleDisabled}
 			disableClearable
 		/>
@@ -106,7 +119,7 @@ const CoreAIAnalysisValue = React.memo((props) => {
 			getOptionLabel={(option) => option.primary_class_label ?? ''}
 			getOptionSelected={(option, value) => option.primary_class_label === value.primary_class_label}
 			style={{ width: 300, backgroundColor: 'white' }}
-			onChange={(event, value) => setReviewData('primaryClassLabel', value.primary_class_label)}
+			onChange={(_event, value) => setReviewData('primaryClassLabel', value.primary_class_label)}
 			renderInput={(params) => <TextField {...params} label="Analysis" variant="outlined" />}
 			value={primaryClassLabel ? { primary_class_label: primaryClassLabel } : null}
 			disabled={finished} //|| roleDisabled}
@@ -116,29 +129,20 @@ const CoreAIAnalysisValue = React.memo((props) => {
 });
 
 const ServiceComponentReviewerValue = React.memo((props) => {
-	const { serviceReviewer, finished, dropdownData, setReviewData } = props;
+	const { serviceReviewer, finished, dropdownData, setReviewDataMultiple } = props;
 
-	const serviceReviewers =
-		dropdownData && dropdownData.serviceReviewers
-			? dropdownData.serviceReviewers
-					.map((reviewer) => {
-						return `${reviewer.name}${
-							reviewer.organization && reviewer.organization.length && reviewer.organization.length > 1
-								? ` (${reviewer.organization})`
-								: ''
-						}`;
-					})
-					.sort()
-			: [];
+	const reviewers = createReviewersObject(dropdownData, 'serviceReviewers');
 
 	return (
 		<Autocomplete
 			size="small"
-			options={serviceReviewers}
+			options={Object.keys(reviewers)}
 			style={{ width: 300, backgroundColor: 'white' }}
 			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
 			value={serviceReviewer ?? null}
-			onChange={(event, value) => setReviewData('serviceReviewer', value)}
+			onChange={(_e, value) => {
+				setReviewDataMultiple({ serviceReviewer: value, serviceReviewerEmail: reviewers[value].email });
+			}}
 			disabled={finished} //|| roleDisabled}
 			disableClearable
 		/>

@@ -354,6 +354,14 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 					},
 			  ]
 			: []),
+		...(showPrediction
+			? [
+					{
+						Key: 'Predicted Tag',
+						Value: predictionString,
+					},
+			  ]
+			: []),
 	];
 };
 
