@@ -43,6 +43,7 @@ const filterNameMap = {
 	excludeTerms: 'Excluded Term',
 	contractSOW: 'Contract SOW',
 	clinText: 'CLIN Data',
+	reqDesc: 'Desc of Reqs',
 };
 
 const handleFilterChange = (option, state, dispatch, type) => {
