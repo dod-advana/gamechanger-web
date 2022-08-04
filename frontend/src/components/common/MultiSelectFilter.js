@@ -66,12 +66,15 @@ const MultiSelectFilter = ({
 	state,
 	dispatch,
 	classes,
+	searchSettingsName,
 	filter,
 	originalFilters,
 	allSelected,
 	specificSelected,
 	update,
 	trackingName,
+	showNumResultsPerOption = false,
+	preventSearchOnChange = false,
 }) => {
 	const [showSeeMore, setShowSeeMore] = useState(false);
 	const [showClear, setShowClear] = useState(false);
@@ -92,14 +95,16 @@ const MultiSelectFilter = ({
 	const containerRef = useRef();
 	const checkboxRef = useRef();
 
-	const handleFilterChange = (event, gcState, gcDispatch) => {
-		const newSearchSettings = structuredClone(gcState.searchSettings);
-		if (gcState.searchSettings[allSelected]) {
+	const handleFilterChange = (event) => {
+		const newSearchSettings = structuredClone(state[searchSettingsName]);
+		if (state[searchSettingsName][allSelected]) {
 			newSearchSettings[allSelected] = false;
 			newSearchSettings[specificSelected] = true;
 			setShowClear(true);
 		}
-		let name = event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1);
+		let name = showNumResultsPerOption
+			? event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1)
+			: event.target.name;
 		newSearchSettings[filter] = {
 			...newSearchSettings[filter],
 			[name]: event.target.checked,
@@ -111,14 +116,14 @@ const MultiSelectFilter = ({
 		}
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
-		setState(gcDispatch, {
-			searchSettings: newSearchSettings,
+		setState(dispatch, {
+			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
-			runSearch: true,
-			runGraphSearch: true,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
 		});
 		trackEvent(
-			getTrackingNameForFactory(gcState.cloneData.clone_name),
+			getTrackingNameForFactory(state.cloneData.clone_name),
 			trackingName,
 			event.target.name,
 			event.target.value ? 1 : 0
@@ -129,11 +134,11 @@ const MultiSelectFilter = ({
 		setShowingAllOptions(!showingAllOptions);
 	};
 
-	const handleClear = (gcState, gcDispatch) => {
-		const newSearchSettings = structuredClone(gcState.searchSettings);
+	const handleClear = () => {
+		const newSearchSettings = structuredClone(state[searchSettingsName]);
 
 		// Set all options to false
-		const newFilter = Object.keys(gcState.searchSettings[filter]).reduce((accumulator, key) => {
+		const newFilter = Object.keys(state[searchSettingsName][filter]).reduce((accumulator, key) => {
 			return { ...accumulator, [key]: false };
 		}, {});
 
@@ -143,11 +148,11 @@ const MultiSelectFilter = ({
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
 		setShowClear(false);
-		setState(gcDispatch, {
-			searchSettings: newSearchSettings,
+		setState(dispatch, {
+			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
-			runSearch: true,
-			runGraphSearch: true,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
 		});
 	};
 
@@ -164,6 +169,11 @@ const MultiSelectFilter = ({
 			width = ref.current.clientWidth + marginLeft + marginRight;
 		}
 		return [width, height];
+	};
+
+	const getCheckboxText = (option) => {
+		if (showNumResultsPerOption) return `${option} (${betterData[option]})`;
+		else return option;
 	};
 
 	useEffect(() => {
@@ -183,11 +193,16 @@ const MultiSelectFilter = ({
 		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 			<div ref={containerRef} style={styles.checkboxContainer}>
 				{visibleOptions.map((option) => {
+					const checkboxText = getCheckboxText(option);
 					return (
 						<FormControlLabel
-							disabled={!betterData[option] && !state.searchSettings[filter][option]}
-							key={`${option} (${betterData[option]})`}
-							value={`${option} (${betterData[option]})`}
+							disabled={
+								showNumResultsPerOption &&
+								!betterData[option] &&
+								!state[searchSettingsName][filter][option]
+							}
+							key={checkboxText}
+							value={checkboxText}
 							classes={{
 								root: classes.rootLabel,
 								label: classes.checkboxPill,
@@ -198,13 +213,13 @@ const MultiSelectFilter = ({
 										root: classes.rootButton,
 										checked: classes.checkedButton,
 									}}
-									name={`${option} (${betterData[option]})`}
-									checked={state.searchSettings[filter][option] || false}
-									onChange={(event) => handleFilterChange(event, state, dispatch)}
-									key={`${option} (${betterData[option]})`}
+									name={checkboxText}
+									checked={state[searchSettingsName][filter][option] || false}
+									onChange={(event) => handleFilterChange(event)}
+									key={checkboxText}
 								/>
 							}
-							label={`${option} (${betterData[option]})`}
+							label={checkboxText}
 							labelPlacement="end"
 							ref={checkboxRef}
 						/>
@@ -244,12 +259,15 @@ MultiSelectFilter.propTypes = {
 	}),
 	dispatch: PropTypes.func,
 	classes: PropTypes.object,
+	searchSettingsName: PropTypes.string,
 	filter: PropTypes.string,
 	originalFilters: PropTypes.object,
 	allSelected: PropTypes.string,
 	specificSelected: PropTypes.string,
 	update: PropTypes.string,
 	trackingName: PropTypes.string,
+	showNumResultsPerOption: PropTypes.bool,
+	preventSearchOnChange: PropTypes.bool,
 };
 
 export default MultiSelectFilter;

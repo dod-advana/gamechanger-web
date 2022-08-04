@@ -1344,7 +1344,7 @@ const JBookProfilePage = (props) => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.ai_predictions[selectedPortfolio])}
+							scores={scorecardData(projectData.ai_predictions?.[selectedPortfolio])}
 							commentThread={commentThread}
 							gameChangerAPI={gameChangerAPI}
 							docID={docID}
