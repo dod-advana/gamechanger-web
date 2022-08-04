@@ -861,33 +861,59 @@ class JBookDataHandler extends DataHandler {
 
 	async getUserSpecificReviews(req, userId) {
 		try {
-			const { permissions, email } = req.body;
+			const { email } = req.body;
+			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+			const reviewerTypes = [
+				'primary_reviewer_email_s',
+				'service_reviewer_email_s',
+				'service_secondary_reviewer_email_s',
+			];
+			const shouldArray = reviewerTypes.map((type) => ({
+				term: {
+					[`review_n.${type}`]: email,
+				},
+			}));
 
-			const jbookSearchSettings = {};
-			this.setJbookSearchSettingReviewers(permissions, email, jbookSearchSettings);
+			const esQuery = {
+				query: {
+					bool: {
+						must: {
+							nested: {
+								path: 'review_n',
+								query: {
+									bool: {
+										should: shouldArray,
+									},
+								},
+								inner_hits: {},
+							},
+						},
+					},
+				},
+				_source: [
+					'type_s',
+					'budgetYear_s',
+					'budgetLineItem_s',
+					'programElement_s',
+					'projectNum_s',
+					'projectTitle_s',
+					'serviceAgency_s',
+					'appropriationNumber',
+					'keyword_n',
+				],
+			};
 
-			const [pSelect, rSelect, oSelect] = this.jbookSearchUtility.buildSelectQuery();
-			const [pWhere, rWhere, oWhere] = this.jbookSearchUtility.buildWhereQueryForUserDash(jbookSearchSettings);
-			const pQuery = pSelect + pWhere;
-			const rQuery = rSelect + rWhere;
-			const oQuery = oSelect + oWhere;
+			const esResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				esQuery,
+				userId
+			);
 
-			let giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
-
-			const queryEnd = this.jbookSearchUtility.buildEndQuery(jbookSearchSettings.sort);
-			giantQuery += queryEnd;
-
-			let data2 = await this.db.jbook.query(giantQuery, {});
-
-			let returnData = data2[0];
-
-			// set the keywords
-			returnData.map((doc) => {
-				return doc;
-			});
+			const { docs } = this.jbookSearchUtility.cleanESUserReviews(esResults, userId);
 
 			return {
-				docs: returnData,
+				docs,
 			};
 		} catch (err) {
 			this.logger.error(err, '6TNRBVL', userId);

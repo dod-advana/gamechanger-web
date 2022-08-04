@@ -7,6 +7,7 @@ const {
 	esData,
 	portfolioData,
 	reviewData,
+	userReviews,
 	commentData,
 } = require('../../resources/mockResponses/jbookMockData');
 
@@ -637,6 +638,58 @@ describe('JBookDataHandler', function () {
 			const target = new JBookDataHandler(opts);
 			const expected = { updated: true };
 			const actual = await target.voteComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+	});
+
+	describe('#getUserSpecificReviews', () => {
+		it('should get all reviews for user', async (done) => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(userReviews);
+					},
+				},
+			};
+			const req = {
+				body: {
+					email: 'test@test.com',
+				},
+			};
+			const target = new JBookDataHandler(opts);
+			const expected = {
+				docs: [
+					{
+						appropriationNumber: '2040',
+						budgetActivityNumber: '03',
+						budgetLineItem: 'MO2',
+						budgetType: 'rdoc',
+						budgetYear: '2023',
+						createdAt: '2022-07-29T15:35:42.958Z',
+						hasKeywords: false,
+						id: 'rdoc#2023#PB#03#0603002A#21#N/A#2040#MO2',
+						keywords: [],
+						portfolioName: 'AI Inventory',
+						programElement: '0603002A',
+						projectNum: 'MO2',
+						projectTitle: 'Traumatic Brain Injury (TBI) Treatment Adv Tech',
+						reviewStatus: 'Needs Review',
+						serviceAgency: 'Army',
+						serviceReviewStatus: 'Partial Review',
+						serviceSecondaryReviewer: 'Test',
+						serviceSecondaryReviewerEmail: 'test@test.com',
+						updatedAt: '2022-07-29T15:35:42.958Z',
+					},
+				],
+			};
+			const actual = await target.getUserSpecificReviews(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
 			done();
 		});
