@@ -415,7 +415,6 @@ const JBookSearchHandler = {
 			}
 
 			if (searchSettings[optionType] && searchSettings[optionType].length === 0) {
-				console.log('empty search setting detected');
 				delete searchSettings[optionType];
 			}
 		}
