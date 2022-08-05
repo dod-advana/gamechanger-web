@@ -20,6 +20,7 @@ import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMe
 import PropTypes from 'prop-types';
 
 const getToolTheme = (cloneData) => {
+	console.log('this is where we are', window.location.href);
 	return {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
@@ -30,8 +31,8 @@ const getToolTheme = (cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href="#/jbook">
-				<img src={JAICLogo} alt="tool logo" />
+			<PageLink href={`#/jbook`}>
+				<img onClick={() => window.location.reload()} src={JAICLogo} alt="tool logo" />
 			</PageLink>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
