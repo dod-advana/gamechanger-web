@@ -26,14 +26,14 @@ const gameChangerAPI = new GameChangerAPI();
 
 const highlightColors = [primaryPurple, primaryAlt, primaryRedDark, primaryDark, tertiaryGreen, tertiaryGoldDarkest];
 
-const useStyles = (theme) => ({
+const useStyles = () => ({
 	dialogXl: {
 		maxWidth: '1360px',
 		minWidth: '1000px',
 	},
 });
 
-const BorderLinearProgress = withStyles((theme) => ({
+const BorderLinearProgress = withStyles(() => ({
 	root: {
 		height: 15,
 		borderRadius: 10,
@@ -105,7 +105,7 @@ class GameChangerAssist extends Component {
 		});
 	}
 
-	componentDidUpdate(prevProps, prevState, snapshot) {
+	componentDidUpdate(prevProps) {
 		if (this.props.context.state.showAssistModal !== prevProps.context.state.showAssistModal) {
 			if (this.props.context.state.showAssistModal) {
 				this.getAnnotationData();
@@ -126,11 +126,10 @@ class GameChangerAssist extends Component {
 	countWords(str) {
 		let tmpStr = str.replace(/(^\s*)|(\s*$)/gi, '');
 		tmpStr = tmpStr.replace(/[.]/gi, '');
-		tmpStr = tmpStr.replace(/[ ]{2,}/gi, ' ');
+		tmpStr = tmpStr.replace(/ {2,}/gi, ' ');
 		tmpStr = tmpStr.replace(/\n /, '\n');
-		const count = tmpStr.split(' ').length;
 
-		return count;
+		return tmpStr.split(' ').length;
 	}
 
 	countEntities(entities) {
@@ -215,10 +214,28 @@ class GameChangerAssist extends Component {
 		});
 	};
 
-	setupGeneralUserData = (data) => {
-		const paragraphsWithEntities = data.paragraphs.filter((paragraph) => {
+	getParagraphsWithEntities = (paragraphs) => {
+		return paragraphs.filter((paragraph) => {
 			return paragraph.entities ? this.countEntities(paragraph.entities) > 0 : false;
 		});
+	};
+
+	getStart = (startIndex, textTokens) => {
+		let start = 0;
+
+		if (startIndex > 0) {
+			let totalChars = 0;
+			textTokens.forEach((token, i) => {
+				if (token.length + 1 + totalChars === startIndex) start = i + 1;
+				totalChars += token.length + 1;
+			});
+		}
+
+		return start;
+	};
+
+	setupGeneralUserData = (data) => {
+		const paragraphsWithEntities = this.getParagraphsWithEntities(data.paragraphs);
 
 		const paragraphEntities = [];
 		const paragraphEntityAnswers = [];
@@ -257,15 +274,7 @@ class GameChangerAssist extends Component {
 						const textTokens = paragraph.par_raw_text_t.split(' ');
 						const startIndex = paragraph.par_raw_text_t.indexOf(entity);
 
-						let start = 0;
-
-						if (startIndex > 0) {
-							let totalChars = 0;
-							textTokens.forEach((token, i) => {
-								if (token.length + 1 + totalChars === startIndex) start = i + 1;
-								totalChars += token.length + 1;
-							});
-						}
+						const start = this.getStart(startIndex, textTokens);
 
 						const end = entity.split(' ').length + start;
 
@@ -352,8 +361,7 @@ class GameChangerAssist extends Component {
 		// Are we going forward or back
 		if (change > 0 && canMoveForward) {
 			// Are we moving to the next entity in this paragraph or onto a new paragraph?
-			if (currentEntityIndex + change === paragraphEntities[currentParagraphIndex].length) {
-			} else {
+			if (currentEntityIndex + change !== paragraphEntities[currentParagraphIndex].length) {
 				newEntityIndex = (currentEntityIndex + change) % paragraphEntities[currentParagraphIndex].length;
 			}
 		} else {
@@ -429,7 +437,6 @@ class GameChangerAssist extends Component {
 
 	handleGeneralAnswers = (correct, incorrectReason, unknown = false) => {
 		const { paragraphEntityAnswers, currentEntityIndex, currentParagraphIndex } = this.state;
-		//gameChangerAPI.saveDocumentAnnotations(dataToSave);
 
 		paragraphEntityAnswers[currentParagraphIndex][currentEntityIndex] = {
 			correct,
@@ -640,7 +647,7 @@ class GameChangerAssist extends Component {
 							Your Assists this Week: <b style={{ color: 'red', fontSize: 14 }}>(Beta)</b>
 						</Typography>
 					</div>
-					<CloseButton onClick={() => this.handleSave(true)}>
+					<CloseButton onClick={() => this.closeModal()}>
 						<CloseIcon fontSize="large" />
 					</CloseButton>
 				</DialogTitle>
