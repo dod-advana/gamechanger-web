@@ -20,7 +20,6 @@ import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMe
 import PropTypes from 'prop-types';
 
 const getToolTheme = (cloneData) => {
-	console.log('this is where we are', window.location.href);
 	return {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
