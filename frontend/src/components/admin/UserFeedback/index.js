@@ -7,6 +7,8 @@ import { styles, TableRow } from '../util/GCAdminStyles';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const PAGE_SIZE = 15;
+
 // The table columns
 const DEFAULT_COLUMNS = [
 	{
@@ -23,6 +25,28 @@ const DEFAULT_COLUMNS = [
 	},
 ];
 
+const getUserFeedbackData = async ({ limit = PAGE_SIZE, offset, sorted, filtered }) => {
+	const order = sorted.map(({ id, desc }) => {
+		return [id, desc ? 'DESC' : 'ASC'];
+	});
+	const where = filtered.map(({ id, value }) => ({
+		[id]: { $iLike: `%${value}%` },
+	}));
+
+	const data = await gameChangerAPI.getJbookFeedbackData({
+		limit,
+		offset,
+		order,
+		where,
+	});
+
+	if (data && data.data) {
+		return data.data;
+	} else {
+		return { totalCount: 0, docs: [] };
+	}
+};
+
 /**
  *
  * @class UserFeedback
@@ -33,22 +57,29 @@ const UserFeedback = React.memo((props) => {
 	// Component Properties
 	const [gcUserTableData, setGCUserTableData] = useState([]);
 	const [tableColumns, setTableColumns] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [numPages, setNumPages] = useState(0);
 	// Component Methods
 
-	const getUserData = useCallback(async () => {
-		const tableData = [];
-
-		const data = await gameChangerAPI.getJbookFeedbackData();
-
-		_.forEach(data.data.results, (result) => {
-			tableData.push(result);
-		});
-		setGCUserTableData(tableData);
+	const handleFetchData = useCallback(async ({ page, sorted, filtered }) => {
+		try {
+			setLoading(true);
+			const { totalCount, docs = [] } = await getUserFeedbackData({
+				offset: page * PAGE_SIZE,
+				sorted,
+				filtered,
+			});
+			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
+			setNumPages(pageCount);
+			setGCUserTableData(docs);
+		} catch (e) {
+			setGCUserTableData([]);
+			setNumPages(0);
+			console.error(e);
+		} finally {
+			setLoading(false);
+		}
 	}, []);
-
-	useEffect(() => {
-		getUserData();
-	}, [getUserData]);
 
 	useEffect(() => {
 		let tmpColumns = [...DEFAULT_COLUMNS];
@@ -66,33 +97,33 @@ const UserFeedback = React.memo((props) => {
 	const cloneDisplayName = cloneName ? cloneName.toUpperCase() : 'GAMECHANGER';
 
 	return (
-		<>
-			<div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-						{title ? `${cloneDisplayName} ${title}` : `${cloneDisplayName} User Feedback`}
-					</p>
-					{titleAdditions && titleAdditions()}
-				</div>
-				{descriptionAdditions && descriptionAdditions()}
-				<ReactTable
-					data={gcUserTableData}
-					columns={tableColumns}
-					style={{ margin: '0 80px 20px 80px', height: 700 }}
-					defaultPageSize={10}
-					filterable={true}
-					defaultFilterMethod={(filter, row) =>
-						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
-					}
-					defaultSorted={[
-						{
-							id: 'last_name',
-							desc: false,
-						},
-					]}
-				/>
+		<div>
+			<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+					{title ? `${cloneDisplayName} ${title}` : `${cloneDisplayName} User Feedback`}
+				</p>
+				{titleAdditions && titleAdditions()}
 			</div>
-		</>
+			{descriptionAdditions && descriptionAdditions()}
+			<ReactTable
+				data={gcUserTableData}
+				columns={tableColumns}
+				style={{ margin: '0 80px 20px 80px', height: 700 }}
+				filterable={true}
+				pageSize={PAGE_SIZE}
+				showPageSizeOptions={false}
+				loading={loading}
+				manual={true}
+				pages={numPages}
+				onFetchData={handleFetchData}
+				defaultSorted={[
+					{
+						id: 'last_name',
+						desc: false,
+					},
+				]}
+			/>
+		</div>
 	);
 });
 

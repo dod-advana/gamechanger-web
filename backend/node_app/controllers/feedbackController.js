@@ -36,7 +36,7 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
-			const feedback = await this.feedback.create({
+			await this.feedback.create({
 				event_name: eventName,
 				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'search_text: ' + searchText,
@@ -54,7 +54,7 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, question, answer, qaContext, params } = req.body;
 		try {
-			const feedback = await this.feedback.create({
+			await this.feedback.create({
 				event_name: eventName,
 				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'question: ' + question,
@@ -100,18 +100,26 @@ class FeedbackController {
 	}
 
 	async getJbookFeedbackData(req, res) {
-		console.log('\n\n\n\nhello???');
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const { limit = 15, offset = 0, order = [], where = {} } = req.body;
+
+		const new_where = {};
+		where.forEach((object, idx) => {
+			const col = Object.keys(object)[0];
+			new_where[col] = { [Sequelize.Op.iLike]: where[idx][col]['$iLike'] };
+		});
+
 		try {
-			const { limit = 100, offset = 0, order = ['id'], where = {} } = req.body;
-			const results = await this.feedback_jbook.findAndCountAll({
+			const totalCount = await this.feedback_jbook.count({ where: new_where });
+			const docs = await this.feedback_jbook.findAll({
 				limit,
 				offset,
 				order,
-				where,
+				where: new_where,
 				attributes: ['id', 'first_name', 'last_name', 'email', 'type', 'description'],
 			});
-			res.status(200).send({ totalCount: results.count, results: results.rows });
+
+			res.status(200).send({ totalCount, docs });
 		} catch (err) {
 			this.logger.error(err, '9FCQYV2', userId);
 			res.status(500).send(err);

@@ -111,6 +111,7 @@ const userFeedbackTableAdditions = [
 	{
 		Header: 'Feedback',
 		accessor: 'description',
+		filterable: false,
 		minWidth: 300,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
