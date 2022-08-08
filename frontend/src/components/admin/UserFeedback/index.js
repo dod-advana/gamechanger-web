@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import _ from 'underscore';
@@ -23,45 +23,6 @@ const DEFAULT_COLUMNS = [
 	},
 ];
 
-const TEST_DATA = [
-	{
-		id: 1,
-		first_name: 'Jane',
-		last_name: 'Doe',
-		email: 'jane@gmail.com',
-		type: 'Suggestion',
-		description: 'can you make this better?',
-		timestamp: new Date().toISOString(),
-	},
-	{
-		id: 2,
-		first_name: 'John',
-		last_name: 'Doe',
-		email: 'john@gmail.com',
-		type: 'Question',
-		description: 'why did you do this to me?',
-		timestamp: new Date().toISOString(),
-	},
-	{
-		id: 3,
-		first_name: 'Melodie',
-		last_name: 'Butz',
-		email: 'melodie@gmail.com',
-		type: 'Other',
-		description: 'Im not really a hard taco guy',
-		timestamp: new Date().toISOString(),
-	},
-	{
-		id: 4,
-		first_name: 'Melodie',
-		last_name: 'Butz',
-		email: 'melodie@gmail.com',
-		type: 'Content',
-		description: 'Would love to see more air force documents on here',
-		timestamp: new Date().toISOString(),
-	},
-];
-
 /**
  *
  * @class UserFeedback
@@ -74,21 +35,20 @@ const UserFeedback = React.memo((props) => {
 	const [tableColumns, setTableColumns] = useState([]);
 	// Component Methods
 
-	const getUserData = async () => {
-		const tableData = TEST_DATA;
+	const getUserData = useCallback(async () => {
+		const tableData = [];
 
-		const data = await gameChangerAPI.getUserData(cloneName);
+		const data = await gameChangerAPI.getJbookFeedbackData();
 
-		_.forEach(data.data.users, (result) => {
-			console.log(result);
+		_.forEach(data.data.results, (result) => {
+			tableData.push(result);
 		});
 		setGCUserTableData(tableData);
-	};
+	}, []);
 
 	useEffect(() => {
 		getUserData();
-		// eslint-disable-next-line
-	}, []);
+	}, [getUserData]);
 
 	useEffect(() => {
 		let tmpColumns = [...DEFAULT_COLUMNS];

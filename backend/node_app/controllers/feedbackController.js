@@ -1,4 +1,5 @@
 const FEEDBACK = require('../models').feedback;
+const FEEDBACK_JBOOK = require('../models').feedback_jbook;
 const DOC_INGEST_REQUEST = require('../models').doc_ingest_requests;
 const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
@@ -11,15 +12,22 @@ const axios = require('axios').default;
 
 class FeedbackController {
 	constructor(opts = {}) {
-		const { logger = LOGGER, feedback = FEEDBACK, doc_ingest_request = DOC_INGEST_REQUEST } = opts;
+		const {
+			logger = LOGGER,
+			feedback = FEEDBACK,
+			doc_ingest_request = DOC_INGEST_REQUEST,
+			feedback_jbook = FEEDBACK_JBOOK,
+		} = opts;
 
 		this.logger = logger;
 		this.feedback = feedback;
+		this.feedback_jbook = feedback_jbook;
 		this.doc_ingest_request = doc_ingest_request;
 
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
+		this.getJbookFeedbackData = this.getJbookFeedbackData.bind(this);
 		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
 		this.requestDocIngest = this.requestDocIngest.bind(this);
 	}
@@ -83,6 +91,25 @@ class FeedbackController {
 					'value_5',
 					'value_7',
 				],
+			});
+			res.status(200).send({ totalCount: results.count, results: results.rows });
+		} catch (err) {
+			this.logger.error(err, '9FCQYV2', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getJbookFeedbackData(req, res) {
+		console.log('\n\n\n\nhello???');
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		try {
+			const { limit = 100, offset = 0, order = ['id'], where = {} } = req.body;
+			const results = await this.feedback_jbook.findAndCountAll({
+				limit,
+				offset,
+				order,
+				where,
+				attributes: ['id', 'first_name', 'last_name', 'email', 'type', 'description'],
 			});
 			res.status(200).send({ totalCount: results.count, results: results.rows });
 		} catch (err) {
