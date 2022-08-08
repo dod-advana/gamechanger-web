@@ -71,7 +71,6 @@ parent-oci-image-copy:
           TASKNAME=$(echo ${IMAGE})
           genchildpipeline
         done
-      done
 
       else
         echo 'there was no dockerfile found'
