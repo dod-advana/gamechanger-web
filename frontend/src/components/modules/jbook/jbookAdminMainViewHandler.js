@@ -172,21 +172,7 @@ const renderDescriptionAdditions = () => {
 };
 
 const renderUserFeedbackTitleAdditions = () => {
-	return (
-		<GCButton
-			// onClick={async () => {
-			// 	const data = await gameChangerUserAPI.exportFeedbackUsers({
-			// 		cloneName: 'jbook',
-			// 	});
-			// 	const blob = new Blob([data.data], { type: 'text/csv;charset=utf-8' });
-			// 	const d = new Date();
-			// 	await autoDownloadFile({ data: blob, extension: 'csv', filename: 'user-feedback-' + d.toISOString() });
-			// }}
-			style={{ minWidth: 'unset', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
-		>
-			Download
-		</GCButton>
-	);
+	return <></>;
 };
 
 const renderUserFeedbackDescriptionAdditions = () => {
