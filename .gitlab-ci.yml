@@ -69,7 +69,7 @@ parent-oci-image-copy:
         for dkr in $(find . -name Dockerfile); do
           CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
           DOCKERFILE=$(echo $dkr)
-          TASKNAME="${CONTEXT}"
+          TASKNAME="test-docker-build"
           genchildpipeline
         done
 
