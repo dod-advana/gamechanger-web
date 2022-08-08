@@ -13,16 +13,52 @@ const DEFAULT_COLUMNS = [
 		Header: 'First',
 		accessor: 'first_name',
 		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Unknown First'}</TableRow>,
+		width: 150,
 	},
 	{
 		Header: 'Last',
 		accessor: 'last_name',
 		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Unknown Last'}</TableRow>,
+		width: 150,
+	},
+];
+
+const TEST_DATA = [
+	{
+		id: 1,
+		first_name: 'Jane',
+		last_name: 'Doe',
+		email: 'jane@gmail.com',
+		type: 'Suggestion',
+		description: 'can you make this better?',
+		timestamp: new Date().toISOString(),
 	},
 	{
-		Header: 'Organization',
-		accessor: 'organization',
-		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		id: 2,
+		first_name: 'John',
+		last_name: 'Doe',
+		email: 'john@gmail.com',
+		type: 'Question',
+		description: 'why did you do this to me?',
+		timestamp: new Date().toISOString(),
+	},
+	{
+		id: 3,
+		first_name: 'Melodie',
+		last_name: 'Butz',
+		email: 'melodie@gmail.com',
+		type: 'Other',
+		description: 'Im not really a hard taco guy',
+		timestamp: new Date().toISOString(),
+	},
+	{
+		id: 4,
+		first_name: 'Melodie',
+		last_name: 'Butz',
+		email: 'melodie@gmail.com',
+		type: 'Content',
+		description: 'Would love to see more air force documents on here',
+		timestamp: new Date().toISOString(),
 	},
 ];
 
@@ -39,12 +75,12 @@ const UserFeedback = React.memo((props) => {
 	// Component Methods
 
 	const getUserData = async () => {
-		const tableData = [];
+		const tableData = TEST_DATA;
 
 		const data = await gameChangerAPI.getUserData(cloneName);
 
 		_.forEach(data.data.users, (result) => {
-			tableData.push(result);
+			console.log(result);
 		});
 		setGCUserTableData(tableData);
 	};
@@ -61,21 +97,6 @@ const UserFeedback = React.memo((props) => {
 			if (columns.length > 0) {
 				columns.forEach((column) => tmpColumns.push(column));
 			}
-
-			tmpColumns.push({
-				Header: ' ',
-				accessor: 'id',
-				width: 120,
-				filterable: false,
-				Cell: () => <TableRow>Edit</TableRow>,
-			});
-			tmpColumns.push({
-				Header: ' ',
-				accessor: 'id',
-				width: 120,
-				filterable: false,
-				Cell: () => <TableRow>Delete</TableRow>,
-			});
 		}
 
 		setTableColumns(tmpColumns);

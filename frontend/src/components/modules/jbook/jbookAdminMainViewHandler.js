@@ -103,20 +103,22 @@ const userListTableAdditions = [
 
 const userFeedbackTableAdditions = [
 	{
-		Header: 'Other Column',
-		accessor: 'extra_fields.jbook.is_primary_reviewer',
-		width: 160,
-		Cell: (row) => (
-			<TableRow>
-				<GCCheckbox
-					checked={row.value}
-					onChange={() => undefined}
-					name={'primary_reviewer'}
-					color="inherit"
-					style={{ ...styles.checkbox, color: '#1C2D64' }}
-				/>
-			</TableRow>
-		),
+		Header: 'Type',
+		accessor: 'type',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		width: 100,
+	},
+	{
+		Header: 'Feedback',
+		accessor: 'description',
+		minWidth: 300,
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Email',
+		accessor: 'email',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		minWidth: 150,
 	},
 ];
 
