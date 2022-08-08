@@ -1,190 +1,92 @@
-stages:          # List of stages for jobs, and their order of execution.
-  - prepare
-  - static-test
-  - security-test
-  - setup-test-server
-  - integration-test
-  - deploy
+default:
+  image: 092912502985.dkr.ecr.us-east-1.amazonaws.com/platform/oci/super-deployer:kaniko-700872863f1e73cd6905d779a3e1b822c1f85616
+variables:
+  CI_REGISTRY:
+    value: "092912502985.dkr.ecr.us-east-1.amazonaws.com"
+    description: "OCI registry for image in ECR"
+  CI_PROJECT_PATH:
+    value: ""
+    description: "Repository path"
+  CLEANUP_PIPELINE_RUN:
+    value: "true"
+    description: "Set to false to keep pipeline output in Tketon"
+stages:
+  - build
+  - pipeline-trigger
 
-cache: &global_cache
-  untracked: true
-  key:
-    files:
-      - backend/yarn.lock
-      - frontend/yarn.lock
-  paths:
-    - frontend/node_modules
-    - backend/node_modules
-    - .yarn-cache
-  policy: pull
-
-.setup-github-npm:
-  before_script:   # Setups the npm vars
-    - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-    - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
-
-prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: node:14
-  stage: prepare
-  cache:
-    <<: *global_cache
-    policy: pull-push
-  extends: .setup-github-npm
-  rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      - if: $DAILY_SCAN == "true"
+parent-oci-image-copy:
+  environment:
+    name: vdms
+  stage: build
   script:
     - |
-      if [[ -d frontend/node_modules ]]; then
-        exit 0
-      fi
-    - cd frontend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-    - cd ../backend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
-
-unit-backend-test-job:    # Job for the unit tests
-  image: node:14
-  stage: static-test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  script:
-    - cd backend && npm run test:gitlab
-  artifacts:
-    paths:
-      - backend/coverage/lcov.info
-      - backend/junit.xml
-    when: always
-    reports:
-      junit:
-        - backend/junit.xml
-      cobertura: backend/coverage/cobertura-coverage.xml
-
-lint-test-job:  # lint-job
-  image: node:14
-  stage: static-test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  script:
-    - cd backend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
-    - cd ../frontend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
-  artifacts:
-    paths:
-      - backend/eslintReport.json
-      - frontend/eslintReport.json
-
-sonar_scan-job:  # Run code through sonar scanner
-  stage: security-test
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  artifacts:
-    paths:
-      - "public"
-  variables:
-    REPOSITORY: "${CI_PROJECT_PATH}"
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    SONAR_HOST_EXTERNAL_URL: "${SONAR_HOST_EXTERNAL_URL}"
-    SONAR_HOST_URL: "${SONAR_HOST_URL}"
-    SONAR_TOKEN: "${SONAR_TOKEN}"
-    PROJECTURL: "${CI_REPOSITORY_URL}"
-    PROJECTNAME: "advana/gamechanger/gamechanger-web-source"
-    PROJECTKEY: "${SONAR_PROJECT_KEY}"
-    CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
-    GIT_DEPTH: "0"
-  script:
-    - |
-      sonar-scanner \
-        -Dsonar.qualitygate.wait=true \
-        -Dsonar.exclusions=backend/node_app/sql/* \
-        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-        -Dsonar.junit.reportPaths=backend/junit.xml \
-        -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
-        -Dsonar.language=js \
-        -Dsonar.projectName="${PROJECTNAME}" \
-        -Dsonar.projectKey="${PROJECTKEY}" \
-        -Dsonar.links.ci="${PROJECTURL}/pipelines" \
-        -Dsonar.links.issue="${PROJECTURL}/issues" \
-        -Dsonar.analysis.mode="publish" \
-        -Dsonar.projectBaseDir=. \
-        -Dsonar.sources=frontend/src,backend/node_app
-      mkdir -p public
-      <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
-      <html>
-      <head>
-      <meta http-equiv="refresh" content="0; url=${SONAR_HOST_EXTERNAL_URL}/dashboard?id=${PROJECTKEY}" />
-      </head>
-      </html>
+      genchildpipeline() {
+          <<-EOF cat | tee -a child-pipeline-gitlab-ci.yml
+            default:
+              image: 092912502985.dkr.ecr.us-east-1.amazonaws.com/platform/oci/super-deployer:kaniko-700872863f1e73cd6905d779a3e1b822c1f85616
+            stages:
+              - pipelinerun
+            "${TASKNAME}":
+              stage: pipelinerun
+              variables:
+                BUILD_LIB: "test"
+              script:
+                - |
+                  <<-WORKSPACE cat | tee -a workspace-template.yaml
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                          storage: 1Gi
+                  WORKSPACE
+                  TAILLOG="\$(tkn pipeline start promotion-container-build \
+                  --serviceaccount "build-bot" \
+                  --workspace "name=output,volumeClaimTemplateFile=workspace-template.yaml" \
+                  --use-param-defaults \
+                  --param CONTEXT="\$CONTEXT" \
+                  --param DOCKERFILE="\$DOCKERFILE" \
+                  --prefix-name "${TASKNAME}" \
+                  -n workflows-platform | tail -1)"
+                  \$TAILLOG
+                  TASKID=\$(echo "\${TAILLOG}" | awk '{print \$4}')
+                  TASKNS=\$(echo "\${TAILLOG}" | awk '{print \$7}')
+                  sleep 1
+                  export STATUSCODE=\$(tkn pipelinerun describe \${TASKID} -n \${TASKNS} -o yaml | yq e '.status.conditions[0].reason' -)
+                  if [[ "\${STATUSCODE}" = "Succeeded" ]] && [[ "\${CLEANUP_PIPELINE_RUN}" = "true" ]]; then
+                    echo "y" | tkn pipelinerun delete \${TASKID} -n \${TASKNS}
+                    exit 0
+                  else
+                    exit 1
+                  fi
       EOF
+      }
+      FILENAME="./registries/${SRC_REGISTRY}-image-list.txt"
+      OLDIFS=$IFS
+      #copy a single image
+      if [ $(find . -name Dockerfile) ]; then
+        for dkr in $(find . -name Dockerfile); do
+          CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
+          DOCKERFILE=$(echo $dkr)
+          TASKNAME=$(echo ${IMAGE})
+          genchildpipeline
+        done
+      done
+
+      else
+        echo 'there was no dockerfile found'
+        exit 1
+      fi
 
 
-setup-server:  # build dev server with the commit branch
-  stage: setup-test-server
-  variables:
-    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
-    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
-    APP_NAME: "gamechanger"
-    AWS_SERVER: "88"
-  rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    - if: $DAILY_SCAN == "true"
-  trigger:
-    strategy: "depend"
-    project: "advana/gamechanger/gamechanger-ci-cd"
-    branch: "main"
-
-integration-testing-cypress-job:  # Start the integration testing
-  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
-  stage: integration-test
-  rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
-  variables:
-    AWS_SERVER: "88"
-    CYPRESS_BASE_URL: "http://10.194.9.${AWS_SERVER}:8080"
-    CYPRESS_API_URL: "http://10.194.9.${AWS_SERVER}:8990"
-    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
-    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
-  script:
-    - npm install -g cypress
-    - curl ${CYPRESS_BASE_URL}
-    - cd frontend && npm run cy:test
-  after_script:
-    - |
-      echo "Cypress tests finished"
-      cd frontend
-      npm run report:merge
-      npm run report:send
   artifacts:
-    when: always
-    expire_in: 1 days
     paths:
-      - frontend/results.json
-      - frontend/cypress/screenshots
-      - frontend/cypress/videos
-  allow_failure: true
+      - child-pipeline-gitlab-ci.yml
 
-deploy-job:       # This job runs the build for dev.
-  stage: deploy
-  rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
-      - if: $DO_DEPLOY == "true"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
-    CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger: "advana/gamechanger/gamechanger-web"
+child-oci-image-copy:
+ stage: pipeline-trigger
+ trigger:
+   include:
+     - artifact: child-pipeline-gitlab-ci.yml
+       job: parent-oci-image-copy
+   strategy: depend
