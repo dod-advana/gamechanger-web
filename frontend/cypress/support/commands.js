@@ -45,6 +45,10 @@ import './policy-commands';
 
 /* ************* GENERAL ************** */
 
+Cypress.Commands.add('getDataCy', (cyTag, ...args) => {
+    cy.get(`[data-cy="${cyTag}"]`, ...args)
+});
+
 // this handles setting up your cookies and headers
 Cypress.Commands.add('setup', () => {
 	CypressHelper.setupHeaders(cy);
@@ -58,5 +62,9 @@ Cypress.Commands.add('visit_accept_consent', (page) => {
 	cy.visit(`${BASE_URL}/#/${page}`);
 
 	// Click the okay button
-	cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
+	cy.accept_consent();
+});
+
+Cypress.Commands.add('accept_consent', () => {
+    cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
 });
