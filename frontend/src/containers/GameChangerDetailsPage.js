@@ -295,8 +295,7 @@ const GameChangerDetailsPage = (props) => {
 				headName: name,
 			},
 		});
-		const head = resp?.data?.headData?.head || '';
-		return head;
+		return resp?.data?.headData?.head || '';
 	};
 
 	const getTypeData = async (name, cloneName) => {
@@ -307,8 +306,7 @@ const GameChangerDetailsPage = (props) => {
 				typeName: name,
 			},
 		});
-		const types = resp?.data?.typeData?.nodes?.map((node) => node.name).join(', ') || '';
-		return types;
+		return resp?.data?.typeData?.nodes?.map((node) => node.name).join(', ') || '';
 	};
 
 	const getSourceData = async (searchText, cloneName) => {
@@ -360,21 +358,21 @@ const GameChangerDetailsPage = (props) => {
 					const topics = metaData.Value;
 					metaData.Value = (
 						<div>
-							{topics.map((topic, index) => {
-								const favorite = favoriteTopics.includes(topic.toLowerCase());
-								topic = topic.trim();
+							{topics.map((favTopic, index) => {
+								const favorite = favoriteTopics.includes(favTopic.toLowerCase());
+								favTopic = favTopic.trim();
 								return (
 									<FavoriteTopic
 										key={index}
-										onClick={(event) => {
-											trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
+										onClick={() => {
+											trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', favTopic);
 											window.open(
-												`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`
+												`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${favTopic}`
 											);
 										}}
 										favorited={favorite}
 									>
-										{topic}
+										{favTopic}
 										<i
 											className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
 											style={{
@@ -386,7 +384,7 @@ const GameChangerDetailsPage = (props) => {
 											onClick={(event) => {
 												event.stopPropagation();
 												handleSaveFavoriteTopic(
-													topic.toLowerCase(),
+													favTopic.toLowerCase(),
 													'',
 													!favorite,
 													dispatchUserData
@@ -394,11 +392,14 @@ const GameChangerDetailsPage = (props) => {
 
 												if (favorite) {
 													const newFavorites = [...favoriteTopics];
-													newFavorites.splice(favoriteTopics.indexOf(topic.toLowerCase()), 1);
+													newFavorites.splice(
+														favoriteTopics.indexOf(favTopic.toLowerCase()),
+														1
+													);
 													setFavoriteTopics(newFavorites);
 												} else {
 													const newFavorites = [...favoriteTopics];
-													newFavorites.push(topic.toLowerCase());
+													newFavorites.push(favTopic.toLowerCase());
 													setFavoriteTopics(newFavorites);
 												}
 											}}
