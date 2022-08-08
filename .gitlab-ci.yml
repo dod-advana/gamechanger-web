@@ -44,8 +44,8 @@ parent-oci-image-copy:
                   --serviceaccount "build-bot" \
                   --workspace "name=output,volumeClaimTemplateFile=workspace-template.yaml" \
                   --use-param-defaults \
-                  --param CONTEXT="\${CONTEXT}" \
-                  --param DOCKERFILE="\${DOCKERFILE}" \
+                  --param CONTEXT="${CONTEXT}" \
+                  --param DOCKERFILE="${DOCKERFILE}" \
                   --prefix-name "${TASKNAME}" \
                   -n workflows-platform | tail -1)"
                   \$TAILLOG
