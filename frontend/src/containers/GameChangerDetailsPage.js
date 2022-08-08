@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TitleBar from '../components/searchBar/TitleBar';
 import { trackEvent, trackPageView } from '../components/telemetry/Matomo';
@@ -32,6 +33,7 @@ import EditEntityDialog from '../components/admin/EditEntityDialog';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 import dodSeal from '../images/United_States_Department_of_Defense_Seal.svg.png';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
+import { Typography } from '@material-ui/core';
 
 const gameChangerAPI = new GameChangerAPI();
 const gcUserManagementAPI = new GamechangerUserManagementAPI();
@@ -665,299 +667,315 @@ const GameChangerDetailsPage = (props) => {
 	};
 
 	const renderEntityContainer = () => {
-		let fallbackSources = {};
-		if (entity) {
-			fallbackSources.s3 = undefined;
-			fallbackSources.admin = sealURLOverride;
-			fallbackSources.entity = entity.image;
-			entity.details.forEach((detail, i) => {
-				if (detail.name === 'NodeVec') entity.details.splice(i, 1);
-			});
-		}
+		// let fallbackSources = {};
+		// if (entity) {
+		// 	fallbackSources.s3 = undefined;
+		// 	fallbackSources.admin = sealURLOverride;
+		// 	fallbackSources.entity = entity.image;
+		// 	entity.details.forEach((detail, i) => {
+		// 		if (detail.name === 'NodeVec') entity.details.splice(i, 1);
+		// 	});
+		// }
+
+		// return (
+		// 	<>
+		// 		{editEntityVisible && (
+		// 			<EditEntityDialog
+		// 				open={editEntityVisible}
+		// 				handleClose={() => setEditEntityVisible(false)}
+		// 				url={sealURLOverride}
+		// 				orgName={entity?.name}
+		// 				setSealURLOverride={setSealURLOverride}
+		// 			/>
+		// 		)}
+		// 		{entity && (
+		// 			<MainContainer>
+		// 				<div className={'details'}>
+		// 					<Paper>
+		// 						<div className={'name'}>{entity.name}</div>
+		// 						<img
+		// 							className={'img'}
+		// 							alt={`${entity.name} Img`}
+		// 							src={
+		// 								fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal
+		// 							}
+		// 							onError={(event) => {
+		// 								handleImgSrcError(event, fallbackSources);
+		// 								if (fallbackSources.admin) fallbackSources.admin = undefined;
+		// 							}}
+		// 						/>
+
+		// 						<div className={'details-header'}>
+		// 							<span>{'ENTITY DETAILS'}</span>
+		// 							{Permissions.isGameChangerAdmin() && (
+		// 								<IconButton
+		// 									aria-label="edit"
+		// 									style={{ padding: 5, color: 'white' }}
+		// 									onClick={editEntity}
+		// 								>
+		// 									<EditIcon />
+		// 								</IconButton>
+		// 							)}
+		// 						</div>
+
+		// 						<div className={'details-table'}>
+		// 							<SimpleTable
+		// 								tableClass={'sidebar-table'}
+		// 								zoom={1}
+		// 								headerExtraStyle={{
+		// 									backgroundColor: '#313541',
+		// 									color: 'white',
+		// 								}}
+		// 								rows={entity.details.filter((entity) => {
+		// 									return !blacklistedEntityProperties.includes(entity.name);
+		// 								})}
+		// 								height={'auto'}
+		// 								dontScroll={true}
+		// 								firstColWidth={styles.entityColWidth}
+		// 								colWidth={colWidth}
+		// 								disableWrap={true}
+		// 								title={'Entity Statistics'}
+		// 								hideHeader={true}
+		// 							/>
+		// 						</div>
+		// 					</Paper>
+		// 				</div>
+		// 				<div className={'graph-top-docs'}>
+		// 					<div className={'section'} ref={graphContainerRef}>
+		// 						<GCAccordion
+		// 							expanded={false}
+		// 							header={'GRAPH VIEW'}
+		// 							backgroundColor={'rgb(238,241,242)'}
+		// 						>
+		// 							<MemoizedNodeCluster2D
+		// 								graphWidth={
+		// 									graphContainerRef?.current?.clientWidth
+		// 										? graphContainerRef.current.clientWidth - 25
+		// 										: undefined
+		// 								}
+		// 								runningQuery={runningQuery}
+		// 								displayLinkLabel={false}
+		// 								graph={graph}
+		// 								graphRefProp={graphRef}
+		// 								hierarchyView={hierarchyView}
+		// 								cloneData={cloneData}
+		// 							/>
+		// 						</GCAccordion>
+		// 					</div>
+
+		// 					<div className={'section'}>
+		// 						<GCAccordion
+		// 							expanded={true}
+		// 							header={'RELATED DOCUMENTS'}
+		// 							backgroundColor={'rgb(238,241,242)'}
+		// 						>
+		// 							<div className={'related-documents'} style={{ width: '100%' }}>
+		// 								<div
+		// 									style={{
+		// 										display: 'flex',
+		// 										justifyContent: 'space-between',
+		// 									}}
+		// 								>
+		// 									<div style={styles.resultsCount}>
+		// 										{gettingDocuments
+		// 											? 'Searching for documents...'
+		// 											: `${numberWithCommas(
+		// 													docCount
+		// 											  )} results found in ${timeFound} seconds`}
+		// 									</div>
+		// 									<div
+		// 										style={{ marginTop: '-14px', display: 'flex' }}
+		// 										className={'gcPagination'}
+		// 									>
+		// 										<Pagination
+		// 											activePage={docResultsPage}
+		// 											itemsCountPerPage={20}
+		// 											totalItemsCount={docCount}
+		// 											pageRangeDisplayed={8}
+		// 											onChange={(page) => {
+		// 												trackEvent(
+		// 													'GAMECHANGER_DETAILS',
+		// 													'DetailsPaginationChanged',
+		// 													'page',
+		// 													page
+		// 												);
+		// 												handleChangeDocsPage(page);
+		// 											}}
+		// 											className="gcPagination"
+		// 										/>
+		// 									</div>
+		// 								</div>
+		// 								<div
+		// 									className="row"
+		// 									style={{
+		// 										paddingLeft: 0,
+		// 										marginRight: -15,
+		// 										width: 'unset',
+		// 									}}
+		// 								>
+		// 									{gettingDocuments ? (
+		// 										<div style={{ margin: '0 auto' }}>
+		// 											<LoadingIndicator customColor={gcOrange} />
+		// 										</div>
+		// 									) : (
+		// 										renderDocuments()
+		// 									)}
+		// 								</div>
+		// 							</div>
+		// 						</GCAccordion>
+		// 					</div>
+		// 				</div>
+		// 			</MainContainer>
+		// 		)}
+		// 	</>
+		// );
 
 		return (
-			<>
-				{editEntityVisible && (
-					<EditEntityDialog
-						open={editEntityVisible}
-						handleClose={() => setEditEntityVisible(false)}
-						url={sealURLOverride}
-						orgName={entity?.name}
-						setSealURLOverride={setSealURLOverride}
-					/>
-				)}
-				{entity && (
-					<MainContainer>
-						<div className={'details'}>
-							<Paper>
-								<div className={'name'}>{entity.name}</div>
-								<img
-									className={'img'}
-									alt={`${entity.name} Img`}
-									src={
-										fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal
-									}
-									onError={(event) => {
-										handleImgSrcError(event, fallbackSources);
-										if (fallbackSources.admin) fallbackSources.admin = undefined;
-									}}
-								/>
-
-								<div className={'details-header'}>
-									<span>{'ENTITY DETAILS'}</span>
-									{Permissions.isGameChangerAdmin() && (
-										<IconButton
-											aria-label="edit"
-											style={{ padding: 5, color: 'white' }}
-											onClick={editEntity}
-										>
-											<EditIcon />
-										</IconButton>
-									)}
-								</div>
-
-								<div className={'details-table'}>
-									<SimpleTable
-										tableClass={'sidebar-table'}
-										zoom={1}
-										headerExtraStyle={{
-											backgroundColor: '#313541',
-											color: 'white',
-										}}
-										rows={entity.details.filter((entity) => {
-											return !blacklistedEntityProperties.includes(entity.name);
-										})}
-										height={'auto'}
-										dontScroll={true}
-										firstColWidth={styles.entityColWidth}
-										colWidth={colWidth}
-										disableWrap={true}
-										title={'Entity Statistics'}
-										hideHeader={true}
-									/>
-								</div>
-							</Paper>
-						</div>
-						<div className={'graph-top-docs'}>
-							<div className={'section'} ref={graphContainerRef}>
-								<GCAccordion
-									expanded={false}
-									header={'GRAPH VIEW'}
-									backgroundColor={'rgb(238,241,242)'}
-								>
-									<MemoizedNodeCluster2D
-										graphWidth={
-											graphContainerRef?.current?.clientWidth
-												? graphContainerRef.current.clientWidth - 25
-												: undefined
-										}
-										runningQuery={runningQuery}
-										displayLinkLabel={false}
-										graph={graph}
-										graphRefProp={graphRef}
-										hierarchyView={hierarchyView}
-										cloneData={cloneData}
-									/>
-								</GCAccordion>
-							</div>
-
-							<div className={'section'}>
-								<GCAccordion
-									expanded={true}
-									header={'RELATED DOCUMENTS'}
-									backgroundColor={'rgb(238,241,242)'}
-								>
-									<div className={'related-documents'} style={{ width: '100%' }}>
-										<div
-											style={{
-												display: 'flex',
-												justifyContent: 'space-between',
-											}}
-										>
-											<div style={styles.resultsCount}>
-												{gettingDocuments
-													? 'Searching for documents...'
-													: `${numberWithCommas(
-															docCount
-													  )} results found in ${timeFound} seconds`}
-											</div>
-											<div
-												style={{ marginTop: '-14px', display: 'flex' }}
-												className={'gcPagination'}
-											>
-												<Pagination
-													activePage={docResultsPage}
-													itemsCountPerPage={20}
-													totalItemsCount={docCount}
-													pageRangeDisplayed={8}
-													onChange={(page) => {
-														trackEvent(
-															'GAMECHANGER_DETAILS',
-															'DetailsPaginationChanged',
-															'page',
-															page
-														);
-														handleChangeDocsPage(page);
-													}}
-													className="gcPagination"
-												/>
-											</div>
-										</div>
-										<div
-											className="row"
-											style={{
-												paddingLeft: 0,
-												marginRight: -15,
-												width: 'unset',
-											}}
-										>
-											{gettingDocuments ? (
-												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator customColor={gcOrange} />
-												</div>
-											) : (
-												renderDocuments()
-											)}
-										</div>
-									</div>
-								</GCAccordion>
-							</div>
-						</div>
-					</MainContainer>
-				)}
-			</>
+			<div style={{ marginTop: '20px', marginLeft: '20px' }}>
+				<Typography>
+					The Organization Details page is currently undergoing changes. Please check again later.
+				</Typography>
+			</div>
 		);
 	};
 
 	const renderTopicContainer = () => {
+		// return (
+		// 	<div>
+		// 		<p style={{ margin: '10px 4%', fontSize: 18 }}>
+		// 			Welcome to our new (Beta version) Topic Details page! As you look around, you may note some
+		// 			technical issues below; please bear with us while we continue making improvements here and check
+		// 			back often for a more stable version.
+		// 		</p>
+		// 		{topic && (
+		// 			<MainContainer>
+		// 				<div className={'details'}>
+		// 					<Paper>
+		// 						<div className={'name'}>{topic.name || ''}</div>
+
+		// 						<div className={'details-header'}>
+		// 							<span>{'TOPIC DETAILS'}</span>
+		// 						</div>
+
+		// 						<div className={'details-table'}>
+		// 							<SimpleTable
+		// 								tableClass={'sidebar-table'}
+		// 								zoom={1}
+		// 								headerExtraStyle={{
+		// 									backgroundColor: '#313541',
+		// 									color: 'white',
+		// 								}}
+		// 								rows={topic.details || []}
+		// 								height={'auto'}
+		// 								dontScroll={true}
+		// 								colWidth={colWidth}
+		// 								disableWrap={true}
+		// 								title={'Topic Statistics'}
+		// 								hideHeader={true}
+		// 							/>
+		// 						</div>
+		// 					</Paper>
+		// 				</div>
+		// 				<div className={'graph-top-docs'}>
+		// 					<div className={'section'} ref={graphContainerRef}>
+		// 						<GCAccordion
+		// 							expanded={fromNeo4j}
+		// 							header={'GRAPH VIEW'}
+		// 							backgroundColor={'rgb(238,241,242)'}
+		// 						>
+		// 							<MemoizedPolicyGraphView
+		// 								width={
+		// 									graphContainerRef?.current?.clientWidth
+		// 										? graphContainerRef.current.clientWidth - 25
+		// 										: undefined
+		// 								}
+		// 								graphData={graph}
+		// 								runningSearchProp={runningQuery}
+		// 								setDocumentsFound={() => {}}
+		// 								setTimeFound={() => {}}
+		// 								cloneData={cloneData}
+		// 								setNumOfEdges={() => {}}
+		// 								dispatch={{}}
+		// 								showBasic={false}
+		// 								searchText={''}
+		// 								hierarchyView={hierarchyView}
+		// 								detailsView={true}
+		// 							/>
+		// 						</GCAccordion>
+		// 					</div>
+
+		// 					<div className={'section'}>
+		// 						<GCAccordion
+		// 							expanded={true}
+		// 							header={'RELATED DOCUMENTS'}
+		// 							backgroundColor={'rgb(238,241,242)'}
+		// 						>
+		// 							<div className={'related-documents'} style={{ width: '100%' }}>
+		// 								<div
+		// 									style={{
+		// 										display: 'flex',
+		// 										justifyContent: 'space-between',
+		// 									}}
+		// 								>
+		// 									<div style={styles.resultsCount}>
+		// 										{gettingDocuments
+		// 											? 'Searching for documents...'
+		// 											: `${numberWithCommas(
+		// 													docCount
+		// 											  )} results found in ${timeFound} seconds`}
+		// 									</div>
+		// 									<div
+		// 										style={{ marginTop: '-14px', display: 'flex' }}
+		// 										className={'gcPagination'}
+		// 									>
+		// 										<Pagination
+		// 											activePage={docResultsPage}
+		// 											itemsCountPerPage={20}
+		// 											totalItemsCount={docCount}
+		// 											pageRangeDisplayed={8}
+		// 											onChange={(page) => {
+		// 												trackEvent(
+		// 													'GAMECHANGER',
+		// 													'DetailsPaginationChanged',
+		// 													'page',
+		// 													page
+		// 												);
+		// 												handleChangeDocsPage(page);
+		// 											}}
+		// 											className="gcPagination"
+		// 										/>
+		// 									</div>
+		// 								</div>
+		// 								<div
+		// 									className="row"
+		// 									style={{
+		// 										paddingLeft: 0,
+		// 										marginRight: -15,
+		// 										width: 'unset',
+		// 									}}
+		// 								>
+		// 									{gettingDocuments ? (
+		// 										<div style={{ margin: '0 auto' }}>
+		// 											<LoadingIndicator customColor={gcColors.buttonColor2} />
+		// 										</div>
+		// 									) : (
+		// 										renderDocuments()
+		// 									)}
+		// 								</div>
+		// 							</div>
+		// 						</GCAccordion>
+		// 					</div>
+		// 				</div>
+		// 			</MainContainer>
+		// 		)}
+		// 	</div>
+		// );
+
 		return (
-			<div>
-				<p style={{ margin: '10px 4%', fontSize: 18 }}>
-					Welcome to our new (Beta version) Topic Details page! As you look around, you may note some
-					technical issues below; please bear with us while we continue making improvements here and check
-					back often for a more stable version.
-				</p>
-				{topic && (
-					<MainContainer>
-						<div className={'details'}>
-							<Paper>
-								<div className={'name'}>{topic.name || ''}</div>
-
-								<div className={'details-header'}>
-									<span>{'TOPIC DETAILS'}</span>
-								</div>
-
-								<div className={'details-table'}>
-									<SimpleTable
-										tableClass={'sidebar-table'}
-										zoom={1}
-										headerExtraStyle={{
-											backgroundColor: '#313541',
-											color: 'white',
-										}}
-										rows={topic.details || []}
-										height={'auto'}
-										dontScroll={true}
-										colWidth={colWidth}
-										disableWrap={true}
-										title={'Topic Statistics'}
-										hideHeader={true}
-									/>
-								</div>
-							</Paper>
-						</div>
-						<div className={'graph-top-docs'}>
-							<div className={'section'} ref={graphContainerRef}>
-								<GCAccordion
-									expanded={fromNeo4j}
-									header={'GRAPH VIEW'}
-									backgroundColor={'rgb(238,241,242)'}
-								>
-									<MemoizedPolicyGraphView
-										width={
-											graphContainerRef?.current?.clientWidth
-												? graphContainerRef.current.clientWidth - 25
-												: undefined
-										}
-										graphData={graph}
-										runningSearchProp={runningQuery}
-										setDocumentsFound={() => {}}
-										setTimeFound={() => {}}
-										cloneData={cloneData}
-										setNumOfEdges={() => {}}
-										dispatch={{}}
-										showBasic={false}
-										searchText={''}
-										hierarchyView={hierarchyView}
-										detailsView={true}
-									/>
-								</GCAccordion>
-							</div>
-
-							<div className={'section'}>
-								<GCAccordion
-									expanded={true}
-									header={'RELATED DOCUMENTS'}
-									backgroundColor={'rgb(238,241,242)'}
-								>
-									<div className={'related-documents'} style={{ width: '100%' }}>
-										<div
-											style={{
-												display: 'flex',
-												justifyContent: 'space-between',
-											}}
-										>
-											<div style={styles.resultsCount}>
-												{gettingDocuments
-													? 'Searching for documents...'
-													: `${numberWithCommas(
-															docCount
-													  )} results found in ${timeFound} seconds`}
-											</div>
-											<div
-												style={{ marginTop: '-14px', display: 'flex' }}
-												className={'gcPagination'}
-											>
-												<Pagination
-													activePage={docResultsPage}
-													itemsCountPerPage={20}
-													totalItemsCount={docCount}
-													pageRangeDisplayed={8}
-													onChange={(page) => {
-														trackEvent(
-															'GAMECHANGER',
-															'DetailsPaginationChanged',
-															'page',
-															page
-														);
-														handleChangeDocsPage(page);
-													}}
-													className="gcPagination"
-												/>
-											</div>
-										</div>
-										<div
-											className="row"
-											style={{
-												paddingLeft: 0,
-												marginRight: -15,
-												width: 'unset',
-											}}
-										>
-											{gettingDocuments ? (
-												<div style={{ margin: '0 auto' }}>
-													<LoadingIndicator customColor={gcColors.buttonColor2} />
-												</div>
-											) : (
-												renderDocuments()
-											)}
-										</div>
-									</div>
-								</GCAccordion>
-							</div>
-						</div>
-					</MainContainer>
-				)}
+			<div style={{ marginTop: '20px', marginLeft: '20px' }}>
+				<Typography>
+					The Topic Details page is currently undergoing changes. Please check again later.
+				</Typography>
 			</div>
 		);
 	};
