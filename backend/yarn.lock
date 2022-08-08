@@ -331,10 +331,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dod-advana/advana-api-auth@0.0.45":
-  version "0.0.45"
-  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-api-auth/0.0.45/5f1f946e41849050b2d9a8f079de23fd8088c917c9c8ee4addca6bc0517ae98a#66a0533b973b1a69f5ac8b8b521bdf9e3f4ba900"
-  integrity sha512-meyJEHJYrmHWHY4ApBpwG3+Mv1thSC3T7/qTVc/VHM7+xjp1BQEsyTp0SECxYABfFdiSDPJgfkwamYE42r6+og==
+"@dod-advana/advana-api-auth@1.0.0":
+  version "1.0.0"
+  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-api-auth/1.0.0/544c2e9831b118d97335e41176fe7bb52fa11d06#544c2e9831b118d97335e41176fe7bb52fa11d06"
+  integrity sha512-sHJfdj+y8lF2quC0rP1d2dFozt3dL3zQi87zNkXjY9eeGF1FfxiV4sTvmF8HjFwjOFt+j0wuurBQMTpfg5phpA==
   dependencies:
     connect-redis "6.0.0"
     crypto-js "4.0.0"
