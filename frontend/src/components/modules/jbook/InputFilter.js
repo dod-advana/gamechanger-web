@@ -23,9 +23,7 @@ const InputFilter = (props) => {
 	const debounce = useCallback(
 		_.debounce((_searchVal) => {
 			// send the server request here
-			if (!state.initial) {
-				setState(dispatch, { runSearch: true, loading: true });
-			}
+			setState(dispatch, { runSearch: true, loading: true });
 		}, 1500),
 		[]
 	);

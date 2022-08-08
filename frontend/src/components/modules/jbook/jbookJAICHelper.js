@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, CircularProgress } from '@material-ui/core';
+import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCPrimaryButton from '../../common/GCButton';
 import { setState } from '../../../utils/sharedFunctions';
-import { Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { StyledFooterDiv } from './profilePage/profilePageStyles';
-import { ButtonStyles } from './profilePage/profilePageStyles';
+import { StyledFooterDiv, ButtonStyles } from './profilePage/profilePageStyles';
 
 const useStyles = makeStyles((theme) => ({
 	customWidth: {
@@ -23,7 +21,7 @@ const ReviewersValue = React.memo((props) => {
 		dropdownData,
 		setReviewData,
 	} = props;
-
+	console.log('dropdownData: ', dropdownData);
 	const primaryReviewers =
 		dropdownData && dropdownData.reviewers
 			? dropdownData.reviewers
@@ -193,9 +191,9 @@ const PlannedTransitionPartnerValue = React.memo((props) => {
 	return (
 		<Autocomplete
 			size="small"
-			options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+			options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 			style={{ width: 300, backgroundColor: 'white' }}
-			onChange={(event, value) => setReviewData('primaryPlannedTransitionPartner', value)}
+			onChange={(_event, value) => setReviewData('primaryPlannedTransitionPartner', value)}
 			renderInput={(params) => <TextField {...params} label="Partner" variant="outlined" />}
 			value={primaryPlannedTransitionPartner ?? null}
 			disabled={finished} //|| roleDisabled}

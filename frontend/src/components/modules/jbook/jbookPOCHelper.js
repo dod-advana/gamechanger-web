@@ -809,7 +809,7 @@ const TransitionPartnerValue = React.memo((props) => {
 					size="small"
 					options={['Yes', 'No']}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('pocPTPAgreeLabel', value)}
+					onChange={(_event, value) => setReviewData('pocPTPAgreeLabel', value)}
 					value={
 						reviewData && reviewData.pocPTPAgreeLabel && reviewData.pocPTPAgreeLabel !== null
 							? reviewData.pocPTPAgreeLabel
@@ -829,9 +829,9 @@ const TransitionPartnerValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+					options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('pocPlannedTransitionPartner', value)}
+					onChange={(_event, value) => setReviewData('pocPlannedTransitionPartner', value)}
 					value={
 						reviewData &&
 						(reviewData.pocPlannedTransitionPartner ||

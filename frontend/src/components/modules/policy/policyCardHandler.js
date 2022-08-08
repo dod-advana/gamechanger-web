@@ -858,11 +858,11 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 					docTypeColor={docTypeColor}
 					docOrgColor={docOrgColor}
 				>
-					<div className={'sub-header-one'}>
+					<div data-cy={'card-type'} className={'sub-header-one'}>
 						{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
 						{displayType}
 					</div>
-					<div className={'sub-header-two'}>
+					<div data-cy={'card-org'} className={'sub-header-two'}>
 						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
 					</div>
 				</StyledFrontCardSubHeader>
