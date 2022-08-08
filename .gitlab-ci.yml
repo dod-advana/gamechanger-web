@@ -44,8 +44,8 @@ parent-oci-image-copy:
                   --serviceaccount "build-bot" \
                   --workspace "name=output,volumeClaimTemplateFile=workspace-template.yaml" \
                   --use-param-defaults \
-                  --param CONTEXT="\$CONTEXT" \
-                  --param DOCKERFILE="\$DOCKERFILE" \
+                  --param CONTEXT="\${CONTEXT}" \
+                  --param DOCKERFILE="\${DOCKERFILE}" \
                   --prefix-name "\${TASKNAME}" \
                   -n workflows-platform | tail -1)"
                   \$TAILLOG
@@ -63,12 +63,13 @@ parent-oci-image-copy:
       }
       FILENAME="./registries/${SRC_REGISTRY}-image-list.txt"
       OLDIFS=$IFS
-      #copy a single image
-      if [ -n echo "$(find . -name Dockerfile)" ]; then
+      #check for dockerfiles
+      DOCKERFILES="$(find . -name Dockerfile)"
+      if [ ! -z ${DOCKERFILES}]; then
         for dkr in $(find . -name Dockerfile); do
           CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
           DOCKERFILE=$(echo $dkr)
-          TASKNAME=$(echo $CONTEXT)
+          TASKNAME=$(echo ${CONTEXT})
           genchildpipeline
         done
 
