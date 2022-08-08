@@ -201,7 +201,7 @@ const types = {
 };
 
 const metadataNameToSearchFilterName = {
-	'Service Agency Name': 'serviceAgency',
+	'Service/Agency Name': 'serviceAgency',
 	'Budget Year (FY)': 'budgetYear',
 	'Program Element': 'programElement',
 	'Project Number': 'projectNum',
