@@ -46,7 +46,7 @@ parent-oci-image-copy:
                   --use-param-defaults \
                   --param CONTEXT="\$CONTEXT" \
                   --param DOCKERFILE="\$DOCKERFILE" \
-                  --prefix-name "${TASKNAME}" \
+                  --prefix-name "\${TASKNAME}" \
                   -n workflows-platform | tail -1)"
                   \$TAILLOG
                   TASKID=\$(echo "\${TAILLOG}" | awk '{print \$4}')
@@ -64,11 +64,11 @@ parent-oci-image-copy:
       FILENAME="./registries/${SRC_REGISTRY}-image-list.txt"
       OLDIFS=$IFS
       #copy a single image
-      if [ $(find . -name Dockerfile) ]; then
+      if [ -n echo "$(find . -name Dockerfile)" ]; then
         for dkr in $(find . -name Dockerfile); do
           CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
           DOCKERFILE=$(echo $dkr)
-          TASKNAME=$(echo ${IMAGE})
+          TASKNAME=$(echo $CONTEXT)
           genchildpipeline
         done
 
