@@ -46,7 +46,7 @@ parent-oci-image-copy:
                   --use-param-defaults \
                   --param CONTEXT="\${CONTEXT}" \
                   --param DOCKERFILE="\${DOCKERFILE}" \
-                  --prefix-name "\${TASKNAME}" \
+                  --prefix-name "${TASKNAME}" \
                   -n workflows-platform | tail -1)"
                   \$TAILLOG
                   TASKID=\$(echo "\${TAILLOG}" | awk '{print \$4}')
