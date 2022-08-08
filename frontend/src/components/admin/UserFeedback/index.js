@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import _ from 'underscore';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { styles, TableRow } from '../util/GCAdminStyles';
 
