@@ -114,7 +114,7 @@ export default function GCResponsibilityDocumentView({
 					createAlert(
 						'Text Not Found',
 						'error',
-						'The exact respsonsibility text could not be found in the PDF due to a discrepancy'
+						'The exact responsibility text could not be found in the PDF due to a discrepancy'
 					);
 				}
 			}, 2000);

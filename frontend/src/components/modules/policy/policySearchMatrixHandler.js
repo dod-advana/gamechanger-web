@@ -129,12 +129,14 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					state={state}
 					dispatch={dispatch}
 					classes={classes}
+					searchSettingsName={'searchSettings'}
 					filter={'orgFilter'}
 					originalFilters={originalOrgFilters}
 					allSelected={'allOrgsSelected'}
 					specificSelected={'specificOrgsSelected'}
 					update={'orgUpdate'}
 					trackingName={'OrgFilterToggle'}
+					showNumResultsPerOption
 				/>
 			)}
 		</FormControl>
@@ -283,12 +285,14 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 						state={state}
 						dispatch={dispatch}
 						classes={classes}
+						searchSettingsName={'searchSettings'}
 						filter={'typeFilter'}
 						originalFilters={originalTypeFilters}
 						allSelected={'allTypesSelected'}
 						specificSelected={'specificTypesSelected'}
 						update={'typeUpdate'}
 						trackingName={'TypeFilterToggle'}
+						showNumResultsPerOption
 					/>
 				</>
 			)}
@@ -464,7 +468,7 @@ const getSearchMatrixItems = (props) => {
 
 	return (
 		<>
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div data-cy={'source-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					header={'SOURCE'}
 					headerBackground={'rgb(238,241,242)'}
@@ -475,7 +479,7 @@ const getSearchMatrixItems = (props) => {
 				</GCAccordion>
 			</div>
 
-			<div style={{ width: '100%', marginBottom: 10 }}>
+			<div data-cy={'type-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
 					header={'TYPE'}
 					headerBackground={'rgb(238,241,242)'}

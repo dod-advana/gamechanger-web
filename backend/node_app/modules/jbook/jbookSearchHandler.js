@@ -158,11 +158,7 @@ class JBookSearchHandler extends SearchHandler {
 				}
 			});
 
-			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(
-				req.body,
-				userId,
-				this.jbookSearchUtility.getMapping('esServiceAgency', false)
-			);
+			const esQuery = this.jbookSearchUtility.getElasticSearchQueryForJBook(req.body, userId);
 
 			let expansionDict = {};
 
@@ -329,30 +325,6 @@ class JBookSearchHandler extends SearchHandler {
 			returnData = reviewData[0][0];
 		}
 
-		returnData.budgetYear = [];
-		returnData.serviceAgencyES = [];
-
-		const pdocQuery = `SELECT array_agg(DISTINCT "P40-04_BudgetYear") as budgetYear, array_agg(DISTINCT "P40-06_Organization") as serviceAgency FROM pdoc`;
-		const odocQuery = `SELECT array_agg(DISTINCT "budget_year") as budgetYear, array_agg(DISTINCT "organization") as serviceAgency FROM om`;
-		const rdocQuery = `SELECT array_agg(DISTINCT "BudgetYear") as budgetYear, array_agg(DISTINCT "Organization") as serviceAgency FROM rdoc`;
-
-		const mainQuery = `${pdocQuery} UNION ALL ${odocQuery} UNION ALL ${rdocQuery};`;
-
-		const agencyYearData = await this.db.jbook.query(mainQuery, { replacements: {} });
-
-		returnData.budgetYear = [];
-
-		if (agencyYearData[0].length > 0) {
-			agencyYearData[0].forEach((data) => {
-				returnData.budgetYear = [
-					...new Set([
-						...returnData.budgetYear,
-						...(data.budgetyear && data.budgetyear !== null ? data.budgetyear : []),
-					]),
-				];
-			});
-		}
-
 		const serviceReviewers = Array.from(
 			new Set([...returnData.servicereviewer, ...returnData.servicesecondaryreviewer])
 		);
@@ -364,7 +336,6 @@ class JBookSearchHandler extends SearchHandler {
 		}
 		returnData.servicereviewer = serviceReviewers;
 
-		returnData.budgetYear.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 		returnData.reviewstatus.push(null);
 
 		returnData = await this.getESDataForFilters(returnData, userId);
@@ -415,11 +386,11 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYearES = processESResults(budgetYearESResults);
+				returnData.budgetYear = processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
-			query.aggs.values.terms.field = 'serviceAgency_s';
+			query.aggs.values.terms.field = 'org_jbook_desc_s';
 
 			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
@@ -431,7 +402,7 @@ class JBookSearchHandler extends SearchHandler {
 			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
 				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
 
-				returnData.serviceAgencyES = _.uniq(
+				returnData.serviceAgency = _.uniq(
 					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
 				);
 			}

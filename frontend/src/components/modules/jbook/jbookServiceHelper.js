@@ -335,7 +335,7 @@ const TransitionPartnersValue = React.memo((props) => {
 					size="small"
 					options={['Yes', 'No']}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePTPAgreeLabel', value)}
+					onChange={(_event, value) => setReviewData('servicePTPAgreeLabel', value)}
 					value={servicePTPAgreeLabel ?? 'Yes'}
 					disabled={finished} //|| roleDisabled}
 					disableClearable
@@ -348,9 +348,9 @@ const TransitionPartnersValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+					options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePlannedTransitionPartner', value)}
+					onChange={(_event, value) => setReviewData('servicePlannedTransitionPartner', value)}
 					value={
 						servicePlannedTransitionPartner || primaryPlannedTransitionPartner
 							? servicePlannedTransitionPartner ?? primaryPlannedTransitionPartner
