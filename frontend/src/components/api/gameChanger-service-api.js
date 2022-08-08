@@ -1025,9 +1025,9 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
-	getJbookFeedbackData = async () => {
+	getJbookFeedbackData = async (body) => {
 		const url = endpoints.getJbookFeedbackData;
-		return axiosGET(this.axios, url);
+		return axiosPOST(this.axios, url, body);
 	};
 
 	getThumbnail = async (body) => {
