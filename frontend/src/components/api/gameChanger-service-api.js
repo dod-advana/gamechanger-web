@@ -124,6 +124,7 @@ const endpoints = {
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
 	qaSearchFeedback: '/api/gamechanger/sendFeedback/QA',
 	getFeedbackData: '/api/gamechanger/sendFeedback/getFeedbackData',
+	getJbookFeedbackData: '/api/gamechanger/sendFeedback/getJbookFeedbackData',
 	sendFrontendErrorPOST: '/api/gamechanger/sendFrontendError',
 	getOrgImageOverrideURLs: '/api/gamechanger/getOrgImageOverrideURLs',
 	saveOrgImageOverrideURL: '/api/gamechanger/saveOrgImageOverrideURL',
@@ -1021,6 +1022,11 @@ export default class GameChangerAPI {
 
 	getFeedbackData = async () => {
 		const url = endpoints.getFeedbackData;
+		return axiosGET(this.axios, url);
+	};
+
+	getJbookFeedbackData = async () => {
+		const url = endpoints.getJbookFeedbackData;
 		return axiosGET(this.axios, url);
 	};
 
