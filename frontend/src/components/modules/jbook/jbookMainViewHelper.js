@@ -107,7 +107,7 @@ export const filterSortFunction = (a, b) => {
 
 const getName = (reviewer) => {
 	if (reviewer !== null && reviewer.name !== null) {
-		return `${reviewer.name}${reviewer.organization ? ' ' + reviewer.organization : ''}`;
+		return `${reviewer.name}${reviewer.organization ? ' (' + reviewer.organization + ')' : ''}`;
 	}
 	return 'Blank';
 };
@@ -129,15 +129,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 	});
 
 	try {
-		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-
-		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-
-		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgencyES
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
@@ -146,6 +138,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
+
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
@@ -157,15 +150,9 @@ export const populateDropDowns = async (state, _dispatch) => {
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
-		if (jbookSearchSettings.budgetYearES) {
-			defaultOptions.budgetYear = jbookSearchSettings.budgetYear = jbookSearchSettings.budgetYearES;
-		}
 		if (jbookSearchSettings.appropriationNumberES) {
 			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
 				jbookSearchSettings.appropriationNumberES;
-		}
-		if (jbookSearchSettings.appropriationNumberES) {
-			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumberES;
 		}
 	} catch (err) {
 		console.log('Error setting dropdown data');

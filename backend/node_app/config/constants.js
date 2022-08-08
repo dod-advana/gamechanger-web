@@ -1,4 +1,4 @@
-var path = require('path');
+const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const https = require('https');
@@ -185,6 +185,9 @@ module.exports = Object.freeze({
 		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
+		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
+		QLIK_EXCLUDE_CUST_PROP_VAL: process.env.QLIK_EXCLUDE_CUST_PROP_VAL || 'ExcludeSearch',
+		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain',
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,

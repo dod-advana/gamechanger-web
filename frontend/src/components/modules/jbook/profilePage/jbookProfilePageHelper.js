@@ -23,6 +23,7 @@ import {
 	getFormattedTotalCost,
 } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
+import JBookCommentSection from './jbookCommentSection';
 
 const firstColWidth = {
 	maxWidth: 150,
@@ -116,7 +117,17 @@ const BasicData = (props) => {
 };
 
 const ClassificationScoreCard = (props) => {
-	const { scores } = props;
+	const {
+		scores,
+		commentThread,
+		gameChangerAPI,
+		docID,
+		portfolioName,
+		getCommentThread,
+		userData,
+		updateUserProfileData,
+		dispatch,
+	} = props;
 
 	return (
 		<StyledLeftContainer>
@@ -176,6 +187,16 @@ const ClassificationScoreCard = (props) => {
 						</div>
 					);
 				})}
+				<JBookCommentSection
+					commentThread={commentThread}
+					gameChangerAPI={gameChangerAPI}
+					docID={docID}
+					portfolioName={portfolioName}
+					getCommentThread={getCommentThread}
+					userData={userData}
+					updateUserProfileData={updateUserProfileData}
+					dispatch={dispatch}
+				/>
 			</div>
 		</StyledLeftContainer>
 	);
@@ -541,8 +562,12 @@ const getMetadataTableData = (
 			Hidden: budgetType !== 'RDT&E',
 		},
 		{
-			Key: 'Service Agency Name',
+			Key: 'Department',
 			Value: projectData.serviceAgency || 'N/A',
+		},
+		{
+			Key: 'Agency',
+			Value: projectData.org_jbook_desc_s || 'N/A',
 		},
 		{
 			Key: 'To Complete',
@@ -586,7 +611,10 @@ const getMetadataTableData = (
 };
 
 const renderTitle = (projectData, programElement, projectNum) => {
-	const projectTitle = projectData.projectTitle ?? projectData.budgetLineItemTitle;
+	const projectTitle =
+		projectData.budgetType === 'odoc'
+			? projectData.budgetActivityTitle
+			: projectData.projectTitle ?? projectData.budgetLineItemTitle;
 	const title = projectTitle && projectTitle !== 'undefined' ? `${projectTitle}` : '';
 	const element = programElement && programElement !== 'undefined' ? `${programElement} ` : '';
 	const service =
