@@ -65,7 +65,7 @@ parent-oci-image-copy:
       OLDIFS=$IFS
       #check for dockerfiles
       DOCKERFILES="$(find . -name Dockerfile)"
-      if [ ! -z ${DOCKERFILES}]; then
+      if [ ! -z ${DOCKERFILES} ]; then
         for dkr in $(find . -name Dockerfile); do
           CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
           DOCKERFILE=$(echo $dkr)
