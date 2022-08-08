@@ -375,6 +375,10 @@ export default class GameChangerAPI {
 				filename = encodeURIComponent(fileName);
 			}
 
+			if (cloneData.clone_name === 'jbook') {
+				filename = encodeURIComponent(filename);
+			}
+
 			axiosGET(
 				this.axios,
 				`${endpoints.dataStorageDownloadGET}?path=${encodeURIComponent(

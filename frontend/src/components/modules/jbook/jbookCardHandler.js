@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
-import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { CARD_FONT_SIZE, getTrackingNameForFactory, encode } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -239,6 +239,16 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 		types[budgetType]
 	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
+};
+
+const clickFnPDF = (filename, cloneName, searchText, pageNumber = 0) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	console.log(filename);
+	window.open(
+		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+	);
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
@@ -967,7 +977,8 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								// LINK TO PDF PAGE
+								console.log(item);
+								clickFnPDF(item.pdf_location_s, cloneName);
 							}}
 						>
 							Open
