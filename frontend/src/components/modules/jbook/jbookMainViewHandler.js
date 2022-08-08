@@ -320,29 +320,29 @@ const getCardViewPanel = (props) => {
 												background: 'transparent',
 											}}
 										>
-											<TabList style={styles.tabsList}>
-												<div style={{ flex: 1, display: 'flex' }}>
-													<Tab
-														style={{
-															...styles.tabStyle,
-															...(mainTabSelected === 0 ? styles.tabSelectedStyle : {}),
-															borderRadius: `5px 5px 0 0`,
-														}}
-														title="summaryFAQ"
-														onClick={() => handleTabClicked(dispatch, state, 0)}
-													>
-														<Typography variant="h6" display="inline" title="jbookSearch">
-															JBOOK SEARCH ({count})
-														</Typography>
-													</Tab>
-													{(Permissions.permissionValidator(
-														`${edaCloneData.clone_name} Admin`,
-														true
-													) ||
-														Permissions.permissionValidator(
-															`View ${edaCloneData.clone_name}`,
-															true
-														)) && (
+											<GCButton
+												buttonColor={'rgb(28, 45, 101)'}
+												style={{ position: 'absolute', right: 15, top: 5 }}
+												onClick={() => {
+													window.open(
+														'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													);
+												}}
+											>
+												Budget Insights & Dashboards
+											</GCButton>
+										</GCTooltip>
+										<Tabs selectedIndex={mainTabSelected ?? 0}>
+											<div
+												style={{
+													...styles.tabButtonContainer,
+													backgroundColor: '#ffffff',
+													paddingTop: 20,
+													background: 'transparent',
+												}}
+											>
+												<TabList style={styles.tabsList}>
+													<div style={{ flex: 1, display: 'flex' }}>
 														<Tab
 															style={{
 																...styles.tabStyle,

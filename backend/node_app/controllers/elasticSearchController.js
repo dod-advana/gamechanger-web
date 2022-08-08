@@ -77,7 +77,7 @@ class ElasticSearchController {
 			}
 			this.logger.info('START qlik full app cache and ES storage');
 
-			const { data } = await getQlikApps(undefined, this.logger, false, true, undefined);
+			const data = await getQlikApps(undefined, this.logger, false, undefined);
 
 			await Promise.all([this.storeUpdateQlikAppsInES(data), this.cacheQlikApps(data)]);
 
@@ -120,11 +120,16 @@ class ElasticSearchController {
 					published_b: app['published'],
 					tags_n: app['tags'],
 					description_t: app['description'],
+					streamId_s: app['stream']['id'],
 					streamName_s: app['stream']['name'],
+					streamCustomProperties_s: app['stream']['customProperties'],
 					fileSize_i: app['fileSize'],
 					lastReloadTime_dt: app['lastReloadTime'],
 					thumbnail_s: app['thumbnail'],
 					dynamicColor_s: app['dynamicColor'],
+					appCustomProperties_s: app['customProperties'],
+					businessDomains_s: app['businessDomains'],
+					owner_s: app['owner']['name'],
 				};
 			});
 
