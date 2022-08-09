@@ -116,7 +116,7 @@ class FeedbackController {
 				offset,
 				order,
 				where: new_where,
-				attributes: ['id', 'first_name', 'last_name', 'email', 'type', 'description'],
+				attributes: ['id', 'first_name', 'last_name', 'email', 'type', 'description', 'createdAt'],
 			});
 
 			res.status(200).send({ totalCount, docs });
