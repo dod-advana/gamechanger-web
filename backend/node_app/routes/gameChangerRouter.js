@@ -224,6 +224,7 @@ router.post('/sendFrontendError', appSettings.logFrontendError);
 router.post('/sendFeedback/intelligentSearch', feedback.sendIntelligentSearchFeedback);
 router.post('/sendFeedback/QA', feedback.sendQAFeedback);
 router.get('/sendFeedback/getFeedbackData', feedback.getFeedbackData);
+router.post('/sendFeedback/getJbookFeedbackData', feedback.getJbookFeedbackData);
 router.post('/sendFeedback/jira', feedback.sendJiraFeedback);
 router.post('/sendFeedback/requestDoc', feedback.requestDocIngest);
 
