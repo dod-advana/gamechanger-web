@@ -7,6 +7,9 @@ variables:
   CI_PROJECT_PATH:
     value: ""
     description: "Repository path"
+  BUILD_IMAGE_PATH:
+    value: ""
+    description: "Specify a dockerfile to build, defaults to all if left empty."
   CLEANUP_PIPELINE_RUN:
     value: "true"
     description: "Set to false to keep pipeline output in Tketon"
@@ -14,7 +17,7 @@ stages:
   - build
   - pipeline-trigger
 
-parent-oci-image-copy:
+parent-image-build:
   environment:
     name: vdms
   stage: build
@@ -61,29 +64,39 @@ parent-oci-image-copy:
                   fi
       EOF
       }
-      FILENAME="./registries/${SRC_REGISTRY}-image-list.txt"
-      OLDIFS=$IFS
+
       #check for dockerfiles
-      DOCKERFILES="$(find . -name Dockerfile)"
-      if [ ! -z "${DOCKERFILES}" ]; then
-        for dkr in $(find . -name Dockerfile); do
-          CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
-          DOCKERFILE=$(echo $dkr)
-          TASKNAME="$(echo $dkr | rev | cut -d '/' -f2 | rev)"
-          genchildpipeline
-        done
+
+      if [ -z ${BUILD_IMAGE_PATH} ]; then
+
+        DOCKERFILES="$(find . -name Dockerfile)"
+        if [ ! -z "${DOCKERFILES}" ]; then
+          for dkr in $(find . -name Dockerfile); do
+            CONTEXT=$(echo $dkr | rev | cut -d '/' -f2- | rev)
+            DOCKERFILE=$(echo $dkr)
+            TASKNAME="$(echo $dkr | rev | cut -d '/' -f2 | rev)"
+            genchildpipeline
+          done
+
+        else
+          echo 'there was no dockerfile found'
+          exit 1
+        fi
+
+      elif [ ! -z ${BUILD_IMAGE_PATH} ]; then
+        CONTEXT="$(echo ${BUILD_IMAGE_PATH} | rev | cut -d '/' -f2- | rev)"
+        DOCKERFILE=${BUILD_IMAGE_PATH}
+        TASKNAME="$(echo ${BUILD_IMAGE_PATH}| rev | cut -d '/' -f2 | rev)"
 
       else
         echo 'there was no dockerfile found'
         exit 1
       fi
-
-
   artifacts:
     paths:
       - child-pipeline-gitlab-ci.yml
 
-child-oci-image-copy:
+child-image-build:
  stage: pipeline-trigger
  trigger:
    include:
