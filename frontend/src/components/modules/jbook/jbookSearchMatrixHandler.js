@@ -1,4 +1,5 @@
 import React from 'react';
+import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, Curve } from 'recharts';
 import GCAccordion from '../../common/GCAccordion';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { GC_COLORS } from './jbookMainViewHandler';
@@ -272,15 +273,16 @@ const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
+const parseContractAmounts = (amount) => {
+	return '$' + (amount > 1000 ? (amount / 1000).toFixed(2) + ' B' : parseFloat(amount).toFixed(2) + ' M');
+};
+
 const renderStats = (contractTotals) => {
 	contractTotals.sort((a, b) => b.sum_agg.value - a.sum_agg.value);
 	let data = contractTotals.map((item) => {
 		return {
 			Key: item.key,
-			Value:
-				item.sum_agg.value > 1000
-					? (item.sum_agg.value / 1000).toFixed(2) + ' B'
-					: parseFloat(item.sum_agg.value).toFixed(2) + ' M',
+			Value: parseContractAmounts(item.sum_agg.value),
 		};
 	});
 
@@ -609,6 +611,108 @@ const getSearchMatrixItemsAIInventory = (props) => {
 	);
 };
 
+const getContractData = (contractTotals) => {
+	const COLORS = ['#fc9d03', '#ad0202', '#007506', '#6c0299', '#006069', '#969902'];
+	const orgColorMap = {
+		Army: '#4b5320', // army green
+		Navy: '#282053', // navy blue
+		'Air Force (AF)': '#00308f', // sky blue
+		'The Joint Staff (TJS)': '#330066', // purple
+	};
+	let totalAmount = 0;
+	let index = 0;
+
+	const contractData = contractTotals.map((item) => {
+		totalAmount += item.sum_agg.value;
+		let color = COLORS[index % 6];
+		if (orgColorMap[item.key]) {
+			color = orgColorMap[item.key];
+		} else {
+			index++;
+		}
+		return {
+			type: item.key,
+			count: item.sum_agg.value,
+			convertedTotal: parseContractAmounts(item.sum_agg.value),
+			color,
+		};
+	});
+
+	return { contractData, totalAmount };
+};
+
+const BudgetRequestPie = ({ contractTotals }) => {
+	let { contractData, totalAmount } = getContractData(contractTotals);
+	const convertedTotalAmount = parseContractAmounts(totalAmount);
+
+	const hideLabel = ({ endAngle, startAngle }) => {
+		const size = endAngle - startAngle;
+		return size < 8;
+	};
+
+	const customLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, type, color, endAngle, startAngle }) => {
+		const RADIAN = Math.PI / 180;
+		const radius = 25 + innerRadius + (outerRadius - innerRadius);
+		const x = cx + radius * Math.cos(-midAngle * RADIAN);
+		const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+		if (hideLabel({ endAngle, startAngle })) return null;
+
+		let display = type;
+		const regExp = /\(([^)]+)\)/;
+		const matches = regExp.exec(type);
+		if (matches && matches[1]) display = matches[1];
+
+		if (type)
+			return (
+				<text x={x} y={y} fill={color} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+					{display}
+				</text>
+			);
+	};
+
+	const customLabelLine = (props) => {
+		if (hideLabel(props)) return null;
+		return <Curve {...props} type="linear" className="recharts-pie-label-line" />;
+	};
+
+	const CustomTooltip = ({ payload }) => {
+		let tooltipText = '';
+		if (payload.length > 0) {
+			let data = payload[0];
+			tooltipText += data.name + ': ' + data.payload.convertedTotal;
+		}
+		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
+	};
+
+	return (
+		<ResponsiveContainer width="100%" height={300}>
+			<PieChart width={'100%'} height={'100%'}>
+				<Pie
+					innerRadius={'40%'}
+					outerRadius={'55%'}
+					data={contractData}
+					cx="50%"
+					cy="50%"
+					dataKey="count"
+					nameKey="type"
+					label={customLabel}
+					labelLine={customLabelLine}
+					isAnimationActive={false}
+				>
+					{contractData.map((_entry, index) => (
+						<Cell key={`cell-${index}`} fill={contractData[index].color} />
+					))}
+				</Pie>
+				<text x={'50%'} y={'50%'} dy={8} textAnchor="middle">
+					{convertedTotalAmount}
+				</text>
+				<Tooltip content={<CustomTooltip />} />
+			</PieChart>
+		</ResponsiveContainer>
+	);
+};
+
 // search matrix for all other portfolios (not AI Inventory)
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
@@ -841,7 +945,10 @@ const getSearchMatrixItems = (props) => {
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				) : (
-					<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
+					<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+						<BudgetRequestPie contractTotals={contractTotals} />
+						<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
+					</div>
 				)}
 			</GCAccordion>
 		</div>
