@@ -202,6 +202,7 @@ const EdaSearchHandler = {
 								loadingTinyUrl: false,
 								hideTabs: false,
 								query: resp.data.query,
+								runningSearch: false,
 							});
 						} else {
 							if (!offset) {

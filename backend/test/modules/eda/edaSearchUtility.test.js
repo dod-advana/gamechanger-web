@@ -67,6 +67,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -261,6 +262,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -464,6 +466,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -665,6 +668,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -819,6 +823,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1001,6 +1006,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1199,6 +1205,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1410,6 +1417,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1580,6 +1588,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -2132,6 +2141,8 @@ describe('EDASearchUtility', function () {
 										total_obligated_amount_eda_ext_f: 6472000,
 										contract_payment_office_name_eda_ext: 'DFAS COLUMBUS CENTER',
 									},
+									clins_parsed_n: 'test',
+									clins_parsed_successfully_b: 'test',
 									pagerank_r: 0.00001,
 								},
 								fields: {
@@ -2677,6 +2688,8 @@ describe('EDASearchUtility', function () {
 							keyw_5: '',
 							ref_list: [],
 							score: 8.036867,
+							clins: 'test',
+							clins_parsed_successfully_b: 'test',
 						},
 					],
 					doc_types: [],
@@ -2712,7 +2725,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, false, false, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, false, false);
 				const expected = {
 					_source: {
 						includes: [
@@ -2782,7 +2795,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, true, true, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, true, true);
 				const expected = {
 					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
 					from: 0,
