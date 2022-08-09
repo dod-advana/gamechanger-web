@@ -101,5 +101,5 @@ child-image-build:
  trigger:
    include:
      - artifact: child-pipeline-gitlab-ci.yml
-       job: parent-oci-image-copy
+       job: parent-image-build
    strategy: depend
