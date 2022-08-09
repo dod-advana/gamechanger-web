@@ -87,7 +87,7 @@ parent-image-build:
         CONTEXT="$(echo ${BUILD_IMAGE_PATH} | rev | cut -d '/' -f2- | rev)"
         DOCKERFILE=${BUILD_IMAGE_PATH}
         TASKNAME="$(echo ${BUILD_IMAGE_PATH}| rev | cut -d '/' -f2 | rev)"
-
+        genchildpipeline
       else
         echo 'there was no dockerfile found'
         exit 1
