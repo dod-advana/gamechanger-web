@@ -122,6 +122,12 @@ const userFeedbackTableAdditions = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 		minWidth: 150,
 	},
+	{
+		Header: 'Date Submitted',
+		accessor: 'createdAt',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		minWidth: 125,
+	},
 ];
 
 const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
@@ -219,6 +225,7 @@ const JBookAdminMainViewHandler = {
 						title={'User Feedback'}
 						titleAdditions={renderUserFeedbackTitleAdditions}
 						descriptionAdditions={renderUserFeedbackDescriptionAdditions}
+						defaultSorted={[{ id: 'createdAt', desc: true }]}
 					/>
 				);
 			default:
