@@ -1,6 +1,6 @@
-const PDOC = require('../../models').pdoc;
-const RDOC = require('../../models').rdoc;
-const OM = require('../../models').om;
+const PDOC = require('../../models').pdoc_archive;
+const RDOC = require('../../models').rdoc_archive;
+const OM = require('../../models').om_archive;
 const REVIEW = require('../../models').review;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc;
 const USER_REQUEST = require('../../models').user_request;
@@ -10,7 +10,6 @@ const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const COMMENTS = require('../../models').comments;
 const constantsFile = require('../../config/constants');
-const GL = require('../../models').gl;
 const { Sequelize, Op } = require('sequelize');
 const DB = require('../../models/index');
 const EmailUtility = require('../../utils/emailUtility');
@@ -37,7 +36,6 @@ class JBookDataHandler extends DataHandler {
 			jbookSearchUtility = new JBookSearchUtility(opts),
 			constants = constantsFile,
 			keyword_assoc = KEYWORD_ASSOC,
-			gl = GL,
 			db = DB,
 			userRequest = USER_REQUEST,
 			reviewer = REVIEWER,
@@ -57,7 +55,6 @@ class JBookDataHandler extends DataHandler {
 		this.searchUtility = searchUtility;
 		this.jbookSearchUtility = jbookSearchUtility;
 		this.constants = constants;
-		this.gl = gl;
 		this.keyword_assoc = keyword_assoc;
 		this.db = db;
 		this.userRequest = userRequest;
