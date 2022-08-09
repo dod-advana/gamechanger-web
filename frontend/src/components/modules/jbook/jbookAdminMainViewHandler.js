@@ -113,7 +113,7 @@ const userFeedbackTableAdditions = [
 		accessor: 'description',
 		filterable: false,
 		minWidth: 300,
-		style: { 'white-space': 'unset', overflow: 'scroll' },
+		style: { 'white-space': 'unset', overflow: 'auto' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
