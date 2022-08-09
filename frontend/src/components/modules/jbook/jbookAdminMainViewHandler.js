@@ -12,8 +12,10 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler';
 import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
+import UserFeedback from '../../admin/UserFeedback';
 import PortfolioBuilder from './portfolioBuilder/jbookPortfolioBuilder';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import FeedbackIcon from '@mui/icons-material/Feedback';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import FolderIcon from '@mui/icons-material/Folder';
 import GeneralAdminButtons from './jbookGeneralButtons';
@@ -29,6 +31,7 @@ const PAGES = {
 	reviewerList: 'ReviewerList',
 	notifications: 'Notifications',
 	portfolio: 'Portfolio',
+	userFeedback: 'UserFeedback',
 };
 
 const userListTableAdditions = [
@@ -40,7 +43,7 @@ const userListTableAdditions = [
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
-					onChange={() => {}}
+					onChange={() => undefined}
 					name={'primary_reviewer'}
 					color="inherit"
 					style={{ ...styles.checkbox, color: '#1C2D64' }}
@@ -56,7 +59,7 @@ const userListTableAdditions = [
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
-					onChange={() => {}}
+					onChange={() => undefined}
 					name={'service_reviewer'}
 					color="inherit"
 					style={{ ...styles.checkbox, color: '#1C2D64' }}
@@ -72,7 +75,7 @@ const userListTableAdditions = [
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
-					onChange={() => {}}
+					onChange={() => undefined}
 					name={'poc_reviewer'}
 					color="inherit"
 					style={{ ...styles.checkbox, color: '#1C2D64' }}
@@ -88,13 +91,36 @@ const userListTableAdditions = [
 			<TableRow>
 				<GCCheckbox
 					checked={row.value}
-					onChange={() => {}}
+					onChange={() => undefined}
 					name={'admin'}
 					color="inherit"
 					style={{ ...styles.checkbox, color: '#1C2D64' }}
 				/>
 			</TableRow>
 		),
+	},
+];
+
+const userFeedbackTableAdditions = [
+	{
+		Header: 'Type',
+		accessor: 'type',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		width: 100,
+	},
+	{
+		Header: 'Feedback',
+		accessor: 'description',
+		filterable: false,
+		minWidth: 300,
+		style: { 'white-space': 'unset', overflow: 'scroll' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Email',
+		accessor: 'email',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		minWidth: 150,
 	},
 ];
 
@@ -146,6 +172,20 @@ const renderDescriptionAdditions = () => {
 	);
 };
 
+const renderUserFeedbackTitleAdditions = () => {
+	return <></>;
+};
+
+const renderUserFeedbackDescriptionAdditions = () => {
+	return (
+		<div style={{ background: '#f2f2f2', borderRadius: 6, margin: '0 80px 20px 80px', padding: 10 }}>
+			<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+				The table below lists all the feedback submitted by JBOOK users to date.
+			</Typography>
+		</div>
+	);
+};
+
 const JBookAdminMainViewHandler = {
 	getPages: () => {
 		return PAGES;
@@ -171,12 +211,22 @@ const JBookAdminMainViewHandler = {
 				return <ReviewerList cloneName={cloneName} />;
 			case PAGES.portfolio:
 				return <PortfolioBuilder cloneName={cloneName} />;
+			case PAGES.userFeedback:
+				return (
+					<UserFeedback
+						cloneName={cloneName}
+						columns={userFeedbackTableAdditions}
+						title={'User Feedback'}
+						titleAdditions={renderUserFeedbackTitleAdditions}
+						descriptionAdditions={renderUserFeedbackDescriptionAdditions}
+					/>
+				);
 			default:
 				return <GeneralAdminButtons />;
 		}
 	},
 
-	closedAdminMenu: (setPageToView, pages, cloneName) => {
+	closedAdminMenu: (setPageToView, _pages, cloneName) => {
 		return (
 			<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
@@ -211,6 +261,14 @@ const JBookAdminMainViewHandler = {
 				)}
 
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
+					<Tooltip title="User Feedback" placement="right" arrow>
+						<HoverNavItem centered onClick={() => setPageToView(PAGES.userFeedback)} toolTheme={toolTheme}>
+							<FeedbackIcon style={{ fontSize: 30 }} />
+						</HoverNavItem>
+					</Tooltip>
+				)}
+
+				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
 					<Tooltip title="Add/Edit Reviewers" placement="right" arrow>
 						<HoverNavItem centered onClick={() => setPageToView(PAGES.reviewerList)} toolTheme={toolTheme}>
 							<RateReviewIcon style={{ fontSize: 30 }} />
@@ -240,7 +298,7 @@ const JBookAdminMainViewHandler = {
 		);
 	},
 
-	openedAdminMenu: (setPageToView, pages, cloneName) => {
+	openedAdminMenu: (setPageToView, _pages, cloneName) => {
 		return (
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
@@ -272,6 +330,15 @@ const JBookAdminMainViewHandler = {
 						<HoverNavItem onClick={() => setPageToView(PAGES.userList)} toolTheme={toolTheme}>
 							<ManageAccountsIcon style={{ fontSize: 30 }} />
 							<span style={{ marginLeft: '5px' }}>User Permissions</span>
+						</HoverNavItem>
+					</Tooltip>
+				)}
+
+				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
+					<Tooltip title="User Permissions" placement="right" arrow>
+						<HoverNavItem onClick={() => setPageToView(PAGES.userFeedback)} toolTheme={toolTheme}>
+							<FeedbackIcon style={{ fontSize: 30 }} />
+							<span style={{ marginLeft: '5px' }}>User Feedback</span>
 						</HoverNavItem>
 					</Tooltip>
 				)}
