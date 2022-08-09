@@ -13,13 +13,13 @@ const DEFAULT_COLUMNS = [
 	{
 		Header: 'First',
 		accessor: 'first_name',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Unknown First'}</TableRow>,
+		Cell: (row) => <TableRow>{row.value || 'Unknown First'}</TableRow>,
 		width: 150,
 	},
 	{
 		Header: 'Last',
 		accessor: 'last_name',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Unknown Last'}</TableRow>,
+		Cell: (row) => <TableRow>{row.value || 'Unknown Last'}</TableRow>,
 		width: 150,
 	},
 ];
