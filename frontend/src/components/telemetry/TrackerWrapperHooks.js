@@ -13,7 +13,7 @@ export default function TrackerWrapperHooks(ComposedComponent, documentTitle) {
 			const regex = /\d{10}/g;
 			const id = regex.exec(userId);
 
-			pushInstruction('setUserId', id, SparkMD5.hash(id ? id[0] : userId));
+			pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
 			trackPageView({
 				// documentTitle and href get logged automatically
 
