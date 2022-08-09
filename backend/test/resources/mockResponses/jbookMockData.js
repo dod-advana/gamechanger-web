@@ -1488,6 +1488,31 @@ const commentData = [
 	},
 ];
 
+const budgetDropdownData = {
+	reviewers: [{ name: 'Test Testerson' }],
+	primaryClassLabel: [
+		{ primary_class_label: 'Core AI' },
+		{ primary_class_label: 'AI Enabled' },
+		{ primary_class_label: 'AI Enabling' },
+		{ primary_class_label: 'Not AI' },
+		{ primary_class_label: 'Unknown' },
+	],
+	serviceReviewers: [{ name: 'Test Testerman' }],
+	reviewStat: [
+		{ jaic_review_stat: 'Needs Review' },
+		{ jaic_review_stat: 'Partial Review' },
+		{ jaic_review_stat: 'Finished Review' },
+	],
+	transitionPartners: ['Air Force (AF)', 'Army', 'Navy', 'Unknown'],
+	missionPartners: [
+		{ current_msn_part: 'Unknown' },
+		{ current_msn_part: 'Academia' },
+		{ current_msn_part: 'Industry' },
+		{ current_msn_part: 'Other' },
+	],
+	secondaryReviewers: [{ name: 'Test Testeroni' }],
+};
+
 module.exports = {
 	profileData,
 	keywordData,
@@ -1496,4 +1521,5 @@ module.exports = {
 	portfolioData,
 	userReviews,
 	commentData,
+	budgetDropdownData,
 };

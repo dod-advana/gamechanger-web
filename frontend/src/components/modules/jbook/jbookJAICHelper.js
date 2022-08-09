@@ -197,9 +197,9 @@ const PlannedTransitionPartnerValue = React.memo((props) => {
 	return (
 		<Autocomplete
 			size="small"
-			options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+			options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 			style={{ width: 300, backgroundColor: 'white' }}
-			onChange={(event, value) => setReviewData('primaryPlannedTransitionPartner', value)}
+			onChange={(_event, value) => setReviewData('primaryPlannedTransitionPartner', value)}
 			renderInput={(params) => <TextField {...params} label="Partner" variant="outlined" />}
 			value={primaryPlannedTransitionPartner ?? null}
 			disabled={finished} //|| roleDisabled}

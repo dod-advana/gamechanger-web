@@ -1,13 +1,31 @@
 const axios = require('axios');
 const https = require('https');
+const _ = require('lodash');
 const constantsFile = require('../../config/constants');
 
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
+let {
+	QLIK_URL,
+	CA,
+	KEY,
+	CERT,
+	AD_DOMAIN,
+	QLIK_SYS_ACCOUNT,
+	QLIK_EXCLUDE_CUST_PROP_NAME,
+	QLIK_EXCLUDE_CUST_PROP_VAL,
+	QLIK_BUSINESS_DOMAIN_PROP_NAME,
+} = constantsFile.QLIK_OPTS;
 
 const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
 const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
-const QLIK_ES_FIELDS = ['name_s', 'description_t', 'streamName_s'];
+const QLIK_ES_FIELDS = [
+	'name_s',
+	'description_t',
+	'streamName_s',
+	'streamCustomProperties_s',
+	'appCustomProperties_s',
+	'businessDomains_s',
+];
 
 const QLIK_ES_MAPPING = {
 	created_dt: { newName: 'createdDate' },
@@ -22,25 +40,106 @@ const QLIK_ES_MAPPING = {
 	lastReloadTime_dt: { newName: 'lastReloadTime' },
 	thumbnail_s: { newName: 'thumbnail' },
 	dynamicColor_s: { newName: 'dynamicColor' },
+	streamCustomProperties_s: { newName: 'streamCustomProperties' },
+	appCustomProperties_s: { newName: 'appCustomProperties' },
+	businessDomains_s: { newName: 'businessDomains' },
 };
 
-const getQlikApps = async (userId, logger, getCount = false, getFull = false, params = {}) => {
+const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 	try {
-		let url = `${QLIK_URL}/qrs/app`;
+		let url = `${QLIK_URL}/qrs/app/full`;
 
 		if (getCount) {
 			url = `${QLIK_URL}/qrs/app/count`;
-		} else if (getFull) {
-			url = `${QLIK_URL}/qrs/app/full`;
 		}
 
-		return await axios.get(url, getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
+		const qlikAppReq = axios.get(url, getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
+
+		const qlikStreamReq = axios.get(
+			`${QLIK_URL}/qrs/stream/full`,
+			getRequestConfigs({ filter: STREAM_PROD_FILTER }, userId)
+		);
+
+		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
+
+		return processQlikApps(qlikApps.data, qlikStreams.data);
 	} catch (err) {
 		if (!userId)
 			// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
 			logger.error(err, 'O799J51', userId);
 
 		return {};
+	}
+};
+
+const determineIfExcluded = (app, { excludeName, excludeValue }) => {
+	return app.customProperties.some(
+		(property) => property.definition.name === excludeName && property.value === excludeValue
+	);
+};
+
+const separateBusinessDomainsAndCustomProps = (
+	customProperties = [],
+	businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME
+) => {
+	const businessDomains = [];
+	const otherCustomProps = [];
+
+	for (const customProp of customProperties) {
+		if (customProp.definition.name === businessDomainPropName) {
+			businessDomains.push(customProp.value);
+		} else {
+			otherCustomProps.push(customProp.value);
+		}
+	}
+
+	return { businessDomains, otherCustomProps };
+};
+
+const processQlikApps = (
+	apps,
+	streams,
+	{
+		excludeName = QLIK_EXCLUDE_CUST_PROP_NAME,
+		excludeValue = QLIK_EXCLUDE_CUST_PROP_VAL,
+		businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME,
+	}
+) => {
+	try {
+		const processedApps = [];
+		for (const app of apps) {
+			if (
+				!determineIfExcluded(app, {
+					excludeName,
+					excludeValue,
+				})
+			) {
+				const appsFullStreamData = _.find(streams, (stream) => {
+					return stream.id === app.stream.id;
+				});
+				let allBusinessDomains = [];
+				app.stream.customProperties = [];
+
+				const { businessDomains: streamBDs, otherCustomProps: streamOtherProps } =
+					separateBusinessDomainsAndCustomProps(appsFullStreamData?.customProperties, businessDomainPropName);
+
+				allBusinessDomains = allBusinessDomains.concat(streamBDs);
+				app.stream.customProperties = app.stream.customProperties.concat(streamOtherProps);
+
+				const { businessDomains: appBDs, otherCustomProps: appOtherProps } =
+					separateBusinessDomainsAndCustomProps(app.customProperties, businessDomainPropName);
+
+				allBusinessDomains = allBusinessDomains.concat(appBDs);
+
+				app.customProperties = appOtherProps;
+				app.businessDomains = allBusinessDomains;
+				processedApps.push(app);
+			}
+		}
+		return processedApps;
+	} catch (err) {
+		logger.error(err, 'W290KC1');
+		throw err;
 	}
 };
 
@@ -193,4 +292,5 @@ module.exports = {
 	getQlikApps,
 	getElasticSearchQueryForQlikApps,
 	cleanQlikESResults,
+	processQlikApps,
 };
