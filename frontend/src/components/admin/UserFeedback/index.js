@@ -51,7 +51,14 @@ const getUserFeedbackData = async ({ limit = PAGE_SIZE, offset, sorted, filtered
  * @class UserFeedback
  */
 const UserFeedback = React.memo((props) => {
-	const { cloneName, columns, title, titleAdditions, descriptionAdditions } = props;
+	const {
+		cloneName,
+		columns,
+		title,
+		titleAdditions,
+		descriptionAdditions,
+		defaultSorted = [{ id: 'last_name', desc: false }],
+	} = props;
 
 	// Component Properties
 	const [gcUserTableData, setGCUserTableData] = useState([]);
@@ -115,12 +122,7 @@ const UserFeedback = React.memo((props) => {
 				manual={true}
 				pages={numPages}
 				onFetchData={handleFetchData}
-				defaultSorted={[
-					{
-						id: 'last_name',
-						desc: false,
-					},
-				]}
+				defaultSorted={defaultSorted}
 			/>
 		</div>
 	);
