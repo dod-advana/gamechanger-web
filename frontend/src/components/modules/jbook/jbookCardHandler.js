@@ -201,7 +201,7 @@ const types = {
 };
 
 const metadataNameToSearchFilterName = {
-	'Service Agency Name': 'serviceAgency',
+	'Service/Agency Name': 'serviceAgency',
 	'Budget Year (FY)': 'budgetYear',
 	'Program Element': 'programElement',
 	'Project Number': 'projectNum',
@@ -281,12 +281,28 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Hidden: budgetType === 'PDOC',
 		},
 		{
-			Key: 'Service Agency Name',
-			Value: projectData.org_jbook_desc_s,
+			Key: 'Budget Year (FY)',
+			Value: projectData.budgetYear,
 		},
 		{
 			Key: 'Appropriation Title',
 			Value: projectData.appropriationTitle,
+		},
+		{
+			Key: 'Service/Agency Name',
+			Value: projectData.org_jbook_desc_s,
+		},
+		{
+			Key: 'Main Account',
+			Value: projectData.appropriationNumber,
+		},
+		{
+			Key: 'Budget Activity',
+			Value: projectData.budgetActivityNumber,
+		},
+		{
+			Key: 'Budget Sub Activity',
+			Value: getBudgetSubActivity(projectData),
 		},
 		{
 			Key: 'Budget Year 1 Requested',
@@ -337,24 +353,8 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: getToComplete(projectData, budgetType),
 		},
 		{
-			Key: 'Budget Year (FY)',
-			Value: projectData.budgetYear,
-		},
-		{
 			Key: 'Budget Cycle',
 			Value: projectData.budgetCycle,
-		},
-		{
-			Key: 'Main Account',
-			Value: projectData.appropriationNumber,
-		},
-		{
-			Key: 'Budget Activity',
-			Value: projectData.budgetActivityNumber,
-		},
-		{
-			Key: 'Budget Sub Activity',
-			Value: getBudgetSubActivity(projectData),
 		},
 		...(showPrediction
 			? [

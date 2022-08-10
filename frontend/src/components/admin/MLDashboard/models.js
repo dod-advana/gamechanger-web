@@ -62,7 +62,6 @@ export default (props) => {
 	});
 	const [modelTable, setModelTable] = useState([]);
 	const [dataTable, setDataTable] = useState([]);
-	//const [currentTransformer, setCurrentTransformer] = useState(initTransformer);
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
 	const [currentSentenceIndex, setCurrentSentenceIndex] = useState('');
@@ -408,12 +407,6 @@ export default (props) => {
 		let downloading = checkFlag('corpus:');
 		return ('' + downloading).toUpperCase();
 	};
-	// const checkTraining = () => {
-	// 	return checkFlag('training:') || checkFlag('corpus:');
-	// };
-	// const checkReloading = () => {
-	// 	return checkFlag('models:');
-	// };
 	/**
 	 * Takes a String and checks if it is in any of the flag keys and checks
 	 * those values. If any of them are true it returns true
@@ -1119,7 +1112,7 @@ export default (props) => {
 								defaultPageSize={10}
 								SubComponent={(row) => {
 									return (
-										<div className="code-container" style={{ padding: '15px' }}>
+										<div className="code-container" style={{ padding: '15px', color: 'black' }}>
 											Files
 											<ul>
 												{row.original.files.map((d) => (
