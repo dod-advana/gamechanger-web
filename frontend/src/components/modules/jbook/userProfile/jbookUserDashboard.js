@@ -80,16 +80,21 @@ const styles = {
 	},
 };
 
+const TableData = (props) => {
+	const { data } = props;
+	return (
+		<div style={{ textAlign: 'center' }}>
+			<p>{data}</p>
+		</div>
+	);
+};
+
 const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>ID</p>,
 		accessor: 'id',
 		width: 190,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -99,13 +104,9 @@ const columns = [
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>BUDGET TYPE</p>,
-		accessor: 'type',
+		accessor: 'budgetType',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -116,11 +117,7 @@ const columns = [
 		Header: () => <p style={styles.tableColumn}>BUDGET YEAR (FY)</p>,
 		accessor: 'budgetYear',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -130,33 +127,21 @@ const columns = [
 		Header: () => <p style={styles.tableColumn}>PROGRAM ELEMENT / BUDGET LINE ITEM</p>,
 		accessor: (row) => (row.budgetLineItem && row.budgetLineItem !== '-' ? row.budgetLineItem : row.programElement),
 		width: 180,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'programElement',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PROJECT #</p>,
 		accessor: 'projectNum',
 		width: 155,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'projectNum',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PROJECT TITLE</p>,
 		accessor: 'projectTitle',
 		width: 190,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'projectTitle',
 	},
 	{
@@ -166,22 +151,24 @@ const columns = [
 		headerStyle: {
 			overflow: 'visible',
 		},
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'serviceAgency',
+	},
+	{
+		Header: () => <p style={styles.tableColumn}>PORTFOLIO</p>,
+		accessor: 'portfolioName',
+		width: 130,
+		Cell: (row) => <TableData data={row.value} />,
+		headerStyle: {
+			overflow: 'visible',
+		},
+		id: 'portfolioName',
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER</p>,
 		accessor: 'primaryReviewer',
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -194,11 +181,7 @@ const columns = [
 				? row.serviceSecondaryReviewer
 				: row.serviceReviewer,
 		width: 130,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -215,11 +198,7 @@ const columns = [
 				? `${row.servicePOCName} (${row.servicePOCOrg})`
 				: row.servicePOCName,
 		width: 120,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -230,11 +209,7 @@ const columns = [
 		accessor: (row) => row.keywords,
 		width: 150,
 		show: false,
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'keywords',
 	},
 	{
@@ -274,11 +249,7 @@ const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>SOURCE</p>,
 		accessor: 'sourceTag',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		headerStyle: {
 			overflow: 'visible',
 		},
@@ -288,26 +259,34 @@ const columns = [
 	{
 		Header: () => <p style={styles.tableColumn}>BUDGET LINE ITEM #</p>,
 		accessor: 'budgetLineItem',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'budgetLineItem',
 		show: false,
 	},
 	{
 		Header: () => <p style={styles.tableColumn}>APPROPRIATION NUMBER</p>,
 		accessor: 'appropriationNumber',
-		Cell: (row) => (
-			<div style={{ textAlign: 'center' }}>
-				<p>{row.value}</p>
-			</div>
-		),
+		Cell: (row) => <TableData data={row.value} />,
 		id: 'appropriationNumber',
 		show: false,
 	},
 ];
+
+const getTbodyProps = () => {
+	return {
+		style: {
+			overflowY: 'auto',
+			overflowX: 'hidden',
+		},
+		id: 'list-view-tbody',
+	};
+};
+
+const getTdProps = () => ({
+	style: {
+		whiteSpace: 'unset',
+	},
+});
 
 const JBookUserDashboard = (props) => {
 	const [toDoList, setToDoList] = useState([]);
@@ -329,6 +308,27 @@ const JBookUserDashboard = (props) => {
 	}, []);
 
 	useEffect(() => {
+		const checkIfFinished = (doc, finished) => {
+			let returnBool = false;
+			if (permissions.primary) {
+				returnBool = doc.primaryReviewStatus === 'Finished Review';
+			}
+
+			if (permissions.service) {
+				returnBool = doc.serviceReviewStatus === 'Finished Review';
+			}
+
+			if (permissions.poc) {
+				returnBool = doc.pocReviewStatus === 'Finished Review';
+			}
+
+			if (doc.reviewStatus) {
+				returnBool = doc.reviewStatus === 'Finished Review';
+			}
+
+			if (finished) return returnBool;
+			return !returnBool;
+		};
 		if (permissions && email) {
 			gameChangerAPI
 				.callDataFunction({
@@ -339,37 +339,11 @@ const JBookUserDashboard = (props) => {
 				.then((data) => {
 					const docs = data.data.docs;
 					const toDo = docs.filter((doc) => {
-						let returnBool = false;
-						if (permissions.primary) {
-							returnBool = doc.primaryReviewStatus !== 'Finished Review';
-						}
-
-						if (permissions.service) {
-							returnBool = doc.serviceReviewStatus !== 'Finished Review';
-						}
-
-						if (permissions.poc) {
-							returnBool = doc.pocReviewStatus !== 'Finished Review';
-						}
-
-						return returnBool;
+						return checkIfFinished(doc, false);
 					});
 
 					const finished = docs.filter((doc) => {
-						let returnBool = false;
-						if (permissions.primary) {
-							returnBool = doc.primaryReviewStatus === 'Finished Review';
-						}
-
-						if (permissions.service) {
-							returnBool = doc.serviceReviewStatus === 'Finished Review';
-						}
-
-						if (permissions.poc) {
-							returnBool = doc.pocReviewStatus === 'Finished Review';
-						}
-
-						return returnBool;
+						return checkIfFinished(doc, true);
 					});
 
 					setToDoList(toDo);
@@ -390,46 +364,25 @@ const JBookUserDashboard = (props) => {
 					defaultFilterMethod={(filter, row) =>
 						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
 					}
-					getTbodyProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								overflowY: 'auto',
-								overflowX: 'hidden',
-							},
-							id: 'list-view-tbody',
-						};
-					}}
-					getTdProps={(state, rowInfo, column) => ({
-						style: {
-							whiteSpace: 'unset',
-						},
-					})}
-					getTheadThProps={(state, rowInfo, column) => {
+					getTbodyProps={getTbodyProps}
+					getTdProps={getTdProps}
+					getTheadThProps={() => {
 						return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
 					}}
-					getTheadTrProps={(state, rowInfo, column) => {
+					getTheadTrProps={() => {
 						return { style: { overflow: 'visible' } };
 					}}
-					getTrProps={(state, rowInfo, column) => {
+					getTrProps={(_state, rowInfo, _column) => {
 						return {
 							style: { cursor: 'pointer' },
 							onClick: () => {
 								const row = rowInfo.row;
-								const {
-									projectTitle,
-									projectNum,
-									budgetLineItem,
-									budgetType,
-									keywords,
-									budgetYear,
-									id,
-									appropriationNumber,
-								} = row;
+								const { budgetType, keywords, budgetYear, id, appropriationNumber, portfolioName } =
+									row;
 								// I do not understand why row changes programElement into BLI
-								const programElement = rowInfo.original.programElement;
-								let url = `#/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?type=${encodeURIComponent(
 									budgetType
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								)}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
 								if (keywords && keywords.length) {
 									url += `&keywords=${keywords}`;
 								}
@@ -454,46 +407,25 @@ const JBookUserDashboard = (props) => {
 					defaultFilterMethod={(filter, row) =>
 						String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
 					}
-					getTbodyProps={(state, rowInfo, column) => {
-						return {
-							style: {
-								overflowY: 'auto',
-								overflowX: 'hidden',
-							},
-							id: 'list-view-tbody',
-						};
-					}}
-					getTdProps={(state, rowInfo, column) => ({
-						style: {
-							whiteSpace: 'unset',
-						},
-					})}
-					getTheadThProps={(state, rowInfo, column) => {
+					getTbodyProps={getTbodyProps}
+					getTdProps={getTdProps}
+					getTheadThProps={() => {
 						return { style: { fontSize: 15, fontWeight: 'bold', whiteSpace: 'unset' } };
 					}}
-					getTheadTrProps={(state, rowInfo, column) => {
+					getTheadTrProps={() => {
 						return { style: { overflow: 'visible' } };
 					}}
-					getTrProps={(state, rowInfo, column) => {
+					getTrProps={(_state, rowInfo, _column) => {
 						return {
 							style: { cursor: 'pointer' },
 							onClick: () => {
 								const row = rowInfo.row;
-								const {
-									projectTitle,
-									projectNum,
-									budgetLineItem,
-									budgetType,
-									keywords,
-									budgetYear,
-									id,
-									appropriationNumber,
-								} = row;
+								const { budgetType, keywords, budgetYear, id, appropriationNumber, portfolioName } =
+									row;
 								// I do not understand why row changes programElement into BLI
-								const programElement = rowInfo.original.programElement;
-								let url = `#/profile?title=${projectTitle}&programElement=${programElement}&projectNum=${projectNum}&type=${encodeURIComponent(
+								let url = `#/jbook/profile?type=${encodeURIComponent(
 									budgetType
-								)}&budgetLineItem=${budgetLineItem}&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}`;
+								)}&&budgetYear=${budgetYear}&searchText=${''}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}`;
 								if (keywords && keywords.length) {
 									url += `&keywords=${keywords}`;
 								}

@@ -224,6 +224,16 @@ module.exports = (sequelize, DataTypes) => {
 			portfolio_name: {
 				type: DataTypes.TEXT,
 			},
+			primary_reviewer_email: {
+				type: DataTypes.TEXT,
+			},
+			service_reviewer_email: {
+				type: DataTypes.TEXT,
+			},
+			service_secondary_reviewer_email: {
+				type: DataTypes.TEXT,
+			},
+
 			latest_class_label: {
 				type: DataTypes.TEXT,
 			},

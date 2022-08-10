@@ -133,7 +133,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
-		jbookSearchSettings.appropriationNumberES = defaultOptions.appropriationNumberES = data.appropriationNumberES;
+		jbookSearchSettings.appropriationNumber = defaultOptions.appropriationNumber = data.appropriationNumber;
 
 		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
 			.map(itemOrBlank)
@@ -149,11 +149,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
-
-		if (jbookSearchSettings.appropriationNumberES) {
-			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
-				jbookSearchSettings.appropriationNumberES;
-		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
 		console.log(err);

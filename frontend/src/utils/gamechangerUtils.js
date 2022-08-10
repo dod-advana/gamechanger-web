@@ -38,6 +38,7 @@ export const PAGE_DISPLAYED = {
 	aboutUs: 'aboutUs',
 	faq: 'faq',
 	searchFavorites: 'searchFavorites',
+	profile: 'profile',
 };
 
 export const SEARCH_TYPES = {
