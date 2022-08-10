@@ -243,10 +243,14 @@ const getGamechangerRoute = (clone, tutorialData) => {
 				)}
 				pageName={clone.display_name}
 				allowFunction={() => {
-					return (
-						Permissions.allowGCClone(clone.clone_name) ||
-						Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
-					);
+					if (clone.permissions_required) {
+						return (
+							Permissions.allowGCClone(clone.clone_name) ||
+							Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
+						);
+					} else {
+						return true;
+					}
 				}}
 			/>
 		));
