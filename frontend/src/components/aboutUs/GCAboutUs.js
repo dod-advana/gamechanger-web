@@ -32,10 +32,10 @@ const StyledCategories = styled.ul`
 `;
 
 const StyledListItem = styled.li`
-	border-left: ${({ selected, id }) => (selected === id ? '6px solid #E9691E' : '')}
-	background: ${({ selected, id }) => (selected === id ? '#E9691E59' : '')}
-	color: ${({ selected, id }) => (selected === id ? '#1C2D65' : '#000000DE')}
-	padding-left: ${({ selected, id }) => (selected === id ? '34px' : '40px')}
+	border-left: ${({ selected, id }) => (selected === id ? '6px solid #E9691E' : '')};
+	background: ${({ selected, id }) => (selected === id ? '#E9691E59' : '')};
+	color: ${({ selected, id }) => (selected === id ? '#1C2D65' : '#000000DE')};
+	padding-left: ${({ selected, id }) => (selected === id ? '34px' : '40px')};
 	padding-top: 4px;
 	padding-bottom: 4px;
 	width: 15vw;
