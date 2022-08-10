@@ -25,6 +25,7 @@ import {
 const JBookServiceReviewForm = React.memo((props) => {
 	const {
 		setReviewData,
+		setReviewDataMultiple,
 		dropdownData,
 		submitReviewForm,
 		reviewStatus,
@@ -45,7 +46,7 @@ const JBookServiceReviewForm = React.memo((props) => {
 				<SecondaryReviewerValue
 					dropdownData={dropdownData}
 					serviceSecondaryReviewer={reviewData.serviceSecondaryReviewer}
-					setReviewData={setReviewData}
+					setReviewDataMultiple={setReviewDataMultiple}
 					finished={finished}
 				/>
 			),

@@ -77,11 +77,6 @@ const UnauthorizedPage = LoadableVisibility({
 	loading: () => emptyPage(),
 });
 
-const JBookProfilePage = LoadableVisibility({
-	loader: () => import('./containers/JBookProfilePage'),
-	loading: () => emptyPage(),
-});
-
 const GamechangerPage = LoadableVisibility({
 	loader: () => import('./containers/GameChangerPage'),
 	loading: () => {
@@ -230,9 +225,6 @@ const getGamechangerRoute = (clone, tutorialData) => {
 				}}
 			/>
 		));
-		if (clone.clone_name === 'jbook') {
-			cloneRoutes.push((location) => getJBookProfileRoute(clone, location));
-		}
 		cloneRoutes.push((location) => (
 			<PrivateTrackedRoute
 				key={`${clone.url}-main`}
@@ -251,10 +243,14 @@ const getGamechangerRoute = (clone, tutorialData) => {
 				)}
 				pageName={clone.display_name}
 				allowFunction={() => {
-					return (
-						Permissions.allowGCClone(clone.clone_name) ||
-						Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
-					);
+					if (clone.permissions_required) {
+						return (
+							Permissions.allowGCClone(clone.clone_name) ||
+							Permissions.permissionValidator(`${clone.clone_name} Admin`, true)
+						);
+					} else {
+						return true;
+					}
 				}}
 			/>
 		));
@@ -277,26 +273,6 @@ const getGamechangerClones = async (tutorialData, setGameChangerCloneRoutes) => 
 		console.log(err);
 		console.log('Failed to retrieve GC Clones.');
 	}
-};
-
-const getJBookProfileRoute = (cloneData, location) => {
-	const JBookProvider = getProvider('jbook');
-
-	return (
-		<PrivateTrackedRoute
-			key={`jbook-profile`}
-			path={`/jbook/profile`}
-			render={(props) => (
-				<JBookProvider>
-					<JBookProfilePage {...props} cloneData={cloneData} location={location} />
-				</JBookProvider>
-			)}
-			pageName={'JBookProfilePage'}
-			allowFunction={() => {
-				return true;
-			}}
-		/>
-	);
 };
 
 const App = () => {

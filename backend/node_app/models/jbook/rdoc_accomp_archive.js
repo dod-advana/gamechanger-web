@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-	const ACCOMP = sequelize.define(
-		'rdoc_accomp',
+	return sequelize.define(
+		'rdoc_accomp_archive',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -81,8 +81,7 @@ module.exports = (sequelize, DataTypes) => {
 			freezeTableName: true,
 			timestamps: false,
 			// schema: 'public',
-			tableName: 'rdoc_accomp',
+			tableName: 'rdoc_accomp_archive',
 		}
 	);
-	return ACCOMP;
 };

@@ -959,7 +959,7 @@ describe('JBookSearchHandler', function () {
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
-					appropriationNumberES: {
+					appropriationNumber: {
 						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
 						paccts: [
 							'2035',
