@@ -218,6 +218,15 @@ class JBookSearchUtility {
 		return pageHits;
 	}
 
+	combineContractTotals(generalData, omData) {
+		const combinedData = generalData;
+		omData.forEach((omData) => {
+			const index = combinedData.findIndex((comData) => omData.key === comData.key);
+			combinedData[index].sum_agg.value += omData.sum_agg.value / 1000;
+		});
+		return combinedData;
+	}
+
 	cleanESResults(esResults, userId) {
 		const results = [];
 
@@ -226,9 +235,11 @@ class JBookSearchUtility {
 
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
-			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
+			const { service_agency_aggs = {}, contract_totals = {}, om_contract_totals = {} } = aggregations;
 			const service_buckets = service_agency_aggs.buckets ? service_agency_aggs.buckets : [];
 			const contract_buckets = contract_totals.buckets ? contract_totals.buckets : [];
+			const om_contract_buckets = om_contract_totals.buckets ? om_contract_totals.buckets : [];
+			const combinedContractBuckets = this.combineContractTotals(contract_buckets, om_contract_buckets);
 			const { hits: esHits = {} } = body;
 			const {
 				hits = [],
@@ -237,7 +248,7 @@ class JBookSearchUtility {
 
 			searchResults.totalCount = value;
 			searchResults.serviceAgencyCounts = service_buckets;
-			searchResults.contractTotalCounts = contract_buckets;
+			searchResults.contractTotalCounts = combinedContractBuckets;
 
 			const agencyMapping = this.getMapping('esServiceAgency', false);
 
@@ -670,6 +681,17 @@ class JBookSearchUtility {
 						aggs: {
 							sum_agg: {
 								sum: { field: 'by1_request_d' },
+							},
+						},
+						terms: {
+							field: 'org_jbook_desc_s',
+							size: 10000,
+						},
+					},
+					om_contract_totals: {
+						aggs: {
+							sum_agg: {
+								sum: { field: 'by1_request_l' },
 							},
 						},
 						terms: {
