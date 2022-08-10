@@ -4,6 +4,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import GCButton from '../../../common/GCButton';
 import JBookUserNameModal from './jbookUserNameModal';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -51,6 +53,8 @@ const JBookCommentSection = ({
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [showExpandButton, setShowExpandButton] = useState(false);
 	const [showUserModal, setShowUserModal] = useState(false);
+	const [thumbsUp, setThumbsUp] = useState(0);
+	const [thumbsDown, setThumbsDown] = useState(0);
 	const bottomRef = useRef(null);
 
 	useEffect(() => {
@@ -62,6 +66,33 @@ const JBookCommentSection = ({
 	useEffect(() => {
 		setShowExpandButton(!isExpanded && commentThread && commentThread.length > 3);
 	}, [isExpanded, commentThread]);
+
+	const voteComment = async (comment, e) => {
+		try {
+			let myField;
+			if (e.target.dataset.testid === 'ThumbUpOffAltIcon') {
+				myField = 'upvotes';
+				setThumbsUp(comment.upvotes + 1);
+			} else {
+				myField = 'downvotes';
+				setThumbsDown(comment.downvotes + 1);
+			}
+
+			await gameChangerAPI.callDataFunction({
+				functionName: 'voteComment',
+				cloneName: 'jbook',
+				options: {
+					id: comment.id,
+					field: myField,
+				},
+			});
+			await getCommentThread(docID, portfolioName);
+			console.log('this my comment object after voting', comment);
+		} catch (err) {
+			console.log('Error while voting on comment');
+			console.log(err);
+		}
+	};
 
 	const renderComments = () => {
 		try {
@@ -85,6 +116,33 @@ const JBookCommentSection = ({
 						</CommentTitle>
 
 						<CommentBody>{comment.message}</CommentBody>
+						<div style={{ display: 'flex' }}>
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'center',
+									marginRight: '5px',
+								}}
+							>
+								<ThumbUpOffAltIcon
+									onClick={(e) => {
+										voteComment(comment, e);
+									}}
+								/>
+								<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
+							</div>
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'center',
+								}}
+							>
+								<ThumbDownOffAltIcon onClick={(e) => voteComment(comment, e)} />
+								<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
+							</div>
+						</div>
 					</CommentContainer>
 				);
 
