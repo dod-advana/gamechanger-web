@@ -1056,13 +1056,13 @@ class AppStatsController {
 				select
 					count(distinct b.user_id) as unique_users
 				from
-					matomo_log_action a,
-					matomo_log_visit b,
-					matomo_log_link_visit_action c
-				where
-					c.idvisitor = b.idvisitor
-					AND c.idaction_name = a.idaction
-					AND c.idaction_event_category = ?
+					matomo_log_visit b
+				where 
+					b.idvisitor in (
+						select distinct idvisitor
+						from matomo_log_link_visit_action
+						where idaction_event_category=?
+					)
 					AND b.visit_last_action_time >= ?
 					AND b.visit_last_action_time <= ?
 				`,

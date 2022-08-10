@@ -433,13 +433,23 @@ export default () => {
 			cloneName: cloneName.split('-')[1],
 			cloneID: cloneName.split('-')[0],
 		};
-		gameChangerAPI.getUserAggregations(params).then((data) => {
-			setUserAggData(data.data.users);
-			setLoading((prevState) => ({
-				...prevState,
-				userData: true,
-			}));
-		});
+		gameChangerAPI
+			.getUserAggregations(params)
+			.then((data) => {
+				setUserAggData(data.data.users);
+				setLoading((prevState) => ({
+					...prevState,
+					userData: true,
+				}));
+			})
+			.catch((err) => {
+				console.log(err);
+				setUserAggData([]);
+				setLoading((prevState) => ({
+					...prevState,
+					userData: true,
+				}));
+			});
 	}, [startDate, endDate, cloneName]);
 
 	/**
@@ -458,17 +468,31 @@ export default () => {
 			cloneName: cloneName.split('-')[1],
 			cloneID: cloneName.split('-')[0],
 		};
-		gameChangerAPI.getUserDashboard(params).then((data) => {
-			setGraphData({
-				searchBar: data.data.searchBar,
-				userBar: data.data.userBar,
+		gameChangerAPI
+			.getUserDashboard(params)
+			.then((data) => {
+				setGraphData({
+					searchBar: data.data.searchBar,
+					userBar: data.data.userBar,
+				});
+				setCardData(data.data.cards);
+				setLoading((prevState) => ({
+					...prevState,
+					userGraph: true,
+				}));
+			})
+			.catch((err) => {
+				console.log(err);
+				setGraphData({
+					searchBar: [],
+					userBar: [],
+				});
+				setCardData({ unique_users: 0, total_searches: 0, unique_searches: 0 });
+				setLoading((prevState) => ({
+					...prevState,
+					userGraph: true,
+				}));
 			});
-			setCardData(data.data.cards);
-			setLoading((prevState) => ({
-				...prevState,
-				userGraph: true,
-			}));
-		});
 	}, [startDate, endDate, cloneName]);
 	/**
 	 * Takes in a set time to go back in the query
