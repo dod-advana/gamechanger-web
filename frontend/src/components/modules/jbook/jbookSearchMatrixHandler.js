@@ -917,7 +917,7 @@ const getSearchMatrixItems = (props) => {
 					</div>
 				) : (
 					<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-						<BudgetRequestPie contractTotals={contractTotals} />
+						{Boolean(contractTotals.length) && <BudgetRequestPie contractTotals={contractTotals} />}
 						<div style={{ textAlign: 'left', width: '100%' }}>{renderStats(contractTotals)}</div>
 					</div>
 				)}
