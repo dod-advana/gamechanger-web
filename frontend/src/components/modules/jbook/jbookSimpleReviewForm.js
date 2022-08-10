@@ -35,8 +35,16 @@ const boldKeys = (data) => {
 };
 
 const JBookSimpleReviewForm = React.memo((props) => {
-	const { submitReviewForm, dropdownData, setReviewData, reviewStatus, finished, renderReenableModal, roleDisabled } =
-		props;
+	const {
+		submitReviewForm,
+		dropdownData,
+		setReviewData,
+		setReviewDataMultiple,
+		reviewStatus,
+		finished,
+		renderReenableModal,
+		roleDisabled,
+	} = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
@@ -52,7 +60,7 @@ const JBookSimpleReviewForm = React.memo((props) => {
 						primaryReviewer={reviewData.primaryReviewer}
 						finished={finished}
 						dropdownData={dropdownData}
-						setReviewData={setReviewData}
+						setReviewDataMultiple={setReviewDataMultiple}
 					/>
 				),
 			},
