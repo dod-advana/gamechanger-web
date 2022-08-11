@@ -445,45 +445,35 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async getBudgetDropdownData(userId) {
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 		try {
-			let transitionPartnerP;
-			let transitionPartnerR;
-			let transitionPartnerO;
+			const transitionPartners = [];
 			try {
-				transitionPartnerP = await this.pdocs.findAll({
-					attributes: [Sequelize.fn('DISTINCT', Sequelize.col('P40-06_Organization')), 'P40-06_Organization'],
-				});
-				transitionPartnerP = transitionPartnerP.map((org) => org.dataValues['P40-06_Organization']);
+				const transitionPartnerQuery = {
+					size: 0,
+					aggs: {
+						transitionPartners: {
+							terms: {
+								field: 'org_jbook_desc_s',
+								size: 10000,
+							},
+						},
+					},
+				};
+				const tpESResults = await this.dataLibrary.queryElasticSearch(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					transitionPartnerQuery,
+					userId
+				);
+				tpESResults.body.aggregations.transitionPartners.buckets.forEach((org) =>
+					transitionPartners.push(org.key)
+				);
 			} catch (err) {
-				console.log('Error fetching PDOC orgs');
 				this.logger.error(err, 'XMCNRA1', userId);
 			}
-
-			try {
-				transitionPartnerR = await this.rdocs.findAll({
-					attributes: [Sequelize.fn('DISTINCT', Sequelize.col('Organization')), 'Organization'],
-				});
-				transitionPartnerR = transitionPartnerR.map((org) => org.dataValues['Organization']);
-			} catch (err) {
-				console.log('Error fetching RDOC orgs');
-				this.logger.error(err, 'XMCNRA2', userId);
-			}
-
-			try {
-				transitionPartnerO = await this.om.findAll({
-					attributes: [Sequelize.fn('DISTINCT', Sequelize.col('organization')), 'organization'],
-				});
-				transitionPartnerO = transitionPartnerO.map((org) => org.dataValues['organization']);
-			} catch (err) {
-				console.log('Error fetching OM orgs');
-				this.logger.error(err, 'XMCNRA3', userId);
-			}
-
-			const transitionPartner = [
-				...new Set([...transitionPartnerP, ...transitionPartnerR, ...transitionPartnerO]),
-			];
-			transitionPartner.sort();
-			transitionPartner.push('Unknown');
+			transitionPartners.sort();
+			transitionPartners.push('Unknown');
 
 			const reviewers = await this.reviewer.findAll({
 				where: {
@@ -519,7 +509,7 @@ class JBookDataHandler extends DataHandler {
 					{ jaic_review_stat: 'Partial Review' },
 					{ jaic_review_stat: 'Finished Review' },
 				],
-				transitionPartner,
+				transitionPartners,
 				missionPartners: [
 					{ current_msn_part: 'Unknown' },
 					{ current_msn_part: 'Academia' },
