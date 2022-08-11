@@ -53,8 +53,6 @@ const JBookCommentSection = ({
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [showExpandButton, setShowExpandButton] = useState(false);
 	const [showUserModal, setShowUserModal] = useState(false);
-	const [thumbsUp, setThumbsUp] = useState(0);
-	const [thumbsDown, setThumbsDown] = useState(0);
 	const bottomRef = useRef(null);
 
 	useEffect(() => {
@@ -72,10 +70,8 @@ const JBookCommentSection = ({
 			let myField;
 			if (e.target.dataset.testid === 'ThumbUpOffAltIcon') {
 				myField = 'upvotes';
-				setThumbsUp(comment.upvotes + 1);
 			} else {
 				myField = 'downvotes';
-				setThumbsDown(comment.downvotes + 1);
 			}
 
 			await gameChangerAPI.callDataFunction({
@@ -87,7 +83,6 @@ const JBookCommentSection = ({
 				},
 			});
 			await getCommentThread(docID, portfolioName);
-			console.log('this my comment object after voting', comment);
 		} catch (err) {
 			console.log('Error while voting on comment');
 			console.log(err);
