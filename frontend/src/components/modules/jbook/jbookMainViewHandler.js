@@ -524,7 +524,12 @@ const JBookMainViewHandler = (props) => {
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
 		case PAGE_DISPLAYED.profile:
-			return <JBookProfilePage {...props} />;
+			return (
+				<>
+					<FeedbackModal state={state} dispatch={dispatch} />
+					<JBookProfilePage {...props} />
+				</>
+			);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({
