@@ -613,6 +613,7 @@ describe('EDAExportHandler', function () {
 			const expectedStatus = 200;
 			const expectedResults =
 				'Filename,Contract Number,Page Count,Issuing Organization,PCS Code,PSC Description,Obligated Amount,Clin Number,Unit,Unit Price,Amount,Purchase Request Number,Supply Services,Clin PCS Code,NAICSEDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,W911NF17D0002-0002,48,Army,,,6472000';
+			// 'Filename,Contract Number,Page Count,Issuing Organization,PCS Code,PSC Description,Obligated Amount,Clin Number,Unit,Unit Price,Purchase Request Number,Supply Services,NAICSEDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,W911NF17D0002-0002,48,Army,,,6472000';
 			try {
 				await target.exportHelper(mockReq, mockRes, 'test');
 				assert.strictEqual(status, expectedStatus);
