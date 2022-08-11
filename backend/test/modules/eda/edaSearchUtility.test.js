@@ -262,11 +262,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -470,11 +466,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -676,11 +668,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -835,11 +823,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -1022,11 +1006,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -1225,11 +1205,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -1441,11 +1417,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
@@ -1616,11 +1588,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
-<<<<<<< HEAD
-							'clins_parsed_n'
-=======
 							'clins_parsed_n',
->>>>>>> dev
 						],
 					},
 					stored_fields: [
