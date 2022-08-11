@@ -283,6 +283,62 @@ class JBookSearchUtility {
 		}
 	}
 
+	cleanESUserReviews(esResults, userId) {
+		const results = [];
+
+		try {
+			let searchResults = { totalCount: 0, docs: [] };
+
+			const { body = {} } = esResults;
+			const { hits: esHits = {} } = body;
+			const {
+				hits = [],
+				total: { value },
+			} = esHits;
+
+			searchResults.totalCount = value;
+
+			hits.forEach((hit) => {
+				let result = this.transformEsFields(hit._source);
+
+				result.hasKeywords = result?.keywords?.length > 0;
+				if (result.hasKeywords) {
+					result.keywords = result.keywords.map((keyword) => {
+						return keyword.keyword_s;
+					});
+				}
+
+				switch (result.budgetType) {
+					case 'rdte':
+						result.budgetType = 'rdoc';
+						break;
+					case 'om':
+						result.budgetType = 'odoc';
+						break;
+					case 'procurement':
+						result.budgetType = 'pdoc';
+						break;
+					default:
+						break;
+				}
+
+				hit.inner_hits.review_n.hits.hits.forEach((review) => {
+					const parsedReview = this.parseFields(review._source, false, 'reviewES');
+					parsedReview.id = hit._id;
+					results.push({ ...result, ...parsedReview });
+				});
+			});
+
+			searchResults.docs = results;
+
+			return searchResults;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '9V1IZLH', userId);
+			return searchResults;
+		}
+	}
+
 	transformEsFields(raw) {
 		let result = {};
 		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
