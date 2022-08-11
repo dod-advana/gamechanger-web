@@ -45,6 +45,7 @@ const styles = {
 	childContainer: {
 		paddingLeft: 20,
 		paddingTop: 20,
+		width: '100%',
 	},
 	icon: {
 		height: 20,

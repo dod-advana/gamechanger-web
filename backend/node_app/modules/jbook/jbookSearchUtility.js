@@ -283,6 +283,62 @@ class JBookSearchUtility {
 		}
 	}
 
+	cleanESUserReviews(esResults, userId) {
+		const results = [];
+
+		try {
+			let searchResults = { totalCount: 0, docs: [] };
+
+			const { body = {} } = esResults;
+			const { hits: esHits = {} } = body;
+			const {
+				hits = [],
+				total: { value },
+			} = esHits;
+
+			searchResults.totalCount = value;
+
+			hits.forEach((hit) => {
+				let result = this.transformEsFields(hit._source);
+
+				result.hasKeywords = result?.keywords?.length > 0;
+				if (result.hasKeywords) {
+					result.keywords = result.keywords.map((keyword) => {
+						return keyword.keyword_s;
+					});
+				}
+
+				switch (result.budgetType) {
+					case 'rdte':
+						result.budgetType = 'rdoc';
+						break;
+					case 'om':
+						result.budgetType = 'odoc';
+						break;
+					case 'procurement':
+						result.budgetType = 'pdoc';
+						break;
+					default:
+						break;
+				}
+
+				hit.inner_hits.review_n.hits.hits.forEach((review) => {
+					const parsedReview = this.parseFields(review._source, false, 'reviewES');
+					parsedReview.id = hit._id;
+					results.push({ ...result, ...parsedReview });
+				});
+			});
+
+			searchResults.docs = results;
+
+			return searchResults;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, '9V1IZLH', userId);
+			return searchResults;
+		}
+	}
+
 	transformEsFields(raw) {
 		let result = {};
 		const arrayFields = ['keyword_n', 'review_n', 'gl_contract_n', 'r_2a_accomp_pp_n'];
@@ -592,8 +648,7 @@ class JBookSearchUtility {
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
 		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
-		userId,
-		serviceAgencyMappings
+		userId
 	) {
 		let query = {};
 		try {
@@ -636,7 +691,7 @@ class JBookSearchUtility {
 			};
 
 			// ES FILTERS
-			let filterQueries = this.getJbookESFilters(jbookSearchSettings, serviceAgencyMappings);
+			let filterQueries = this.getJbookESFilters(jbookSearchSettings);
 			query.query.bool.must = this.getJBookESReviewFilters(jbookSearchSettings);
 
 			if (filterQueries.length > 0) {
@@ -981,7 +1036,7 @@ class JBookSearchUtility {
 
 	// creates the portions of the ES query for filtering based on jbookSearchSettings
 	// 'filter' instead of 'must' should ignore scoring, and do a hard include/exclude of results
-	getJbookESFilters(jbookSearchSettings = {}, serviceAgencyMappings = {}) {
+	getJbookESFilters(jbookSearchSettings = {}) {
 		let filterQueries = [];
 		try {
 			let settingKeys = Object.keys(jbookSearchSettings);
@@ -1105,19 +1160,9 @@ class JBookSearchUtility {
 
 					// Service Agency
 					case 'serviceAgency':
-						const convertedAgencies = [];
-
-						jbookSearchSettings.serviceAgency.forEach((agency) => {
-							Object.keys(serviceAgencyMappings).forEach((agencyKey) => {
-								if (serviceAgencyMappings[agencyKey] === agency) {
-									convertedAgencies.push(agencyKey);
-								}
-							});
-						});
-
 						filterQueries.push({
 							terms: {
-								serviceAgency_s: convertedAgencies,
+								org_jbook_desc_s: jbookSearchSettings.serviceAgency,
 							},
 						});
 						break;

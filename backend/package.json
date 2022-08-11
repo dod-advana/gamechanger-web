@@ -26,7 +26,7 @@
 		"moment": "2.29.3"
 	},
 	"dependencies": {
-		"@dod-advana/advana-api-auth": "0.0.45",
+		"@dod-advana/advana-api-auth": "1.0.1",
 		"@dod-advana/advana-logger": "0.0.4",
 		"@elastic/elasticsearch": "7.10.0",
 		"async-redis": "2.0.0",

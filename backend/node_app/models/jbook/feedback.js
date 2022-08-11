@@ -1,6 +1,8 @@
 'use strict';
+const { Sequelize } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-	const FEEDBACK_JBOOK = sequelize.define(
+	return sequelize.define(
 		'feedback_jbook',
 		{
 			id: {
@@ -24,6 +26,11 @@ module.exports = (sequelize, DataTypes) => {
 			description: {
 				type: DataTypes.TEXT,
 			},
+			createdAt: {
+				allowNull: false,
+				type: DataTypes.DATE,
+				defaultValue: Sequelize.fn('NOW'),
+			},
 		},
 		{
 			freezeTableName: true,
@@ -31,5 +38,4 @@ module.exports = (sequelize, DataTypes) => {
 			tableName: 'feedback',
 		}
 	);
-	return FEEDBACK_JBOOK;
 };

@@ -1359,6 +1359,108 @@ const portfolioData = [
 	},
 ];
 
+const userReviews = {
+	body: {
+		took: 3,
+		timed_out: false,
+		_shards: { total: 3, successful: 3, skipped: 0, failed: 0 },
+		hits: {
+			total: { value: 4, relation: 'eq' },
+			max_score: 0.6931471,
+			hits: [
+				{
+					_index: 'jbook_july_28',
+					_type: '_doc',
+					_id: 'rdoc#2023#PB#03#0603002A#21#N/A#2040#MO2',
+					_score: 0.6931471,
+					_source: {
+						projectNum_s: 'MO2',
+						type_s: 'rdte',
+						projectTitle_s: 'Traumatic Brain Injury (TBI) Treatment Adv Tech',
+						budgetYear_s: '2023',
+						programElement_s: '0603002A',
+						serviceAgency_s: 'DEPARTMENT OF THE ARMY',
+						keyword_n: [],
+					},
+					inner_hits: {
+						review_n: {
+							hits: {
+								total: { value: 1, relation: 'eq' },
+								max_score: 0.6931471,
+								hits: [
+									{
+										_index: 'jbook_july_28',
+										_type: '_doc',
+										_id: 'rdoc#2023#PB#03#0603002A#21#N/A#2040#MO2',
+										_nested: { field: 'review_n', offset: 0 },
+										_score: 0.6931471,
+										_source: {
+											budget_year_s: '2023',
+											updatedAt_s: '2022-07-29T15:35:42.958Z',
+											service_review_status_s: 'Partial Review',
+											service_secondary_reviewer_email_s: 'test@test.com',
+											budget_line_item_s: 'MO2',
+											budget_type_s: 'rdoc',
+											createdAt_s: '2022-07-29T15:35:42.958Z',
+											budget_activity_s: '03',
+											service_secondary_reviewer_s: 'Test',
+											portfolio_name_s: 'AI Inventory',
+											program_element_s: '0603002A',
+											agency_s: 'Army',
+											review_status_s: 'Needs Review',
+											id_s: 259536,
+											appn_num_s: '2040',
+										},
+									},
+								],
+							},
+						},
+					},
+				},
+			],
+		},
+	},
+	statusCode: 200,
+	headers: {
+		date: 'Fri, 29 Jul 2022 18:28:32 GMT',
+		'content-type': 'application/json; charset=UTF-8',
+		'content-length': '4654',
+		connection: 'keep-alive',
+		'access-control-allow-origin': '*',
+	},
+	meta: {
+		context: null,
+		request: {
+			params: {
+				method: 'POST',
+				path: '/jbook/_search',
+				body: '{"query":{"bool":{"must":{"nested":{"path":"review_n","query":{"bool":{"should":[{"term":{"review_n.primary_reviewer_email_s":"616836@bah.com"}},{"term":{"review_n.service_reviewer_email_s":"616836@bah.com"}},{"term":{"review_n.service_secondary_reviewer_email_s":"616836@bah.com"}}]}},"inner_hits":{}}}}},"_source":["type_s","budgetYear_s","budgetLineItem_s","programElement_s","projectNum_s","projectTitle_s","serviceAgency_s","appropriationNumber","keyword_n"]}',
+				querystring: '',
+				headers: {
+					'user-agent': 'elasticsearch-js/7.10.0 (linux 5.10.104-linuxkit-x64; Node.js v14.20.0)',
+					'content-type': 'application/json',
+					'content-length': '464',
+				},
+				timeout: 60000,
+			},
+			options: {},
+			id: 1,
+		},
+		name: 'elasticsearch-js',
+		connection: {
+			url: 'https://vpc-gamechanger-dev-es-ms4wkfqyvlyt3gmiyak2hleqyu.us-east-1.es.amazonaws.com/',
+			id: 'https://vpc-gamechanger-dev-es-ms4wkfqyvlyt3gmiyak2hleqyu.us-east-1.es.amazonaws.com/',
+			headers: {},
+			deadCount: 0,
+			resurrectTimeout: 0,
+			_openRequests: 0,
+			status: 'alive',
+			roles: { master: true, data: true, ingest: true, ml: false },
+		},
+		attempts: 0,
+		aborted: false,
+	},
+};
 const commentData = [
 	{
 		author: null,
@@ -1386,11 +1488,38 @@ const commentData = [
 	},
 ];
 
+const budgetDropdownData = {
+	reviewers: [{ name: 'Test Testerson' }],
+	primaryClassLabel: [
+		{ primary_class_label: 'Core AI' },
+		{ primary_class_label: 'AI Enabled' },
+		{ primary_class_label: 'AI Enabling' },
+		{ primary_class_label: 'Not AI' },
+		{ primary_class_label: 'Unknown' },
+	],
+	serviceReviewers: [{ name: 'Test Testerman' }],
+	reviewStat: [
+		{ jaic_review_stat: 'Needs Review' },
+		{ jaic_review_stat: 'Partial Review' },
+		{ jaic_review_stat: 'Finished Review' },
+	],
+	transitionPartners: ['Air Force (AF)', 'Army', 'Navy', 'Unknown'],
+	missionPartners: [
+		{ current_msn_part: 'Unknown' },
+		{ current_msn_part: 'Academia' },
+		{ current_msn_part: 'Industry' },
+		{ current_msn_part: 'Other' },
+	],
+	secondaryReviewers: [{ name: 'Test Testeroni' }],
+};
+
 module.exports = {
 	profileData,
 	keywordData,
 	reviewData,
 	esData,
 	portfolioData,
+	userReviews,
 	commentData,
+	budgetDropdownData,
 };
