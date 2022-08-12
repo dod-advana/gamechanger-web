@@ -109,7 +109,19 @@ const SecondaryReviewerKey = React.memo(() => {
 });
 
 const SecondaryReviewerValue = React.memo((props) => {
-	const { dropdownData, serviceSecondaryReviewer, setReviewData, finished } = props;
+	const { dropdownData, serviceSecondaryReviewer, setReviewDataMultiple, finished } = props;
+	const reviewers = {};
+	if (dropdownData.secondaryReviewers) {
+		dropdownData.secondaryReviewers.forEach((reviewer) => {
+			const display = `${reviewer.name}${
+				reviewer?.organization?.length > 1 ? ` (${reviewer.organization})` : ''
+			}`;
+			reviewers[display] = {
+				display,
+				...reviewer,
+			};
+		});
+	}
 
 	return (
 		<StyledTableValueContainer>
@@ -117,25 +129,16 @@ const SecondaryReviewerValue = React.memo((props) => {
 				<div />
 				<Autocomplete
 					size="small"
-					options={
-						dropdownData && dropdownData.secondaryReviewers
-							? dropdownData.secondaryReviewers
-									.map((reviewer) => {
-										return `${reviewer.name}${
-											reviewer.organization &&
-											reviewer.organization.length &&
-											reviewer.organization.length > 1
-												? ` (${reviewer.organization})`
-												: ''
-										}`;
-									})
-									.sort()
-							: []
-					}
+					options={Object.keys(reviewers)}
 					style={{ width: 300, backgroundColor: 'white' }}
 					renderInput={(params) => <TextField {...params} label="Secondary" variant="outlined" />}
 					value={serviceSecondaryReviewer ?? null}
-					onChange={(event, value) => setReviewData('serviceSecondaryReviewer', value)}
+					onChange={(_event, value) => {
+						setReviewDataMultiple({
+							serviceSecondaryReviewer: value,
+							serviceSecondaryReviewerEmail: reviewers[value]?.email,
+						});
+					}}
 					disabled={finished}
 				/>
 			</StyledInlineContainer>
@@ -335,7 +338,7 @@ const TransitionPartnersValue = React.memo((props) => {
 					size="small"
 					options={['Yes', 'No']}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePTPAgreeLabel', value)}
+					onChange={(_event, value) => setReviewData('servicePTPAgreeLabel', value)}
 					value={servicePTPAgreeLabel ?? 'Yes'}
 					disabled={finished} //|| roleDisabled}
 					disableClearable
@@ -348,9 +351,9 @@ const TransitionPartnersValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+					options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePlannedTransitionPartner', value)}
+					onChange={(_event, value) => setReviewData('servicePlannedTransitionPartner', value)}
 					value={
 						servicePlannedTransitionPartner || primaryPlannedTransitionPartner
 							? servicePlannedTransitionPartner ?? primaryPlannedTransitionPartner

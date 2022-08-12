@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const RDOC = sequelize.define(
-		'rdoc',
+	return sequelize.define(
+		'rdoc_archive',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -485,12 +485,6 @@ module.exports = (sequelize, DataTypes) => {
 			OthProgFund_Summary_Remarks: {
 				type: DataTypes.TEXT,
 			},
-			Proj_Fund_BY1: {
-				type: DataTypes.TEXT,
-			},
-			Proj_Fund_APY: {
-				type: DataTypes.TEXT,
-			},
 
 			Accomp_Fund_PY_Text_Search: {
 				type: DataTypes.TSVECTOR,
@@ -559,8 +553,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'rdoc',
+			tableName: 'rdoc_arxv',
 		}
 	);
-	return RDOC;
 };

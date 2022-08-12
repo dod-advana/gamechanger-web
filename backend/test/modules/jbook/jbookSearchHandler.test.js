@@ -785,19 +785,6 @@ describe('JBookSearchHandler', function () {
 				],
 			];
 
-			const mockAgencyYearData = [
-				[
-					{
-						budgetyear: ['2020', '2021', '2022'],
-						serviceagency: ['Army', 'Air Force'],
-					},
-					{
-						budgetyear: ['2015', '2016'],
-						serviceagency: ['Navy', 'Marine Corp'],
-					},
-				],
-			];
-
 			const mockESBudgetYear = {
 				body: {
 					aggregations: {
@@ -934,7 +921,6 @@ describe('JBookSearchHandler', function () {
 							if (query.indexOf('primary_reviewer') !== -1) {
 								return mockPGResults;
 							}
-							return mockAgencyYearData;
 						},
 					},
 				},
@@ -963,10 +949,9 @@ describe('JBookSearchHandler', function () {
 			try {
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
-					budgetYearES: ['2020', '2021', '2022'],
-					budgetYear: ['2015', '2016', '2020', '2021', '2022'],
+					budgetYear: ['2020', '2021', '2022'],
 					reviewstatus: [null],
-					serviceAgencyES: [
+					serviceAgency: [
 						'Air Force (AF)',
 						'Defense Contract Management Agency (DCMA)',
 						'Court of Appeals for the Armed Forces (CAAF)',
@@ -974,7 +959,7 @@ describe('JBookSearchHandler', function () {
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
-					appropriationNumberES: {
+					appropriationNumber: {
 						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
 						paccts: [
 							'2035',

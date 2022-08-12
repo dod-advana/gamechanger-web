@@ -37,6 +37,7 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
+import JBookProfilePage from '../../../containers/JBookProfilePage';
 
 const _ = require('lodash');
 
@@ -274,128 +275,120 @@ const getCardViewPanel = (props) => {
 	return (
 		<div key={'cardView'} className={'jbook-main-view'}>
 			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
-				<div>
-					<div id="game-changer-content-top" />
+				<div id="game-changer-content-top" />
 
-					<StyledCenterContainer showSideFilters={showSideFilters}>
-						{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
+				<StyledCenterContainer showSideFilters={showSideFilters}>
+					{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
 
-						<div className={'right-container'}>
-							<div className={'top-container'} style={{ marginLeft: 10 }}>
-								<div>
-									{!hideTabs && (
-										<ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />
-									)}
-								</div>
+					<div className={'right-container'}>
+						<div className={'top-container'} style={{ marginLeft: 10 }}>
+							<div>
+								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
-							<div
-								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
-								style={{ padding: 0 }}
-							>
-								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div
-										className={'col-xs-12'}
-										style={{ ...sideScroll, padding: 0, position: 'relative' }}
+						</div>
+						<div
+							className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
+							style={{ padding: 0 }}
+						>
+							<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+								<div
+									className={'col-xs-12'}
+									style={{ ...sideScroll, padding: 0, position: 'relative' }}
+								>
+									<GCTooltip
+										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
+										placement="bottom"
+										arrow
 									>
-										<GCTooltip
-											title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
-											placement="bottom"
-											arrow
+										<GCButton
+											buttonColor={'rgb(28, 45, 101)'}
+											style={{ position: 'absolute', right: 15, top: 5 }}
+											onClick={() => {
+												window.open(
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+												);
+											}}
 										>
-											<GCButton
-												buttonColor={'rgb(28, 45, 101)'}
-												style={{ position: 'absolute', right: 15, top: 5 }}
-												onClick={() => {
-													window.open(
-														'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
-													);
-												}}
-											>
-												Budget Insights & Dashboards
-											</GCButton>
-										</GCTooltip>
-										<Tabs selectedIndex={mainTabSelected ?? 0}>
-											<div
-												style={{
-													...styles.tabButtonContainer,
-													backgroundColor: '#ffffff',
-													paddingTop: 20,
-													background: 'transparent',
-												}}
-											>
-												<TabList style={styles.tabsList}>
-													<div style={{ flex: 1, display: 'flex' }}>
+											Budget Insights & Dashboards
+										</GCButton>
+									</GCTooltip>
+									<Tabs selectedIndex={mainTabSelected ?? 0}>
+										<div
+											style={{
+												...styles.tabButtonContainer,
+												backgroundColor: '#ffffff',
+												paddingTop: 20,
+												background: 'transparent',
+											}}
+										>
+											<TabList style={styles.tabsList}>
+												<div style={{ flex: 1, display: 'flex' }}>
+													<Tab
+														style={{
+															...styles.tabStyle,
+															...(mainTabSelected === 0 ? styles.tabSelectedStyle : {}),
+															borderRadius: `5px 5px 0 0`,
+														}}
+														title="summaryFAQ"
+														onClick={() => handleTabClicked(dispatch, state, 0)}
+													>
+														<Typography variant="h6" display="inline" title="jbookSearch">
+															JBOOK SEARCH ({count})
+														</Typography>
+													</Tab>
+													{(Permissions.permissionValidator(
+														`${edaCloneData.clone_name} Admin`,
+														true
+													) ||
+														Permissions.permissionValidator(
+															`View ${edaCloneData.clone_name}`,
+															true
+														)) && (
 														<Tab
 															style={{
 																...styles.tabStyle,
-																...(mainTabSelected === 0
+																...(mainTabSelected === 1
 																	? styles.tabSelectedStyle
 																	: {}),
 																borderRadius: `5px 5px 0 0`,
 															}}
-															title="summaryFAQ"
-															onClick={() => handleTabClicked(dispatch, state, 0)}
+															title="reviewerChecklist"
+															onClick={() => handleTabClicked(dispatch, state, 1)}
 														>
 															<Typography
 																variant="h6"
 																display="inline"
-																title="jbookSearch"
+																title="contractSearch"
 															>
-																JBOOK SEARCH ({count})
+																CONTRACT SEARCH
 															</Typography>
 														</Tab>
-														{(Permissions.permissionValidator(
-															`${edaCloneData.clone_name} Admin`,
-															true
-														) ||
-															Permissions.permissionValidator(
-																`View ${edaCloneData.clone_name}`,
-																true
-															)) && (
-															<Tab
-																style={{
-																	...styles.tabStyle,
-																	...(mainTabSelected === 1
-																		? styles.tabSelectedStyle
-																		: {}),
-																	borderRadius: `5px 5px 0 0`,
-																}}
-																title="reviewerChecklist"
-																onClick={() => handleTabClicked(dispatch, state, 1)}
-															>
-																<Typography
-																	variant="h6"
-																	display="inline"
-																	title="contractSearch"
-																>
-																	CONTRACT SEARCH
-																</Typography>
-															</Tab>
-														)}
-													</div>
-												</TabList>
+													)}
+												</div>
+											</TabList>
 
-												<div style={styles.panelContainer}>
-													<TabPanel>
-														{runningSearch && (
+											<div style={styles.panelContainer}>
+												<TabPanel>
+													{runningSearch && (
+														<div style={{ margin: '0 auto' }} data-cy="jbook-search-load">
+															<LoadingIndicator customColor={GC_COLORS.primary} />
+														</div>
+													)}
+													{!runningSearch && (
+														<div
+															className="row"
+															style={{ padding: 5 }}
+															data-cy="jbook-search-results"
+														>
+															{getSearchResults(
+																rawSearchResults ? rawSearchResults : [],
+																state,
+																dispatch
+															)}
 															<div
-																style={{ margin: '0 auto' }}
-																data-cy="jbook-search-load"
+																className="jbookPagination col-xs-12 text-center"
+																style={{ marginTop: 10 }}
 															>
-																<LoadingIndicator customColor={GC_COLORS.primary} />
-															</div>
-														)}
-														{!runningSearch && (
-															<div
-																className="row"
-																style={{ padding: 5 }}
-																data-cy="jbook-search-results"
-															>
-																{getSearchResults(
-																	rawSearchResults ? rawSearchResults : [],
-																	state,
-																	dispatch
-																)}
 																<div
 																	className="jbookPagination col-xs-12 text-center"
 																	style={{ marginTop: 10 }}
@@ -425,33 +418,28 @@ const getCardViewPanel = (props) => {
 																	/>
 																</div>
 															</div>
-														)}
-													</TabPanel>
-													<TabPanel>
-														{getPagination(
-															state,
-															dispatch,
-															edaCloneData,
-															edaLoading,
-															edaSearchResults,
-															edaResultsPage,
-															edaCount
-														)}
-													</TabPanel>
-												</div>
+														</div>
+													)}
+												</TabPanel>
+												<TabPanel>
+													{getPagination(
+														state,
+														dispatch,
+														edaCloneData,
+														edaLoading,
+														edaSearchResults,
+														edaResultsPage,
+														edaCount
+													)}
+												</TabPanel>
 											</div>
-										</Tabs>
-										{/*
-													<div className="col-xs-12">
-														<LoadingIndicator customColor={gcOrange} />
-													</div>
-										*/}
-									</div>
+										</div>
+									</Tabs>
 								</div>
 							</div>
 						</div>
-					</StyledCenterContainer>
-				</div>
+					</div>
+				</StyledCenterContainer>
 			</div>
 		</div>
 	);
@@ -535,6 +523,8 @@ const JBookMainViewHandler = (props) => {
 			);
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
+		case PAGE_DISPLAYED.profile:
+			return <JBookProfilePage {...props} />;
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({

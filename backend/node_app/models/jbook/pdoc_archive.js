@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-	const PDOC = sequelize.define(
-		'pdoc',
+	return sequelize.define(
+		'pdoc_archive',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -1375,8 +1375,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			freezeTableName: true,
 			timestamps: false,
-			tableName: 'pdoc',
+			tableName: 'pdoc_arxv',
 		}
 	);
-	return PDOC;
 };
