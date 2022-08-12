@@ -342,8 +342,8 @@ const GetQAResults = (props) => {
 
 	if (open && question !== '' && answers.length > 0) {
 		return (
-			<div style={styles.intelligentContainer}>
-				<strong>{question.toUpperCase()}</strong>
+			<div style={styles.intelligentContainer} data-cy={'qa-result-card'}>
+				<strong data-cy={'qa-result-title'}>{question.toUpperCase()}</strong>
 				<b style={{ color: 'red', fontSize: 14, marginLeft: '5px' }}>(Beta)</b>
 				<CloseButton
 					style={styles.topRight}
@@ -372,7 +372,7 @@ const GetQAResults = (props) => {
 		);
 	} else if (open && Object.keys(intelligentSearchResult).length !== 0) {
 		return (
-			<div style={styles.intelligentContainer}>
+			<div data-cy={'intelligent-result'} style={styles.intelligentContainer}>
 				<div
 					style={{
 						display: 'flex',
@@ -381,7 +381,7 @@ const GetQAResults = (props) => {
 					}}
 				>
 					<div>
-						<div style={styles.bold}>
+						<div data-cy={'intelligent-result-title'} style={styles.bold}>
 							{' '}
 							DOCUMENT {intelligentSearchResult.display_title_s}{' '}
 							<span style={{ fontSize: '0.8em', color: 'gray' }}>

@@ -83,7 +83,7 @@ module.exports = Object.freeze({
 		},
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
-	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}:8990`,
+	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}`,
 	EDL_UPLOAD_DIRECTORY: path.dirname(require.main.filename) + '/volumes/uploads/',
 	LOG_FILE: path.dirname(require.main.filename) + '/logs/gc-node-api/gc-node-api',
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
@@ -185,6 +185,9 @@ module.exports = Object.freeze({
 		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
+		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
+		QLIK_EXCLUDE_CUST_PROP_VAL: process.env.QLIK_EXCLUDE_CUST_PROP_VAL || 'ExcludeSearch',
+		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain',
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,

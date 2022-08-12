@@ -129,23 +129,16 @@ export const populateDropDowns = async (state, _dispatch) => {
 	});
 
 	try {
-		jbookSearchSettings.budgetYearES = defaultOptions.budgetYearES = data.budgetYearES
+		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgency
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
 
-		jbookSearchSettings.serviceAgencyES = defaultOptions.serviceAgencyES = data.serviceAgencyES
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-
-		jbookSearchSettings.serviceAgency = defaultOptions.serviceAgency = data.serviceAgencyES
-			.map(itemOrBlank)
-			.sort(filterSortFunction);
-
-		jbookSearchSettings.appropriationNumberES = defaultOptions.appropriationNumberES = data.appropriationNumberES;
+		jbookSearchSettings.appropriationNumber = defaultOptions.appropriationNumber = data.appropriationNumber;
 
 		jbookSearchSettings.budgetYear = defaultOptions.budgetYear = data.budgetYear
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
+
 		jbookSearchSettings.reviewStatus = defaultOptions.reviewStatus = data.reviewstatus
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
@@ -156,14 +149,6 @@ export const populateDropDowns = async (state, _dispatch) => {
 		jbookSearchSettings.sourceTag = defaultOptions.sourceTag = data.sourcetag
 			.map(itemOrBlank)
 			.sort(filterSortFunction);
-
-		if (jbookSearchSettings.budgetYearES) {
-			defaultOptions.budgetYear = jbookSearchSettings.budgetYear = jbookSearchSettings.budgetYearES;
-		}
-		if (jbookSearchSettings.appropriationNumberES) {
-			defaultOptions.appropriationNumber = jbookSearchSettings.appropriationNumber =
-				jbookSearchSettings.appropriationNumberES;
-		}
 	} catch (err) {
 		console.log('Error setting dropdown data');
 		console.log(err);
