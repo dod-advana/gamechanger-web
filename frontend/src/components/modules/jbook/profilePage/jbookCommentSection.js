@@ -72,7 +72,8 @@ const JBookCommentSection = ({
 			let myField;
 			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUp') {
 				myField = 'upvotes';
-			} else {
+			}
+			if (e.target.dataset.testid === 'ThumbDownOffAltIcon' || e.target.dataset.testid === 'ThumbDown') {
 				myField = 'downvotes';
 			}
 
