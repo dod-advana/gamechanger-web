@@ -1,6 +1,5 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-// import SimpleTable from '../../common/SimpleTable';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
@@ -218,7 +217,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let amount = 0;
 
 	if (!isNaN(totalObligatedAmount)) {
-		amount = numberWithCommas(Math.floor(totalObligatedAmount / 1000000)) ?? 0;
+		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
 	}
 
 	const renderChartLabel = (entry) => {
@@ -228,8 +227,8 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	const CustomTooltip = ({ payload }) => {
 		let tooltipText = '';
 		if (payload.length > 0) {
-			let data = payload[0];
-			tooltipText += data.name + ': ' + data.payload.obligatedAmount;
+			let agency = payload[0];
+			tooltipText += agency.name + ': ' + agency.payload.obligatedAmount;
 		}
 		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
 	};
@@ -248,7 +247,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					label={renderChartLabel}
 					isAnimationActive={false}
 				>
-					{data.map((entry, index) => (
+					{data.map((_entry, index) => (
 						<Cell key={`cell-${index}`} fill={data[index].color} />
 					))}
 				</Pie>
