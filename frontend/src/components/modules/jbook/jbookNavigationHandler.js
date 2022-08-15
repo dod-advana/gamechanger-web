@@ -30,8 +30,8 @@ const getToolTheme = (cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href="#/">
-				<img src={JAICLogo} alt="tool logo" />
+			<PageLink href={`#/jbook`}>
+				<img onClick={() => window.location.reload()} src={JAICLogo} alt="tool logo" />
 			</PageLink>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
@@ -89,7 +89,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserFeedbackIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			{/* <GCTooltip title="User Dashboard" placement="right" arrow>
+			<GCTooltip title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -110,7 +110,7 @@ const generateClosedContentArea = (state, dispatch) => {
 				>
 					<ConstrainedIcon src={UserIcon} />
 				</HoverNavItem>
-			</GCTooltip> */}
+			</GCTooltip>
 			{Permissions.hasPermission('JBOOK Admin') && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
@@ -175,7 +175,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<span style={{ marginLeft: '10px' }}>User Feedback</span>
 				</HoverNavItem>
 			</GCTooltip>
-			{/* <GCTooltip title="User Dashboard" placement="right" arrow>
+			<GCTooltip title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -196,7 +196,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserIcon} />
 					<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 				</HoverNavItem>
-			</GCTooltip> */}
+			</GCTooltip>
 			{Permissions.hasPermission('JBOOK Admin') && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`}>

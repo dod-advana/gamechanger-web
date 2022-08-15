@@ -49,8 +49,6 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 		const tmpData = { ...editReviewerData };
 		tmpData[key] = value;
 
-		console.log(key);
-
 		if (key === 'type') {
 			switch (value) {
 				case 'primary':
@@ -118,29 +116,33 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Name"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.name : null}
+								defaultValue={editReviewerData?.name}
 								onChange={(event) => handleTextChange(event.target.value, 'name')}
 								className={classes.textField}
 								margin="dense"
 								helperText={'Last, First'}
+								required
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Organization"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.organization : null}
+								defaultValue={editReviewerData?.organization}
 								onChange={(event) => handleTextChange(event.target.value, 'organization')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Phone Number"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.phone_number : null}
+								defaultValue={editReviewerData?.phone_number}
 								onChange={(event) => handleTextChange(event.target.value, 'phone_number')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 						</Grid>
 						<Grid item xs={6}>
@@ -149,12 +151,13 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 								options={['primary', 'service', 'secondary']}
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
-								defaultValue={editReviewerData ? editReviewerData.type : null}
-								onChange={(event, value) => {
+								defaultValue={editReviewerData?.type}
+								onChange={(_event, value) => {
 									handleTextChange(value, 'type');
 								}}
 								disableClearable
 								helperText={' '}
+								required
 							/>
 							{/*<TextField*/}
 							{/*	label="Type"*/}
@@ -168,20 +171,24 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 							<TextField
 								label="Email"
 								id="margin-dense"
-								defaultValue={editReviewerData ? editReviewerData.email : null}
+								defaultValue={editReviewerData?.email}
 								onChange={(event) => handleTextChange(event.target.value, 'email')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								required
+								style={{ width: 300 }}
 							/>
 							<TextField
 								label="Title"
 								id="margin-dense"
-								value={editReviewerData ? editReviewerData.title : null}
+								InputLabelProps={{ shrink: editReviewerData?.title }}
+								value={editReviewerData?.title}
 								onChange={(event) => handleTextChange(event.target.value, 'title')}
 								className={classes.textField}
 								margin="dense"
 								helperText={' '}
+								style={{ width: 300 }}
 							/>
 						</Grid>
 					</Grid>
@@ -200,6 +207,9 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 					id={'editReviewerSubmit'}
 					onClick={() => storeReviewerData()}
 					style={{ margin: '10px', backgroundColor: '#1C2D64', borderColor: '#1C2D64' }}
+					disabled={
+						!editReviewerData?.name?.trim() || !editReviewerData?.type || !editReviewerData?.email?.trim()
+					}
 				>
 					Submit
 				</GCButton>
