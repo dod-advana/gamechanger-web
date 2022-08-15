@@ -1,5 +1,6 @@
 const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
+const CryptoJS = require('crypto-js');
 const axiosLib = require('axios');
 const https = require('https');
 const AWS = require('aws-sdk');
@@ -8,6 +9,7 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
+const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
 
@@ -74,15 +76,6 @@ class DataLibrary {
 			this.awsS3Client = null;
 		}
 
-		const clientOptions = {
-			s3Client: this.awsS3Client,
-			maxAsyncS3: 20, // this is the default
-			s3RetryCount: 3, // this is the default
-			s3RetryDelay: 1000, // this is the default
-			multipartUploadThreshold: 20971520, // this is the default (20 MB)
-			multipartUploadSize: 15728640, // this is the default (15 MB)
-		};
-
 		this.queryElasticSearch = this.queryElasticSearch.bind(this);
 		this.getESRequestConfig = this.getESRequestConfig.bind(this);
 		this.getElasticsearchSearchUrl = this.getElasticsearchSearchUrl.bind(this);
@@ -93,7 +86,7 @@ class DataLibrary {
 		this.updateDocument = this.updateDocument.bind(this);
 	}
 
-	async queryLineItemPostgres(columns, tables, filenames) {
+	async queryLineItemPostgres(_columns, _tables, filenames) {
 		try {
 			// original raw query
 			// const results = await this.edaDatabase.eda.query('SELECT p.filename, p.prod_or_svc, p.prod_or_svc_desc,p.li_base, p.li_type, p.obligated_amount,'+
@@ -196,7 +189,7 @@ class DataLibrary {
 		}
 	}
 
-	getESRequestConfig({ user, password, port, ca, index }) {
+	getESRequestConfig({ user, password, port, ca }) {
 		let reqConfig = {};
 		if (port === '443' && user) {
 			reqConfig.httpsAgent = new https.Agent({
@@ -218,7 +211,7 @@ class DataLibrary {
 		return reqConfig;
 	}
 
-	getESClientConfig({ user, password, ca, protocol, host, port, index, requestTimeout }) {
+	getESClientConfig({ user, password, ca, protocol, host, port, requestTimeout }) {
 		let config = {
 			node: {},
 		};
@@ -253,10 +246,8 @@ class DataLibrary {
 			let opts = Object.assign({}, this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS);
 
 			if (isClone && cloneData.clone_data.esCluster !== 'gamechanger') {
-				switch (cloneData.clone_data.esCluster) {
-					case 'eda':
-						opts = Object.assign({}, this.constants.EDA_ELASTIC_SEARCH_OPTS);
-						break;
+				if (cloneData.clone_data.esCluster === 'eda') {
+					opts = Object.assign({}, this.constants.EDA_ELASTIC_SEARCH_OPTS);
 				}
 			}
 
@@ -287,26 +278,33 @@ class DataLibrary {
 		}
 	}
 
-	getFilePDF(res, data, userId) {
+	async getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
 		const { req } = res;
-		const {
-			_parsedOriginalUrl: { query = undefined },
-		} = req;
-		const queryString = query ? `?${query}` : '';
-		// console.log("getFilePDFn",req)
-
 		try {
 			if (
 				(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
 				req.query.isClone &&
 				req.query.clone_name === 'eda'
 			) {
-				const edaUrl = this.constants.GAMECHANGER_BACKEND_EDA_URL + req.baseUrl + req.path + queryString;
+				const edaUrl =
+					this.constants.GAMECHANGER_BACKEND_EDA_URL +
+					req.baseUrl +
+					req.path +
+					'?path=' +
+					req.query.path +
+					'&dest=' +
+					req.query.dest +
+					'&filekey=' +
+					req.query.filekey +
+					'&isClone=' +
+					req.query.isClone +
+					'&clone_name=edaReRoute';
 
 				this.axios({
 					method: 'get',
 					url: edaUrl,
+					headers: req.headers,
 					responseType: 'stream',
 				})
 					.then((response) => {
@@ -343,20 +341,24 @@ class DataLibrary {
 		}
 	}
 
-	async getFileThumbnail(data, userId) {
-		let { dest, folder, filename, clone_name } = data;
+	getFileType(fileType) {
+		let rtnType = 'image/png';
+		if (fileType === 'svg') {
+			rtnType = 'image/svg+xml';
+		}
+		return rtnType;
+	}
+
+	async getFileThumbnail(tmpData, userId) {
+		let { dest, folder, filename, clone_name } = tmpData;
 		const key = `${clone_name}/${folder}/${filename}`;
 		let filetype = filename.split('.').pop();
-		if (filetype === '.png') {
-			filetype = 'image/png';
-		} else if (filetype === 'svg') {
-			filetype = 'image/svg+xml';
-		}
+		filetype = this.getFileType(filetype);
 
 		const params = {
 			Bucket: dest,
 			Key: key,
-			ResponseContentType: 'image/png',
+			ResponseContentType: filetype,
 		};
 
 		return new Promise(async (resolve, reject) => {
@@ -377,6 +379,7 @@ class DataLibrary {
 							await this.redisDB.set(key, result);
 							resolve(result);
 						} catch (e) {
+							this.logger.error(e, 'LKRS7EOGF', userId);
 							reject(e);
 						}
 					}
@@ -385,12 +388,12 @@ class DataLibrary {
 		});
 	}
 
-	async queryGraph(query, parameters = {}, userId) {
+	async queryGraph(query, parameters = {}, userId = 'undefined') {
 		try {
 			const driver = await this.getDriver();
 			await driver.verifyConnectivity();
 			const session = await this.getSession(driver);
-			// console.log(body.query);
+
 			const result = await session.run(query, parameters);
 			await this.close(driver, session);
 			return { result };
