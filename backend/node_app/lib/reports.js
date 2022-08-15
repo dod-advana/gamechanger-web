@@ -137,7 +137,6 @@ class Reports {
 
 			data.docs.forEach((doc) => {
 				const docData = doc.dataValues ?? doc;
-				console.log(docData);
 				const item = [
 					docData.budgetYear,
 					docData.budgetType,
