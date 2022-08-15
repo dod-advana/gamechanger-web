@@ -62,7 +62,7 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 
 		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
 
-		return processQlikApps(qlikApps.data, qlikStreams.data);
+		return processQlikApps(qlikApps.data, qlikStreams.data, logger);
 	} catch (err) {
 		if (!userId)
 			// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
@@ -99,10 +99,11 @@ const separateBusinessDomainsAndCustomProps = (
 const processQlikApps = (
 	apps,
 	streams,
-	{
-		excludeName = QLIK_EXCLUDE_CUST_PROP_NAME,
-		excludeValue = QLIK_EXCLUDE_CUST_PROP_VAL,
-		businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME,
+	logger,
+	opts = {
+		excludeName: QLIK_EXCLUDE_CUST_PROP_NAME,
+		excludeValue: QLIK_EXCLUDE_CUST_PROP_VAL,
+		businessDomainPropName: QLIK_BUSINESS_DOMAIN_PROP_NAME,
 	}
 ) => {
 	try {
@@ -110,8 +111,8 @@ const processQlikApps = (
 		for (const app of apps) {
 			if (
 				!determineIfExcluded(app, {
-					excludeName,
-					excludeValue,
+					excludeName: opts.excludeName,
+					excludeValue: opts.excludeValue,
 				})
 			) {
 				const appsFullStreamData = _.find(streams, (stream) => {
@@ -121,13 +122,16 @@ const processQlikApps = (
 				app.stream.customProperties = [];
 
 				const { businessDomains: streamBDs, otherCustomProps: streamOtherProps } =
-					separateBusinessDomainsAndCustomProps(appsFullStreamData?.customProperties, businessDomainPropName);
+					separateBusinessDomainsAndCustomProps(
+						appsFullStreamData?.customProperties,
+						opts.businessDomainPropName
+					);
 
 				allBusinessDomains = allBusinessDomains.concat(streamBDs);
 				app.stream.customProperties = app.stream.customProperties.concat(streamOtherProps);
 
 				const { businessDomains: appBDs, otherCustomProps: appOtherProps } =
-					separateBusinessDomainsAndCustomProps(app.customProperties, businessDomainPropName);
+					separateBusinessDomainsAndCustomProps(app.customProperties, opts.businessDomainPropName);
 
 				allBusinessDomains = allBusinessDomains.concat(appBDs);
 
