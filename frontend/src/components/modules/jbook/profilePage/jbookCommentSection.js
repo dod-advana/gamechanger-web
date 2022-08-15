@@ -6,6 +6,8 @@ import GCButton from '../../../common/GCButton';
 import JBookUserNameModal from './jbookUserNameModal';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import ThumbDown from '@mui/icons-material/ThumbDown';
+import ThumbUp from '@mui/icons-material/ThumbUp';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -68,7 +70,7 @@ const JBookCommentSection = ({
 	const voteComment = async (comment, e) => {
 		try {
 			let myField;
-			if (e.target.dataset.testid === 'ThumbUpOffAltIcon') {
+			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUp') {
 				myField = 'upvotes';
 			} else {
 				myField = 'downvotes';
@@ -86,6 +88,14 @@ const JBookCommentSection = ({
 		} catch (err) {
 			console.log('Error while voting on comment');
 			console.log(err);
+		}
+	};
+
+	const alreadyVoted = (userId, votedArr) => {
+		for (const voters of votedArr) {
+			if (voters.includes(String(userId))) {
+				return true;
+			}
 		}
 	};
 
@@ -120,11 +130,21 @@ const JBookCommentSection = ({
 									marginRight: '5px',
 								}}
 							>
-								<ThumbUpOffAltIcon
-									onClick={(e) => {
-										voteComment(comment, e);
-									}}
-								/>
+								{alreadyVoted(userData.user_id, comment.upvotes) ? (
+									<ThumbUp
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								) : (
+									<ThumbUpOffAltIcon
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								)}
 								<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
 							</div>
 							<div
@@ -134,7 +154,21 @@ const JBookCommentSection = ({
 									alignItems: 'center',
 								}}
 							>
-								<ThumbDownOffAltIcon onClick={(e) => voteComment(comment, e)} />
+								{alreadyVoted(userData.user_id, comment.downvotes) ? (
+									<ThumbDown
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								) : (
+									<ThumbDownOffAltIcon
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								)}
 								<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
 							</div>
 						</div>
