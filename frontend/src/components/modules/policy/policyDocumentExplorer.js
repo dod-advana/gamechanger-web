@@ -41,6 +41,7 @@ const styles = {
 	docExplorerPag: {
 		display: 'flex',
 		width: '100%',
+		justifyContent: 'center',
 	},
 };
 
@@ -434,7 +435,7 @@ export default function DocumentExplorer({
 						<Pagination
 							activePage={resultsPage}
 							itemsCountPerPage={resultsPerPage}
-							totalItemsCount={totalCount}
+							totalItemsCount={totalCount > 9982 ? 9982 : totalCount}
 							pageRangeDisplayed={3}
 							onChange={(page) => {
 								trackEvent(
@@ -467,7 +468,7 @@ export default function DocumentExplorer({
 							</div>
 						</div>
 					) : (
-						'Make a search to get started.'
+						'' // 'Make a search to get started.'
 					)}
 				</div>
 
