@@ -241,11 +241,10 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 	window.open(url);
 };
 
-const clickFnPDF = (filename, cloneName, searchText, pageNumber = 0) => {
+const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	console.log(filename);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 	);
@@ -971,18 +970,20 @@ const cardHandler = {
 			return (
 				<>
 					<>
-						<CardButton
-							target={'_blank'}
-							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
-							href={'#'}
-							onClick={(e) => {
-								e.preventDefault();
-								console.log(item);
-								clickFnPDF(item.pdf_location_s, cloneName);
-							}}
-						>
-							Open
-						</CardButton>
+						{item.dtic_pdf_location_s !== undefined && (
+							<CardButton
+								target={'_blank'}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									console.log(item);
+									clickFnPDF(item.dtic_pdf_location_s, cloneName, item.dtic_pdf_page_s);
+								}}
+							>
+								Open
+							</CardButton>
+						)}
 						<CardButton
 							target={'_blank'}
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
