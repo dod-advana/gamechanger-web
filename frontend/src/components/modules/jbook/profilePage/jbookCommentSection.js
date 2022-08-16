@@ -93,9 +93,11 @@ const JBookCommentSection = ({
 	};
 
 	const alreadyVoted = (userId, votedArr) => {
-		for (const voters of votedArr) {
-			if (voters.includes(String(userId))) {
-				return true;
+		if (votedArr) {
+			for (const voters of votedArr) {
+				if (voters.includes(String(userId))) {
+					return true;
+				}
 			}
 		}
 	};
