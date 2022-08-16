@@ -131,13 +131,13 @@ class EdaSearchHandler extends SearchHandler {
 			}
 			permissions = permissions.map((permission) => permission.toLowerCase());
 
-			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, forStats = false } = body;
+			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false } = body;
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 
 			const { esClientName, esIndex } = clientObj;
-			let esQuery = '';
+			let esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 
 			if (
 				!(
@@ -152,12 +152,6 @@ class EdaSearchHandler extends SearchHandler {
 			const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 			body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 			body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
-
-			if (forStats) {
-				esQuery = this.edaSearchUtility.getElasticsearchStatsQuery(body, userId);
-			} else {
-				esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
-			}
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 

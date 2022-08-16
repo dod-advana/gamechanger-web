@@ -145,7 +145,21 @@ const EdaSearchHandler = {
 					let getUserDataFlag = true;
 
 					if (_.isObject(resp.data)) {
-						let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
+						let {
+							docs,
+							totalCount,
+							expansionDict,
+							isCached,
+							timeSinceCache,
+							issuingOrgs,
+							totalObligatedAmount,
+						} = resp.data;
+
+						setState(dispatch, {
+							issuingOrgs: this.countOrgData(issuingOrgs),
+							statsLoading: false,
+							totalObligatedAmount,
+						});
 
 						if (docs && Array.isArray(docs)) {
 							// intelligent search failed, show keyword results with warning alert
@@ -259,40 +273,6 @@ const EdaSearchHandler = {
 					console.log(err);
 					throw err;
 				});
-
-			// stats search
-			gameChangerAPI
-				.modularSearch({
-					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
-					offset,
-					limit: 10000,
-					options: {
-						charsPadding,
-						tiny_url,
-						combinedSearch,
-						edaSearchSettings,
-						forStats: true,
-					},
-				})
-				.then((resp) => {
-					if (_.isObject(resp.data)) {
-						const docs = resp.data.docs;
-
-						const { issuingOrgs, totalObligatedAmount } = this.countOrgData(docs);
-
-						setState(dispatch, {
-							issuingOrgs,
-							statsLoading: false,
-							totalObligatedAmount,
-						});
-					}
-				})
-				.catch((err) => {
-					console.log('error');
-					console.log(err);
-					throw err;
-				});
 		} catch (e) {
 			console.log(e);
 			setState(dispatch, {
@@ -311,7 +291,7 @@ const EdaSearchHandler = {
 		getAndSetDidYouMean(index, searchText, dispatch);
 	},
 
-	countOrgData(docs) {
+	countOrgData(data) {
 		try {
 			const issuingOrgs = {
 				'Air Force': {
@@ -348,27 +328,11 @@ const EdaSearchHandler = {
 				'DEFENSE LOGISTICS AGENCY': 'DLA',
 			};
 
-			let totalObligatedAmount = 0;
-
-			// doc.issuing_organization_eda_ext which is set in edaSearchUtility > getExtractedFields is no longer being used
-			// fpds_contracting_agency_name_eda_ext could work, but not every doc has fpds
-
-			for (const doc of docs) {
-				// if we have a name for the org, we will use that name
-				const orgField = doc.issuing_organization_eda_ext ?? doc.fpds_contracting_agency_name_eda_ext;
-				let org = orgNames[orgField] ?? orgField;
-
-				if (org !== 'undefined') {
-					if (!(org in issuingOrgs)) {
-						org = 'ODA';
-					}
-					issuingOrgs[org].count += 1;
-					if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
-						totalObligatedAmount += doc.obligated_amounts_eda_ext;
-						issuingOrgs[org].obligatedAmount += doc.obligated_amounts_eda_ext;
-					}
-				}
-			}
+			data.forEach((org) => {
+				const orgName = orgNames[org.key.toUpperCase()] ? orgNames[org.key.toUpperCase()] : 'ODA';
+				issuingOrgs[orgName].count += org.count;
+				issuingOrgs[orgName].obligatedAmount += org.value;
+			});
 
 			for (const org of Object.keys(issuingOrgs)) {
 				if (issuingOrgs[org].count === 0) {
@@ -378,11 +342,11 @@ const EdaSearchHandler = {
 				}
 			}
 
-			return { totalObligatedAmount, issuingOrgs };
+			return issuingOrgs;
 		} catch (err) {
 			console.log('Error calculating EDA org data');
 			console.log(err);
-			return { totalObligatedAmount: 0, issuingOrgs: {} };
+			return [];
 		}
 	},
 
