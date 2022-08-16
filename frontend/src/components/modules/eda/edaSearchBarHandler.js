@@ -100,22 +100,21 @@ const EDASearchBarHandler = {
 						}}
 						placeholder="Search..."
 						id="gcSearchInput"
+						padding="0 40px 0 36px"
 					/>
 
-					{!hideSearchResults && (
-						<GCToolTip
-							title={
-								<>
-									To search A or B, enter "A or B" <br />
-									To search terms together, separate them with a space like "A B"
-								</>
-							}
-							arrow
-							enterDelay={500}
-						>
-							<InfoIcon style={{ position: 'absolute', right: '10px' }} />
-						</GCToolTip>
-					)}
+					<GCToolTip
+						title={
+							<>
+								To search A or B, enter "A or B" <br />
+								To search terms together, separate them with a space like "A B"
+							</>
+						}
+						arrow
+						enterDelay={500}
+					>
+						<InfoIcon style={{ position: 'absolute', right: hideSearchResults ? '165px' : '10px' }} />
+					</GCToolTip>
 
 					{dropdownOpen && !advancedSearchOpen && (
 						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
