@@ -22,7 +22,7 @@ RUN rpm --import /tmp/RPM-GPG-KEY-PGDG-11 && \
     dnf install -y --nodocs glibc-langpack-en /tmp/postgresql11-server.rpm /tmp/postgresql11.rpm /tmp/postgresql11-libs.rpm /tmp/postgresql11-contrib.rpm && \
     dnf clean all && \
     rm -rf /var/cache/dnf
-     
+
 # non-root app USER/GROUP
 ARG APP_UID=1000
 ARG APP_GID=1000
@@ -30,10 +30,10 @@ ARG APP_GID=1000
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/opt/app-root"
 ENV APP_DIR="${APP_ROOT}/src"
-ENV APP_FRONTEND_DIR="${APP_DIR}/frontend" 
-ENV APP_BACKEND_DIR="${APP_DIR}/backend" 
+ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
+ENV APP_BACKEND_DIR="${APP_DIR}/backend"
 ENV APP_SHARED_DIR="${APP_ROOT}/shared"
-ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin" 
+ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin"
 ENV PATH="${APP_SHARED_BIN}:${PATH}"
 ENV NPM_CONFIG_USERCONFIG="${APP_ROOT}/.nmprc"
 ENV LOGS="/logs/uotapp"
@@ -45,26 +45,26 @@ RUN mkdir -p \
         "${APP_SHARED_DIR}" \
         "${LOGS}" \
     && touch "${NPM_CONFIG_USERCONFIG}" \
-    && chown -R "$APP_UID:$APP_GID" "${APP_ROOT}" \
-    && chown -R "$APP_UID:$APP_GID" "${LOGS}"
+    && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}" \
+    && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
 
-USER "$APP_UID:$APP_GID"
+USER "${APP_UID}":"${APP_GID}"
 # thou shall not root
 
 ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 
-COPY --chown="$APP_UID:$APP_GID" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
-COPY --chown="$APP_UID:$APP_GID" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+COPY --chown="${APP_UID}":"${APP_GID}" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+COPY --chown="${APP_UID}":"${APP_GID}" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
         _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
         && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
     )) \
-    && (\ 
+    && (\
         cd "$APP_SHARED_DIR" \
         && npm install nodemon \
         && npm install sequelize-cli \
@@ -80,7 +80,7 @@ RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     )\
     && rm -rf "${NPM_CONFIG_USERCONFIG}"
 
-COPY --chown="$APP_UID:$APP_GID" ./ "${APP_DIR}"
+COPY --chown="${APP_UID}":"${APP_GID}" ./ "${APP_DIR}"
 
 RUN (\
         cd "${APP_FRONTEND_DIR}" \
