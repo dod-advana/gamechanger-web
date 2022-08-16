@@ -6,8 +6,8 @@ import GCButton from '../../../common/GCButton';
 import JBookUserNameModal from './jbookUserNameModal';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
-import ThumbDown from '@mui/icons-material/ThumbDown';
-import ThumbUp from '@mui/icons-material/ThumbUp';
+import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
+import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -70,10 +70,10 @@ const JBookCommentSection = ({
 	const voteComment = async (comment, e) => {
 		try {
 			let myField;
-			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUp') {
+			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUpAlt') {
 				myField = 'upvotes';
 			}
-			if (e.target.dataset.testid === 'ThumbDownOffAltIcon' || e.target.dataset.testid === 'ThumbDown') {
+			if (e.target.dataset.testid === 'ThumbDownOffAltIcon' || e.target.dataset.testid === 'ThumbDownAlt') {
 				myField = 'downvotes';
 			}
 
@@ -134,7 +134,7 @@ const JBookCommentSection = ({
 								}}
 							>
 								{alreadyVoted(userData.user_id, comment.upvotes) ? (
-									<ThumbUp
+									<ThumbUpAlt
 										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
 										onClick={(e) => {
 											voteComment(comment, e);
@@ -158,7 +158,7 @@ const JBookCommentSection = ({
 								}}
 							>
 								{alreadyVoted(userData.user_id, comment.downvotes) ? (
-									<ThumbDown
+									<ThumbDownAlt
 										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
 										onClick={(e) => {
 											voteComment(comment, e);
