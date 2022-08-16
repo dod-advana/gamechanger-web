@@ -218,7 +218,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let amount = 0;
 
 	if (!isNaN(totalObligatedAmount)) {
-		amount = numberWithCommas(Math.floor(totalObligatedAmount / 1000000)) ?? 0;
+		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
 	}
 
 	const renderChartLabel = (entry) => {

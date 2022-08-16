@@ -71,6 +71,40 @@ class EDASearchUtility {
 				from: offset,
 				size: limit,
 				track_total_hits: true,
+				aggs: {
+					contractTotals: {
+						nested: {
+							path: 'fpds_ng_n',
+						},
+						aggs: {
+							agencies: {
+								terms: {
+									field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+									size: 1000000,
+								},
+								aggs: {
+									docs: {
+										reverse_nested: {},
+										aggs: {
+											obligatedAmounts: {
+												nested: {
+													path: 'extracted_data_eda_n',
+												},
+												aggs: {
+													sum_agg: {
+														sum: {
+															field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 				query: {
 					bool: {
 						must: [
@@ -805,25 +839,23 @@ class EDASearchUtility {
 				docs: [],
 			};
 
-			let docTypes = [];
-			let docOrgs = [];
-
 			const { body = {} } = raw;
 			const { aggregations = {} } = body;
-			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
-			const type_buckets = doc_type_aggs.buckets ? doc_type_aggs.buckets : [];
-			const org_buckets = doc_org_aggs.buckets ? doc_org_aggs.buckets : [];
+			const { contractTotals = {} } = aggregations;
+			const contractBuckets = contractTotals?.agencies?.buckets ? contractTotals.agencies.buckets : [];
 
-			type_buckets.forEach((agg) => {
-				docTypes.push(agg);
+			let totalObligatedAmount = 0;
+			const cleanedContractTotals = contractBuckets.map((bucket) => {
+				totalObligatedAmount += bucket.docs.obligatedAmounts.sum_agg.value;
+				return {
+					key: bucket.key,
+					count: bucket.doc_count,
+					value: bucket.docs.obligatedAmounts.sum_agg.value,
+				};
 			});
 
-			org_buckets.forEach((agg) => {
-				docOrgs.push(agg);
-			});
-
-			results.doc_types = docTypes;
-			results.doc_orgs = docOrgs;
+			results.issuingOrgs = cleanedContractTotals;
+			results.totalObligatedAmount = totalObligatedAmount;
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.searchUtility.transformEsFields(r.fields);
