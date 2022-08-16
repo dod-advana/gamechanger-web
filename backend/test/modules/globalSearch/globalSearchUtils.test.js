@@ -1,4 +1,5 @@
 const globalSearchUtils = require('../../../node_app/modules/globalSearch/globalSearchUtils');
+const { constructorOptionsMock } = require('../../resources/testUtility');
 
 const processQlikApps = globalSearchUtils.processQlikApps;
 
@@ -309,7 +310,7 @@ const qlikStreamRes = [STREAM_TO_BE_EXCLUDED, STREAM_WITH_OTHER_CUSTOM_PROP, STR
 
 describe('GlobalSearchUtils', function () {
 	describe('#processQlikApps', () => {
-		const processedApps = processQlikApps(qlikAppRes, qlikStreamRes, {
+		const processedApps = processQlikApps(qlikAppRes, qlikStreamRes, constructorOptionsMock.logger, {
 			excludeName: 'excludeName',
 			excludeValue: 'boop',
 			businessDomainPropName: 'businessDomain',
