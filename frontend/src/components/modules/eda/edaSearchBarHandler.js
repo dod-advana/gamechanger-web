@@ -106,8 +106,9 @@ const EDASearchBarHandler = {
 					<GCToolTip
 						title={
 							<>
-								To search A or B, enter "A or B" <br />
-								To search terms together, separate them with a space like "A B"
+								To search A or B, enter 'A or B' <br />
+								To search A and B, enter 'A B' or 'A and B' <br />
+								To search a phrase together, add quotes around it like '"machine learning"'
 							</>
 						}
 						arrow
