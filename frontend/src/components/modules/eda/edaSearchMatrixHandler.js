@@ -1,6 +1,5 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-// import SimpleTable from '../../common/SimpleTable';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
@@ -870,31 +869,97 @@ export const getAdvancedOptions = (props) => {
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderOrganizationFilters(state, dispatch)}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>FISCAL YEAR</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderFiscalYearFilter(state, dispatch)}</div>
 			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>EDA CONTRACT DATA</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderContractDataFilter(state, dispatch)}</div>
-			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
 			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>VENDOR NAME</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>FUNDING OFFICE DoDAAC</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>FUNDING AGENCY NAME</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>PSC</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>PSC DESCRIPTION</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>NAICS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>DUNS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>AVAILABLE EDA FORMAT</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderContractDataFilter(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>EXCLUDED TERMS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderExcludeTerms(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>DESCRIPTION OF REQS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}</div>
+			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
