@@ -416,9 +416,8 @@ export default function DocumentExplorer({
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
-					borderRight: '1px solid lightgrey',
 					height: '100%',
-					overflow: 'auto',
+					marginTop: '-65px',
 				}}
 			>
 				<div
@@ -427,7 +426,10 @@ export default function DocumentExplorer({
 						color: grey800,
 						fontWeight: 'bold',
 						display: 'flex',
-						marginBottom: '10px',
+						alignItems: 'center',
+						width: '100%',
+						minWidth: '370px',
+						marginBottom: '20px',
 					}}
 				>
 					<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
@@ -470,53 +472,59 @@ export default function DocumentExplorer({
 						'Make a search to get started.'
 					)}
 				</div>
+				<div style={{ overflow: 'auto', height: '100%', borderRight: '1px solid lightgrey' }}>
+					{loading ? (
+						<div style={{ margin: '0 auto' }}>
+							<LoadingIndicator customColor={'#E9691D'} />
+						</div>
+					) : (
+						_.map(data, (item, key) => {
+							const collapsed = collapseKeys?.[key.toString()] ?? true;
+							const displayTitle =
+								item.title === 'NA'
+									? `${item.doc_type} ${item.doc_num}`
+									: `${item.doc_type} ${item.doc_num} - ${item.title}`;
 
-				{loading ? (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={'#E9691D'} />
-					</div>
-				) : (
-					_.map(data, (item, key) => {
-						const collapsed = collapseKeys?.[key.toString()] ?? true;
-						const displayTitle =
-							item.title === 'NA'
-								? `${item.doc_type} ${item.doc_num}`
-								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
-
-						if (item.type === 'document') {
-							const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
-							return (
-								<div key={key}>
-									<div
-										className="searchdemo-modal-result-header"
-										onClick={(e) => {
-											e.preventDefault();
-											setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
-										}}
-									>
-										<i
-											style={{
-												marginRight: collapsed ? 14 : 10,
-												fontSize: 20,
-												cursor: 'pointer',
+							if (item.type === 'document') {
+								const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
+								return (
+									<div key={key}>
+										<div
+											className="searchdemo-modal-result-header"
+											onClick={(e) => {
+												e.preventDefault();
+												setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
 											}}
-											className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
-										/>
-										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
-										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
-											{item.pageHitCount}
-										</span>
+										>
+											<i
+												style={{
+													marginRight: collapsed ? 14 : 10,
+													fontSize: 20,
+													cursor: 'pointer',
+												}}
+												className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
+											/>
+											<span className="gc-document-explorer-result-header-text">
+												{displayTitle}
+											</span>
+											<span
+												style={{ width: 30, marginLeft: 'auto', color: 'white' }}
+												className="badge"
+											>
+												{item.pageHitCount}
+											</span>
+										</div>
+										<Collapse isOpened={!collapsed}>
+											<div>{renderHighlightedSections(pageHits, item, key)}</div>
+										</Collapse>
 									</div>
-									<Collapse isOpened={!collapsed}>
-										<div>{renderHighlightedSections(pageHits, item, key)}</div>
-									</Collapse>
-								</div>
-							);
-						} else {
-							return null;
-						}
-					})
-				)}
+								);
+							} else {
+								return null;
+							}
+						})
+					)}
+				</div>
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
