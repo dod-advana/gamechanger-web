@@ -104,6 +104,38 @@ class EDASearchUtility {
 							},
 						},
 					},
+					contractTotalsNoAgency: {
+						filter: {
+							bool: {
+								must_not: [
+									{
+										nested: {
+											path: 'fpds_ng_n',
+											query: {
+												exists: {
+													field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+												},
+											},
+										},
+									},
+								],
+							},
+						},
+						aggs: {
+							obligatedAmounts: {
+								nested: {
+									path: 'extracted_data_eda_n',
+								},
+								aggs: {
+									sum_agg: {
+										sum: {
+											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 				query: {
 					bool: {
@@ -841,8 +873,9 @@ class EDASearchUtility {
 
 			const { body = {} } = raw;
 			const { aggregations = {} } = body;
-			const { contractTotals = {} } = aggregations;
+			const { contractTotals = {}, contractTotalsNoAgency = {} } = aggregations;
 			const contractBuckets = contractTotals?.agencies?.buckets ? contractTotals.agencies.buckets : [];
+			const contractNoAgencyBucket = contractTotalsNoAgency?.obligatedAmounts;
 
 			let totalObligatedAmount = 0;
 			const cleanedContractTotals = contractBuckets.map((bucket) => {
@@ -853,6 +886,12 @@ class EDASearchUtility {
 					value: bucket.docs.obligatedAmounts.sum_agg.value,
 				};
 			});
+			if (contractNoAgencyBucket)
+				cleanedContractTotals.push({
+					key: 'No Agency',
+					count: contractNoAgencyBucket.doc_count,
+					value: contractNoAgencyBucket.sum_agg.value,
+				});
 
 			results.issuingOrgs = cleanedContractTotals;
 			results.totalObligatedAmount = totalObligatedAmount;
