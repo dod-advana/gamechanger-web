@@ -435,7 +435,7 @@ export default function DocumentExplorer({
 						<Pagination
 							activePage={resultsPage}
 							itemsCountPerPage={resultsPerPage}
-							totalItemsCount={totalCount > 9982 ? 9982 : totalCount}
+							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
 							onChange={(page) => {
 								trackEvent(
