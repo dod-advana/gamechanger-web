@@ -4,6 +4,10 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import GCButton from '../../../common/GCButton';
 import JBookUserNameModal from './jbookUserNameModal';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
+import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -63,6 +67,41 @@ const JBookCommentSection = ({
 		setShowExpandButton(!isExpanded && commentThread && commentThread.length > 3);
 	}, [isExpanded, commentThread]);
 
+	const voteComment = async (comment, e) => {
+		try {
+			let myField;
+			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUpAlt') {
+				myField = 'upvotes';
+			}
+			if (e.target.dataset.testid === 'ThumbDownOffAltIcon' || e.target.dataset.testid === 'ThumbDownAlt') {
+				myField = 'downvotes';
+			}
+
+			await gameChangerAPI.callDataFunction({
+				functionName: 'voteComment',
+				cloneName: 'jbook',
+				options: {
+					id: comment.id,
+					field: myField,
+				},
+			});
+			await getCommentThread(docID, portfolioName);
+		} catch (err) {
+			console.log('Error while voting on comment');
+			console.log(err);
+		}
+	};
+
+	const alreadyVoted = (userId, votedArr) => {
+		if (votedArr) {
+			for (const voters of votedArr) {
+				if (voters.includes(String(userId))) {
+					return true;
+				}
+			}
+		}
+	};
+
 	const renderComments = () => {
 		try {
 			const comments = [];
@@ -85,6 +124,57 @@ const JBookCommentSection = ({
 						</CommentTitle>
 
 						<CommentBody>{comment.message}</CommentBody>
+						<div style={{ display: 'flex' }}>
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'center',
+									marginRight: '5px',
+								}}
+							>
+								{alreadyVoted(userData.user_id, comment.upvotes) ? (
+									<ThumbUpAlt
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								) : (
+									<ThumbUpOffAltIcon
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								)}
+								<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
+							</div>
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'center',
+								}}
+							>
+								{alreadyVoted(userData.user_id, comment.downvotes) ? (
+									<ThumbDownAlt
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								) : (
+									<ThumbDownOffAltIcon
+										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									/>
+								)}
+								<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
+							</div>
+						</div>
 					</CommentContainer>
 				);
 
