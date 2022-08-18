@@ -8,6 +8,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
+import Delete from '@mui/icons-material/Delete';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -41,7 +42,10 @@ const CommentBody = styled.p`
 	max-height: 170px;
 `;
 
-const testingPush = 'does this show?';
+const CommentFooter = styled.div`
+	display: flex;
+	justify-content: space-between;
+`;
 
 const JBookCommentSection = ({
 	commentThread = [],
@@ -68,6 +72,24 @@ const JBookCommentSection = ({
 	useEffect(() => {
 		setShowExpandButton(!isExpanded && commentThread && commentThread.length > 3);
 	}, [isExpanded, commentThread]);
+
+	const deleteComment = async (comment) => {
+		try {
+			await gameChangerAPI.callDataFunction({
+				functionName: 'deleteComment',
+				cloneName: 'jbook',
+				options: {
+					id: comment.id,
+				},
+			});
+
+			await getCommentThread(docID, portfolioName);
+			bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		} catch (err) {
+			console.log('Error while deleting comment');
+			console.log(err);
+		}
+	};
 
 	const voteComment = async (comment, e) => {
 		try {
@@ -115,6 +137,7 @@ const JBookCommentSection = ({
 			}
 
 			for (const [index, comment] of thread.entries()) {
+				console.log('this is the comment', comment, 'this is the data', userData);
 				let date = new Date(comment.createdAt);
 				comments.push(
 					<CommentContainer>
@@ -126,57 +149,102 @@ const JBookCommentSection = ({
 						</CommentTitle>
 
 						<CommentBody>{comment.message}</CommentBody>
-						<div style={{ display: 'flex' }}>
-							<div
-								style={{
-									display: 'flex',
-									flexDirection: 'column',
-									alignItems: 'center',
-									marginRight: '5px',
-								}}
-							>
-								{alreadyVoted(userData.user_id, comment.upvotes) ? (
-									<ThumbUpAlt
-										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
-										onClick={(e) => {
-											voteComment(comment, e);
-										}}
-									/>
-								) : (
-									<ThumbUpOffAltIcon
-										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
-										onClick={(e) => {
-											voteComment(comment, e);
-										}}
-									/>
-								)}
-								<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
+						<CommentFooter>
+							<div style={{ display: 'flex' }}>
+								<div
+									style={{
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+										marginRight: '5px',
+									}}
+								>
+									{alreadyVoted(userData.user_id, comment.upvotes) ? (
+										<ThumbUpAlt
+											sx={{
+												'&:hover': {
+													color: 'green',
+													backgroundColor: 'rgb(250, 250, 250)',
+													borderRadius: '10px',
+												},
+												cursor: 'pointer',
+											}}
+											onClick={(e) => {
+												voteComment(comment, e);
+											}}
+										/>
+									) : (
+										<ThumbUpOffAltIcon
+											sx={{
+												'&:hover': {
+													color: 'green',
+													backgroundColor: 'rgb(250, 250, 250)',
+													borderRadius: '10px',
+												},
+												cursor: 'pointer',
+											}}
+											onClick={(e) => {
+												voteComment(comment, e);
+											}}
+										/>
+									)}
+									<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
+								</div>
+								<div
+									style={{
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+									}}
+								>
+									{alreadyVoted(userData.user_id, comment.downvotes) ? (
+										<ThumbDownAlt
+											sx={{
+												'&:hover': {
+													color: 'green',
+													backgroundColor: 'rgb(250, 250, 250)',
+													borderRadius: '10px',
+												},
+												cursor: 'pointer',
+											}}
+											onClick={(e) => {
+												voteComment(comment, e);
+											}}
+										/>
+									) : (
+										<ThumbDownOffAltIcon
+											sx={{
+												'&:hover': {
+													color: 'green',
+													backgroundColor: 'rgb(250, 250, 250)',
+													borderRadius: '10px',
+												},
+												cursor: 'pointer',
+											}}
+											onClick={(e) => {
+												voteComment(comment, e);
+											}}
+										/>
+									)}
+									<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
+								</div>
 							</div>
-							<div
-								style={{
-									display: 'flex',
-									flexDirection: 'column',
-									alignItems: 'center',
-								}}
-							>
-								{alreadyVoted(userData.user_id, comment.downvotes) ? (
-									<ThumbDownAlt
-										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
-										onClick={(e) => {
-											voteComment(comment, e);
-										}}
-									/>
-								) : (
-									<ThumbDownOffAltIcon
-										sx={{ '&:hover': { color: 'green' }, cursor: 'pointer' }}
-										onClick={(e) => {
-											voteComment(comment, e);
-										}}
-									/>
-								)}
-								<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
-							</div>
-						</div>
+							{comment.authorId === userData.user_id && (
+								<Delete
+									onClick={() => deleteComment(comment)}
+									sx={{
+										transform: 'scale(1.5)',
+										color: 'red',
+										'&:hover': {
+											color: 'rgb(200, 0, 0)',
+											backgroundColor: 'rgb(240, 240, 240)',
+											borderRadius: '10px',
+										},
+										cursor: 'pointer',
+									}}
+								/>
+							)}
+						</CommentFooter>
 					</CommentContainer>
 				);
 
@@ -218,6 +286,7 @@ const JBookCommentSection = ({
 						docID,
 						portfolioName,
 						author: first + last,
+						authorId: userData.user_id,
 					},
 				});
 
