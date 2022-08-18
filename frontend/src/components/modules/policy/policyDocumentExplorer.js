@@ -41,6 +41,7 @@ const styles = {
 	docExplorerPag: {
 		display: 'flex',
 		width: '100%',
+		justifyContent: 'center',
 	},
 };
 
@@ -467,7 +468,7 @@ export default function DocumentExplorer({
 							</div>
 						</div>
 					) : (
-						'Make a search to get started.'
+						'' // 'Make a search to get started.'
 					)}
 				</div>
 
