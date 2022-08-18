@@ -1,4 +1,3 @@
-//test
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -41,6 +40,8 @@ const CommentBody = styled.p`
 	max-width: 280px;
 	max-height: 170px;
 `;
+
+const testingPush = 'does this show?';
 
 const JBookCommentSection = ({
 	commentThread = [],
