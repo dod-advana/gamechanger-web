@@ -259,29 +259,6 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="Clone Request" placement="right" arrow>
-				<a
-					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
-					target="_blank"
-					rel="noopener noreferrer"
-					style={{ color: 'white', textDecoration: 'none', width: '40px' }}
-				>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							// open modal or link
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'CloneRequest'
-							);
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={CloneRequest} />
-					</HoverNavItem>
-				</a>
-			</GCTooltip>
 			{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
@@ -420,28 +397,6 @@ const generateOpenedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="Clone Request" placement="right" arrow>
-				<a
-					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
-					target="_blank"
-					rel="noopener noreferrer"
-					style={{ color: 'white', textDecoration: 'none' }}
-				>
-					<HoverNavItem
-						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'CloneRequest'
-							);
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={CloneRequest} />
-						<span style={{ marginLeft: '10px' }}>Clone Request</span>
-					</HoverNavItem>
-				</a>
-			</GCTooltip>
 			{Permissions.permissionValidator(`${state.cloneData.clone_name} Admin`, true) && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`}>
