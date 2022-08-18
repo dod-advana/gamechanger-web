@@ -724,7 +724,6 @@ const getViewNames = (props) => {
 const getExtraViewPanels = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
-	const { cloneData, count, docSearchResults, resultsPage, loading, prevSearchText, searchText } = state;
 	const viewPanels = [];
 	viewPanels.push({
 		panelName: 'Explorer',
@@ -734,18 +733,17 @@ const getExtraViewPanels = (props) => {
 					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 					<PolicyDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
-						data={docSearchResults}
-						searchText={searchText}
-						prevSearchText={prevSearchText}
-						totalCount={count}
-						loading={loading}
-						resultsPage={resultsPage}
 						resultsPerPage={RESULTS_PER_PAGE}
-						onPaginationClick={(page) => {
-							setState(dispatch, { resultsPage: page, runSearch: true });
+						onPaginationClick={async (page) => {
+							setState(dispatch, {
+								docsLoading: true,
+								resultsPage: page,
+								docsPagination: true,
+							});
 						}}
 						isClone={true}
-						cloneData={cloneData}
+						state={state}
+						dispatch={dispatch}
 					/>
 				</div>
 			</StyledCenterContainer>
@@ -1147,7 +1145,8 @@ const PolicyMainViewHandler = (props) => {
 
 	useEffect(() => {
 		if (state.docsPagination && searchHandler) {
-			searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+			const replaceResults = state.currentViewName === 'Explorer' ? true : state.replaceResults;
+			searchHandler.handleDocPagination(state, dispatch, replaceResults);
 		}
 		if (state.entityPagination && searchHandler) {
 			searchHandler.handleEntityPagination(state, dispatch);

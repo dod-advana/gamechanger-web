@@ -122,7 +122,8 @@ const MainView = (props) => {
 				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
 				!state.docsPagination &&
-				state.cloneData.clone_name.toLowerCase() !== 'jbook' // disabling infinite scroll for jbook
+				state.cloneData.clone_name.toLowerCase() !== 'jbook' &&
+				state.currentViewName !== 'Explorer'
 			) {
 				setState(dispatch, {
 					docsLoading: true,

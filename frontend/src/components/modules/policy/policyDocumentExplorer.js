@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import _ from 'underscore';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
@@ -18,6 +18,7 @@ import {
 import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
+import { setState } from '../../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -82,6 +83,7 @@ function DocumentPanel({
 	handlePdfOnLoadStart,
 	data,
 	fileUrl,
+	loading,
 }) {
 	return (
 		<>
@@ -98,30 +100,35 @@ function DocumentPanel({
 				}}
 			>
 				<div style={{ height: '100%' }}>
-					{filename && filename.endsWith('pdf') && (
-						<iframe
-							title={'PDFViewer'}
-							className="aref"
-							id={'PdfViewer'}
-							ref={measuredRef}
-							onLoad={handlePdfOnLoadStart}
-							style={{
-								borderStyle: 'none',
-								display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
-							}}
-							width="100%"
-							height="100%%"
-						></iframe>
-					)}
-
-					{filename && filename.endsWith('html') && (
-						<iframe
-							title={'PDFViewer'}
-							className="aref"
-							id={'pdfViewer'}
-							src={fileUrl}
-							style={{ width: '100%', height: '100%' }}
-						></iframe>
+					{!loading && filename ? (
+						<>
+							{filename && filename.endsWith('pdf') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'PdfViewer'}
+									ref={measuredRef}
+									onLoad={handlePdfOnLoadStart}
+									style={{
+										borderStyle: 'none',
+										display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
+									}}
+									width="100%"
+									height="100%%"
+								></iframe>
+							)}
+							{filename && filename.endsWith('html') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'pdfViewer'}
+									src={fileUrl}
+									style={{ width: '100%', height: '100%' }}
+								></iframe>
+							)}{' '}
+						</>
+					) : (
+						<LoadingIndicator customColor={'#E9691D'} />
 					)}
 				</div>
 			</div>
@@ -171,35 +178,30 @@ function RightPanel({ iframeLoading, rightPanelOpen, handleRightPanelToggle }) {
 	);
 }
 
-export default function DocumentExplorer({
-	data = [],
-	totalCount,
-	_searchText = '',
-	prevSearchText = '',
-	loading,
-	resultsPage,
-	resultsPerPage,
-	onPaginationClick,
-	isClone = false,
-	cloneData = {},
-}) {
+export default function DocumentExplorer({ resultsPerPage, onPaginationClick, isClone = false, state, dispatch }) {
+	const {
+		cloneData = {},
+		count: totalCount,
+		docSearchResults: data = [],
+		resultsPage,
+		docsLoading: loading,
+		prevSearchText,
+	} = state;
+
 	// Set out state variables and access functions
-	const [collapseKeys, setCollapseKeys] = React.useState(null);
-	const [iframePreviewLink, setIframePreviewLink] = React.useState({
+	const [collapseKeys, setCollapseKeys] = useState(null);
+	const [iframePreviewLink, setIframePreviewLink] = useState({
 		dataIdx: 0,
 		pageHitIdx: 0,
 	});
-	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({
-		dataIdx: -1,
-		pageHitIdx: -1,
-	});
-	const [iframeLoading, setIframeLoading] = React.useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = React.useState(true);
-	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
-	const [pdfLoaded, setPdfLoaded] = React.useState(false);
-	const [viewToggle, setviewToggle] = React.useState(false);
-	const [fileUrl, setFileUrl] = React.useState(null);
-	const [filename, setFilename] = React.useState(null);
+	const [loadPDF, setLoadPDF] = useState(false);
+	const [iframeLoading, setIframeLoading] = useState(false);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+	const [rightPanelOpen, setRightPanelOpen] = useState(true);
+	const [pdfLoaded, setPdfLoaded] = useState(false);
+	const [viewToggle, setviewToggle] = useState(false);
+	const [fileUrl, setFileUrl] = useState(null);
+	const [filename, setFilename] = useState(null);
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -211,7 +213,8 @@ export default function DocumentExplorer({
 
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
-					if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
+					if (filename && loadPDF) {
+						setLoadPDF(false);
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
 							filename,
@@ -223,14 +226,28 @@ export default function DocumentExplorer({
 						).then((url) => {
 							node.src = url;
 							setIframeLoading(false);
-							setPrevIframPreviewLink(iframePreviewLink);
 						});
 					}
 				}
 			}
 		},
-		[iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]
+		[iframePreviewLink, prevSearchText, isClone, cloneData, data, filename, loadPDF]
 	);
+
+	useEffect(() => {
+		setState(dispatch, { activeCategoryTab: 'Documents' });
+	}, [dispatch]);
+
+	useEffect(() => {
+		setIframePreviewLink({
+			pageHitIdx: 0,
+			dataIdx: 0,
+		});
+	}, [data]);
+
+	useEffect(() => {
+		setLoadPDF(true);
+	}, [iframePreviewLink]);
 
 	useEffect(() => {
 		const { dataIdx } = iframePreviewLink;
@@ -429,6 +446,7 @@ export default function DocumentExplorer({
 						alignItems: 'center',
 						width: '100%',
 						minWidth: '370px',
+						height: '45px',
 						marginBottom: '20px',
 					}}
 				>
@@ -436,7 +454,7 @@ export default function DocumentExplorer({
 						<Pagination
 							activePage={resultsPage}
 							itemsCountPerPage={resultsPerPage}
-							totalItemsCount={totalCount}
+							totalItemsCount={totalCount > 9982 ? 9982 : totalCount}
 							pageRangeDisplayed={3}
 							onChange={(page) => {
 								trackEvent(
@@ -449,7 +467,7 @@ export default function DocumentExplorer({
 							}}
 						/>
 					</div>
-					{totalCount ? (
+					{!totalCount || (
 						<div>
 							<div
 								style={{
@@ -468,8 +486,6 @@ export default function DocumentExplorer({
 								{getViewToggleText(viewToggle)}
 							</div>
 						</div>
-					) : (
-						'Make a search to get started.'
 					)}
 				</div>
 				<div style={{ overflow: 'auto', height: '100%', borderRight: '1px solid lightgrey' }}>
@@ -478,7 +494,7 @@ export default function DocumentExplorer({
 							<LoadingIndicator customColor={'#E9691D'} />
 						</div>
 					) : (
-						_.map(data, (item, key) => {
+						data.map((item, key) => {
 							const collapsed = collapseKeys?.[key.toString()] ?? true;
 							const displayTitle =
 								item.title === 'NA'
@@ -576,6 +592,7 @@ export default function DocumentExplorer({
 						handlePdfOnLoadStart={handlePdfOnLoadStart}
 						data={data}
 						fileUrl={fileUrl}
+						loading={loading}
 					/>
 
 					<RightPanel
