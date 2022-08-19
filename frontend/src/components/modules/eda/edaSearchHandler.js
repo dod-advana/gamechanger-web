@@ -346,7 +346,7 @@ const EdaSearchHandler = {
 		} catch (err) {
 			console.log('Error calculating EDA org data');
 			console.log(err);
-			return [];
+			return {};
 		}
 	},
 
