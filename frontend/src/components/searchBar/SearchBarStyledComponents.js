@@ -33,7 +33,7 @@ export const SearchBarInput = styled.input`
 	flex: 1;
 	height: 50px;
 	font-size: 22px;
-	padding-left: 36px;
+	padding: ${({ padding }) => padding ?? '0 0 0 36px'};
 	border: ${inputBorder};
 	border-right: none;
 	font-family: 'Montserrat';
