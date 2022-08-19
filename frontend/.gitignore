@@ -11,6 +11,9 @@
 jest_0/
 jest/
 *.snap
+cypress/results
+cypress/screenshots
+cypress/videos
 
 
 # production
