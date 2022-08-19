@@ -96,8 +96,17 @@ const MainView = (props) => {
 	useEffect(() => {
 		const fullUrl = window.location.href;
 		const { url } = state?.cloneData;
-		const urlEnd = fullUrl.slice(fullUrl.indexOf(url) + url.length + 1);
-		const pageDisplayed = urlEnd.match(/^([\w-]+)/g)?.[0] ?? 'main';
+		const urlEnd = fullUrl.slice(fullUrl.indexOf(url) + url.length);
+		let pageDisplayed = '';
+		if (urlEnd.charAt(0) === '?') {
+			// ignore rest of url, go to main
+			pageDisplayed = 'main';
+		} else {
+			pageDisplayed =
+				urlEnd
+					.slice(1) // skip next character
+					.match(/^([\w-]+)/g)?.[0] ?? 'main';
+		}
 		setState(dispatch, { pageDisplayed });
 	}, [dispatch, state.cloneData]);
 
