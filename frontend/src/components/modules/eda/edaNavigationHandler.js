@@ -12,7 +12,6 @@ import UserIcon from '../../../images/icon/UserIcon.png';
 import CrowdSourcingAppIcon from '../../../images/icon/NewCrowdSourcingIcon.png';
 import DataStatusTrackerIcon from '../../../images/icon/NewDataStatusTrackerIcon.png';
 import AnalystToolsIcon from '../../../images/icon/analyticswht.png';
-import CloneRequest from '../../../images/icon/CloneRequest.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import { Typography } from '@material-ui/core';
@@ -74,6 +73,19 @@ const getToolState = (state) => {
 	};
 };
 
+const clickNotification = (state, dispatch) => {
+	getNotifications(dispatch);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'ShowNotifications');
+};
+
+const clickTutorial = (state, dispatch) => {
+	setState(dispatch, {
+		showTutorial: true,
+		clickedTutorial: true,
+	});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'ShowTutorial');
+};
+
 const generateClosedContentArea = (state, dispatch) => {
 	const toolTheme = getToolTheme(state.cloneData);
 	return (
@@ -89,12 +101,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							getNotifications(dispatch);
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowNotifications'
-							);
+							clickNotification(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -108,15 +115,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							setState(dispatch, {
-								showTutorial: true,
-								clickedTutorial: true,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowTutorial'
-							);
+							clickTutorial(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -247,12 +246,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="Show Notifications" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							getNotifications(dispatch);
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowNotifications'
-							);
+							clickNotification(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -269,15 +263,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							setState(dispatch, {
-								showTutorial: true,
-								clickedTutorial: true,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowTutorial'
-							);
+							clickTutorial(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
