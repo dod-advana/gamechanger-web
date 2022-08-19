@@ -857,6 +857,7 @@ const renderExcludeTerms = (state, dispatch) => {
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+	setState(dispatch, { runSearch: true });
 };
 
 export const getAdvancedOptions = (props) => {
