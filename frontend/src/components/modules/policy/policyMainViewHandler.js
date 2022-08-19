@@ -1144,14 +1144,18 @@ const PolicyMainViewHandler = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
-		if (state.docsPagination && searchHandler) {
+		const shouldRunPagination = (type) => {
+			return Boolean(type && searchHandler);
+		};
+
+		if (shouldRunPagination(state.docsPagination)) {
 			const replaceResults = state.currentViewName === 'Explorer' ? true : state.replaceResults;
 			searchHandler.handleDocPagination(state, dispatch, replaceResults);
 		}
-		if (state.entityPagination && searchHandler) {
+		if (shouldRunPagination(state.entityPagination)) {
 			searchHandler.handleEntityPagination(state, dispatch);
 		}
-		if (state.topicPagination && searchHandler) {
+		if (shouldRunPagination(state.topicPagination)) {
 			searchHandler.handleTopicPagination(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);
