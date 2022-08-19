@@ -102,7 +102,7 @@ function DocumentPanel({
 				<div style={{ height: '100%' }}>
 					{!loading && filename ? (
 						<>
-							{filename && filename.endsWith('pdf') && (
+							{filename.endsWith('pdf') && (
 								<iframe
 									title={'PDFViewer'}
 									className="aref"
@@ -117,7 +117,7 @@ function DocumentPanel({
 									height="100%%"
 								></iframe>
 							)}
-							{filename && filename.endsWith('html') && (
+							{filename.endsWith('html') && (
 								<iframe
 									title={'PDFViewer'}
 									className="aref"
@@ -178,14 +178,68 @@ function RightPanel({ iframeLoading, rightPanelOpen, handleRightPanelToggle }) {
 	);
 }
 
+const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHighlightedSections }) => {
+	return (
+		<div style={{ overflow: 'auto', height: '100%', borderRight: '1px solid lightgrey' }}>
+			{docsLoading ? (
+				<div style={{ margin: '0 auto' }}>
+					<LoadingIndicator customColor={'#E9691D'} />
+				</div>
+			) : (
+				data.map((item, key) => {
+					const collapsed = collapseKeys?.[key.toString()] ?? true;
+					const displayTitle =
+						item.title === 'NA'
+							? `${item.doc_type} ${item.doc_num}`
+							: `${item.doc_type} ${item.doc_num} - ${item.title}`;
+
+					if (item.type === 'document') {
+						const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
+						return (
+							<div key={key}>
+								<div
+									className="searchdemo-modal-result-header"
+									onClick={(e) => {
+										e.preventDefault();
+										setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
+									}}
+								>
+									<i
+										style={{
+											marginRight: collapsed ? 14 : 10,
+											fontSize: 20,
+											cursor: 'pointer',
+										}}
+										className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
+									/>
+									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+									<span style={{ width: 30, marginLeft: 'auto', color: 'white' }} className="badge">
+										{item.pageHitCount}
+									</span>
+								</div>
+								<Collapse isOpened={!collapsed}>
+									<div>{renderHighlightedSections(pageHits, item, key)}</div>
+								</Collapse>
+							</div>
+						);
+					} else {
+						return null;
+					}
+				})
+			)}
+		</div>
+	);
+};
+
 export default function DocumentExplorer({ resultsPerPage, onPaginationClick, isClone = false, state, dispatch }) {
 	const {
 		cloneData = {},
 		count: totalCount,
 		docSearchResults: data = [],
 		resultsPage,
-		docsLoading: loading,
+		docsLoading,
 		prevSearchText,
+		loading,
 	} = state;
 
 	// Set out state variables and access functions
@@ -488,59 +542,13 @@ export default function DocumentExplorer({ resultsPerPage, onPaginationClick, is
 						</div>
 					)}
 				</div>
-				<div style={{ overflow: 'auto', height: '100%', borderRight: '1px solid lightgrey' }}>
-					{loading ? (
-						<div style={{ margin: '0 auto' }}>
-							<LoadingIndicator customColor={'#E9691D'} />
-						</div>
-					) : (
-						data.map((item, key) => {
-							const collapsed = collapseKeys?.[key.toString()] ?? true;
-							const displayTitle =
-								item.title === 'NA'
-									? `${item.doc_type} ${item.doc_num}`
-									: `${item.doc_type} ${item.doc_num} - ${item.title}`;
-
-							if (item.type === 'document') {
-								const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
-								return (
-									<div key={key}>
-										<div
-											className="searchdemo-modal-result-header"
-											onClick={(e) => {
-												e.preventDefault();
-												setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
-											}}
-										>
-											<i
-												style={{
-													marginRight: collapsed ? 14 : 10,
-													fontSize: 20,
-													cursor: 'pointer',
-												}}
-												className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
-											/>
-											<span className="gc-document-explorer-result-header-text">
-												{displayTitle}
-											</span>
-											<span
-												style={{ width: 30, marginLeft: 'auto', color: 'white' }}
-												className="badge"
-											>
-												{item.pageHitCount}
-											</span>
-										</div>
-										<Collapse isOpened={!collapsed}>
-											<div>{renderHighlightedSections(pageHits, item, key)}</div>
-										</Collapse>
-									</div>
-								);
-							} else {
-								return null;
-							}
-						})
-					)}
-				</div>
+				<DocResults
+					docsLoading={docsLoading}
+					data={data}
+					collapseKeys={collapseKeys}
+					setCollapseKeys={setCollapseKeys}
+					renderHighlightedSections={renderHighlightedSections}
+				/>
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
