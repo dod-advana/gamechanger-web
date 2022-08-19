@@ -42,6 +42,7 @@ const styles = {
 	docExplorerPag: {
 		display: 'flex',
 		width: '100%',
+		justifyContent: 'center',
 	},
 };
 
@@ -231,16 +232,15 @@ const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHi
 	);
 };
 
-export default function DocumentExplorer({ resultsPerPage, onPaginationClick, isClone = false, state, dispatch }) {
-	const {
-		cloneData = {},
-		count: totalCount,
-		docSearchResults: data = [],
-		resultsPage,
-		docsLoading,
-		prevSearchText,
-		loading,
-	} = state;
+export default function DocumentExplorer({
+	totalCount,
+	resultsPerPage,
+	onPaginationClick,
+	isClone = false,
+	state,
+	dispatch,
+}) {
+	const { cloneData = {}, docSearchResults: data = [], resultsPage, docsLoading, prevSearchText, loading } = state;
 
 	// Set out state variables and access functions
 	const [collapseKeys, setCollapseKeys] = useState(null);
@@ -508,7 +508,7 @@ export default function DocumentExplorer({ resultsPerPage, onPaginationClick, is
 						<Pagination
 							activePage={resultsPage}
 							itemsCountPerPage={resultsPerPage}
-							totalItemsCount={totalCount > 9982 ? 9982 : totalCount}
+							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
 							onChange={(page) => {
 								trackEvent(
@@ -521,7 +521,7 @@ export default function DocumentExplorer({ resultsPerPage, onPaginationClick, is
 							}}
 						/>
 					</div>
-					{!totalCount || (
+					{totalCount ? (
 						<div>
 							<div
 								style={{
@@ -540,6 +540,8 @@ export default function DocumentExplorer({ resultsPerPage, onPaginationClick, is
 								{getViewToggleText(viewToggle)}
 							</div>
 						</div>
+					) : (
+						''
 					)}
 				</div>
 				<DocResults

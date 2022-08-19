@@ -724,6 +724,7 @@ const getViewNames = (props) => {
 const getExtraViewPanels = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
+	const { count } = state;
 	const viewPanels = [];
 	viewPanels.push({
 		panelName: 'Explorer',
@@ -733,6 +734,7 @@ const getExtraViewPanels = (props) => {
 					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 					<PolicyDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
+						totalCount={count > 9982 ? 9982 : count}
 						resultsPerPage={RESULTS_PER_PAGE}
 						onPaginationClick={async (page) => {
 							setState(dispatch, {
