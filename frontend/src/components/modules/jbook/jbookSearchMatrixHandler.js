@@ -4,234 +4,27 @@ import GCAccordion from '../../common/GCAccordion';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { GC_COLORS } from './jbookMainViewHandler';
 import SimpleTable from '../../common/SimpleTable';
+import JBookMultiSelectFilter from './jbookMultiSelectFilter';
 
 import _ from 'lodash';
-import { Typography, FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import Pluralize from 'pluralize';
+import { FormControl } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
-
-import { trackEvent } from '../../telemetry/Matomo';
-import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import InputFilter from './InputFilter';
-
-const handleSelectSpecific = (state, dispatch, type, checked) => {
-	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
-	newSearchSettings[`${type}SpecificSelected`] = true;
-	newSearchSettings[`${type}AllSelected`] = false;
-	if (!checked) newSearchSettings[type] = [];
-	setState(dispatch, {
-		jbookSearchSettings: newSearchSettings,
-		metricsCounted: false,
-	});
-};
-
-const handleSelectAll = (state, dispatch, type) => {
-	const specific = `${type}SpecificSelected`;
-	const all = `${type}AllSelected`;
-
-	if (state.jbookSearchSettings[specific]) {
-		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
-		newSearchSettings[specific] = false;
-		newSearchSettings[all] = true;
-		let runSearch = true;
-		let runGraphSearch = false;
-		newSearchSettings[type] = state.defaultOptions[type];
-		const diffSearchSettings = [...state.modifiedSearchSettings].filter((e) => e !== type);
-		if (type === 'appropriationNumber') {
-			newSearchSettings.paccts = [];
-			newSearchSettings.raccts = [];
-			newSearchSettings.oaccts = [];
-		}
-		setState(dispatch, {
-			jbookSearchSettings: newSearchSettings,
-			metricsCounted: false,
-			runSearch,
-			runGraphSearch,
-			modifiedSearchSettings: diffSearchSettings,
-		});
-	}
-};
-
-const handleFilterChange = (event, state, dispatch, type) => {
-	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
-	let optionName = event.target.name;
-	const index = newSearchSettings[type].indexOf(optionName);
-
-	if (index !== -1) {
-		newSearchSettings[type].splice(index, 1);
-	} else {
-		newSearchSettings[type].push(optionName);
-	}
-
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings[`${type}Update`] = true;
-
-	let diffSearchSettings = [...state.modifiedSearchSettings];
-	// if filter is being applied for the first time
-	if (index === -1 && !diffSearchSettings.includes(type)) {
-		diffSearchSettings.push(type);
-		diffSearchSettings.sort();
-		// if a filter was removed and no longer applies
-	} else if (index !== -1 && diffSearchSettings.includes(type)) {
-		diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
-	}
-
-	setState(dispatch, {
-		jbookSearchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-		modifiedSearchSettings: diffSearchSettings,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		`${type}FilterToggle`,
-		event.target.name,
-		event.target.value ? 1 : 0
-	);
-};
 
 const keywordsOpts = ['Yes', 'No'];
 
-const renderFilterCheckboxesOptions = (state, dispatch, classes, type, options) => {
-	const renderOptions = (op, doctype = '') => {
-		return op.map((option, index) => {
-			return (
-				<FormControlLabel
-					key={`${option} ${index}`}
-					value={`${option}`}
-					classes={{
-						root: classes.rootLabel,
-						label: classes.checkboxPill,
-					}}
-					data-cy={`filter-option-${option}`}
-					control={
-						<Checkbox
-							classes={{
-								root: classes.rootButton,
-								checked: classes.checkedButton,
-							}}
-							name={`${option}`}
-							checked={state.jbookSearchSettings[doctype === '' ? type : doctype].indexOf(option) !== -1}
-							onClick={(event) =>
-								handleFilterChange(event, state, dispatch, doctype === '' ? type : doctype)
-							}
-						/>
-					}
-					label={`${option}`}
-					labelPlacement="end"
-				/>
-			);
-		});
-	};
-
-	if (type === 'appropriationNumber') {
-		let docs = Object.keys(options);
-		let map = {
-			raccts: 'RDT&E',
-			'RDT&E': 'raccts',
-			paccts: 'Procurement',
-			Procurement: 'paccts',
-			oaccts: 'O&M',
-			'O&M': 'oaccts',
-		};
-
-		if (state.selectedPortfolio !== 'AI Inventory') {
-			docs = docs.filter((item) => item !== 'oaccts');
-		}
-		if (state.jbookSearchSettings.budgetTypeSpecificSelected && state.jbookSearchSettings.budgetType.length > 0) {
-			docs = state.jbookSearchSettings.budgetType.map((item) => map[item]);
-		}
-		return (
-			<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-				{docs.map((doctype) => {
-					return (
-						<>
-							<Typography style={{ width: '100%', display: 'inline-flex', fontSize: '20' }}>
-								{map[doctype]}
-							</Typography>
-							{renderOptions(options[doctype], doctype)}
-						</>
-					);
-				})}
-			</FormGroup>
-		);
-	}
-	return (
-		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
-			{renderOptions(options)}
-		</FormGroup>
-	);
-};
-
-const renderFilterCheckboxes = (state, dispatch, classes, type, displayName, customOptions = undefined) => {
-	const allSelected = `${type}AllSelected`;
-	const allText = `All ${Pluralize(displayName)}`;
-	const specificText = `Specific ${Pluralize(displayName)}`;
-	const specificSelected = `${type}SpecificSelected`;
-
+const renderFilterOptions = (state, dispatch, classes, type, customOptions = undefined) => {
 	const options = customOptions || state.defaultOptions[type];
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			{
-				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
-							name={allText}
-							value={allText}
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() => handleSelectAll(state, dispatch, type)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.jbookSearchSettings[allSelected]}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={allText}
-									style={styles.filterBox}
-								/>
-							}
-							label={allText}
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					<FormGroup row>
-						<FormControlLabel
-							name={specificText}
-							value={specificText}
-							classes={{ label: classes.titleText }}
-							data-cy="filter-checkbox"
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={() =>
-										handleSelectSpecific(
-											state,
-											dispatch,
-											type,
-											state.jbookSearchSettings[specificSelected]
-										)
-									}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.jbookSearchSettings[specificSelected]}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={specificText}
-									style={styles.filterBox}
-								/>
-							}
-							label={specificText}
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-					{state.jbookSearchSettings[specificSelected] &&
-						options &&
-						renderFilterCheckboxesOptions(state, dispatch, classes, type, options)}
-				</>
-			}
+			<JBookMultiSelectFilter
+				state={state}
+				dispatch={dispatch}
+				classes={classes}
+				filter={type}
+				options={options}
+			/>
 		</FormControl>
 	);
 };
@@ -446,7 +239,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
+					{renderFilterOptions(state, dispatch, classes, 'budgetYear')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -457,12 +250,11 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
+					{renderFilterOptions(
 						state,
 						dispatch,
 						classes,
 						'budgetType',
-						'budget type',
 						selectedPortfolio !== 'AI Inventory'
 							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
 							: undefined
@@ -477,7 +269,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterOptions(state, dispatch, classes, 'serviceAgency')}
 				</GCAccordion>
 			</div>
 
@@ -489,7 +281,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'appropriationNumber', 'appropriation number')}
+					{renderFilterOptions(state, dispatch, classes, 'appropriationNumber')}
 				</GCAccordion>
 			</div>
 
@@ -501,7 +293,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity')}
+					{renderFilterOptions(state, dispatch, classes, 'budgetActivity')}
 				</GCAccordion>
 			</div>
 
@@ -581,7 +373,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewer', 'primary reviewer')}
+					{renderFilterOptions(state, dispatch, classes, 'primaryReviewer')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="serviceReviewer-filter">
@@ -592,7 +384,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceReviewer', 'service reviewer')}
+					{renderFilterOptions(state, dispatch, classes, 'serviceReviewer')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="pocReviewer-filter">
@@ -618,7 +410,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'reviewStatus', 'review status')}
+					{renderFilterOptions(state, dispatch, classes, 'reviewStatus')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="hasKeywords-filter">
@@ -629,9 +421,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-						{renderFilterCheckboxesOptions(state, dispatch, classes, 'hasKeywords', keywordsOpts)}
-					</FormControl>
+					{renderFilterOptions(state, dispatch, classes, 'hasKeywords', keywordsOpts)}
 				</GCAccordion>
 			</div>
 
@@ -643,12 +433,11 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
+					{renderFilterOptions(
 						state,
 						dispatch,
 						classes,
 						'classLabel',
-						'tag',
 						portfolioMap?.[selectedPortfolio]?.tags
 					)}
 				</GCAccordion>
@@ -662,7 +451,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'sourceTag', 'source tag')}
+					{renderFilterOptions(state, dispatch, classes, 'sourceTag')}
 				</GCAccordion>
 			</div>
 
@@ -718,7 +507,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetYear', 'budget year')}
+					{renderFilterOptions(state, dispatch, classes, 'budgetYear')}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="budgetType-filter">
@@ -729,12 +518,11 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(
+					{renderFilterOptions(
 						state,
 						dispatch,
 						classes,
 						'budgetType',
-						'budget type',
 						selectedPortfolio !== 'AI Inventory'
 							? state.defaultOptions['budgetType'].filter((item) => item !== 'O&M')
 							: undefined
@@ -749,7 +537,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'serviceAgency', 'service agency')}
+					{renderFilterOptions(state, dispatch, classes, 'serviceAgency')}
 				</GCAccordion>
 			</div>
 
@@ -761,7 +549,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'appropriationNumber', 'appropriation number')}
+					{renderFilterOptions(state, dispatch, classes, 'appropriationNumber')}
 				</GCAccordion>
 			</div>
 
@@ -773,7 +561,7 @@ const getSearchMatrixItems = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterCheckboxes(state, dispatch, classes, 'budgetActivity', 'budget activity')}
+					{renderFilterOptions(state, dispatch, classes, 'budgetActivity')}
 				</GCAccordion>
 			</div>
 
@@ -854,7 +642,7 @@ const getSearchMatrixItems = (props) => {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterCheckboxes(state, dispatch, classes, 'primaryReviewStatus', 'review status')}
+						{renderFilterOptions(state, dispatch, classes, 'primaryReviewStatus')}
 					</GCAccordion>
 				</div>
 			)}
@@ -868,12 +656,11 @@ const getSearchMatrixItems = (props) => {
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 					>
-						{renderFilterCheckboxes(
+						{renderFilterOptions(
 							state,
 							dispatch,
 							classes,
 							'classLabel',
-							'tag',
 							portfolioMap?.[selectedPortfolio]?.tags
 						)}
 					</GCAccordion>
@@ -953,39 +740,6 @@ const JBookSearchMatrixHandler = (props) => {
 		return getSearchMatrixItemsAIInventory(props);
 	}
 	return getSearchMatrixItems(props);
-};
-
-const styles = {
-	innerContainer: {
-		display: 'flex',
-		height: '100%',
-		flexDirection: 'column',
-	},
-	cardBody: {
-		padding: '10px 0px',
-		fontSize: '1.1em',
-		fontFamily: 'Noto Sans',
-	},
-	subHead: {
-		fontSize: '1.0em',
-		display: 'flex',
-		position: 'relative',
-	},
-	headerColumn: {
-		fontSize: '1.0em',
-		width: '100%',
-		padding: '8px 8px',
-		backgroundColor: 'rgb(50,53,64)',
-		display: 'flex',
-		alignItems: 'center',
-	},
-	filterDiv: {
-		display: 'block',
-		margin: '10px',
-	},
-	boldText: {
-		fontSize: '0.8em',
-	},
 };
 
 export default JBookSearchMatrixHandler;
