@@ -11,6 +11,9 @@ import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import GCToolTip from '../../common/GCToolTip';
+import InfoIcon from '@material-ui/icons/Info';
+
 const gameChangerAPI = new GameChangerAPI();
 
 const EDASearchBarHandler = {
@@ -97,7 +100,22 @@ const EDASearchBarHandler = {
 						}}
 						placeholder="Search..."
 						id="gcSearchInput"
+						padding="0 40px 0 36px"
 					/>
+
+					<GCToolTip
+						title={
+							<>
+								To search A or B, enter 'A or B' <br />
+								To search A and B, enter 'A B' or 'A and B' <br />
+								To search a phrase together, add quotes around it like '"machine learning"'
+							</>
+						}
+						arrow
+						enterDelay={500}
+					>
+						<InfoIcon style={{ position: 'absolute', right: hideSearchResults ? '165px' : '10px' }} />
+					</GCToolTip>
 
 					{dropdownOpen && !advancedSearchOpen && (
 						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
