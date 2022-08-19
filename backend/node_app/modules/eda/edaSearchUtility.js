@@ -860,6 +860,112 @@ class EDASearchUtility {
 		};
 	}
 
+	cleanContractTotals(contractNoAgencyBucket, contractBuckets) {
+		let totalObligatedAmount = 0;
+		const cleanedContractTotals = contractBuckets.map((bucket) => {
+			totalObligatedAmount += bucket.docs.obligatedAmounts.sum_agg.value;
+			return {
+				key: bucket.key,
+				count: bucket.doc_count,
+				value: bucket.docs.obligatedAmounts.sum_agg.value,
+			};
+		});
+		if (contractNoAgencyBucket)
+			cleanedContractTotals.push({
+				key: 'No Agency',
+				count: contractNoAgencyBucket.doc_count,
+				value: contractNoAgencyBucket.sum_agg.value,
+			});
+		return { totalObligatedAmount, cleanedContractTotals };
+	}
+
+	cleanHitsWithPage(hit, pageSet, result, user) {
+		hit.inner_hits.pages.hits.hits.forEach((phit) => {
+			const pageIndex = phit._nested.offset;
+			let pageNumber = pageIndex + 1;
+			// one hit per page max
+			if (!pageSet.has(pageNumber)) {
+				const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+				if (usePageZero) {
+					if (pageSet.has(0)) {
+						return;
+					} else {
+						pageNumber = 0;
+						pageSet.add(0);
+					}
+				}
+				pageSet.add(pageNumber);
+				result.pageHits.push({ snippet, pageNumber });
+			}
+		});
+	}
+
+	cleanHitsNoGivenPage(hit, pageSet, result, _source, _score, user) {
+		Object.keys(hit.inner_hits).forEach((id) => {
+			const { file_location_eda_ext } = _source;
+			result.file_location_eda_ext = file_location_eda_ext;
+			result.score = _score;
+			hit.inner_hits[id].hits.hits.forEach((phit) => {
+				const pageIndex = phit._nested.offset;
+				const paragraphIdBeingMatched = parseInt(id);
+				const text = phit.fields['pages.p_raw_text'][0];
+				const score = phit._score;
+				let pageNumber = pageIndex + 1;
+
+				// one hit per page max
+				if (!pageSet.has(pageNumber)) {
+					const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+					if (usePageZero) {
+						if (pageSet.has(0)) {
+							return;
+						} else {
+							pageNumber = 0;
+							pageSet.add(0);
+						}
+					}
+					pageSet.add(pageNumber);
+					result.pageHits.push({
+						snippet,
+						pageNumber,
+						paragraphIdBeingMatched,
+						score,
+						text,
+						id,
+					});
+				}
+			});
+		});
+	}
+
+	cleanInnerHits(hit, pageSet, result, _source, _score, user) {
+		if (r.inner_hits) {
+			if (hit.inner_hits.pages) {
+				this.cleanHitsWithPage(hit, pageSet, result, user);
+			} else {
+				this.cleanHitsNoGivenPage(hit, pageSet, result, _source, _score, user);
+			}
+		}
+	}
+
+	cleanKeyw_5(result) {
+		if (Array.isArray(result['keyw_5'])) {
+			result['keyw_5'] = result['keyw_5'].join(', ');
+		} else {
+			result['keyw_5'] = '';
+		}
+	}
+
+	cleanHighlights(hit, result) {
+		if (hit.highlight) {
+			if (hit.highlight['title.search']) {
+				result.pageHits.push({ title: 'Title', snippet: hit.highlight['title.search'][0] });
+			}
+			if (hit.highlight.keyw_5) {
+				result.pageHits.push({ title: 'Keywords', snippet: hit.highlight.keyw_5[0] });
+			}
+		}
+	}
+
 	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
 		try {
 			let results = {
@@ -877,21 +983,8 @@ class EDASearchUtility {
 			const contractBuckets = contractTotals?.agencies?.buckets ? contractTotals.agencies.buckets : [];
 			const contractNoAgencyBucket = contractTotalsNoAgency?.obligatedAmounts;
 
-			let totalObligatedAmount = 0;
-			const cleanedContractTotals = contractBuckets.map((bucket) => {
-				totalObligatedAmount += bucket.docs.obligatedAmounts.sum_agg.value;
-				return {
-					key: bucket.key,
-					count: bucket.doc_count,
-					value: bucket.docs.obligatedAmounts.sum_agg.value,
-				};
-			});
-			if (contractNoAgencyBucket)
-				cleanedContractTotals.push({
-					key: 'No Agency',
-					count: contractNoAgencyBucket.doc_count,
-					value: contractNoAgencyBucket.sum_agg.value,
-				});
+			let cleanContractObject = this.cleanContractTotals(contractNoAgencyBucket, contractBuckets);
+			const { cleanedContractTotals, totalObligatedAmount } = cleanContractObject;
 
 			results.issuingOrgs = cleanedContractTotals;
 			results.totalObligatedAmount = totalObligatedAmount;
@@ -911,76 +1004,12 @@ class EDASearchUtility {
 					result.pageHits = [];
 					const pageSet = new Set();
 
-					if (r.inner_hits) {
-						if (r.inner_hits.pages) {
-							r.inner_hits.pages.hits.hits.forEach((phit) => {
-								const pageIndex = phit._nested.offset;
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-						} else {
-							Object.keys(r.inner_hits).forEach((id) => {
-								const { file_location_eda_ext } = _source;
-								result.file_location_eda_ext = file_location_eda_ext;
-								result.score = _score;
-								r.inner_hits[id].hits.hits.forEach((phit) => {
-									const pageIndex = phit._nested.offset;
-									const paragraphIdBeingMatched = parseInt(id);
-									const text = phit.fields['pages.p_raw_text'][0];
-									const score = phit._score;
-									let pageNumber = pageIndex + 1;
-
-									// one hit per page max
-									if (!pageSet.has(pageNumber)) {
-										const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(
-											phit,
-											user
-										);
-										if (usePageZero) {
-											if (pageSet.has(0)) {
-												return;
-											} else {
-												pageNumber = 0;
-												pageSet.add(0);
-											}
-										}
-										pageSet.add(pageNumber);
-										result.pageHits.push({
-											snippet,
-											pageNumber,
-											paragraphIdBeingMatched,
-											score,
-											text,
-											id,
-										});
-									}
-								});
-							});
-						}
-					}
+					this.cleanInnerHits(r, pageSet, result, _source, _score, user);
 
 					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-					if (r.highlight) {
-						if (r.highlight['title.search']) {
-							result.pageHits.push({ title: 'Title', snippet: r.highlight['title.search'][0] });
-						}
-						if (r.highlight.keyw_5) {
-							result.pageHits.push({ title: 'Keywords', snippet: r.highlight.keyw_5[0] });
-						}
-					}
+
+					this.cleanHighlights(r, result);
+
 					result.pageHitCount = pageSet.size;
 
 					try {
@@ -994,11 +1023,8 @@ class EDASearchUtility {
 
 					result.esIndex = index;
 
-					if (Array.isArray(result['keyw_5'])) {
-						result['keyw_5'] = result['keyw_5'].join(', ');
-					} else {
-						result['keyw_5'] = '';
-					}
+					this.cleanKeyw_5(result);
+
 					if (!result.ref_list) {
 						result.ref_list = [];
 					}
