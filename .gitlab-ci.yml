@@ -161,9 +161,12 @@ integration-testing-cypress-job:  # Start the integration testing
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   script:
-    - npm install -g cypress
     - curl ${CYPRESS_BASE_URL}
-    - cd frontend && npm run cy:test
+    - cd frontend
+    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
+    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
+    - yarn add --cache-folder ../.yarn-cache cypress
+    - npm run cy:test
   after_script:
     - |
       echo "Cypress tests finished"
