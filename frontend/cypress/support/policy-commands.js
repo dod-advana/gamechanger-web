@@ -42,6 +42,6 @@ Cypress.Commands.add('getFavoriteCard', (favoriteTitle, ...args) => {
 /**
  * Clicks the Tab on the Search bar
  */
-Cypress.Commands.add('switchTab', (resultType) => {
+Cypress.Commands.add('switchResultsTab', (resultType) => {
 	cy.getDataCy('tabs-container', { timeout: 10000 }).find('p').contains(resultType).should('exist').click();
 });

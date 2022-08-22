@@ -71,8 +71,8 @@ declare namespace Cypress {
 		/**
 		 * Switch between the tabs under the Search Bar (Organizations, Topics, Documents)
 		 * @param tabName
-		 * @example cy.switchTab('Organizations');
+		 * @example cy.switchResultsTab('Organizations');
 		 */
-		switchTab(tabName: String);
+		switchResultsTab(tabName: String);
 	}
 }
