@@ -72,6 +72,18 @@ if (constants.EXPRESS_TRUST_PROXY) {
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
 
+app.use(async function (req, _res, next) {
+	if (req.get('x-env-ssl-client-certificate')) {
+		req.headers['x-env-ssl_client_certificate'] = req.get('x-env-ssl-client-certificate');
+	}
+
+	if (req.get('SSL-CLIENT-S-DN-CN')) {
+		req.headers['SSL_CLIENT_S_DN_CN'] = req.get('SSL-CLIENT-S-DN-CN');
+	}
+
+	next();
+});
+
 app.get('*.js', function (req, res, next) {
 	if (req.url === '/config.js') {
 		next();
