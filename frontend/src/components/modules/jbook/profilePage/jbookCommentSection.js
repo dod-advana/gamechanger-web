@@ -61,6 +61,7 @@ const JBookCommentSection = ({
 	const [text, setText] = useState('');
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [showExpandButton, setShowExpandButton] = useState(false);
+	const [currentComment, setCurrentComment] = useState({});
 	const [showUserModal, setShowUserModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const bottomRef = useRef(null);
@@ -295,13 +296,13 @@ const JBookCommentSection = ({
 										/>
 									)}
 									<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
-									<DeleteModal comment={comment} />
 								</div>
 							</div>
 							{(comment.authorId === userData.user_id ||
 								comment.author === `${userData.first_name} ${userData.last_name[0]}.`) && (
 								<Delete
 									onClick={() => {
+										setCurrentComment(comment);
 										setShowDeleteModal(true);
 									}}
 									sx={{
@@ -385,6 +386,7 @@ const JBookCommentSection = ({
 
 	return (
 		<StyledCard>
+			<DeleteModal comment={currentComment} />
 			<JBookUserNameModal
 				showUserModal={showUserModal}
 				userData={userData}
