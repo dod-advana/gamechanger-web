@@ -94,9 +94,11 @@ const MainView = (props) => {
 	}, [state.runningSearch]);
 
 	useEffect(() => {
+		const baseUrl = window.location.origin;
 		const fullUrl = window.location.href;
+		const pathname = fullUrl.replace(baseUrl, '');
 		const { url } = state?.cloneData;
-		const urlEnd = fullUrl.slice(fullUrl.indexOf(url) + url.length + 1);
+		const urlEnd = pathname.slice(pathname.indexOf(url) + url.length + 1);
 		const pageDisplayed = urlEnd.match(/^([\w-]+)/g)?.[0] ?? 'main';
 		setState(dispatch, { pageDisplayed });
 	}, [dispatch, state.cloneData]);
