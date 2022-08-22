@@ -45,10 +45,10 @@ describe('Tests multiple types of policy searches.', () => {
 	//     cy.search(searchTerm);
 	//     getCard(0).find('a').contains('Open').click();
 	//     //cy.getCard(0).find('a').contains('Open').click();
-	// });
+	// }); Cypress can't handle new tabs, need to find a way to open doc without new tab opening
 });
 
-describe.only('User Dashboard Tests', () => {
+describe('User Dashboard Tests', () => {
 	beforeEach(() => {
 		cy.login('gamechanger');
 	});
@@ -99,7 +99,7 @@ describe.only('User Dashboard Tests', () => {
 		const searchTerm = 'West point';
 
 		cy.search(searchTerm);
-		cy.switchTab('Organizations');
+		cy.switchResultsTab('Organizations');
 		cy.getCard(0)
 			.find('.text')
 			.then((card) => {
@@ -121,13 +121,13 @@ describe.only('User Dashboard Tests', () => {
 		const searchTerm = 'Military';
 
 		cy.search(searchTerm);
-		cy.switchTab('Topic');
+		cy.switchResultsTab('Topic');
 		cy.getCard(0)
 			.find('.text')
 			.then((card) => {
 				const titleText = card.text();
 
-				cy.get('iframe').then((el) => el.remove()); //I dont even know where this iframe is coming from...
+				cy.get('iframe').then((el) => el.remove());
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
