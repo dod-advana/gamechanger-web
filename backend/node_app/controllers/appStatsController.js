@@ -730,7 +730,7 @@ class AppStatsController {
 
 				const feedbackData = await this.feedback.findAndCountAll({
 					offset: 0,
-					order:  [['createdAt','DESC']],
+					order: [['createdAt', 'DESC']],
 					where: {},
 					attributes: [
 						'event_name',
