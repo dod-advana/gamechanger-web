@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Select, MenuItem, Input, Checkbox, Typography } from '@material-ui/core';
+import { Select, MenuItem, Input, Checkbox, Typography, TextField } from '@material-ui/core';
+import Autocomplete from '@mui/material/Autocomplete';
 import ReactTable from 'react-table';
 import Modal from 'react-modal';
 import { BorderDiv, TableRow } from './util/styledDivs';
@@ -75,6 +76,8 @@ export default (props) => {
 	const [currentTopicModel, setCurrentTopicModel] = useState('');
 
 	const [corpusCount, setCorpusCount] = useState(0);
+	const [selectedCache, setSelectedCache] = useState([]);
+	const [cacheOptions, setCacheOptions] = useState([]);
 
 	const [selectedSentence, setSelectedSentence] = useState('');
 	const [docCompareSelectedSentence, setDocCompareSelectedSentence] = useState('');
@@ -111,6 +114,7 @@ export default (props) => {
 		getModelsList();
 		getCorpusCount();
 		getLocalData();
+		getCache();
 	};
 	/**
 	 * Retrieves the current transformer from gameChangerAPI.getLoadedModels()
@@ -178,19 +182,17 @@ export default (props) => {
 		const processList = [];
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
-				if (key !== 'flags') {
-					const status = props.processes.process_status[key]['process'].split(': ');
-					if (['models', 'training'].includes(status[0])) {
-						processList.push({
-							...props.processes.process_status[key],
-							thread_id: key,
-							date: 'Currently Running',
-						});
-					}
+				const status = key !== 'flags' ? props.processes.process_status[key]['process'].split(': ') : [''];
+				if (['models', 'training'].includes(status[0])) {
+					processList.push({
+						...props.processes.process_status[key],
+						thread_id: key,
+						date: 'Currently Running',
+					});
 				}
 			}
 		}
-		if (props.processes && props.processes.completed_process) {
+		if (props.processes.completed_process) {
 			for (const completed of props.processes.completed_process) {
 				const completed_process = completed.process.split(': ');
 				if (['models', 'training'].includes(completed_process[0])) {
@@ -307,6 +309,51 @@ export default (props) => {
 			props.updateLogs('Error training model: ' + e.toString(), 2);
 		}
 	};
+
+	/**
+	 * @method getCache
+	 */
+	const getCache = async () => {
+		try {
+			const cache = await gameChangerAPI.getCache();
+			setCacheOptions(cache.data);
+			props.getProcesses();
+		} catch (e) {
+			props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
+		}
+	};
+	/**
+	 * @method clearAllCache
+	 */
+	const clearAllCache = async () => {
+		try {
+			await gameChangerAPI.clearCache({
+				clear: [],
+			});
+			props.getProcesses();
+			setSelectedCache([]);
+			getCache();
+		} catch (e) {
+			props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
+		}
+	};
+
+	/**
+	 * @method clearSelectCache
+	 */
+	const clearSelectCache = async () => {
+		try {
+			await gameChangerAPI.clearCache({
+				clear: selectedCache,
+			});
+			props.getProcesses();
+			setSelectedCache([]);
+			getCache();
+		} catch (e) {
+			props.updateLogs('Error clearing selected cache: ' + e.toString(), 2);
+		}
+	};
+
 	/**
 	 * @method triggerTrainTopics
 	 */
@@ -1131,6 +1178,66 @@ export default (props) => {
 							/>
 						</div>
 					</fieldset>
+				</BorderDiv>
+				<BorderDiv className="half" style={{ float: 'right' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block' }}>
+							<b>Cache Control:</b>
+						</div>
+						<div
+							style={{
+								width: '100%',
+								padding: '20px',
+								marginBottom: '10px',
+								border: '2px solid darkgray',
+								borderRadius: '6px',
+								display: 'inline-block',
+								justifyContent: 'space-between',
+							}}
+						>
+							<div
+								style={{
+									padding: '20px',
+									marginBottom: '10px',
+								}}
+							>
+								<Autocomplete
+									multiple
+									disablePortal
+									id="combo-box-demo"
+									options={cacheOptions}
+									sx={{ width: 300 }}
+									renderInput={(params) => <TextField {...params} label="Saved Searches" />}
+									value={selectedCache}
+									onChange={(event, newValue) => {
+										setSelectedCache(newValue);
+									}}
+								/>
+							</div>
+							<GCPrimaryButton
+								onClick={() => {
+									clearSelectCache();
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Clear Selected Cache
+							</GCPrimaryButton>
+							<GCPrimaryButton
+								onClick={() => {
+									clearAllCache();
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Clear All Cache
+							</GCPrimaryButton>
+						</div>
+					</div>
 				</BorderDiv>
 			</div>
 		</div>
