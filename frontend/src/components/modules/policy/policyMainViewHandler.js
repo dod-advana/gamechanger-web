@@ -737,7 +737,7 @@ const getExtraViewPanels = (props) => {
 						data={docSearchResults}
 						searchText={searchText}
 						prevSearchText={prevSearchText}
-						totalCount={count}
+						totalCount={count > 9982 ? 9982 : count}
 						loading={loading}
 						resultsPage={resultsPage}
 						resultsPerPage={RESULTS_PER_PAGE}
