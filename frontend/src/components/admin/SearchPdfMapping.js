@@ -748,7 +748,7 @@ export default () => {
 									<Grid item lg={2} xs={3}>
 										<GCPrimaryButton
 											onClick={() => {
-												trackEvent('GAMECHANGER', 'ExportFeedback', 'onClick');
+												trackEvent('GAMECHANGER', 'ExportUserData', 'onClick');
 												exportData('UserData');
 											}}
 											style={{ minWidth: 'unset' }}
