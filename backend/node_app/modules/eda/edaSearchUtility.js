@@ -938,7 +938,7 @@ class EDASearchUtility {
 	}
 
 	cleanInnerHits(hit, pageSet, result, _source, _score, user) {
-		if (r.inner_hits) {
+		if (hit.inner_hits) {
 			if (hit.inner_hits.pages) {
 				this.cleanHitsWithPage(hit, pageSet, result, user);
 			} else {
