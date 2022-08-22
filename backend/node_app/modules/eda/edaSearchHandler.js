@@ -137,7 +137,6 @@ class EdaSearchHandler extends SearchHandler {
 			body.parsedQuery = parsedQuery;
 
 			const { esClientName, esIndex } = clientObj;
-			let esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 
 			if (
 				!(
@@ -152,6 +151,8 @@ class EdaSearchHandler extends SearchHandler {
 			const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 			body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
 			body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
+
+			let esQuery = this.edaSearchUtility.getElasticsearchPagesQuery(body, userId);
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
