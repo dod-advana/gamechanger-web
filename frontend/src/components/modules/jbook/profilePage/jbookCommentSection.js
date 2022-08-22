@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import GCButton from '../../../common/GCButton';
+import Modal from 'react-modal';
 import JBookUserNameModal from './jbookUserNameModal';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
@@ -61,6 +62,7 @@ const JBookCommentSection = ({
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [showExpandButton, setShowExpandButton] = useState(false);
 	const [showUserModal, setShowUserModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const bottomRef = useRef(null);
 
 	useEffect(() => {
@@ -74,6 +76,9 @@ const JBookCommentSection = ({
 	}, [isExpanded, commentThread]);
 
 	const deleteComment = async (comment) => {
+		if (!comment) {
+			return;
+		}
 		try {
 			await gameChangerAPI.callDataFunction({
 				functionName: 'deleteComment',
@@ -124,6 +129,71 @@ const JBookCommentSection = ({
 				}
 			}
 		}
+	};
+
+	const DeleteModal = ({ comment }) => {
+		console.log('Here is my comment', comment);
+		return (
+			<Modal
+				isOpen={showDeleteModal}
+				onRequestClose={() => setShowDeleteModal(false)}
+				shouldCloseOnOverlayClick={false}
+				style={{
+					overlay: {
+						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+					},
+					content: {
+						top: '35%',
+						left: '50%',
+						right: 'auto',
+						bottom: 'auto',
+						marginRight: '-50%',
+						width: '40%',
+						transform: 'translate(-50%, -10%)',
+					},
+				}}
+			>
+				<div>
+					<Typography variant="h2" style={{ width: '100%', fontSize: '20px', marginBottom: 20 }}>
+						Are you sure you want to delete your comment?
+					</Typography>
+					<div style={{ display: 'flex' }}>
+						<div style={{ marginLeft: 'auto' }}>
+							<GCButton
+								onClick={() => setShowDeleteModal(false)}
+								style={{
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+								}}
+								isSecondaryBtn
+							>
+								Close
+							</GCButton>
+							<GCButton
+								onClick={() => {
+									setShowDeleteModal(false);
+									deleteComment(comment);
+								}}
+								style={{
+									backgroundColor: 'red',
+									border: 'none',
+									height: 40,
+									minWidth: 40,
+									padding: '2px 8px 0px',
+									fontSize: 14,
+									margin: '16px 0px 0px 10px',
+								}}
+							>
+								Delete
+							</GCButton>
+						</div>
+					</div>
+				</div>
+			</Modal>
+		);
 	};
 
 	const renderComments = () => {
@@ -227,11 +297,15 @@ const JBookCommentSection = ({
 										/>
 									)}
 									<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
+									<DeleteModal comment={comment} />
 								</div>
 							</div>
-							{comment.authorId === userData.user_id && (
+							{(comment.authorId === userData.user_id ||
+								comment.author === `${userData.first_name} ${userData.last_name[0]}.`) && (
 								<Delete
-									onClick={() => deleteComment(comment)}
+									onClick={() => {
+										setShowDeleteModal(true);
+									}}
 									sx={{
 										transform: 'scale(1.5)',
 										color: 'red',
