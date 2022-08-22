@@ -1183,8 +1183,12 @@ export default (props) => {
 					<div
 						style={{
 							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
 							display: 'inline-block',
-							paddingBottom: '5px',
+							justifyContent: 'space-between',
 						}}
 					>
 						<div style={{ display: 'inline-block' }}>
@@ -1192,51 +1196,39 @@ export default (props) => {
 						</div>
 						<div
 							style={{
-								width: '100%',
 								padding: '20px',
 								marginBottom: '10px',
-								border: '2px solid darkgray',
-								borderRadius: '6px',
-								display: 'inline-block',
-								justifyContent: 'space-between',
 							}}
 						>
-							<div
-								style={{
-									padding: '20px',
-									marginBottom: '10px',
+							<Autocomplete
+								multiple
+								disablePortal
+								id="combo-box-demo"
+								options={cacheOptions}
+								sx={{ width: 300 }}
+								renderInput={(params) => <TextField {...params} label="Saved Searches" />}
+								value={selectedCache}
+								onChange={(_event, newValue) => {
+									setSelectedCache(newValue);
 								}}
-							>
-								<Autocomplete
-									multiple
-									disablePortal
-									id="combo-box-demo"
-									options={cacheOptions}
-									sx={{ width: 300 }}
-									renderInput={(params) => <TextField {...params} label="Saved Searches" />}
-									value={selectedCache}
-									onChange={(event, newValue) => {
-										setSelectedCache(newValue);
-									}}
-								/>
-							</div>
-							<GCPrimaryButton
-								onClick={() => {
-									clearSelectCache();
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Clear Selected Cache
-							</GCPrimaryButton>
-							<GCPrimaryButton
-								onClick={() => {
-									clearAllCache();
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Clear All Cache
-							</GCPrimaryButton>
+							/>
 						</div>
+						<GCPrimaryButton
+							onClick={() => {
+								clearSelectCache();
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Clear Selected Cache
+						</GCPrimaryButton>
+						<GCPrimaryButton
+							onClick={() => {
+								clearAllCache();
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Clear All Cache
+						</GCPrimaryButton>
 					</div>
 				</BorderDiv>
 			</div>
