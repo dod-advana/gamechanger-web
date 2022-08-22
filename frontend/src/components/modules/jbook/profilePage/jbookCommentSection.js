@@ -132,7 +132,6 @@ const JBookCommentSection = ({
 	};
 
 	const DeleteModal = ({ comment }) => {
-		console.log('Here is my comment', comment);
 		return (
 			<Modal
 				isOpen={showDeleteModal}
@@ -207,7 +206,6 @@ const JBookCommentSection = ({
 			}
 
 			for (const [index, comment] of thread.entries()) {
-				console.log('this is the comment', comment, 'this is the data', userData);
 				let date = new Date(comment.createdAt);
 				comments.push(
 					<CommentContainer>
