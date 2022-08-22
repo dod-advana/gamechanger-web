@@ -56,7 +56,6 @@ const EDASearchBarHandler = {
 			handleFavoriteSearchClicked,
 			dataRows,
 			cursor,
-			hideSearchResults,
 			setAdvancedSearchOpen,
 			searchFavoritePopperOpen,
 			favoriteName,
