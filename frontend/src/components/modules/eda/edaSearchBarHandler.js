@@ -59,7 +59,6 @@ const EDASearchBarHandler = {
 			handleFavoriteSearchClicked,
 			dataRows,
 			cursor,
-			hideSearchResults,
 			setAdvancedSearchOpen,
 			searchFavoritePopperOpen,
 			favoriteName,
@@ -120,28 +119,26 @@ const EDASearchBarHandler = {
 					{dropdownOpen && !advancedSearchOpen && (
 						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
 					)}
-					{hideSearchResults && (
-						<AdvancedDropdown
-							context={context}
-							handleSubmit={handleSubmit}
-							open={advancedSearchOpen}
-							close={() => {
-								setAdvancedSearchOpen(false);
-							}}
-						></AdvancedDropdown>
-					)}
-					{hideSearchResults && (
-						<AdvancedSearchButton
-							type="button"
-							id="advancedSearchButton"
-							onClick={() => {
-								setAdvancedSearchOpen(!advancedSearchOpen);
-							}}
-						>
-							Advanced
-							<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
-						</AdvancedSearchButton>
-					)}
+
+					<AdvancedDropdown
+						context={context}
+						handleSubmit={handleSubmit}
+						open={advancedSearchOpen}
+						close={() => {
+							setAdvancedSearchOpen(false);
+						}}
+					></AdvancedDropdown>
+
+					<AdvancedSearchButton
+						type="button"
+						id="advancedSearchButton"
+						onClick={() => {
+							setAdvancedSearchOpen(!advancedSearchOpen);
+						}}
+					>
+						Advanced
+						<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
+					</AdvancedSearchButton>
 				</SearchBarForm>
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />
