@@ -111,7 +111,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="User Feedback" placement="right" arrow>
+			<GCTooltip data-cy="user-feedback" title="User Feedback" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -127,7 +127,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserFeedbackIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Crowd Sourcing" placement="right" arrow>
+			<GCTooltip data-cy="crowd-sourcing" title="Crowd Sourcing" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -143,7 +143,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={CrowdSourcingAppIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Data Status Tracker" placement="right" arrow>
+			<GCTooltip data-cy="data-status-tracker" title="Data Status Tracker" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -165,7 +165,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={DataStatusTrackerIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Analyst Tools" placement="right" arrow>
+			<GCTooltip data-cy="analyst-tools" title="Analyst Tools" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -201,7 +201,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={AboutUsIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="User Dashboard" placement="right" arrow>
+			<GCTooltip data-cy="user-dashboard" title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {

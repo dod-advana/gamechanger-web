@@ -83,7 +83,7 @@ module.exports = Object.freeze({
 		},
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
-	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}:8990`,
+	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}`,
 	EDL_UPLOAD_DIRECTORY: path.dirname(require.main.filename) + '/volumes/uploads/',
 	LOG_FILE: path.dirname(require.main.filename) + '/logs/gc-node-api/gc-node-api',
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
