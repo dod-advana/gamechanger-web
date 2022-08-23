@@ -5,6 +5,21 @@ describe('Tests multiple types of policy searches.', () => {
 		cy.login('gamechanger');
 	});
 
+	it('Should be able to search for a policy by name.', () => {
+		cy.search('AFMAN 11-2EC-130HV1');
+		// Wait for the results to be visible
+		cy.getDataCy('results-Documents', { timeout: 10000 }).should('exist');
+
+		// Results should have more than 1
+		cy.getDataCy('results-Documents').find('[data-cy="searchCard"]').should('have.length.greaterThan', 1);
+
+		// First result should have the correct name
+		cy.getDataCy('results-Documents')
+			.find('[data-cy="policy-card-header"]', { timeout: 10000 })
+			.first()
+			.should('contain', 'AFMAN 11-2EC-130HV1 EC-130H AIRCREW TRAINING');
+	});
+
 	it('Runs a search and verifies highlighting', () => {
 		const searchTerm = 'laundry';
 		cy.search(searchTerm);
