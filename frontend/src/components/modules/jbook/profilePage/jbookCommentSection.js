@@ -9,7 +9,9 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import ThumbDownAlt from '@mui/icons-material/ThumbDownAlt';
 import ThumbUpAlt from '@mui/icons-material/ThumbUpAlt';
-import Delete from '@mui/icons-material/Delete';
+import Cancel from '@mui/icons-material/Cancel';
+import CloseIcon from '@material-ui/icons/Close';
+import { CloseButton } from './profilePageStyles';
 
 const StyledCard = styled.div`
 	background-color: white;
@@ -28,7 +30,6 @@ const Separator = styled.hr`
 const CommentTitle = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	margin: 5px 0;
 `;
 
@@ -45,7 +46,7 @@ const CommentBody = styled.p`
 
 const CommentFooter = styled.div`
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
 `;
 
 const JBookCommentSection = ({
@@ -100,10 +101,10 @@ const JBookCommentSection = ({
 	const voteComment = async (comment, e) => {
 		try {
 			let myField;
-			if (e.target.dataset.testid === 'ThumbUpOffAltIcon' || e.target.dataset.testid === 'ThumbUpAlt') {
+			if (e.target.parentNode.id === 'thumbs-up' || e.target.parentNode.dataset.testid === 'ThumbUpAltIcon') {
 				myField = 'upvotes';
 			}
-			if (e.target.dataset.testid === 'ThumbDownOffAltIcon' || e.target.dataset.testid === 'ThumbDownAlt') {
+			if (e.target.parentNode.id === 'thumbs-down' || e.target.parentNode.dataset.testid === 'ThumbDownAltIcon') {
 				myField = 'downvotes';
 			}
 
@@ -140,7 +141,7 @@ const JBookCommentSection = ({
 				shouldCloseOnOverlayClick={false}
 				style={{
 					overlay: {
-						backgroundColor: 'rgba(0, 0, 0, 0.5)',
+						backgroundColor: 'rgba(0, 0, 0, 0.3)',
 					},
 					content: {
 						top: '35%',
@@ -149,13 +150,23 @@ const JBookCommentSection = ({
 						bottom: 'auto',
 						marginRight: '-50%',
 						width: '40%',
-						transform: 'translate(-50%, -10%)',
+						transform: 'translate(-50%, -50%)',
+						boxShadow: '0 10px 6px -6px #777',
 					},
 				}}
 			>
 				<div>
-					<Typography variant="h2" style={{ width: '100%', fontSize: '20px', marginBottom: 20 }}>
-						Are you sure you want to delete your comment?
+					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+						<Typography variant="h2" style={{ width: '100%', fontSize: '20px', marginBottom: 20 }}>
+							Are you sure you want to delete your comment?
+						</Typography>
+						<CloseButton onClick={() => setShowDeleteModal(false)}>
+							<CloseIcon fontSize="25" style={{ color: 'black' }} />
+						</CloseButton>
+					</div>
+					<Typography variant="body2" style={{ width: '100%', fontSize: '15px', marginBottom: 20 }}>
+						This action can't be undone and it will be removed from the comment section and the portfolio
+						page.
 					</Typography>
 					<div style={{ display: 'flex' }}>
 						<div style={{ marginLeft: 'auto' }}>
@@ -164,7 +175,7 @@ const JBookCommentSection = ({
 								style={{
 									height: 40,
 									minWidth: 40,
-									padding: '2px 8px 0px',
+									padding: '2px 18px 0px',
 									fontSize: 14,
 									margin: '16px 0px 0px 10px',
 								}}
@@ -182,7 +193,7 @@ const JBookCommentSection = ({
 									border: 'none',
 									height: 40,
 									minWidth: 40,
-									padding: '2px 8px 0px',
+									padding: '2px 18px 0px',
 									fontSize: 14,
 									margin: '16px 0px 0px 10px',
 								}}
@@ -207,16 +218,34 @@ const JBookCommentSection = ({
 			}
 
 			for (const [index, comment] of thread.entries()) {
+				console.log('here is the comment');
 				let date = new Date(comment.createdAt);
 				comments.push(
 					<CommentContainer>
 						<CommentTitle>
-							<Typography variant="h5" style={{ fontWeight: 'bold' }}>
+							<Typography variant="h5" style={{ fontWeight: 'bold', marginRight: '10px' }}>
 								{comment.author}
 							</Typography>
-							<div style={{ color: 'gray' }}>{date.toDateString()}</div>
+							<div style={{ color: 'gray', marginRight: 'auto' }}>{date.toDateString()}</div>
+							{(comment.authorId === userData.user_id ||
+								comment.author === `${userData.first_name} ${userData.last_name[0]}.`) && (
+								<Cancel
+									onClick={() => {
+										setCurrentComment(comment);
+										setShowDeleteModal(true);
+									}}
+									sx={{
+										color: 'red',
+										'&:hover': {
+											color: 'white',
+											backgroundColor: 'red',
+											borderRadius: '30px',
+										},
+										cursor: 'pointer',
+									}}
+								/>
+							)}
 						</CommentTitle>
-
 						<CommentBody>{comment.message}</CommentBody>
 						<CommentFooter>
 							<div style={{ display: 'flex' }}>
@@ -228,35 +257,36 @@ const JBookCommentSection = ({
 										marginRight: '5px',
 									}}
 								>
-									{alreadyVoted(userData.user_id, comment.upvotes) ? (
-										<ThumbUpAlt
-											sx={{
-												'&:hover': {
-													color: 'green',
-													backgroundColor: 'rgb(250, 250, 250)',
-													borderRadius: '10px',
-												},
-												cursor: 'pointer',
-											}}
-											onClick={(e) => {
-												voteComment(comment, e);
-											}}
-										/>
-									) : (
-										<ThumbUpOffAltIcon
-											sx={{
-												'&:hover': {
-													color: 'green',
-													backgroundColor: 'rgb(250, 250, 250)',
-													borderRadius: '10px',
-												},
-												cursor: 'pointer',
-											}}
-											onClick={(e) => {
-												voteComment(comment, e);
-											}}
-										/>
-									)}
+									<div
+										id="thumbs-up"
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									>
+										{alreadyVoted(userData.user_id, comment.upvotes) ? (
+											<ThumbUpAlt
+												sx={{
+													'&:hover': {
+														color: 'green',
+														backgroundColor: 'rgb(250, 250, 250)',
+														borderRadius: '10px',
+													},
+													cursor: 'pointer',
+												}}
+											/>
+										) : (
+											<ThumbUpOffAltIcon
+												sx={{
+													'&:hover': {
+														color: 'green',
+														backgroundColor: 'rgb(250, 250, 250)',
+														borderRadius: '10px',
+													},
+													cursor: 'pointer',
+												}}
+											/>
+										)}
+									</div>
 									<p>{comment.upvotes === null ? 0 : comment.upvotes.length}</p>
 								</div>
 								<div
@@ -266,57 +296,39 @@ const JBookCommentSection = ({
 										alignItems: 'center',
 									}}
 								>
-									{alreadyVoted(userData.user_id, comment.downvotes) ? (
-										<ThumbDownAlt
-											sx={{
-												'&:hover': {
-													color: 'green',
-													backgroundColor: 'rgb(250, 250, 250)',
-													borderRadius: '10px',
-												},
-												cursor: 'pointer',
-											}}
-											onClick={(e) => {
-												voteComment(comment, e);
-											}}
-										/>
-									) : (
-										<ThumbDownOffAltIcon
-											sx={{
-												'&:hover': {
-													color: 'green',
-													backgroundColor: 'rgb(250, 250, 250)',
-													borderRadius: '10px',
-												},
-												cursor: 'pointer',
-											}}
-											onClick={(e) => {
-												voteComment(comment, e);
-											}}
-										/>
-									)}
+									<div
+										id="thumbs-down"
+										onClick={(e) => {
+											voteComment(comment, e);
+										}}
+									>
+										{alreadyVoted(userData.user_id, comment.downvotes) ? (
+											<ThumbDownAlt
+												sx={{
+													'&:hover': {
+														color: 'green',
+														backgroundColor: 'rgb(250, 250, 250)',
+														borderRadius: '10px',
+													},
+													cursor: 'pointer',
+												}}
+											/>
+										) : (
+											<ThumbDownOffAltIcon
+												sx={{
+													'&:hover': {
+														color: 'green',
+														backgroundColor: 'rgb(250, 250, 250)',
+														borderRadius: '10px',
+													},
+													cursor: 'pointer',
+												}}
+											/>
+										)}
+									</div>
 									<p>{comment.downvotes === null ? 0 : comment.downvotes.length}</p>
 								</div>
 							</div>
-							{(comment.authorId === userData.user_id ||
-								comment.author === `${userData.first_name} ${userData.last_name[0]}.`) && (
-								<Delete
-									onClick={() => {
-										setCurrentComment(comment);
-										setShowDeleteModal(true);
-									}}
-									sx={{
-										transform: 'scale(1.5)',
-										color: 'red',
-										'&:hover': {
-											color: 'rgb(200, 0, 0)',
-											backgroundColor: 'rgb(240, 240, 240)',
-											borderRadius: '10px',
-										},
-										cursor: 'pointer',
-									}}
-								/>
-							)}
 						</CommentFooter>
 					</CommentContainer>
 				);
