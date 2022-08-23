@@ -634,8 +634,7 @@ describe('JBookDataHandler', function () {
 					update: updateForVote,
 				},
 			};
-			const req = { body: { id: 3, field: 'upvotes' } };
-
+			const req = { body: { id: 3, field: 'upvotes', author: 'test' } };
 			const target = new JBookDataHandler(opts);
 			const expected = { updated: true };
 			const actual = await target.voteComment(req, 'test');
