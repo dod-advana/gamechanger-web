@@ -113,7 +113,7 @@ const EDASearchBarHandler = {
 						arrow
 						enterDelay={500}
 					>
-						<InfoIcon style={{ position: 'absolute', right: hideSearchResults ? '165px' : '10px' }} />
+						<InfoIcon style={{ position: 'absolute', right: '165px' }} />
 					</GCToolTip>
 
 					{dropdownOpen && !advancedSearchOpen && (
