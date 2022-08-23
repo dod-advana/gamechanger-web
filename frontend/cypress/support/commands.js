@@ -49,6 +49,10 @@ Cypress.Commands.add('getDataCy', (cyTag, ...args) => {
     cy.get(`[data-cy="${cyTag}"]`, ...args)
 });
 
+Cypress.Commands.add('findDataCy', {prevSubject: true}, (subject, cyTag) => {
+    cy.wrap(subject).find(`[data-cy="${cyTag}"]`)
+});
+
 // this handles setting up your cookies and headers
 Cypress.Commands.add('setup', () => {
 	CypressHelper.setupHeaders(cy);

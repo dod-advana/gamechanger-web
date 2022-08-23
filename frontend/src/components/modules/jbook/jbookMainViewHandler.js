@@ -90,18 +90,20 @@ const handlePageLoad = async (props) => {
 			portfolios = data.data !== undefined ? data.data : [];
 		});
 
-	// the main setstate that triggers the initial search
-	setState(dispatch, {
-		searchText,
-		loading: true,
-		runSearch: true,
-		mainTabSelected,
-		urlSearch: true,
-		jbookSearchSettings,
-		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
-		dropdownData,
-		portfolios,
-	});
+	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
+		// the main setstate that triggers the initial search (only on main page)
+		setState(dispatch, {
+			searchText,
+			loading: true,
+			runSearch: true,
+			mainTabSelected,
+			urlSearch: true,
+			jbookSearchSettings,
+			defaultOptions: { ...state.defaultOptions, ...defaultOptions },
+			dropdownData,
+			portfolios,
+		});
+	}
 };
 
 const renderHideTabs = () => {
@@ -524,7 +526,12 @@ const JBookMainViewHandler = (props) => {
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
 		case PAGE_DISPLAYED.profile:
-			return <JBookProfilePage {...props} />;
+			return (
+				<>
+					<FeedbackModal state={state} dispatch={dispatch} />
+					<JBookProfilePage {...props} />
+				</>
+			);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({

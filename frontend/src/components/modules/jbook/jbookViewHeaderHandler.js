@@ -156,14 +156,15 @@ const JbookViewHeaderHandler = (props) => {
 	useEffect(() => {
 		let search = false;
 		PORTFOLIO_FILTERS.forEach((filter) => {
-			if (jbookSearchSettings[filter] !== defaultOptions[filter]) {
+			if (!_.isEqual(jbookSearchSettings[filter], defaultOptions[filter])) {
 				search = true;
 			}
 		});
+
 		if (search) {
 			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+			setState(dispatch, { runSearch: true });
 		}
-		setState(dispatch, { runSearch: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.selectedPortfolio, dispatch]);
 
