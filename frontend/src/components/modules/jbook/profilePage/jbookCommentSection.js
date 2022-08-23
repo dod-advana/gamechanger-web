@@ -218,7 +218,6 @@ const JBookCommentSection = ({
 			}
 
 			for (const [index, comment] of thread.entries()) {
-				console.log('here is the comment');
 				let date = new Date(comment.createdAt);
 				comments.push(
 					<CommentContainer>
