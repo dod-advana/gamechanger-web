@@ -117,6 +117,7 @@ const PolicySearchBarHandler = {
 								backgroundColor: 'white',
 								padding: '0 15px',
 							}}
+							data-cy="searchbar-favorite-star"
 							onClick={(event) => handleFavoriteSearchClicked(event.target, state.isFavoriteSearch)}
 						>
 							<i
@@ -175,7 +176,7 @@ const PolicySearchBarHandler = {
 					}}
 				>
 					<div className={classes.paper}>
-						<div style={{ width: 330, margin: 5 }}>
+						<div style={{ width: 330, margin: 5 }} data-cy="search-favorite-save-dialog">
 							<TextField
 								label={'Favorite Name'}
 								value={favoriteName}

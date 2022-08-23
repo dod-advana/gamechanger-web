@@ -40,7 +40,7 @@ const SearchTabBar = (props) => {
 				<JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} />
 			</div>
 
-			<div style={styles.tabsContainer}>
+			<div style={styles.tabsContainer} data-cy="tabs-container">
 				{_.map(searchTypesWithAll, (enabled, searchType) => {
 					if (!enabled) return null;
 					if (resultMetaData[searchType]?.total <= 0) return null;
