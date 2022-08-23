@@ -233,7 +233,6 @@ export const renderHideTabs = (props) => {
 	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 
 	const handleLinkListItemClick = (text) => {
-		console.log(text);
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', text);
 		setState(dispatch, {
 			searchText: text,
@@ -265,8 +264,6 @@ const EdaMainViewHandler = (props) => {
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 
-	const { runSearch } = state;
-
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
@@ -288,8 +285,6 @@ const EdaMainViewHandler = (props) => {
 
 		return viewPanels;
 	};
-
-	console.log(runSearch);
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.analystTools:
