@@ -114,6 +114,7 @@ const JBookCommentSection = ({
 				options: {
 					id: comment.id,
 					field: myField,
+					author: String(userData.id),
 				},
 			});
 			await getCommentThread(docID, portfolioName);
@@ -226,7 +227,7 @@ const JBookCommentSection = ({
 								{comment.author}
 							</Typography>
 							<div style={{ color: 'gray', marginRight: 'auto' }}>{date.toDateString()}</div>
-							{(comment.authorId === userData.user_id ||
+							{(comment.authorId === String(userData.id) ||
 								comment.author === `${userData.first_name} ${userData.last_name[0]}.`) && (
 								<Cancel
 									onClick={() => {
@@ -262,7 +263,7 @@ const JBookCommentSection = ({
 											voteComment(comment, e);
 										}}
 									>
-										{alreadyVoted(userData.user_id, comment.upvotes) ? (
+										{alreadyVoted(String(userData.id), comment.upvotes) ? (
 											<ThumbUpAlt
 												sx={{
 													'&:hover': {
@@ -301,7 +302,7 @@ const JBookCommentSection = ({
 											voteComment(comment, e);
 										}}
 									>
-										{alreadyVoted(userData.user_id, comment.downvotes) ? (
+										{alreadyVoted(String(userData.id), comment.downvotes) ? (
 											<ThumbDownAlt
 												sx={{
 													'&:hover': {
@@ -370,7 +371,7 @@ const JBookCommentSection = ({
 						docID,
 						portfolioName,
 						author: first + last,
-						authorId: userData.user_id,
+						authorId: String(userData.id),
 					},
 				});
 
