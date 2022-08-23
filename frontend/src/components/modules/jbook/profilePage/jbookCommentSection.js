@@ -190,8 +190,6 @@ const JBookCommentSection = ({
 									deleteComment(comment);
 								}}
 								style={{
-									backgroundColor: 'red',
-									border: 'none',
 									height: 40,
 									minWidth: 40,
 									padding: '2px 18px 0px',
