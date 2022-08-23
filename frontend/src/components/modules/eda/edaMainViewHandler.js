@@ -265,6 +265,8 @@ const EdaMainViewHandler = (props) => {
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 
+	const { runSearch } = state;
+
 	useEffect(() => {
 		if (state.cloneDataSet && state.historySet && !pageLoaded) {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
@@ -286,6 +288,8 @@ const EdaMainViewHandler = (props) => {
 
 		return viewPanels;
 	};
+
+	console.log(runSearch);
 
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.analystTools:
