@@ -286,9 +286,6 @@ const ExportResultsDialog = ({
 									PDF
 								</MenuItem>
 							)}
-							<MenuItem style={styles.menuItem} value="json" key="json">
-								JSON
-							</MenuItem>
 							<MenuItem style={styles.menuItem} value="csv" key="csv">
 								CSV
 							</MenuItem>

@@ -627,8 +627,8 @@ const JBookProfilePage = () => {
 						</Typography>
 					</div>
 				</DialogTitle>
-				<CloseButton>
-					<CloseIcon fontSize="large" />
+				<CloseButton onClick={() => setState(dispatch, { [`${reviewType}ModalOpen`]: false })}>
+					<CloseIcon fontSize="25" />
 				</CloseButton>
 				<DialogContent>
 					<p>Would you like to re-enable the {reviewType} review form?</p>

@@ -755,6 +755,7 @@ const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponen
 			listView={state.listView}
 			docListView={docListView}
 			intelligentSearch={intelligentSearch}
+			data-cy="policy-card-header"
 		>
 			<div className={'title-text-selected-favorite-div'}>
 				<GCTooltip title={displayTitle} placement="top" arrow>

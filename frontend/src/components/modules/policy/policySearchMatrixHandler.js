@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import styled from 'styled-components';
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
-import MultiSelectFilter from '../../common/MultiSelectFilter';
+import PolicyMultiSelectFilter from './PolicyMultiSelectFilter';
 import _ from 'lodash';
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -125,7 +125,7 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					}
 				</>
 			) : (
-				<MultiSelectFilter
+				<PolicyMultiSelectFilter
 					state={state}
 					dispatch={dispatch}
 					classes={classes}
@@ -281,7 +281,7 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 						/>
 					</FormGroup>
 
-					<MultiSelectFilter
+					<PolicyMultiSelectFilter
 						state={state}
 						dispatch={dispatch}
 						classes={classes}
