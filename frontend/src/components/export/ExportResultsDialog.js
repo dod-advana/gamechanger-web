@@ -78,9 +78,12 @@ const styles = {
 	},
 };
 
-export const downloadFile = async (data, format, cloneData) => {
+export const downloadFile = async (data, format, classificationMarking, cloneData) => {
 	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', 'onDownloadFile', format);
-	const filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	let filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	if (classificationMarking === 'CUI') {
+		filename += '-CUI';
+	}
 	if (format === 'pdf') {
 		const blob = b64toBlob(data, 'application/pdf');
 		autoDownloadFile({ data: blob, extension: 'pdf', filename });
@@ -189,7 +192,7 @@ const ExportResultsDialog = ({
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(data, selectedFormat, cloneData);
+			downloadFile(data, selectedFormat, classificationMarking, cloneData);
 			getUserData();
 			if (
 				selectedFormat === 'pdf' &&
@@ -259,7 +262,6 @@ const ExportResultsDialog = ({
 					onInputChange={(_, value) => {
 						setClassificationMarking(value);
 					}}
-					disabled={selectedFormat !== 'pdf'}
 				/>
 			</div>
 
