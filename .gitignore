@@ -13,3 +13,4 @@ cypress-tests/cypress/videos
 cypress-tests/cypress/screenshots
 cypress-tests/cypress/results
 junit.xml
+.DS_Store
