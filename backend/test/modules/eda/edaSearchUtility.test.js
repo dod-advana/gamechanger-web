@@ -2754,6 +2754,8 @@ describe('EDASearchUtility', function () {
 							modification_eda_ext: 'Award',
 							naics_eda_ext: undefined,
 							award_id_eda_ext: 'W911NF17D0002-0002',
+							clins: undefined,
+							clins_parsed_successfully_b: undefined,
 							reference_idv_eda_ext: 'W911NF17D0002',
 							signature_date_eda_ext: '2017-09-21',
 							effective_date_eda_ext: '2017-09-21',
