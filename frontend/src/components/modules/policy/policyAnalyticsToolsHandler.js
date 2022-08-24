@@ -10,7 +10,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import themeDatePicker from '../../common/theme-datepicker';
 import { setState } from '../../../utils/sharedFunctions';
 import { gcOrange } from '../../common/gc-colors';
-import MultiSelectFilter from '../../common/MultiSelectFilter';
+import PolicyMultiSelectFilter from './PolicyMultiSelectFilter';
 
 const DatePickerWrapper = styled.div`
 	margin-right: 10px;
@@ -48,7 +48,7 @@ const renderSources = (state, dispatch, classes, results) => {
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			<MultiSelectFilter
+			<PolicyMultiSelectFilter
 				state={state}
 				dispatch={dispatch}
 				classes={classes}
@@ -77,7 +77,7 @@ const renderTypes = (state, dispatch, classes, results) => {
 
 	return (
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
-			<MultiSelectFilter
+			<PolicyMultiSelectFilter
 				state={state}
 				dispatch={dispatch}
 				classes={classes}
