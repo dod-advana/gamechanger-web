@@ -17,6 +17,7 @@ const MLRoutes = {
 	getDataList: `${transformerBaseUrl}/getDataList`,
 	getFilesInCorpus: `${transformerBaseUrl}/getFilesInCorpus`,
 	getProcessStatus: `${transformerBaseUrl}/getProcessStatus`,
+	getCache: `${transformerBaseUrl}/getCache`,
 
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
@@ -32,6 +33,7 @@ const MLRoutes = {
 	recommender: `${transformerBaseUrl}/recommender`,
 	stopProcess: `${transformerBaseUrl}/stopProcess`,
 	sendUserAggregations: `${transformerBaseUrl}/sendUserAggregations`,
+	clearCache: `${transformerBaseUrl}/clearCache`,
 };
 /**
  * @class MLApiClient
@@ -62,6 +64,7 @@ class MLApiClient {
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
+		this.getCache = this.getData.bind(this, 'getCache');
 		// Post methods
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
@@ -70,6 +73,7 @@ class MLApiClient {
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
+		this.clearCache = this.postData.bind(this, 'clearCache');
 	}
 
 	async getExpandedSearchTerms(termsList, userId = 'unknown', qe_model = undefined) {
