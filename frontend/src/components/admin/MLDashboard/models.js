@@ -41,6 +41,288 @@ const dataColumns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 ];
+
+/**
+ * Retrieves the current transformer from gameChangerAPI.getLoadedModels()
+ * @method getLoadedModels
+ */
+const getLoadedModels = async (loadingFunctions, props) => {
+	try {
+		const [
+			setCurrentEncoder,
+			setCurrentSim,
+			setCurrentSentenceIndex,
+			setCurrentDocCompareEncoder,
+			setCurrentDocCompareSim,
+			setCurrentDocCompareIndex,
+			setCurrentQexp,
+			setCurrentQa,
+			setCurrentJbook,
+			setCurrentWordSim,
+			setCurrentTopicModel,
+		] = loadingFunctions;
+		// set currentTransformer
+		const current = await gameChangerAPI.getLoadedModels();
+		// current.data is of the form {sentence_models:{encoder, sim}}
+		//setCurrentTransformer(
+		//	current.data.sentence_models
+		//		? current.data.sentence_models
+		//		: initTransformer
+		//);
+		setCurrentEncoder(current.data.encoder_model ? current.data.encoder_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentSim(current.data.sim_model ? current.data.sim_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentSentenceIndex(current.data.sentence_index ? current.data.sentence_index.replace(/^.*[\\/]/, '') : '');
+		setCurrentDocCompareEncoder(
+			current.data.doc_compare_encoder_model ? current.data.doc_compare_encoder_model.replace(/^.*[\\/]/, '') : ''
+		);
+		setCurrentDocCompareSim(
+			current.data.doc_compare_sim_model ? current.data.doc_compare_sim_model.replace(/^.*[\\/]/, '') : ''
+		);
+		setCurrentDocCompareIndex(
+			current.data.doc_compare_sentence_index
+				? current.data.doc_compare_sentence_index.replace(/^.*[\\/]/, '')
+				: ''
+		);
+		setCurrentQexp(current.data.qexp_model ? current.data.qexp_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentQa(current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentJbook(current.data.jbook_model ? current.data.jbook_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentWordSim(current.data.wordsim_model ? current.data.wordsim_model.replace(/^.*[\\/]/, '') : '');
+		setCurrentTopicModel(current.data.topic_model ? current.data.topic_model.replace(/^.*[\\/]/, '') : '');
+
+		props.updateLogs('Successfully queried current loaded models.', 0);
+	} catch (e) {
+		props.updateLogs('Error querying current loaded models: ' + e.toString(), 2);
+		throw e;
+	}
+};
+
+/**
+ * Get a list of all the proccesses running and completed
+ * @method getAllProcessData
+ */
+const getAllProcessData = (props) => {
+	const processList = [];
+	if (props.processes.process_status) {
+		for (const key in props.processes.process_status) {
+			const status = key !== 'flags' ? props.processes.process_status[key]['process'].split(': ') : [''];
+			if (['models', 'training'].includes(status[0])) {
+				processList.push({
+					...props.processes.process_status[key],
+					thread_id: key,
+					date: 'Currently Running',
+				});
+			}
+		}
+	}
+	if (props.processes.completed_process) {
+		for (const completed of props.processes.completed_process) {
+			const completed_process = completed.process.split(': ');
+			if (['models', 'training'].includes(completed_process[0])) {
+				processList.push({
+					...completed,
+					process: completed_process[1],
+					category: completed_process[0],
+					progress: completed.total,
+				});
+			}
+		}
+	}
+	return processList;
+};
+
+/**
+ * Get a list of all the downloaded sentence index, qexp, and transformers.
+ * @method getModelsList
+ */
+const getModelsList = async (setDownloadedModelsList, setModelTable, props) => {
+	try {
+		// set downloadedModelsList
+		const list = await gameChangerAPI.getModelsList();
+		setDownloadedModelsList(list.data);
+		const modelList = [];
+		for (const type in list.data) {
+			for (const model in list.data[type]) {
+				modelList.push({
+					type,
+					model,
+					config: JSON.stringify(list.data[type][model], null, 2),
+				});
+			}
+		}
+		setModelTable(modelList);
+		props.updateLogs('Successfully queried models list', 0);
+	} catch (e) {
+		props.updateLogs('Error querying models list: ' + e.toString(), 2);
+		throw e;
+	}
+};
+
+/**
+ * Takes a String and checks if it is in any of the flag keys and checks
+ * those values. If any of them are true it returns true
+ * @method checkFlag
+ * @param {String} flag
+ * @returns boolean
+ */
+const checkFlag = (flag, props) => {
+	let flagged = false;
+	if (props.processes.process_status && props.processes.process_status.flags) {
+		const flags = props.processes.process_status.flags;
+		for (const key in flags) {
+			if (key.includes(flag) && flags[key]) {
+				flagged = true;
+			}
+		}
+	}
+	return flagged;
+};
+
+/**
+ * @method triggerTrainTopics
+ */
+const triggerTrainTopics = async (props, topicsSampling, topicsUpload, topicsVersion) => {
+	try {
+		await gameChangerAPI.trainModel({
+			build_type: 'topics',
+			sample_rate: topicsSampling,
+			upload: topicsUpload,
+			version: topicsVersion,
+		});
+		props.updateLogs('Started training', 0);
+		props.getProcesses();
+	} catch (e) {
+		props.updateLogs('Error training model: ' + e.toString(), 2);
+	}
+};
+
+/**
+ * @method triggerEvaluateModel
+ */
+const triggerEvaluateModel = async (props, evalModelName) => {
+	try {
+		await gameChangerAPI.trainModel({
+			build_type: 'eval',
+			model_name: evalModelName,
+			validation_data: 'latest',
+			eval_type: 'domain',
+		});
+		props.updateLogs('Started evaluating', 0);
+		props.getProcesses();
+	} catch (e) {
+		console.log('\nERROR EVALUATING MODEL');
+		console.log(e);
+		props.updateLogs('Error evaluating model: ' + e.toString(), 2);
+	}
+};
+
+/**
+ * @method triggerReloadModels
+ */
+const triggerReloadModels = async (
+	props,
+	selectedSentence,
+	docCompareSelectedSentence,
+	selectedQEXP,
+	selectedTopicModel,
+	selectedJbookQEXP,
+	selectedQAModel
+) => {
+	try {
+		const params = {};
+		if (selectedSentence) {
+			params['sentence'] = selectedSentence;
+		}
+		if (docCompareSelectedSentence) {
+			params['doc_compare_sentence'] = docCompareSelectedSentence;
+		}
+		if (selectedQEXP) {
+			params['qexp'] = selectedQEXP;
+		}
+		if (selectedTopicModel) {
+			params['topic_models'] = selectedTopicModel;
+		}
+		if (selectedJbookQEXP) {
+			params['jbook_qexp'] = selectedJbookQEXP;
+		}
+		if (selectedQAModel) {
+			params['qa_model'] = selectedQAModel;
+		}
+		await gameChangerAPI.reloadModels(params);
+		props.updateLogs('Reloaded Models', 0);
+		props.getProcesses();
+	} catch (e) {
+		props.updateLogs('Error reloading models: ' + e.toString(), 2);
+	}
+};
+
+const triggerInitializeLTR = async (props, setLTRInitializedStatus) => {
+	try {
+		await gameChangerAPI.initializeLTR().then((data) => {
+			setLTRInitializedStatus(data.status);
+		});
+		props.updateLogs('Initializing LTR', 0);
+		props.getProcesses();
+	} catch (e) {
+		props.updateLogs('Error initializing LTR: ' + e.toString(), 2);
+	}
+};
+
+const triggerCreateModelLTR = async (props, setLTRModelCreatedStatus) => {
+	try {
+		await gameChangerAPI.createModelLTR().then((data) => {
+			setLTRModelCreatedStatus(data.status);
+		});
+		props.updateLogs('Creating LTR model', 0);
+		props.getProcesses();
+	} catch (e) {
+		props.updateLogs('Error creating LTR model: ' + e.toString(), 2);
+	}
+};
+
+/**
+ * @method getCache
+ */
+const getCache = async (props, setCacheOptions) => {
+	try {
+		const cache = await gameChangerAPI.getCache();
+		setCacheOptions(cache.data);
+		props.getProcesses();
+	} catch (e) {
+		props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
+	}
+};
+
+/**
+ * @method clearAllCache
+ */
+const clearAllCache = async (props, setSelectedCache, setCacheOptions) => {
+	try {
+		await gameChangerAPI.clearCache({
+			clear: [],
+		});
+		props.getProcesses();
+		setSelectedCache([]);
+		getCache(props, setCacheOptions);
+	} catch (e) {
+		props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
+	}
+};
+
+/**
+ * @method clearSelectCache
+ */
+const clearSelectCache = async (props, selectedCache, setSelectedCache, setCacheOptions) => {
+	try {
+		await gameChangerAPI.clearCache({
+			clear: selectedCache,
+		});
+		props.getProcesses();
+		setSelectedCache([]);
+		getCache(props, setCacheOptions);
+	} catch (e) {
+		props.updateLogs('Error clearing selected cache: ' + e.toString(), 2);
+	}
+};
 /**
  * This class provides controls to veiw and control the
  * resouces loaded locally to the ml api.
@@ -110,55 +392,24 @@ export default (props) => {
 	 * @method onload
 	 */
 	const onload = async () => {
-		getLoadedModels();
-		getModelsList();
+		const loadingModels = [
+			setCurrentEncoder,
+			setCurrentSim,
+			setCurrentSentenceIndex,
+			setCurrentDocCompareEncoder,
+			setCurrentDocCompareSim,
+			setCurrentDocCompareIndex,
+			setCurrentQexp,
+			setCurrentQa,
+			setCurrentJbook,
+			setCurrentWordSim,
+			setCurrentTopicModel,
+		];
+		getLoadedModels(loadingModels, props);
+		getModelsList(setDownloadedModelsList, setModelTable, props);
 		getCorpusCount();
 		getLocalData();
-		getCache();
-	};
-	/**
-	 * Retrieves the current transformer from gameChangerAPI.getLoadedModels()
-	 * @method getLoadedModels
-	 */
-	const getLoadedModels = async () => {
-		try {
-			// set currentTransformer
-			const current = await gameChangerAPI.getLoadedModels();
-			// current.data is of the form {sentence_models:{encoder, sim}}
-			//setCurrentTransformer(
-			//	current.data.sentence_models
-			//		? current.data.sentence_models
-			//		: initTransformer
-			//);
-			setCurrentEncoder(current.data.encoder_model ? current.data.encoder_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentSim(current.data.sim_model ? current.data.sim_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentSentenceIndex(
-				current.data.sentence_index ? current.data.sentence_index.replace(/^.*[\\/]/, '') : ''
-			);
-			setCurrentDocCompareEncoder(
-				current.data.doc_compare_encoder_model
-					? current.data.doc_compare_encoder_model.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentDocCompareSim(
-				current.data.doc_compare_sim_model ? current.data.doc_compare_sim_model.replace(/^.*[\\/]/, '') : ''
-			);
-			setCurrentDocCompareIndex(
-				current.data.doc_compare_sentence_index
-					? current.data.doc_compare_sentence_index.replace(/^.*[\\/]/, '')
-					: ''
-			);
-			setCurrentQexp(current.data.qexp_model ? current.data.qexp_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentQa(current.data.qa_model ? current.data.qa_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentJbook(current.data.jbook_model ? current.data.jbook_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentWordSim(current.data.wordsim_model ? current.data.wordsim_model.replace(/^.*[\\/]/, '') : '');
-			setCurrentTopicModel(current.data.topic_model ? current.data.topic_model.replace(/^.*[\\/]/, '') : '');
-
-			props.updateLogs('Successfully queried current loaded models.', 0);
-		} catch (e) {
-			props.updateLogs('Error querying current loaded models: ' + e.toString(), 2);
-			throw e;
-		}
+		getCache(props, setCacheOptions);
 	};
 
 	const deleteLocalModels = async (model, type) => {
@@ -172,72 +423,14 @@ export default (props) => {
 			type: type,
 		});
 		props.getProcesses();
-		getModelsList();
-	};
-	/**
-	 * Get a list of all the proccesses running and completed
-	 * @method getAllProcessData
-	 */
-	const getAllProcessData = () => {
-		const processList = [];
-		if (props.processes.process_status) {
-			for (const key in props.processes.process_status) {
-				const status = key !== 'flags' ? props.processes.process_status[key]['process'].split(': ') : [''];
-				if (['models', 'training'].includes(status[0])) {
-					processList.push({
-						...props.processes.process_status[key],
-						thread_id: key,
-						date: 'Currently Running',
-					});
-				}
-			}
-		}
-		if (props.processes.completed_process) {
-			for (const completed of props.processes.completed_process) {
-				const completed_process = completed.process.split(': ');
-				if (['models', 'training'].includes(completed_process[0])) {
-					processList.push({
-						...completed,
-						process: completed_process[1],
-						category: completed_process[0],
-						progress: completed.total,
-					});
-				}
-			}
-		}
-		return processList;
+		getModelsList(setDownloadedModelsList, setModelTable, props);
 	};
 
 	const getLocalData = async () => {
 		const dataList = await gameChangerAPI.getDataList();
 		setDataTable(dataList.data.dirs);
 	};
-	/**
-	 * Get a list of all the downloaded sentence index, qexp, and transformers.
-	 * @method getModelsList
-	 */
-	const getModelsList = async () => {
-		try {
-			// set downloadedModelsList
-			const list = await gameChangerAPI.getModelsList();
-			setDownloadedModelsList(list.data);
-			const modelList = [];
-			for (const type in list.data) {
-				for (const model in list.data[type]) {
-					modelList.push({
-						type,
-						model,
-						config: JSON.stringify(list.data[type][model], null, 2),
-					});
-				}
-			}
-			setModelTable(modelList);
-			props.updateLogs('Successfully queried models list', 0);
-		} catch (e) {
-			props.updateLogs('Error querying models list: ' + e.toString(), 2);
-			throw e;
-		}
-	};
+
 	/**
 	 * Get a list of all the downloaded sentence index, qexp, and transformers.
 	 * @method getCorpusCount
@@ -311,167 +504,11 @@ export default (props) => {
 	};
 
 	/**
-	 * @method getCache
-	 */
-	const getCache = async () => {
-		try {
-			const cache = await gameChangerAPI.getCache();
-			setCacheOptions(cache.data);
-			props.getProcesses();
-		} catch (e) {
-			props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
-		}
-	};
-	/**
-	 * @method clearAllCache
-	 */
-	const clearAllCache = async () => {
-		try {
-			await gameChangerAPI.clearCache({
-				clear: [],
-			});
-			props.getProcesses();
-			setSelectedCache([]);
-			getCache();
-		} catch (e) {
-			props.updateLogs('Error clearing all cache: ' + e.toString(), 2);
-		}
-	};
-
-	/**
-	 * @method clearSelectCache
-	 */
-	const clearSelectCache = async () => {
-		try {
-			await gameChangerAPI.clearCache({
-				clear: selectedCache,
-			});
-			props.getProcesses();
-			setSelectedCache([]);
-			getCache();
-		} catch (e) {
-			props.updateLogs('Error clearing selected cache: ' + e.toString(), 2);
-		}
-	};
-
-	/**
-	 * @method triggerTrainTopics
-	 */
-	const triggerTrainTopics = async () => {
-		try {
-			await gameChangerAPI.trainModel({
-				build_type: 'topics',
-				sample_rate: topicsSampling,
-				upload: topicsUpload,
-				version: topicsVersion,
-			});
-			props.updateLogs('Started training', 0);
-			props.getProcesses();
-		} catch (e) {
-			props.updateLogs('Error training model: ' + e.toString(), 2);
-		}
-	};
-	/**
-	 * @method triggerEvaluateModel
-	 */
-	const triggerEvaluateModel = async () => {
-		try {
-			await gameChangerAPI.trainModel({
-				build_type: 'eval',
-				model_name: evalModelName,
-				validation_data: 'latest',
-				eval_type: 'domain',
-			});
-			props.updateLogs('Started evaluating', 0);
-			props.getProcesses();
-		} catch (e) {
-			console.log('\nERROR EVALUATING MODEL');
-			console.log(e);
-			props.updateLogs('Error evaluating model: ' + e.toString(), 2);
-		}
-	};
-
-	/**
-	 * @method triggerReloadModels
-	 */
-	const triggerReloadModels = async () => {
-		try {
-			const params = {};
-			if (selectedSentence) {
-				params['sentence'] = selectedSentence;
-			}
-			if (docCompareSelectedSentence) {
-				params['doc_compare_sentence'] = docCompareSelectedSentence;
-			}
-			if (selectedQEXP) {
-				params['qexp'] = selectedQEXP;
-			}
-			if (selectedTopicModel) {
-				params['topic_models'] = selectedTopicModel;
-			}
-			if (selectedJbookQEXP) {
-				params['jbook_qexp'] = selectedJbookQEXP;
-			}
-			if (selectedQAModel) {
-				params['qa_model'] = selectedQAModel;
-			}
-			await gameChangerAPI.reloadModels(params);
-			props.updateLogs('Reloaded Models', 0);
-			props.getProcesses();
-		} catch (e) {
-			props.updateLogs('Error reloading models: ' + e.toString(), 2);
-		}
-	};
-
-	const triggerInitializeLTR = async () => {
-		try {
-			await gameChangerAPI.initializeLTR().then((data) => {
-				setLTRInitializedStatus(data.status);
-			});
-			props.updateLogs('Initializing LTR', 0);
-			props.getProcesses();
-		} catch (e) {
-			props.updateLogs('Error initializing LTR: ' + e.toString(), 2);
-		}
-	};
-
-	const triggerCreateModelLTR = async () => {
-		try {
-			await gameChangerAPI.createModelLTR().then((data) => {
-				setLTRModelCreatedStatus(data.status);
-			});
-			props.updateLogs('Creating LTR model', 0);
-			props.getProcesses();
-		} catch (e) {
-			props.updateLogs('Error creating LTR model: ' + e.toString(), 2);
-		}
-	};
-
-	/**
 	 * @method checkCorpusDownloading
 	 */
 	const checkCorpusDownloading = () => {
-		let downloading = checkFlag('corpus:');
+		let downloading = checkFlag('corpus:', props);
 		return ('' + downloading).toUpperCase();
-	};
-	/**
-	 * Takes a String and checks if it is in any of the flag keys and checks
-	 * those values. If any of them are true it returns true
-	 * @method checkFlag
-	 * @param {String} flag
-	 * @returns boolean
-	 */
-	const checkFlag = (flag) => {
-		let flagged = false;
-		if (props.processes.process_status && props.processes.process_status.flags) {
-			const flags = props.processes.process_status.flags;
-			for (const key in flags) {
-				if (key.includes(flag) && flags[key]) {
-					flagged = true;
-				}
-			}
-		}
-		return flagged;
 	};
 
 	useEffect(() => {
@@ -546,7 +583,7 @@ export default (props) => {
 				</GCPrimaryButton>
 			</div>
 			<div>
-				<Processes processData={getAllProcessData()} />
+				<Processes processData={getAllProcessData(props)} />
 			</div>
 			<div className="info">
 				<BorderDiv className="half">
@@ -679,7 +716,15 @@ export default (props) => {
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
-								triggerReloadModels();
+								triggerReloadModels(
+									props,
+									selectedSentence,
+									docCompareSelectedSentence,
+									selectedQEXP,
+									selectedTopicModel,
+									selectedJbookQEXP,
+									selectedQAModel
+								);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
@@ -935,7 +980,7 @@ export default (props) => {
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
-								triggerTrainTopics();
+								triggerTrainTopics(props, topicsSampling, topicsUpload, topicsVersion);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
@@ -1065,7 +1110,7 @@ export default (props) => {
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
-								triggerEvaluateModel();
+								triggerEvaluateModel(props, evalModelName);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
@@ -1097,7 +1142,7 @@ export default (props) => {
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
-								triggerInitializeLTR();
+								triggerInitializeLTR(props, setLTRInitializedStatus);
 							}}
 							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
 						>
@@ -1118,7 +1163,7 @@ export default (props) => {
 						<br />
 						<GCPrimaryButton
 							onClick={() => {
-								triggerCreateModelLTR();
+								triggerCreateModelLTR(props, setLTRModelCreatedStatus);
 							}}
 							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
 						>
@@ -1215,7 +1260,7 @@ export default (props) => {
 						</div>
 						<GCPrimaryButton
 							onClick={() => {
-								clearSelectCache();
+								clearSelectCache(props, selectedCache, setSelectedCache, setCacheOptions);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -1223,7 +1268,7 @@ export default (props) => {
 						</GCPrimaryButton>
 						<GCPrimaryButton
 							onClick={() => {
-								clearAllCache();
+								clearAllCache(props, setSelectedCache, setCacheOptions);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
