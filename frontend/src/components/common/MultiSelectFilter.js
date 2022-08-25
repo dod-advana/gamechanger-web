@@ -5,7 +5,6 @@ import Button from '@mui/material/Button';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
@@ -69,15 +68,15 @@ const MultiSelectFilter = ({
 	searchSettingsName,
 	filter,
 	originalFilters,
-	allSelected,
-	specificSelected,
-	update,
 	trackingName,
 	showNumResultsPerOption = false,
-	preventSearchOnChange = false,
+	handleFilterChange,
+	handleClear,
+	showClear,
+	isChecked,
+	children,
 }) => {
 	const [showSeeMore, setShowSeeMore] = useState(false);
-	const [showClear, setShowClear] = useState(false);
 	const [maxNumVisible, setMaxNumVisible] = useState();
 	const [showingAllOptions, setShowingAllOptions] = useState(false);
 
@@ -87,41 +86,16 @@ const MultiSelectFilter = ({
 	originalFilters.forEach((option) => {
 		betterData[option[0]] = option[1];
 	});
-	let visibleOptions = Object.keys(betterData);
+	let visibleOptions = originalFilters.map((option) => option[0]);
 	if (maxNumVisible && !showingAllOptions) {
-		visibleOptions = Object.keys(betterData).slice(0, maxNumVisible);
+		visibleOptions = visibleOptions.slice(0, maxNumVisible);
 	}
 
 	const containerRef = useRef();
 	const checkboxRef = useRef();
 
-	const handleFilterChange = (event) => {
-		const newSearchSettings = structuredClone(state[searchSettingsName]);
-		if (state[searchSettingsName][allSelected]) {
-			newSearchSettings[allSelected] = false;
-			newSearchSettings[specificSelected] = true;
-			setShowClear(true);
-		}
-		let name = showNumResultsPerOption
-			? event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1)
-			: event.target.name;
-		newSearchSettings[filter] = {
-			...newSearchSettings[filter],
-			[name]: event.target.checked,
-		};
-		if (Object.values(newSearchSettings[filter]).filter((value) => value).length === 0) {
-			newSearchSettings[allSelected] = true;
-			newSearchSettings[specificSelected] = false;
-			setShowClear(false);
-		}
-		newSearchSettings.isFilterUpdate = true;
-		newSearchSettings[update] = true;
-		setState(dispatch, {
-			[searchSettingsName]: newSearchSettings,
-			metricsCounted: false,
-			runSearch: !preventSearchOnChange,
-			runGraphSearch: !preventSearchOnChange,
-		});
+	const handleFilterChangeAndTrack = (event) => {
+		handleFilterChange(event);
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
 			trackingName,
@@ -132,28 +106,6 @@ const MultiSelectFilter = ({
 
 	const handleSeeMore = () => {
 		setShowingAllOptions(!showingAllOptions);
-	};
-
-	const handleClear = () => {
-		const newSearchSettings = structuredClone(state[searchSettingsName]);
-
-		// Set all options to false
-		const newFilter = Object.keys(state[searchSettingsName][filter]).reduce((accumulator, key) => {
-			return { ...accumulator, [key]: false };
-		}, {});
-
-		newSearchSettings[filter] = newFilter;
-		newSearchSettings[allSelected] = true;
-		newSearchSettings[specificSelected] = false;
-		newSearchSettings.isFilterUpdate = true;
-		newSearchSettings[update] = true;
-		setShowClear(false);
-		setState(dispatch, {
-			[searchSettingsName]: newSearchSettings,
-			metricsCounted: false,
-			runSearch: !preventSearchOnChange,
-			runGraphSearch: !preventSearchOnChange,
-		});
 	};
 
 	const getCheckboxWidthAndHeight = (ref) => {
@@ -192,39 +144,40 @@ const MultiSelectFilter = ({
 	return (
 		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 			<div ref={containerRef} style={styles.checkboxContainer}>
-				{visibleOptions.map((option) => {
-					const checkboxText = getCheckboxText(option);
-					return (
-						<FormControlLabel
-							disabled={
-								showNumResultsPerOption &&
-								!betterData[option] &&
-								!state[searchSettingsName][filter][option]
-							}
-							key={checkboxText}
-							value={checkboxText}
-							classes={{
-								root: classes.rootLabel,
-								label: classes.checkboxPill,
-							}}
-							control={
-								<Checkbox
-									classes={{
-										root: classes.rootButton,
-										checked: classes.checkedButton,
-									}}
-									name={checkboxText}
-									checked={state[searchSettingsName][filter][option] || false}
-									onChange={(event) => handleFilterChange(event)}
-									key={checkboxText}
-								/>
-							}
-							label={checkboxText}
-							labelPlacement="end"
-							ref={checkboxRef}
-						/>
-					);
-				})}
+				{children ||
+					visibleOptions.map((option) => {
+						const checkboxText = getCheckboxText(option);
+						return (
+							<FormControlLabel
+								disabled={
+									showNumResultsPerOption &&
+									!betterData[option] &&
+									!state[searchSettingsName][filter][option]
+								}
+								key={checkboxText}
+								value={checkboxText}
+								classes={{
+									root: classes.rootLabel,
+									label: classes.checkboxPill,
+								}}
+								control={
+									<Checkbox
+										classes={{
+											root: classes.rootButton,
+											checked: classes.checkedButton,
+										}}
+										name={checkboxText}
+										checked={isChecked(option) || false}
+										onChange={(event) => handleFilterChangeAndTrack(event)}
+										key={checkboxText}
+									/>
+								}
+								label={checkboxText}
+								labelPlacement="end"
+								ref={checkboxRef}
+							/>
+						);
+					})}
 			</div>
 			{(showSeeMore || showClear) && (
 				<ButtonGroup
@@ -262,12 +215,13 @@ MultiSelectFilter.propTypes = {
 	searchSettingsName: PropTypes.string,
 	filter: PropTypes.string,
 	originalFilters: PropTypes.object,
-	allSelected: PropTypes.string,
-	specificSelected: PropTypes.string,
-	update: PropTypes.string,
 	trackingName: PropTypes.string,
 	showNumResultsPerOption: PropTypes.bool,
 	preventSearchOnChange: PropTypes.bool,
+	handleFilterChange: PropTypes.func,
+	handleClear: PropTypes.func,
+	showClear: PropTypes.bool,
+	isChecked: PropTypes.func,
 };
 
 export default MultiSelectFilter;

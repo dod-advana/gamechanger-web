@@ -214,7 +214,11 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 				<LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />
 			) : (
 				<>
-					<Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>
+					<Typography
+						variant="h2"
+						data-cy="jbook-profile-title"
+						style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
+					>
 						{renderTitle(projectData, programElement, projectNum)}
 					</Typography>
 					<div style={{ overflow: 'auto' }}>
