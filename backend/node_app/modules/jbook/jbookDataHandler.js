@@ -1310,7 +1310,7 @@ class JBookDataHandler extends DataHandler {
 	// use comment id and which field (upvotes or downvotes) and properly update the vote lists
 	async voteComment(req, userId) {
 		try {
-			const { id, field } = req.body;
+			const { id, field, author } = req.body;
 
 			let where = { id };
 
@@ -1329,17 +1329,17 @@ class JBookDataHandler extends DataHandler {
 			let isAdded = false;
 
 			if (primaryVotes !== null && primaryVotes !== undefined) {
-				let index = primaryVotes.indexOf(userId);
+				let index = primaryVotes.indexOf(author);
 
 				if (index !== -1) {
 					primaryVotes.splice(index, 1);
 				} else {
-					primaryVotes.push(userId);
+					primaryVotes.push(author);
 
 					isAdded = true;
 				}
 			} else {
-				primaryVotes = [userId];
+				primaryVotes = [author];
 				isAdded = true;
 			}
 
@@ -1347,9 +1347,9 @@ class JBookDataHandler extends DataHandler {
 				isAdded &&
 				secondaryVotes !== null &&
 				secondaryVotes !== undefined &&
-				secondaryVotes.indexOf(userId) !== -1
+				secondaryVotes.indexOf(author) !== -1
 			) {
-				secondaryVotes.splice(secondaryVotes.indexOf(userId), 1);
+				secondaryVotes.splice(secondaryVotes.indexOf(author), 1);
 			}
 
 			let update = await this.comments.update(
