@@ -600,7 +600,7 @@ const cardHandler = {
 			} else {
 				return (
 					<StyledFrontCardContent
-						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+						className={`eda-card-front tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
 						isWideCard={isWideCard}
 					>
 						<div className={'currents-as-of-div'}>
