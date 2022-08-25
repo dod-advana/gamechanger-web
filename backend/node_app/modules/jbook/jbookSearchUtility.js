@@ -831,7 +831,7 @@ class JBookSearchUtility {
 			shouldQuery.bool.should.push({
 				query_string: {
 					query: `*${jbookSearchSettings.budgetSubActivity}*`,
-					default_field: 'budgetActivityTitle_t',
+					default_field: 'budgetSubActivityNumber_s',
 				},
 			});
 		}
