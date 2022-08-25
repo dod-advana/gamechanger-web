@@ -122,7 +122,7 @@ const generateClosedContentArea = (state, dispatch) => {
 			)}
 			<GCTooltip title="User Guide" placement="right" arrow>
 				<a
-					href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources"
+					href="https://wiki.advana.data.mil/display/SDKB/JBOOK+Search+Training+Resources"
 					target="_blank"
 					rel="noopener noreferrer"
 					style={{ color: 'white', textDecoration: 'none', width: '40px' }}
