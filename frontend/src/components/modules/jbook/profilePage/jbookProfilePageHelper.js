@@ -177,7 +177,6 @@ const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
-
 	return (
 		<SimpleTable
 			tableClass={'magellan-table'}
@@ -557,12 +556,20 @@ const getMetadataTableData = (
 			Value: projectData.appropriationTitle || 'N/A',
 		},
 		{
-			Key: 'Budget Activity',
+			Key: 'Budget Activity Title',
+			Value: projectData.budgetActivityTitle || 'N/A',
+		},
+		{
+			Key: 'Budget Activity Number',
 			Value: projectData.budgetActivityNumber || 'N/A',
 		},
 		{
-			Key: 'Budget Activity Title',
-			Value: projectData.budgetActivityTitle || 'N/A',
+			Key: 'Budget Sub Activity Title',
+			Value: projectData.budgetSubActivityTitle ?? projectData.budgetSubActivity ?? 'N/A',
+		},
+		{
+			Key: 'Budget Sub Activity Number',
+			Value: projectData.budgetSubActivityNumber || 'N/A',
 		},
 		{
 			Key: 'Category',
