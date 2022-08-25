@@ -1,4 +1,5 @@
 'use strict';
+const tableName = 'comments';
 
 module.exports = {
 	async up(queryInterface, Sequelize) {
