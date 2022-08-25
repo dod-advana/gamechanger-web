@@ -250,7 +250,6 @@ const JBookSearchHandler = {
 	async handleEDASearch(state, dispatch) {
 		const { searchText = '', edaResultsPage, edaCloneData } = state;
 
-		// let searchResults = [];
 		setState(dispatch, {
 			edaCount: 0,
 			edaSearchResults: [],
@@ -274,8 +273,6 @@ const JBookSearchHandler = {
 					charsPadding,
 				},
 			});
-
-			// const t1 = new Date().getTime();
 
 			if (_.isObject(results.data)) {
 				let { docs, totalCount } = results.data;
@@ -422,6 +419,8 @@ const JBookSearchHandler = {
 		for (const setting in searchSettings) {
 			if (!searchSettings[setting]) {
 				delete searchSettings[setting];
+			} else if (typeof searchSettings[setting] === 'string') {
+				searchSettings[setting] = searchSettings[setting].trim();
 			}
 		}
 
