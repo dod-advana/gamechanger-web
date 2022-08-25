@@ -253,7 +253,7 @@ const EDAViewHeaderHandler = (props) => {
 			<div
 				style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}
 			>
-				<Typography variant="h3" display="inline">
+				<Typography variant="h3" display="inline" data-cy="eda-results-found">
 					{!runningSearch ? numResultsText : ''}
 				</Typography>
 				<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>

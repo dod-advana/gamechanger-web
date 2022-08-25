@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
@@ -42,11 +43,13 @@ import CypressHelper, { BASE_URL } from './CypressHelper';
 import './jbook-commands';
 // policy commands
 import './policy-commands';
+// eda commands
+import './eda-commands';
 
 /* ************* GENERAL ************** */
 
 Cypress.Commands.add('getDataCy', (cyTag, ...args) => {
-    cy.get(`[data-cy="${cyTag}"]`, ...args)
+	cy.get(`[data-cy="${cyTag}"]`, ...args);
 });
 
 Cypress.Commands.add('findDataCy', {prevSubject: true}, (subject, cyTag) => {
@@ -70,5 +73,5 @@ Cypress.Commands.add('visit_accept_consent', (page) => {
 });
 
 Cypress.Commands.add('accept_consent', () => {
-    cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
+	cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
 });
