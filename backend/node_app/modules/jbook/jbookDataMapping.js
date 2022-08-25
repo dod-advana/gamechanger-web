@@ -1914,6 +1914,16 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		budgetSubActivityTitle_t: {
+			newName: 'budgetSubActivityTitle',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		budgetSubActivityNumber_s: {
+			newName: 'budgetSubActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		budgetActivityTitle_t: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
