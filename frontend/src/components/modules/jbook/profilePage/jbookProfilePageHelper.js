@@ -569,7 +569,7 @@ const getMetadataTableData = (
 		},
 		{
 			Key: 'Budget Sub Activity Title',
-			Value: projectData.budgetSubActivityTitle ?? projectData.budgetSubActivity ?? 'N/A',
+			Value: projectData.budgetSubActivityTitle || 'N/A',
 		},
 		{
 			Key: 'Budget Sub Activity Number',

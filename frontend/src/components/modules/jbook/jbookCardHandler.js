@@ -289,7 +289,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		},
 		{
 			Key: 'Budget Sub Activity Title',
-			Value: projectData.budgetSubActivity ?? projectData.budgetSubActivityTitle,
+			Value: projectData.budgetSubActivityTitle,
 		},
 		{
 			Key: 'Budget Sub Activity Number',

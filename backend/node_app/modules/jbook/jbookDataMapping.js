@@ -1914,11 +1914,6 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		budgetSubActivityTitle_t: {
-			newName: 'budgetSubActivityTitle',
-			defaultValue: '',
-			processValue: (value) => value,
-		},
 		budgetSubActivityNumber_s: {
 			newName: 'budgetSubActivityNumber',
 			defaultValue: '',
@@ -2035,7 +2030,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title_t': {
-			newName: 'budgetSubActivity',
+			newName: 'budgetSubActivityTitle',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
