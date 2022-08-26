@@ -19,9 +19,9 @@ const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customPro
 const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
 const QLIK_ES_FIELDS = [
-	'name_s',
+	'name_t',
 	'description_t',
-	'streamName_s',
+	'streamName_t',
 	'streamCustomProperties_s',
 	'appCustomProperties_s',
 	'businessDomains_s',
@@ -30,19 +30,19 @@ const QLIK_ES_FIELDS = [
 const QLIK_ES_MAPPING = {
 	created_dt: { newName: 'createdDate' },
 	modified_dt: { newName: 'modifiedDate' },
-	name_s: { newName: 'name' },
+	name_t: { newName: 'name' },
 	publishTime_dt: { newName: 'publishTime' },
 	published_b: { newName: 'published' },
 	tags_n: { newName: 'tags' },
 	description_t: { newName: 'description' },
-	streamName_s: { newName: 'streamName' },
+	streamName_t: { newName: 'streamName' },
 	fileSize_i: { newName: 'fileSize' },
 	lastReloadTime_dt: { newName: 'lastReloadTime' },
-	thumbnail_s: { newName: 'thumbnail' },
+	thumbnail_t: { newName: 'thumbnail' },
 	dynamicColor_s: { newName: 'dynamicColor' },
-	streamCustomProperties_s: { newName: 'streamCustomProperties' },
-	appCustomProperties_s: { newName: 'appCustomProperties' },
-	businessDomains_s: { newName: 'businessDomains' },
+	streamCustomProperties_n: { newName: 'streamCustomProperties' },
+	appCustomProperties_n: { newName: 'appCustomProperties' },
+	businessDomains_n: { newName: 'businessDomains' },
 };
 
 const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
@@ -61,7 +61,6 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 		);
 
 		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
-
 		return processQlikApps(qlikApps.data, qlikStreams.data, logger);
 	} catch (err) {
 		if (!userId)
@@ -172,7 +171,7 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ parsedQuery, offset, limit, operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
+	{ parsedQuery, offset, limit, _operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
@@ -185,18 +184,8 @@ const getElasticSearchQueryForQlikApps = (
 				bool: {
 					should: [
 						{
-							multi_match: {
-								query: `${parsedQuery}`,
-								fields: QLIK_ES_FIELDS,
-								type: 'best_fields',
-								operator: `${operator}`,
-								fuzziness: 'AUTO',
-								analyzer: 'standard',
-							},
-						},
-						{
 							match_phrase: {
-								name_s: searchText,
+								name_t: searchText,
 							},
 						},
 					],
@@ -217,6 +206,11 @@ const getElasticSearchQueryForQlikApps = (
 		}
 
 		QLIK_ES_FIELDS.forEach((field) => {
+			query.query.bool.should.push({
+				wildcard: {
+					[field]: `*${parsedQuery}*`,
+				},
+			});
 			query.highlight.fields[field] = {};
 		});
 
