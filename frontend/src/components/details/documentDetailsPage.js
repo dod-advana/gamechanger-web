@@ -51,7 +51,9 @@ const emptyObject = {};
 const DocumentDetailsPage = (props) => {
 	const { document, cloneData, userData, rawSearchResults } = props;
 
-	const defaultFunction = useCallback(() => {}, []);
+	const defaultFunction = useCallback(() => {
+		return;
+	}, []);
 
 	const ref = useRef(null);
 
@@ -91,8 +93,8 @@ const DocumentDetailsPage = (props) => {
 	useEffect(() => {
 		if (document?.refList) {
 			const newList = [];
-			document.ref_list.forEach((ref) => {
-				newList.push({ References: ref });
+			document.ref_list.forEach((localRef) => {
+				newList.push({ References: localRef });
 			});
 			setRefList(newList);
 		}
@@ -111,10 +113,7 @@ const DocumentDetailsPage = (props) => {
 	useEffect(() => {
 		if (document) {
 			const docs = document?.ref_list.filter((doc) => {
-				return (
-					!docsReferenced.docs.find((ref) => ref.display_title_s.includes(doc)) &&
-					!document.display_title_s.includes(doc)
-				);
+				return notInCorpusHelper(doc);
 			});
 			setNotInCorpusDocs(docs);
 		}
@@ -133,40 +132,30 @@ const DocumentDetailsPage = (props) => {
 		if (!graphData.nodes.length > 0 || !cloneData) return;
 
 		// Find doc Ids to get the docs that are similar to
-		const docIds = [];
+		let docIdSet = new Set();
 		const docsMap = {
-			similar_to: [],
-			references: [],
-			referencedBy: [],
+			similar_to: new Set(),
+			references: new Set(),
+			referencedBy: new Set(),
 		};
 		const nodeIdMap = {};
 		for (const node of graphData.nodes) {
 			nodeIdMap[node.id] = node;
 		}
 		graphData.edges.forEach((edge) => {
-			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-				const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
-				const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
-				if (source === document.id && edge.label === 'SIMILAR_TO') {
-					if (!docsMap.similar_to.includes(target)) {
-						docsMap.similar_to.push(target);
-					}
-				}
-				if (source === document.id && edge.label === 'REFERENCES') {
-					if (!docsMap.references.includes(target)) {
-						docsMap.references.push(target);
-					}
-				}
-				if (target === document.id && edge.label === 'REFERENCES') {
-					if (!docsMap.referencedBy.includes(target)) {
-						docsMap.referencedBy.push(target);
-					}
-				}
-				if (!docIds.includes(target)) {
-					docIds.push(target);
-				}
-			}
+			buildDocMap(edge, nodeIdMap, docsMap, docIdSet);
 		});
+
+		let docIds = Array.from(docIdSet);
+
+		// Limits number of documents that will be requested from Elasticsearch:
+		// Express request sizes are limited by size in memory (100kb) rather than
+		// count, so 1000 has been chosen as a reasonable limit that is not expected
+		// to approach 100kb even for documents with long titles
+
+		if (docIds.length > 1000) {
+			docIds = docIds.slice(0, 1000);
+		}
 
 		let t0 = new Date().getTime();
 		if (docIds.length > 0) {
@@ -180,29 +169,29 @@ const DocumentDetailsPage = (props) => {
 				})
 				.then((resp) => {
 					const t1 = new Date().getTime();
-					const similarDocs = resp.data.docs.filter((doc) => {
-						return docsMap.similar_to.includes(doc.id);
+					const filteredSimilarDocs = resp.data.docs.filter((doc) => {
+						return docsMap.similar_to.has(doc.id);
 					});
-					const referencesDocs = resp.data.docs.filter((doc) => {
-						return docsMap.references.includes(doc.id);
+					const filteredReferencesDocs = resp.data.docs.filter((doc) => {
+						return docsMap.references.has(doc.id);
 					});
-					const referencedByDocs = resp.data.docs.filter((doc) => {
-						return docsMap.referencedBy.includes(doc.id);
+					const filteredReferencedByDocs = resp.data.docs.filter((doc) => {
+						return docsMap.referencedBy.has(doc.id);
 					});
 					setSimilarDocs({
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						docs: similarDocs,
-						docCount: similarDocs.length,
+						docs: filteredSimilarDocs,
+						docCount: filteredSimilarDocs.length,
 					});
 					setDocsReferenced({
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						docs: referencesDocs,
-						docCount: referencesDocs.length,
+						docs: filteredReferencesDocs,
+						docCount: filteredReferencesDocs.length,
 					});
 					setReferencedByDocs({
 						timeFound: ((t1 - t0) / 1000).toFixed(2),
-						docs: referencedByDocs,
-						docCount: referencedByDocs.length,
+						docs: filteredReferencedByDocs,
+						docCount: filteredReferencedByDocs.length,
 					});
 					setRunningSimilarDocsQuery(false);
 					setRunningDocsReferencedQuery(false);
@@ -247,7 +236,53 @@ const DocumentDetailsPage = (props) => {
 		}
 	};
 
-	const renderDocs = (documentObj = {}, docPage = 0, section, runningQuery = true) => {
+	const buildDocMap = (edge, nodeIdMap, docsMap, docIdSet) => {
+		if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
+			const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
+			const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
+
+			if (source === document.id && edge.label === 'SIMILAR_TO') {
+				docsMap.similar_to.add(target);
+			}
+
+			if (source === document.id && edge.label === 'REFERENCES') {
+				docsMap.references.add(target);
+			}
+
+			if (target === document.id && edge.label === 'REFERENCES') {
+				docsMap.referencedBy.add(source);
+			}
+
+			docIdSet.add(target);
+			docIdSet.add(source);
+		}
+	};
+
+	const addNotInCorpusDocs = (documentObj, localNotInCorpusDocs, docsVisible, emptyDoc) => {
+		for (
+			let i = docsReferencedPage * 10 - documentObj.docCount - 10;
+			i < docsReferencedPage * 10 - documentObj.docCount;
+			i++
+		) {
+			const invalidIndex = i < 0 || !localNotInCorpusDocs[i];
+			if (invalidIndex) continue;
+			docsVisible.push({
+				...emptyDoc,
+				display_title_s: localNotInCorpusDocs[i],
+				type: 'document',
+				notInCorpus: true,
+			});
+		}
+	};
+
+	const notInCorpusHelper = (doc) => {
+		return (
+			!docsReferenced.docs.find((localRef) => localRef.display_title_s.includes(doc)) &&
+			!document.display_title_s.includes(doc)
+		);
+	};
+
+	const renderDocs = (documentObj = {}, docPage = 0, section = '', queryInProgress = true) => {
 		let docsVisible = [];
 
 		switch (section) {
@@ -259,28 +294,13 @@ const DocumentDetailsPage = (props) => {
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
 				);
-				const notInCorpusDocs = document?.ref_list.filter((doc) => {
-					return (
-						!docsReferenced.docs.find((ref) => ref.display_title_s.includes(doc)) &&
-						!document.display_title_s.includes(doc)
-					);
+				const localNotInCorpusDocs = document?.ref_list.filter((doc) => {
+					return notInCorpusHelper(doc);
 				});
 				const emptyDoc = { ...document };
 				Object.keys(emptyDoc).forEach((prop) => (emptyDoc[prop] = null));
-				if (notInCorpusDocs) {
-					for (
-						let i = docsReferencedPage * 10 - documentObj.docCount - 10;
-						i < docsReferencedPage * 10 - documentObj.docCount;
-						i++
-					) {
-						if (i < 0 || !notInCorpusDocs[i]) continue;
-						docsVisible.push({
-							...emptyDoc,
-							display_title_s: notInCorpusDocs[i],
-							type: 'document',
-							notInCorpus: true,
-						});
-					}
+				if (localNotInCorpusDocs) {
+					addNotInCorpusDocs(documentObj, localNotInCorpusDocs, docsVisible, emptyDoc);
 				}
 				break;
 			case 'referencedByDocs':
@@ -293,7 +313,7 @@ const DocumentDetailsPage = (props) => {
 				break;
 		}
 
-		const renderDocs = () => {
+		const renderDocsHelper = () => {
 			return docsVisible.map((item, idx) => {
 				return (
 					<Card
@@ -309,17 +329,32 @@ const DocumentDetailsPage = (props) => {
 							userData,
 							rawSearchResults,
 						}}
-						dispatch={() => {}}
+						dispatch={() => {
+							return;
+						}}
 					/>
 				);
 			});
+		};
+
+		const renderDisplay = () => {
+			const totalDocCount = documentObj.docCount + notInCorpusDocs.length;
+			if (queryInProgress) {
+				return (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={gcColors.buttonColor2} />
+					</div>
+				);
+			} else if (totalDocCount === 0) {
+				return <div style={styles.noResults}>No Documents Found</div>;
+			}
 		};
 
 		return (
 			<div className={`related-documents`} style={{ width: '100%' }}>
 				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 					<div style={{ display: 'flex' }} className={'gcPagination'}>
-						{!runningQuery && documentObj.docCount > 0 && (
+						{!queryInProgress && documentObj.docCount > 0 && (
 							<Pagination
 								activePage={docPage}
 								itemsCountPerPage={10}
@@ -343,15 +378,7 @@ const DocumentDetailsPage = (props) => {
 					</div>
 				</div>
 				<div className="row" style={{ width: 'unset', marginLeft: 0 }}>
-					{runningQuery ? (
-						<div style={{ margin: '0 auto' }}>
-							<LoadingIndicator customColor={gcColors.buttonColor2} />
-						</div>
-					) : documentObj.docCount < 1 && notInCorpusDocs.length < 1 ? (
-						<div style={styles.noResults}>No Documents Found</div>
-					) : (
-						renderDocs()
-					)}
+					{renderDisplay() || renderDocsHelper()}
 				</div>
 			</div>
 		);
