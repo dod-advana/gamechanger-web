@@ -478,16 +478,51 @@ module.exports = Object.freeze({
 		COLLIBRA_CACHE_POLL_INTERVAL: process.env.COLLIBRA_CACHE_POLL_INTERVAL,
 		ES_MAPPING: {
 			settings: {
-				index: {
-					number_of_shards: 3,
-					number_of_replicas: 2,
+				analysis: {
+					filter: {
+						english_stemmer: {
+							type: 'stemmer',
+							language: 'english',
+						},
+						english_possessive_stemmer: {
+							type: 'stemmer',
+							language: 'possessive_english',
+						},
+					},
+					normalizer: {
+						lowercase_normalizer: {
+							filter: ['lowercase'],
+							type: 'custom',
+							char_filter: [],
+						},
+					},
+					analyzer: {
+						my_analyzer: {
+							type: 'custom',
+							tokenizer: 'my_tokenizer',
+							filter: ['english_possessive_stemmer', 'lowercase', 'english_stemmer'],
+						},
+						key_analyzer: {
+							type: 'custom',
+							tokenizer: 'keyword',
+							filter: ['lowercase'],
+						},
+					},
+					tokenizer: {
+						my_tokenizer: {
+							type: 'ngram',
+							min_gram: 3,
+							max_gram: 5,
+							token_chars: ['letter', 'digit'],
+						},
+					},
 				},
+				max_ngram_diff: 10,
 			},
 			mappings: {
 				dynamic_templates: [
 					{
 						string: {
-							match_mapping_type: 'string',
 							match: '*_s',
 							mapping: {
 								type: 'keyword',
@@ -498,19 +533,17 @@ module.exports = Object.freeze({
 					{
 						text: {
 							match: '*_t',
-							match_mapping_type: 'string',
-							mapping: { type: 'text' },
+							mapping: { type: 'text', analyzer: 'my_analyzer' },
 						},
 					},
 					{
 						string_and_text: {
 							match: '*_ks',
-							match_mapping_type: 'string',
 							mapping: {
 								type: 'keyword',
 								ignore_above: 256,
 								fields: {
-									search: { type: 'text' },
+									search: { type: 'text', analyzer: 'my_analyzer' },
 								},
 							},
 						},
@@ -518,77 +551,61 @@ module.exports = Object.freeze({
 					{
 						integer: {
 							match: '*_i',
-							match_mapping_type: 'string',
 							mapping: { type: 'integer' },
 						},
 					},
 					{
 						integer: {
 							match: '*_l',
-							match_mapping_type: 'string',
 							mapping: { type: 'long' },
 						},
 					},
 					{
 						boolean: {
 							match: '*_b',
-							match_mapping_type: 'string',
 							mapping: { type: 'boolean' },
 						},
 					},
 					{
 						double: {
 							match: '*_d',
-							match_mapping_type: 'string',
 							mapping: { type: 'double' },
 						},
 					},
 					{
 						float: {
 							match: '*_f',
-							match_mapping_type: 'string',
 							mapping: { type: 'float' },
 						},
 					},
 					{
 						date: {
 							match: '*_dt',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" },
 						},
 					},
 					{
 						date_year_only: {
 							match: '*_year_only',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: 'yyyy' },
 						},
 					},
 					{
 						date_year_month_only: {
 							match: '*_year_month_only',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: 'yyyy-MM' },
 						},
 					},
 					{
 						rank_feature: {
 							match: '*_r',
-							match_mapping_type: 'string',
 							mapping: { type: 'rank_feature' },
 						},
 					},
 					{
 						rank_features: {
 							match: '*_rs',
-							match_mapping_type: 'string',
 							mapping: { type: 'rank_features' },
-						},
-					},
-					{
-						nested_object: {
-							match: '*_n',
-							mapping: { type: 'nested' },
 						},
 					},
 				],
