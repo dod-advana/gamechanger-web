@@ -98,6 +98,8 @@ class ElasticSearchController {
 				esIndex: 'global_search_qlik',
 			};
 
+			await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
+
 			// Create index for qlik apps in case it is not there
 			await this.esSearchLib.createIndex(
 				clientObj.esClientName,
@@ -115,21 +117,21 @@ class ElasticSearchController {
 					modified_dt: app['modifiedDate'],
 					//modifiedByUserName_s: app['modifiedByUserName'],
 					//ownerName_s: app['owner']['name'],
-					name_s: app['name'],
+					name_t: app['name'],
 					publishTime_dt: app['publishTime'],
 					published_b: app['published'],
 					tags_n: app['tags'],
 					description_t: app['description'],
-					streamId_s: app['stream']['id'],
-					streamName_s: app['stream']['name'],
+					streamId_t: app['stream']['id'],
+					streamName_t: app['stream']['name'],
 					streamCustomProperties_s: app['stream']['customProperties'],
 					fileSize_i: app['fileSize'],
 					lastReloadTime_dt: app['lastReloadTime'],
-					thumbnail_s: app['thumbnail'],
-					dynamicColor_s: app['dynamicColor'],
-					appCustomProperties_s: app['customProperties'],
-					businessDomains_s: app['businessDomains'],
-					owner_s: app['owner']['name'],
+					thumbnail_t: app['thumbnail'],
+					dynamicColor_t: app['dynamicColor'],
+					appCustomProperties_n: app['customProperties'],
+					businessDomains_n: app['businessDomains'],
+					owner_t: app['owner']['name'],
 				};
 			});
 

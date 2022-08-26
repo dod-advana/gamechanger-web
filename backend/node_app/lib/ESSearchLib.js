@@ -38,7 +38,7 @@ class ESSearchLib {
 		}
 	}
 
-	async multiqueryElasticsearch(clientName, index, queryBodiesArray, user) {
+	async multiqueryElasticsearch(clientName, _index, queryBodiesArray, user) {
 		try {
 			const multiquery = {
 				body: [],
@@ -65,7 +65,7 @@ class ESSearchLib {
 
 	async updateDocument(clientName, index, updatedDocument, documentId, user) {
 		try {
-			const resp = await this._clients[clientName].update({
+			await this._clients[clientName].update({
 				index,
 				id: documentId,
 				body: { doc: updatedDocument, detect_noop: false },
@@ -78,7 +78,7 @@ class ESSearchLib {
 		}
 	}
 
-	async createIndex(clientName, index, mappings, aliases, user) {
+	async createIndex(clientName, index, mappings, _aliases, user) {
 		try {
 			const { body: indexExists } = await this._clients[clientName].indices.exists({ index });
 			if (indexExists) {
@@ -100,17 +100,28 @@ class ESSearchLib {
 		}
 	}
 
+	async deleteIndex(clientName, index, user) {
+		try {
+			await this._clients[clientName].indices.delete({ index });
+
+			return true;
+		} catch (e) {
+			this.logger.error(e.message, '6Q71ARKD', user);
+			return false;
+		}
+	}
+
 	async bulkInsert(clientName, index, documents, user) {
 		try {
 			const operations = documents.flatMap((doc) => [{ index: { _index: index, _id: doc['id'] } }, doc]);
 			const bulkResponse = await this._clients[clientName].bulk({ refresh: true, body: operations });
 
-			if (bulkResponse.errors) {
+			if (bulkResponse['body']['errors']) {
 				const erroredDocuments = [];
 				// The items array has the same order of the dataset we just indexed.
 				// The presence of the `error` key indicates that the operation
 				// that we did for the document has failed.
-				bulkResponse.items.forEach((action, i) => {
+				bulkResponse['body']['items'].forEach((action, _i) => {
 					const operation = Object.keys(action)[0];
 					if (action[operation].error) {
 						erroredDocuments.push({
@@ -119,8 +130,6 @@ class ESSearchLib {
 							// fix the document before to try it again.
 							status: action[operation].status,
 							error: action[operation].error,
-							operation: body[i * 2],
-							document: body[i * 2 + 1],
 						});
 					}
 				});
