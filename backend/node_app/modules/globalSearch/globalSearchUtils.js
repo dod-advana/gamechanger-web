@@ -203,16 +203,16 @@ const getElasticSearchQueryForQlikApps = (
 			query.query = {
 				terms: { 'id.keyword': favoriteApps },
 			};
-		}
-
-		QLIK_ES_FIELDS.forEach((field) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[field]: `*${parsedQuery}*`,
-				},
+		} else {
+			QLIK_ES_FIELDS.forEach((field) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[field]: `*${parsedQuery}*`,
+					},
+				});
+				query.highlight.fields[field] = {};
 			});
-			query.highlight.fields[field] = {};
-		});
+		}
 
 		return query;
 	} catch (e) {
