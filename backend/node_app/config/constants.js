@@ -180,9 +180,9 @@ module.exports = Object.freeze({
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
-		CA: process.env.QLIK_CERT_CA ? process.env.QLIK_CERT_CA.replace(/\\n/g, '\n') : '',
-		KEY: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
-		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
+		CA: getCert('QLIK_CERT_CA', 'QLIK_CERT_CA_FILEPATH'),
+		KEY: getCert('QLIK_CERT_KEY', 'QLIK_CERT_KEY_FILEPATH'),
+		CERT: getCert('QLIK_CERT', 'QLIK_CERT_FILEPATH'),
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
 		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
