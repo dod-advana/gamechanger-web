@@ -22,9 +22,10 @@ const QLIK_ES_FIELDS = [
 	'name_t',
 	'description_t',
 	'streamName_t',
-	'streamCustomProperties_s',
-	'appCustomProperties_s',
-	'businessDomains_s',
+	'streamCustomProperties_n',
+	'appCustomProperties_n',
+	'businessDomains_n',
+	'tags_n',
 ];
 
 const QLIK_ES_MAPPING = {
@@ -205,11 +206,25 @@ const getElasticSearchQueryForQlikApps = (
 			};
 		} else {
 			QLIK_ES_FIELDS.forEach((field) => {
-				query.query.bool.should.push({
-					wildcard: {
-						[field]: `*${parsedQuery}*`,
-					},
-				});
+				if (field.indexOf('_n') !== -1) {
+					query.query.bool.should.push({
+						nested: {
+							path: field,
+							query: {
+								wildcard: {
+									[`${field}.items`]: `*${parsedQuery}*`,
+								},
+							},
+						},
+					});
+				} else {
+					query.query.bool.should.push({
+						wildcard: {
+							[field]: `*${parsedQuery}*`,
+						},
+					});
+				}
+
 				query.highlight.fields[field] = {};
 			});
 		}

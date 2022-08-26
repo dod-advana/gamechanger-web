@@ -499,7 +499,7 @@ module.exports = Object.freeze({
 					analyzer: {
 						my_analyzer: {
 							type: 'custom',
-							tokenizer: 'my_tokenizer',
+							tokenizer: 'standard',
 							filter: ['english_possessive_stemmer', 'lowercase', 'english_stemmer'],
 						},
 						key_analyzer: {
@@ -511,7 +511,7 @@ module.exports = Object.freeze({
 					tokenizer: {
 						my_tokenizer: {
 							type: 'ngram',
-							min_gram: 3,
+							min_gram: 2,
 							max_gram: 5,
 							token_chars: ['letter', 'digit'],
 						},
@@ -606,6 +606,12 @@ module.exports = Object.freeze({
 						rank_features: {
 							match: '*_rs',
 							mapping: { type: 'rank_features' },
+						},
+					},
+					{
+						nested_object: {
+							match: '*_n',
+							mapping: { type: 'nested' },
 						},
 					},
 				],
