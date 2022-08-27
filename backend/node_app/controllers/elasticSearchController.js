@@ -109,8 +109,6 @@ class ElasticSearchController {
 				'QlikAppCaching'
 			);
 
-			console.log(qlikApps);
-
 			// Convert qlik apps into documents
 			const dataset = qlikApps.map((app) => {
 				return {
