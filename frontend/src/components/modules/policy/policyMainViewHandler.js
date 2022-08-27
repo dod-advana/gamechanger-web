@@ -724,7 +724,7 @@ const getViewNames = (props) => {
 const getExtraViewPanels = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
-	const { cloneData, count, docSearchResults, resultsPage, loading, prevSearchText, searchText } = state;
+	const { count } = state;
 	const viewPanels = [];
 	viewPanels.push({
 		panelName: 'Explorer',
@@ -734,18 +734,18 @@ const getExtraViewPanels = (props) => {
 					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 					<PolicyDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
-						data={docSearchResults}
-						searchText={searchText}
-						prevSearchText={prevSearchText}
-						totalCount={count}
-						loading={loading}
-						resultsPage={resultsPage}
+						totalCount={count > 9982 ? 9982 : count}
 						resultsPerPage={RESULTS_PER_PAGE}
-						onPaginationClick={(page) => {
-							setState(dispatch, { resultsPage: page, runSearch: true });
+						onPaginationClick={async (page) => {
+							setState(dispatch, {
+								docsLoading: true,
+								resultsPage: page,
+								docsPagination: true,
+							});
 						}}
 						isClone={true}
-						cloneData={cloneData}
+						state={state}
+						dispatch={dispatch}
 					/>
 				</div>
 			</StyledCenterContainer>
@@ -1146,13 +1146,18 @@ const PolicyMainViewHandler = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
-		if (state.docsPagination && searchHandler) {
-			searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+		const shouldRunPagination = (type) => {
+			return Boolean(type && searchHandler);
+		};
+
+		if (shouldRunPagination(state.docsPagination)) {
+			const replaceResults = state.currentViewName === 'Explorer' ? true : state.replaceResults;
+			searchHandler.handleDocPagination(state, dispatch, replaceResults);
 		}
-		if (state.entityPagination && searchHandler) {
+		if (shouldRunPagination(state.entityPagination)) {
 			searchHandler.handleEntityPagination(state, dispatch);
 		}
-		if (state.topicPagination && searchHandler) {
+		if (shouldRunPagination(state.topicPagination)) {
 			searchHandler.handleTopicPagination(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);

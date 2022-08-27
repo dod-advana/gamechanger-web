@@ -24,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
 			author: {
 				type: DataTypes.TEXT,
 			},
+			authorId: {
+				type: DataTypes.TEXT,
+			},
 			createdAt: {
 				type: DataTypes.DATE,
 				allowNull: false,
