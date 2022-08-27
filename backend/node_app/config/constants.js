@@ -502,22 +502,8 @@ module.exports = Object.freeze({
 							tokenizer: 'standard',
 							filter: ['english_possessive_stemmer', 'lowercase', 'english_stemmer'],
 						},
-						key_analyzer: {
-							type: 'custom',
-							tokenizer: 'keyword',
-							filter: ['lowercase'],
-						},
-					},
-					tokenizer: {
-						my_tokenizer: {
-							type: 'ngram',
-							min_gram: 2,
-							max_gram: 5,
-							token_chars: ['letter', 'digit'],
-						},
 					},
 				},
-				max_ngram_diff: 10,
 			},
 			mappings: {
 				dynamic_templates: [
