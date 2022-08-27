@@ -1,6 +1,5 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-// import SimpleTable from '../../common/SimpleTable';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
@@ -218,7 +217,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let amount = 0;
 
 	if (!isNaN(totalObligatedAmount)) {
-		amount = numberWithCommas(Math.floor(totalObligatedAmount / 1000000)) ?? 0;
+		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
 	}
 
 	const renderChartLabel = (entry) => {
@@ -228,8 +227,8 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	const CustomTooltip = ({ payload }) => {
 		let tooltipText = '';
 		if (payload.length > 0) {
-			let data = payload[0];
-			tooltipText += data.name + ': ' + data.payload.obligatedAmount;
+			let agency = payload[0];
+			tooltipText += agency.name + ': ' + agency.payload.obligatedAmount;
 		}
 		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
 	};
@@ -248,7 +247,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					label={renderChartLabel}
 					isAnimationActive={false}
 				>
-					{data.map((entry, index) => (
+					{data.map((_entry, index) => (
 						<Cell key={`cell-${index}`} fill={data[index].color} />
 					))}
 				</Pie>
@@ -858,6 +857,7 @@ const renderExcludeTerms = (state, dispatch) => {
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+	setState(dispatch, { runSearch: true });
 };
 
 export const getAdvancedOptions = (props) => {
@@ -866,65 +866,119 @@ export const getAdvancedOptions = (props) => {
 	return (
 		<div style={{ height: 500, overflow: 'scroll' }}>
 			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE ORGANIZATION</strong>
+				<strong style={styles.boldText}>EXCLUDED TERMS</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderOrganizationFilters(state, dispatch)}</div>
+				<div>{renderExcludeTerms(state, dispatch)}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
+				<strong style={styles.boldText}>DESCRIPTION OF REQS</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
+				<div>{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}</div>
 			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>FISCAL YEAR</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderFiscalYearFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>EDA CONTRACT DATA</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderContractDataFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderModificationFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>IDV PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>MOD NUMBER</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
-			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>CONTRACT SOW</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'Contract SOW', 'contractSOW')}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>CLIN DATA</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'CLIN DATA', 'clinText')}</div>
 			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>VENDOR NAME</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>FUNDING OFFICE DoDAAC</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>FUNDING AGENCY NAME</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>PSC</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>PSC DESCRIPTION</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>NAICS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>DUNS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>AVAILABLE EDA FORMAT</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderContractDataFilter(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderModificationFilter(state, dispatch)}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>IDV PIID</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>PIID</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
+			</div>
+
+			<div style={styles.advFilterDiv}>
+				<strong style={styles.boldText}>MOD NUMBER</strong>
+				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+				<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
+			</div>
+
 			<div style={{ display: 'flex', margin: '10px' }}>
 				<div style={{ width: '120px', height: '40px', marginRight: '20px' }}>
 					<GCButton
@@ -1126,28 +1180,6 @@ const EDASearchMatrixHandler = (props) => {
 
 			<GCAccordion
 				contentPadding={15}
-				expanded={edaSearchSettings.excludeTerms !== null}
-				header={'EXCLUDED TERMS'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderExcludeTerms(state, dispatch)}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.reqDesc}
-				header={'DESCRIPTION OF REQS'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
 				expanded={edaSearchSettings.contractsOrMods !== 'both'}
 				header={'CONTRACTS OR MODS'}
 				headerBackground={'rgb(238,241,242)'}
@@ -1188,28 +1220,6 @@ const EDASearchMatrixHandler = (props) => {
 				headerTextWeight={'normal'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.contractSOW}
-				header={'CONTRACT SOW'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'Contract SOW', 'contractSOW')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.clinText}
-				header={'CLIN DATA'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'CLIN DATA', 'clinText')}
 			</GCAccordion>
 
 			<GCButton

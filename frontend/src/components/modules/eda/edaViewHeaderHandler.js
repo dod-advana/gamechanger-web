@@ -46,34 +46,6 @@ const filterNameMap = {
 	reqDesc: 'Desc of Reqs',
 };
 
-const handleFilterChange = (option, state, dispatch, type) => {
-	const newSearchSettings = structuredClone(state.edaSearchSettings);
-
-	if (isArray(newSearchSettings[type])) {
-		const index = newSearchSettings[type].indexOf(option);
-
-		if (index !== -1) {
-			newSearchSettings[type].splice(index, 1);
-		} else {
-			newSearchSettings[type].push(option);
-		}
-	} else if (typeof newSearchSettings[type] === 'string') {
-		if (type === 'contractsOrMods') {
-			newSearchSettings[type] = 'both';
-		} else {
-			newSearchSettings[type] = '';
-		}
-	} else if (type === 'contractData') {
-		newSearchSettings[type] = { pds: false, syn: false, fpds: false, none: false };
-	}
-
-	setState(dispatch, {
-		edaSearchSettings: newSearchSettings,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-};
-
 const EDAViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {} } = props;
@@ -94,6 +66,9 @@ const EDAViewHeaderHandler = (props) => {
 		rawSearchResults,
 		count,
 		timeFound,
+		runSearch,
+		defaultOptions,
+		loading,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -104,6 +79,34 @@ const EDAViewHeaderHandler = (props) => {
 			setState(dispatch, { currentViewName: 'Card', listView: true });
 		}
 	}, [dispatch]);
+
+	const handleFilterChange = (option, type) => {
+		const newSearchSettings = structuredClone(state.edaSearchSettings);
+
+		if (isArray(newSearchSettings[type])) {
+			const index = newSearchSettings[type].indexOf(option);
+
+			if (index !== -1) {
+				newSearchSettings[type].splice(index, 1);
+			} else {
+				newSearchSettings[type].push(option);
+			}
+		} else if (typeof newSearchSettings[type] === 'string') {
+			if (type === 'contractsOrMods') {
+				newSearchSettings[type] = 'both';
+			} else {
+				newSearchSettings[type] = '';
+			}
+		} else if (type === 'contractData') {
+			newSearchSettings[type] = { pds: false, syn: false, fpds: false, none: false };
+		}
+
+		setState(dispatch, {
+			edaSearchSettings: newSearchSettings,
+			runSearch: true,
+			runGraphSearch: true,
+		});
+	};
 
 	const setDrawer = (open) => {
 		setState(dispatch, { docsDrawerOpen: open });
@@ -206,6 +209,8 @@ const EDAViewHeaderHandler = (props) => {
 	};
 
 	const processFilters = (settings) => {
+		console.log(processFilters);
+		console.log(settings);
 		const processedFilters = [];
 		Object.keys(settings).forEach((type) => {
 			if (type in filterNameMap) {
@@ -414,12 +419,13 @@ const EDAViewHeaderHandler = (props) => {
 
 			<FilterList
 				filterNameMap={filterNameMap}
-				state={state}
-				dispatch={dispatch}
 				searchSettings={edaSearchSettings}
 				handleFilterChange={handleFilterChange}
 				processFilters={processFilters}
 				margin="26px 0 0 6px"
+				runSearch={runSearch}
+				defaultOptions={defaultOptions}
+				loading={loading}
 			/>
 		</div>
 	);

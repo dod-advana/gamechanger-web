@@ -1473,6 +1473,7 @@ const commentData = [
 		portfolioName: 'AI Inventory',
 		updatedAt: '2022-07-15T21:44:52.984Z',
 		upvotes: [],
+		authorId: '99',
 	},
 	{
 		author: null,
@@ -1485,6 +1486,7 @@ const commentData = [
 		portfolioName: 'AI Inventory',
 		updatedAt: '2022-07-15T21:44:55.984Z',
 		upvotes: [],
+		authorId: '99',
 	},
 ];
 
