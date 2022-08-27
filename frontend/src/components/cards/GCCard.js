@@ -667,6 +667,7 @@ const FavoriteComponent = (props) => {
 								break;
 						}
 					}}
+					data-cy="card-favorite-star"
 					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
 					style={{
 						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
