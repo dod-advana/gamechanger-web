@@ -95,7 +95,7 @@ class ElasticSearchController {
 
 			const clientObj = {
 				esClientName: 'gamechanger',
-				esIndex: 'global_search_qlik',
+				esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX,
 			};
 
 			await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
