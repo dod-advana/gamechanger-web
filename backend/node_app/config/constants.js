@@ -603,6 +603,6 @@ module.exports = Object.freeze({
 				],
 			},
 		},
-		ES_INDEX: 'global_search_qlik',
+		ES_INDEX: process.env.GLOBAL_SEARCH_ELASTICSEARCH_INDEX || 'global_search_qlik',
 	},
 });
