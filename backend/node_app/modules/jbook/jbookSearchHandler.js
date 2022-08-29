@@ -380,7 +380,7 @@ class JBookSearchHandler extends SearchHandler {
 				returnData.appropriationNumber = processMainAccountResults(mainAccountESResults);
 			}
 
-			console.log(returnData);
+			// console.log(returnData);
 
 			return returnData;
 		} catch (e) {
