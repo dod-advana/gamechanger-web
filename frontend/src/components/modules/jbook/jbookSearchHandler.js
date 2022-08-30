@@ -75,7 +75,16 @@ const JBookSearchHandler = {
 	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
-			const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+			let offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+			let search_after = [];
+			if (offset >= 9982) {
+				if (state.rawSearchResults.length > 0) {
+					offset = 0;
+					search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort;
+				} else {
+					console.log('bad yo, state.rawSearchResults is empty');
+				}
+			}
 
 			if (runningSearch) {
 				cancelToken.cancel('cancelled axios with consecutive call');
@@ -88,6 +97,7 @@ const JBookSearchHandler = {
 					cloneName: 'jbook',
 					searchText,
 					offset,
+					search_after,
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
