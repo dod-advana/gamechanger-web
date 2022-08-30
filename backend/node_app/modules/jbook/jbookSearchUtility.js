@@ -254,6 +254,7 @@ class JBookSearchUtility {
 				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
 
 				result.pageHits = this.getPageHits(hit);
+				result.sort = hit.sort;
 
 				switch (result.budgetType) {
 					case 'rdte':
@@ -647,7 +648,16 @@ class JBookSearchUtility {
 
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
+		{
+			searchText = '',
+			parsedQuery,
+			offset,
+			limit,
+			jbookSearchSettings,
+			operator = 'and',
+			sortSelected,
+			search_after = [],
+		},
 		userId
 	) {
 		let query = {};
@@ -781,9 +791,6 @@ class JBookSearchUtility {
 			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
 			// SORT
 			switch (sortText) {
-				case 'relevance':
-					query.sort = [{ _score: { order: sort } }];
-					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: sort } }];
 					break;
@@ -802,8 +809,16 @@ class JBookSearchUtility {
 				case 'budgetLineItem':
 					query.sort = [{ budgetLineItem_s: { order: sort } }];
 					break;
+				case 'relevance':
 				default:
+					query.sort = [{ _score: { order: sort } }];
 					break;
+			}
+			query.sort.push({ _id: 'asc' });
+
+			// add search_after
+			if (search_after.length > 0) {
+				query.search_after = search_after;
 			}
 
 			return query;

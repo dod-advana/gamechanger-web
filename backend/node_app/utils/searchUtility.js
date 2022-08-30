@@ -409,6 +409,7 @@ class SearchUtility {
 			ltr = false,
 			paragraphLimit = 100,
 			hasHighlights = true,
+			search_after = [],
 		},
 		user
 	) {
@@ -610,6 +611,12 @@ class SearchUtility {
 				default:
 					break;
 			}
+
+			// add search_after
+			if (search_after.length > 0) {
+				query.search_after = search_after;
+			}
+
 			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
 				const titleMainSearch = {
 					query_string: {

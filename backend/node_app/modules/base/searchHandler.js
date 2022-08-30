@@ -19,7 +19,18 @@ class SearchHandler {
 		this.searchUtility = searchUtility;
 	}
 
-	async search(searchText, offset, limit, options, cloneName, permissions, userId, storeHistory, session) {
+	async search(
+		searchText,
+		offset,
+		limit,
+		options,
+		cloneName,
+		permissions,
+		userId,
+		storeHistory,
+		session,
+		search_after = []
+	) {
 		// Setup the request
 		this.logger.info(
 			`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(
@@ -31,6 +42,7 @@ class SearchHandler {
 		proxyBody.offset = offset;
 		proxyBody.limit = limit;
 		proxyBody.cloneName = cloneName;
+		proxyBody.search_after = search_after;
 
 		return await this.searchHelper({ body: proxyBody, permissions, session }, userId, storeHistory);
 	}

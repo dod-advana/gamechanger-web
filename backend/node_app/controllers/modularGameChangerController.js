@@ -161,7 +161,7 @@ class ModularGameChangerController {
 
 	async search(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { cloneName, searchText, limit = 18, options, storeHistory = true } = req.body;
+		const { cloneName, searchText, limit = 18, options, storeHistory = true, search_after = [] } = req.body;
 		let { offset = 0 } = req.body;
 		try {
 			// NOTE: if this code changes then this will likely necessitate changes to `favoritesController.checkLeastRecentFavoritedSearch`
@@ -176,7 +176,8 @@ class ModularGameChangerController {
 				req.permissions,
 				userId,
 				storeHistory,
-				req.session
+				req.session,
+				search_after
 			);
 			const error = handler.getError();
 			if (error.code) results.error = error;
