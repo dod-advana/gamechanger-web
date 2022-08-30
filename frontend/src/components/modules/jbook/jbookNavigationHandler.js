@@ -19,7 +19,7 @@ import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuCo
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import PropTypes from 'prop-types';
 
-const getToolTheme = (cloneData) => {
+const getToolTheme = (cloneData, dispatch) => {
 	return {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
@@ -31,17 +31,24 @@ const getToolTheme = (cloneData) => {
 		hoverColor: '#E9691D',
 		toolLogo: (
 			<PageLink href={`#/jbook`}>
-				<img onClick={() => window.location.reload()} src={JAICLogo} alt="tool logo" />
+				<img
+					onClick={() => {
+						window.location.href = `#/${cloneData.url}`;
+						dispatch({ type: 'RESET_STATE' });
+					}}
+					src={JAICLogo}
+					alt="tool logo"
+				/>
 			</PageLink>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 	};
 };
 
-const getToolState = (state) => {
+const getToolState = (state, dispatch) => {
 	return {
 		knowledgeBaseHref: 'https://wiki.advana.data.mil',
-		toolTheme: getToolTheme(state.cloneData),
+		toolTheme: getToolTheme(state.cloneData, dispatch),
 		toolName: state.cloneData?.clone_name?.toUpperCase() || '',
 		hideAllApplicationsSection: false,
 		hideContentSection: false,
@@ -51,7 +58,7 @@ const getToolState = (state) => {
 };
 
 const generateClosedContentArea = (state, dispatch) => {
-	const toolTheme = getToolTheme(state.cloneData);
+	const toolTheme = getToolTheme(state.cloneData, dispatch);
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 			{state.notificationIds.length > 0 && (
@@ -137,7 +144,7 @@ const generateClosedContentArea = (state, dispatch) => {
 };
 
 const generateOpenedContentArea = (state, dispatch) => {
-	const toolTheme = getToolTheme(state.cloneData);
+	const toolTheme = getToolTheme(state.cloneData, dispatch);
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
 			{state.notificationIds.length > 0 && (
@@ -230,12 +237,12 @@ const JBookNavigationHandler = (props) => {
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
 	useEffect(() => {
-		setToolState(getToolState(state));
+		setToolState(getToolState(state, dispatch));
 
 		return () => {
 			unsetTool();
 		};
-	}, [unsetTool, setToolState, state]);
+	}, [unsetTool, setToolState, state, dispatch]);
 
 	return (
 		<>
