@@ -52,31 +52,6 @@ const filterNameMap = {
 	sourceTag: 'Source',
 };
 
-const handleFilterChange = (option, state, dispatch, type) => {
-	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
-
-	if (isArray(newSearchSettings[type])) {
-		const index = newSearchSettings[type].indexOf(option);
-
-		if (index !== -1) {
-			newSearchSettings[type].splice(index, 1);
-		} else {
-			newSearchSettings[type].push(option);
-		}
-	} else {
-		newSearchSettings[type] = '';
-	}
-
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings[`${type}Update`] = true;
-	setState(dispatch, {
-		jbookSearchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-};
-
 const createFilterArray = (settings, options) => {
 	const processedFilters = [];
 	Object.keys(settings).forEach((type) => {
@@ -138,6 +113,7 @@ const JbookViewHeaderHandler = (props) => {
 		sortSelected,
 		searchText,
 		exportLoading,
+		runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
@@ -156,14 +132,15 @@ const JbookViewHeaderHandler = (props) => {
 	useEffect(() => {
 		let search = false;
 		PORTFOLIO_FILTERS.forEach((filter) => {
-			if (jbookSearchSettings[filter] !== defaultOptions[filter]) {
+			if (!_.isEqual(jbookSearchSettings[filter], defaultOptions[filter])) {
 				search = true;
 			}
 		});
+
 		if (search) {
 			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+			setState(dispatch, { runSearch: true });
 		}
-		setState(dispatch, { runSearch: true });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.selectedPortfolio, dispatch]);
 
@@ -196,6 +173,31 @@ const JbookViewHeaderHandler = (props) => {
 			console.log(e);
 		}
 	}, [gameChangerAPI]);
+
+	const handleFilterChange = (option, type) => {
+		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+		if (isArray(newSearchSettings[type])) {
+			const index = newSearchSettings[type].indexOf(option);
+
+			if (index !== -1) {
+				newSearchSettings[type].splice(index, 1);
+			} else {
+				newSearchSettings[type].push(option);
+			}
+		} else {
+			newSearchSettings[type] = '';
+		}
+
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings[`${type}Update`] = true;
+		setState(dispatch, {
+			jbookSearchSettings: newSearchSettings,
+			metricsCounted: false,
+			runSearch: true,
+			runGraphSearch: true,
+		});
+	};
 
 	// handle view selector change
 	const handleChangeView = useCallback(
@@ -457,11 +459,11 @@ const JbookViewHeaderHandler = (props) => {
 			</div>
 			<FilterList
 				filterNameMap={filterNameMap}
-				state={state}
-				dispatch={dispatch}
 				searchSettings={jbookSearchSettings}
 				handleFilterChange={handleFilterChange}
 				processFilters={processFilters}
+				runSearch={runSearch}
+				defaultOptions={defaultOptions}
 			/>
 		</div>
 	);
