@@ -726,7 +726,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 };
 
 const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
-	const displayTitle = getDisplayTitle(item);
+	const displayTitle = getDisplayTitle(item, state.currentViewName);
 	const isRevoked = item.is_revoked_b;
 
 	const docListView = state.listView && !graphView;
@@ -981,8 +981,11 @@ const getCardExtrasHandler = (props) => {
 	);
 };
 
-const getDisplayTitle = (item) => {
-	return item.display_title_s ? item.display_title_s : item.title;
+const getDisplayTitle = (item, currentViewName) => {
+	if (currentViewName === 'Card') {
+		return item.display_title_s ? `${item.doc_type} ${item.doc_num}: ${item.title}` : item.title;
+	}
+	return item.display_title_s || item.title;
 };
 
 const handleImgSrcError = (event, fallbackSources) => {
@@ -997,8 +1000,8 @@ const handleImgSrcError = (event, fallbackSources) => {
 
 const cardHandler = {
 	document: {
-		getDisplayTitle: (item) => {
-			return getDisplayTitle(item);
+		getDisplayTitle: (item, currentViewName) => {
+			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
 			return getCardHeaderHandler(props);
@@ -1553,8 +1556,8 @@ const cardHandler = {
 	},
 
 	publication: {
-		getDisplayTitle: (item) => {
-			return getDisplayTitle(item);
+		getDisplayTitle: (item, currentViewName) => {
+			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
 			return getCardHeaderHandler(props);
@@ -2121,12 +2124,13 @@ const cardHandler = {
 };
 
 const PolicyCardHandler = (props) => {
-	const { setFilename, setDisplayTitle, item, cardType } = props;
+	const { state, setFilename, setDisplayTitle, item, cardType } = props;
+	const { currentViewName } = state;
 
 	useEffect(() => {
 		setFilename(cardHandler[cardType].getFilename(item));
-		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
-	}, [cardType, item, setDisplayTitle, setFilename]);
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item, currentViewName));
+	}, [cardType, item, setDisplayTitle, setFilename, currentViewName]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
