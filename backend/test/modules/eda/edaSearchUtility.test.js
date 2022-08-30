@@ -2,6 +2,73 @@ const assert = require('assert');
 const EDASearchUtility = require('../../../node_app/modules/eda/edaSearchUtility');
 const { constructorOptionsMock } = require('../../resources/testUtility');
 
+const contractAggQuery = {
+	contractTotals: {
+		aggs: {
+			agencies: {
+				aggs: {
+					docs: {
+						aggs: {
+							obligatedAmounts: {
+								aggs: {
+									sum_agg: {
+										sum: {
+											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+										},
+									},
+								},
+								nested: {
+									path: 'extracted_data_eda_n',
+								},
+							},
+						},
+						reverse_nested: {},
+					},
+				},
+				terms: {
+					field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+					size: 1000000,
+				},
+			},
+		},
+		nested: {
+			path: 'fpds_ng_n',
+		},
+	},
+	contractTotalsNoAgency: {
+		aggs: {
+			obligatedAmounts: {
+				aggs: {
+					sum_agg: {
+						sum: {
+							field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+						},
+					},
+				},
+				nested: {
+					path: 'extracted_data_eda_n',
+				},
+			},
+		},
+		filter: {
+			bool: {
+				must_not: [
+					{
+						nested: {
+							path: 'fpds_ng_n',
+							query: {
+								exists: {
+									field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+								},
+							},
+						},
+					},
+				],
+			},
+		},
+	},
+};
+
 describe('EDASearchUtility', function () {
 	describe('getElasticsearchPagesQuery', function () {
 		it('should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included', async (done) => {
@@ -88,6 +155,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -283,6 +351,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -487,6 +556,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -689,6 +759,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -844,6 +915,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1027,6 +1099,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1226,6 +1299,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1438,6 +1512,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1609,6 +1684,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -2604,6 +2680,7 @@ describe('EDASearchUtility', function () {
 						},
 					},
 					totalCount: 1,
+					totalObligatedAmount: 0,
 					docs: [
 						{
 							metadata_type_eda_ext: 'syn',
@@ -2677,6 +2754,8 @@ describe('EDASearchUtility', function () {
 							modification_eda_ext: 'Award',
 							naics_eda_ext: undefined,
 							award_id_eda_ext: 'W911NF17D0002-0002',
+							clins: undefined,
+							clins_parsed_successfully_b: undefined,
 							reference_idv_eda_ext: 'W911NF17D0002',
 							signature_date_eda_ext: '2017-09-21',
 							effective_date_eda_ext: '2017-09-21',
@@ -2692,8 +2771,7 @@ describe('EDASearchUtility', function () {
 							clins_parsed_successfully_b: 'test',
 						},
 					],
-					doc_types: [],
-					doc_orgs: [],
+					issuingOrgs: [],
 					searchTerms: ['army'],
 					expansionDict: {
 						army: [

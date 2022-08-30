@@ -573,6 +573,7 @@ const PolicySearchHandler = {
 			cloneData,
 			currentSort,
 			currentOrder,
+			currentViewName,
 		} = state;
 
 		const {
@@ -588,7 +589,9 @@ const PolicySearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		const offset = ((activeCategoryTab === 'all' ? resultsPage : infiniteScrollPage) - 1) * RESULTS_PER_PAGE;
+		const offset =
+			((activeCategoryTab === 'all' || currentViewName === 'Explorer' ? resultsPage : infiniteScrollPage) - 1) *
+			RESULTS_PER_PAGE;
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
 		const typeFilterString = getTypeQuery(allTypesSelected, typeFilter);
 		const transformResults = searchType === SEARCH_TYPES.contextual;
