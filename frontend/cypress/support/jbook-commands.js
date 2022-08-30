@@ -46,3 +46,28 @@ Cypress.Commands.add('jbook_select_specific_filter_options', (filterOptions) => 
 		cy.get(`[data-cy="filter-option-${_option}"]`).click();
 	});
 });
+
+/* ************* EXPORT ************** */
+Cypress.Commands.add('set_export_format', (format) => {
+	// get the sidebar
+	cy.get('[data-cy="export-dialog"]').should('exist');
+	// get the filter
+	cy.get(`[data-cy="export-select"]`).should('exist');
+
+	cy.get(`[data-cy="export-select-form"]`).should('exist');
+	cy.get(`[data-cy="export-select"]`).click();
+
+	// open the filter accordion
+	cy.get(`[data-cy="export-option-${format}"]`).click();
+});
+
+Cypress.Commands.add('set_export_classification', (format) => {
+	// get the sidebar
+	cy.get('[data-cy="export-dialog"]').should('exist');
+	// get the filter
+	cy.get(`[data-cy="export-classification"]`).should('exist');
+
+	cy.get(`[data-cy="export-autocomplete"]`).should('exist');
+	cy.get(`[data-cy="export-autocomplete"]`).click();
+	cy.get('.MuiAutocomplete-popper li[data-option-index="1"]').click();
+});
