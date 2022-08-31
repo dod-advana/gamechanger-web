@@ -399,7 +399,8 @@ const getCardViewPanel = (props) => {
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
 																		totalItemsCount={count}
-																		pageRangeDisplayed={8}
+																		pageRangeDisplayed={3}
+																		hideFirstLastPages={true}
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
