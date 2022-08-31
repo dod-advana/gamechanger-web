@@ -110,6 +110,16 @@ const DocumentDetailsPage = (props) => {
 		}
 	}, [cloneData, document, userData]);
 
+	const notInCorpusHelper = useCallback(
+		(doc) => {
+			return (
+				!docsReferenced.docs.find((localRef) => localRef.display_title_s.includes(doc)) &&
+				!document.display_title_s.includes(doc)
+			);
+		},
+		[docsReferenced, document]
+	);
+
 	useEffect(() => {
 		if (document) {
 			const docs = document?.ref_list.filter((doc) => {
@@ -117,7 +127,7 @@ const DocumentDetailsPage = (props) => {
 			});
 			setNotInCorpusDocs(docs);
 		}
-	}, [docsReferenced.docs, document]);
+	}, [docsReferenced.docs, document, notInCorpusHelper]);
 
 	useEffect(() => {
 		setRunningQuery(true);
@@ -127,6 +137,31 @@ const DocumentDetailsPage = (props) => {
 		if (!document || !cloneData) return;
 		getGraphDataFull(cloneData.clone_name, document, setGraphData, setRunningQuery, setBackendError);
 	}, [document, cloneData]);
+
+	const buildDocMap = useCallback(
+		(edge, nodeIdMap, docsMap, docIdSet) => {
+			if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
+				const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
+				const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
+
+				if (source === document.id && edge.label === 'SIMILAR_TO') {
+					docsMap.similar_to.add(target);
+				}
+
+				if (source === document.id && edge.label === 'REFERENCES') {
+					docsMap.references.add(target);
+				}
+
+				if (target === document.id && edge.label === 'REFERENCES') {
+					docsMap.referencedBy.add(source);
+				}
+
+				docIdSet.add(target);
+				docIdSet.add(source);
+			}
+		},
+		[document]
+	);
 
 	useEffect(() => {
 		if (!graphData.nodes.length > 0 || !cloneData) return;
@@ -218,7 +253,7 @@ const DocumentDetailsPage = (props) => {
 				docCount: 0,
 			});
 		}
-	}, [graphData, cloneData, document]);
+	}, [graphData, cloneData, document, buildDocMap]);
 
 	const handleChangeDocsPage = (section, page) => {
 		switch (section) {
@@ -233,28 +268,6 @@ const DocumentDetailsPage = (props) => {
 				break;
 			default:
 				break;
-		}
-	};
-
-	const buildDocMap = (edge, nodeIdMap, docsMap, docIdSet) => {
-		if (edge.label === 'REFERENCES' || edge.label === 'SIMILAR_TO') {
-			const target = nodeIdMap[edge.target] ? nodeIdMap[edge.target].doc_id : '';
-			const source = nodeIdMap[edge.source] ? nodeIdMap[edge.source].doc_id : '';
-
-			if (source === document.id && edge.label === 'SIMILAR_TO') {
-				docsMap.similar_to.add(target);
-			}
-
-			if (source === document.id && edge.label === 'REFERENCES') {
-				docsMap.references.add(target);
-			}
-
-			if (target === document.id && edge.label === 'REFERENCES') {
-				docsMap.referencedBy.add(source);
-			}
-
-			docIdSet.add(target);
-			docIdSet.add(source);
 		}
 	};
 
@@ -273,13 +286,6 @@ const DocumentDetailsPage = (props) => {
 				notInCorpus: true,
 			});
 		}
-	};
-
-	const notInCorpusHelper = (doc) => {
-		return (
-			!docsReferenced.docs.find((localRef) => localRef.display_title_s.includes(doc)) &&
-			!document.display_title_s.includes(doc)
-		);
 	};
 
 	const renderDocs = (documentObj = {}, docPage = 0, section = '', queryInProgress = true) => {
