@@ -209,8 +209,6 @@ const EDAViewHeaderHandler = (props) => {
 	};
 
 	const processFilters = (settings) => {
-		console.log(processFilters);
-		console.log(settings);
 		const processedFilters = [];
 		Object.keys(settings).forEach((type) => {
 			if (type in filterNameMap) {

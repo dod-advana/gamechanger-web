@@ -386,6 +386,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 						label="Specific organization(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id={'specificOrgCheckbox'}
 					/>
 				</FormGroup>
 
@@ -411,6 +412,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Air Force"
 							labelPlacement="end"
+							id="airForceCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('air force') !== -1 &&
@@ -435,6 +437,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Army"
 							labelPlacement="end"
+							id="armyCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('army') !== -1 &&
@@ -459,6 +462,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="DOD"
 							labelPlacement="end"
+							id="dodCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('defense') !== -1 &&
@@ -483,6 +487,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Navy"
 							labelPlacement="end"
+							id="navyCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('navy') !== -1 &&
@@ -509,6 +514,7 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 					height: 19,
 					width: '100%',
 				},
+				id: fieldName + 'Filter',
 			}}
 		/>
 	);
@@ -543,6 +549,7 @@ const renderFiscalYearFilter = (state, dispatch) => {
 				}
 				label={i.toString()}
 				labelPlacement="end"
+				id={'year' + i.toString() + 'Checkbox'}
 			/>
 		);
 	}
@@ -584,6 +591,7 @@ const renderFiscalYearFilter = (state, dispatch) => {
 						label="Specific fiscal year(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id={'specificFiscalYearCheckbox'}
 					/>
 				</FormGroup>
 
@@ -633,6 +641,7 @@ const renderContractDataFilter = (state, dispatch) => {
 						label="Specific data source(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id="specificContractDataCheckbox"
 					/>
 				</FormGroup>
 
@@ -658,6 +667,7 @@ const renderContractDataFilter = (state, dispatch) => {
 							}
 							label="PDS"
 							labelPlacement="end"
+							id={'pdsCheckbox'}
 						/>
 						<FormControlLabel
 							name="SYN"
@@ -749,6 +759,7 @@ const renderObligatedAmountFilter = (state, dispatch) => {
 						height: 19,
 						width: '100%',
 					},
+					id: 'minObligatedAmountFilter',
 				}}
 			/>
 			<TextField
@@ -764,6 +775,7 @@ const renderObligatedAmountFilter = (state, dispatch) => {
 						height: 19,
 						width: '100%',
 					},
+					id: 'maxObligatedAmountFilter',
 				}}
 			/>
 		</div>
@@ -1016,7 +1028,7 @@ const EDASearchMatrixHandler = (props) => {
 	};
 
 	return (
-		<div>
+		<div data-cy="eda-filter-container">
 			<div className={'sidebar-section-title'} style={{ paddingTop: 10 }}>
 				FILTERS
 				<p style={{ fontSize: 10, color: 'gray', margin: '5px 0px' }}>Data sources: PDS, SYN, FPDS</p>
@@ -1032,6 +1044,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOrganizationAccordion'}
 			>
 				{renderOrganizationFilters(state, dispatch)}
 			</GCAccordion>
@@ -1043,6 +1056,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOfficeDoDAACAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Issue Office DoDAAC', 'issueOfficeDoDAAC')}
 			</GCAccordion>
@@ -1054,6 +1068,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOfficeNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Issue Office Name', 'issueOfficeName')}
 			</GCAccordion>
@@ -1069,6 +1084,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fiscalYearAccordion'}
 			>
 				{renderFiscalYearFilter(state, dispatch)}
 			</GCAccordion>
@@ -1080,6 +1096,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'obligatedAmountAccordion'}
 			>
 				{renderObligatedAmountFilter(state, dispatch)}
 			</GCAccordion>
@@ -1091,6 +1108,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'vendorNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}
 			</GCAccordion>
@@ -1102,6 +1120,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fundingOfficeCodeAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}
 			</GCAccordion>
@@ -1113,6 +1132,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fundingAgencyNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}
 			</GCAccordion>
@@ -1124,6 +1144,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'pscAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}
 			</GCAccordion>
@@ -1135,6 +1156,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'pscDescriptionAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
 			</GCAccordion>
@@ -1146,6 +1168,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'naicsAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}
 			</GCAccordion>
@@ -1157,6 +1180,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'dunsAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}
 			</GCAccordion>
@@ -1174,6 +1198,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'contractDataAccordion'}
 			>
 				{renderContractDataFilter(state, dispatch)}
 			</GCAccordion>
@@ -1185,6 +1210,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'contractsOrModsAccordion'}
 			>
 				{renderModificationFilter(state, dispatch)}
 			</GCAccordion>
@@ -1196,6 +1222,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'idvPIIDAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}
 			</GCAccordion>
@@ -1207,6 +1234,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'piidAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}
 			</GCAccordion>
@@ -1218,6 +1246,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'modNumberAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
 			</GCAccordion>

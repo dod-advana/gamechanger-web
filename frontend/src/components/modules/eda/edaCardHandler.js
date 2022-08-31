@@ -7,7 +7,6 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import styled from 'styled-components';
 import { getEDAMetadataForCard, getDisplayTitle } from './edaUtils';
 import { List, ListItem, ListItemIcon, ListItemText, Divider } from '@material-ui/core';
 import Table from '@mui/material/Table';
@@ -19,15 +18,13 @@ import TableRow from '@mui/material/TableRow';
 
 import AwardIcon from '../../../images/icon/Award.svg';
 import GCAccordion from '../../common/GCAccordion';
-import { primary } from '../../common/gc-colors';
+import { primary, gcOrange } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
-// import SimpleTable from '../../common/SimpleTable';
 import { KeyboardArrowRight, Star } from '@material-ui/icons';
 import _ from 'lodash';
 import { setState } from '../../../utils/sharedFunctions';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
-import { gcOrange } from '../../common/gc-colors';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import sanitizeHtml from 'sanitize-html';
 import {
@@ -37,6 +34,7 @@ import {
 	StyledFrontCardContent,
 	RevokedTag,
 } from '../default/defaultCardHandler';
+import EDAListViewCard from './edaListViewCard';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -181,102 +179,6 @@ const styles = {
 	},
 };
 
-const StyledListViewFrontCardContent = styled.div`
-	.list-view-button {
-		width: 100%;
-		height: fit-content;
-		margin-top: 10px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-
-		i {
-			font-size: ${CARD_FONT_SIZE}px;
-			color: #386f94;
-			font-weight: normal;
-			margin-left: 5px;
-			margin-right: 20px;
-		}
-	}
-
-	.expanded-hits {
-		display: flex;
-		height: 100%;
-
-		.page-hits {
-			min-width: 100px;
-			height: 100%;
-			border: 1px solid rgb(189, 189, 189);
-			border-top: 0px;
-
-			.page-hit {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				padding-right: 5px;
-				padding-left: 5px;
-				border-top: 1px solid rgb(189, 189, 189);
-				cursor: pointer;
-				color: #386f94;
-
-				span {
-					font-size: ${CARD_FONT_SIZE}px;
-				}
-
-				i {
-					font-size: ${CARD_FONT_SIZE}px;
-					margin-left: 10px;
-				}
-			}
-		}
-
-		> .expanded-metadata {
-			border: 1px solid rgb(189, 189, 189);
-			border-left: 0px;
-			min-height: 126px;
-			width: 100%;
-
-			> blockquote {
-				font-size: ${CARD_FONT_SIZE}px;
-				line-height: 20px;
-
-				background: #eceef1;
-				margin-bottom: 0;
-				height: 165px;
-				border-left: 0;
-				overflow: hidden;
-				font-family: Noto Sans, Arial, Helvetica, sans-serif;
-				padding: 0.5em 10px;
-				margin-left: 0;
-				quotes: '\\201C''\\201D''\\2018''\\2019';
-
-				> em {
-					color: white;
-					background-color: #e9691d;
-					margin-right: 5px;
-					padding: 4px;
-					font-style: normal;
-				}
-			}
-		}
-	}
-
-	.metadata {
-		display: flex;
-		height: 100%;
-		flex-direction: column;
-		border-radius: 5px;
-		overflow: auto;
-
-		.inner-scroll-container {
-			background-color: rgb(238, 241, 242);
-			display: block;
-			overflow: auto;
-			height: 100%;
-		}
-	}
-`;
-
 const tableColumns = [{ id: 'name' }, { id: 'fpds' }, { id: 'eda' }];
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
@@ -288,6 +190,106 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 			filename
 		)}&prevSearchText=${searchText}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 	);
+};
+
+const getCardTooltipText = (item) => {
+	let tooltipText = 'No metadata available';
+	if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
+		if (item.metadata_type_eda_ext === 'pds') {
+			tooltipText = 'Pulled from PDS data';
+		} else if (item.metadata_type_eda_ext === 'syn' && item.award_id_eda_ext) {
+			tooltipText = 'Pulled from Synopsis data';
+		}
+	}
+
+	return tooltipText;
+};
+
+const loadContractAward = async ({ open, item, dispatch, contractAwards, cloneData }) => {
+	if (open && item.award_id_eda_ext !== 'empty') {
+		const newContractAwards = _.cloneDeep(contractAwards) ?? {};
+		const awardID = item.award_id_eda_ext;
+		if (!newContractAwards[awardID] || !newContractAwards[awardID].length > 0) {
+			newContractAwards[awardID] = 'loading';
+			setState(dispatch, { contractAwards: newContractAwards });
+			try {
+				const contractMods = await gameChangerAPI.callSearchFunction({
+					functionName: 'queryContractMods',
+					cloneName: cloneData.clone_name,
+					options: {
+						awardID: item.award_id_eda_ext,
+						isSearch: false,
+					},
+				});
+				newContractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
+
+				setState(dispatch, { contractAwards: newContractAwards });
+			} catch (err) {
+				console.log(err);
+				contractAwards[awardID] = [];
+				setState(dispatch, { contractAwards: newContractAwards });
+			}
+		}
+	}
+};
+
+const renderContractMods = ({ contractAwards = {}, item }) => {
+	const contractMods = contractAwards[item.award_id_eda_ext] ?? [];
+	const listItems = [];
+
+	if (contractMods === 'loading') {
+		return listItems;
+	}
+	if (contractMods.length > 0) {
+		listItems.push(
+			<>
+				<ListItem>
+					<ListItemText style={{ textAlign: 'end' }} secondary={'(S) Signature Date | (E) Effective Date'} />
+				</ListItem>
+				<Divider light={true} />
+			</>
+		);
+	}
+
+	for (const mod of contractMods) {
+		const { modNumber, signatureDate, effectiveDate } = mod;
+		if (modNumber === 'Award') {
+			continue;
+		}
+		let date = null;
+		let dateText = '';
+		if (signatureDate) {
+			date = signatureDate;
+			dateText = '(S)';
+		} else if (effectiveDate) {
+			date = effectiveDate;
+			dateText = '(E)';
+		}
+
+		listItems.push(
+			<>
+				<ListItem>
+					{item.modification_eda_ext === modNumber && (
+						<ListItemIcon style={{ minWidth: '54px' }}>
+							<Star style={{ fontSize: 20 }} />
+						</ListItemIcon>
+					)}
+					<ListItemText
+						style={{
+							margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
+							display: 'flex',
+							justifyContent: 'space-between',
+						}}
+						primary={modNumber}
+						secondary={date ? `${dateText}  ${date}` : ''}
+					/>
+				</ListItem>
+				<Divider light={true} />
+			</>
+		);
+	}
+
+	return listItems;
 };
 
 const cardHandler = {
@@ -316,7 +318,9 @@ const cardHandler = {
 								onClick={
 									docListView
 										? () => clickFn(item.file_location_eda_ext, clone_name, '', 0)
-										: () => {}
+										: () => {
+												// this is intentional
+										  }
 								}
 								style={{
 									width: '100%',
@@ -392,136 +396,59 @@ const cardHandler = {
 				setHoveredHit,
 				metadataExpanded,
 				setMetadataExpanded,
-				intelligentSearch,
-				intelligentFeedbackComponent,
 			} = props;
 
 			const { cloneData } = state;
 			const { clone_name } = cloneData;
 
-			let hoveredSnippet = '';
-			if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
-				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+			let contextHtml = '';
+			if (Array.isArray(item.pageHits)) {
+				contextHtml = item.pageHits[hoveredHit]?.snippet ?? '';
 			}
-			const contextHtml = hoveredSnippet;
+
 			const isWideCard = true;
 
 			const currentAsOfText = `Page Count: ${item.page_count}`;
 
-			let tooltipText = 'No metadata available';
-			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
-				if (item.metadata_type_eda_ext === 'pds') {
-					tooltipText = 'Pulled from PDS data';
-				} else if (item.metadata_type_eda_ext === 'syn' && item.award_id_eda_ext) {
-					tooltipText = 'Pulled from Synopsis data';
-				}
-			}
+			let tooltipText = getCardTooltipText(item);
 
-			if (state.listView && !intelligentSearch) {
+			if (state.listView) {
 				return (
-					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-						{item.pageHits && item.pageHits.length > 0 && (
-							<button
-								type="button"
-								className={'list-view-button'}
-								onClick={() => {
-									trackEvent(
-										getTrackingNameForFactory(state.cloneData.clone_name),
-										'ListViewInteraction',
-										!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
-									);
-									setHitsExpanded(!hitsExpanded);
-								}}
-							>
-								<span className="buttonText">Page Hits</span>
-								<i
-									className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-									aria-hidden="true"
-								/>
-							</button>
-						)}
-						{hitsExpanded && (
-							<div className={'expanded-hits'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits)
-										.map((page, key) => {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-														clickFn(
-															item.file_location_eda_ext,
-															clone_name,
-															'',
-															page.pageNumber
-														);
-													}}
-												>
-													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
-													</span>
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote
-										dangerouslySetInnerHTML={{
-											__html: sanitizeHtml(contextHtml),
-										}}
-									/>
-								</div>
-							</div>
-						)}
-						<GCTooltip title={tooltipText} arrow placement="top" enterDelay={400}>
-							<div>
-								<button
-									type="button"
-									className={'list-view-button'}
-									onClick={() => {
-										trackEvent(
-											getTrackingNameForFactory(state.cloneData.clone_name),
-											'ListViewInteraction',
-											!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
-										);
-										setMetadataExpanded(!metadataExpanded);
-									}}
-								>
-									<span className="buttonText">Document Metadata</span>
-									<i
-										className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-										aria-hidden="true"
-									/>
-								</button>
-								{metadataExpanded && (
-									<div className={'metadata'}>
-										<div className={'inner-scroll-container'}>{backBody}</div>
-									</div>
-								)}
-							</div>
-						</GCTooltip>
-					</StyledListViewFrontCardContent>
+					<EDAListViewCard
+						item={item}
+						tooltipText={tooltipText}
+						cloneData={cloneData}
+						hitsExpanded={hitsExpanded}
+						setHitsExpanded={setHitsExpanded}
+						hoveredHit={hoveredHit}
+						setHoveredHit={setHoveredHit}
+						clickFn={clickFn}
+						contextHtml={contextHtml}
+						metadataExpanded={metadataExpanded}
+						setMetadataExpanded={setMetadataExpanded}
+						backBody={backBody}
+					/>
 				);
-			} else if (state.listView && intelligentSearch) {
-				return (
-					<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
-						<div className={'expanded-hits'}>
+			}
+			return (
+				<StyledFrontCardContent
+					className={`eda-card-front tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					isWideCard={isWideCard}
+				>
+					<div className={'currents-as-of-div'}>
+						<div className={'current-text'}>{currentAsOfText}</div>
+						{item.isRevoked && (
+							<GCTooltip
+								title={'This version of the document is no longer in effect'}
+								placement="top"
+								arrow
+							>
+								<RevokedTag>Canceled</RevokedTag>
+							</GCTooltip>
+						)}
+					</div>
+					{item.pageHits.length > 0 && (
+						<div className={'hits-container'}>
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
@@ -560,130 +487,26 @@ const cardHandler = {
 							</div>
 							<div className={'expanded-metadata'}>
 								<blockquote
+									className="searchdemo-blockquote"
 									dangerouslySetInnerHTML={{
 										__html: sanitizeHtml(contextHtml),
 									}}
 								/>
 							</div>
 						</div>
-						<button
-							type="button"
-							className={'list-view-button'}
-							onClick={() => {
-								trackEvent(
-									getTrackingNameForFactory(state.cloneData.clone_name),
-									'ListViewInteraction',
-									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
-								);
-								setMetadataExpanded(!metadataExpanded);
-							}}
-						>
-							<span className="buttonText">Document Metadata</span>
-							<i
-								className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'}
-								aria-hidden="true"
-							/>
-						</button>
-
-						{metadataExpanded && (
-							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
-							</div>
-						)}
-
-						<div style={{ marginTop: '10px', marginBottom: '10px' }}>
-							{' '}
-							{intelligentFeedbackComponent()}{' '}
-						</div>
-					</StyledListViewFrontCardContent>
-				);
-			} else {
-				return (
-					<StyledFrontCardContent
-						className={`eda-card-front tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
-						isWideCard={isWideCard}
-					>
-						<div className={'currents-as-of-div'}>
-							<div className={'current-text'}>{currentAsOfText}</div>
-							{item.isRevoked && (
-								<GCTooltip
-									title={'This version of the document is no longer in effect'}
-									placement="top"
-									arrow
-								>
-									<RevokedTag>Canceled</RevokedTag>
-								</GCTooltip>
-							)}
-						</div>
-						{item.pageHits.length > 0 && (
-							<div className={'hits-container'}>
-								<div className={'page-hits'}>
-									{_.chain(item.pageHits)
-										.map((page, key) => {
-											return (
-												<div
-													className={'page-hit'}
-													key={key}
-													style={{
-														...(hoveredHit === key && {
-															backgroundColor: '#E9691D',
-															color: 'white',
-														}),
-													}}
-													onMouseEnter={() => setHoveredHit(key)}
-													onClick={(e) => {
-														e.preventDefault();
-														clickFn(
-															item.file_location_eda_ext,
-															clone_name,
-															'',
-															page.pageNumber
-														);
-													}}
-												>
-													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
-													</span>
-													<i
-														className="fa fa-chevron-right"
-														style={{
-															color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-														}}
-													/>
-												</div>
-											);
-										})
-										.value()}
-								</div>
-								<div className={'expanded-metadata'}>
-									<blockquote
-										className="searchdemo-blockquote"
-										dangerouslySetInnerHTML={{
-											__html: sanitizeHtml(contextHtml),
-										}}
-									/>
-								</div>
-							</div>
-						)}
-					</StyledFrontCardContent>
-				);
-			}
+					)}
+				</StyledFrontCardContent>
+			);
 		},
 
 		getCardBack: (props) => {
 			const { item, state, dispatch, detailPage = false } = props;
 
-			let tooltipText = 'No metadata available';
+			const { contractAwards, cloneData, listView } = state;
+
+			let tooltipText = getCardTooltipText(item);
 			let fields = EDA_FIELDS;
 			let rows = getEDAMetadataForCard(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP, EDA_NUMBER_FIELDS);
-
-			if (item && item.metadata_type_eda_ext && item.contract_issue_dodaac_eda_ext) {
-				if (item.metadata_type_eda_ext === 'pds') {
-					tooltipText = 'Pulled from PDS data';
-				} else if (item.metadata_type_eda_ext === 'syn') {
-					tooltipText = 'Pulled from Synopsis data';
-				}
-			}
 
 			// grab award ID from filename if missing
 			if (!item.award_id_eda_ext) {
@@ -695,104 +518,14 @@ const cardHandler = {
 				}
 			}
 
-			const loadContractAward = async (open) => {
-				if (open && item.award_id_eda_ext !== 'empty') {
-					const contractAwards = _.cloneDeep(state.contractAwards) ?? {};
-					const awardID = item.award_id_eda_ext;
-					if (!contractAwards[awardID] || !contractAwards[awardID].length > 0) {
-						contractAwards[awardID] = 'loading';
-						setState(dispatch, { contractAwards });
-						try {
-							const contractMods = await gameChangerAPI.callSearchFunction({
-								functionName: 'queryContractMods',
-								cloneName: state.cloneData.clone_name,
-								options: {
-									awardID: item.award_id_eda_ext,
-									isSearch: false,
-								},
-							});
-							contractAwards[awardID] = contractMods?.data?.length ? contractMods.data : [];
-
-							setState(dispatch, { contractAwards });
-						} catch (err) {
-							console.log(err);
-							contractAwards[awardID] = [];
-							setState(dispatch, { contractAwards });
-						}
-					}
-				}
-			};
-
-			const renderContractMods = () => {
-				const contractMods =
-					state.contractAwards && state.contractAwards[item.award_id_eda_ext]
-						? state.contractAwards[item.award_id_eda_ext]
-						: [];
-				const listItems = [];
-
-				if (contractMods && contractMods !== 'loading') {
-					if (contractMods.length > 0) {
-						listItems.push(
-							<>
-								<ListItem>
-									<ListItemText
-										style={{ textAlign: 'end' }}
-										secondary={'(S) Signature Date | (E) Effective Date'}
-									/>
-								</ListItem>
-								<Divider light={true} />
-							</>
-						);
-					}
-
-					for (const mod of contractMods) {
-						const { modNumber, signatureDate, effectiveDate } = mod;
-						if (modNumber !== 'Award') {
-							let date = signatureDate ? signatureDate : effectiveDate ? effectiveDate : null;
-							let dateText = '';
-							if (signatureDate) {
-								date = signatureDate;
-								dateText = '(S)';
-							} else if (effectiveDate) {
-								date = effectiveDate;
-								dateText = '(E)';
-							} else {
-								date = null;
-								dateText = '';
-							}
-							listItems.push(
-								<>
-									<ListItem>
-										{item.modification_eda_ext === modNumber && (
-											<ListItemIcon style={{ minWidth: '54px' }}>
-												<Star style={{ fontSize: 20 }} />
-											</ListItemIcon>
-										)}
-										<ListItemText
-											style={{
-												margin: item.modification_eda_ext !== modNumber ? '0 0 0 54px' : '',
-												display: 'flex',
-												justifyContent: 'space-between',
-											}}
-											primary={modNumber}
-											secondary={date ? `${dateText}  ${date}` : ''}
-										/>
-									</ListItem>
-									<Divider light={true} />
-								</>
-							);
-						}
-					}
-				}
-				return listItems;
-			};
-
 			return (
-				<GCTooltip title={state.listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
+				<GCTooltip title={listView ? '' : tooltipText} arrow placement="top" enterDelay={400}>
 					<div style={{ height: '100%', overflow: 'hidden' }}>
 						{item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage && (
 							<GCAccordion
-								onChange={loadContractAward}
+								onChange={(e) =>
+									loadContractAward({ open: e, item, dispatch, contractAwards, cloneData })
+								}
 								contentPadding={0}
 								expanded={false}
 								header={'Show Contract Modifications'}
@@ -809,7 +542,7 @@ const cardHandler = {
 										<ListItemText primary={item.award_id_eda_ext} />
 									</ListItem>
 									<Divider light={true} />
-									{renderContractMods()}
+									{renderContractMods({ contractAwards, item })}
 									{state.contractAwards &&
 										state.contractAwards[item.award_id_eda_ext] === 'loading' && (
 											<LoadingIndicator customColor={gcOrange} />
@@ -818,23 +551,6 @@ const cardHandler = {
 							</GCAccordion>
 						)}
 
-						{/* <SimpleTable
-							tableClass={'magellan-table'}
-							zoom={1}
-							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={getEDAMetadataForPropertyTable(EDA_FIELD_JSON_MAP, fields, item, EDA_FPDS_MAP)}
-							height={'auto'}
-							dontScroll={true}
-							colWidth={colWidth}
-							disableWrap={true}
-							title={'Metadata'}
-							hideHeader={true}
-							margin={
-								item.award_id_eda_ext && item.award_id_eda_ext !== 'empty' && !detailPage
-									? '-10px 0 0 0'
-									: ''
-							}
-						/> */}
 						<TableContainer sx={{ maxHeight: 295 }}>
 							<Table stickyHeader aria-label="sticky table">
 								<TableHead>
@@ -875,8 +591,12 @@ const cardHandler = {
 				graphView,
 				cloneName,
 				filename,
-				setToggledMore = () => {},
-				closeGraphCard = () => {},
+				setToggledMore = () => {
+					// intentional
+				},
+				closeGraphCard = () => {
+					// intentional
+				},
 				item,
 			} = props;
 
@@ -954,7 +674,7 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: () => {
 			return <></>;
 		},
 
