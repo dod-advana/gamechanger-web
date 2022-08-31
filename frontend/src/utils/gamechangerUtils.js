@@ -450,7 +450,8 @@ export const invertedCrawlerMappingFunc = (item) => {
 };
 
 export const crawlerMappingFunc = (item) => {
-	return crawlerMapping[item] ? crawlerMapping[item] : item;
+	console.log('item', crawlerMapping[item]);
+	return crawlerMapping[item] ? crawlerMapping[item].join(', ') : item;
 };
 
 export const orgColorMap = {
