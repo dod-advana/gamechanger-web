@@ -429,15 +429,20 @@ const GCFavoriteCard = (props) => {
 
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>
-			<div className={'main-info'}>
+			<div className={'main-info'} data-cy="favorite-card">
 				<div className={'top-buttons'}>
 					<GCTooltip title={cardTitle} placement="top">
-						<div className={'summary-title'} onClick={getSummaryTitleOnClick(favoriteType)}>
+						<div
+							className={'summary-title'}
+							data-cy="favorite-card-title"
+							onClick={getSummaryTitleOnClick(favoriteType)}
+						>
 							{getTitleDiv(favoriteObject, favoriteType, handleClearNotification)}
 						</div>
 					</GCTooltip>
 					<div className={'check-div'}>
 						<GCButton
+							data-cy="favorite-star"
 							onClick={(event) => handleStarClicked(event)}
 							style={{
 								height: 37,
