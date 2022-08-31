@@ -1716,18 +1716,18 @@ const cardHandler = {
 			const { item, state, backBody } = props;
 
 			if (state.listView) {
-				if (item.description?.length > 300) {
-					item.description = item?.description?.slice(0, 280) + '...';
+				if (item.information?.length > 300) {
+					item.information = item?.information?.slice(0, 280) + '...';
 				}
-			} else if (item.image === undefined && item.description?.length > 300) {
-				item.description = item?.description?.slice(0, 280) + '...';
-			} else if (item.image && item.description?.length > 180) {
-				item.description = item?.description?.slice(0, 160) + '...';
+			} else if (item.image === undefined && item.information?.length > 300) {
+				item.information = item?.information?.slice(0, 280) + '...';
+			} else if (item.image && item.information?.length > 180) {
+				item.information = item?.information?.slice(0, 160) + '...';
 			}
 			if (state.listView) {
 				return (
 					<StyledListViewFrontCardContent>
-						{item.description && <p>{item.description}</p>}
+						{item.information && <p>{item.information}</p>}
 						<GCAccordion
 							header={'DOCUMENT METADATA'}
 							headerBackground={'rgb(238,241,242)'}
@@ -1749,17 +1749,17 @@ const cardHandler = {
 
 				return (
 					<StyledEntityTopicFrontCardContent listView={state.listView}>
-						{!state.listView && item.image && (
+						{!state.listView && (
 							<img
 								alt="Office Img"
-								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal}
 								onError={(event) => {
 									handleImgSrcError(event, fallbackSources);
 									if (fallbackSources.admin) fallbackSources.admin = undefined;
 								}}
 							/>
 						)}
-						<p>{item.description}</p>
+						<p>{item.information}</p>
 					</StyledEntityTopicFrontCardContent>
 				);
 			}
