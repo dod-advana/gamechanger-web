@@ -1233,7 +1233,7 @@ const JBookProfilePage = () => {
 		);
 	};
 
-	const SimpleReviewerSection = React.memo(() => {
+	const renderSimpleReviewerSection = () => {
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1285,7 +1285,7 @@ const JBookProfilePage = () => {
 				</GCAccordion>
 			</StyledAccordionContainer>
 		);
-	}, []);
+	};
 
 	const renderReviewSection = () => {
 		switch (selectedPortfolio) {
@@ -1300,7 +1300,7 @@ const JBookProfilePage = () => {
 					</>
 				);
 			default:
-				return <SimpleReviewerSection />;
+				return <>{renderSimpleReviewerSection()}</>;
 		}
 	};
 
