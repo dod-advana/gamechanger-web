@@ -1332,6 +1332,7 @@ class SearchUtility {
 								}
 							}
 							result.pageHitCount = pageSet.size;
+							result.matchCount = r.inner_hits?.paragraphs?.hits?.total?.value;
 						} else if (r.inner_hits.paragraphs && isCompareReturn) {
 							result.paragraphs = [];
 							result.score = 0;
