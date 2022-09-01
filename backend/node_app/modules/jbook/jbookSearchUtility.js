@@ -218,7 +218,7 @@ class JBookSearchUtility {
 		return pageHits;
 	}
 
-	cleanESResults(esResults, userId) {
+	cleanESResults(esResults, userId, reverseResultOrder = false) {
 		const results = [];
 
 		try {
@@ -274,6 +274,10 @@ class JBookSearchUtility {
 			});
 
 			searchResults.docs = results;
+
+			if (reverseResultOrder) {
+				searchResults.docs.reverse();
+			}
 
 			return searchResults;
 		} catch (e) {
@@ -657,6 +661,7 @@ class JBookSearchUtility {
 			operator = 'and',
 			sortSelected,
 			search_after = [],
+			search_before = [],
 		},
 		userId
 	) {
@@ -789,6 +794,9 @@ class JBookSearchUtility {
 			}
 
 			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
+			if (search_before.length > 0) {
+				sort = sort === 'desc' ? 'asc' : 'desc';
+			}
 			// SORT
 			switch (sortText) {
 				case 'budgetYear':
@@ -814,10 +822,12 @@ class JBookSearchUtility {
 					query.sort = [{ _score: { order: sort } }];
 					break;
 			}
-			query.sort.push({ _id: 'asc' });
+			query.sort.push({ _id: sort });
 
 			// add search_after
-			if (search_after.length > 0) {
+			if (search_before.length > 0) {
+				query.search_after = search_before;
+			} else if (search_after.length > 0) {
 				query.search_after = search_after;
 			}
 

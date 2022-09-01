@@ -29,7 +29,8 @@ class SearchHandler {
 		userId,
 		storeHistory,
 		session,
-		search_after = []
+		search_after = [],
+		search_before = []
 	) {
 		// Setup the request
 		this.logger.info(
@@ -43,6 +44,7 @@ class SearchHandler {
 		proxyBody.limit = limit;
 		proxyBody.cloneName = cloneName;
 		proxyBody.search_after = search_after;
+		proxyBody.search_before = search_before;
 
 		return await this.searchHelper({ body: proxyBody, permissions, session }, userId, storeHistory);
 	}

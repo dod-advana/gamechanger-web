@@ -415,6 +415,7 @@ const getCardViewPanel = (props) => {
 																				runSearch: true,
 																				loading: true,
 																				paginationSearch: true,
+																				visitEarlierPage: page < resultsPage,
 																			});
 																			scrollToContentTop();
 																		}}
