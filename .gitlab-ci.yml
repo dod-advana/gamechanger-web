@@ -1,5 +1,7 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
+  - project: "platform/promotion"
+    file: "ci/helm.yml"
 
 stages:          # List of stages for jobs, and their order of execution.
   - setup-test-server
@@ -163,6 +165,20 @@ sonar_scan-job:  # Run code through sonar scanner
 
 
 
+
+chart-publish:
+  stage: setup-test-server
+  rules:
+    - if: "$DEPLOY_TO_GC_DEV =~ /^(true)$/ && $UPSTREAM_COMMIT_BRANCH"
+  extends: ".helm-setup"
+  variables:
+    CHART: "${PLATFORM_PROMOTION_CHART}"
+  script:
+    - "cd \"${HELM_CHART_DIR}\""
+    - "eval eval CHART=\"${CHART}\""
+    - "helm dependency update ."
+    - "helm chart save . \"${CHART}\""
+    - "helm chart push \"${CHART}\""
 
 setup-server:  # build dev server with the commit branch
   stage: setup-test-server
