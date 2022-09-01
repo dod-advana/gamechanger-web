@@ -385,14 +385,14 @@ const JBookProfilePage = () => {
 				// if there is an or, highlight terms separately
 				if (searchText.indexOf('or') !== -1) {
 					terms.forEach((term) => {
-						const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
+						const regex = new RegExp(`${term.replaceAll('"', '')}([a-z]+)?`, 'gi');
 						const tmpMatches = descriptions.value.match(regex);
 						matches = matches.concat(tmpMatches);
 					});
 				}
 				// else highlight as 1 phrase
 				else {
-					const regex = new RegExp(`${searchText}([a-z]+)?`, 'gi');
+					const regex = new RegExp(`${searchText.replaceAll('"', '')}([a-z]+)?`, 'gi');
 					const tmpMatches = descriptions.value.match(regex);
 					matches = matches.concat(tmpMatches);
 				}
