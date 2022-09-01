@@ -77,10 +77,15 @@ const JBookSearchHandler = {
 			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
 			let offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 			let search_after = [];
+			let search_before = [];
 			if (offset >= 9982) {
 				if (state.rawSearchResults.length > 0) {
 					offset = 0;
-					search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort;
+					if (state.visitEarlierPage) {
+						search_before = state.rawSearchResults[0]?.sort;
+					} else {
+						search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort;
+					}
 				} else {
 					console.log('bad yo, state.rawSearchResults is empty');
 				}
@@ -98,6 +103,7 @@ const JBookSearchHandler = {
 					searchText,
 					offset,
 					search_after,
+					search_before,
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
