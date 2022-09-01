@@ -1,5 +1,5 @@
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 stages:          # List of stages for jobs, and their order of execution.
   - setup-test-server
@@ -72,8 +72,6 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
 
 sast:
   stage: static-test
-  include:
-    - template: Security/SAST.gitlab-ci.yml
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
