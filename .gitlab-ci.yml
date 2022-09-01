@@ -1,10 +1,30 @@
 stages:          # List of stages for jobs, and their order of execution.
+  - setup-test-server
   - prepare
   - static-test
   - security-test
-  - setup-test-server
   - integration-test
   - deploy
+
+variables:
+  HELM_CHART_DIR: "./k8s"
+  ENVIRONMENT: "gc-dev"
+  HELM_RELEASE_NAME: "${GITLAB_USER_NAME}"
+  DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
+  DOCKERFILE_PATH: "./Dockerfile.prod"
+  HELM_UPGRADE_EXTRA_ARGS: >-
+    --set image.tag=${CI_COMMIT_SHA}-oci
+    --set appVersion=${BUILD_VERSION}
+    --set ingress.web.hostname=${HELM_RELEASE_NAME}
+    --set env.REACT_APP_BACKEND_URL=${DEV_URL}
+    --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
+    --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
+    --set env.APPROVED_API_CALLERS=(${DEV_URL})
+  AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS: >-
+    --build-arg=BASE_IMAGE=${IRONBANK_NODEJS}
+    --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
+    --build-arg=APP_UID=1001
+    --build-arg=APP_GID=1001
 
 cache: &global_cache
   untracked: true
@@ -46,6 +66,11 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+
+sast:
+  stage: static-test
+  include:
+    - template: Security/SAST.gitlab-ci.yml
 
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
@@ -133,33 +158,29 @@ sonar_scan-job:  # Run code through sonar scanner
       EOF
 
 
+
+
+
 setup-server:  # build dev server with the commit branch
   stage: setup-test-server
-  variables:
-    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
-    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
-    APP_NAME: "gamechanger"
-    AWS_SERVER: "88"
   rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    - if: $DAILY_SCAN == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
+
 integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: integration-test
   rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $DAILY_SCAN == "true"
   variables:
     AWS_SERVER: "88"
-    CYPRESS_BASE_URL: "http://10.194.9.${AWS_SERVER}:8080"
-    CYPRESS_API_URL: "http://10.194.9.${AWS_SERVER}:8990"
+    CYPRESS_BASE_URL: "${DEV_URL}"
+    CYPRESS_API_URL: "${DEV_URL}"
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   script:
@@ -184,12 +205,4 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/cypress/videos
   allow_failure: true
 
-deploy-job:       # This job runs the build for dev.
-  stage: deploy
-  rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
-      - if: $DO_DEPLOY == "true"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
-    CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger: "advana/gamechanger/gamechanger-web"
+
