@@ -26,7 +26,7 @@ Cypress.Commands.add('switch_portfolio', (portfolio) => {
 	cy.get(`li[data-value="${portfolio}"]`).click();
 });
 
-// this opens a jbook filter and selects the "select specific" checkbox
+// this opens a jbook filter
 Cypress.Commands.add('jbook_open_specific_filter', (filterName) => {
 	// get the sidebar
 	cy.get('[data-cy="jbook-filters"]').should('exist');
@@ -36,17 +36,26 @@ Cypress.Commands.add('jbook_open_specific_filter', (filterName) => {
 	cy.get(`[data-cy="${filterName}-filter"] #accordion-header`).click();
 	// check that filter is opened
 	cy.get(`[data-cy="${filterName}-filter"] #accordion-content`).should('exist');
-	// select specific checkbox
-	cy.get(`[data-cy="${filterName}-filter"] [data-cy="filter-checkbox"]`).click();
 });
 
-// this selects options for one of the "seelct specific" jbook filters
+// this selects options for one of the "select specific" jbook filters
 Cypress.Commands.add('jbook_select_specific_filter_options', (filterOptions) => {
 	filterOptions.forEach((_option) => {
 		cy.get(`[data-cy="filter-option-${_option}"]`).click();
 	});
 });
 
+// makes a search and waits for the results
+Cypress.Commands.add('jbook_search', (query) => {
+	// Type the search query
+	cy.get('#gcSearchInput').type(query);
+
+	// Get the search button and click it
+	cy.get('#gcSearchButton').click();
+
+	// Wait for the results to be visible
+	cy.getDataCy('jbook-search-results', { timeout: 10000 }).should('exist');
+})
 /* ************* EXPORT ************** */
 Cypress.Commands.add('set_export_format', (format) => {
 	// get the sidebar
@@ -61,7 +70,7 @@ Cypress.Commands.add('set_export_format', (format) => {
 	cy.get(`[data-cy="export-option-${format}"]`).click();
 });
 
-Cypress.Commands.add('set_export_classification', (format) => {
+Cypress.Commands.add('set_export_classification', () => {
 	// get the sidebar
 	cy.get('[data-cy="export-dialog"]').should('exist');
 	// get the filter
