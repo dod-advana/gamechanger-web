@@ -169,7 +169,7 @@ sonar_scan-job:  # Run code through sonar scanner
 chart-publish:
   stage: setup-test-server
   rules:
-    - if: "$DEPLOY_TO_GC_DEV =~ /^(true)$/ && $UPSTREAM_COMMIT_BRANCH"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   extends: ".helm-setup"
   variables:
     CHART: "${PLATFORM_PROMOTION_CHART}"
