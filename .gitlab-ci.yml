@@ -168,6 +168,8 @@ setup-server:  # build dev server with the commit branch
   stage: setup-test-server
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    DEPLOY_TO_GC_DEV: "true"
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
