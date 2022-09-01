@@ -71,6 +71,8 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
 sast:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   stage: static-test
 
 unit-backend-test-job:    # Job for the unit tests
