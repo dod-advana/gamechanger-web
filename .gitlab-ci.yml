@@ -1,3 +1,6 @@
+include:
+- template: Security/SAST.gitlab-ci.yml
+
 stages:          # List of stages for jobs, and their order of execution.
   - setup-test-server
   - prepare
