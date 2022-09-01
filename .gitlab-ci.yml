@@ -171,7 +171,7 @@ setup-server:  # build dev server with the commit branch
   trigger:
     strategy: "depend"
     project: "advana/gamechanger/gamechanger-ci-cd"
-    branch: "main"
+    branch: "ingress"
 
 
 integration-testing-cypress-job:  # Start the integration testing
