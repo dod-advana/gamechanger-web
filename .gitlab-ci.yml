@@ -18,6 +18,7 @@ stages:          # List of stages for jobs, and their order of execution.
 
 variables:
   UPSTREAM_KANIKO: "true"
+  UPSTREAM_REPOSITORY_URL: "https://main:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-web-source.git"
   HELM_CHART_DIR: "./chart"
   HELM_RELEASE_NAME: "gamechanger-web"
   DOCKERFILE_PATH: "./Dockerfile.prod"
