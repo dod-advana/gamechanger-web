@@ -202,7 +202,6 @@ test-overrides:
     - 'mv ${TEST_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
 
 trigger:
-  cache: []
   stage: "🚀 deploy"
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
