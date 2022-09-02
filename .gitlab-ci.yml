@@ -12,6 +12,7 @@ stages:          # List of stages for jobs, and their order of execution.
   - "🚀 deploy"
   - "🧪 integration-test"
   - "📡 prepare"
+  - "🧪 sast"
   - "🧪 static-test"
   - "🧪 security-test"
 
@@ -72,7 +73,25 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
 sast:
-  stage: "🧪 static-test"
+  stage: "🧪 sast"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+eslint-sast:
+  stage: "🧪 sast"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+nodejs-scan-sast:
+  stage: "🧪 sast"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+semgrep-sast:
+  stage: "🧪 sast"
   cache: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"

@@ -49,6 +49,9 @@ RUN mkdir -p \
 
 FROM base AS builder
 
+ARG APP_UID=1000
+ARG APP_GID=1000
+
 USER "${APP_UID}":"${APP_GID}"
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
@@ -71,6 +74,9 @@ RUN (\
     )
 
 FROM base
+
+ARG APP_UID=1000
+ARG APP_GID=1000
 
 USER "${APP_UID}":"${APP_GID}"
 
