@@ -49,7 +49,7 @@ cache: &global_cache
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
-  stage: prepare
+  stage: "📡 prepare"
   cache:
     <<: *global_cache
     policy: pull-push
@@ -114,7 +114,6 @@ sonar_scan-job:  # Run code through sonar scanner
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -158,12 +157,11 @@ sonar_scan-job:  # Run code through sonar scanner
       </html>
       EOF
 
-
 chart-publish:
   stage: "🚧 build-chart"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: ${CI_COMMIT_BRANCH} == "main"
+    - if: $CI_COMMIT_BRANCH == "main"
   extends: ".helm-publish"
   variables:
     CHART: "${PLATFORM_PROMOTION_CHART}"
@@ -180,7 +178,7 @@ dev-overrides:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         DEV_VALUES_FILE: "${INGRESS_DEV_VALUES}"
-    - if: ${CI_COMMIT_BRANCH} == "main"
+    - if: $CI_COMMIT_BRANCH == "main"
       variables:
         DEV_VALUES_FILE: "${DEV_VALUES}"
   extends:
@@ -191,7 +189,7 @@ dev-overrides:
 test-overrides:
   stage: "🚧 override-chart test"
   rules:
-    - if: ${CI_COMMIT_BRANCH} == "main"
+    - if: $CI_COMMIT_BRANCH == "main"
   extends:
     - ".helm-overrides"
   script:
@@ -214,7 +212,7 @@ trigger:
             --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
             --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
             --set env.APPROVED_API_CALLERS=(${DEV_URL})
-      - if: ${CI_COMMIT_BRANCH} == "main"
+      - if: $CI_COMMIT_BRANCH == "main"
   extends: ".helm-deploy-trigger"
 
 integration-testing-cypress-job:  # Start the integration testing
