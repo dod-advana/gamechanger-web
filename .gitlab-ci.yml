@@ -4,8 +4,6 @@ include:
     file: "ci/container.yml"
   - project: platform/promotion
     file: "ci/helm.yml"
-  - project: platform/promotion
-    file: ci/security.yml
 
 stages:          # List of stages for jobs, and their order of execution.
   - "🚧 build-chart"
@@ -32,43 +30,6 @@ variables:
     --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
     --build-arg=APP_UID=1001
     --build-arg=APP_GID=1001
-
-.sonar_scan:
-  image:
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
-    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
-    REPOSITORY: "${CI_PROJECT_PATH}"
-    SONAR_HOST_EXTERNAL_URL: "${SONAR_HOST_EXTERNAL_URL}"
-    SONAR_HOST_URL: "${SONAR_HOST_URL}"
-    SONAR_TOKEN: "${SONAR_TOKEN}"
-    PROJECTURL: "${CI_REPOSITORY_URL}"
-    PROJECTNAME: "advana/gamechanger/gamechanger-web-source"
-    PROJECTKEY: "${SONAR_PROJECT_KEY}"
-    CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
-    SONAR_CLI_FLAGS: >-
-      -Dsonar.qualitygate.wait=true \
-      -Dsonar.exclusions=backend/node_app/sql/* \
-      -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-      -Dsonar.junit.reportPaths=backend/junit.xml \
-      -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
-      -Dsonar.language=js \
-      -Dsonar.projectName="${PROJECTNAME}" \
-      -Dsonar.projectKey="${PROJECTKEY}" \
-      -Dsonar.links.ci="${PROJECTURL}/pipelines" \
-      -Dsonar.links.issue="${PROJECTURL}/issues" \
-      -Dsonar.analysis.mode="publish" \
-      -Dsonar.projectBaseDir=. \
-      -Dsonar.sources=frontend/src,backend/node_app
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  artifacts:
-    paths:
-      - "public"
-  allow_failure: true
 
 cache: &global_cache
   untracked: true
@@ -110,6 +71,13 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
+sast:
+  stage: "🧪 static-test"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+
 unit-backend-test-job:    # Job for the unit tests
   image: node:14
   stage: "🧪 static-test"
@@ -142,6 +110,57 @@ lint-test-job:  # lint-job
       - backend/eslintReport.json
       - frontend/eslintReport.json
 
+sonar_scan-job:  # Run code through sonar scanner
+  stage: "🧪 security-test"
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  artifacts:
+    paths:
+      - "public"
+  variables:
+    REPOSITORY: "${CI_PROJECT_PATH}"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    SONAR_HOST_EXTERNAL_URL: "${SONAR_HOST_EXTERNAL_URL}"
+    SONAR_HOST_URL: "${SONAR_HOST_URL}"
+    SONAR_TOKEN: "${SONAR_TOKEN}"
+    PROJECTURL: "${CI_REPOSITORY_URL}"
+    PROJECTNAME: "advana/gamechanger/gamechanger-web-source"
+    PROJECTKEY: "${SONAR_PROJECT_KEY}"
+    CODEQUALITY_REPORT_ARTIFACT: "sonarqube-report.html"
+    GIT_DEPTH: "0"
+  script:
+    - |
+      sonar-scanner \
+        -Dsonar.qualitygate.wait=true \
+        -Dsonar.exclusions=backend/node_app/sql/* \
+        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+        -Dsonar.junit.reportPaths=backend/junit.xml \
+        -Dsonar.eslint.reportPaths=backend/eslintReport.json,frontend/eslintReport.json \
+        -Dsonar.language=js \
+        -Dsonar.projectName="${PROJECTNAME}" \
+        -Dsonar.projectKey="${PROJECTKEY}" \
+        -Dsonar.links.ci="${PROJECTURL}/pipelines" \
+        -Dsonar.links.issue="${PROJECTURL}/issues" \
+        -Dsonar.analysis.mode="publish" \
+        -Dsonar.projectBaseDir=. \
+        -Dsonar.sources=frontend/src,backend/node_app
+      mkdir -p public
+      <<-EOF cat > "public/${CODEQUALITY_REPORT_ARTIFACT}"
+      <html>
+      <head>
+      <meta http-equiv="refresh" content="0; url=${SONAR_HOST_EXTERNAL_URL}/dashboard?id=${PROJECTKEY}" />
+      </head>
+      </html>
+      EOF
+
+
 chart-publish:
   cache: []
   stage: "🚧 build-chart"
@@ -163,25 +182,34 @@ dev-overrides:
   stage: "🚧 override-chart dev"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-#      variables:
-#        DEV_VALUES_FILE: "${INGRESS_DEV_VALUES}"
+      variables:
+        VALUES_FILE: "ingress.dev.values.yaml"
     - if: $CI_COMMIT_BRANCH == "main"
-#      variables:
-#        DEV_VALUES_FILE: "${DEV_VALUES}"
+      variables:
+        VALUES_FILE: "dev.values.yaml"
   extends:
     - ".helm-overrides"
   script:
-    - 'mv ${INGRESS_DEV_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
+    - |
+      git clone https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+      rm -rf gamechanger-ci-cd
+      
 
 test-overrides:
   cache: []
   stage: "🚧 override-chart test"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        VALUES_FILE: "test.values.yaml"
   extends:
     - ".helm-overrides"
   script:
-    - 'mv ${TEST_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
+    - |
+      git clone https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+        rm -rf gamechanger-ci-cd
 
 trigger:
   stage: "🚀 deploy"
