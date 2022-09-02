@@ -71,6 +71,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
 sast:
+  cache: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   stage: "🧪 static-test"
@@ -158,7 +159,9 @@ sonar_scan-job:  # Run code through sonar scanner
       EOF
 
 
+
 chart-publish:
+  cache: []
   stage: "🚧 build-chart"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -174,6 +177,7 @@ chart-publish:
     - 'helm chart push "${CHART}"'
 
 dev-overrides:
+  cache: []
   stage: "🚧 override-chart dev"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -188,6 +192,7 @@ dev-overrides:
     - 'mv ${INGRESS_DEV_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
 
 test-overrides:
+  cache: []
   stage: "🚧 override-chart test"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
@@ -197,6 +202,7 @@ test-overrides:
     - 'mv ${TEST_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
 
 trigger:
+  cache: []
   stage: "🚀 deploy"
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
