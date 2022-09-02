@@ -19,30 +19,31 @@ const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customPro
 const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
 const QLIK_ES_FIELDS = [
-	'name_s',
+	'name_t',
 	'description_t',
-	'streamName_s',
-	'streamCustomProperties_s',
-	'appCustomProperties_s',
-	'businessDomains_s',
+	'streamName_t',
+	'streamCustomProperties_n',
+	'appCustomProperties_n',
+	'businessDomains_n',
+	'tags_n',
 ];
 
 const QLIK_ES_MAPPING = {
 	created_dt: { newName: 'createdDate' },
 	modified_dt: { newName: 'modifiedDate' },
-	name_s: { newName: 'name' },
+	name_t: { newName: 'name' },
 	publishTime_dt: { newName: 'publishTime' },
 	published_b: { newName: 'published' },
 	tags_n: { newName: 'tags' },
 	description_t: { newName: 'description' },
-	streamName_s: { newName: 'streamName' },
+	streamName_t: { newName: 'streamName' },
 	fileSize_i: { newName: 'fileSize' },
 	lastReloadTime_dt: { newName: 'lastReloadTime' },
-	thumbnail_s: { newName: 'thumbnail' },
+	thumbnail_t: { newName: 'thumbnail' },
 	dynamicColor_s: { newName: 'dynamicColor' },
-	streamCustomProperties_s: { newName: 'streamCustomProperties' },
-	appCustomProperties_s: { newName: 'appCustomProperties' },
-	businessDomains_s: { newName: 'businessDomains' },
+	streamCustomProperties_n: { newName: 'streamCustomProperties' },
+	appCustomProperties_n: { newName: 'appCustomProperties' },
+	businessDomains_n: { newName: 'businessDomains' },
 };
 
 const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
@@ -61,7 +62,6 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 		);
 
 		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
-
 		return processQlikApps(qlikApps.data, qlikStreams.data, logger);
 	} catch (err) {
 		if (!userId)
@@ -172,11 +172,14 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ parsedQuery, offset, limit, operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
+	{ parsedQuery, offset, limit, isVerbatimSearch, searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
 	try {
+		const textFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_t') !== -1);
+		const nestedFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_n') !== -1);
+		const wildcardSearchText = isVerbatimSearch ? [parsedQuery] : parsedQuery.split(' ');
 		let query = {
 			track_total_hits: true,
 			from: offset,
@@ -185,18 +188,16 @@ const getElasticSearchQueryForQlikApps = (
 				bool: {
 					should: [
 						{
-							multi_match: {
-								query: `${parsedQuery}`,
-								fields: QLIK_ES_FIELDS,
-								type: 'best_fields',
-								operator: `${operator}`,
-								fuzziness: 'AUTO',
-								analyzer: 'standard',
+							match_phrase: {
+								name_t: searchText,
 							},
 						},
 						{
-							match_phrase: {
-								name_s: searchText,
+							query_string: {
+								fields: textFields,
+								query: parsedQuery,
+								boost: 0.5,
+								analyzer: 'my_analyzer',
 							},
 						},
 					],
@@ -214,11 +215,51 @@ const getElasticSearchQueryForQlikApps = (
 			query.query = {
 				terms: { 'id.keyword': favoriteApps },
 			};
-		}
+		} else {
+			nestedFields.forEach((field) => {
+				query.query.bool.should.push({
+					nested: {
+						path: field,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {
+									[`${field}.items`]: {
+										fragmenter: 'simple',
+										type: 'unified',
+									},
+								},
+							},
+						},
+						query: {
+							bool: {
+								should: wildcardSearchText.map((wildcardSearch) => {
+									return {
+										wildcard: {
+											[`${field}.items`]: `*${wildcardSearch}*`,
+										},
+									};
+								}),
+							},
+						},
+					},
+				});
+			});
 
-		QLIK_ES_FIELDS.forEach((field) => {
-			query.highlight.fields[field] = {};
-		});
+			textFields.forEach((field) => {
+				wildcardSearchText.forEach((wildcardSearch) => {
+					query.query.bool.should.push({
+						wildcard: {
+							[field]: `*${wildcardSearch}*`,
+						},
+					});
+				});
+			});
+
+			QLIK_ES_FIELDS.forEach((field) => {
+				query.highlight.fields[field] = {};
+			});
+		}
 
 		return query;
 	} catch (e) {
@@ -253,6 +294,24 @@ const cleanQlikESResults = (esResults, userId, logger) => {
 					});
 				});
 			}
+
+			const innerHits = hit.inner_hits || {};
+
+			Object.keys(innerHits).forEach((innerHitKey) => {
+				const innerHitObj = innerHits[innerHitKey];
+				const innerHitHits = innerHitObj?.hits?.hits || [];
+
+				innerHitHits.forEach((innerHitsHit) => {
+					if (innerHitsHit.highlight) {
+						Object.keys(innerHitsHit.highlight).forEach((hitKey) => {
+							result.highlights.push({
+								title: QLIK_ES_MAPPING[innerHitKey].newName,
+								fragment: innerHitsHit.highlight[hitKey][0],
+							});
+						});
+					}
+				});
+			});
 
 			searchResults.hits.push(result);
 		});
