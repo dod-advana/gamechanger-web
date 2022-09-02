@@ -510,6 +510,7 @@ export default function DocumentExplorer({
 							itemsCountPerPage={resultsPerPage}
 							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
+							hideFirstLastPages={true}
 							onChange={(page) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),

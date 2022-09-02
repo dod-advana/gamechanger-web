@@ -589,7 +589,7 @@ const PolicySearchHandler = {
 			searchFields,
 		} = searchSettings;
 
-		const offset =
+		let offset =
 			((activeCategoryTab === 'all' || currentViewName === 'Explorer' ? resultsPage : infiniteScrollPage) - 1) *
 			RESULTS_PER_PAGE;
 		const orgFilterString = getOrgToOrgQuery(allOrgsSelected, orgFilter);
@@ -601,6 +601,15 @@ const PolicySearchHandler = {
 		const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 		const limit = 18;
 
+		let search_after = [];
+		if (offset >= 9982) {
+			if (state.rawSearchResults.length > 0) {
+				offset = 0;
+				search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort || [];
+			} else {
+				console.log('bad yo, state.rawSearchResults is empty');
+			}
+		}
 		const resp = await gameChangerAPI.callSearchFunction({
 			functionName: 'documentSearchPagination',
 			cloneName: cloneData.clone_name,
@@ -624,6 +633,7 @@ const PolicySearchHandler = {
 				limit,
 				sort: currentSort,
 				order: currentOrder,
+				search_after,
 			},
 		});
 

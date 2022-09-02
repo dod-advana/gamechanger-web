@@ -608,6 +608,7 @@ class SearchUtility {
 							},
 						},
 					];
+					break;
 				default:
 					break;
 			}
@@ -735,6 +736,8 @@ class SearchUtility {
 						},
 					},
 				];
+			} else {
+				query.sort.push({ _id: order });
 			}
 			return query;
 		} catch (err) {
@@ -1438,6 +1441,9 @@ class SearchUtility {
 
 					if (!result.ref_list) {
 						result.ref_list = [];
+					}
+					if (r.sort) {
+						result.sort = r.sort;
 					}
 					results.docs.push(result);
 				}
