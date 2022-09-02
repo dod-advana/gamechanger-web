@@ -220,7 +220,10 @@ trigger:
             --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
             --set env.APPROVED_API_CALLERS=(${DEV_URL})
       - if: $CI_COMMIT_BRANCH == "main"
-  extends: ".helm-deploy-trigger"
+  trigger:
+    strategy: "depend"
+    project: "platform/promotion"
+    branch: "allow-for-other-envs"
 
 integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
