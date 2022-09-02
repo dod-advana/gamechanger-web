@@ -44,7 +44,6 @@ const FilterList = ({
 				return (
 					<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
 						<Button
-							data-cy={`${optionName}-top-filter`}
 							variant="outlined"
 							backgroundColor="white"
 							display="inline-flex"

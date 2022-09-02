@@ -175,7 +175,6 @@ const MultiSelectFilter = ({
 								label={checkboxText}
 								labelPlacement="end"
 								ref={checkboxRef}
-								data-cy={`filter-option-${option}`}
 							/>
 						);
 					})}

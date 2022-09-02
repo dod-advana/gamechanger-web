@@ -1,4 +1,4 @@
-stages:          # List of stages for jobs, and their order of execution.
+stages: # List of stages for jobs, and their order of execution.
   - prepare
   - static-test
   - security-test
@@ -19,7 +19,7 @@ cache: &global_cache
   policy: pull
 
 .setup-github-npm:
-  before_script:   # Setups the npm vars
+  before_script: # Setups the npm vars
     - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
@@ -31,8 +31,8 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     policy: pull-push
   extends: .setup-github-npm
   rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      - if: $DAILY_SCAN == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DAILY_SCAN == "true"
   script:
     - |
       if [[ -d frontend/node_modules ]]; then
@@ -47,7 +47,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
-unit-backend-test-job:    # Job for the unit tests
+unit-backend-test-job: # Job for the unit tests
   image: node:14
   stage: static-test
   rules:
@@ -63,11 +63,11 @@ unit-backend-test-job:    # Job for the unit tests
     reports:
       junit:
         - backend/junit.xml
-      coverage_report: 
+      coverage_report:
         coverage_format: cobertura
         path: backend/coverage/cobertura-coverage.xml
 
-lint-test-job:  # lint-job
+lint-test-job: # lint-job
   image: node:14
   stage: static-test
   rules:
@@ -81,7 +81,7 @@ lint-test-job:  # lint-job
       - backend/eslintReport.json
       - frontend/eslintReport.json
 
-sonar_scan-job:  # Run code through sonar scanner
+sonar_scan-job: # Run code through sonar scanner
   stage: security-test
   image:
     name: sonarsource/sonar-scanner-cli:latest
@@ -132,8 +132,7 @@ sonar_scan-job:  # Run code through sonar scanner
       </html>
       EOF
 
-
-setup-server:  # build dev server with the commit branch
+setup-server: # build dev server with the commit branch
   stage: setup-test-server
   variables:
     BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
@@ -150,7 +149,7 @@ setup-server:  # build dev server with the commit branch
     project: "advana/gamechanger/gamechanger-ci-cd"
     branch: "main"
 
-integration-testing-cypress-job:  # Start the integration testing
+integration-testing-cypress-job: # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
   stage: integration-test
   rules:
@@ -184,11 +183,11 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/cypress/videos
   allow_failure: true
 
-deploy-job:       # This job runs the build for dev.
+deploy-job: # This job runs the build for dev.
   stage: deploy
   rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
-      - if: $DO_DEPLOY == "true"
+    - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
+    - if: $DO_DEPLOY == "true"
   variables:
     BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
     CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
