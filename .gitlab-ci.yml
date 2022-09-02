@@ -63,7 +63,11 @@ unit-backend-test-job: # Job for the unit tests
     reports:
       junit:
         - backend/junit.xml
+<<<<<<< HEAD
       coverage_report:
+=======
+      coverage_report: 
+>>>>>>> 201693d60a6ce97ff2e63e84228a39ae87267d13
         coverage_format: cobertura
         path: backend/coverage/cobertura-coverage.xml
 
