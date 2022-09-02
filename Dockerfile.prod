@@ -1,47 +1,5 @@
 ARG BASE_IMAGE="registry.access.redhat.com/ubi8/nodejs-14:1-50"
-FROM $BASE_IMAGE AS builder
-
-USER root
-
-ENV APP_ROOT="/opt/app-root"
-ENV APP_DIR="${APP_ROOT}/src"
-ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
-
-RUN mkdir -p \
-        "${APP_DIR}" \
-        "${APP_BACKEND_DIR}" \
-        "${APP_FRONTEND_DIR}" \
-    && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
-
-ARG APP_UID=1000
-ARG APP_GID=1000
-
-USER "${APP_UID}":"${APP_GID}"
-
-ARG NPM_PROFILE="dod-advana"
-ARG NPM_REGISTRY="https://npm.pkg.github.com"
-ARG NPM_AUTH_TOKEN=""
-
-COPY --chown="${APP_UID}":"${APP_GID}" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
-
-RUN yarn set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
-    && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && yarn set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
-    )) \
-    && (\
-        cd "${APP_FRONTEND_DIR}" \
-        && yarn install --production \
-    )
-
-COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
-
-RUN (\
-        cd "${APP_FRONTEND_DIR}" \
-        && yarn build \
-    )
-
-FROM $BASE_IMAGE
+FROM $BASE_IMAGE AS base
 
 USER root
 
@@ -66,6 +24,10 @@ RUN rpm --import /tmp/RPM-GPG-KEY-PGDG-11 && \
 ARG APP_UID=1000
 ARG APP_GID=1000
 
+ARG NPM_PROFILE="dod-advana"
+ARG NPM_REGISTRY="https://npm.pkg.github.com"
+ARG NPM_AUTH_TOKEN=""
+
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/opt/app-root"
 ENV APP_DIR="${APP_ROOT}/src"
@@ -78,40 +40,61 @@ ENV LOGS="/logs/uotapp"
 
 RUN mkdir -p \
         "${APP_DIR}" \
+        "${APP_FRONTEND_DIR}" \
         "${APP_BACKEND_DIR}" \
         "${APP_SHARED_DIR}" \
         "${LOGS}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
+FROM base AS builder
 
 USER "${APP_UID}":"${APP_GID}"
 
-ARG NPM_PROFILE="dod-advana"
-ARG NPM_REGISTRY="https://npm.pkg.github.com"
-ARG NPM_AUTH_TOKEN=""
+COPY --chown="${APP_UID}":"${APP_GID}" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
+
+RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
+    && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+    )) \
+    && (\
+        cd "${APP_FRONTEND_DIR}" \
+        && npm install --production \
+    )
+
+COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
+
+RUN (\
+        cd "${APP_FRONTEND_DIR}" \
+        && npm run build \
+    )
+
+FROM base
+
+USER "${APP_UID}":"${APP_GID}"
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
 
-RUN yarn set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
+RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
         _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && yarn set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
     )) \
     && (\
         cd "$APP_SHARED_DIR" \
-        && yarn install nodemon \
-        && yarn install sequelize-cli \
+        && npm install nodemon \
+        && npm install sequelize-cli \
     )\
     && (\
         cd "${APP_BACKEND_DIR}" \
-        && yarn install --production \
+        && npm install --production \
     )
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}"
 
-RUN cd "${APP_BACKEND_DIR}
+RUN cd "${APP_BACKEND_DIR}"
 
 # http & https
 EXPOSE 8990 8443
