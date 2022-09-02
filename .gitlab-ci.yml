@@ -191,7 +191,7 @@ dev-overrides:
     - ".helm-overrides"
   script:
     - |
-      git clone https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
       mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
       rm -rf gamechanger-ci-cd
       
@@ -207,7 +207,7 @@ test-overrides:
     - ".helm-overrides"
   script:
     - |
-      git clone https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
       mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
         rm -rf gamechanger-ci-cd
 
