@@ -401,7 +401,7 @@ const JBookProfilePage = () => {
 					for (const match of matches) {
 						descriptions.value = descriptions.value.replaceAll(
 							match,
-							`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+							`<span style="background-color: #1C2D64; color: white; padding: 0 4px;">${match}</span>`
 						);
 					}
 				}

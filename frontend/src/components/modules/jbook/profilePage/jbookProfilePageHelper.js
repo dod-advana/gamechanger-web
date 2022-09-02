@@ -222,7 +222,7 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 					>
 						{renderTitle(projectData, programElement, projectNum)}
 					</Typography>
-					<div style={{ overflow: 'auto' }}>
+					<div style={{ overflow: 'auto' }} data-cy="jbook-project-descriptions">
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions.map((pd) => {
 								return (
