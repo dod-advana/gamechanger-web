@@ -205,6 +205,7 @@ trigger:
   trigger:
     strategy: "depend"
     project: "platform/promotion"
+    branch: "getting-other-clusters-to-work"
 
 integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
