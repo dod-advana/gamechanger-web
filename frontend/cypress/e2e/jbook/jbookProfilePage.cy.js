@@ -1,4 +1,4 @@
-describe('Tests multiple types of jbook searches.', () => {
+describe('Tests the JBook portfolio page', () => {
 	beforeEach(() => {
 		cy.setup();
 		cy.visit_accept_consent(
@@ -7,7 +7,7 @@ describe('Tests multiple types of jbook searches.', () => {
         cy.getDataCy('jbook-project-descriptions', { timeout: 10000 }).should('exist');
 	});
 
-	it('Search text with quotes should be highlighted on the portfolio page', () => {
+	it('Should ensure search text with quotes are highlighted on the portfolio page', () => {
 		// Check highlighted text exists
         cy.get('[style="background-color:#1C2D64;color:white;padding:0 4px"]').should('exist');
 	});
