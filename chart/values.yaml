@@ -60,11 +60,13 @@ service:
     port: 80
     # container-side port
     targetPort: 8990
+    nodePort: 31007
     protocol: TCP
     name: http
   https:
     port: 443
     targetPort: 8443
+    nodePort: 31207
     protocol: TCP
     name: https
 
@@ -111,7 +113,7 @@ serviceAccount:
 ##
 externalDomain: "" #"dev.advana.boozallencsn.com"
 ingress:
-  enabled: true
+  enabled: false
   ## @param ingress.certManager Set to true to add the `kubernetes.io/tls-acme: "true"` annotation to gamechanger ingresses
   ##
   certManager: true
