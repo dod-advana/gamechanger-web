@@ -19,7 +19,7 @@ stages:          # List of stages for jobs, and their order of execution.
 variables:
   UPSTREAM_KANIKO: "true"
  # UPSTREAM_REPOSITORY_URL: "https://${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-web-source.git"
-  UPSTREAM_COMMIT_BRANCH: "${CI_COMMIT_BRANCH}"
+  UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
   HELM_CHART_DIR: "./chart"
   HELM_RELEASE_NAME: "gamechanger-web"
   DOCKERFILE_PATH: "./Dockerfile.prod"
@@ -208,6 +208,7 @@ trigger:
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
         variables:
+          UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
           HELM_RELEASE_NAME: "${GITLAB_USER_NAME}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
