@@ -157,6 +157,7 @@ sonar_scan-job:  # Run code through sonar scanner
       </html>
       EOF
 
+
 chart-publish:
   stage: "🚧 build-chart"
   rules:
@@ -176,15 +177,15 @@ dev-overrides:
   stage: "🚧 override-chart dev"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        DEV_VALUES_FILE: "${INGRESS_DEV_VALUES}"
+#      variables:
+#        DEV_VALUES_FILE: "${INGRESS_DEV_VALUES}"
     - if: $CI_COMMIT_BRANCH == "main"
-      variables:
-        DEV_VALUES_FILE: "${DEV_VALUES}"
+#      variables:
+#        DEV_VALUES_FILE: "${DEV_VALUES}"
   extends:
     - ".helm-overrides"
   script:
-    - 'mv ${DEV_VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"'
+    - 'mv ${INGRESS_DEV_VALUES} "${HELM_UPGRADE_VALUES_FILE}"'
 
 test-overrides:
   stage: "🚧 override-chart test"
