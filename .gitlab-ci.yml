@@ -237,7 +237,7 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
-          HELM_RELEASE_NAME: "${GITLAB_USER_NAME}"
+          HELM_RELEASE_NAME: "${GITLAB_USER_ID}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
           HELM_UPGRADE_EXTRA_ARGS: >-
             --set image.tag=${CI_COMMIT_SHA}-oci
