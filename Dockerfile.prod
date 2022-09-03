@@ -24,10 +24,6 @@ RUN rpm --import /tmp/RPM-GPG-KEY-PGDG-11 && \
 ARG APP_UID=1000
 ARG APP_GID=1000
 
-ARG NPM_PROFILE="dod-advana"
-ARG NPM_REGISTRY="https://npm.pkg.github.com"
-ARG NPM_AUTH_TOKEN=""
-
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/opt/app-root"
 ENV APP_DIR="${APP_ROOT}/src"
@@ -56,6 +52,10 @@ USER "${APP_UID}":"${APP_GID}"
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend/package.json "${APP_FRONTEND_DIR}/package.json"
 
+ARG NPM_PROFILE="dod-advana"
+ARG NPM_REGISTRY="https://npm.pkg.github.com"
+ARG NPM_AUTH_TOKEN=""
+
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
         _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
@@ -81,6 +81,10 @@ ARG APP_GID=1000
 USER "${APP_UID}":"${APP_GID}"
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend/package.json "${APP_BACKEND_DIR}/package.json"
+
+ARG NPM_PROFILE="dod-advana"
+ARG NPM_REGISTRY="https://npm.pkg.github.com"
+ARG NPM_AUTH_TOKEN=""
 
 RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
     && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
