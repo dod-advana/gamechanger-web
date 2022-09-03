@@ -237,12 +237,12 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
-          HELM_RELEASE_NAME: "${GITLAB_USER_ID}"
+          HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
           HELM_UPGRADE_EXTRA_ARGS: >-
             --set image.tag=${CI_COMMIT_SHA}-oci
             --set appVersion=${BUILD_VERSION}
-            --ser ingress.enabled=true
+            --set ingress.enabled=true
             --set ingress.web.hostname=${HELM_RELEASE_NAME}
             --set env.REACT_APP_BACKEND_URL=${DEV_URL}
             --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
