@@ -214,8 +214,7 @@ dev-overrides:
       git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
       mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
       rm -rf gamechanger-ci-cd
-      if [${CI_PIPELINE_SOURCE} = "merge_request_event"]; then HELM_RELEASE_NAME="${GITLAB_USER_LOGIN//_}"; fi
-      
+
 
 test-overrides:
   cache: []
@@ -239,7 +238,8 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
-          KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
+          HELM_RELEASE_NAME: ${${GITLAB_USER_LOGIN}}
+          UPSTREAM_HELM_NAMESPACE: "${HELM_RELEASE_NAME}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
           HELM_UPGRADE_EXTRA_ARGS: >-
             --set image.tag=${CI_COMMIT_SHA}-oci
