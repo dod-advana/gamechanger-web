@@ -6,13 +6,13 @@ include:
     file: "ci/helm.yml"
 
 stages:          # List of stages for jobs, and their order of execution.
-  - "📡 prepare"
-  - "🧪 static-test"
-  - "🧪 security-test"
   - "🚧 build-chart"
   - "🚧 override-chart dev"
   - "🚧 override-chart test"
   - "🚀 deploy"
+  - "📡 prepare"
+  - "🧪 static-test"
+  - "🧪 security-test"
   - "🧪 integration-test"
 
 variables:
@@ -238,7 +238,7 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
-          HELM_RELEASE_NAME: ${${GITLAB_USER_LOGIN}}
+          HELM_RELEASE_NAME: "${${GITLAB_USER_LOGIN}}"
           UPSTREAM_HELM_NAMESPACE: "${HELM_RELEASE_NAME}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
           HELM_UPGRADE_EXTRA_ARGS: >-
