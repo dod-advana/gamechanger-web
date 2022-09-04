@@ -71,6 +71,12 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
+sast:
+  stage: "🧪 static-test"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
 eslint-sast:
   stage: "🧪 static-test"
   cache: []
