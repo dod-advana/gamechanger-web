@@ -76,6 +76,8 @@ sast:
   cache: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - echo "This works"
 
 eslint-sast:
   stage: "🧪 static-test"
