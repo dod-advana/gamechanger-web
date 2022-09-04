@@ -6,7 +6,7 @@
 {{- else }}
   {{- $_ := set . "web_path" "/" -}}
 {{- end }}
-{{- if eq .Values.ingress.enabled "true" }}
+{{- if eq .Values.ingress.enabled true }}
 apiVersion: {{ template "chart.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
