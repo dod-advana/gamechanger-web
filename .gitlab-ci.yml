@@ -29,6 +29,7 @@ variables:
     --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
     --build-arg=APP_UID=1001
     --build-arg=APP_GID=1001
+    --reproducible
 
 cache: &global_cache
   untracked: true
@@ -209,8 +210,9 @@ dev-overrides:
   extends:
     - ".helm-overrides"
   script:
+    - git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+    - cat gamechanger-ci-cd/${VALUES_FILE}
     - |
-      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
       mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
       rm -rf gamechanger-ci-cd
 
