@@ -210,10 +210,9 @@ dev-overrides:
   extends:
     - ".helm-overrides"
   script:
-    - git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
-    - cat gamechanger-ci-cd/${VALUES_FILE}
     - |
-      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+    - mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
       rm -rf gamechanger-ci-cd
 
 
@@ -239,6 +238,7 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           ENVIRONMENT: "gc-dev"
+          UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
           HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}"
           KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
           DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
@@ -250,7 +250,7 @@ trigger:
             --set env.REACT_APP_BACKEND_URL=${DEV_URL}
             --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
             --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
-            --set env.APPROVED_API_CALLERS=(${DEV_URL})
+            --set env.APPROVED_API_CALLERS=${DEV_URL}
       - if: $CI_COMMIT_BRANCH == "main"
   trigger:
     strategy: "depend"
