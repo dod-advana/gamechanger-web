@@ -246,7 +246,7 @@ trigger:
             --set image.tag=${CI_COMMIT_SHA}-oci
             --set appVersion=${BUILD_VERSION}
             --set ingress.enabled=true
-            --set externalDomain="gc.dev.advana.us"
+            --set externalDomain=gc.dev.advana.us
             --set ingress.web.hostname=${HELM_RELEASE_NAME}
             --set env.REACT_APP_BACKEND_URL=${DEV_URL}
             --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
