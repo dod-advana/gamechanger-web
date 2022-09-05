@@ -1,5 +1,5 @@
 apiVersion: v2
-name: gamechanger-web
+name: gamechanger-web-source
 description: A Helm chart for Kubernetes
 
 type: application
