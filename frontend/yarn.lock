@@ -1225,10 +1225,10 @@
     styled-components "5.3.3"
     underscore "1.13.1"
 
-"@dod-advana/advana-side-nav@0.1.6":
-  version "0.1.6"
-  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-side-nav/0.1.6/a9c6d37cec8ca1d1c1d00dc56835870207174df284cffbc70f4e7ed6f79af74b#8fbdd5c59b45ff238ccb4407d14723438d9b19b0"
-  integrity sha512-TkMwO68DU1lxh8aqBSRwV4/2+pMr9sp0vwZYGQSno2ZRYu0FSKxDHjAeYzoVLEDx3aFIw+8cTFeO0y0H0J4p5A==
+"@dod-advana/advana-side-nav@0.1.10":
+  version "0.1.10"
+  resolved "https://npm.pkg.github.com/download/@dod-advana/advana-side-nav/0.1.10/44f5a2eed08c35cf045878fd45f8c83c101ade07#44f5a2eed08c35cf045878fd45f8c83c101ade07"
+  integrity sha512-sp0ohYyZgXnlxYz6rw5zZ6NHa+XvFPP6uPRiGEt8h0mHDo1FKlzbkudrUFVfdnqjzTfQT28Opru3Z0w+vPSeyQ==
   dependencies:
     "@babel/plugin-proposal-class-properties" "7.13.0"
     "@babel/plugin-syntax-class-properties" "7.12.13"
@@ -1237,7 +1237,7 @@
     "@material-ui/icons" "4.11.2"
     axios "0.24.0"
     babel-plugin-import "1.13.5"
-    react-slidedown "2.4.5"
+    react-slidedown "2.4.7"
     styled-components "5.3.3"
     underscore "1.13.1"
 
@@ -12907,6 +12907,13 @@ react-slidedown@2.4.5:
   dependencies:
     tslib "^1.9.0"
 
+react-slidedown@2.4.7:
+  version "2.4.7"
+  resolved "http://10.194.9.122/react-slidedown/-/react-slidedown-2.4.7.tgz#c09e72bba8aac25018fd644ece041da771854589"
+  integrity sha512-HGDfrqo70r1WVE0DwrySPdCT27/2wcZaJYh5kOnmuPSCtjDDJrNkDdn4Ep/cma2VVfwupeAGhbc2pbrGThU6VQ==
+  dependencies:
+    tslib "^2.0.0"
+
 react-smooth@^1.0.5:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/react-smooth/-/react-smooth-1.0.6.tgz#18b964f123f7bca099e078324338cd8739346d0a"
@@ -13353,11 +13360,6 @@ resolve-url-loader@^3.1.2:
     rework "1.0.1"
     rework-visit "1.0.0"
     source-map "0.6.1"
-
-resolve-url@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/resolve-url/-/resolve-url-0.2.1.tgz#2c637fe77c893afd2a663fe21aa9080068e2052a"
-  integrity sha512-ZuF55hVUQaaczgOIwqWzkEcEidmlD/xl44x1UZnhOXcYuFN2S6+rcxpG+C1N3So0wvNI3DmJICUFfu2SxhBmvg==
 
 resolve@1.18.1:
   version "1.18.1"
@@ -14043,20 +14045,9 @@ source-map-js@^1.0.2:
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.2.tgz#adbc361d9c62df380125e7f161f71c826f1e490c"
   integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
 
-source-map-resolve@^0.5.0, source-map-resolve@^0.5.2:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/source-map-resolve/-/source-map-resolve-0.5.3.tgz#190866bece7553e1f8f267a2ee82c606b5509a1a"
-  integrity sha512-Htz+RnsXWk5+P2slx5Jh3Q66vhQj1Cllm0zvnaY98+NFx+Dv2CF/f5O/t8x+KaNdrdIAsruNzoh/KpialbqAnw==
-  dependencies:
-    atob "^2.1.2"
-    decode-uri-component "^0.2.0"
-    resolve-url "^0.2.1"
-    source-map-url "^0.4.0"
-    urix "^0.1.0"
-
-source-map-resolve@^0.6.0:
+source-map-resolve@0.6.0, source-map-resolve@^0.5.0, source-map-resolve@^0.5.2, source-map-resolve@^0.6.0:
   version "0.6.0"
-  resolved "https://registry.yarnpkg.com/source-map-resolve/-/source-map-resolve-0.6.0.tgz#3d9df87e236b53f16d01e58150fc7711138e5ed2"
+  resolved "http://10.194.9.122/source-map-resolve/-/source-map-resolve-0.6.0.tgz#3d9df87e236b53f16d01e58150fc7711138e5ed2"
   integrity sha512-KXBr9d/fO/bWo97NXsPIAW1bFSBOuCnjbNTBMO7N59hsv5i9yzRDfcYwwt0l04+VqnKC+EwzvJZIP/qkuMgR/w==
   dependencies:
     atob "^2.1.2"
@@ -15032,9 +15023,9 @@ tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.0.3, tslib@^2.1.0, tslib@^2.4.0:
+tslib@^2.0.0, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.4.0:
   version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  resolved "http://10.194.9.122/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tsutils@^3.17.1, tsutils@^3.21.0:

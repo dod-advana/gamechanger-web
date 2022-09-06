@@ -3,6 +3,8 @@ FROM $BASE_IMAGE AS base
 
 USER root
 
+RUN corepack prepare --all
+
 RUN yum install -y \
         git \
         make
@@ -43,6 +45,11 @@ RUN mkdir -p \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
+USER "${APP_UID}":"${APP_GID}"
+
+RUN cd "$APP_SHARED_DIR" && \
+    yarn add -g nodemon sequelize-cli
+
 FROM base AS builder
 
 ARG APP_UID=1000
@@ -56,22 +63,18 @@ ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 
-RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
-    && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
-    )) \
-    && (\
-        cd "${APP_FRONTEND_DIR}" \
-        && npm install --production \
-    )
+RUN cd "${APP_FRONTEND_DIR}" && \
+    ([ -n "$NPM_AUTH_TOKEN" ] && ( \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
+        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
+        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
+    )) && \
+    yarn install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
 
-RUN (\
-        cd "${APP_FRONTEND_DIR}" \
-        && npm run build \
-    )
+RUN cd "${APP_FRONTEND_DIR}" && \
+    yarn build
 
 FROM base
 
@@ -86,20 +89,13 @@ ARG NPM_PROFILE="dod-advana"
 ARG NPM_REGISTRY="https://npm.pkg.github.com"
 ARG NPM_AUTH_TOKEN=""
 
-RUN npm set "@${NPM_PROFILE}:registry" "${NPM_REGISTRY}" \
-    && ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
-    )) \
-    && (\
-        cd "$APP_SHARED_DIR" \
-        && npm install nodemon \
-        && npm install sequelize-cli \
-    )\
-    && (\
-        cd "${APP_BACKEND_DIR}" \
-        && npm install --production \
-    )
+RUN cd "${APP_BACKEND_DIR}" && \
+    ([ -n "$NPM_AUTH_TOKEN" ] && ( \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
+        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
+        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
+    )) && \
+    yarn install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}/build"
