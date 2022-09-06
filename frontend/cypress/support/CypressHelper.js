@@ -1,7 +1,6 @@
 const CN = Cypress.env('CYPRESS_SSL_CLIENT_CERTIFICATE') || Cypress.env('SSL_CLIENT_CERTIFICATE');
 const USER_ID = Cypress.env('CYPRESS_SSL_CLIENT_S_DN_CN') || Cypress.env('SSL_CLIENT_S_DN_CN');
 
-export const BASE_URL = Cypress.env('CYPRESS_BASE_URL') || Cypress.env('BASE_URL');
 export const API_URL = Cypress.env('CYPRESS_API_URL') || Cypress.env('API_URL');
 const WAIT_TIMES = 5;
 

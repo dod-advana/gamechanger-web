@@ -3,7 +3,7 @@ import CypressHelper, { BASE_URL } from '../../support/CypressHelper';
 describe('Tests the advanaCommon functionality of the app including side nav and consent banner.', () => {
 	beforeEach(() => {
 		cy.setup();
-		cy.visit(`${BASE_URL}/#/gamechanger`);
+		cy.visit(`/#/gamechanger`);
 	});
 
 	// Test the consent banner appears and a cookie is created when okay clicked
