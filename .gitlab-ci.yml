@@ -6,13 +6,13 @@ include:
     file: "ci/helm.yml"
 
 stages:          # List of stages for jobs, and their order of execution.
+  - "📡 prepare"
+  - "🧪 static-test"
+  - "🧪 security-test"
   - "🚧 build-chart"
   - "🚧 override-chart dev"
   - "🚧 override-chart test"
   - "🚀 deploy"
-  - "📡 prepare"
-  - "🧪 static-test"
-  - "🧪 security-test"
   - "🧪 integration-test"
 
 variables:
@@ -197,66 +197,66 @@ chart-publish:
     - 'helm chart save . "${CHART}"'
     - 'helm chart push "${CHART}"'
 
-dev-overrides:
-  cache: []
-  stage: "🚧 override-chart dev"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        VALUES_FILE: "ingress.dev.values.yaml"
-    - if: $CI_COMMIT_BRANCH == "main"
-      variables:
-        VALUES_FILE: "dev.values.yaml"
-  extends:
-    - ".helm-overrides"
-  script:
-    - |
-      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
-      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
-      rm -rf gamechanger-ci-cd
-
-
-test-overrides:
-  cache: []
-  stage: "🚧 override-chart test"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      variables:
-        VALUES_FILE: "test.values.yaml"
-  extends:
-    - ".helm-overrides"
-  script:
-    - |
-      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
-      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
-      rm -rf gamechanger-ci-cd
-
-trigger:
-  stage: "🚀 deploy"
-  rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-        variables:
-          UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
-          ENVIRONMENT: "gc-dev"
-          UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
-          HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}"
-          KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
-          DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
-          HELM_UPGRADE_EXTRA_ARGS: >-
-            --set image.tag=${CI_COMMIT_SHA}-oci
-            --set appVersion=${BUILD_VERSION}
-            --set ingress.enabled=true
-            --set externalDomain=gc.dev.advana.us
-            --set ingress.web.hostname=${HELM_RELEASE_NAME}
-            --set env.REACT_APP_BACKEND_URL=${DEV_URL}
-            --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
-            --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
-            --set env.APPROVED_API_CALLERS=${DEV_URL}
-      - if: $CI_COMMIT_BRANCH == "main"
-  trigger:
-    strategy: "depend"
-    project: "platform/promotion"
-    branch: "getting-other-clusters-to-work"
+#dev-overrides:
+#  cache: []
+#  stage: "🚧 override-chart dev"
+#  rules:
+#    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#      variables:
+#        VALUES_FILE: "ingress.dev.values.yaml"
+#    - if: $CI_COMMIT_BRANCH == "main"
+#      variables:
+#        VALUES_FILE: "dev.values.yaml"
+#  extends:
+#    - ".helm-overrides"
+#  script:
+#    - |
+#      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+#      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+#      rm -rf gamechanger-ci-cd
+#
+#
+#test-overrides:
+#  cache: []
+#  stage: "🚧 override-chart test"
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == "main"
+#      variables:
+#        VALUES_FILE: "test.values.yaml"
+#  extends:
+#    - ".helm-overrides"
+#  script:
+#    - |
+#      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+#      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+#      rm -rf gamechanger-ci-cd
+#
+#trigger:
+#  stage: "🚀 deploy"
+#  rules:
+#      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#        variables:
+#          UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+#          ENVIRONMENT: "gc-dev"
+#          UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
+#          HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}"
+#          KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
+#          DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
+#          HELM_UPGRADE_EXTRA_ARGS: >-
+#            --set image.tag=${CI_COMMIT_SHA}-oci
+#            --set appVersion=${BUILD_VERSION}
+#            --set ingress.enabled=true
+#            --set externalDomain=gc.dev.advana.us
+#            --set ingress.web.hostname=${HELM_RELEASE_NAME}
+#            --set env.REACT_APP_BACKEND_URL=${DEV_URL}
+#            --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
+#            --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
+#            --set env.APPROVED_API_CALLERS=${DEV_URL}
+#      - if: $CI_COMMIT_BRANCH == "main"
+#  trigger:
+#    strategy: "depend"
+#    project: "platform/promotion"
+#    branch: "getting-other-clusters-to-work"
 
 integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
@@ -271,7 +271,6 @@ integration-testing-cypress-job:  # Start the integration testing
     CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
     CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
   script:
-    - curl ${CYPRESS_BASE_URL}
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
