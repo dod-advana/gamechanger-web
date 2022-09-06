@@ -91,14 +91,12 @@ class EdaSearchHandler extends SearchHandler {
 
 			return searchResults;
 		} catch (err) {
-			console.log(forCacheReload);
 			if (storeHistory && !forCacheReload) {
 				const { message } = err;
 				this.logger.error(message, '3VOOUHO', userId);
 				historyRec.endTime = new Date().toISOString();
 				historyRec.hadError = true;
 				await this.storeRecordOfSearchInPg(historyRec, showTutorial);
-				console.log('here');
 			}
 			throw err;
 		}
