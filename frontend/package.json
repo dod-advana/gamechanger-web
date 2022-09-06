@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@datapunt/matomo-tracker-react": "0.3.1",
 		"@dod-advana/advana-platform-ui": "1.4.16",
-		"@dod-advana/advana-side-nav": "0.1.6",
+		"@dod-advana/advana-side-nav": "0.1.10",
 		"@dod-advana/advana-tutorial-overlay": "0.0.9",
 		"@emotion/react": "11.7.0",
 		"@emotion/styled": "11.6.0",
@@ -106,6 +106,7 @@
 	"scripts": {
 		"109": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=test109 yarn start",
 		"analyze": "source-map-explorer 'build/static/js/*.js'",
+		"preinstall": "([ ! -f package-lock.json ] && npm install --package-lock-only --ignore-scripts --no-audit); npx npm-force-resolutions",
 		"start": "react-scripts start",
 		"dev": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=development PORT=8080 yarn start",
 		"devDecoupled": "REACT_APP_GLUU_SSO=disabled NODE_ENV=development REACT_APP_NODE_ENV=development REACT_APP_GC_DECOUPLED=1 yarn start",
