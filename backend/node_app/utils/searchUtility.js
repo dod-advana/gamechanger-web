@@ -35,7 +35,6 @@ class SearchUtility {
 		this.cleanUpIdEsResults = this.cleanUpIdEsResults.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
-		// this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
@@ -73,17 +72,16 @@ class SearchUtility {
 
 			let expandedWords = {};
 			let similarWords = {};
-			//let expandedWords= (typeof expansionDict['qexp']  === 'undefined') ? [] : expansionDict['qexp'] ;
 			if (expansionDict) {
 				expandedWords = expansionDict['qexp'];
 				similarWords = expansionDict['wordsim'];
 			}
 
 			let wordsList = [];
-			for (var word in similarWords) {
+			for (let word in similarWords) {
 				wordsList = wordsList.concat(similarWords[word]);
 			}
-			for (var word in expandedWords) {
+			for (let word in expandedWords) {
 				wordsList = wordsList.concat(expandedWords[word]);
 			}
 
@@ -119,7 +117,6 @@ class SearchUtility {
 					nextAbbIndex++;
 				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
 					let phrase = wordsList[nextMlIndex];
-					//let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
 					if (phrase && phrase !== '') {
 						let found = false;
 						result[key].forEach((r) => {
@@ -147,11 +144,7 @@ class SearchUtility {
 			}
 
 			toReturn = result;
-			let cleaned = this.cleanExpansions(key, toReturn);
-
-			// this.logger.info('cleaned: ' + cleaned);
-
-			return cleaned;
+			return this.cleanExpansions(key, toReturn);
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'NOIROJE', userId);
@@ -159,12 +152,12 @@ class SearchUtility {
 	}
 
 	cleanExpansions(key, toReturn) {
-		let cleaned = {};
+		const cleaned = {};
 		cleaned[key] = [];
 		if (toReturn && toReturn[key] && toReturn[key].length) {
-			var ordered = [];
-			var currList = [];
-			let orig = key.replace(/[^\w\s]|_/g, '').trim();
+			const ordered = [];
+			const currList = [];
+			const orig = key.replace(/[^\w\s]|_/g, '').trim();
 			currList.push(orig);
 			toReturn[key].forEach((y) => {
 				y.phrase = y.phrase.replace(/[^\w\s]|_/g, '').trim();
@@ -174,7 +167,6 @@ class SearchUtility {
 				}
 			});
 			cleaned[key] = ordered;
-			('');
 		}
 
 		return cleaned;
@@ -207,8 +199,8 @@ class SearchUtility {
 		const stopwords = this.constants.STOP_WORDS;
 		let res = [];
 		const words = str.toLowerCase().split(' ');
-		for (let i = 0; i < words.length; i++) {
-			const word_clean = words[i].split('.').join('');
+		for (let word of words) {
+			const word_clean = word.split('.').join('');
 			if (!stopwords.includes(word_clean)) {
 				res.push(word_clean);
 			}
@@ -237,7 +229,7 @@ class SearchUtility {
 		const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchTextLower.replace(/\/|{|}/g, '');
+		let cleanSearch = searchTextLower.replace(/[\/{}]/g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -301,7 +293,7 @@ class SearchUtility {
 
 	findQuoted(searchText) {
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-		return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>'|").*?\k<quote>)/g) || [];
+		return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>['"]).*?\k<quote>)/g) || [];
 	}
 
 	findLowerCaseWordsOrAcronyms(searchText) {
@@ -316,7 +308,7 @@ class SearchUtility {
 		return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
 	}
 
-	getElasticsearchQueryForGraphCache({ limit = 1000, offset = 0, searchAfter = null }, user) {
+	getElasticsearchQueryForGraphCache({ limit = 1000, _offset = 0, searchAfter = null }, user) {
 		try {
 			const query = {
 				_source: false,
@@ -353,23 +345,23 @@ class SearchUtility {
 	getElasticsearchQuery(
 		{
 			searchText,
-			searchTerms,
+			_searchTerms,
 			parsedQuery,
 			orgFilterString = '',
 			typeFilterString = '',
-			index,
+			_index,
 			offset = 0,
 			limit = 20,
-			format = 'json',
-			getIdList = false,
-			expandTerms = false,
+			_format = 'json',
+			_getIdList = false,
+			_expandTerms = false,
 			isClone = false,
-			cloneData = {},
+			_cloneData = {},
 			charsPadding = 90,
 			operator = 'and',
 			searchFields = {},
 			mainMaxkeywords = 3,
-			accessDateFilter = [],
+			_accessDateFilter = [],
 			publicationDateFilter = [],
 			publicationDateAllTime = true,
 			storedFields = [
@@ -426,7 +418,6 @@ class SearchUtility {
 					searchField.input.length !== 0
 				) {
 					const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
-					// wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
 
 					mustQueries.push(wildcard);
 				}
@@ -438,7 +429,7 @@ class SearchUtility {
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 			let mainKeywords = this.remove_stopwords(plainQuery)
-				.replace(/"|'/gi, '')
+				.replace(/["']/gi, '')
 				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
 				.slice(0, mainMaxkeywords)
@@ -645,16 +636,14 @@ class SearchUtility {
 				publicationDateFilter[0] &&
 				publicationDateFilter[1]
 			) {
-				if (!publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]) {
-					query.query.bool.must.push({
-						range: {
-							publication_date_dt: {
-								gte: publicationDateFilter[0].split('.')[0],
-								lte: publicationDateFilter[1].split('.')[0],
-							},
+				query.query.bool.must.push({
+					range: {
+						publication_date_dt: {
+							gte: publicationDateFilter[0].split('.')[0],
+							lte: publicationDateFilter[1].split('.')[0],
 						},
-					});
-				}
+					},
+				});
 			}
 
 			if (!includeRevoked && !isClone) {
@@ -693,7 +682,7 @@ class SearchUtility {
 					},
 				});
 			}
-			if (includeHighlights == false) {
+			if (!includeHighlights) {
 				delete query.query.bool.should[0].nested.inner_hits;
 				delete query.highlight;
 			}
@@ -946,10 +935,10 @@ class SearchUtility {
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
 				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map((item) => item.name);
-				for (var i = 0; i < aliases.length; i++) {
-					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
+				for (let alias of aliases) {
+					if (alias.split(/\s+/).length === 1 && alias === alias.toUpperCase()) {
 						matchingAlias = aliasResults.body.hits.hits[0];
-						matchingAlias.match = aliases[i];
+						matchingAlias.match = alias;
 						break;
 					}
 				}
@@ -969,7 +958,7 @@ class SearchUtility {
 		// multi search in ES
 		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
 
-		let query = {
+		return {
 			suggest: {
 				suggester: {
 					text: plainQuery,
@@ -981,10 +970,9 @@ class SearchUtility {
 				},
 			},
 		};
-		return query;
 	}
 	getSearchCountQuery(daysBack, filterWords) {
-		const query = {
+		return {
 			size: 1,
 			query: {
 				bool: {
@@ -1024,8 +1012,8 @@ class SearchUtility {
 				},
 			},
 		};
-		return query;
 	}
+
 	async getSearchCount(daysBack, filterWords, userId, esClientName = 'gamechanger', maxSearches = 10) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
@@ -1243,13 +1231,14 @@ class SearchUtility {
 		raw,
 		searchTerms,
 		user,
-		selectedDocuments = [],
+		selectedDocuments,
 		expansionDict,
 		index,
 		query,
 		isCompareReturn = false,
 		paragraphResults = []
 	) {
+		if (!selectedDocuments) selectedDocuments = [];
 		try {
 			let results = {
 				query,
@@ -1323,8 +1312,10 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
-									result.pageHits.push({ title: 'Keywords', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Keywords',
+										snippet: this.highlight_keywords(result.keyw_5, r.highlight.keyw_5),
+									});
 								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({
@@ -1339,15 +1330,19 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.top_entities_t) {
-									var new_highlights = this.highlight_keywords(
-										result.top_entities_t,
-										r.highlight.top_entities_t
-									);
-									result.pageHits.push({ title: 'Entities', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Entities',
+										snippet: this.highlight_keywords(
+											result.top_entities_t,
+											r.highlight.top_entities_t
+										),
+									});
 								}
 								if (r.highlight.topics_s) {
-									var new_highlights = this.highlight_keywords(result.topics_s, r.highlight.topics_s);
-									result.pageHits.push({ title: 'Topics', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Topics',
+										snippet: this.highlight_keywords(result.topics_s, r.highlight.topics_s),
+									});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1382,7 +1377,6 @@ class SearchUtility {
 						} else {
 							r.inner_hits.pages.hits.hits.forEach((phit) => {
 								const pageIndex = phit._nested.offset;
-								// const snippet =  phit.fields["pages.p_raw_text"][0];
 								let pageNumber = pageIndex + 1;
 								// one hit per page max
 								if (!pageSet.has(pageNumber)) {
@@ -1409,8 +1403,10 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.keyw_5) {
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
-									result.pageHits.push({ title: 'Keywords', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Keywords',
+										snippet: this.highlight_keywords(result.keyw_5, r.highlight.keyw_5),
+									});
 								}
 								if (r.highlight['filename.search']) {
 									result.pageHits.push({
@@ -1425,15 +1421,19 @@ class SearchUtility {
 									});
 								}
 								if (r.highlight.top_entities_t) {
-									var new_highlights = this.highlight_keywords(
-										result.top_entities_t,
-										r.highlight.top_entities_t
-									);
-									result.pageHits.push({ title: 'Entities', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Entities',
+										snippet: this.highlight_keywords(
+											result.top_entities_t,
+											r.highlight.top_entities_t
+										),
+									});
 								}
 								if (r.highlight.topics_s) {
-									var new_highlights = this.highlight_keywords(result.topics_s, r.highlight.topics_s);
-									result.pageHits.push({ title: 'Topics', snippet: new_highlights });
+									result.pageHits.push({
+										title: 'Topics',
+										snippet: this.highlight_keywords(result.topics_s, r.highlight.topics_s),
+									});
 								}
 							}
 							result.pageHitCount = pageSet.size;
@@ -1469,24 +1469,25 @@ class SearchUtility {
 			this.logger.error(err.message, 'GL7EDI3', user);
 		}
 	}
+
 	highlight_keywords(all_words, highlights) {
 		// purpose is to highlight words from the entire list.
-		var resultHighlights = highlights.map(function (x) {
+		const resultHighlights = highlights.map(function (x) {
 			return x.replace(/<em>/g, '').replace(`</em>`, '');
 		});
+		let all_words_str;
 		if (all_words instanceof Array) {
-			var all_words_str = all_words.join(', ');
+			all_words_str = all_words.join(', ');
 		} else {
-			var all_words_str = all_words;
+			all_words_str = all_words;
 		}
 		for (let ind in resultHighlights) {
-			var word = resultHighlights[ind];
+			const word = resultHighlights[ind];
 			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`);
 		}
-		let complete_words = all_words_str.split(', ');
-
-		return complete_words;
+		return all_words_str.split(', ');
 	}
+
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
 		try {
 			if (
@@ -1614,7 +1615,7 @@ class SearchUtility {
 
 	getSearchWikiQuery(searchTerm) {
 		try {
-			let query = {
+			return {
 				size: 5,
 				query: {
 					query_string: {
@@ -1622,13 +1623,12 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
 		} catch {
 			this.logger.error(e, '17I8XO8', user);
 		}
 	}
 
-	async documentSearchOneID(req, body, clientObj, userId) {
+	async documentSearchOneID(_req, body, clientObj, userId) {
 		try {
 			const { id = '', searchTerms = [], expansionDict = {}, limit = 20, maxLength = 200 } = body;
 
@@ -1653,7 +1653,7 @@ class SearchUtility {
 		}
 	}
 
-	async documentSearch(req, body, clientObj, userId) {
+	async documentSearch(_req, body, clientObj, userId) {
 		try {
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, searchType } = body;
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
@@ -1708,20 +1708,18 @@ class SearchUtility {
 			throw e;
 		}
 	}
+
 	checkValidResults(results) {
-		if (
+		return (
 			results &&
 			results.body &&
 			results.body.hits &&
 			results.body.hits.total &&
 			results.body.hits.total.value &&
 			results.body.hits.total.value > 0
-		) {
-			return true;
-		} else {
-			return false;
-		}
+		);
 	}
+
 	reorderFirst(results, titleResults) {
 		// reorders a matching title result to the top of the results
 		let reorderedHits = [];
@@ -1748,7 +1746,7 @@ class SearchUtility {
 
 	getEntityQuery(searchText, offset = 0, limit = 6) {
 		try {
-			let query = {
+			return {
 				from: offset,
 				size: limit,
 				query: {
@@ -1784,7 +1782,6 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'JAEIWMF', '');
 		}
@@ -1792,7 +1789,7 @@ class SearchUtility {
 
 	getTopicQuery(searchText, offset = 0, limit = 6) {
 		try {
-			let query = {
+			return {
 				from: offset,
 				size: limit,
 				query: {
@@ -1802,7 +1799,6 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'YTP3YF0', '');
 		}
@@ -1810,7 +1806,7 @@ class SearchUtility {
 
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
-			let query = {
+			return {
 				_source: ['title', 'filename', 'pop_score', 'id'],
 				from: offset,
 				size: limit,
@@ -1829,7 +1825,6 @@ class SearchUtility {
 					},
 				],
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'PTF390A', '');
 		}
@@ -1858,9 +1853,10 @@ class SearchUtility {
 			return popDocs;
 		}
 	}
-	getSourceQuery(searchText, offset, limit) {
+
+	getSourceQuery(searchText, _offset, _limit) {
 		try {
-			let query = {
+			return {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs'],
 				},
@@ -1927,11 +1923,11 @@ class SearchUtility {
 					},
 				],
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'G3WEJ64', '');
 		}
 	}
+
 	getOrgQuery() {
 		return {
 			_source: 'false',
@@ -2027,7 +2023,7 @@ class SearchUtility {
 	}
 
 	getESClient(cloneName, permissions) {
-		let esClientName = 'gamechanger';
+		let esClientName = '';
 		let esIndex = '';
 		try {
 			esIndex = [
@@ -2039,31 +2035,22 @@ class SearchUtility {
 			esIndex = 'gamechanger';
 		}
 
-		switch (cloneName) {
-			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-					esClientName = 'eda';
-					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
-				} else {
-					throw 'Unauthorized';
-				}
-				break;
-			default:
-				esClientName = 'gamechanger';
+		if (cloneName === 'eda') {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esClientName = 'eda';
+				esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			} else {
+				throw new Error('Unauthorized');
+			}
+		} else {
+			esClientName = 'gamechanger';
 		}
 
 		return { esClientName, esIndex };
 	}
+
 	checkESResultsEmpty(results) {
-		if (results && results.body && results.body.hits) {
-			if (results.body.hits.total.value == 0) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
+		return results && results.body && results.body.hits && results.body.hits.total.value == 0;
 	}
 
 	cleanNeo4jData(result, isTest, user) {
@@ -2177,10 +2164,10 @@ class SearchUtility {
 							}
 						} else if (recType === 'Array') {
 							for (let obj of v) {
-								const recType = this.getNeo4jType(obj, isTest);
-								if (recType === 'Node') {
+								const recTypeV = this.getNeo4jType(obj, isTest);
+								if (recTypeV === 'Node') {
 									addNode(this.buildNodeVisObject(obj, isTest, user));
-								} else if (recType === 'Relationship') {
+								} else if (recTypeV === 'Relationship') {
 									addEdge(this.buildEdgeVisObject(obj, isTest, user));
 								}
 							}
