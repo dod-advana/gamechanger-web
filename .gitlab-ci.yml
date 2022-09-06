@@ -6,6 +6,7 @@ include:
     file: "ci/helm.yml"
 
 stages:          # List of stages for jobs, and their order of execution.
+  - 'test'
   - "📡 prepare"
   - "🧪 static-test"
   - "🧪 security-test"
@@ -14,6 +15,16 @@ stages:          # List of stages for jobs, and their order of execution.
   - "🚧 override-chart test"
   - "🚀 deploy"
   - "🧪 integration-test"
+
+test-cypress-job:  # Start the integration testing
+  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
+  stage: "🧪 integration-test"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - curl https://www.google.com
+    - curl https://jlyons.gc.dev.advana.us
+    - curl https://gamechanger.dev.advana.boozallencsn.com
 
 variables:
   UPSTREAM_KANIKO: "true"
