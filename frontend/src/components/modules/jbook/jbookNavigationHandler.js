@@ -19,7 +19,7 @@ import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuCo
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import PropTypes from 'prop-types';
 
-const getToolTheme = (cloneData, dispatch) => {
+const getToolTheme = (cloneData) => {
 	return {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
@@ -30,24 +30,18 @@ const getToolTheme = (cloneData, dispatch) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href={`#/jbook`} data-cy="jbook-nav-title">
-				<img
-					onClick={() => {
-						dispatch({ type: 'RESET_STATE' });
-					}}
-					src={JAICLogo}
-					alt="tool logo"
-				/>
+			<PageLink href={`#/jbook`}>
+				<img onClick={() => window.location.reload()} src={JAICLogo} alt="tool logo" />
 			</PageLink>
 		),
 		toolIconHref: `#/${cloneData?.clone_data?.url || ''}`,
 	};
 };
 
-const getToolState = (state, dispatch) => {
+const getToolState = (state) => {
 	return {
 		knowledgeBaseHref: 'https://wiki.advana.data.mil',
-		toolTheme: getToolTheme(state.cloneData, dispatch),
+		toolTheme: getToolTheme(state.cloneData),
 		toolName: state.cloneData?.clone_name?.toUpperCase() || '',
 		hideAllApplicationsSection: false,
 		hideContentSection: false,
@@ -57,7 +51,7 @@ const getToolState = (state, dispatch) => {
 };
 
 const generateClosedContentArea = (state, dispatch) => {
-	const toolTheme = getToolTheme(state.cloneData, dispatch);
+	const toolTheme = getToolTheme(state.cloneData);
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 			{state.notificationIds.length > 0 && (
@@ -128,7 +122,7 @@ const generateClosedContentArea = (state, dispatch) => {
 			)}
 			<GCTooltip title="User Guide" placement="right" arrow>
 				<a
-					href="https://wiki.advana.data.mil/display/SDKB/JBOOK+Search+Training+Resources"
+					href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources"
 					target="_blank"
 					rel="noopener noreferrer"
 					style={{ color: 'white', textDecoration: 'none', width: '40px' }}
@@ -143,7 +137,7 @@ const generateClosedContentArea = (state, dispatch) => {
 };
 
 const generateOpenedContentArea = (state, dispatch) => {
-	const toolTheme = getToolTheme(state.cloneData, dispatch);
+	const toolTheme = getToolTheme(state.cloneData);
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column' }}>
 			{state.notificationIds.length > 0 && (
@@ -236,12 +230,12 @@ const JBookNavigationHandler = (props) => {
 	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
 
 	useEffect(() => {
-		setToolState(getToolState(state, dispatch));
+		setToolState(getToolState(state));
 
 		return () => {
 			unsetTool();
 		};
-	}, [unsetTool, setToolState, state, dispatch]);
+	}, [unsetTool, setToolState, state]);
 
 	return (
 		<>
