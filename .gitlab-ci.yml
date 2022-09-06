@@ -23,8 +23,8 @@ test-cypress-job:  # Start the integration testing
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - curl https://www.google.com
-    - curl https://gamechanger.dev.advana.boozallencsn.com
-    - curl https://jlyons.gc.dev.advana.us
+    - curl http://gamechanger.dev.advana.boozallencsn.com
+    - curl http://jlyons.gc.dev.advana.us
 
 variables:
   UPSTREAM_KANIKO: "true"
