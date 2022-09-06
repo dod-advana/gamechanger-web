@@ -20,18 +20,15 @@ class SearchHandler {
 	}
 
 	async search(
-		searchText,
-		offset,
-		limit,
 		options,
 		cloneName,
 		permissions,
 		userId,
 		storeHistory,
 		session,
-		search_after = [],
-		search_before = []
+		searchBounds = { searchText: '', search_after: [], search_before: [], offset: 0, limit: 18 }
 	) {
+		const { searchText, search_after, search_before, offset, limit } = searchBounds;
 		// Setup the request
 		this.logger.info(
 			`${userId} is doing a ${cloneName} search for ${searchText} with offset ${offset}, limit ${limit}, options ${JSON.stringify(
@@ -46,7 +43,7 @@ class SearchHandler {
 		proxyBody.search_after = search_after;
 		proxyBody.search_before = search_before;
 
-		return await this.searchHelper({ body: proxyBody, permissions, session }, userId, storeHistory);
+		return this.searchHelper({ body: proxyBody, permissions, session }, userId, storeHistory);
 	}
 
 	async callFunction(functionName, options, cloneName, permissions, userId, res, session) {
@@ -60,18 +57,18 @@ class SearchHandler {
 		proxyBody.functionName = functionName;
 		proxyBody.cloneName = cloneName;
 
-		return await this.callFunctionHelper({ body: proxyBody, permissions, session }, userId, res);
+		return this.callFunctionHelper({ body: proxyBody, permissions, session }, userId, res);
 	}
 
-	async searchHelper(req, userId, storeHistory) {
+	async searchHelper(req, _userId, _storeHistory) {
 		return req.body;
 	}
 
-	async callFunctionHelper(req, userId, res) {
+	async callFunctionHelper(req, _userId, _res) {
 		return req.body;
 	}
 
-	async getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory) {
+	async getCachedResults(req, historyRec, cloneSpecificObject, userId, _storeHistory) {
 		try {
 			const { showTutorial = false } = req.body;
 
