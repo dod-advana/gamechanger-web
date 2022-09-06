@@ -481,6 +481,10 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
+const retrieveProjectField = (field) => {
+	return field || 'N/A';
+};
+
 const getMetadataTableData = (
 	projectData,
 	budgetType,
@@ -537,43 +541,43 @@ const getMetadataTableData = (
 		},
 		{
 			Key: 'Department',
-			Value: projectData.serviceAgency || 'N/A',
+			Value: retrieveProjectField(projectData.serviceAgency),
 		},
 		{
 			Key: 'Agency',
-			Value: projectData.org_jbook_desc_s || 'N/A',
+			Value: retrieveProjectField(projectData.org_jbook_desc_s),
 		},
 		{
 			Key: 'To Complete',
-			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
+			Value: retrieveProjectField(`${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}`),
 		},
 		{
 			Key: 'Budget Cycle',
-			Value: projectData.budgetCycle || 'N/A',
+			Value: retrieveProjectField(projectData.budgetCycle),
 		},
 		{
 			Key: 'Appropriation',
-			Value: projectData.appropriationNumber || 'N/A',
+			Value: retrieveProjectField(projectData.appropriationNumber),
 		},
 		{
 			Key: 'Appropriation Title',
-			Value: projectData.appropriationTitle || 'N/A',
+			Value: retrieveProjectField(projectData.appropriationTitle),
 		},
 		{
 			Key: 'Budget Activity Title',
-			Value: projectData.budgetActivityTitle || 'N/A',
+			Value: retrieveProjectField(projectData.budgetActivityTitle),
 		},
 		{
 			Key: 'Budget Activity Number',
-			Value: projectData.budgetActivityNumber || 'N/A',
+			Value: retrieveProjectField(projectData.budgetActivityNumber),
 		},
 		{
 			Key: 'Budget Sub Activity Title',
-			Value: projectData.budgetSubActivityTitle || 'N/A',
+			Value: retrieveProjectField(projectData.budgetSubActivityTitle),
 		},
 		{
 			Key: 'Budget Sub Activity Number',
-			Value: projectData.budgetSubActivityNumber || 'N/A',
+			Value: retrieveProjectField(projectData.budgetSubActivityNumber),
 		},
 		{
 			Key: 'Category',
@@ -583,7 +587,7 @@ const getMetadataTableData = (
 			Key: 'Keywords',
 			Value: (
 				<div>
-					{keywordCheckboxes && keywordCheckboxes.length > 0
+					{keywordCheckboxes?.length > 0
 						? renderKeywordCheckboxes(keywordsChecked, keywordCheckboxes, setKeywordCheck)
 						: 'None'}
 				</div>
