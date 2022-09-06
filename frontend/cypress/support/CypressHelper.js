@@ -32,14 +32,14 @@ class CypressHelper {
 		});
 
 		cy.intercept(`${API_URL}**`, (req) => {
-			req.headers['x-env-ssl_client_certificate'] = cn || CN;
-			req.headers['SSL_CLIENT_S_DN_CN'] = userId || USER_ID;
+			req.headers['x-env-ssl-client-certificate'] = cn || CN;
+			req.headers['SSL-CLIENT-S-DN-CN'] = userId || USER_ID;
 		}).as('gamechangerAPI');
 
 		cy.server({
 			onAnyRequest: (_route, proxy) => {
-				proxy.xhr.setRequestHeader('x-env-ssl_client_certificate', cn || CN);
-				proxy.xhr.setRequestHeader('SSL_CLIENT_S_DN_CN', userId || USER_ID);
+				proxy.xhr.setRequestHeader('x-env-ssl-client-certificate', cn || CN);
+				proxy.xhr.setRequestHeader('SSL-CLIENT-S-DN-CN', userId || USER_ID);
 			},
 		});
 
