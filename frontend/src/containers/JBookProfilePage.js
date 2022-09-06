@@ -1318,6 +1318,7 @@ const JBookProfilePage = () => {
 							projectData={projectData}
 							docID={docID}
 							getCommentThread={getCommentThread}
+							pageDisplayed={state.pageDisplayed}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>

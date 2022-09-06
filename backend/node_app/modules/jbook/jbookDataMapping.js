@@ -1954,11 +1954,6 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		currentYearAmount_l: {
-			newName: 'currentYearAmount',
-			defaultValue: '',
-			processValue: (value) => value,
-		},
 		currentYearAmount_d: {
 			newName: 'currentYearAmount',
 			defaultValue: '',
