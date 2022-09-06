@@ -410,6 +410,7 @@ class SearchUtility {
 			paragraphLimit = 100,
 			hasHighlights = true,
 			search_after = [],
+			search_before = [],
 		},
 		user
 	) {
@@ -585,6 +586,7 @@ class SearchUtility {
 					  }
 					: {},
 			};
+
 			switch (sort) {
 				case 'Relevance':
 					query.sort = [{ _score: { order: order } }];
@@ -611,11 +613,6 @@ class SearchUtility {
 					break;
 				default:
 					break;
-			}
-
-			// add search_after
-			if (search_after.length > 0) {
-				query.search_after = search_after;
 			}
 
 			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
@@ -737,7 +734,19 @@ class SearchUtility {
 					},
 				];
 			} else {
+				if (search_before.length > 0) {
+					order = order === 'desc' ? 'asc' : 'desc';
+				}
+				if (query.sort[0]) {
+					query.sort[0][Object.keys(query.sort[0])[0]].order = order;
+				}
 				query.sort.push({ _id: order });
+				// add search_after
+				if (search_before.length > 0) {
+					query.search_after = search_before;
+				} else if (search_after.length > 0) {
+					query.search_after = search_after;
+				}
 			}
 			return query;
 		} catch (err) {

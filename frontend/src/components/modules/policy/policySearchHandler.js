@@ -602,14 +602,18 @@ const PolicySearchHandler = {
 		const limit = 18;
 
 		let search_after = [];
+		let search_before = [];
 		if (offset >= 9982) {
 			if (state.rawSearchResults.length > 0) {
 				offset = 0;
-				search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort || [];
-			} else {
-				console.log('bad yo, state.rawSearchResults is empty');
+				if (state.visitEarlierPage) {
+					search_before = state.rawSearchResults[0]?.sort;
+				} else {
+					search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort;
+				}
 			}
 		}
+
 		const resp = await gameChangerAPI.callSearchFunction({
 			functionName: 'documentSearchPagination',
 			cloneName: cloneData.clone_name,
@@ -634,6 +638,7 @@ const PolicySearchHandler = {
 				sort: currentSort,
 				order: currentOrder,
 				search_after,
+				search_before,
 			},
 		});
 
@@ -748,7 +753,7 @@ const PolicySearchHandler = {
 	},
 
 	setSearchURL(state) {
-		const { searchText, resultsPage } = state;
+		const { searchText } = state;
 		const {
 			searchType,
 			orgFilter,
@@ -761,8 +766,6 @@ const PolicySearchHandler = {
 			allTypesSelected,
 			includeRevoked,
 		} = state.searchSettings;
-
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 
 		const orgFilterText = !allOrgsSelected
 			? Object.keys(_.pickBy(orgFilter, (value) => value)).join('_')
@@ -799,7 +802,6 @@ const PolicySearchHandler = {
 		};
 		const params = new URLSearchParams();
 		appendParams(params, searchText, 'q');
-		appendParams(params, offset, 'offset');
 		appendParams(params, searchType, 'searchType');
 		appendParams(params, orgFilterText, 'orgFilter');
 		appendParams(params, typeFilterText, 'typeFilter');
