@@ -268,8 +268,8 @@ integration-testing-cypress-job:  # Start the integration testing
     DEV_URL: "https://${HELM_RELEASE_NAME}.gc.dev.advana.us"
     CYPRESS_BASE_URL: "${DEV_URL}"
     CYPRESS_API_URL: "${DEV_URL}"
-    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
-    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
+    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_CLIENT_S_DN_CN}"
+    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_CLIENT_CERTIFICATE}"
   script:
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
