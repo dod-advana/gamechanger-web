@@ -16,7 +16,7 @@ describe('Test search and filters', () => {
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 15000 }).should('exist');
 
 		// results found text
-		cy.get('[data-cy="eda-results-found"]', { timeout: 10000 }).should('exist');
+		cy.get('[data-cy="eda-results-found"]', { timeout: 20000 }).should('exist');
 
 		// view selector
 		cy.get('.view-buttons-container', { timeout: 10000 }).should('exist');
@@ -36,6 +36,8 @@ describe('Test search and filters', () => {
 
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
+
+		cy.get('iframe').then((el) => el.remove());
 
 		// find DoDAAC filter and type 'N00'
 		cy.get('#issueOfficeDoDAACAccordion', { timeout: 10000 }).click();
@@ -75,8 +77,10 @@ describe('Test search and filters', () => {
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
 
+		cy.get('iframe').then((el) => el.remove());
+
 		// open issue organization and make selections
-		cy.get('#issueOrganizationAccordion', { timeout: 10000 }).click();
+		cy.get('#issueOrganizationAccordion', { timeout: 15000 }).click();
 		cy.get('#specificOrgCheckbox', { timeout: 10000 }).click();
 		cy.get('#airForceCheckbox', { timeout: 10000 }).click();
 
@@ -107,6 +111,8 @@ describe('Test search and filters', () => {
 
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
+
+		cy.get('iframe').then((el) => el.remove());
 
 		// enter amount for obligated amount filters
 		cy.get('#obligatedAmountAccordion', { timeout: 10000 }).click();
