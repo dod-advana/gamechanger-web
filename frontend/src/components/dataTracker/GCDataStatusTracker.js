@@ -12,7 +12,7 @@ import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
 import _ from 'lodash';
 import { makeStyles } from '@material-ui/core/styles';
-
+import GCTooltip from '../common/GCToolTip';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
@@ -725,7 +725,16 @@ const GCDataStatusTracker = (props) => {
 						{crawl_download(props.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
@@ -739,7 +748,16 @@ const GCDataStatusTracker = (props) => {
 						{ingest_progress(props.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
@@ -753,7 +771,16 @@ const GCDataStatusTracker = (props) => {
 						{ingest_complete(props.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
