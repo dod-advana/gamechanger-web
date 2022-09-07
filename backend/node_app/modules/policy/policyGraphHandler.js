@@ -885,15 +885,15 @@ class PolicyGraphHandler extends GraphHandler {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				const searchResults = this.searchUtility.cleanUpEsResults(
-					esResults,
+				const searchResults = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
-					null,
-					clientObj.esIndex,
-					esQuery
-				);
+					user: userId,
+					selectedDocuments: null,
+					expansionDict: null,
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {

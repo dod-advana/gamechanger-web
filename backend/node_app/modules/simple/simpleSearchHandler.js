@@ -235,15 +235,15 @@ class SimpleSearchHandler extends SearchHandler {
 				if (forGraphCache) {
 					return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return searchUtility.cleanUpEsResults(
-						results,
+					return searchUtility.cleanUpEsResults({
+						raw: results,
 						searchTerms,
-						userId,
+						user: userId,
 						selectedDocuments,
 						expansionDict,
-						esIndex,
-						esQuery
-					);
+						index: esIndex,
+						query: esQuery,
+					});
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', '0F31BB1', userId);

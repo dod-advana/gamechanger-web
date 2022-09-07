@@ -1,4 +1,5 @@
 const LOGGER = require('@dod-advana/advana-logger');
+const _ = require('lodash');
 const sparkMD5Lib = require('spark-md5');
 const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
@@ -28,9 +29,26 @@ class SearchUtility {
 		this.dataLibrary = dataApi;
 
 		this.combineExpansionTerms = this.combineExpansionTerms.bind(this);
+		// helpers for combineExpansionTerms
+		this.getWordsList = this.getWordsList.bind(this);
+		this.expandRelatedSearches = this.expandRelatedSearches.bind(this);
+		this.combineExpansionTermsLoopHelper = this.combineExpansionTermsLoopHelper.bind(this);
+
 		this.getEsSearchTerms = this.getEsSearchTerms.bind(this);
 		this.getElasticsearchQueryForGraphCache = this.getElasticsearchQueryForGraphCache.bind(this);
 		this.getElasticsearchQuery = this.getElasticsearchQuery.bind(this);
+		//  helpers for getElasticsearchQuery
+		this.getSearchFieldsWildcardQueries = this.getSearchFieldsWildcardQueries.bind(this);
+		this.setQuerySort = this.setQuerySort.bind(this);
+		this.setQueryMainSearchText = this.setQueryMainSearchText.bind(this);
+		this.setQueryExtSearchFields = this.setQueryExtSearchFields.bind(this);
+		this.setQueryPubDate = this.setQueryPubDate.bind(this);
+		this.setQueryCancelledDocs = this.setQueryCancelledDocs.bind(this);
+		this.setQueryOrgFilter = this.setQueryOrgFilter.bind(this);
+		this.setQueryTypeFilter = this.setQueryTypeFilter.bind(this);
+		this.setQueryRescore = this.setQueryRescore.bind(this);
+		this.setQuerySearchAfter = this.setQuerySearchAfter.bind(this);
+
 		this.getESHighlightContent = this.getESHighlightContent.bind(this);
 		this.cleanUpIdEsResults = this.cleanUpIdEsResults.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
@@ -57,10 +75,67 @@ class SearchUtility {
 
 	/********** RELATED SEARCH AND EXPANSION FUNCTIONS **********/
 
+	// helper for combineExpansionTerms
+	getWordsList(similarWords, expandedWords) {
+		let wordsList = [];
+		for (let word in similarWords) {
+			wordsList = wordsList.concat(similarWords[word]);
+		}
+		for (let word in expandedWords) {
+			wordsList = wordsList.concat(expandedWords[word]);
+		}
+		return wordsList;
+	}
+
+	// helper for combineExpansionTerms
+	expandRelatedSearches(relatedSearches) {
+		if (relatedSearches && relatedSearches.length > 0) {
+			relatedSearches.forEach((term) => {
+				result[key].push({ phrase: term, source: 'related' });
+			});
+		}
+		return relatedSearches;
+	}
+
+	// helper for combineExpansionTerms
+	combineExpansionTermsLoopHelper(
+		checkSyns,
+		checkAbbs,
+		checkWordList,
+		phraseSets,
+		indexes,
+		timesSinceLastAdd,
+		results
+	) {
+		let { nextSynIndex, nextAbbIndex, nextMlIndex } = indexes;
+		let { synonyms, abbreviationExpansions, wordsList } = phraseSets;
+		if (checkSyns) {
+			let syn = synonyms[nextSynIndex];
+			if (!_.find(results, { phrase: syn })) {
+				results.push({ phrase: syn, source: 'thesaurus' });
+			}
+			nextSynIndex++;
+		} else if (checkAbbs) {
+			let abb = abbreviationExpansions[nextAbbIndex];
+			if (!_.find(results, { phrase: abb })) {
+				results.unshift({ phrase: abb, source: 'abbreviations' });
+			}
+			nextAbbIndex++;
+		} else if (checkWordList) {
+			let phrase = wordsList[nextMlIndex];
+			if (phrase && phrase !== '' && !_.find(results, { phrase })) {
+				results.push({ phrase: phrase, source: 'ML-QE' });
+			}
+			nextMlIndex++;
+		} else {
+			timesSinceLastAdd++;
+		}
+		return { results, timesSinceLastAdd, nextSynIndex, nextAbbIndex, nextMlIndex };
+	}
+
 	combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbreviationExpansions, userId) {
 		try {
 			let result = {};
-			let toReturn;
 			result[key] = [];
 
 			let nextSynIndex = 0;
@@ -77,61 +152,28 @@ class SearchUtility {
 				similarWords = expansionDict['wordsim'];
 			}
 
-			let wordsList = [];
-			for (let word in similarWords) {
-				wordsList = wordsList.concat(similarWords[word]);
-			}
-			for (let word in expandedWords) {
-				wordsList = wordsList.concat(expandedWords[word]);
-			}
+			const wordsList = this.getWordsList(similarWords, expandedWords);
+			this.expandRelatedSearches(relatedSearches);
 
-			if (relatedSearches && relatedSearches.length > 0) {
-				relatedSearches.forEach((term) => {
-					result[key].push({ phrase: term, source: 'related' });
-				});
-			}
 			while (result[key].length < 12 && timesSinceLastAdd < 18) {
-				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
-					let syn = synonyms[nextSynIndex];
-					let found = false;
-					result[key].forEach((r) => {
-						if (r.phrase === syn) {
-							found = true;
-						}
-					});
-					if (!found) {
-						result[key].push({ phrase: syn, source: 'thesaurus' });
-					}
-					nextSynIndex++;
-				} else if (nextIsAbb && abbreviationExpansions && abbreviationExpansions[nextAbbIndex]) {
-					let abb = abbreviationExpansions[nextAbbIndex];
-					let found = false;
-					result[key].forEach((r) => {
-						if (r.phrase === abb) {
-							found = true;
-						}
-					});
-					if (!found) {
-						result[key].unshift({ phrase: abb, source: 'abbreviations' });
-					}
-					nextAbbIndex++;
-				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
-					let phrase = wordsList[nextMlIndex];
-					if (phrase && phrase !== '') {
-						let found = false;
-						result[key].forEach((r) => {
-							if (r.phrase === phrase) {
-								found = true;
-							}
-						});
-						if (!found) {
-							result[key].push({ phrase: phrase, source: 'ML-QE' });
-						}
-					}
-					nextMlIndex++;
-				} else {
-					timesSinceLastAdd++;
-				}
+				const checkSynonyms = nextIsSyn && synonyms && synonyms[nextSynIndex];
+				const checkAbbreviations = nextIsAbb && abbreviationExpansions && abbreviationExpansions[nextAbbIndex];
+				const checkWordList = !nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex];
+
+				const helperResult = this.combineExpansionTermsLoopHelper(
+					checkSynonyms,
+					checkAbbreviations,
+					checkWordList,
+					{ synonyms, abbreviationExpansions, wordsList },
+					{ nextSynIndex, nextAbbIndex, nextMlIndex },
+					timesSinceLastAdd,
+					result[key]
+				);
+				result[key] = helperResult.results;
+				timesSinceLastAdd = helperResult.timesSinceLastAdd;
+				nextSynIndex = helperResult.nextSynIndex;
+				nextAbbIndex = helperResult.nextAbbIndex;
+				nextMlIndex = helperResult.nextMlIndex;
 
 				if (nextIsSyn) {
 					nextIsSyn = false;
@@ -143,8 +185,7 @@ class SearchUtility {
 				}
 			}
 
-			toReturn = result;
-			return this.cleanExpansions(key, toReturn);
+			return this.cleanExpansions(key, result);
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'NOIROJE', userId);
@@ -342,6 +383,200 @@ class SearchUtility {
 		}
 	}
 
+	// helper for getElasticsearchQuery
+	getSearchFieldsWildcardQueries(searchFields) {
+		const mustQueries = [];
+		for (const key in searchFields) {
+			const searchField = searchFields[key];
+			if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
+				const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
+
+				mustQueries.push(wildcard);
+			}
+		}
+		return mustQueries;
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySort(sort, order, query) {
+		switch (sort) {
+			case 'Relevance':
+				query.sort = [{ _score: { order: order } }];
+				break;
+			case 'Publishing Date':
+				query.sort = [{ publication_date_dt: { order: order } }];
+				break;
+			case 'Alphabetical':
+				query.sort = [{ display_title_s: { order: order } }];
+				break;
+			case 'Popular':
+				query.sort = [{ pop_score: { order: order } }];
+				break;
+			case 'References':
+				query.sort = [
+					{
+						_script: {
+							type: 'number',
+							script: 'doc.ref_list.size()',
+							order: order,
+						},
+					},
+				];
+				break;
+			default:
+				break;
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryMainSearchText(searchText, mainKeywords, query) {
+		if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
+			const titleMainSearch = {
+				query_string: {
+					fields: ['display_title_s.search'],
+					query: `*${mainKeywords}*`,
+					type: 'best_fields',
+					boost: 10,
+					analyzer,
+				},
+			};
+			query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryExtSearchFields(extSearchFields, searchText, query) {
+		if (extSearchFields.length > 0) {
+			const extQuery = {
+				multi_match: {
+					query: searchText,
+					fields: [],
+					operator: 'or',
+				},
+			};
+			extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
+			query.query.bool.should = query.query.bool.should.concat(extQuery);
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryPubDate(publicationDateAllTime, publicationDateFilter, query) {
+		if (
+			this.constants.GAME_CHANGER_OPTS.allow_daterange &&
+			!publicationDateAllTime &&
+			publicationDateFilter[0] &&
+			publicationDateFilter[1]
+		) {
+			query.query.bool.must.push({
+				range: {
+					publication_date_dt: {
+						gte: publicationDateFilter[0].split('.')[0],
+						lte: publicationDateFilter[1].split('.')[0],
+					},
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryCancelledDocs(includeRevoked, query) {
+		if (!includeRevoked) {
+			// if includeRevoked, get return cancelled docs
+			query.query.bool.filter.push({
+				term: {
+					is_revoked_b: 'false',
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySelectedDocs(selectedDocuments, query) {
+		if (selectedDocuments?.length > 0) {
+			// filter selected documents
+			query.query.bool.filter.push({
+				terms: {
+					filename: selectedDocuments,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryOrgFilter(orgFilterString, query) {
+		if (orgFilterString.length > 0) {
+			query.query.bool.filter.push({
+				terms: {
+					display_org_s: orgFilterString,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryTypeFilter(typeFilterString, query) {
+		if (typeFilterString.length > 0) {
+			query.query.bool.filter.push({
+				terms: {
+					display_doc_type_s: typeFilterString,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryRescore(parsedQuery, query) {
+		query.rescore = [
+			{
+				window_size: 50,
+				query: {
+					rescore_query: {
+						sltr: {
+							params: { keywords: `${parsedQuery}` },
+							model: 'ltr_model',
+						},
+					},
+				},
+			},
+			{
+				window_size: 500,
+				query: {
+					rescore_query: {
+						bool: {
+							must: [
+								{
+									rank_feature: {
+										field: 'pagerank_r',
+										boost: 10,
+									},
+								},
+							],
+						},
+					},
+					query_weight: 0.7,
+					rescore_query_weight: 2,
+				},
+			},
+		];
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySearchAfter(search_before, search_after, order, query) {
+		if (search_before.length > 0) {
+			order = order === 'desc' ? 'asc' : 'desc';
+		}
+		if (query.sort[0]) {
+			query.sort[0][Object.keys(query.sort[0])[0]].order = order;
+		}
+		query.sort.push({ _id: order });
+		// add search_after
+		if (search_before.length > 0) {
+			query.search_after = search_before;
+		} else if (search_after.length > 0) {
+			query.search_after = search_after;
+		}
+	}
+
 	getElasticsearchQuery(
 		{
 			searchText,
@@ -408,20 +643,8 @@ class SearchUtility {
 	) {
 		try {
 			// add additional search fields to the query
-			const mustQueries = [];
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (
-					searchField.field &&
-					searchField.field.name &&
-					searchField.input &&
-					searchField.input.length !== 0
-				) {
-					const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
+			const mustQueries = this.getSearchFieldsWildcardQueries(searchFields);
 
-					mustQueries.push(wildcard);
-				}
-			}
 			storedFields = [...storedFields, ...extStoredFields];
 			const default_field = this.isVerbatim(searchText)
 				? 'paragraphs.par_raw_text_t'
@@ -578,165 +801,37 @@ class SearchUtility {
 					: {},
 			};
 
-			switch (sort) {
-				case 'Relevance':
-					query.sort = [{ _score: { order: order } }];
-					break;
-				case 'Publishing Date':
-					query.sort = [{ publication_date_dt: { order: order } }];
-					break;
-				case 'Alphabetical':
-					query.sort = [{ display_title_s: { order: order } }];
-					break;
-				case 'Popular':
-					query.sort = [{ pop_score: { order: order } }];
-					break;
-				case 'References':
-					query.sort = [
-						{
-							_script: {
-								type: 'number',
-								script: 'doc.ref_list.size()',
-								order: order,
-							},
-						},
-					];
-					break;
-				default:
-					break;
-			}
+			this.setQuerySort(sort, order, query);
+			this.setQueryMainSearchText(searchText, mainKeywords, query);
+			this.setQueryExtSearchFields(extSearchFields, searchText, query);
+			this.setQueryPubDate(publicationDateAllTime, publicationDateFilter, query);
 
-			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
-				const titleMainSearch = {
-					query_string: {
-						fields: ['display_title_s.search'],
-						query: `*${mainKeywords}*`,
-						type: 'best_fields',
-						boost: 10,
-						analyzer,
-					},
-				};
-				query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
-			}
-			if (extSearchFields.length > 0) {
-				const extQuery = {
-					multi_match: {
-						query: searchText,
-						fields: [],
-						operator: 'or',
-					},
-				};
-				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				query.query.bool.should = query.query.bool.should.concat(extQuery);
-			}
-
-			if (
-				this.constants.GAME_CHANGER_OPTS.allow_daterange &&
-				!publicationDateAllTime &&
-				publicationDateFilter[0] &&
-				publicationDateFilter[1]
-			) {
-				query.query.bool.must.push({
-					range: {
-						publication_date_dt: {
-							gte: publicationDateFilter[0].split('.')[0],
-							lte: publicationDateFilter[1].split('.')[0],
-						},
-					},
-				});
-			}
-
-			if (!includeRevoked && !isClone) {
-				// if includeRevoked, get return cancelled docs
-				query.query.bool.filter.push({
-					term: {
-						is_revoked_b: 'false',
-					},
-				});
-			}
-
-			if (selectedDocuments?.length > 0 && !isClone) {
-				// filter selected documents
-				query.query.bool.filter.push({
-					terms: {
-						filename: selectedDocuments,
-					},
-				});
+			if (!isClone) {
+				this.setQueryCancelledDocs(includeRevoked, query);
+				this.setQuerySelectedDocs(selectedDocuments, query);
+				this.setQueryOrgFilter(orgFilterString, query);
+				this.setQueryTypeFilter(typeFilterString, query);
 			}
 
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
 
-			if (!isClone && orgFilterString.length > 0) {
-				query.query.bool.filter.push({
-					terms: {
-						display_org_s: orgFilterString,
-					},
-				});
-			}
-			if (!isClone && typeFilterString.length > 0) {
-				query.query.bool.filter.push({
-					terms: {
-						display_doc_type_s: typeFilterString,
-					},
-				});
-			}
 			if (!includeHighlights) {
 				delete query.query.bool.should[0].nested.inner_hits;
 				delete query.highlight;
 			}
+
 			if (Object.keys(docIds).length !== 0) {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
+
 			if (ltr && sort === 'Relevance') {
-				query.rescore = [
-					{
-						window_size: 50,
-						query: {
-							rescore_query: {
-								sltr: {
-									params: { keywords: `${parsedQuery}` },
-									model: 'ltr_model',
-								},
-							},
-						},
-					},
-					{
-						window_size: 500,
-						query: {
-							rescore_query: {
-								bool: {
-									must: [
-										{
-											rank_feature: {
-												field: 'pagerank_r',
-												boost: 10,
-											},
-										},
-									],
-								},
-							},
-							query_weight: 0.7,
-							rescore_query_weight: 2,
-						},
-					},
-				];
+				this.setQueryRescore(parsedQuery, query);
 			} else {
-				if (search_before.length > 0) {
-					order = order === 'desc' ? 'asc' : 'desc';
-				}
-				if (query.sort[0]) {
-					query.sort[0][Object.keys(query.sort[0])[0]].order = order;
-				}
-				query.sort.push({ _id: order });
-				// add search_after
-				if (search_before.length > 0) {
-					query.search_after = search_before;
-				} else if (search_after.length > 0) {
-					query.search_after = search_after;
-				}
+				this.setQuerySearchAfter(search_before, search_after, order, query);
 			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
@@ -1227,7 +1322,7 @@ class SearchUtility {
 		}
 	}
 
-	cleanUpEsResults(
+	cleanUpEsResults({
 		raw,
 		searchTerms,
 		user,
@@ -1236,8 +1331,8 @@ class SearchUtility {
 		index,
 		query,
 		isCompareReturn = false,
-		paragraphResults = []
-	) {
+		paragraphResults = [],
+	}) {
 		if (!selectedDocuments) selectedDocuments = [];
 		try {
 			let results = {
@@ -1638,7 +1733,15 @@ class SearchUtility {
 			const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
 			if (this.checkValidResults(esResults)) {
-				return this.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, esIndex);
+				return this.cleanUpEsResults({
+					raw: esResults,
+					searchTerms,
+					user: userId,
+					selectedDocuments: null,
+					expansionDict,
+					index: esIndex,
+					query: null,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
 				if (this.checkESResultsEmpty(esResults)) {
@@ -1684,15 +1787,15 @@ class SearchUtility {
 				if (forGraphCache) {
 					return this.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return this.cleanUpEsResults(
-						results,
+					return this.cleanUpEsResults({
+						raw: results,
 						searchTerms,
-						userId,
+						user: userId,
 						selectedDocuments,
 						expansionDict,
-						esIndex,
-						esQuery
-					);
+						index: esIndex,
+						query: esQuery,
+					});
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);

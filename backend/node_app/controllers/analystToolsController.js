@@ -104,17 +104,17 @@ class AnalystToolsController {
 				);
 
 				// Aggregate Data
-				returnData = this.searchUtility.cleanUpEsResults(
-					esResults,
-					[],
-					userId,
-					[],
-					{},
-					null,
-					esQuery,
-					true,
-					resultsObject
-				);
+				returnData = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
+					searchTerms: [],
+					user: userId,
+					selectedDocuments: [],
+					expansionDict: {},
+					index: null,
+					query: esQuery,
+					isCompareReturn: true,
+					paragraphResults: resultsObject,
+				});
 
 				if (cloneName !== 'eda') {
 					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);

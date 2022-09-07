@@ -176,15 +176,15 @@ class SearchController {
 				if (forGraphCache) {
 					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return this.searchUtility.cleanUpEsResults(
-						results,
+					return this.searchUtility.cleanUpEsResults({
+						raw: results,
 						searchTerms,
-						userId,
+						user: userId,
 						selectedDocuments,
 						expansionDict,
-						esIndex,
-						esQuery
-					);
+						index: esIndex,
+						query: esQuery,
+					});
 				}
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'M91NVGW', userId);
@@ -218,15 +218,15 @@ class SearchController {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				return this.searchUtility.cleanUpEsResults(
-					esResults,
+				return this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
+					user: userId,
+					selectedDocuments: null,
 					expansionDict,
-					esIndex,
-					esQuery
-				);
+					index: esIndex,
+					query: esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
 				return { totalCount: 0, docs: [] };
@@ -269,15 +269,15 @@ class SearchController {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				return this.searchUtility.cleanUpEsResults(
-					esResults,
+				return this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
+					user: esResults,
+					selectedDocuments: null,
 					expansionDict,
-					clientObj.esIndex,
-					esQuery
-				);
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JBVXMP6', userId);
 				return { totalCount: 0, docs: [] };

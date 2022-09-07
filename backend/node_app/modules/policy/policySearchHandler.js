@@ -606,15 +606,15 @@ class PolicySearchHandler extends SearchHandler {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				const searchResults = this.searchUtility.cleanUpEsResults(
-					esResults,
-					'',
-					userId,
-					null,
-					null,
-					clientObj.esIndex,
-					esQuery
-				);
+				const searchResults = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
+					searchTerms: '',
+					user: userId,
+					selectedDocuments: null,
+					expansionDict: null,
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {
@@ -650,15 +650,15 @@ class PolicySearchHandler extends SearchHandler {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				let searchResults = this.searchUtility.cleanUpEsResults(
-					esResults,
-					'',
-					userId,
-					null,
-					null,
-					clientObj.esIndex,
-					esQuery
-				);
+				let searchResults = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
+					searchTerms: '',
+					user: userId,
+					selectedDocuments: null,
+					expansionDict: null,
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 
 				searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 				// insert crawler dates into search results

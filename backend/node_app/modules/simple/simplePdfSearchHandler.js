@@ -503,14 +503,15 @@ async function documentSearch(req, body, userId) {
 			if (forGraphCache) {
 				return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 			} else {
-				return searchUtility.cleanUpEsResults(
-					results,
+				return searchUtility.cleanUpEsResults({
+					raw: results,
 					searchTerms,
-					userId,
+					user: userId,
 					selectedDocuments,
 					expansionDict,
-					esIndex
-				);
+					index: esIndex,
+					query: esQuery,
+				});
 			}
 		} else {
 			LOGGER.error('Error with Elasticsearch results', '8JQKR3N', userId);
@@ -554,15 +555,15 @@ async function documentSearchUsingParaId(req, body, userId) {
 			esResults.body.hits.total.value &&
 			esResults.body.hits.total.value > 0
 		) {
-			return searchUtility.cleanUpEsResults(
-				esResults,
+			return searchUtility.cleanUpEsResults({
+				raw: esResults,
 				searchTerms,
-				userId,
-				null,
+				user: userId,
+				selectedDocuments: null,
 				expansionDict,
-				clientObj.esIndex,
-				esQuery
-			);
+				index: clientObj.esIndex,
+				query: esQuery,
+			});
 		} else {
 			LOGGER.error('Error with Elasticsearch results', 'JBVXMP6', userId);
 			return { totalCount: 0, docs: [] };
