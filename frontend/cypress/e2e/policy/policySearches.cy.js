@@ -31,6 +31,26 @@ describe('Tests multiple types of policy searches.', () => {
 			.should('contain', searchTerm);
 	});
 
+	it('Runs a search and verifies organization card results', () => {
+		const searchTerm = 'washington headquarters service';
+		cy.search(searchTerm);
+
+		cy.switchResultsTab('Organizations');
+		cy.getCard(0)
+			.find('.text')
+			.then(() => {
+				cy.get('iframe').then((el) => el.remove());
+				cy.getCard(0).find('.text').should('contain', 'Washington Headquarters Service');
+				cy.getCard(0).find('img').should('exist');
+				cy.getCard(0)
+					.find('p')
+					.should(
+						'contain',
+						'Washington Headquarters Services (WHS) is a Department of Defense (DoD) Field Activity, created on October 1, 1977'
+					);
+			});
+	});
+
 	it('Runs a question search and verifies the answer box exists', () => {
 		const searchTerm = 'who is sergeant major of the army?';
 		cy.search(searchTerm);
