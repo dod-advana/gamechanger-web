@@ -216,13 +216,6 @@ const metadataNameToSearchFilterName = {
 	'POC Reviewer': 'pocReviewer',
 };
 
-// helper functions
-const getBudgetSubActivity = (projectData) => {
-	return projectData.budgetType === 'odoc'
-		? projectData.budgetActivityTitle ?? 'N/A'
-		: projectData.budgetSubActivity ?? 'N/A';
-};
-
 const getToComplete = (projectData, budgetType) => {
 	return `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A';
 };
@@ -287,12 +280,20 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: projectData.appropriationNumber,
 		},
 		{
-			Key: 'Budget Activity',
+			Key: 'Budget Activity Title',
+			Value: projectData.budgetActivityTitle,
+		},
+		{
+			Key: 'Budget Activity Number',
 			Value: projectData.budgetActivityNumber,
 		},
 		{
-			Key: 'Budget Sub Activity',
-			Value: getBudgetSubActivity(projectData),
+			Key: 'Budget Sub Activity Title',
+			Value: projectData.budgetSubActivityTitle,
+		},
+		{
+			Key: 'Budget Sub Activity Number',
+			Value: projectData.budgetSubActivityNumber,
 		},
 		{
 			Key: 'Budget Year 1 Requested',
