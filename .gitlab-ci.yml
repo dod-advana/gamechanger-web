@@ -6,15 +6,14 @@ include:
     file: "ci/helm.yml"
 
 stages:          # List of stages for jobs, and their order of execution.
+  - "🚧 build-chart"
+  - "🚧 override-chart dev"
+  - "🚧 override-chart test"
   - "🚀 deploy"
   - "🧪 integration-test"
   - "📡 prepare"
   - "🧪 static-test"
   - "🧪 security-test"
-  - "🚧 build-chart"
-  - "🚧 override-chart dev"
-  - "🚧 override-chart test"
-
 
 variables:
   UPSTREAM_KANIKO: "true"
@@ -239,6 +238,7 @@ trigger:
         variables:
           UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
           NO_TEST: "true"
+          ENVIRONMENT: "dev"
 #          UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
           HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
           KUBE_NAMESPACE: "${HELM_RELEASE_NAME}-gc"
