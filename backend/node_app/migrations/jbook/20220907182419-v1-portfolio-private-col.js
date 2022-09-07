@@ -5,7 +5,9 @@ module.exports = {
 		return queryInterface.describeTable(tablename).then((tableDefinition) => {
 			const queries = [];
 			if (!tableDefinition['private']) {
-				queries.push(queryInterface.addColumn(tablename, 'private', Sequelize.BOOLEAN));
+				queries.push(
+					queryInterface.addColumn(tablename, 'private', { type: Sequelize.BOOLEAN, defaultValue: false })
+				);
 			}
 			return queryInterface.sequelize.transaction(function () {
 				Promise.all(queries);
