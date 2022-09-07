@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     {{- toYaml (list .Values.service.http .Values.service.https) | nindent 4 }}
   selector:

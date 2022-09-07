@@ -58,15 +58,12 @@ podAnnotations:
 service:
   http:
     port: 80
-    # container-side port
     targetPort: 8990
-    nodePort: 31007
     protocol: TCP
     name: http
   https:
     port: 443
     targetPort: 8443
-    nodePort: 31207
     protocol: TCP
     name: https
 
