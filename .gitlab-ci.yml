@@ -7,13 +7,14 @@ include:
 
 stages:          # List of stages for jobs, and their order of execution.
   - "📡 prepare"
+  - "🧪 integration-test"
   - "🧪 static-test"
   - "🧪 security-test"
   - "🚧 build-chart"
   - "🚧 override-chart dev"
   - "🚧 override-chart test"
   - "🚀 deploy"
-  - "🧪 integration-test"
+
 
 variables:
   UPSTREAM_KANIKO: "true"
@@ -287,6 +288,6 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/results.json
       - frontend/cypress/screenshots
       - frontend/cypress/videos
-  allow_failure: true
+  allow_failure: false
 
 
