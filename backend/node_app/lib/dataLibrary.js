@@ -281,88 +281,82 @@ class DataLibrary {
 	async getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
 		const { req } = res;
-		try {
-			if (
-				(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
-				req.query.isClone &&
-				req.query.clone_name === 'eda'
-			) {
-				const edaUrl =
-					this.constants.GAMECHANGER_BACKEND_EDA_URL +
-					req.baseUrl +
-					req.path +
-					'?path=' +
-					req.query.path +
-					'&dest=' +
-					req.query.dest +
-					'&filekey=' +
-					req.query.filekey +
-					'&isClone=' +
-					req.query.isClone +
-					'&clone_name=edaReRoute';
+		if (
+			(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
+			req.query.isClone &&
+			req.query.clone_name === 'eda'
+		) {
+			const edaUrl =
+				this.constants.GAMECHANGER_BACKEND_EDA_URL +
+				req.baseUrl +
+				req.path +
+				'?path=' +
+				req.query.path +
+				'&dest=' +
+				req.query.dest +
+				'&filekey=' +
+				req.query.filekey +
+				'&isClone=' +
+				req.query.isClone +
+				'&clone_name=edaReRoute';
 
-				this.axios({
-					method: 'get',
-					url: edaUrl,
-					headers: req.headers,
-					responseType: 'stream',
+			this.axios({
+				method: 'get',
+				url: edaUrl,
+				headers: req.headers,
+				responseType: 'stream',
+			})
+				.then((response) => {
+					response.data.pipe(res);
 				})
-					.then((response) => {
-						response.data.pipe(res);
-					})
-					.catch((err) => {
-						this.logger.error(err, 'N4BAC3N', userId);
-						throw err;
-					});
-			} else {
-				const params = {
-					Bucket: dest,
-					Key: decodeURIComponent(filekey),
-				};
-
-				if (samplingType === 'head') {
-					params.Range = 'bytes=0-' + SAMPLING_BYTES;
-				} else if (samplingType === 'tail') {
-					params.Range = 'bytes=-' + SAMPLING_BYTES;
-				}
-
-				try {
-					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
-					let error = false;
-					this.awsS3Client
-						.getObject(params)
-						.createReadStream()
-						.on('error', function (err) {
-							//Handles errors on the read stream
-							error = true;
-							console.log('Error reading file');
-							res.status(500);
-							res.end();
-						})
-						.pipe(res)
-						.on('error', function (err) {
-							//Handles errors on the write stream
-							error = true;
-							console.log('Error writing file');
-							console.log(err);
-							res.status(500);
-							res.end();
-						})
-						.on('finish', function () {
-							res.end();
-							if (!error) {
-								console.log('Successfully downloaded file from S3');
-							}
-						});
-				} catch (err) {
-					this.logger.error(err, 'IPOQHZS', userId);
+				.catch((err) => {
+					this.logger.error(err, 'N4BAC3N', userId);
 					throw err;
-				}
+				});
+		} else {
+			const params = {
+				Bucket: dest,
+				Key: decodeURIComponent(filekey),
+			};
+
+			if (samplingType === 'head') {
+				params.Range = 'bytes=0-' + SAMPLING_BYTES;
+			} else if (samplingType === 'tail') {
+				params.Range = 'bytes=-' + SAMPLING_BYTES;
 			}
-		} catch (err) {
-			const msg = err && err.message ? `${err.message}` : `${err}`;
-			this.logger.error(msg, 'PFXO7XD', userId);
-			throw msg;
+
+			try {
+				res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
+				let error = false;
+				this.awsS3Client
+					.getObject(params)
+					.createReadStream()
+					.on('error', function (err) {
+						//Handles errors on the read stream
+						error = true;
+						console.log('Error reading file');
+						res.status(500);
+						res.end();
+					})
+					.pipe(res)
+					.on('error', function (err) {
+						//Handles errors on the write stream
+						error = true;
+						console.log('Error writing file');
+						console.log(err);
+						res.status(500);
+						res.end();
+					})
+					.on('finish', function () {
+						res.end();
+						if (!error) {
+							console.log('Successfully downloaded file from S3');
+						}
+					});
+			} catch (err) {
+				this.logger.error(err, 'IPOQHZS', userId);
+				throw err;
+			}
 		}
 	}
 
