@@ -727,7 +727,7 @@ const GCDataStatusTracker = (props) => {
 						) : (
 							<GCTooltip
 								title={
-									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
 								}
 								placement="top-start"
 								style={{ color: 'white' }}
@@ -750,7 +750,7 @@ const GCDataStatusTracker = (props) => {
 						) : (
 							<GCTooltip
 								title={
-									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
 								}
 								placement="top-start"
 								style={{ color: 'white' }}
@@ -773,7 +773,7 @@ const GCDataStatusTracker = (props) => {
 						) : (
 							<GCTooltip
 								title={
-									'The team is actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
 								}
 								placement="top-start"
 								style={{ color: 'white' }}
