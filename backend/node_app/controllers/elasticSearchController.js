@@ -95,7 +95,7 @@ class ElasticSearchController {
 
 			const clientObj = {
 				esClientName: 'gamechanger',
-				esIndex: 'global_search_qlik',
+				esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX,
 			};
 
 			await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
@@ -120,17 +120,17 @@ class ElasticSearchController {
 					name_t: app['name'],
 					publishTime_dt: app['publishTime'],
 					published_b: app['published'],
-					tags_n: app['tags'],
+					tags_n: { items: app['tags'] },
 					description_t: app['description'],
 					streamId_t: app['stream']['id'],
 					streamName_t: app['stream']['name'],
-					streamCustomProperties_s: app['stream']['customProperties'],
-					fileSize_i: app['fileSize'],
+					streamCustomProperties_n: { items: app['stream']['customProperties'] },
+					fileSize_i: Number.parseInt(app['fileSize']),
 					lastReloadTime_dt: app['lastReloadTime'],
 					thumbnail_t: app['thumbnail'],
 					dynamicColor_t: app['dynamicColor'],
-					appCustomProperties_n: app['customProperties'],
-					businessDomains_n: app['businessDomains'],
+					appCustomProperties_n: { items: app['customProperties'] },
+					businessDomains_n: { items: app['businessDomains'] },
 					owner_t: app['owner']['name'],
 				};
 			});

@@ -499,25 +499,11 @@ module.exports = Object.freeze({
 					analyzer: {
 						my_analyzer: {
 							type: 'custom',
-							tokenizer: 'my_tokenizer',
+							tokenizer: 'standard',
 							filter: ['english_possessive_stemmer', 'lowercase', 'english_stemmer'],
-						},
-						key_analyzer: {
-							type: 'custom',
-							tokenizer: 'keyword',
-							filter: ['lowercase'],
-						},
-					},
-					tokenizer: {
-						my_tokenizer: {
-							type: 'ngram',
-							min_gram: 3,
-							max_gram: 5,
-							token_chars: ['letter', 'digit'],
 						},
 					},
 				},
-				max_ngram_diff: 10,
 			},
 			mappings: {
 				dynamic_templates: [
@@ -608,9 +594,15 @@ module.exports = Object.freeze({
 							mapping: { type: 'rank_features' },
 						},
 					},
+					{
+						nested_object: {
+							match: '*_n',
+							mapping: { type: 'nested' },
+						},
+					},
 				],
 			},
 		},
-		ES_INDEX: 'global_search_qlik',
+		ES_INDEX: process.env.GLOBAL_SEARCH_ELASTICSEARCH_INDEX || 'global_search_qlik',
 	},
 });
