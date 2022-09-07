@@ -181,6 +181,7 @@ sonar_scan-job:  # Run code through sonar scanner
       EOF
 
 
+
 chart-publish:
   cache: []
   stage: "🚧 build-chart"
