@@ -114,6 +114,7 @@ class UserController {
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
 		this.getUserDataForUserList = this.getUserDataForUserList.bind(this);
+		this.getUserDataByIDs = this.getUserDataByIDs.bind(this);
 		this.updateOrCreateUser = this.updateOrCreateUser.bind(this);
 		this.updateOrCreateUserHelper = this.updateOrCreateUserHelper.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
@@ -290,6 +291,28 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, 'RQ0WSQP', userId);
 			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
+	async getUserDataByIDs(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+
+			const { ids } = req.body;
+			const idList = ids.map((id) => ({ id }));
+
+			const results = await this.user.findAll({
+				attributes: ['id', 'first_name', 'last_name', 'email'],
+				where: { [Op.or]: idList },
+				raw: true,
+			});
+
+			res.status(200).send({ users: results, timeStamp: new Date().toISOString() });
+		} catch (err) {
+			this.logger.error(err, 'RQ0W123', userId);
+			res.status(500).send(`Error getting users by IDs`);
 		}
 	}
 
