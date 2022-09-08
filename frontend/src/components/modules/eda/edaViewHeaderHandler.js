@@ -32,7 +32,6 @@ const filterNameMap = {
 	fundingOfficeCode: 'Funding Office DoDAAC',
 	fundingAgencyName: 'Funding Agency Name',
 	psc: 'PSC',
-	pscDesc: 'PSC Description',
 	naicsCode: 'NAICS',
 	duns: 'DUNS',
 	contractData: 'EDA Format',

@@ -34,7 +34,6 @@ const initState = {
 		fundingOfficeCode: '',
 		idvPIID: '',
 		modNumber: '',
-		pscDesc: '',
 		piid: '',
 		reqDesc: '',
 		psc: '',
