@@ -1,5 +1,3 @@
-import CypressHelper, { BASE_URL } from '../../support/CypressHelper';
-
 describe('Tests the advanaCommon functionality of the app including side nav and consent banner.', () => {
 	beforeEach(() => {
 		cy.setup();

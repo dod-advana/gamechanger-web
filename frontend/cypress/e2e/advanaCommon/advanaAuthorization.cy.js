@@ -1,4 +1,4 @@
-import CypressHelper, { BASE_URL } from '../../support/CypressHelper';
+import CypressHelper from '../../support/CypressHelper';
 
 describe('Tests the authorization api', () => {
 	it('Should be unauthorized to view the gamechanger admin page', () => {
