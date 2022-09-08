@@ -169,7 +169,6 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 		case 'fundingOfficeCode':
 		case 'idvPIID':
 		case 'modNumber':
-		case 'pscDesc':
 		case 'piid':
 		case 'reqDesc':
 		case 'psc':
@@ -874,6 +873,7 @@ const resetAdvancedSettings = (dispatch) => {
 
 export const getAdvancedOptions = (props) => {
 	const { state, dispatch, handleSubmit } = props;
+	const { searchText } = state;
 
 	return (
 		<div style={{ height: 500, overflow: 'scroll' }}>
@@ -901,95 +901,105 @@ export const getAdvancedOptions = (props) => {
 				<div>{renderTextFieldFilter(state, dispatch, 'CLIN DATA', 'clinText')}</div>
 			</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
-			</div>
+			{(!searchText || searchText.length === 0) && (
+				<>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE ORGANIZATION</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderOrganizationFilters(state, dispatch)}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>VENDOR NAME</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FISCAL YEAR</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderFiscalYearFilter(state, dispatch)}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>FUNDING OFFICE DoDAAC</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderObligatedAmountFilter(state, dispatch)}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>FUNDING AGENCY NAME</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>VENDOR NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>PSC</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FUNDING OFFICE DoDAAC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>PSC DESCRIPTION</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FUNDING AGENCY NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>NAICS</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>PSC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>DUNS</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>NAICS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>AVAILABLE EDA FORMAT</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderContractDataFilter(state, dispatch)}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>DUNS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderModificationFilter(state, dispatch)}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>AVAILABLE EDA FORMAT</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderContractDataFilter(state, dispatch)}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>IDV PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderModificationFilter(state, dispatch)}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>IDV PIID</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
+					</div>
 
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>MOD NUMBER</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
-			</div>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>PIID</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>MOD NUMBER</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
+					</div>
+				</>
+			)}
 
 			<div style={{ display: 'flex', margin: '10px' }}>
 				<div style={{ width: '120px', height: '40px', marginRight: '20px' }}>
@@ -1147,18 +1157,6 @@ const EDASearchMatrixHandler = (props) => {
 				id={'pscAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.pscDesc}
-				header={'PSC DESCRIPTION'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-				id={'pscDescriptionAccordion'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
 			</GCAccordion>
 
 			<GCAccordion
