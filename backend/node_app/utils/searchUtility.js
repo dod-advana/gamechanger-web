@@ -1322,6 +1322,142 @@ class SearchUtility {
 		}
 	}
 
+	cleanUpEsResultsAddOneHitPerPage(pageSet, hits, user, result) {
+		hits.forEach((parahit) => {
+			const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
+			let pageNumber = pageIndex + 1;
+			// one hit per page max
+			if (!pageSet.has(pageNumber)) {
+				const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
+				// use page 0 for title matches or errors
+				// but only allow 1
+				if (usePageZero) {
+					if (pageSet.has(0)) {
+						return;
+					} else {
+						pageNumber = 0;
+						pageSet.add(0);
+					}
+				}
+
+				pageSet.add(pageNumber);
+				result.pageHits.push({ snippet, pageNumber });
+			}
+		});
+	}
+
+	cleanUpEsResultsHandleHighlights(rawHit, result) {
+		if (rawHit.highlight) {
+			if (rawHit.highlight['display_title_s.search']) {
+				result.pageHits.push({
+					title: 'Title',
+					snippet: rawHit.highlight['display_title_s.search'][0],
+				});
+			}
+			if (rawHit.highlight.keyw_5) {
+				result.pageHits.push({
+					title: 'Keywords',
+					snippet: this.highlight_keywords(result.keyw_5, rawHit.highlight.keyw_5),
+				});
+			}
+			if (rawHit.highlight['filename.search']) {
+				result.pageHits.push({
+					title: 'Filename',
+					snippet: rawHit.highlight['filename.search'][0],
+				});
+			}
+			if (rawHit.highlight['display_source_s.search']) {
+				result.pageHits.push({
+					title: 'Source',
+					snippet: rawHit.highlight['display_source_s.search'][0],
+				});
+			}
+			if (rawHit.highlight.top_entities_t) {
+				result.pageHits.push({
+					title: 'Entities',
+					snippet: this.highlight_keywords(result.top_entities_t, rawHit.highlight.top_entities_t),
+				});
+			}
+			if (rawHit.highlight.topics_s) {
+				result.pageHits.push({
+					title: 'Topics',
+					snippet: this.highlight_keywords(result.topics_s, rawHit.highlight.topics_s),
+				});
+			}
+		}
+	}
+
+	cleanUpEsResultsHandleParagraphsScore(rawHit, result, paragraphResults) {
+		rawHit.inner_hits.paragraphs.hits.hits.forEach((paragraph) => {
+			let entities = [];
+			Object.keys(paragraph._source.entities).forEach((entKey) => {
+				entities = entities.concat(paragraph._source.entities[entKey]);
+			});
+			result.score += paragraphResults[paragraph._source.id].score;
+			result.paragraphs.push({
+				id: paragraph._source.id,
+				par_raw_text_t: paragraph._source.par_raw_text_t,
+				page_num_i: paragraph._source.page_num_i,
+				entities: entities,
+				score: paragraphResults[paragraph._source.id].score,
+				transformTextMatch: paragraphResults[paragraph._source.id].text,
+				paragraphIdBeingMatched: paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
+				score_display: paragraphResults[paragraph._source.id].score_display,
+			});
+		});
+	}
+
+	cleanUpEsResultsHandleInnerHits(rawHit, isCompareReturn, pageSet, user, result, paragraphResults) {
+		if (rawHit.inner_hits) {
+			if (rawHit.inner_hits.paragraphs && !isCompareReturn) {
+				this.cleanUpEsResultsAddOneHitPerPage(pageSet, rawHit.inner_hits.paragraphs.hits.hits, user, result);
+				rawHit.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
+					const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
+					let pageNumber = pageIndex + 1;
+					this.cleanUpEsResultsAddOneHitPerPage(pageSet, pageNumber, parahit, user, result);
+				});
+
+				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+
+				this.cleanUpEsResultsHandleHighlights(rawHit, result);
+
+				result.pageHitCount = pageSet.size;
+			} else if (rawHit.inner_hits.paragraphs && isCompareReturn) {
+				result.paragraphs = [];
+				result.score = 0;
+				this.cleanUpEsResultsHandleParagraphsScore(rawHit, result, paragraphResults);
+				result.paragraphs.sort((a, b) => b.score - a.score);
+				result.score /= result.paragraphs.length;
+			} else {
+				this.cleanUpEsResultsAddOneHitPerPage(pageSet, rawHit.inner_hits.pages.hits.hits, user, result);
+
+				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+				this.cleanUpEsResultsHandleHighlights(rawHit, result);
+				result.pageHitCount = pageSet.size;
+			}
+		}
+	}
+
+	cleanUpEsResultsHandleKeyW5(result) {
+		if (Array.isArray(result['keyw_5'])) {
+			result['keyw_5'] = result['keyw_5'].join(', ');
+		} else {
+			result['keyw_5'] = '';
+		}
+	}
+
+	cleanUpEsResultsHandleEmptyRefList(result) {
+		if (!result.ref_list) {
+			result.ref_list = [];
+		}
+	}
+
+	cleanUpEsResultsHandleSort(rawHit, result) {
+		if (rawHit.sort) {
+			result.sort = r.sort;
+		}
+	}
+
 	cleanUpEsResults({
 		raw,
 		searchTerms,
@@ -1344,25 +1480,11 @@ class SearchUtility {
 				docs: [],
 			};
 
-			let docTypes = [];
-			let docOrgs = [];
-
 			const { body = {} } = raw;
 			const { aggregations = {} } = body;
 			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
-			const type_buckets = doc_type_aggs.buckets ? doc_type_aggs.buckets : [];
-			const org_buckets = doc_org_aggs.buckets ? doc_org_aggs.buckets : [];
-
-			type_buckets.forEach((agg) => {
-				docTypes.push(agg);
-			});
-
-			org_buckets.forEach((agg) => {
-				docOrgs.push(agg);
-			});
-
-			results.doc_types = docTypes;
-			results.doc_orgs = docOrgs;
+			results.doc_types = doc_type_aggs.buckets || [];
+			results.doc_orgs = doc_org_aggs.buckets || [];
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
@@ -1374,181 +1496,23 @@ class SearchUtility {
 				) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits) {
-						if (r.inner_hits.paragraphs && !isCompareReturn) {
-							r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-								const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
-									// use page 0 for title matches or errors
-									// but only allow 1
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
 
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-
-							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-							if (r.highlight) {
-								if (r.highlight['display_title_s.search']) {
-									result.pageHits.push({
-										title: 'Title',
-										snippet: r.highlight['display_title_s.search'][0],
-									});
-								}
-								if (r.highlight.keyw_5) {
-									result.pageHits.push({
-										title: 'Keywords',
-										snippet: this.highlight_keywords(result.keyw_5, r.highlight.keyw_5),
-									});
-								}
-								if (r.highlight['filename.search']) {
-									result.pageHits.push({
-										title: 'Filename',
-										snippet: r.highlight['filename.search'][0],
-									});
-								}
-								if (r.highlight['display_source_s.search']) {
-									result.pageHits.push({
-										title: 'Source',
-										snippet: r.highlight['display_source_s.search'][0],
-									});
-								}
-								if (r.highlight.top_entities_t) {
-									result.pageHits.push({
-										title: 'Entities',
-										snippet: this.highlight_keywords(
-											result.top_entities_t,
-											r.highlight.top_entities_t
-										),
-									});
-								}
-								if (r.highlight.topics_s) {
-									result.pageHits.push({
-										title: 'Topics',
-										snippet: this.highlight_keywords(result.topics_s, r.highlight.topics_s),
-									});
-								}
-							}
-							result.pageHitCount = pageSet.size;
-						} else if (r.inner_hits.paragraphs && isCompareReturn) {
-							result.paragraphs = [];
-							result.score = 0;
-
-							r.inner_hits.paragraphs.hits.hits.forEach((paragraph) => {
-								const entities = [];
-								Object.keys(paragraph._source.entities).forEach((entKey) => {
-									paragraph._source.entities[entKey].forEach((org) => {
-										entities.push(org);
-									});
-								});
-								result.score += paragraphResults[paragraph._source.id].score;
-								result.paragraphs.push({
-									id: paragraph._source.id,
-									par_raw_text_t: paragraph._source.par_raw_text_t,
-									page_num_i: paragraph._source.page_num_i,
-									entities: entities,
-									score: paragraphResults[paragraph._source.id].score,
-									transformTextMatch: paragraphResults[paragraph._source.id].text,
-									paragraphIdBeingMatched:
-										paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
-									score_display: paragraphResults[paragraph._source.id].score_display,
-								});
-							});
-
-							result.paragraphs.sort((a, b) => b.score - a.score);
-
-							result.score /= result.paragraphs.length;
-						} else {
-							r.inner_hits.pages.hits.hits.forEach((phit) => {
-								const pageIndex = phit._nested.offset;
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.getESHighlightContent(phit, user);
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-
-							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-							if (r.highlight) {
-								if (r.highlight['display_title_s.search']) {
-									result.pageHits.push({
-										title: 'Title',
-										snippet: r.highlight['display_title_s.search'][0],
-									});
-								}
-								if (r.highlight.keyw_5) {
-									result.pageHits.push({
-										title: 'Keywords',
-										snippet: this.highlight_keywords(result.keyw_5, r.highlight.keyw_5),
-									});
-								}
-								if (r.highlight['filename.search']) {
-									result.pageHits.push({
-										title: 'Filename',
-										snippet: r.highlight['filename.search'][0],
-									});
-								}
-								if (r.highlight['display_source_s.search']) {
-									result.pageHits.push({
-										title: 'Source',
-										snippet: r.highlight['display_source_s.search'][0],
-									});
-								}
-								if (r.highlight.top_entities_t) {
-									result.pageHits.push({
-										title: 'Entities',
-										snippet: this.highlight_keywords(
-											result.top_entities_t,
-											r.highlight.top_entities_t
-										),
-									});
-								}
-								if (r.highlight.topics_s) {
-									result.pageHits.push({
-										title: 'Topics',
-										snippet: this.highlight_keywords(result.topics_s, r.highlight.topics_s),
-									});
-								}
-							}
-							result.pageHitCount = pageSet.size;
-						}
-					}
+					// handle r.inner_hits
+					this.cleanUpEsResultsHandleInnerHits(
+						rawHit,
+						isCompareReturn,
+						pageSet,
+						user,
+						result,
+						paragraphResults
+					);
 
 					result.esIndex = index;
 
-					if (Array.isArray(result['keyw_5'])) {
-						result['keyw_5'] = result['keyw_5'].join(', ');
-					} else {
-						result['keyw_5'] = '';
-					}
+					this.cleanUpEsResultsHandleKeyW5(result);
+					this.cleanUpEsResultsHandleEmptyRefList(result);
+					this.cleanUpEsResultsHandleSort(rawHit, result);
 
-					if (!result.ref_list) {
-						result.ref_list = [];
-					}
-					if (r.sort) {
-						result.sort = r.sort;
-					}
 					results.docs.push(result);
 				}
 			});
@@ -1620,6 +1584,16 @@ class SearchUtility {
 		}
 	}
 
+	getESHighlightContentFieldTextFieldFilename(fieldTextArray, fieldFilenameArray2) {
+		if (fieldTextArray.length > 0 && fieldTextArray[0]) {
+			return [fieldTextArray[0], false];
+		} else if (fieldFilenameArray2.length > 0 && fieldFilenameArray2[0]) {
+			return [fieldFilenameArray2[0].replace(/.pdf/g, ''), true];
+		} else {
+			throw new Error('failed to highlight');
+		}
+	}
+
 	getESHighlightContent(parahit, user) {
 		try {
 			const { highlight = {} } = parahit;
@@ -1657,14 +1631,8 @@ class SearchUtility {
 				return [pageHighlightTextArray[0], false];
 			} else if (pageFieldFilenameArray.length > 0 && pageFieldFilenameArray[0]) {
 				return [pageFieldFilenameArray[0].replace(/.pdf/g, ''), true];
-			} else if (fieldTextArray.length > 0 && fieldTextArray[0]) {
-				return [fieldTextArray[0], false];
-			} else if (fieldFilenameArray2.length > 0 && fieldFilenameArray2[0]) {
-				return [fieldFilenameArray2[0].replace(/.pdf/g, ''), true];
 			}
-			{
-				throw new Error('failed to highlight');
-			}
+			return this.getESHighlightContentFieldTextFieldFilename(fieldTextArray, fieldFilenameArray2);
 		} catch (e) {
 			this.logger.error(e, 'x983Nsiw', user);
 			return ['Error highlighting', true];
@@ -1756,9 +1724,43 @@ class SearchUtility {
 		}
 	}
 
+	documentSearchHandleValidResults({
+		titleResults,
+		results,
+		getIdList,
+		searchTerms,
+		userId,
+		expansionDict,
+		forGraphCache,
+		selectedDocuments,
+		esIndex,
+		esQuery,
+	}) {
+		if (this.checkValidResults(titleResults)) {
+			results = this.reorderFirst(results, titleResults);
+		}
+		if (getIdList) {
+			return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+		}
+
+		if (forGraphCache) {
+			return this.cleanUpIdEsResultsForGraphCache(results, userId);
+		} else {
+			return this.cleanUpEsResults({
+				raw: results,
+				searchTerms,
+				user: userId,
+				selectedDocuments,
+				expansionDict,
+				index: esIndex,
+				query: esQuery,
+			});
+		}
+	}
+
 	async documentSearch(_req, body, clientObj, userId) {
 		try {
-			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, searchType } = body;
+			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false } = body;
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
@@ -1777,26 +1779,18 @@ class SearchUtility {
 
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
 			if (this.checkValidResults(results)) {
-				if (this.checkValidResults(titleResults)) {
-					results = this.reorderFirst(results, titleResults);
-				}
-				if (getIdList) {
-					return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
-				}
-
-				if (forGraphCache) {
-					return this.cleanUpIdEsResultsForGraphCache(results, userId);
-				} else {
-					return this.cleanUpEsResults({
-						raw: results,
-						searchTerms,
-						user: userId,
-						selectedDocuments,
-						expansionDict,
-						index: esIndex,
-						query: esQuery,
-					});
-				}
+				return this.documentSearchHandleValidResults({
+					titleResults,
+					results,
+					getIdList,
+					searchTerms,
+					userId,
+					expansionDict,
+					forGraphCache,
+					selectedDocuments,
+					esIndex,
+					esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) {
@@ -2156,6 +2150,231 @@ class SearchUtility {
 		return results && results.body && results.body.hits && results.body.hits.total.value == 0;
 	}
 
+	addNode(nodes, node, nodeIds, nodeProperties, labels) {
+		nodes[node.id] = node;
+		if (nodeIds.indexOf(node.id) === -1) {
+			nodeIds.push(node.id);
+			if (labels.indexOf(node.label) === -1) {
+				labels.push(node.label);
+				nodeProperties[node.label] = node.properties;
+			}
+		}
+	}
+
+	addEdge(edges, edge, edgeIds, relationships, relProperties) {
+		try {
+			edges[edge.id] = edge;
+			if (edgeIds.indexOf(edge.id) === -1) {
+				edgeIds.push(edge.id);
+				if (relationships.indexOf(edge.label) === -1) {
+					relationships.push(edge.label);
+					relProperties[edge.label] = edge.properties;
+				}
+			}
+
+			const tmpEdges = edgeIds.filter((edgeId) => {
+				if (edges[edgeId].source === edge.source && edges[edgeId].target === edge.target) {
+					return edgeId;
+				}
+			});
+
+			const edgeCount = tmpEdges.length;
+			const oddEdges = edgeCount % 2 !== 0;
+			tmpEdges.forEach((edgeId, index) => {
+				if (oddEdges && index === 0) {
+					edges[edgeId].rotation = 0;
+					edges[edgeId].curvature = 0;
+				} else {
+					edges[edgeId].rotation = Math.PI * (index / 6);
+					edges[edgeId].curvature = (edgeCount / 10) * (index % 2 !== 0 ? -1 : 1);
+				}
+			});
+		} catch (err) {
+			console.log(edge);
+		}
+	}
+
+	cleanNeo4jDataHandlePathRecType({
+		nodes,
+		v,
+		isTest,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		this.addNode(nodes, this.buildNodeVisObject(v.start, isTest, user), nodeIds, nodeProperties, labels);
+		this.addNode(nodes, this.buildNodeVisObject(v.end, isTest, user), nodeIds, nodeProperties, labels);
+
+		for (let obj of v.segments) {
+			this.addNode(nodes, this.buildNodeVisObject(obj.start, isTest, user), nodeIds, nodeProperties, labels);
+			this.addNode(nodes, this.buildNodeVisObject(obj.end, isTest, user), nodeIds, nodeProperties, labels);
+			this.addEdge(
+				edges,
+				this.buildEdgeVisObject(obj.relationship, isTest, user),
+				edgeIds,
+				relationships,
+				relProperties
+			);
+		}
+	}
+
+	cleanNeo4jDataHandleArrayRecType({
+		v,
+		isTest,
+		nodes,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		for (let obj of v) {
+			const recTypeV = this.getNeo4jType(obj, isTest);
+			if (recTypeV === 'Node') {
+				this.addNode(nodes, this.buildNodeVisObject(obj, isTest, user), nodeIds, nodeProperties, labels);
+			} else if (recTypeV === 'Relationship') {
+				this.addEdge(edges, this.buildEdgeVisObject(obj, isTest, user), edgeIds, relationships, relProperties);
+			}
+		}
+	}
+
+	cleanNeo4jDataHandleRecType({
+		recType,
+		v,
+		isTest,
+		nodes,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		if (recType === 'Node') {
+			this.addNode(nodes, this.buildNodeVisObject(v, isTest, user), nodeIds, nodeProperties, labels);
+		} else if (recType === 'Relationship') {
+			this.addEdge(edges, this.buildEdgeVisObject(v, isTest, user), edgeIds, relationships, relProperties);
+		} else if (recType === 'Path') {
+			this.cleanNeo4jDataHandlePathRecType({
+				nodes,
+				v,
+				isTest,
+				user,
+				nodeIds,
+				nodeProperties,
+				labels,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
+			});
+		} else if (recType === 'Array') {
+			this.cleanNeo4jDataHandleArrayRecType({
+				v,
+				isTest,
+				nodes,
+				user,
+				nodeIds,
+				nodeProperties,
+				labels,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
+			});
+		} else if (v !== null) {
+			console.log(v);
+		}
+	}
+
+	cleanNeo4jDataHandleRecords({
+		result,
+		isTest,
+		user,
+		nodes,
+		nodeIds,
+		nodeProperties,
+		labels,
+		graphMetaData,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		result.records.forEach((record) => {
+			const recObj = record.toObject();
+
+			if (recObj.hasOwnProperty('entityScore')) {
+				const node = this.buildNodeVisObject(recObj.node, isTest, user);
+				node.entityScore = recObj.entityScore;
+				node.mentions = recObj.mentions.low;
+				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
+			} else if (recObj.hasOwnProperty('topicScore')) {
+				const node = this.buildNodeVisObject(recObj.node, isTest, user);
+				node.topicScore = recObj.topicScore;
+				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
+			} else if (recObj.hasOwnProperty('doc_id')) {
+				docIds.push({ doc_id: recObj.doc_id, mentions: recObj.mentions?.low });
+			} else if (recObj.hasOwnProperty('primary_key')) {
+				graphMetaData.push({
+					label: recObj.label,
+					property: recObj.property,
+					type: recObj.type,
+					primary_key: recObj.primary_key,
+				});
+			} else if (recObj.hasOwnProperty('relTypesCount')) {
+				graphMetaData.push({
+					relationship_counts: recObj.relTypesCount,
+					node_counts: recObj.labels,
+				});
+			} else if (recObj.hasOwnProperty('topic')) {
+				this.addNode(
+					nodes,
+					this.buildNodeVisObject(recObj.topic, isTest, user),
+					nodeIds,
+					nodeProperties,
+					labels
+				);
+				nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
+			} else if (recObj.hasOwnProperty('topic_name')) {
+				recObj.doc_count = recObj.doc_count.low;
+				graphMetaData.push(recObj);
+			} else if (recObj.hasOwnProperty('doc_count')) {
+				graphMetaData.push({
+					documents: recObj.doc_count.low,
+				});
+			} else {
+				Object.values(recObj).map(async (v) => {
+					const recType = this.getNeo4jType(v, isTest);
+					this.cleanNeo4jDataHandleRecType({
+						recType,
+						v,
+						isTest,
+						nodes,
+						user,
+						nodeIds,
+						nodeProperties,
+						labels,
+						edges,
+						edgeIds,
+						relationships,
+						relProperties,
+					});
+				});
+			}
+		});
+	}
+
 	cleanNeo4jData(result, isTest, user) {
 		const nodes = {};
 		const nodeIds = [];
@@ -2169,118 +2388,19 @@ class SearchUtility {
 		const graphMetaData = [];
 
 		try {
-			const addNode = (node) => {
-				nodes[node.id] = node;
-				if (nodeIds.indexOf(node.id) === -1) {
-					nodeIds.push(node.id);
-					if (labels.indexOf(node.label) === -1) {
-						labels.push(node.label);
-						nodeProperties[node.label] = node.properties;
-					}
-				}
-			};
-
-			const addEdge = (edge) => {
-				try {
-					edges[edge.id] = edge;
-					if (edgeIds.indexOf(edge.id) === -1) {
-						edgeIds.push(edge.id);
-						if (relationships.indexOf(edge.label) === -1) {
-							relationships.push(edge.label);
-							relProperties[edge.label] = edge.properties;
-						}
-					}
-
-					const tmpEdges = edgeIds.filter((edgeId) => {
-						if (edges[edgeId].source === edge.source && edges[edgeId].target === edge.target) {
-							return edgeId;
-						}
-					});
-
-					const edgeCount = tmpEdges.length;
-					const oddEdges = edgeCount % 2 !== 0;
-					tmpEdges.forEach((edgeId, index) => {
-						if (oddEdges && index === 0) {
-							edges[edgeId].rotation = 0;
-							edges[edgeId].curvature = 0;
-						} else {
-							edges[edgeId].rotation = Math.PI * (index / 6);
-							edges[edgeId].curvature = (edgeCount / 10) * (index % 2 !== 0 ? -1 : 1);
-						}
-					});
-				} catch (err) {
-					console.log(edge);
-				}
-			};
-
-			result.records.forEach((record) => {
-				const recObj = record.toObject();
-
-				if (recObj.hasOwnProperty('entityScore')) {
-					const node = this.buildNodeVisObject(recObj.node, isTest, user);
-					node.entityScore = recObj.entityScore;
-					node.mentions = recObj.mentions.low;
-					addNode(node);
-				} else if (recObj.hasOwnProperty('topicScore')) {
-					const node = this.buildNodeVisObject(recObj.node, isTest, user);
-					node.topicScore = recObj.topicScore;
-					addNode(node);
-				} else if (recObj.hasOwnProperty('doc_id')) {
-					docIds.push({ doc_id: recObj.doc_id, mentions: recObj.mentions?.low });
-				} else if (recObj.hasOwnProperty('primary_key')) {
-					graphMetaData.push({
-						label: recObj.label,
-						property: recObj.property,
-						type: recObj.type,
-						primary_key: recObj.primary_key,
-					});
-				} else if (recObj.hasOwnProperty('relTypesCount')) {
-					graphMetaData.push({
-						relationship_counts: recObj.relTypesCount,
-						node_counts: recObj.labels,
-					});
-				} else if (recObj.hasOwnProperty('topic')) {
-					addNode(this.buildNodeVisObject(recObj.topic, isTest, user));
-					nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
-				} else if (recObj.hasOwnProperty('topic_name')) {
-					recObj.doc_count = recObj.doc_count.low;
-					graphMetaData.push(recObj);
-				} else if (recObj.hasOwnProperty('doc_count')) {
-					graphMetaData.push({
-						documents: recObj.doc_count.low,
-					});
-				} else {
-					Object.values(recObj).map(async (v) => {
-						const recType = this.getNeo4jType(v, isTest);
-						if (recType === 'Node') {
-							addNode(this.buildNodeVisObject(v, isTest, user));
-						} else if (recType === 'Relationship') {
-							addEdge(this.buildEdgeVisObject(v, isTest, user));
-						} else if (recType === 'Path') {
-							addNode(this.buildNodeVisObject(v.start, isTest, user));
-							addNode(this.buildNodeVisObject(v.end, isTest, user));
-
-							for (let obj of v.segments) {
-								addNode(this.buildNodeVisObject(obj.start, isTest, user));
-								addNode(this.buildNodeVisObject(obj.end, isTest, user));
-								addEdge(this.buildEdgeVisObject(obj.relationship, isTest, user));
-							}
-						} else if (recType === 'Array') {
-							for (let obj of v) {
-								const recTypeV = this.getNeo4jType(obj, isTest);
-								if (recTypeV === 'Node') {
-									addNode(this.buildNodeVisObject(obj, isTest, user));
-								} else if (recTypeV === 'Relationship') {
-									addEdge(this.buildEdgeVisObject(obj, isTest, user));
-								}
-							}
-						} else {
-							if (v !== null) {
-								console.log(v);
-							}
-						}
-					});
-				}
+			this.cleanNeo4jDataHandleRecords({
+				result,
+				isTest,
+				user,
+				nodes,
+				nodeIds,
+				nodeProperties,
+				labels,
+				graphMetaData,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
 			});
 
 			if (docIds.length > 0) {
@@ -2402,23 +2522,27 @@ class SearchUtility {
 		return edge;
 	}
 
+	getNeo4jTypeIsTest(v) {
+		const keys = Object.keys(v);
+		if (keys.includes('identity') && keys.includes('labels') && keys.includes('properties')) return 'Node';
+		else if (
+			keys.includes('identity') &&
+			keys.includes('start') &&
+			keys.includes('end') &&
+			keys.includes('type') &&
+			keys.includes('properties')
+		)
+			return 'Relationship';
+		else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
+		else if (v instanceof Array) return 'Array';
+		else return false;
+	}
+
 	getNeo4jType(v, isTest) {
 		if (v === null) return false;
 
 		if (isTest) {
-			const keys = Object.keys(v);
-			if (keys.includes('identity') && keys.includes('labels') && keys.includes('properties')) return 'Node';
-			else if (
-				keys.includes('identity') &&
-				keys.includes('start') &&
-				keys.includes('end') &&
-				keys.includes('type') &&
-				keys.includes('properties')
-			)
-				return 'Relationship';
-			else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
-			else if (v instanceof Array) return 'Array';
-			else return false;
+			return this.getNeo4jTypeIsTest(v);
 		} else {
 			if (v instanceof neo4jLib.types.Node) return 'Node';
 			else if (v instanceof neo4jLib.types.Relationship) return 'Relationship';
