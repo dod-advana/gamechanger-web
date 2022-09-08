@@ -300,7 +300,7 @@ class UserController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { ids } = req.body;
+			const ids = JSON.parse(req.query.ids);
 			const idList = ids.map((id) => ({ id }));
 
 			const results = await this.user.findAll({
@@ -309,7 +309,7 @@ class UserController {
 				raw: true,
 			});
 
-			res.status(200).send({ users: results, timeStamp: new Date().toISOString() });
+			res.status(200).send({ users: results });
 		} catch (err) {
 			this.logger.error(err, 'RQ0W123', userId);
 			res.status(500).send(`Error getting users by IDs`);
