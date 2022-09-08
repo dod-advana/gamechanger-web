@@ -16,6 +16,7 @@ const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
 const testing = false;
 const { performance } = require('perf_hooks');
+const { default: Helpers } = require('@elastic/elasticsearch/lib/Helpers');
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -44,7 +45,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId, storeHistory) {
-		const { offset, useGCCache, forCacheReload = false, searchText } = req.body;
+		const { searchText } = req.body;
 
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(
 			req.body,
@@ -52,25 +53,20 @@ class PolicySearchHandler extends SearchHandler {
 			storeHistory,
 			getUserIdFromSAMLUserId(req)
 		);
-		// if using cache
-		// if (!forCacheReload && useGCCache && offset === 0) {
-		// 	console.log('something');
-		// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
-		// }
 
 		// cleaning incomplete double quote issue
-		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
+		const doubleQuoteCount = (searchText.match(/"/g) || []).length;
 		if (doubleQuoteCount % 2 === 1) {
-			req.body.searchText = searchText.replace(/["]+/g, '');
+			req.body.searchText = searchText.replace(/"+/g, '');
 		}
 		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
-		var startTime = performance.now();
+		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
-		var startTimeInt = performance.now();
+		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
-		var endTimeInt = performance.now();
-		var endTime = performance.now();
+		let endTimeInt = performance.now();
+		let endTime = performance.now();
 		this.logger.info(
 			`Total search time: ${endTime - startTime} milliseconds --- Enriched search took: ${
 				endTimeInt - startTimeInt
@@ -85,28 +81,27 @@ class PolicySearchHandler extends SearchHandler {
 	async callFunctionHelper(req, userId) {
 		const { functionName, searchText = '' } = req.body;
 		// cleaning incomplete double quote issue
-		const doubleQuoteCount = (searchText.match(/["]/g) || []).length;
+		const doubleQuoteCount = (searchText.match(/"/g) || []).length;
 		if (doubleQuoteCount % 2 === 1) {
-			req.body.searchText = searchText.replace(/["]+/g, '');
+			req.body.searchText = searchText.replace(/"+/g, '');
 		}
 
 		switch (functionName) {
 			case 'getSingleDocumentFromES':
-				return await this.getSingleDocumentFromESHelper(req, userId);
+				return this.getSingleDocumentFromESHelper(req, userId);
 			case 'getDocumentsBySourceFromESHelper':
-				return await this.getDocumentsBySourceFromESHelper(req, userId);
+				return this.getDocumentsBySourceFromESHelper(req, userId);
 			case 'documentSearchPagination':
 				let { clientObj } = await this.createRecObject(req.body, userId, false, getUserIdFromSAMLUserId(req));
 				let expansionDict = await this.gatherExpansionTerms(req.body, userId);
 				req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
-				let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
-				return searchResults;
+				return this.doSearch(req, expansionDict, clientObj, userId);
 			case 'entityPagination':
-				return await this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+				return this.entitySearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'topicPagination':
-				return await this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
+				return this.topicSearch(req.body.searchText, req.body.offset, req.body.limit, userId);
 			case 'getPresearchData':
-				return await this.getPresearchData(userId);
+				return this.getPresearchData(userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policySearchHandler`,
@@ -117,7 +112,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	// searchHelper function breakouts
-	async createRecObject(body, userId, storeHistory, non_hashed_id) {
+	async createRecObject(body, _userId, storeHistory, non_hashed_id) {
 		const historyRec = {
 			user_id: non_hashed_id,
 			clone_name: undefined,
@@ -139,11 +134,8 @@ class PolicySearchHandler extends SearchHandler {
 			cloneName,
 			offset,
 			orgFilterString = [],
-			typeFilterString = [],
-			useGCCache,
 			showTutorial = false,
 			tiny_url,
-			forCacheReload = false,
 			searchFields = {},
 			includeRevoked,
 		} = body;
@@ -195,9 +187,9 @@ class PolicySearchHandler extends SearchHandler {
 		const { searchText, forCacheReload = false, cloneName } = body;
 		try {
 			// try to get search expansion
-			const [parsedQuery, termsArray] = this.searchUtility.getEsSearchTerms({ searchText });
+			const termsArray = this.searchUtility.getEsSearchTerms({ searchText })[1];
 			let expansionDict = await this.mlApiExpansion(termsArray, forCacheReload, userId);
-			let [synonyms, text] = this.thesaurusExpansion(searchText, termsArray);
+			let synonyms = this.thesaurusExpansion(searchText, termsArray)[0];
 			const cleanedAbbreviations = await this.abbreviationCleaner(termsArray, userId);
 			let relatedSearches = await this.MLsearchUtility.getRelatedSearches(
 				searchText,
@@ -245,7 +237,7 @@ class PolicySearchHandler extends SearchHandler {
 		let synList = [];
 		if (termsArray && termsArray.length && termsArray[0]) {
 			useText = false;
-			for (var term in termsArray) {
+			for (let term in termsArray) {
 				lookUpTerm = termsArray[term].replace(/\"/g, '');
 				const synonyms = thesaurus.lookUp(lookUpTerm);
 				if (synonyms && synonyms.length > 1) {
@@ -253,7 +245,7 @@ class PolicySearchHandler extends SearchHandler {
 				}
 			}
 		}
-		//const synonyms = thesaurus.lookUp(lookUpTerm);
+
 		let text = searchText;
 		if (!useText && termsArray && termsArray.length && termsArray[0]) {
 			text = termsArray[0];
@@ -540,21 +532,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId) {
-		const {
-			searchText,
-			searchType,
-			searchVersion,
-			cloneName,
-			offset,
-			orgFilter = 'Department of Defense_Joint Chiefs of Staff_Intelligence Community_United States Code',
-			typeFilter,
-			useGCCache,
-			showTutorial = false,
-			tiny_url,
-			forCacheReload = false,
-			searchFields = {},
-			includeRevoked,
-		} = req.body;
+		const { useGCCache, showTutorial = false, forCacheReload = false } = req.body;
 		try {
 			// try to store to cache
 			if (useGCCache && enrichedResults) {
@@ -678,9 +656,30 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	// uses searchtext to get entity + parent, return entitySearch object
-	async entitySearch(searchText, offset, limit = 6, userId) {
+	entitySearchHelper(docDataCleaned, returnEntity) {
 		try {
+			// if parsing and adding stuff fails, log docDataCleaned
+			if (docDataCleaned && docDataCleaned.nodes && docDataCleaned.nodes.length > 0) {
+				for (const key of Object.keys(docDataCleaned.nodes[0])) {
+					// take highest hit, add key value pairs into return object
+					if (key !== 'properties' && key !== 'nodeVec' && key !== 'pageHits' && key !== 'pageRank') {
+						returnEntity[key] = docDataCleaned.nodes[0][key];
+					}
+				}
+			}
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, '9WJGAKB', userId);
+			this.logger.error('docDataCleaned: ' + JSON.stringify(docDataCleaned), '9WJGAKB', userId);
+		}
+	}
+
+	// uses searchtext to get entity + parent, return entitySearch object
+	async entitySearch(searchText, offset, limit, userId) {
+		try {
+			if (limit == null) {
+				limit = 6;
+			}
 			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
 
@@ -703,26 +702,7 @@ class PolicySearchHandler extends SearchHandler {
 						userId
 					);
 					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					try {
-						// if parsing and adding stuff fails, log docDataCleaned
-						if (docDataCleaned && docDataCleaned.nodes && docDataCleaned.nodes.length > 0) {
-							for (const key of Object.keys(docDataCleaned.nodes[0])) {
-								// take highest hit, add key value pairs into return object
-								if (
-									key !== 'properties' &&
-									key !== 'nodeVec' &&
-									key !== 'pageHits' &&
-									key !== 'pageRank'
-								) {
-									returnEntity[key] = docDataCleaned.nodes[0][key];
-								}
-							}
-						}
-					} catch (err) {
-						const { message } = err;
-						this.logger.error(message, '9WJGAKB', userId);
-						this.logger.error('docDataCleaned: ' + JSON.stringify(docDataCleaned), '9WJGAKB', userId);
-					}
+					this.entitySearchHelper(docDataCleaned, returnEntity);
 					return returnEntity;
 				});
 
@@ -740,8 +720,11 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	async topicSearch(searchText, offset, limit = 6, userId) {
+	async topicSearch(searchText, offset, limit, userId) {
 		try {
+			if (limit == null) {
+				limit = 6;
+			}
 			let esIndex = this.constants.GAME_CHANGER_OPTS.entityIndex;
 			let esClientName = 'gamechanger';
 			const esQuery = this.searchUtility.getTopicQuery(searchText, offset, limit);
@@ -831,7 +814,5 @@ class PolicySearchHandler extends SearchHandler {
 		return this.error;
 	}
 }
-
-// const policySearchHandler = new PolicySearchHandler();
 
 module.exports = PolicySearchHandler;

@@ -81,13 +81,13 @@ class AnalystToolsController {
 				);
 				const paragraphResults = await Promise.all(paragraphSearches);
 
-				paragraphResults.forEach((result) => {
-					Object.keys(result).forEach((id) => {
-						resultsObject[result[id].id] = {
-							score: result[id].score,
-							text: result[id].text,
-							paragraphIdBeingMatched: result.paragraphIdBeingMatched,
-							score_display: result[id].score_display,
+				paragraphResults.forEach((para) => {
+					Object.keys(para).forEach((id) => {
+						resultsObject[para[id].id] = {
+							score: para[id].score,
+							text: para[id].text,
+							paragraphIdBeingMatched: para.paragraphIdBeingMatched,
+							score_display: para[id].score_display,
 						};
 					});
 				});

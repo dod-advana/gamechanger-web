@@ -1,5 +1,4 @@
-const SearchUtility = require('../../utils/searchUtility');
-const searchUtility = new SearchUtility();
+const SearchUtility = require('../../utils/this.searchUtility');
 const constants = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
@@ -27,9 +26,56 @@ class SimpleSearchHandler extends SearchHandler {
 
 		this.dataTracker = dataTracker;
 		this.logger = logger;
-		this.searchUtility = searchUtility;
+		this.this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
+	}
+
+	searchHelperCleanAbbreviations(abbreviationExpansions) {
+		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
+		let cleanedAbbreviations = [];
+		abbreviationExpansions.forEach((abb) => {
+			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
+			if (!termsArray.find((term) => term.toLowerCase().replace(/['"]+/g, '') === cleaned)) {
+				cleanedAbbreviations.push(abb);
+			}
+		});
+		return cleanedAbbreviations;
+	}
+
+	async searchHelperExpandAbbreviations(termsArray) {
+		// get expanded abbreviations
+		await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
+		let abbreviationExpansions = [];
+		let i = 0;
+		for (i; i < termsArray.length; i++) {
+			let term = termsArray[i];
+			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+			let expandedTerm = await redisAsyncClient.get(upperTerm);
+			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+			let compressedTerm = await redisAsyncClient.get(lowerTerm);
+			if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
+				abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
+			}
+			if (compressedTerm && !abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
+				abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
+			}
+		}
+		return abbreviationExpansions;
+	}
+
+	async searchHelperStoreToPG(storeHistory, forCacheReload, searchResults, historyRec, userId) {
+		// try storing results record
+		if (storeHistory && !forCacheReload) {
+			try {
+				const { totalCount } = searchResults;
+				historyRec.endTime = new Date().toISOString();
+				historyRec.numResults = totalCount;
+				await this.storeRecordOfSearchInPg(historyRec, userId);
+			} catch (e) {
+				this.logger.error(e.message, 'SHW1IT9', userId);
+			}
+		}
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -88,7 +134,7 @@ class SimpleSearchHandler extends SearchHandler {
 			// 	return this.getCachedResults(req, historyRec, cloneSpecificObject, userId, storeHistory);
 			// }
 			// try to get search expansion
-			const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({ searchText });
+			const termsArray = this.searchUtility.getEsSearchTerms({ searchText })[1];
 			let expansionDict = {};
 			try {
 				expansionDict = await this.mlApi.getExpandedSearchTerms(termsArray, userId);
@@ -112,53 +158,17 @@ class SimpleSearchHandler extends SearchHandler {
 				text = termsArray[0];
 			}
 
-			// get expanded abbreviations
-			await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
-			let abbreviationExpansions = [];
-			let i = 0;
-			for (i = 0; i < termsArray.length; i++) {
-				let term = termsArray[i];
-				let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-				let expandedTerm = await redisAsyncClient.get(upperTerm);
-				let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-				let compressedTerm = await redisAsyncClient.get(lowerTerm);
-				if (expandedTerm) {
-					if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-					}
-				}
-				if (compressedTerm) {
-					if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-						abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-					}
-				}
-			}
+			const abbreviationExpansions = await this.searchHelperExpandAbbreviations(termsArray);
+			const cleanedAbbreviations = this.searchHelperCleanAbbreviations(abbreviationExpansions);
 
-			// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-			let cleanedAbbreviations = [];
-			abbreviationExpansions.forEach((abb) => {
-				let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
-				let found = false;
-				termsArray.forEach((term) => {
-					if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
-						found = true;
-					}
-				});
-				if (!found) {
-					cleanedAbbreviations.push(abb);
-				}
-			});
-
-			// this.logger.info(cleanedAbbreviations);
-
-			expansionDict = searchUtility.combineExpansionTerms(
+			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,
 				synonyms,
 				text,
 				cleanedAbbreviations,
 				userId
 			);
-			// this.logger.info('exp: ' + expansionDict);
+
 			await redisAsyncClient.select(redisAsyncClientDB);
 
 			let searchResults = await this.documentSearch(
@@ -176,17 +186,7 @@ class SimpleSearchHandler extends SearchHandler {
 				await this.storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, userId);
 			}
 
-			// try storing results record
-			if (storeHistory && !forCacheReload) {
-				try {
-					const { totalCount } = searchResults;
-					historyRec.endTime = new Date().toISOString();
-					historyRec.numResults = totalCount;
-					await this.storeRecordOfSearchInPg(historyRec, userId);
-				} catch (e) {
-					this.logger.error(e.message, 'SHW1IT9', userId);
-				}
-			}
+			await this.searchHelperStoreToPG(storeHistory, forCacheReload, searchResults, historyRec, userId);
 
 			return searchResults;
 		} catch (err) {
@@ -201,10 +201,10 @@ class SimpleSearchHandler extends SearchHandler {
 		}
 	}
 
-	async documentSearch(req, body, clientObj, userId) {
+	async documentSearch(_req, body, clientObj, userId) {
 		try {
 			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false } = body;
-			const [parsedQuery, searchTerms] = searchUtility.getEsSearchTerms(body);
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
 
@@ -213,7 +213,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 			if (esQuery === '') {
 				if (forGraphCache) {
-					esQuery = searchUtility.getElasticsearchQueryForGraphCache(body, userId);
+					esQuery = this.searchUtility.getElasticsearchQueryForGraphCache(body, userId);
 				} else {
 					esQuery = getElasticsearchQuery(body, userId);
 				}
@@ -229,13 +229,13 @@ class SimpleSearchHandler extends SearchHandler {
 				results.body.hits.total.value > 0
 			) {
 				if (getIdList) {
-					return searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 				}
 
 				if (forGraphCache) {
-					return searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
+					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
 				} else {
-					return searchUtility.cleanUpEsResults({
+					return this.searchUtility.cleanUpEsResults({
 						raw: results,
 						searchTerms,
 						user: userId,
@@ -278,18 +278,18 @@ class SimpleSearchHandler extends SearchHandler {
 function getElasticsearchQuery(
 	{
 		searchText,
-		searchTerms,
+		_searchTerms,
 		parsedQuery,
-		index,
+		_index,
 		offset = 0,
 		limit = 20,
-		format = 'json',
-		getIdList = false,
-		expandTerms = false,
+		_format = 'json',
+		_getIdList = false,
+		_expandTerms = false,
 		charsPadding = 90,
 		operator = 'and',
 		searchFields = {},
-		accessDateFilter = [],
+		_accessDateFilter = [],
 		publicationDateFilter = [],
 		publicationDateAllTime = true,
 		storedFields = [
@@ -315,7 +315,7 @@ function getElasticsearchQuery(
 		],
 		extStoredFields = [],
 		extSearchFields = [],
-		includeRevoked = false,
+		_includeRevoked = false,
 	},
 	user
 ) {
@@ -326,7 +326,6 @@ function getElasticsearchQuery(
 			const searchField = searchFields[key];
 			if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
 				const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
-				// wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
 
 				mustQueries.push(wildcard);
 			}
@@ -447,16 +446,14 @@ function getElasticsearchQuery(
 			publicationDateFilter[0] &&
 			publicationDateFilter[1]
 		) {
-			if (!publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]) {
-				query.query.bool.must.push({
-					range: {
-						publication_date_dt: {
-							gte: publicationDateFilter[0].split('.')[0],
-							lte: publicationDateFilter[1].split('.')[0],
-						},
+			query.query.bool.must.push({
+				range: {
+					publication_date_dt: {
+						gte: publicationDateFilter[0].split('.')[0],
+						lte: publicationDateFilter[1].split('.')[0],
 					},
-				});
-			}
+				},
+			});
 		}
 
 		if (mustQueries.length > 0) {
@@ -468,7 +465,5 @@ function getElasticsearchQuery(
 		this.logger.error(err, 'O5ODGS6', user);
 	}
 }
-
-// const simpleSearchHandler = new SimpleSearchHandler();
 
 module.exports = SimpleSearchHandler;

@@ -15,13 +15,16 @@ const { Thesaurus } = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
 const GC_HISTORY = require('../../models').gc_history;
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
+const { clone } = require('underscore');
 
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
-const SimplePdfSearchHandler = function SimplePdfSearchHandler() {};
+const SimplePdfSearchHandler = function SimplePdfSearchHandler() {
+	return undefined;
+};
 SimplePdfSearchHandler.prototype.search = async function (searchText, offset, limit, options, userId, storeHistory) {
 	console.log(
 		`${userId} is doing a covid19 search for ${searchText} with offset ${offset}, limit ${limit}, options ${options}`
@@ -32,6 +35,212 @@ SimplePdfSearchHandler.prototype.search = async function (searchText, offset, li
 	proxyBody.limit = limit;
 	return documentSearchHelper({ body: proxyBody, permissions: [] }, userId, storeHistory);
 };
+
+function documentSearchHelperGetIndex(isClone, cloneData, req) {
+	let index;
+	if (isClone) {
+		index = cloneData.clone_data.project_name;
+	} else if (req.body.index) {
+		index = req.body.index;
+	} else {
+		index = constants.GAME_CHANGER_OPTS.index;
+	}
+
+	if (isClone && cloneData && cloneData.clone_data) {
+		if (cloneData.clone_data.gcIndex) {
+			index = cloneData.clone_data.gcIndex;
+		} else if (cloneData.clone_data.project_name) {
+			index = cloneData.clone_data.project_name;
+		}
+	}
+	return index;
+}
+
+async function documentSearchHelperGetExpandedAbbreviations(redis, termsArray) {
+	// get expanded abbreviations
+	await redis.select(abbreviationRedisAsyncClientDB);
+	let abbreviationExpansions = [];
+	let i = 0;
+	for (i; i < termsArray.length; i++) {
+		let term = termsArray[i];
+		let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
+		let expandedTerm = await redis.get(upperTerm);
+		let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
+		let compressedTerm = await redis.get(lowerTerm);
+		if (expandedTerm && !abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
+			abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
+		}
+		if (compressedTerm && !abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
+			abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
+		}
+	}
+}
+
+async function documentSearchHelperCheckCache({
+	forCacheReload,
+	useGCCache,
+	offset,
+	redisDB,
+	redisKey,
+	historyRec,
+	isClone,
+	cloneData,
+	showTutorial,
+}) {
+	if (!forCacheReload && useGCCache && offset === 0) {
+		try {
+			// check cache for search (first page only)
+			const cachedResults = JSON.parse(await redisDB.get(redisKey));
+			const timestamp = await redisDB.get(redisKey + ':time');
+			const timeDiffHours = Math.floor((new Date().getTime() - timestamp) / (1000 * 60 * 60));
+			if (cachedResults) {
+				const { totalCount } = cachedResults;
+				historyRec.endTime = new Date().toISOString();
+				historyRec.numResults = totalCount;
+				historyRec.cachedResult = true;
+				await storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
+				return { ...cachedResults, isCached: true, timeSinceCache: timeDiffHours };
+			}
+		} catch (e) {
+			// don't reject if cache errors just log
+			LOGGER.error(e.message, 'UA0YFKY', userId);
+		}
+	}
+}
+
+function documentSearchHelperCleanAbbreviations(abbreviationExpansions) {
+	// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
+	let cleanedAbbreviations = [];
+	abbreviationExpansions.forEach((abb) => {
+		let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
+		let found = false;
+		termsArray.forEach((term) => {
+			if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
+				found = true;
+			}
+		});
+		if (!found) {
+			cleanedAbbreviations.push(abb);
+		}
+	});
+	return cleanedAbbreviations;
+}
+
+async function documentSearchHelperDoDocSearch({
+	searchType,
+	searchText,
+	userId,
+	req,
+	expansionDict,
+	index,
+	forCacheReload,
+	operator,
+	searchResults,
+}) {
+	if (searchType === 'Sentence') {
+		try {
+			const sentenceResults = await mlApi.getSentenceTransformerResults(searchText, userId);
+			const filenames = sentenceResults.map(({ id }) => id);
+
+			const docSearchRes = await documentSearchUsingParaId(
+				req,
+				{ ...req.body, expansionDict, index, filenames },
+				userId
+			);
+
+			if (sentenceResults === TRANSFORM_ERRORED) {
+				searchResults.transformFailed = true;
+			} else {
+				searchResults = docSearchRes;
+			}
+			return searchResults;
+		} catch (e) {
+			if (forCacheReload) {
+				throw Error('Cannot transform document search terms in cache reload');
+			}
+			LOGGER.error(`Error sentence transforming document search results ${e.message}`, '7EYPXX7', userId);
+			return [];
+		}
+	} else {
+		// get results
+		try {
+			return await documentSearch(req, { ...req.body, expansionDict, index, operator }, userId);
+		} catch (e) {
+			const { message } = e;
+			LOGGER.error(message, 'GRXU38P', userId);
+			throw e;
+		}
+	}
+}
+
+async function documentSearchHelperTransformResults(searchType, searchResults, searchText, userId) {
+	// use transformer on results
+	if (searchType === 'Intelligent') {
+		try {
+			const { docs } = searchResults;
+			const transformed = await transformDocumentSearchResults(docs, searchText, userId);
+			if (transformed === TRANSFORM_ERRORED) {
+				searchResults.transformFailed = true;
+			} else {
+				searchResults.docs = transformed;
+			}
+		} catch (e) {
+			if (forCacheReload) {
+				throw Error('Cannot transform document search terms in cache reload');
+			}
+			LOGGER.error(`Error transforming document search results ${e.message}`, 'U64MDOA', userId);
+		}
+	}
+}
+
+async function documentSearchHelperWriteToCache(
+	useGCCache,
+	searchResults,
+	redisKey,
+	redisDB,
+	historyRec,
+	forCacheReload,
+	userId
+) {
+	// try to store to cache
+	if (useGCCache && searchResults && redisKey) {
+		try {
+			const timestamp = new Date().getTime();
+			LOGGER.info(`Storing new keyword cache entry: ${redisKey}`);
+			await redisDB.set(redisKey, JSON.stringify(searchResults));
+			await redisDB.set(redisKey + ':time', timestamp);
+			historyRec.cachedResult = false;
+		} catch (e) {
+			if (forCacheReload) {
+				throw Error('Storing to cache failed in cache reload');
+			}
+
+			LOGGER.error(e.message, 'WVVCLPX', userId);
+		}
+	}
+}
+
+async function documentSearchHelperWriteToPG(
+	forCacheReload,
+	searchResults,
+	historyRec,
+	isClone,
+	cloneData,
+	showTutorial,
+	userId
+) {
+	// try storing results record
+	if (!forCacheReload) {
+		try {
+			const { totalCount } = searchResults;
+			historyRec.endTime = new Date().toISOString();
+			historyRec.numResults = totalCount;
+			await storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
+		} catch (e) {
+			LOGGER.error(e.message, 'MPK1GGN', userId);
+		}
+	}
+}
 
 async function documentSearchHelper(req, userId, storeHistory) {
 	const historyRec = {
@@ -75,19 +284,8 @@ async function documentSearchHelper(req, userId, storeHistory) {
 		historyRec.searchType = searchType;
 		historyRec.search_version = searchVersion;
 		historyRec.request_body = req.body;
-		let index = isClone
-			? cloneData.clone_data.project_name
-			: req.body.index
-			? req.body.index
-			: constants.GAME_CHANGER_OPTS.index;
+		let index = documentSearchHelperGetIndex(isClone, cloneData, req);
 
-		if (isClone && cloneData && cloneData.clone_data) {
-			if (cloneData.clone_data.gcIndex) {
-				index = cloneData.clone_data.gcIndex;
-			} else if (cloneData.clone_data.project_name) {
-				index = cloneData.clone_data.project_name;
-			}
-		}
 		const permissions = req.permissions ? req.permissions : [];
 		const operator = 'and';
 
@@ -113,27 +311,23 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			await storeEsRecord(clientObj.esClientName, offset, clone_name, historyRec.user_id, searchText);
 		}
 
-		if (!forCacheReload && useGCCache && offset === 0) {
-			try {
-				// check cache for search (first page only)
-				const cachedResults = JSON.parse(await redisDB.get(redisKey));
-				const timestamp = await redisDB.get(redisKey + ':time');
-				const timeDiffHours = Math.floor((new Date().getTime() - timestamp) / (1000 * 60 * 60));
-				if (cachedResults) {
-					const { totalCount } = cachedResults;
-					historyRec.endTime = new Date().toISOString();
-					historyRec.numResults = totalCount;
-					historyRec.cachedResult = true;
-					await storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
-					return { ...cachedResults, isCached: true, timeSinceCache: timeDiffHours };
-				}
-			} catch (e) {
-				// don't reject if cache errors just log
-				LOGGER.error(e.message, 'UA0YFKY', userId);
-			}
+		let cachedResults = await documentSearchHelperCheckCache({
+			forCacheReload,
+			useGCCache,
+			offset,
+			redisDB,
+			redisKey,
+			historyRec,
+			isClone,
+			cloneData,
+			showTutorial,
+		});
+		if (cachedResults) {
+			return cachedResults;
 		}
+
 		// try to get search expansion
-		const [parsedQuery, termsArray] = searchUtility.getEsSearchTerms({ searchText });
+		const termsArray = searchUtility.getEsSearchTerms({ searchText })[1];
 		let expansionDict = {};
 		try {
 			expansionDict = await mlApi.getExpandedSearchTerms(termsArray, userId);
@@ -157,44 +351,8 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			text = termsArray[0];
 		}
 
-		// get expanded abbreviations
-		await redisAsyncClient.select(abbreviationRedisAsyncClientDB);
-		let abbreviationExpansions = [];
-		let i = 0;
-		for (i = 0; i < termsArray.length; i++) {
-			let term = termsArray[i];
-			let upperTerm = term.toUpperCase().replace(/['"]+/g, '');
-			let expandedTerm = await redisAsyncClient.get(upperTerm);
-			let lowerTerm = term.toLowerCase().replace(/['"]+/g, '');
-			let compressedTerm = await redisAsyncClient.get(lowerTerm);
-			if (expandedTerm) {
-				if (!abbreviationExpansions.includes('"' + expandedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + expandedTerm.toLowerCase() + '"');
-				}
-			}
-			if (compressedTerm) {
-				if (!abbreviationExpansions.includes('"' + compressedTerm.toLowerCase() + '"')) {
-					abbreviationExpansions.push('"' + compressedTerm.toLowerCase() + '"');
-				}
-			}
-		}
-
-		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
-		let cleanedAbbreviations = [];
-		abbreviationExpansions.forEach((abb) => {
-			let cleaned = abb.toLowerCase().replace(/['"]+/g, '');
-			let found = false;
-			termsArray.forEach((term) => {
-				if (term.toLowerCase().replace(/['"]+/g, '') === cleaned) {
-					found = true;
-				}
-			});
-			if (!found) {
-				cleanedAbbreviations.push(abb);
-			}
-		});
-
-		// LOGGER.info(cleanedAbbreviations);
+		await documentSearchHelperGetExpandedAbbreviations(redisAsyncClient, termsArray);
+		let cleanedAbbreviations = documentSearchHelperCleanAbbreviations(abbreviationExpansions);
 
 		expansionDict = searchUtility.combineExpansionTerms(
 			expansionDict,
@@ -203,91 +361,43 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			cleanedAbbreviations,
 			userId
 		);
-		// LOGGER.info('exp: ' + expansionDict);
+
 		await redisAsyncClient.select(redisAsyncClientDB);
-		let searchResults;
-		if (searchType === 'Sentence') {
-			try {
-				const sentenceResults = await mlApi.getSentenceTransformerResults(searchText, userId);
-				const filenames = sentenceResults.map(({ id }) => id);
-
-				const docSearchRes = await documentSearchUsingParaId(
-					req,
-					{ ...req.body, expansionDict, index, filenames },
-					userId
-				);
-
-				if (sentenceResults === TRANSFORM_ERRORED) {
-					searchResults.transformFailed = true;
-				} else {
-					searchResults = docSearchRes;
-				}
-			} catch (e) {
-				if (forCacheReload) {
-					throw Error('Cannot transform document search terms in cache reload');
-				}
-				LOGGER.error(`Error sentence transforming document search results ${e.message}`, '7EYPXX7', userId);
-			}
-		} else {
-			// get results
-			try {
-				searchResults = await documentSearch(req, { ...req.body, expansionDict, index, operator }, userId);
-			} catch (e) {
-				const { message } = e;
-				LOGGER.error(message, 'GRXU38P', userId);
-				throw e;
-			}
-		}
+		let searchResults = await documentSearchHelperDoDocSearch({
+			searchType,
+			searchText,
+			userId,
+			req,
+			expansionDict,
+			index,
+			forCacheReload,
+			operator,
+			searchResults,
+		});
 
 		// insert crawler dates into search results
 		searchResults = await dataTracker.crawlerDateHelper(searchResults, userId);
 
-		// use transformer on results
-		if (searchType === 'Intelligent') {
-			try {
-				const { docs } = searchResults;
-				const transformed = await transformDocumentSearchResults(docs, searchText, userId);
-				if (transformed === TRANSFORM_ERRORED) {
-					searchResults.transformFailed = true;
-				} else {
-					searchResults.docs = transformed;
-				}
-			} catch (e) {
-				if (forCacheReload) {
-					throw Error('Cannot transform document search terms in cache reload');
-				}
-				LOGGER.error(`Error transforming document search results ${e.message}`, 'U64MDOA', userId);
-			}
-		}
+		await documentSearchHelperTransformResults(searchType, searchResults, searchText, userId);
+		await documentSearchHelperWriteToCache(
+			useGCCache,
+			searchResults,
+			redisKey,
+			redisDB,
+			historyRec,
+			forCacheReload,
+			userId
+		);
 
-		// try to store to cache
-		if (useGCCache && searchResults && redisKey) {
-			try {
-				const timestamp = new Date().getTime();
-				LOGGER.info(`Storing new keyword cache entry: ${redisKey}`);
-				await redisDB.set(redisKey, JSON.stringify(searchResults));
-				await redisDB.set(redisKey + ':time', timestamp);
-				historyRec.cachedResult = false;
-			} catch (e) {
-				if (forCacheReload) {
-					throw Error('Storing to cache failed in cache reload');
-				}
-
-				LOGGER.error(e.message, 'WVVCLPX', userId);
-			}
-		}
-
-		// try storing results record
-		if (!forCacheReload) {
-			try {
-				const { totalCount } = searchResults;
-				historyRec.endTime = new Date().toISOString();
-				historyRec.numResults = totalCount;
-				await storeRecordOfSearchInPg(historyRec, isClone, cloneData, showTutorial);
-			} catch (e) {
-				LOGGER.error(e.message, 'MPK1GGN', userId);
-			}
-		}
+		await documentSearchHelperWriteToPG(
+			forCacheReload,
+			searchResults,
+			historyRec,
+			isClone,
+			cloneData,
+			showTutorial,
+			userId
+		);
 
 		return searchResults;
 	} catch (err) {
@@ -302,7 +412,7 @@ async function documentSearchHelper(req, userId, storeHistory) {
 	}
 }
 
-async function storeRecordOfSearchInPg(historyRec, isClone, cloneData = {}, showTutorial) {
+async function storeRecordOfSearchInPg(historyRec, _isClone, _cloneData, showTutorial) {
 	let userId = 'Unknown';
 	try {
 		const {
@@ -348,17 +458,13 @@ function getESClient(isClone, cloneData, permissions, index) {
 	let esClientName = 'gamechanger';
 	let esIndex = 'gamechanger';
 	if (isClone) {
-		switch (cloneData.clone_data.esCluster) {
-			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-					esClientName = 'eda';
-					esIndex = constants.EDA_ELASTIC_SEARCH_OPTS.index;
-				} else {
-					throw 'Unauthorized';
-				}
-				break;
-			default:
-				esClientName = 'gamechanger';
+		if (cloneData.clone_data.esCluster === 'eda') {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esClientName = 'eda';
+				esIndex = constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			} else {
+				throw new Error('Unauthorized');
+			}
 		}
 
 		if (index) {
@@ -435,6 +541,25 @@ async function transformDocumentSearchResults(docs, searchText, userId) {
 	}
 }
 
+function documentSearchHelperEDA(isClone, cloneData, permissions, body, userId, esQuery, esClientName) {
+	if (
+		isClone &&
+		cloneData.clone_data.esCluster === 'eda' &&
+		(permissions.includes('View EDA') || permissions.includes('Webapp Super Admin'))
+	) {
+		const { extSearchFields = [], extRetrieveFields = [] } = constants.EDA_ELASTIC_SEARCH_OPTS;
+
+		body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
+		body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
+		esQuery = searchUtility.getElasticsearchPagesQuery(body, userId);
+
+		esClientName = 'eda';
+	} else if (isClone && cloneData.clone_data.esCluster === 'eda') {
+		throw new Error('Unauthorized');
+	}
+	return [esQuery, esClientName];
+}
+
 async function documentSearch(req, body, userId) {
 	try {
 		const permissions = req.permissions ? req.permissions : [];
@@ -456,35 +581,23 @@ async function documentSearch(req, body, userId) {
 		let esIndex = index;
 		let esQuery = '';
 
-		if (isClone) {
-			switch (cloneData.clone_data.esCluster) {
-				case 'eda':
-					if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-						const { extSearchFields = [], extRetrieveFields = [] } = constants.EDA_ELASTIC_SEARCH_OPTS;
+		[esQuery, esClientName] = documentSearchHelperEDA(
+			isClone,
+			cloneData,
+			permissions,
+			body,
+			userId,
+			esQuery,
+			esClientName
+		);
 
-						body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
-						body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
-						esQuery = searchUtility.getElasticsearchPagesQuery(body, userId);
-
-						esClientName = 'eda';
-					} else {
-						throw 'Unauthorized';
-					}
-					break;
-				default:
-					esClientName = 'gamechanger';
-			}
-		}
-
-		if (esQuery === '') {
-			if (forGraphCache) {
-				esQuery = searchUtility.getElasticsearchQueryForGraphCache(body, userId);
-			} else if (searchType === 'Simple') {
-				esQuery = searchUtility.getSimpleSyntaxElasticsearchQuery(body, userId);
-				esIndex = constants.GAME_CHANGER_OPTS.simpleIndex;
-			} else {
-				esQuery = searchUtility.getElasticsearchQuery(body, userId);
-			}
+		if (esQuery === '' && forGraphCache) {
+			esQuery = searchUtility.getElasticsearchQueryForGraphCache(body, userId);
+		} else if (esQuery === '' && searchType === 'Simple') {
+			esQuery = searchUtility.getSimpleSyntaxElasticsearchQuery(body, userId);
+			esIndex = constants.GAME_CHANGER_OPTS.simpleIndex;
+		} else if (esQuery === '') {
+			esQuery = searchUtility.getElasticsearchQuery(body, userId);
 		}
 
 		const results = await dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
@@ -574,7 +687,5 @@ async function documentSearchUsingParaId(req, body, userId) {
 		throw msg;
 	}
 }
-
-// const simplePdfSearchHandler = new SimplePdfSearchHandler();
 
 module.exports = SimplePdfSearchHandler;
