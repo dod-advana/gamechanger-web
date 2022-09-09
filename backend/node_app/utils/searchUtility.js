@@ -88,7 +88,7 @@ class SearchUtility {
 	}
 
 	// helper for combineExpansionTerms
-	expandRelatedSearches(relatedSearches) {
+	expandRelatedSearches(relatedSearches, result, key) {
 		if (relatedSearches && relatedSearches.length > 0) {
 			relatedSearches.forEach((term) => {
 				result[key].push({ phrase: term, source: 'related' });
@@ -153,13 +153,12 @@ class SearchUtility {
 			}
 
 			const wordsList = this.getWordsList(similarWords, expandedWords);
-			this.expandRelatedSearches(relatedSearches);
+			this.expandRelatedSearches(relatedSearches, result, key);
 
 			while (result[key].length < 12 && timesSinceLastAdd < 18) {
 				const checkSynonyms = nextIsSyn && synonyms && synonyms[nextSynIndex];
 				const checkAbbreviations = nextIsAbb && abbreviationExpansions && abbreviationExpansions[nextAbbIndex];
 				const checkWordList = !nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex];
-
 				const helperResult = this.combineExpansionTermsLoopHelper(
 					checkSynonyms,
 					checkAbbreviations,
@@ -184,7 +183,7 @@ class SearchUtility {
 					nextIsAbb = true;
 				}
 			}
-
+			console.log('result5: ', result);
 			return this.cleanExpansions(key, result);
 		} catch (err) {
 			const { message } = err;
@@ -429,7 +428,7 @@ class SearchUtility {
 	}
 
 	// helper for getElasticsearchQuery
-	setQueryMainSearchText(searchText, mainKeywords, query) {
+	setQueryMainSearchText(searchText, mainKeywords, query, analyzer) {
 		if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
 			const titleMainSearch = {
 				query_string: {
@@ -802,7 +801,7 @@ class SearchUtility {
 			};
 
 			this.setQuerySort(sort, order, query);
-			this.setQueryMainSearchText(searchText, mainKeywords, query);
+			this.setQueryMainSearchText(searchText, mainKeywords, query, analyzer);
 			this.setQueryExtSearchFields(extSearchFields, searchText, query);
 			this.setQueryPubDate(publicationDateAllTime, publicationDateFilter, query);
 
@@ -1498,20 +1497,13 @@ class SearchUtility {
 					const pageSet = new Set();
 
 					// handle r.inner_hits
-					this.cleanUpEsResultsHandleInnerHits(
-						rawHit,
-						isCompareReturn,
-						pageSet,
-						user,
-						result,
-						paragraphResults
-					);
+					this.cleanUpEsResultsHandleInnerHits(r, isCompareReturn, pageSet, user, result, paragraphResults);
 
 					result.esIndex = index;
 
 					this.cleanUpEsResultsHandleKeyW5(result);
 					this.cleanUpEsResultsHandleEmptyRefList(result);
-					this.cleanUpEsResultsHandleSort(rawHit, result);
+					this.cleanUpEsResultsHandleSort(r, result);
 
 					results.docs.push(result);
 				}
