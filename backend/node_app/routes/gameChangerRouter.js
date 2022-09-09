@@ -155,6 +155,7 @@ router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBl
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.post('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/user/getUserDataByIDs', user.getUserDataByIDs);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);

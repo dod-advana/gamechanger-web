@@ -101,16 +101,8 @@ const JBookProfilePage = () => {
 
 	useEffect(() => {
 		const getUserData = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
-			const newMap = {};
-			data.data.users.forEach((user) => {
-				newMap[user.id] = user;
-			});
-
 			const currentUserData = await gameChangerUserAPI.getUserProfileData();
 			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
-
-			setUserMap(newMap);
 		};
 
 		if (!init) {
@@ -293,7 +285,7 @@ const JBookProfilePage = () => {
 
 		const userData = Auth.getTokenPayload();
 
-		if (userData.extra_fields && userData.extra_fields.jbook) {
+		if (userData?.extra_fields?.jbook) {
 			const tmpPermissions = {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
@@ -312,14 +304,25 @@ const JBookProfilePage = () => {
 					cloneName: 'jbook',
 					options: {},
 				})
-				.then((data) => {
-					let portfolioData = data.data !== undefined ? data.data : [];
+				.then(async ({ data }) => {
+					let portfolioData = data !== undefined ? data : [];
 					let map = {};
 					for (let item of portfolioData) {
 						map[item.name] = item;
 					}
 					setMap(map);
 					setState(dispatch, { portfolios: portfolioData });
+
+					const userIdSet = [];
+					Object.keys(map).forEach((portfolio) => {
+						map[portfolio].user_ids.forEach((id) => {
+							if (!userIdSet.includes(id)) userIdSet.push(id);
+						});
+					});
+					const { data: userData } = await gameChangerAPI.getUserDataByIDs(userIdSet);
+					const newUserMap = {};
+					userData.users.forEach((user) => (newUserMap[user.id] = user));
+					setUserMap(newUserMap);
 				});
 		};
 		getPortfolioData();
@@ -960,15 +963,6 @@ const JBookProfilePage = () => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		await gameChangerAPI.callDataFunction({
-			functionName: 'createComment',
-			cloneName: 'jbook',
-			options: {
-				docID,
-				portfolioName: selectedPortfolio,
-				message: 'just another super cool comment',
-			},
-		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
