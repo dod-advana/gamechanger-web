@@ -285,7 +285,7 @@ const JBookProfilePage = () => {
 
 		const userData = Auth.getTokenPayload();
 
-		if (userData.extra_fields && userData.extra_fields.jbook) {
+		if (userData?.extra_fields?.jbook) {
 			const tmpPermissions = {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
