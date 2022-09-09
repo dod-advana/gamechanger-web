@@ -183,7 +183,7 @@ class SearchUtility {
 					nextIsAbb = true;
 				}
 			}
-			console.log('result5: ', result);
+
 			return this.cleanExpansions(key, result);
 		} catch (err) {
 			const { message } = err;
@@ -1410,16 +1410,8 @@ class SearchUtility {
 		if (rawHit.inner_hits) {
 			if (rawHit.inner_hits.paragraphs && !isCompareReturn) {
 				this.cleanUpEsResultsAddOneHitPerPage(pageSet, rawHit.inner_hits.paragraphs.hits.hits, user, result);
-				rawHit.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-					const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-					let pageNumber = pageIndex + 1;
-					this.cleanUpEsResultsAddOneHitPerPage(pageSet, pageNumber, parahit, user, result);
-				});
-
 				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-
 				this.cleanUpEsResultsHandleHighlights(rawHit, result);
-
 				result.pageHitCount = pageSet.size;
 			} else if (rawHit.inner_hits.paragraphs && isCompareReturn) {
 				result.paragraphs = [];

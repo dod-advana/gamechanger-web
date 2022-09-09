@@ -187,6 +187,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 
 			const actual = await target.getESProjectData(req, 'Test');
@@ -301,6 +302,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -414,6 +416,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);

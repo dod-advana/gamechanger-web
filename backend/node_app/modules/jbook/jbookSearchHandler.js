@@ -138,7 +138,7 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
-			const { jbookSearchSettings, search_before } = req.body;
+			const { jbookSearchSettings, search_before = [] } = req.body;
 			// clean empty options:
 			Object.keys(jbookSearchSettings).forEach((key) => {
 				if (

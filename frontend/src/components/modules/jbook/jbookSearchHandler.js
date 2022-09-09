@@ -21,14 +21,6 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
 
-// const getAndSetDidYouMean = (index, searchText, dispatch) => {
-// 	jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-// 		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
-// 	}).catch(_ => {
-// 		//do nothing
-// 	})
-// };
-
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
 		const recentSearches = localStorage.getItem(`recentjbookSearches`) || '[]';
@@ -266,7 +258,6 @@ const JBookSearchHandler = {
 	async handleEDASearch(state, dispatch) {
 		const { searchText = '', edaResultsPage, edaCloneData } = state;
 
-		// let searchResults = [];
 		setState(dispatch, {
 			edaCount: 0,
 			edaSearchResults: [],
@@ -290,8 +281,6 @@ const JBookSearchHandler = {
 					charsPadding,
 				},
 			});
-
-			// const t1 = new Date().getTime();
 
 			if (_.isObject(results.data)) {
 				let { docs, totalCount } = results.data;
@@ -329,11 +318,10 @@ const JBookSearchHandler = {
 		}
 	},
 
-	parseSearchURL(defaultState, url) {
+	parseSearchURL(_defaultState, url) {
 		if (!url) url = window.location.href;
 
 		const parsed = {};
-		// const newSearchSettings = {};
 
 		const searchText = getQueryVariable('q', url);
 		const offsetURL = getQueryVariable('offset', url);
@@ -375,7 +363,9 @@ const JBookSearchHandler = {
 		window.history.pushState(null, document.title, linkString);
 	},
 
-	getPresearchData(state) {},
+	getPresearchData(_state) {
+		return undefined;
+	},
 
 	processSearchSettings(state) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);

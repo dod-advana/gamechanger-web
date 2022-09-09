@@ -232,7 +232,7 @@ const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHi
 	);
 };
 
-export default function DocumentExplorer({
+export default function PolicyDocumentExplorer({
 	totalCount,
 	resultsPerPage,
 	onPaginationClick,
@@ -518,6 +518,9 @@ export default function DocumentExplorer({
 									'Pagination',
 									page
 								);
+								setState(dispatch, {
+									visitEarlierPage: page < resultsPage,
+								});
 								onPaginationClick(page);
 							}}
 						/>
