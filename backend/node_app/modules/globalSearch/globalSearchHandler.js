@@ -224,6 +224,7 @@ class GlobalSearchHandler extends SearchHandler {
 				offset,
 				favoriteApps,
 				isForFavorites,
+				isVerbatimSearch,
 			};
 			const esQuery = getElasticSearchQueryForQlikApps(body, userId, this.logger);
 

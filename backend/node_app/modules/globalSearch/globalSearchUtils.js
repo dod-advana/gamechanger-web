@@ -22,9 +22,10 @@ const QLIK_ES_FIELDS = [
 	'name_t',
 	'description_t',
 	'streamName_t',
-	'streamCustomProperties_s',
-	'appCustomProperties_s',
-	'businessDomains_s',
+	'streamCustomProperties_n',
+	'appCustomProperties_n',
+	'businessDomains_n',
+	'tags_n',
 ];
 
 const QLIK_ES_MAPPING = {
@@ -171,11 +172,14 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ parsedQuery, offset, limit, _operator = 'and', searchText, isForFavorites = false, favoriteApps = [] },
+	{ parsedQuery, offset, limit, isVerbatimSearch, searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
 	try {
+		const textFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_t') !== -1);
+		const nestedFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_n') !== -1);
+		const wildcardSearchText = isVerbatimSearch ? [parsedQuery] : parsedQuery.split(' ');
 		let query = {
 			track_total_hits: true,
 			from: offset,
@@ -186,6 +190,14 @@ const getElasticSearchQueryForQlikApps = (
 						{
 							match_phrase: {
 								name_t: searchText,
+							},
+						},
+						{
+							query_string: {
+								fields: textFields,
+								query: parsedQuery,
+								boost: 0.5,
+								analyzer: 'my_analyzer',
 							},
 						},
 					],
@@ -204,12 +216,47 @@ const getElasticSearchQueryForQlikApps = (
 				terms: { 'id.keyword': favoriteApps },
 			};
 		} else {
-			QLIK_ES_FIELDS.forEach((field) => {
+			nestedFields.forEach((field) => {
 				query.query.bool.should.push({
-					wildcard: {
-						[field]: `*${parsedQuery}*`,
+					nested: {
+						path: field,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {
+									[`${field}.items`]: {
+										fragmenter: 'simple',
+										type: 'unified',
+									},
+								},
+							},
+						},
+						query: {
+							bool: {
+								should: wildcardSearchText.map((wildcardSearch) => {
+									return {
+										wildcard: {
+											[`${field}.items`]: `*${wildcardSearch}*`,
+										},
+									};
+								}),
+							},
+						},
 					},
 				});
+			});
+
+			textFields.forEach((field) => {
+				wildcardSearchText.forEach((wildcardSearch) => {
+					query.query.bool.should.push({
+						wildcard: {
+							[field]: `*${wildcardSearch}*`,
+						},
+					});
+				});
+			});
+
+			QLIK_ES_FIELDS.forEach((field) => {
 				query.highlight.fields[field] = {};
 			});
 		}
@@ -247,6 +294,24 @@ const cleanQlikESResults = (esResults, userId, logger) => {
 					});
 				});
 			}
+
+			const innerHits = hit.inner_hits || {};
+
+			Object.keys(innerHits).forEach((innerHitKey) => {
+				const innerHitObj = innerHits[innerHitKey];
+				const innerHitHits = innerHitObj?.hits?.hits || [];
+
+				innerHitHits.forEach((innerHitsHit) => {
+					if (innerHitsHit.highlight) {
+						Object.keys(innerHitsHit.highlight).forEach((hitKey) => {
+							result.highlights.push({
+								title: QLIK_ES_MAPPING[innerHitKey].newName,
+								fragment: innerHitsHit.highlight[hitKey][0],
+							});
+						});
+					}
+				});
+			});
 
 			searchResults.hits.push(result);
 		});
