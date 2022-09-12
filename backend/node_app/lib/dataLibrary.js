@@ -327,20 +327,17 @@ class DataLibrary {
 
 			try {
 				res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
-				let error = false;
 				this.awsS3Client
 					.getObject(params)
 					.createReadStream()
 					.on('error', function (err) {
 						//Handles errors on the read stream
-						error = true;
 						res.status(500);
 						res.end();
 					})
 					.pipe(res)
 					.on('error', function (err) {
 						//Handles errors on the write stream
-						error = true;
 						res.status(500);
 						res.end();
 					})
