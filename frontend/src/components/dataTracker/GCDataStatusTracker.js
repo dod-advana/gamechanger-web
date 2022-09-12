@@ -952,6 +952,7 @@ const GCDataStatusTracker = (props) => {
 								borderRadius: `5px 0 0 0`,
 							}}
 							title="crawlerTable"
+							data-cy="progress-tab"
 							onClick={() => handleTabClicked('crawler')}
 						>
 							<Typography variant="h6" display="inline">
@@ -965,6 +966,7 @@ const GCDataStatusTracker = (props) => {
 								borderRadius: '0 0 0 0',
 							}}
 							title="userHistory"
+							data-cy="documents-tab"
 							onClick={() => handleTabClicked('documents')}
 						>
 							<Typography variant="h6" display="inline" title="cardView">
@@ -978,6 +980,7 @@ const GCDataStatusTracker = (props) => {
 								borderRadius: `0 5px 0 0`,
 							}}
 							title="neo4jDataTracker"
+							data-cy="knowledge-graph-tab"
 							onClick={() => handleTabClicked('neo4j')}
 						>
 							<Typography variant="h6" display="inline" title="cardView">

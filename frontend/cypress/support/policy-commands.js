@@ -45,3 +45,32 @@ Cypress.Commands.add('getFavoriteCard', (favoriteTitle, ...args) => {
 Cypress.Commands.add('switchResultsTab', (resultType) => {
 	cy.getDataCy('tabs-container', { timeout: 10000 }).find('p').contains(resultType).should('exist').click();
 });
+
+/**
+ * Clicks the Tab from within Data Status Tracker
+ */
+Cypress.Commands.add('switchDstTab', (dstTabDataCyTag) => {
+	cy.getDataCy(dstTabDataCyTag, { timeout: 15000 }).should('exist').click();
+	cy.get('.-loading.-active', { timeout: 30000 }).should('not.exist');
+});
+
+/**
+ * Types in the filter box on the DST Columns at the given column index
+ */
+Cypress.Commands.add('typeIntoDstFilter', (colIndex, textToFilter) => {
+	cy.get('.rt-tr>div').find('input').eq(colIndex).scrollIntoView().type(textToFilter);
+	//cy.get('.-loading.-active', { timeout: 30000 }).should('not.exist');
+});
+
+Cypress.Commands.add('setupDSTIntercepts', () => {
+	cy.intercept('POST', '/api/gamechanger/getCrawlerMetadata').as('getCrawlerMetadata');
+	cy.intercept('POST', '/api/gamechanger/dataTracker/getTrackedData').as('getTrackedData');
+});
+
+Cypress.Commands.add('waitForProgressTableToLoad', () => {
+	cy.wait('@getCrawlerMetadata', { timeout: 15000 });
+});
+
+Cypress.Commands.add('waitForDocumentsTableToLoad', () => {
+	cy.wait('@getTrackedData', { timeout: 15000 });
+});
