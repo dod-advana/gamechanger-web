@@ -372,7 +372,7 @@ export default class GameChangerAPI {
 				}/${fileName}`
 			);
 
-			if (cloneData.clone_name === 'eda') {
+			if (cloneData.clone_name === 'eda' || cloneData.clone_name === 'jbook') {
 				filename = encodeURIComponent(fileName);
 			}
 
