@@ -742,6 +742,10 @@ const PolicyDocumentsComparisonTool = ({
 		setLeftPanelOpen(!leftPanelOpen);
 	};
 
+	const getDocumentGridWidth = () => {
+		return leftPanelOpen ? 6 : 8;
+	};
+
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
 			<Grid item xs={12}>
@@ -851,7 +855,16 @@ const PolicyDocumentsComparisonTool = ({
 					)}
 				</div>
 			</Grid>
-			<Grid item xs={3} style={{ marginTop: 20, display: leftPanelOpen ? 'block' : 'none' }}>
+			<Grid
+				item
+				xs={2}
+				style={{
+					marginTop: 20,
+					display: leftPanelOpen ? 'block' : 'none',
+					maxWidth: 'calc(16.666667% + 20px)',
+					flexBasis: 'calc(16.666667% + 20px)',
+				}}
+			>
 				<div style={{ marginRight: 20 }}>
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
@@ -878,7 +891,11 @@ const PolicyDocumentsComparisonTool = ({
 				</div>
 			</Grid>
 			{returnedDocs.length <= 0 && !loading && (
-				<Grid item xs={9}>
+				<Grid
+					item
+					xs={10}
+					style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}
+				>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
@@ -947,7 +964,11 @@ const PolicyDocumentsComparisonTool = ({
 				</Grid>
 			)}
 			{loading && (
-				<Grid item xs={9}>
+				<Grid
+					item
+					xs={10}
+					style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}
+				>
 					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
@@ -957,8 +978,14 @@ const PolicyDocumentsComparisonTool = ({
 				<>
 					<Grid
 						item
-						xs={leftPanelOpen ? 5 : 8}
-						style={{ marginTop: 20, position: 'relative', height: '800px' }}
+						xs={getDocumentGridWidth()}
+						style={{
+							marginTop: 20,
+							position: 'relative',
+							height: '800px',
+							maxWidth: `calc(${getDocumentGridWidth() / 0.12}% - 20px)`,
+							flexBasis: `calc(${getDocumentGridWidth() / 0.12}% - 20px)`,
+						}}
 					>
 						<div
 							className="searchdemo-vertical-bar-toggle"
@@ -1015,7 +1042,7 @@ const PolicyDocumentsComparisonTool = ({
 							height: '800px',
 							overflowY: 'auto',
 							maxWidth: 'calc(33.333333% + 20px)',
-							flexBasis: 'calc((33.333333% + 20px)',
+							flexBasis: 'calc(33.333333% + 20px)',
 							paddingLeft: '20px',
 							marginLeft: '-20px',
 						}}
