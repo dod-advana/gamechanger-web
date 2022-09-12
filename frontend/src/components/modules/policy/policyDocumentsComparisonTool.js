@@ -960,7 +960,9 @@ const PolicyDocumentsComparisonTool = ({
 										'pdfViewer',
 										'viewerContainer',
 										compareDocument.filename,
-										'PDF Viewer'
+										'PDF Viewer',
+										'gamechanger',
+										gameChangerAPI
 									)
 								}
 								style={{ width: '100%', height: '100%' }}
