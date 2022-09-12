@@ -231,6 +231,17 @@ const JBookProfilePage = () => {
 
 	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
+		console.log('this is userData', userData);
+		console.log('this is portfolios', portfolios);
+		console.log('this is portfolio name', portfolioName);
+
+		portfolios.forEach((portfolio) => {
+			if (portfolio.name === portfolioName) {
+				if (!portfolio.user_ids.includes(userData.id)) {
+					return;
+				}
+			}
+		});
 		let allBYProjectData;
 
 		try {
