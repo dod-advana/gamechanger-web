@@ -981,7 +981,7 @@ const cardHandler = {
 									clickFnPDF(item.dtic_pdf_location_s, cloneName, item.dtic_pdf_page_s);
 								}}
 							>
-								Open
+								Open Document
 							</CardButton>
 						)}
 						<CardButton
