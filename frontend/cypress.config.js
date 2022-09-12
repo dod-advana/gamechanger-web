@@ -6,6 +6,7 @@ module.exports = defineConfig({
 	chromeWebSecurity: false,
 	viewportHeight: 1080,
 	viewportWidth: 1920,
+	defaultCommandTimeout: 15000,
 	component: {
 		devServer: {
 			framework: 'create-react-app',
@@ -52,5 +53,9 @@ module.exports = defineConfig({
 		overwrite: false,
 		html: false,
 		json: true,
+	},
+	retries: {
+		runMode: 3,
+		openMode: 0,
 	},
 });
