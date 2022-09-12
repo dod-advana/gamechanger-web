@@ -977,7 +977,6 @@ const cardHandler = {
 								href={'#'}
 								onClick={(e) => {
 									e.preventDefault();
-									console.log(item);
 									clickFnPDF(item.dtic_pdf_location_s, cloneName, item.dtic_pdf_page_s);
 								}}
 							>

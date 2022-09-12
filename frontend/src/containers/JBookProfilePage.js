@@ -1376,7 +1376,6 @@ const JBookProfilePage = () => {
 								marginLeft: '0',
 							}}
 							onClick={() => {
-								console.log(projectData);
 								clickFnPDF(
 									projectData.dtic_pdf_location_s,
 									cloneData.clone_name,
@@ -1398,7 +1397,6 @@ const JBookProfilePage = () => {
 								marginLeft: '0',
 							}}
 							onClick={() => {
-								console.log(projectData);
 								clickFnPDF(projectData.pdf_location_s, cloneData.clone_name);
 							}}
 						>
