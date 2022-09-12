@@ -291,7 +291,7 @@ class JBookDataHandler extends DataHandler {
 	async getAllBYProjectData(req, userId) {
 		try {
 			const { id } = req.body;
-
+			console.log('this is the userId', userId);
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
 			const esResults = await this.dataLibrary.queryElasticSearch(
