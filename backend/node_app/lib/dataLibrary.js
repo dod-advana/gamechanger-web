@@ -334,7 +334,6 @@ class DataLibrary {
 					.on('error', function (err) {
 						//Handles errors on the read stream
 						error = true;
-						console.log('Error reading file');
 						res.status(500);
 						res.end();
 					})
@@ -342,16 +341,11 @@ class DataLibrary {
 					.on('error', function (err) {
 						//Handles errors on the write stream
 						error = true;
-						console.log('Error writing file');
-						console.log(err);
 						res.status(500);
 						res.end();
 					})
 					.on('finish', function () {
 						res.end();
-						if (!error) {
-							console.log('Successfully downloaded file from S3');
-						}
 					});
 			} catch (err) {
 				this.logger.error(err, 'IPOQHZS', userId);
