@@ -55,6 +55,7 @@ const PolicyDocumentsComparisonTool = ({
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -737,6 +738,10 @@ const PolicyDocumentsComparisonTool = ({
 		return <></>;
 	};
 
+	const handleLeftPanelToggle = () => {
+		setLeftPanelOpen(!leftPanelOpen);
+	};
+
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
 			<Grid item xs={12}>
@@ -846,33 +851,35 @@ const PolicyDocumentsComparisonTool = ({
 					)}
 				</div>
 			</Grid>
-			<Grid item xs={2} style={{ marginTop: 20 }}>
-				<GCAnalystToolsSideBar context={context} results={returnedDocs} />
-				<GCButton
-					isSecondaryBtn
-					onClick={() => resetAdvancedSettings(dispatch)}
-					style={{ margin: 0, width: '100%' }}
-				>
-					Clear Filters
-				</GCButton>
-				{!loading && returnedDocs.length > 0 && (
+			<Grid item xs={3} style={{ marginTop: 20, display: leftPanelOpen ? 'block' : 'none' }}>
+				<div style={{ marginRight: 20 }}>
+					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
-						onClick={() => {
-							setNoResults(false);
-							setReturnedDocs([]);
-							setNeedsSort(true);
-							setState(dispatch, { runDocumentComparisonSearch: true });
-						}}
-						style={{ margin: '10px 0 0 0', width: '100%' }}
-						disabled={!filterChange}
+						isSecondaryBtn
+						onClick={() => resetAdvancedSettings(dispatch)}
+						style={{ margin: 0, width: '100%' }}
 					>
-						Apply filters
+						Clear Filters
 					</GCButton>
-				)}
+					{!loading && returnedDocs.length > 0 && (
+						<GCButton
+							onClick={() => {
+								setNoResults(false);
+								setReturnedDocs([]);
+								setNeedsSort(true);
+								setState(dispatch, { runDocumentComparisonSearch: true });
+							}}
+							style={{ margin: '10px 0 0 0', width: '100%' }}
+							disabled={!filterChange}
+						>
+							Apply filters
+						</GCButton>
+					)}
+				</div>
 			</Grid>
 			{returnedDocs.length <= 0 && !loading && (
-				<Grid item xs={10}>
-					<DocumentInputContainer>
+				<Grid item xs={9}>
+					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
 								<Grid container style={{ display: 'flex', flexDirection: 'column' }}>
@@ -940,7 +947,7 @@ const PolicyDocumentsComparisonTool = ({
 				</Grid>
 			)}
 			{loading && (
-				<Grid item xs={10}>
+				<Grid item xs={9}>
 					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
@@ -948,7 +955,38 @@ const PolicyDocumentsComparisonTool = ({
 			)}
 			{!loading && returnedDocs.length > 0 && (
 				<>
-					<Grid item xs={6} style={{ marginTop: 20 }}>
+					<Grid
+						item
+						xs={leftPanelOpen ? 5 : 8}
+						style={{ marginTop: 20, position: 'relative', height: '800px' }}
+					>
+						<div
+							className="searchdemo-vertical-bar-toggle"
+							style={{ bottom: '0px' }}
+							onClick={handleLeftPanelToggle}
+						>
+							<i
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+								style={{
+									color: 'white',
+									verticalAlign: 'sub',
+									height: 20,
+									width: 20,
+									margin: '20px 0 20px 2px',
+								}}
+							/>
+							<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
+							<i
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+								style={{
+									color: 'white',
+									verticalAlign: 'sub',
+									height: 20,
+									width: 20,
+									margin: '20px 0 20px 2px',
+								}}
+							/>
+						</div>
 						<div style={{ margin: '0px 20px', height: '800px' }}>
 							<iframe
 								title={'PDFViewer'}
@@ -965,7 +1003,7 @@ const PolicyDocumentsComparisonTool = ({
 										gameChangerAPI
 									)
 								}
-								style={{ width: '100%', height: '100%' }}
+								style={{ width: '100%', height: '100%', border: 'none' }}
 							/>
 						</div>
 					</Grid>
