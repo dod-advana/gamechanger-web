@@ -35,7 +35,7 @@ const clearFavoriteSearchUpdate = async (search, dispatch) => {
 };
 
 // set url, trim search text, determine search favorite, set recent searches
-const setupSearchState = (state, dispatch) => {
+const setupSearchState = (state, dispatch, setSearchURL) => {
 	const { searchText = '', userData, tabName, cloneData } = state;
 	const favSearchUrls = userData?.favorite_searches?.map((search) => {
 		return search.url;
@@ -177,60 +177,6 @@ const getOrgMajcomFilters = (organizations, majcoms, allOrgsSelected) => {
 	return { orgFilterText };
 };
 
-const setSearchURL = (state) => {
-	const { searchText, resultsPage, cloneData } = state;
-	const {
-		allOrgsSelected,
-		organizations,
-		startDate,
-		endDate,
-		issueAgency,
-		issueOfficeDoDAAC,
-		issueOfficeName,
-		allYearsSelected,
-		fiscalYears,
-		allDataSelected,
-		contractData,
-		minObligatedAmount,
-		maxObligatedAmount,
-		contractsOrMods,
-		majcoms,
-	} = state.edaSearchSettings;
-
-	let { orgFilterText } = getOrgMajcomFilters(organizations, majcoms, allOrgsSelected);
-
-	const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
-	const issueOfficeNameText = issueOfficeName ?? undefined;
-	const fiscalYearsText =
-		!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
-	const contractDataText =
-		!allDataSelected && contractData ? Object.keys(_.pickBy(contractData, (value) => value)).join('_') : undefined;
-	const minObligatedAmountText = minObligatedAmount ?? undefined;
-	const maxObligatedAmountText = maxObligatedAmount ?? undefined;
-	const modTypeText = contractsOrMods ?? undefined;
-	const startDateText = startDate ?? undefined;
-	const endDateText = endDate ?? undefined;
-	const issueAgencyText = issueAgency ?? undefined;
-	const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
-
-	setURLParams({
-		cloneData,
-		searchText,
-		offset,
-		orgFilterText,
-		issueOfficeDoDAACText,
-		issueOfficeNameText,
-		fiscalYearsText,
-		contractDataText,
-		minObligatedAmountText,
-		maxObligatedAmountText,
-		modTypeText,
-		startDateText,
-		endDateText,
-		issueAgencyText,
-	});
-};
-
 // parse the organizations or sub organizations out of the url param
 const parseOrgs = (orgURL, newSearchSettings) => {
 	const hasSubOrgs = orgURL.indexOf(':') !== -1;
@@ -289,6 +235,62 @@ const parseContractDataURL = (contractDataURL, newSearchSettings) => {
 };
 
 const EdaSearchHandler = {
+	setSearchURL(state) {
+		const { searchText, resultsPage, cloneData } = state;
+		const {
+			allOrgsSelected,
+			organizations,
+			startDate,
+			endDate,
+			issueAgency,
+			issueOfficeDoDAAC,
+			issueOfficeName,
+			allYearsSelected,
+			fiscalYears,
+			allDataSelected,
+			contractData,
+			minObligatedAmount,
+			maxObligatedAmount,
+			contractsOrMods,
+			majcoms,
+		} = state.edaSearchSettings;
+
+		let { orgFilterText } = getOrgMajcomFilters(organizations, majcoms, allOrgsSelected);
+
+		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
+		const issueOfficeNameText = issueOfficeName ?? undefined;
+		const fiscalYearsText =
+			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
+		const contractDataText =
+			!allDataSelected && contractData
+				? Object.keys(_.pickBy(contractData, (value) => value)).join('_')
+				: undefined;
+		const minObligatedAmountText = minObligatedAmount ?? undefined;
+		const maxObligatedAmountText = maxObligatedAmount ?? undefined;
+		const modTypeText = contractsOrMods ?? undefined;
+		const startDateText = startDate ?? undefined;
+		const endDateText = endDate ?? undefined;
+		const issueAgencyText = issueAgency ?? undefined;
+		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+
+		setURLParams({
+			cloneData,
+			searchText,
+			offset,
+			orgFilterText,
+			issueOfficeDoDAACText,
+			issueOfficeNameText,
+			fiscalYearsText,
+			contractDataText,
+			minObligatedAmountText,
+			maxObligatedAmountText,
+			modTypeText,
+			startDateText,
+			endDateText,
+			issueAgencyText,
+		});
+	},
+
 	async handleSearch(state, dispatch) {
 		setState(dispatch, { runSearch: false });
 
@@ -306,7 +308,7 @@ const EdaSearchHandler = {
 
 		try {
 			// set url, trim search text, determine search favorite, set recent searches
-			const { searchFavorite, url } = setupSearchState(state, dispatch);
+			const { searchFavorite, url } = setupSearchState(state, dispatch, this.setSearchURL);
 
 			const combinedSearch = 'false';
 			const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
@@ -422,7 +424,7 @@ const EdaSearchHandler = {
 					});
 				}
 
-				setSearchURL({
+				this.setSearchURL({
 					...state,
 					searchText,
 					resultsPage,
