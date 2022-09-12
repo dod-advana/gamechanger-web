@@ -855,9 +855,7 @@ const PolicyDocumentsComparisonTool = ({
 					)}
 				</div>
 			</Grid>
-			<Grid
-				item
-				xs={2}
+			<div
 				style={{
 					marginTop: 20,
 					display: leftPanelOpen ? 'block' : 'none',
@@ -889,13 +887,9 @@ const PolicyDocumentsComparisonTool = ({
 						</GCButton>
 					)}
 				</div>
-			</Grid>
+			</div>
 			{returnedDocs.length <= 0 && !loading && (
-				<Grid
-					item
-					xs={10}
-					style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}
-				>
+				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
@@ -961,24 +955,18 @@ const PolicyDocumentsComparisonTool = ({
 							<div className={'text'}>No results found</div>
 						</div>
 					)}
-				</Grid>
+				</div>
 			)}
 			{loading && (
-				<Grid
-					item
-					xs={10}
-					style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}
-				>
+				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
 					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
-				</Grid>
+				</div>
 			)}
 			{!loading && returnedDocs.length > 0 && (
 				<>
-					<Grid
-						item
-						xs={getDocumentGridWidth()}
+					<div
 						style={{
 							marginTop: 20,
 							position: 'relative',
@@ -1033,10 +1021,8 @@ const PolicyDocumentsComparisonTool = ({
 								style={{ width: '100%', height: '100%', border: 'none' }}
 							/>
 						</div>
-					</Grid>
-					<Grid
-						item
-						xs={4}
+					</div>
+					<div
 						style={{
 							marginTop: 20,
 							height: '800px',
@@ -1183,7 +1169,7 @@ const PolicyDocumentsComparisonTool = ({
 								);
 							})}
 						</div>
-					</Grid>
+					</div>
 				</>
 			)}
 		</Grid>
