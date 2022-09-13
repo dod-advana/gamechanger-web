@@ -220,10 +220,9 @@ class JBookSearchUtility {
 
 	cleanESResults(esResults, userId, reverseResultOrder = false) {
 		const results = [];
+		let searchResults = { totalCount: 0, docs: [] };
 
 		try {
-			let searchResults = { totalCount: 0, docs: [] };
-
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
 			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
@@ -284,7 +283,7 @@ class JBookSearchUtility {
 			console.log(e);
 			const { message } = e;
 			this.logger.error(message, '8V1IZLH', userId);
-			return results;
+			return searchResults;
 		}
 	}
 

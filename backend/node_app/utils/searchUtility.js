@@ -2519,11 +2519,11 @@ class SearchUtility {
 			return 'Relationship';
 		else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
 		else if (v instanceof Array) return 'Array';
-		else return false;
+		else return '';
 	}
 
 	getNeo4jType(v, isTest) {
-		if (v === null) return false;
+		if (v === null) return '';
 
 		if (isTest) {
 			return this.getNeo4jTypeIsTest(v);
@@ -2532,7 +2532,7 @@ class SearchUtility {
 			else if (v instanceof neo4jLib.types.Relationship) return 'Relationship';
 			else if (v instanceof neo4jLib.types.Path) return 'Path';
 			else if (v instanceof Array) return 'Array';
-			else return false;
+			else return '';
 		}
 	}
 
