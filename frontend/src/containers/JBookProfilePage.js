@@ -242,10 +242,16 @@ const JBookProfilePage = () => {
 				cloneName: cloneData.clone_name,
 				options: {
 					id,
-					user_id: userData.id,
-					selectedPortfolio,
+					portfolioName,
 				},
 			});
+
+			if (allBYProjectData.data === 'Unauthorized Entry Detected') {
+				let newHref = window.location.href;
+				newHref = newHref.split('#')[0];
+				newHref += '#/unauthorized';
+				window.location.replace(newHref);
+			}
 
 			if (allBYProjectData?.data) {
 				allBYProjectData = allBYProjectData.data;
