@@ -1445,7 +1445,7 @@ class SearchUtility {
 
 	cleanUpEsResultsHandleSort(rawHit, result) {
 		if (rawHit.sort) {
-			result.sort = r.sort;
+			result.sort = rawHit.sort;
 		}
 	}
 

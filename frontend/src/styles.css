@@ -885,6 +885,38 @@ html {
   ul.pagination li.active a {
 	z-index: 1 !important;
   }
+
+	.pagination-container {
+		display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+    justify-content: start;
+	}
+
+	ul.pagination-container li {
+		color: black !important;
+		padding: 11px 19px;
+	}
+
+	ul.pagination-container li:hover {
+		cursor: pointer;
+	}
+
+	ul.pagination-container li.active {
+		background-color: #1C2D65 !important;
+    border-color: #1C2D65 !important;
+    color: white !important;
+    padding: 11px 19px;
+	}
+
+	ul.pagination-container span {
+		padding: 11px 0px;
+	}
+
+	ul.pagination-container span:hover {
+		cursor: pointer;
+	}
   
   #disapproveAssignee .MuiSvgIcon-root {
 	color: #00838F !important;

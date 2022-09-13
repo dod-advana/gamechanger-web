@@ -15,7 +15,7 @@ import {
 	policyMetadata,
 } from '../../../utils/gamechangerUtils';
 
-import Pagination from 'react-js-pagination';
+import Pagination from '../../common/Pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
@@ -510,7 +510,8 @@ export default function PolicyDocumentExplorer({
 							itemsCountPerPage={resultsPerPage}
 							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
-							hideFirstLastPages={true}
+							showJumpToFirstLastPages={false}
+							showFirstPageWithEllipsis={true}
 							onChange={(page) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),
