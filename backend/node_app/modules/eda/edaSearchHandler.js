@@ -43,17 +43,17 @@ class EdaSearchHandler extends SearchHandler {
 			request_body: {},
 		};
 
-		const {
-			searchText,
-			searchVersion,
-			cloneName,
-			offset,
-			showTutorial = false,
-			tiny_url,
-			forCacheReload = false,
-		} = req.body;
-
 		try {
+			const {
+				searchText,
+				searchVersion,
+				cloneName,
+				offset,
+				showTutorial = false,
+				tiny_url,
+				forCacheReload = false,
+			} = req.body;
+
 			historyRec.search = searchText;
 			historyRec.searchText = searchText;
 			historyRec.tiny_url = tiny_url;
@@ -309,14 +309,7 @@ class EdaSearchHandler extends SearchHandler {
 			// use the award ID to get the base award data only
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
-			if (
-				results &&
-				results.body &&
-				results.body.hits &&
-				results.body.hits.total &&
-				results.body.hits.total.value &&
-				results.body.hits.total.value > 0
-			) {
+			if (results?.body?.hits?.total?.value > 0) {
 				const hits = results.body.hits.hits;
 				if (hits && hits.length > 0) {
 					return this.edaSearchUtility.cleanUpEsResults(results, [], userId, [], {}, esIndex, esQuery);
