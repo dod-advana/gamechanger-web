@@ -291,34 +291,15 @@ class JBookDataHandler extends DataHandler {
 	async getAllBYProjectData(req, userId) {
 		try {
 			const { id, portfolioName } = req.body;
-			console.log('this is the userId', userId);
-			console.log('some id', id);
-			console.log('portfolio name', portfolioName);
-			// const myAuthorizedUsr = 88;
-			const portfolios = await this.portfolio.findAll({
-				where: {
-					deleted: false,
-					name: {
-						portfolioName,
-					},
-				},
-				attributes: ['name', 'user_ids'],
-			});
-			if (portfolios === null) {
-				console.log('Not found');
-			} else {
-				console.log(portfolios);
-			}
-			// console.log(portfolios);
-			// if (portfolioName !== 'General') {
-			// 	console.log('portyfolios', portfolios);
-			// 	console.log('this is the portfolio', portfolios.name);
-			// 	console.log('these are authorized users', portfolios.user_ids);
 
-			// 	if (portfolios.user_ids.includes(myAuthorizedUsr)) {
-			// 		return 'Unauthorized Entry Detected';
-			// 	}
-			// }
+			if (portfolioName !== 'General') {
+				const portfolios = await this.getPortfolios(userId);
+				const myAuthorizedUsr = 88;
+				const authorizedUsers = portfolios.filter((porty) => porty.name === portfolioName)[0].user_ids;
+				if (!authorizedUsers.includes(myAuthorizedUsr)) {
+					return 'Unauthorized Entry Detected';
+				}
+			}
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
