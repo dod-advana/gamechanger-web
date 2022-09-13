@@ -821,40 +821,37 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 					</div>
 				)}
 			</div>
-			{docListView && (
-				<>
-					{!item.notInCorpus ? (
-						<div className={'list-view-sub-header'}>
-							<p style={{ fontWeight: 400 }}>{`Published on: ${publicationDate}`}</p>
-						</div>
-					) : (
-						<GCTooltip
-							title={'Click to request that this document be made part of the GAMECHANGER corpus'}
-							placement="top"
-							arrow
+			{docListView && !item.notInCorpus && (
+				<div className={'list-view-sub-header'}>
+					<p style={{ fontWeight: 400 }}>{`Published on: ${publicationDate ?? 'Unknown'}`}</p>
+				</div>
+			)}
+			{docListView && item.notInCorpus && (
+				<GCTooltip
+					title={'Click to request that this document be made part of the GAMCHANGER corpus'}
+					placement="top"
+					arrow
+				>
+					<div
+						style={{
+							position: 'absolute',
+							right: '5px',
+							top: '50%',
+							msTransform: 'translateY(-50%)',
+							transform: 'translateY(-50%)',
+							zIndex: 1,
+						}}
+					>
+						<GCButton
+							onClick={() => {
+								setShowDocIngestModal(true);
+								requestDocIngest(item);
+							}}
 						>
-							<div
-								style={{
-									position: 'absolute',
-									right: '5px',
-									top: '50%',
-									msTransform: 'translateY(-50%)',
-									transform: 'translateY(-50%)',
-									zIndex: 1,
-								}}
-							>
-								<GCButton
-									onClick={() => {
-										setShowDocIngestModal(true);
-										requestDocIngest(item);
-									}}
-								>
-									Request This Data
-								</GCButton>
-							</div>
-						</GCTooltip>
-					)}
-				</>
+							Request This Data
+						</GCButton>
+					</div>
+				</GCTooltip>
 			)}
 			<DocIngestModal showDocIngestModal={showDocIngestModal} setShowDocIngestModal={setShowDocIngestModal} />
 		</StyledFrontCardHeader>
