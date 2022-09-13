@@ -12,12 +12,13 @@
 		"glob-parent": "5.1.2",
 		"tar": "4.4.18",
 		"ua-parser-js": "0.7.30",
-		"types/node": "14.17.6"
+		"types/node": "14.17.6",
+		"source-map-resolve": "0.6.0"
 	},
 	"dependencies": {
 		"@datapunt/matomo-tracker-react": "0.3.1",
 		"@dod-advana/advana-platform-ui": "1.4.16",
-		"@dod-advana/advana-side-nav": "0.1.6",
+		"@dod-advana/advana-side-nav": "0.1.10",
 		"@dod-advana/advana-tutorial-overlay": "0.0.9",
 		"@emotion/react": "11.7.0",
 		"@emotion/styled": "11.6.0",
@@ -47,7 +48,6 @@
 		"lodash": "4.17.21",
 		"moment": "2.29.3",
 		"node-sass": "6.0.1",
-		"npm-force-resolutions": "0.0.10",
 		"piwik-react-router": "0.12.1",
 		"pluralize": "8.0.0",
 		"prop-types": "15.8.1",
@@ -120,7 +120,7 @@
 		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/",
 		"cy:open": "npx cypress open",
 		"precy:test": "rm cypress/results/* || true",
-		"cy:test": "npx cypress run --browser chrome",
+		"cy:test": "DEBUG=cypress:server*,-cypress:server:browsers* npx cypress run --browser chrome",
 		"report:merge": "npx mochawesome-merge \"cypress/results/*.json\" > results.json",
 		"report:send": "node cypress/support/sendResults.js"
 	},
