@@ -5,9 +5,11 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
+	Switch,
 	TextField,
 	Typography,
 	FormControl,
+	FormControlLabel,
 } from '@material-ui/core';
 import AddIcon from '@mui/icons-material/Add';
 import GCButton from '../../../common/GCButton';
@@ -56,6 +58,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		user_ids: [],
 		tags: [],
 		deleted: false,
+		isPrivate: false,
 	};
 	const [data, setData] = useState(emptyData);
 	const [create, setCreate] = useState(true);
@@ -289,6 +292,19 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 									multiline
 									rows={4}
 								/>
+								<FormControl>
+									<FormControlLabel
+										control={
+											<Switch
+												checked={data.isPrivate}
+												onChange={(event) =>
+													handleDataChange(event.target.checked, 'isPrivate')
+												}
+											/>
+										}
+										label="Private"
+									/>
+								</FormControl>
 								<hr />
 								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 									Upload Ontology
