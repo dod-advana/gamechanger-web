@@ -717,13 +717,12 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
-const requestDocIngest = (item) => {
+const requestDocIngest = (item, setShowDocIngestModal) => {
 	gameChangerAPI
 		.requestDocIngest({ docId: item.display_title_s })
 		.then((res) => {
 			if (res.status === 200) {
-				console.log('successfully saved!');
-				// set document saved model
+				setShowDocIngestModal(true);
 			}
 		})
 		.catch((err) => {
@@ -1179,7 +1178,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			</div>
 		</GCAccordion>
 	) : (
-		<>Data does not yet exist for this document within the GAMECHANGER corpus</>
+		<div>Data does not yet exist for this document within the GAMECHANGER corpus</div>
 	);
 };
 
@@ -1355,7 +1354,7 @@ const cardHandler = {
 			const publicationDate = getPublicationDate(item.publication_date_dt);
 
 			if (state.listView) {
-				renderListView(
+				return renderListView(
 					{ intelligentSearch, item, contextHtml, backBody },
 					{ hoveredHit, setHoveredHit },
 					{ metadataExpanded, setMetadataExpanded },
