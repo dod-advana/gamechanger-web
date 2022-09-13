@@ -1,4 +1,4 @@
-import CypressHelper, { BASE_URL } from '../../support/CypressHelper';
+import CypressHelper from '../../support/CypressHelper';
 
 describe('Tests the authorization api', () => {
 	it('Should be unauthorized to view the gamechanger admin page', () => {
@@ -6,7 +6,7 @@ describe('Tests the authorization api', () => {
 		CypressHelper.setupHeaders(cy, 'not.a.person.1234567890', '1234567890@mil');
 
 		// Visit the main page
-		cy.visit(`${BASE_URL}/#/gamechanger-admin`);
+		cy.visit(`/#/gamechanger-admin`);
 
 		// Check the page is not unauthorized
 		cy.getDataCy('unauthorized-page').should('exist');
@@ -17,7 +17,7 @@ describe('Tests the authorization api', () => {
 		CypressHelper.setupHeaders(cy);
 
 		// Visit the main page
-		cy.visit(`${BASE_URL}/#/gamechanger-admin`);
+		cy.visit(`/#/gamechanger-admin`);
 
 		// Check the page is unauthorized
 		cy.getDataCy('unauthorized-page').should('not.exist');

@@ -637,6 +637,11 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
+const handleTopicClick = (topic, cloneName) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
+	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+};
+
 export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText, maxWidth) => {
 	const { favorite_topics = null } = userData ?? {};
 	let favorites = [];
@@ -673,14 +678,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												trackEvent(
-													getTrackingNameForFactory(cloneData.clone_name),
-													'TopicOpened',
-													topic
-												);
-												window.open(
-													`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
-												);
+												handleTopicClick(cloneData.clone_name, topic);
 											}}
 										>
 											{topic}
@@ -695,14 +693,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											trackEvent(
-												getTrackingNameForFactory(cloneData.clone_name),
-												'TopicOpened',
-												topic
-											);
-											window.open(
-												`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=topic&topicName=${topic}`
-											);
+											handleTopicClick(cloneData.clone_name, topic);
 										}}
 									>
 										{topic}
@@ -726,12 +717,6 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
-const cardHeaderClickFn = (item, docListView, state) => {
-	if (docListView && !item.notInCorpus) {
-		clickFn(item.filename, state.cloneData.clone_name, state.searchText, 0, item.download_url_s);
-	}
-};
-
 const requestDocIngest = (item) => {
 	gameChangerAPI
 		.requestDocIngest({ docId: item.display_title_s })
@@ -747,10 +732,21 @@ const requestDocIngest = (item) => {
 		});
 };
 
+const getPublicationDate = (publication_date_dt) => {
+	if (publication_date_dt !== undefined && publication_date_dt !== '') {
+		const currentDate = new Date(publication_date_dt);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
+		return `${month}-${day}-${year}`;
+	} else {
+		return 'unknown';
+	}
+};
+
 const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
-
-	const displayTitle = getDisplayTitle(item);
+	const displayTitle = getDisplayTitle(item, state.currentViewName);
 	const isRevoked = item.is_revoked_b;
 
 	const docListView = state.listView && !graphView;
@@ -763,16 +759,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 
 	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
 
-	let publicationDate;
-	if (item.publication_date_dt) {
-		const currentDate = new Date(item.publication_date_dt);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
-		const month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(currentDate);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
-		publicationDate = `${month}-${day}-${year}`;
-	} else {
-		publicationDate = `unknown`;
-	}
+	const publicationDate = getPublicationDate(item.publication_date_dt);
 
 	return (
 		<StyledFrontCardHeader
@@ -786,7 +773,18 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 					<div
 						className={'title-text'}
 						style={item.notInCorpus ? { cursor: 'initial' } : {}}
-						onClick={() => cardHeaderClickFn(item, docListView, state)}
+						onClick={
+							docListView && !item.notInCorpus
+								? () =>
+										clickFn(
+											item.filename,
+											state.cloneData.clone_name,
+											state.searchText,
+											0,
+											item.download_url_s
+										)
+								: () => undefined
+						}
 					>
 						<div className={'text'}>{displayTitle}</div>
 						{docListView && (
@@ -1003,8 +1001,11 @@ const getCardExtrasHandler = (props) => {
 	);
 };
 
-const getDisplayTitle = (item) => {
-	return item.display_title_s ? item.display_title_s : item.title;
+const getDisplayTitle = (item, currentViewName) => {
+	if (currentViewName === 'Card') {
+		return item.display_title_s ? `${item.doc_type} ${item.doc_num}: ${item.title}` : item.title;
+	}
+	return item.display_title_s || item.title;
 };
 
 const handleImgSrcError = (event, fallbackSources) => {
@@ -1017,301 +1018,320 @@ const handleImgSrcError = (event, fallbackSources) => {
 	}
 };
 
-const listViewNoSearchDisplay = (item, hoveredHit, contextHtml, setHoveredHit, state, backBody) => {
+const getHoveredSnippet = (item, hoveredHit) => {
+	let hoveredSnippet = '';
+
+	if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
+		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+	} else if (
+		item.paragraphs &&
+		Array.isArray(item.paragraphs) &&
+		item.paragraphs.length > 0 &&
+		item.paragraphs[hoveredHit]
+	) {
+		hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
+	}
+
+	if (Array.isArray(hoveredSnippet)) hoveredSnippet = hoveredSnippet.join(', ');
+
+	return hoveredSnippet;
+};
+
+const renderListViewPageHitsWithoutIntelligentSearch = (
+	item,
+	hoveredHit,
+	setHoveredHit,
+	cloneName,
+	searchText,
+	contextHtml
+) => {
 	return (
-		<StyledListViewFrontCardContent>
-			{item.pageHits?.length > 0 && (
-				<GCAccordion
-					header={'PAGE HITS'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					<div className={'expanded-hits'}>
-						<div className={'page-hits'}>
-							{_.chain(item.pageHits)
-								.map((page, key) => {
-									return (
-										<div
-											className={'page-hit'}
-											key={key}
+		item.pageHits?.length > 0 && (
+			<GCAccordion
+				header={'PAGE HITS'}
+				headerBackground={'rgb(238,241,242)'}
+				headerTextColor={'black'}
+				headerTextWeight={'normal'}
+			>
+				<div className={'expanded-hits'}>
+					<div className={'page-hits'}>
+						{_.chain(item.pageHits)
+							.map((page, key) => {
+								return (
+									<div
+										className={'page-hit'}
+										key={key}
+										style={{
+											...(hoveredHit === key && {
+												backgroundColor: '#E9691D',
+												color: 'white',
+											}),
+										}}
+										onMouseEnter={() => setHoveredHit(key)}
+										onClick={(e) => {
+											e.preventDefault();
+											clickFn(
+												item.filename,
+												cloneName,
+												searchText,
+												page.pageNumber,
+												item.download_url_s
+											);
+										}}
+									>
+										<span>
+											{page.title && <span>{page.title}</span>}
+											{page.pageNumber && (
+												<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
+											)}
+										</span>
+										<i
+											className="fa fa-chevron-right"
 											style={{
-												...(hoveredHit === key && {
-													backgroundColor: '#E9691D',
-													color: 'white',
-												}),
+												color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 											}}
-											onMouseEnter={() => setHoveredHit(key)}
-											onClick={(e) => {
-												e.preventDefault();
-												clickFn(
-													item.filename,
-													state.cloneData.clone_name,
-													state.searchText,
-													page.pageNumber,
-													item.download_url_s
-												);
-											}}
-										>
-											<span>
-												{page.title && <span>{page.title}</span>}
-												{page.pageNumber && (
-													<span>
-														{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}
-													</span>
-												)}
-											</span>
-											<i
-												className="fa fa-chevron-right"
-												style={{
-													color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-												}}
-											/>
-										</div>
-									);
-								})
-								.value()}
-						</div>
-						<div className={'expanded-metadata'}>
-							<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
-						</div>
+										/>
+									</div>
+								);
+							})
+							.value()}
 					</div>
-				</GCAccordion>
-			)}
-			{item.paragraphs?.length > 0 && (
-				<GCAccordion
-					header={`PARAGRAPH HITS: ${item.paragraphs.length}`}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
-				>
-					<div className={'expanded-hits'}>
-						<div className={'page-hits'}>
-							{_.chain(item.paragraphs)
-								.map((paragraph, key) => {
-									return (
-										<div
-											className={'paragraph-hit'}
-											key={key}
+					<div className={'expanded-metadata'}>
+						<blockquote dangerouslySetInnerHTML={{ __html: sanitizeHtml(contextHtml) }} />
+					</div>
+				</div>
+			</GCAccordion>
+		)
+	);
+};
+
+const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, setHoveredHit, contextHtml) => {
+	return (
+		item.paragraphs?.length > 0 && (
+			<GCAccordion
+				header={`PARAGRAPH HITS: ${item.paragraphs.length}`}
+				headerBackground={'rgb(238,241,242)'}
+				headerTextColor={'black'}
+				headerTextWeight={'normal'}
+			>
+				<div className={'expanded-hits'}>
+					<div className={'page-hits'}>
+						{_.chain(item.paragraphs)
+							.map((paragraph, key) => {
+								return (
+									<div
+										className={'paragraph-hit'}
+										key={key}
+										style={{
+											...(hoveredHit === key && {
+												backgroundColor: '#E9691D',
+												color: 'white',
+											}),
+										}}
+										onMouseEnter={() => setHoveredHit(key)}
+										onClick={(e) => {
+											e.preventDefault();
+										}}
+									>
+										<div>
+											{paragraph.id && (
+												<div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${
+													paragraph.id.split('_')[1]
+												}`}</div>
+											)}
+											{paragraph.score && (
+												<div className={'par-hit'}>{`Score: ${convertDCTScoreToText(
+													paragraph.score
+												)}`}</div>
+											)}
+										</div>
+										<i
+											className="fa fa-chevron-right"
 											style={{
-												...(hoveredHit === key && {
-													backgroundColor: '#E9691D',
-													color: 'white',
-												}),
+												color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
 											}}
-											onMouseEnter={() => setHoveredHit(key)}
-											onClick={(e) => {
-												e.preventDefault();
-											}}
-										>
-											<div>
-												{paragraph.id && (
-													<div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${
-														paragraph.id.split('_')[1]
-													}`}</div>
-												)}
-												{paragraph.score && (
-													<div className={'par-hit'}>{`Score: ${convertDCTScoreToText(
-														paragraph.score
-													)}`}</div>
-												)}
-											</div>
-											<i
-												className="fa fa-chevron-right"
-												style={{
-													color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-												}}
-											/>
-										</div>
-									);
-								})
-								.value()}
-						</div>
-						<div className={'expanded-metadata'}>
-							<blockquote
-								dangerouslySetInnerHTML={{
-									__html: sanitizeHtml(contextHtml),
-								}}
-							/>
-						</div>
+										/>
+									</div>
+								);
+							})
+							.value()}
 					</div>
-				</GCAccordion>
-			)}
-			{!item.notInCorpus ? (
-				<GCAccordion
-					header={'DOCUMENT METADATA'}
-					headerBackground={'rgb(238,241,242)'}
-					headerTextColor={'black'}
-					headerTextWeight={'normal'}
+					<div className={'expanded-metadata'}>
+						<blockquote
+							dangerouslySetInnerHTML={{
+								__html: sanitizeHtml(contextHtml),
+							}}
+						/>
+					</div>
+				</div>
+			</GCAccordion>
+		)
+	);
+};
+
+const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
+	return !item.notInCorpus ? (
+		<GCAccordion
+			header={'DOCUMENT METADATA'}
+			headerBackground={'rgb(238,241,242)'}
+			headerTextColor={'black'}
+			headerTextWeight={'normal'}
+		>
+			<div className={'metadata'}>
+				<div className={'inner-scroll-container'}>{backBody}</div>
+			</div>
+		</GCAccordion>
+	) : (
+		<>Data does not yet exist for this document within the GAMECHANGER corpus</>
+	);
+};
+
+const renderListView = (
+	params,
+	hoveredHitState,
+	metadataExpandedState,
+	cloneName,
+	searchText,
+	intelligentFeedbackComponent
+) => {
+	const { hoveredHit, setHoveredHit } = hoveredHitState;
+	const { metadataExpanded, setMetadataExpanded } = metadataExpandedState;
+	const { intelligentSearch, item, contextHtml, backBody } = params;
+
+	if (!intelligentSearch) {
+		return (
+			<StyledListViewFrontCardContent>
+				{renderListViewPageHitsWithoutIntelligentSearch(
+					item,
+					hoveredHit,
+					setHoveredHit,
+					cloneName,
+					searchText,
+					contextHtml
+				)}
+				{renderListViewParagraphHitsWithoutIntelligentSearch(item, hoveredHit, setHoveredHit, contextHtml)}
+				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody)}
+			</StyledListViewFrontCardContent>
+		);
+	} else if (intelligentSearch) {
+		return (
+			<StyledListViewFrontCardContent>
+				<div className={'expanded-hits'}>
+					<div className={'page-hits'}>
+						{_.chain(item.pageHits)
+							.map((page, key) => {
+								return (
+									<div
+										className={'page-hit'}
+										key={key}
+										style={{
+											...(hoveredHit === key && {
+												backgroundColor: '#E9691D',
+												color: 'white',
+											}),
+										}}
+										onMouseEnter={() => setHoveredHit(key)}
+										onClick={(e) => {
+											e.preventDefault();
+											clickFn(
+												item.filename,
+												cloneName,
+												searchText,
+												page.pageNumber,
+												item.download_url_s
+											);
+										}}
+									>
+										<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
+										<i
+											className="fa fa-chevron-right"
+											style={{
+												color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+											}}
+										/>
+									</div>
+								);
+							})
+							.value()}
+					</div>
+					<div className={'expanded-metadata'}>
+						<blockquote
+							dangerouslySetInnerHTML={{
+								__html: sanitizeHtml(contextHtml),
+							}}
+						/>
+					</div>
+				</div>
+				<button
+					type="button"
+					className={'list-view-button'}
+					onClick={() => {
+						trackEvent(
+							getTrackingNameForFactory(cloneName),
+							'ListViewInteraction',
+							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+						);
+						setMetadataExpanded(!metadataExpanded);
+					}}
 				>
+					<span className="buttonText">Document Metadata</span>
+					<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
+				</button>
+
+				{metadataExpanded && (
 					<div className={'metadata'}>
 						<div className={'inner-scroll-container'}>{backBody}</div>
 					</div>
-				</GCAccordion>
-			) : (
-				<>Data does not yet exist for this document within the GAMECHANGER corpus</>
-			)}
-		</StyledListViewFrontCardContent>
-	);
+				)}
+
+				<div style={{ marginTop: '10px', marginBottom: '10px' }}> {intelligentFeedbackComponent()} </div>
+			</StyledListViewFrontCardContent>
+		);
+	}
 };
 
-const listViewSearchDisplay = (item, hoveredHit, setHoveredHit, state, contextHtml, backBody, inheritedProps) => {
-	const { metadataExpanded, setMetadataExpanded, intelligentFeedbackComponent } = inheritedProps;
-	return (
-		<StyledListViewFrontCardContent>
-			<div className={'expanded-hits'}>
-				<div className={'page-hits'}>
-					{_.chain(item.pageHits)
-						.map((page, key) => {
-							return (
-								<div
-									className={'page-hit'}
-									key={key}
-									style={{
-										...(hoveredHit === key && {
-											backgroundColor: '#E9691D',
-											color: 'white',
-										}),
-									}}
-									onMouseEnter={() => setHoveredHit(key)}
-									onClick={(e) => {
-										e.preventDefault();
-										clickFn(
-											item.filename,
-											state.cloneData.clone_name,
-											state.searchText,
-											page.pageNumber,
-											item.download_url_s
-										);
-									}}
-								>
-									<span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>
-									<i
-										className="fa fa-chevron-right"
-										style={{
-											color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-										}}
-									/>
-								</div>
-							);
-						})
-						.value()}
-				</div>
-				<div className={'expanded-metadata'}>
-					<blockquote
-						dangerouslySetInnerHTML={{
-							__html: sanitizeHtml(contextHtml),
-						}}
-					/>
-				</div>
-			</div>
-			<button
-				type="button"
-				className={'list-view-button'}
-				onClick={() => {
-					trackEvent(
-						getTrackingNameForFactory(state.cloneData.clone_name),
-						'ListViewInteraction',
-						!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
+	if (page.title || key < 5) {
+		return (
+			<div
+				className={'page-hit'}
+				key={key}
+				style={{
+					...(hoveredHit === key && {
+						backgroundColor: '#E9691D',
+						color: 'white',
+					}),
+				}}
+				onMouseEnter={() => setHoveredHit(key)}
+				onClick={(e) => {
+					e.preventDefault();
+					clickFn(
+						item.filename,
+						state.cloneData.clone_name,
+						state.searchText,
+						page.pageNumber,
+						item.download_url_s
 					);
-					setMetadataExpanded(!metadataExpanded);
 				}}
 			>
-				<span className="buttonText">Document Metadata</span>
-				<i className={metadataExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
-			</button>
-
-			{metadataExpanded && (
-				<div className={'metadata'}>
-					<div className={'inner-scroll-container'}>{backBody}</div>
-				</div>
-			)}
-
-			<div style={{ marginTop: '10px', marginBottom: '10px' }}> {intelligentFeedbackComponent()} </div>
-		</StyledListViewFrontCardContent>
-	);
-};
-
-const displayHit = (key, hoveredHit, setHoveredHit, item, state, page) => {
-	return (
-		<div
-			className={'page-hit'}
-			key={key}
-			style={{
-				...(hoveredHit === key && {
-					backgroundColor: '#E9691D',
-					color: 'white',
-				}),
-			}}
-			onMouseEnter={() => setHoveredHit(key)}
-			onClick={(e) => {
-				e.preventDefault();
-				clickFn(
-					item.filename,
-					state.cloneData.clone_name,
-					state.searchText,
-					page.pageNumber,
-					item.download_url_s
-				);
-			}}
-		>
-			{page.title && <span>{page.title}</span>}
-			{page.pageNumber && <span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
-			<i
-				className="fa fa-chevron-right"
-				style={{
-					color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-				}}
-			/>
-		</div>
-	);
-};
-
-const displayHitView = (state, publicationDate, item, hoveredHit, setHoveredHit, contextHtml) => {
-	return (
-		<StyledFrontCardContent className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}>
-			<div className={'currents-as-of-div'}>
-				<GCTooltip
-					title={'Date GAMECHANGER last verified this document against its originating source'}
-					placement="top"
-					arrow
-				>
-					<div className={'current-text'}>{`Published on: ${publicationDate ?? 'Unknown'}`}</div>
-				</GCTooltip>
-				{item.isRevoked && (
-					<GCTooltip title={'This version of the document is no longer in effect'} placement="top" arrow>
-						<RevokedTag>Canceled</RevokedTag>
-					</GCTooltip>
-				)}
+				{page.title && <span>{page.title}</span>}
+				{page.pageNumber && <span>{page.pageNumber === 0 ? 'ID' : `Page ${page.pageNumber}`}</span>}
+				<i
+					className="fa fa-chevron-right"
+					style={{
+						color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
+					}}
+				/>
 			</div>
-			<div className={'hits-container'}>
-				<div className={'page-hits'}>
-					{_.chain(item.pageHits)
-						.map((page, key) => {
-							if (page.title || key < 5) {
-								return displayHit(key, hoveredHit, setHoveredHit, item, state, page);
-							}
-							return '';
-						})
-						.value()}
-				</div>
-				<div className={'expanded-metadata'}>
-					<blockquote
-						className="searchdemo-blockquote"
-						dangerouslySetInnerHTML={{
-							__html: sanitizeHtml(contextHtml),
-						}}
-					/>
-				</div>
-			</div>
-		</StyledFrontCardContent>
-	);
+		);
+	}
+	return '';
 };
 
 const cardHandler = {
 	document: {
-		getDisplayTitle: (item) => {
-			return getDisplayTitle(item);
+		getDisplayTitle: (item, currentViewName) => {
+			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -1334,43 +1354,60 @@ const cardHandler = {
 				intelligentFeedbackComponent,
 			} = props;
 
-			let hoveredSnippet = '';
-			if (Array.isArray(item.pageHits) && item.pageHits.length > 0 && item.pageHits[hoveredHit]) {
-				hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-			} else if (
-				item.paragraphs &&
-				Array.isArray(item.paragraphs) &&
-				item.paragraphs.length > 0 &&
-				item.paragraphs[hoveredHit]
-			) {
-				hoveredSnippet = item.paragraphs[hoveredHit]?.par_raw_text_t ?? '';
-			}
-			if (Array.isArray(hoveredSnippet)) hoveredSnippet = hoveredSnippet.join(', ');
-			const contextHtml = hoveredSnippet;
+			const contextHtml = getHoveredSnippet(item, hoveredHit);
+			const publicationDate = getPublicationDate(item.publication_date_dt);
 
-			let publicationDate;
-			if (item.publication_date_dt !== undefined && item.publication_date_dt !== '') {
-				const currentDate = new Date(item.publication_date_dt);
-				const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
-				const month = new Intl.DateTimeFormat('en', {
-					month: '2-digit',
-				}).format(currentDate);
-				const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
-				publicationDate = `${month}-${day}-${year}`;
+			if (state.listView) {
+				renderListView(
+					{ intelligentSearch, item, contextHtml, backBody },
+					{ hoveredHit, setHoveredHit },
+					{ metadataExpanded, setMetadataExpanded },
+					state.cloneData.clone_name,
+					state.searchText,
+					intelligentFeedbackComponent
+				);
 			} else {
-				publicationDate = `unknown`;
-			}
-
-			if (state.listView && !intelligentSearch) {
-				return listViewNoSearchDisplay(item, hoveredHit, contextHtml, setHoveredHit, state, backBody);
-			} else if (state.listView && intelligentSearch) {
-				return listViewSearchDisplay(item, hoveredHit, setHoveredHit, state, contextHtml, backBody, {
-					metadataExpanded,
-					setMetadataExpanded,
-					intelligentFeedbackComponent,
-				});
-			} else {
-				return displayHitView(state, publicationDate, item, hoveredHit, setHoveredHit, contextHtml);
+				return (
+					<StyledFrontCardContent
+						className={`tutorial-step-${state.componentStepNumbers['Highlight Keyword']}`}
+					>
+						<div className={'currents-as-of-div'}>
+							<GCTooltip
+								title={'Date GAMECHANGER last verified this document against its originating source'}
+								placement="top"
+								arrow
+							>
+								<div className={'current-text'}>{`Published on: ${publicationDate ?? 'Unknown'}`}</div>
+							</GCTooltip>
+							{item.isRevoked && (
+								<GCTooltip
+									title={'This version of the document is no longer in effect'}
+									placement="top"
+									arrow
+								>
+									<RevokedTag>Canceled</RevokedTag>
+								</GCTooltip>
+							)}
+						</div>
+						<div className={'hits-container'}>
+							<div className={'page-hits'}>
+								{_.chain(item.pageHits)
+									.map((page, key) => {
+										return renderPageHit(page, key, hoveredHit, setHoveredHit, item, state);
+									})
+									.value()}
+							</div>
+							<div className={'expanded-metadata'}>
+								<blockquote
+									className="searchdemo-blockquote"
+									dangerouslySetInnerHTML={{
+										__html: sanitizeHtml(contextHtml),
+									}}
+								/>
+							</div>
+						</div>
+					</StyledFrontCardContent>
+				);
 			}
 		},
 
@@ -1574,8 +1611,8 @@ const cardHandler = {
 	},
 
 	publication: {
-		getDisplayTitle: (item) => {
-			return getDisplayTitle(item);
+		getDisplayTitle: (item, currentViewName) => {
+			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -1611,7 +1648,7 @@ const cardHandler = {
 			);
 		},
 
-		getCardBack: (props) => {
+		getCardBack: (_props) => {
 			return <></>;
 		},
 
@@ -1705,18 +1742,18 @@ const cardHandler = {
 			const { item, state, backBody } = props;
 
 			if (state.listView) {
-				if (item.description?.length > 300) {
-					item.description = item?.description?.slice(0, 280) + '...';
+				if (item.information?.length > 300) {
+					item.information = item?.information?.slice(0, 280) + '...';
 				}
-			} else if (item.image === undefined && item.description?.length > 300) {
-				item.description = item?.description?.slice(0, 280) + '...';
-			} else if (item.image && item.description?.length > 180) {
-				item.description = item?.description?.slice(0, 160) + '...';
+			} else if (item.image === undefined && item.information?.length > 300) {
+				item.information = item?.information?.slice(0, 280) + '...';
+			} else if (item.image && item.information?.length > 180) {
+				item.information = item?.information?.slice(0, 160) + '...';
 			}
 			if (state.listView) {
 				return (
 					<StyledListViewFrontCardContent>
-						{item.description && <p>{item.description}</p>}
+						{item.information && <p>{item.information}</p>}
 						<GCAccordion
 							header={'DOCUMENT METADATA'}
 							headerBackground={'rgb(238,241,242)'}
@@ -1738,17 +1775,17 @@ const cardHandler = {
 
 				return (
 					<StyledEntityTopicFrontCardContent listView={state.listView}>
-						{!state.listView && item.image && (
+						{!state.listView && (
 							<img
 								alt="Office Img"
-								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal}
 								onError={(event) => {
 									handleImgSrcError(event, fallbackSources);
 									if (fallbackSources.admin) fallbackSources.admin = undefined;
 								}}
 							/>
 						)}
-						<p>{item.description}</p>
+						<p>{item.information}</p>
 					</StyledEntityTopicFrontCardContent>
 				);
 			}
@@ -1907,11 +1944,11 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 	},
@@ -1935,7 +1972,7 @@ const cardHandler = {
 												window.open(
 													`#/gamechanger-details?type=topic&topicName=${item.name}&cloneName=${state.cloneData.clone_name}`
 												)
-										: () => {}
+										: () => undefined
 								}
 							>
 								<div className={'text'}>{displayTitle}</div>
@@ -2123,23 +2160,24 @@ const cardHandler = {
 			);
 		},
 
-		getCardExtras: (props) => {
+		getCardExtras: (_props) => {
 			return <></>;
 		},
 
-		getFilename: (item) => {
+		getFilename: (_item) => {
 			return '';
 		},
 	},
 };
 
 const PolicyCardHandler = (props) => {
-	const { setFilename, setDisplayTitle, item, cardType } = props;
+	const { state, setFilename, setDisplayTitle, item, cardType } = props;
+	const { currentViewName } = state;
 
 	useEffect(() => {
 		setFilename(cardHandler[cardType].getFilename(item));
-		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
-	}, [cardType, item, setDisplayTitle, setFilename]);
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item, currentViewName));
+	}, [cardType, item, setDisplayTitle, setFilename, currentViewName]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
