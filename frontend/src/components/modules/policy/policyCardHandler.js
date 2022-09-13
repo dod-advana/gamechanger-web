@@ -19,6 +19,7 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
+import DocIngestModal from './policyDocIngestModal';
 import { Popover, TextField, Typography } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -716,6 +717,20 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
+const requestDocIngest = (item, setShowDocIngestModal) => {
+	gameChangerAPI
+		.requestDocIngest({ docId: item.display_title_s })
+		.then((res) => {
+			if (res.status === 200) {
+				setShowDocIngestModal(true);
+			}
+		})
+		.catch((err) => {
+			console.log('there was an error', err);
+			// set error modal
+		});
+};
+
 const getPublicationDate = (publication_date_dt) => {
 	if (publication_date_dt !== undefined && publication_date_dt !== '') {
 		const currentDate = new Date(publication_date_dt);
@@ -728,7 +743,8 @@ const getPublicationDate = (publication_date_dt) => {
 	}
 };
 
-const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
 	const displayTitle = getDisplayTitle(item, state.currentViewName);
 	const isRevoked = item.is_revoked_b;
 
@@ -811,7 +827,7 @@ const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponen
 			)}
 			{docListView && item.notInCorpus && (
 				<GCTooltip
-					title={'Click to request that this document be made part of the GAMCHANGER corpus'}
+					title={'Click to request that this document be made part of the GAMECHANGER corpus'}
 					placement="top"
 					arrow
 				>
@@ -825,12 +841,18 @@ const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponen
 							zIndex: 1,
 						}}
 					>
-						<GCButton onClick={() => gameChangerAPI.requestDocIngest({ docId: item.display_title_s })}>
-							Report Issue
+						<GCButton
+							onClick={() => {
+								setShowDocIngestModal(true);
+								requestDocIngest(item);
+							}}
+						>
+							Request This Data
 						</GCButton>
 					</div>
 				</GCTooltip>
 			)}
+			<DocIngestModal showDocIngestModal={showDocIngestModal} setShowDocIngestModal={setShowDocIngestModal} />
 		</StyledFrontCardHeader>
 	);
 };
@@ -1156,7 +1178,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			</div>
 		</GCAccordion>
 	) : (
-		<>Data does not yet exist for this document within the GAMECHANGER corpus</>
+		<div>Data does not yet exist for this document within the GAMECHANGER corpus</div>
 	);
 };
 
@@ -1308,7 +1330,7 @@ const cardHandler = {
 			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
-			return getCardHeaderHandler(props);
+			return CardHeaderHandler(props);
 		},
 
 		getCardSubHeader: (props) => {
@@ -1332,7 +1354,7 @@ const cardHandler = {
 			const publicationDate = getPublicationDate(item.publication_date_dt);
 
 			if (state.listView) {
-				renderListView(
+				return renderListView(
 					{ intelligentSearch, item, contextHtml, backBody },
 					{ hoveredHit, setHoveredHit },
 					{ metadataExpanded, setMetadataExpanded },
@@ -1589,7 +1611,7 @@ const cardHandler = {
 			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
-			return getCardHeaderHandler(props);
+			return CardHeaderHandler(props);
 		},
 
 		getCardSubHeader: (props) => {
