@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
@@ -42,6 +43,8 @@ import CypressHelper from './CypressHelper';
 import './jbook-commands';
 // policy commands
 import './policy-commands';
+// eda commands
+import './eda-commands';
 
 /* ************* GENERAL ************** */
 
