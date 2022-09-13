@@ -8,7 +8,7 @@ const getTitleBar = (props) => {
 	const { detailsType } = props;
 	return (
 		<div style={{ display: 'flex', marginLeft: '3%' }}>
-			<Typography variant="h1" style={styles.wording} display="inline">
+			<Typography variant="h1" data-cy="details-type" style={styles.wording} display="inline">
 				{detailsType}
 			</Typography>
 			<Typography variant="h1" style={styles.wording} display="inline">
