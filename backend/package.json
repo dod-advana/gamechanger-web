@@ -23,7 +23,8 @@
 	"resolutions": {
 		"types/node": "14.17.6",
 		"ansi-regex": "5.0.1",
-		"moment": "2.29.3"
+		"moment": "2.29.3",
+		"source-map-resolve": "0.6.0"
 	},
 	"dependencies": {
 		"@dod-advana/advana-api-auth": "1.0.1",
@@ -50,7 +51,6 @@
 		"neo4j-driver": "4.4.4",
 		"node-cron": "2.0.3",
 		"nodemailer": "6.6.3",
-		"npm-force-resolutions": "0.0.10",
 		"pagerank.js": "1.0.2",
 		"pdfmake": "0.2.4",
 		"secure-random": "1.1.1",

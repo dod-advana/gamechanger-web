@@ -49,7 +49,7 @@ describe('Tests multiple types of policy searches.', () => {
 	});
 
 	it('Runs a search that contains intelligent results and verifies it is displayed', () => {
-		const searchTerm = 'army';
+		const searchTerm = 'logistics';
 		cy.search(searchTerm);
 		cy.getDataCy('intelligent-result', { timeout: 10000 }).should('exist');
 		cy.getDataCy('intelligent-result-title').should('exist');
@@ -120,7 +120,6 @@ describe('User Dashboard Tests', () => {
 			.then((card) => {
 				const titleText = card.text();
 
-				cy.get('iframe').then((el) => el.remove()); //I dont even know where this iframe is coming from...
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
@@ -142,7 +141,6 @@ describe('User Dashboard Tests', () => {
 			.then((card) => {
 				const titleText = card.text();
 
-				cy.get('iframe').then((el) => el.remove());
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
