@@ -15,12 +15,15 @@ import { Collapse } from 'react-collapse';
 import TextField from '@material-ui/core/TextField';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { Grid, Typography, Checkbox, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import GCAnalystToolsSideBar from '../../analystTools/GCAnalystToolsSideBar';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../../common/gc-colors';
 import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import ExportIcon from '../../../images/icon/Export.svg';
+import { dctTutorialSteps } from '../../analystTools/tutotialSteps';
 
 const sortAlphabetically = (order) => {
 	return (docA, docB) => {
@@ -80,6 +83,13 @@ const PolicyDocumentsComparisonTool = ({
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+
+	const [stepIndex, setStepIndex] = useState(0);
+	const [showTutorial, setShowTutorial] = useState(false);
+
+	const resetPage = () => {
+		setStepIndex(0);
+	};
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -767,6 +777,14 @@ const PolicyDocumentsComparisonTool = ({
 						you can conduct deeper policy analysis and understand how one piece of policy compares to the
 						GAMECHANGER policy repository.
 					</div>
+					<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+						<HelpOutlineIcon
+							style={{ cursor: 'pointer' }}
+							onClick={() => {
+								setShowTutorial(true);
+							}}
+						/>
+					</GCTooltip>
 					{!loading && returnedDocs.length > 0 && (
 						<div style={{ display: 'flex', marginLeft: 20 }}>
 							<FormControl
@@ -1182,6 +1200,16 @@ const PolicyDocumentsComparisonTool = ({
 					</div>
 				</>
 			)}
+			<TutorialOverlay
+				tutorialJoyrideSteps={dctTutorialSteps}
+				setShowTutorial={setShowTutorial}
+				showTutorial={showTutorial}
+				buttonColor={gcOrange}
+				resetPage={resetPage}
+				stepIndex={stepIndex}
+				setStepIndex={setStepIndex}
+				showSkipButton={false}
+			/>
 		</Grid>
 	);
 };
