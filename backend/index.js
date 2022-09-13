@@ -78,7 +78,7 @@ app.use(async function (req, _res, next) {
 	}
 
 	if (req.get('SSL-CLIENT-S-DN-CN')) {
-		req.headers['SSL_CLIENT_S_DN_CN'] = req.get('SSL-CLIENT-S-DN-CN');
+		req.headers['ssl_client_s_dn_cn'] = req.get('SSL-CLIENT-S-DN-CN');
 	}
 
 	next();
