@@ -74,4 +74,6 @@ const reTutorialSteps = [
 	},
 ];
 
-export { reTutorialSteps };
+const dctTutorialSteps = [];
+
+export { reTutorialSteps, dctTutorialSteps };

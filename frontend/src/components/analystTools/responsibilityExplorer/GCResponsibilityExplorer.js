@@ -13,7 +13,7 @@ import GCResponsibilityDocumentView from './GCResponsibilityDocumentView';
 import GCToolTip from '../../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
-import { reTutorialSteps } from './tutotialSteps';
+import { reTutorialSteps } from '../tutotialSteps';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 const gameChangerAPI = new GameChangerAPI();
