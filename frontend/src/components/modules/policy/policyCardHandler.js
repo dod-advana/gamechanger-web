@@ -827,7 +827,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 			)}
 			{docListView && item.notInCorpus && (
 				<GCTooltip
-					title={'Click to request that this document be made part of the GAMCHANGER corpus'}
+					title={'Click to request that this document be made part of the GAMECHANGER corpus'}
 					placement="top"
 					arrow
 				>
