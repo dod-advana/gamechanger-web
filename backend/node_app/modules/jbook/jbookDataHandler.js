@@ -1030,13 +1030,14 @@ class JBookDataHandler extends DataHandler {
 
 	async editPortfolio(req, userId) {
 		try {
-			const { id, name, description, user_ids, tags } = req.body;
+			const { id, name, description, isPrivate, user_ids, tags } = req.body;
 
 			if (id) {
 				let update = await this.portfolio.update(
 					{
 						name,
 						description,
+						isPrivate,
 						user_ids,
 						tags,
 					},
@@ -1053,6 +1054,7 @@ class JBookDataHandler extends DataHandler {
 					return {
 						name,
 						description,
+						isPrivate,
 						user_ids,
 						tags,
 					};

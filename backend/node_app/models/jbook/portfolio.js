@@ -23,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
 			deleted: {
 				type: DataTypes.BOOLEAN,
 			},
+			isPrivate: {
+				type: DataTypes.BOOLEAN,
+			},
 		},
 		{
 			freezeTableName: true,
