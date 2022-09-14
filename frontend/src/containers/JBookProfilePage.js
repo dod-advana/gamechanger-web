@@ -101,16 +101,8 @@ const JBookProfilePage = () => {
 
 	useEffect(() => {
 		const getUserData = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
-			const newMap = {};
-			data.data.users.forEach((user) => {
-				newMap[user.id] = user;
-			});
-
 			const currentUserData = await gameChangerUserAPI.getUserProfileData();
 			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
-
-			setUserMap(newMap);
 		};
 
 		if (!init) {
@@ -293,7 +285,7 @@ const JBookProfilePage = () => {
 
 		const userData = Auth.getTokenPayload();
 
-		if (userData.extra_fields && userData.extra_fields.jbook) {
+		if (userData?.extra_fields?.jbook) {
 			const tmpPermissions = {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
@@ -312,14 +304,25 @@ const JBookProfilePage = () => {
 					cloneName: 'jbook',
 					options: {},
 				})
-				.then((data) => {
-					let portfolioData = data.data !== undefined ? data.data : [];
+				.then(async ({ data }) => {
+					let portfolioData = data !== undefined ? data : [];
 					let map = {};
 					for (let item of portfolioData) {
 						map[item.name] = item;
 					}
 					setMap(map);
 					setState(dispatch, { portfolios: portfolioData });
+
+					const userIdSet = [];
+					Object.keys(map).forEach((portfolio) => {
+						map[portfolio].user_ids.forEach((id) => {
+							if (!userIdSet.includes(id)) userIdSet.push(id);
+						});
+					});
+					const { data: userData } = await gameChangerAPI.getUserDataByIDs(userIdSet);
+					const newUserMap = {};
+					userData.users.forEach((user) => (newUserMap[user.id] = user));
+					setUserMap(newUserMap);
 				});
 		};
 		getPortfolioData();
@@ -385,14 +388,14 @@ const JBookProfilePage = () => {
 				// if there is an or, highlight terms separately
 				if (searchText.indexOf('or') !== -1) {
 					terms.forEach((term) => {
-						const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
+						const regex = new RegExp(`${term.replaceAll('"', '')}([a-z]+)?`, 'gi');
 						const tmpMatches = descriptions.value.match(regex);
 						matches = matches.concat(tmpMatches);
 					});
 				}
 				// else highlight as 1 phrase
 				else {
-					const regex = new RegExp(`${searchText}([a-z]+)?`, 'gi');
+					const regex = new RegExp(`${searchText.replaceAll('"', '')}([a-z]+)?`, 'gi');
 					const tmpMatches = descriptions.value.match(regex);
 					matches = matches.concat(tmpMatches);
 				}
@@ -401,7 +404,7 @@ const JBookProfilePage = () => {
 					for (const match of matches) {
 						descriptions.value = descriptions.value.replaceAll(
 							match,
-							`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+							`<span style="background-color: #1C2D64; color: white; padding: 0 4px;">${match}</span>`
 						);
 					}
 				}
@@ -960,15 +963,6 @@ const JBookProfilePage = () => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		await gameChangerAPI.callDataFunction({
-			functionName: 'createComment',
-			cloneName: 'jbook',
-			options: {
-				docID,
-				portfolioName: selectedPortfolio,
-				message: 'just another super cool comment',
-			},
-		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
@@ -1233,7 +1227,7 @@ const JBookProfilePage = () => {
 		);
 	};
 
-	const SimpleReviewerSection = React.memo(() => {
+	const renderSimpleReviewerSection = () => {
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1285,7 +1279,7 @@ const JBookProfilePage = () => {
 				</GCAccordion>
 			</StyledAccordionContainer>
 		);
-	}, []);
+	};
 
 	const renderReviewSection = () => {
 		switch (selectedPortfolio) {
@@ -1300,7 +1294,7 @@ const JBookProfilePage = () => {
 					</>
 				);
 			default:
-				return <SimpleReviewerSection />;
+				return <>{renderSimpleReviewerSection()}</>;
 		}
 	};
 
@@ -1318,6 +1312,7 @@ const JBookProfilePage = () => {
 							projectData={projectData}
 							docID={docID}
 							getCommentThread={getCommentThread}
+							pageDisplayed={state.pageDisplayed}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>
