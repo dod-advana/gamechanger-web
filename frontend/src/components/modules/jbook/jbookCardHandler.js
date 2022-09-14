@@ -880,6 +880,8 @@ const cardHandler = {
 				'appropriationNumber',
 				'appropriationTitle',
 				'budgetActivityNumber',
+				'budgetSubActivityTitle',
+				'budgetSubActivityNumber',
 			];
 
 			for (let key of keys) {
