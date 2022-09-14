@@ -451,7 +451,7 @@ export const invertedCrawlerMappingFunc = (item) => {
 };
 
 export const crawlerMappingFunc = (item) => {
-	return crawlerMapping[item] ? crawlerMapping[item] : item;
+	return crawlerMapping[item] ? crawlerMapping[item].join(', ') : item;
 };
 
 export const orgColorMap = {
@@ -474,7 +474,6 @@ export const orgColorMap = {
 	NATO: '#003bd1', // blue
 	'Financial Mgmt. Reg': '#636363',
 	Legislation: '#ffbf00',
-	// FED:
 };
 
 const linkColorMap = {
