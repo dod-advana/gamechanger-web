@@ -7,7 +7,6 @@ import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { Typography } from '@material-ui/core';
-import Pagination from 'react-js-pagination';
 import '../../../containers/jbook.css';
 import {
 	getQueryVariable,
@@ -38,6 +37,7 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import JBookProfilePage from '../../../containers/JBookProfilePage';
+import Pagination from '../../common/Pagination';
 
 const _ = require('lodash');
 
@@ -222,6 +222,8 @@ const getPagination = (state, dispatch, edaCloneData, edaLoading, edaSearchResul
 								activePage={edaResultsPage}
 								itemsCountPerPage={18}
 								totalItemsCount={edaCount}
+								showJumpToFirstLastPages={true}
+								showFirstPageWithEllipsis={false}
 								pageRangeDisplayed={8}
 								onChange={(page) => {
 									trackEvent(
@@ -399,7 +401,9 @@ const getCardViewPanel = (props) => {
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
 																		totalItemsCount={count}
-																		pageRangeDisplayed={8}
+																		pageRangeDisplayed={3}
+																		showJumpToFirstLastPages={false}
+																		showFirstPageWithEllipsis={true}
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
@@ -414,6 +418,7 @@ const getCardViewPanel = (props) => {
 																				runSearch: true,
 																				loading: true,
 																				paginationSearch: true,
+																				visitEarlierPage: page < resultsPage,
 																			});
 																			scrollToContentTop();
 																		}}
