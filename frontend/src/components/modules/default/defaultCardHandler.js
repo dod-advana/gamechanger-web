@@ -1288,6 +1288,7 @@ export const getDefaultComponent = (props, cardHandler) => {
 									item,
 									state,
 									detailPage,
+									dispatch,
 								}),
 								hitsExpanded,
 								setHitsExpanded,

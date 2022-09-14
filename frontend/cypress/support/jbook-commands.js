@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* ************* GENERAL ************** */
 
 // this visits the jbook page, clicks consent agreement, and
