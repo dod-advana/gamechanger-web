@@ -1,8 +1,15 @@
 const CN = Cypress.env('CYPRESS_SSL_CLIENT_CERTIFICATE') || Cypress.env('SSL_CLIENT_CERTIFICATE');
 const USER_ID = Cypress.env('CYPRESS_SSL_CLIENT_S_DN_CN') || Cypress.env('SSL_CLIENT_S_DN_CN');
 
-export const BASE_URL = Cypress.env('CYPRESS_BASE_URL') || Cypress.env('BASE_URL');
-export const API_URL = Cypress.env('CYPRESS_API_URL') || Cypress.env('API_URL');
+let BASE_URL = Cypress.env('CYPRESS_BASE_URL') || Cypress.env('BASE_URL');
+const API_URL = Cypress.env('CYPRESS_API_URL') || Cypress.env('API_URL');
+
+if (BASE_URL) {
+	Cypress.config('baseUrl', BASE_URL);
+} else {
+	BASE_URL = Cypress.config('baseUrl');
+}
+
 const WAIT_TIMES = 5;
 
 class CypressHelper {
@@ -32,14 +39,14 @@ class CypressHelper {
 		});
 
 		cy.intercept(`${API_URL}**`, (req) => {
-			req.headers['x-env-ssl_client_certificate'] = cn || CN;
-			req.headers['SSL_CLIENT_S_DN_CN'] = userId || USER_ID;
+			req.headers['x-env-ssl-client-certificate'] = cn || CN;
+			req.headers['SSL-CLIENT-S-DN-CN'] = userId || USER_ID;
 		}).as('gamechangerAPI');
 
 		cy.server({
 			onAnyRequest: (_route, proxy) => {
-				proxy.xhr.setRequestHeader('x-env-ssl_client_certificate', cn || CN);
-				proxy.xhr.setRequestHeader('SSL_CLIENT_S_DN_CN', userId || USER_ID);
+				proxy.xhr.setRequestHeader('x-env-ssl-client-certificate', cn || CN);
+				proxy.xhr.setRequestHeader('SSL-CLIENT-S-DN-CN', userId || USER_ID);
 			},
 		});
 
