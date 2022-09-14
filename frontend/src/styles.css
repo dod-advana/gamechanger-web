@@ -891,7 +891,7 @@ html {
     padding-left: 0;
     list-style: none;
     border-radius: 0.25rem;
-    justify-content: start;
+    justify-content: flex-start;
 	}
 
 	ul.pagination-container li {

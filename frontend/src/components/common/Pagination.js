@@ -66,7 +66,6 @@ const Pagination = ({
 		}
 
 		for (let i = paginationInfo.first_page; i <= paginationInfo.last_page; i += 1) {
-			console.log('acttive? : ', i, activePage, i === activePage);
 			pages.push(
 				<Page
 					active={i === activePage}
