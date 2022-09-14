@@ -81,13 +81,13 @@ class AnalystToolsController {
 				);
 				const paragraphResults = await Promise.all(paragraphSearches);
 
-				paragraphResults.forEach((result) => {
-					Object.keys(result).forEach((id) => {
-						resultsObject[result[id].id] = {
-							score: result[id].score,
-							text: result[id].text,
-							paragraphIdBeingMatched: result.paragraphIdBeingMatched,
-							score_display: result[id].score_display,
+				paragraphResults.forEach((para) => {
+					Object.keys(para).forEach((id) => {
+						resultsObject[para[id].id] = {
+							score: para[id].score,
+							text: para[id].text,
+							paragraphIdBeingMatched: para.paragraphIdBeingMatched,
+							score_display: para[id].score_display,
 						};
 					});
 				});
@@ -104,17 +104,17 @@ class AnalystToolsController {
 				);
 
 				// Aggregate Data
-				returnData = this.searchUtility.cleanUpEsResults(
-					esResults,
-					[],
-					userId,
-					[],
-					{},
-					null,
-					esQuery,
-					true,
-					resultsObject
-				);
+				returnData = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
+					searchTerms: [],
+					user: userId,
+					selectedDocuments: [],
+					expansionDict: {},
+					index: null,
+					query: esQuery,
+					isCompareReturn: true,
+					paragraphResults: resultsObject,
+				});
 
 				if (cloneName !== 'eda') {
 					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
