@@ -228,10 +228,13 @@ export const typeFilters = {
 };
 
 export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
-	if (ref_list.length === 1) {
-		ref_list = ref_list[0].split(', ');
+	let parsedList = ref_list.map((ref) => {
+		return ref.url ? `<a target="_blank" href="${ref.url}">${ref.name}</a>` : ref;
+	});
+	if (parsedList.length === 1) {
+		parsedList = parsedList[0].split(', ');
 	}
-	const trimmed = _.chain(ref_list)
+	const trimmed = _.chain(parsedList)
 		.map((x) => x.trim())
 		.chunk(4)
 		.value();
