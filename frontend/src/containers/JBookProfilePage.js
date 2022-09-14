@@ -83,7 +83,7 @@ const JBookProfilePage = () => {
 	const [budgetYear, setBudgetYear] = useState('');
 	const [docID, setDocID] = useState('');
 	const [appropriationNumber, setAppropriationNumber] = useState('');
-	const [userRowId, setUserRowId] = useState('');
+
 	const [projectDescriptions, setProjectDescriptions] = useState([]);
 
 	const [searchText, setSearchText] = useState(undefined);
