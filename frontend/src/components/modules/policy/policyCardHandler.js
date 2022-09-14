@@ -1332,7 +1332,7 @@ const cardHandler = {
 			const publicationDate = getPublicationDate(item.publication_date_dt);
 
 			if (state.listView) {
-				renderListView(
+				return renderListView(
 					{ intelligentSearch, item, contextHtml, backBody },
 					{ hoveredHit, setHoveredHit },
 					{ metadataExpanded, setMetadataExpanded },
