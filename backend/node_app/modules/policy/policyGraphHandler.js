@@ -239,20 +239,35 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getReferencesPolicyGraphHelper(req, userId) {
 		try {
-			const { ref_name, isUnknown, isTest = false } = req.body;
+			const { ref_name, doc_id, isUnknown, isTest = false } = req.body;
 
-			const [refData] = await this.getGraphData(
-				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
-					isUnknown ? 'UKN_Document' : 'Document'
-				})
-				WHERE d2.ref_name = $ref_name AND NOT d = d2
-				RETURN ref;`,
-				{ ref_name: ref_name },
-				isTest,
-				userId
-			);
+			if (ref_name) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.ref_name = $ref_name AND NOT d = d2
+					RETURN ref;`,
+					{ ref_name: ref_name },
+					isTest,
+					userId
+				);
 
-			return refData;
+				return refData;
+			} else if (doc_id) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.doc_id = $doc_id AND NOT d = d2
+					RETURN ref;`,
+					{ doc_id: doc_id },
+					isTest,
+					userId
+				);
+
+				return refData;
+			}
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '9F2QSP6', userId);

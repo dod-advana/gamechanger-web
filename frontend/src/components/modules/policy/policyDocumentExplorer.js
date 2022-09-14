@@ -638,7 +638,7 @@ export default function DocumentExplorer({
 					<SimpleTable
 						tableClass={'magellan-table'}
 						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
+						headerExtraStyle={{ backgroundColor: '#313541', color: 'white', border: 'unset' }}
 						rows={previewDataReflist}
 						height={'auto'}
 						dontScroll={true}

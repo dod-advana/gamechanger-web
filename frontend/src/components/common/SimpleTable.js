@@ -5,6 +5,7 @@ import parse from 'html-react-parser';
 import { primary } from './gc-colors';
 import CONFIG from '../../config/config';
 import sanitizeHtml from 'sanitize-html';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const defaultColWidth = {
 	maxWidth: 250,
@@ -17,6 +18,7 @@ const titleWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	border: 'unset',
 };
 
 const stickyHeader = {
@@ -30,6 +32,10 @@ const noWrapStyle = {
 	whiteSpace: 'normal',
 	// maxWidth: '100%',
 	// width: '100%'
+};
+
+const loadingStyle = {
+	color: '#fff',
 };
 
 export default class SimpleTable extends React.Component {
@@ -50,6 +56,7 @@ export default class SimpleTable extends React.Component {
 		useParser: false,
 		hideSubheader: false,
 		useInnerHtml: false,
+		loading: false,
 	};
 
 	state = {
@@ -57,7 +64,7 @@ export default class SimpleTable extends React.Component {
 	};
 
 	getHeader = (cols, colMap) => {
-		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
+		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title, loading } = this.props;
 
 		if (hideHeader) return <thead></thead>;
 		return (
@@ -67,7 +74,13 @@ export default class SimpleTable extends React.Component {
 						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
 							{title}
 						</th>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}></th>
+						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}>
+							{loading && (
+								<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+									<CircularProgress size={24} sx={loadingStyle} />
+								</div>
+							)}
+						</th>
 					</tr>
 				)}
 				{!hideSubheader && (
@@ -115,6 +128,21 @@ export default class SimpleTable extends React.Component {
 											key={idx}
 										>
 											{col}
+										</th>
+									);
+								} else if (!title && loading && idx === cols.length - 1 && !col.trim()) {
+									return (
+										<th
+											style={{
+												...(this.props.stickyHeader && stickyHeader),
+												...colWidth,
+												...headerExtraStyle,
+											}}
+											key={idx}
+										>
+											<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+												<CircularProgress size={24} sx={loadingStyle} />
+											</div>
 										</th>
 									);
 								} else {
@@ -203,7 +231,7 @@ export default class SimpleTable extends React.Component {
 								>
 									{editIcon}
 									{useParser
-										? parse(r[c])
+										? parse(r[c] || '')
 										: Array.isArray(r[c])
 										? r[c].join(', ')
 										: typeof r[c] === 'boolean'
