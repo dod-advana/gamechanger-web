@@ -467,6 +467,7 @@ const JbookViewHeaderHandler = (props) => {
 				</GCButton>
 
 				<GCButton
+					data-cy="export-button"
 					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 					onClick={async () => {
 						try {
