@@ -161,22 +161,29 @@ class ModularGameChangerController {
 
 	async search(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { cloneName, searchText, limit = 18, options, storeHistory = true } = req.body;
-		let { offset = 0 } = req.body;
+		const {
+			cloneName,
+			searchText,
+			limit = 18,
+			options,
+			storeHistory = true,
+			search_after = [],
+			search_before = [],
+		} = req.body;
+		let { offset } = req.body;
 		try {
 			// NOTE: if this code changes then this will likely necessitate changes to `favoritesController.checkLeastRecentFavoritedSearch`
 			const handler = this.handler_factory.createHandler('search', cloneName);
-			if (offset === null) offset = 0;
+			if (!offset) offset = 0;
+			const searchBounds = { searchText, offset, limit, search_after, search_before };
 			const results = await handler.search(
-				searchText,
-				offset,
-				limit,
 				options,
 				cloneName,
 				req.permissions,
 				userId,
 				storeHistory,
-				req.session
+				req.session,
+				searchBounds
 			);
 			const error = handler.getError();
 			if (error.code) results.error = error;
@@ -331,12 +338,12 @@ class ModularGameChangerController {
 		}
 	}
 
-	async querySuggester(req, res) {
+	async querySuggester(_req, res) {
 		// TODO add Query Suggester Handlers
 		res.status(200).send('TODO');
 	}
 
-	async docFetcher(req, res) {
+	async docFetcher(_req, res) {
 		// TODO add Doc Fetcher Handlers
 		res.status(200).send('TODO');
 	}
