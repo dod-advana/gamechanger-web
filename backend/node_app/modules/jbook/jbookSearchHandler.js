@@ -138,7 +138,7 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
-			const { jbookSearchSettings } = req.body;
+			const { jbookSearchSettings, search_before = [] } = req.body;
 			// clean empty options:
 			Object.keys(jbookSearchSettings).forEach((key) => {
 				if (
@@ -174,7 +174,7 @@ class JBookSearchHandler extends SearchHandler {
 
 			let returnData = {};
 			try {
-				returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+				returnData = this.jbookSearchUtility.cleanESResults(esResults, userId, search_before.length > 0);
 				returnData.expansionDict = expansionDict;
 			} catch (e) {}
 
