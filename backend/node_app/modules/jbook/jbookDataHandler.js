@@ -290,13 +290,11 @@ class JBookDataHandler extends DataHandler {
 
 	async getAllBYProjectData(req, userId) {
 		try {
-			const { id, portfolioName } = req.body;
-
+			const { id, portfolioName, userRowId } = req.body;
 			if (portfolioName !== 'General') {
 				const portfolios = await this.getPortfolios(userId);
-				const myAuthorizedUsr = 88;
 				const authorizedUsers = portfolios.filter((porty) => porty.name === portfolioName)[0].user_ids;
-				if (!authorizedUsers.includes(myAuthorizedUsr)) {
+				if (!authorizedUsers.includes(userRowId)) {
 					return 'Unauthorized Entry Detected';
 				}
 			}
