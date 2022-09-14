@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 describe('Tests multiple types of jbook searches.', () => {
 	beforeEach(() => {
 		cy.setup();

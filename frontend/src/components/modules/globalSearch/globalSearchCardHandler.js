@@ -415,20 +415,16 @@ const getMetadataForPropertyTable = (item, type) => {
 	switch (type) {
 		case 'dashboards':
 			data.push({
+				Key: 'id',
+				Value: `${item.id}`,
+			});
+			data.push({
 				Key: 'Name',
 				Value: `${item.name}`,
 			});
 			data.push({
-				Key: 'Stream Name',
-				Value: `${item.streamName}`,
-			});
-			data.push({
 				Key: 'Description',
 				Value: `${item.description}`,
-			});
-			data.push({
-				Key: 'id',
-				Value: `${item.id}`,
 			});
 			data.push({
 				Key: 'Created At',
@@ -443,8 +439,28 @@ const getMetadataForPropertyTable = (item, type) => {
 				Value: `${item.publishTime}`,
 			});
 			data.push({
+				Key: 'App Custom Properties',
+				Value:
+					item.appCustomProperties.items.length > 0 ? `${item.appCustomProperties.items.join(', ')}` : 'N/A',
+			});
+			data.push({
+				Key: 'Business Domains',
+				Value: item.businessDomains.items.length > 0 ? `${item.businessDomains.items.join(', ')}` : 'N/A',
+			});
+			data.push({
+				Key: 'Stream Name',
+				Value: `${item.streamName}`,
+			});
+			data.push({
+				Key: 'Stream Custom Properties',
+				Value:
+					item.streamCustomProperties.items.length > 0
+						? `${item.streamCustomProperties.items.join(', ')}`
+						: 'N/A',
+			});
+			data.push({
 				Key: 'Tags',
-				Value: `${item.tags}`,
+				Value: item.tags.items.length > 0 ? `${item.tags.items.join(', ')}` : 'N/A',
 			});
 			break;
 		case 'dataSources':
