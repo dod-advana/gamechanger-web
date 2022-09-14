@@ -54,7 +54,7 @@ describe('Tests multiple types of jbook searches.', () => {
 	});
 });
 
-describe.only('Tests search from multiple pages.', () => {
+describe('Tests search from multiple pages.', () => {
 	before(() => {
 		cy.setup();
 	});
@@ -87,5 +87,52 @@ describe.only('Tests search from multiple pages.', () => {
 			.find('[data-cy="jbook-card-header"]')
 			.first()
 			.should('contain', 'PE: 0206623M - MC Ground Cmbt Spt Arms Sys');
+	});
+});
+
+describe.only('does changing to test/hypersonic cause random scrolling', () => {
+	before(() => {
+		cy.setup();
+	});
+
+	it('can successfully not cause window to jump in test portfolio', () => {
+		// load particular document's profile page
+		cy.visit_accept_consent(
+			'jbook/profile?type=Procurement&id=pdoc#2019#PB#05#A01000#57#N/A#3010&appropriationNumber=3010&portfolioName=Test%20Portfolio&budgetYear=2019'
+		);
+
+		// Wait some time
+		cy.wait(3000);
+
+		// Scroll down
+		cy.scrollTo(0, 835.5);
+
+		//Open the dropdown menu in reviewer form and select the first option
+		cy.getDataCy('jbook-reviewer-label').type('{downArrow}').type('{enter}');
+
+		// Check to see if the window has jumped at all
+		cy.window().then(($window) => {
+			expect($window.scrollY).to.be.closeTo(835.5, 0);
+		});
+	});
+	it('can successfully not cause window to jump in hypersonics', () => {
+		// load particular document's profile page
+		cy.visit_accept_consent(
+			'jbook/profile?type=RDT%26E&searchText=0909999D8Z&id=rdoc#2023#PB#03#0909999D8Z#97#OFFICE%20OF%20THE%20SECRETARY%20OF%20DEFENSE#0400#000&appropriationNumber=0400&portfolioName=Hypersonics&budgetYear=2023'
+		);
+
+		// Wait some time
+		cy.wait(3000);
+
+		// Scroll down
+		cy.scrollTo(0, 1052.5);
+
+		//Open the dropdown menu in reviewer form and select the first option
+		cy.getDataCy('jbook-reviewer-label').type('{downArrow}').type('{enter}');
+
+		// Check to see if the window has jumped at all
+		cy.window().then(($window) => {
+			expect($window.scrollY).to.be.closeTo(1052.5, 0);
+		});
 	});
 });
