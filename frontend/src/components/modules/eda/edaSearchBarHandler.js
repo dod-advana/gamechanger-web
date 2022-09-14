@@ -135,6 +135,7 @@ const EDASearchBarHandler = {
 						onClick={() => {
 							setAdvancedSearchOpen(!advancedSearchOpen);
 						}}
+						data-cy="eda-advanced-settings"
 					>
 						Advanced
 						<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
