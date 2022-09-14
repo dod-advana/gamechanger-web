@@ -1436,7 +1436,6 @@ const cardHandler = {
 
 		getCardBack: ({ item, state, dispatch }) => {
 			if (item.notInCorpus) return <></>;
-			const { ref_list = [] } = item;
 			const data = getMetadataForPropertyTable(item);
 			let favoritableData = policyMetadata(item);
 			favoritableData = [
@@ -1459,7 +1458,7 @@ const cardHandler = {
 						hideHeader={!!state.listView}
 					/>
 					<div>
-						<PolicyDocumentReferenceTable state={state} document={item} refList={ref_list} />
+						<PolicyDocumentReferenceTable state={state} document={item} />
 					</div>
 				</div>
 			);
