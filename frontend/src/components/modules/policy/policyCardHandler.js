@@ -19,6 +19,7 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
+import DocIngestModal from './policyDocIngestModal';
 import { Popover, TextField, Typography } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -716,6 +717,20 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 	return temp;
 };
 
+const requestDocIngest = (item, setShowDocIngestModal) => {
+	gameChangerAPI
+		.requestDocIngest({ docId: item.display_title_s })
+		.then((res) => {
+			if (res.status === 200) {
+				setShowDocIngestModal(true);
+			}
+		})
+		.catch((err) => {
+			console.log('there was an error', err);
+			// set error modal
+		});
+};
+
 const getPublicationDate = (publication_date_dt) => {
 	if (publication_date_dt !== undefined && publication_date_dt !== '') {
 		const currentDate = new Date(publication_date_dt);
@@ -728,7 +743,8 @@ const getPublicationDate = (publication_date_dt) => {
 	}
 };
 
-const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
 	const displayTitle = getDisplayTitle(item, state.currentViewName);
 	const isRevoked = item.is_revoked_b;
 
@@ -811,7 +827,7 @@ const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponen
 			)}
 			{docListView && item.notInCorpus && (
 				<GCTooltip
-					title={'Click to request that this document be made part of the GAMCHANGER corpus'}
+					title={'Click to request that this document be made part of the GAMECHANGER corpus'}
 					placement="top"
 					arrow
 				>
@@ -825,12 +841,18 @@ const getCardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponen
 							zIndex: 1,
 						}}
 					>
-						<GCButton onClick={() => gameChangerAPI.requestDocIngest({ docId: item.display_title_s })}>
-							Report Issue
+						<GCButton
+							onClick={() => {
+								setShowDocIngestModal(true);
+								requestDocIngest(item);
+							}}
+						>
+							Request This Data
 						</GCButton>
 					</div>
 				</GCTooltip>
 			)}
+			<DocIngestModal showDocIngestModal={showDocIngestModal} setShowDocIngestModal={setShowDocIngestModal} />
 		</StyledFrontCardHeader>
 	);
 };
@@ -1156,7 +1178,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			</div>
 		</GCAccordion>
 	) : (
-		<>Data does not yet exist for this document within the GAMECHANGER corpus</>
+		<div>Data does not yet exist for this document within the GAMECHANGER corpus</div>
 	);
 };
 
@@ -1308,7 +1330,7 @@ const cardHandler = {
 			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
-			return getCardHeaderHandler(props);
+			return CardHeaderHandler(props);
 		},
 
 		getCardSubHeader: (props) => {
@@ -1589,7 +1611,7 @@ const cardHandler = {
 			return getDisplayTitle(item, currentViewName);
 		},
 		getCardHeader: (props) => {
-			return getCardHeaderHandler(props);
+			return CardHeaderHandler(props);
 		},
 
 		getCardSubHeader: (props) => {
@@ -1716,18 +1738,18 @@ const cardHandler = {
 			const { item, state, backBody } = props;
 
 			if (state.listView) {
-				if (item.description?.length > 300) {
-					item.description = item?.description?.slice(0, 280) + '...';
+				if (item.information?.length > 300) {
+					item.information = item?.information?.slice(0, 280) + '...';
 				}
-			} else if (item.image === undefined && item.description?.length > 300) {
-				item.description = item?.description?.slice(0, 280) + '...';
-			} else if (item.image && item.description?.length > 180) {
-				item.description = item?.description?.slice(0, 160) + '...';
+			} else if (item.image === undefined && item.information?.length > 300) {
+				item.information = item?.information?.slice(0, 280) + '...';
+			} else if (item.image && item.information?.length > 180) {
+				item.information = item?.information?.slice(0, 160) + '...';
 			}
 			if (state.listView) {
 				return (
 					<StyledListViewFrontCardContent>
-						{item.description && <p>{item.description}</p>}
+						{item.information && <p>{item.information}</p>}
 						<GCAccordion
 							header={'DOCUMENT METADATA'}
 							headerBackground={'rgb(238,241,242)'}
@@ -1749,17 +1771,17 @@ const cardHandler = {
 
 				return (
 					<StyledEntityTopicFrontCardContent listView={state.listView}>
-						{!state.listView && item.image && (
+						{!state.listView && (
 							<img
 								alt="Office Img"
-								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity}
+								src={fallbackSources.s3 || fallbackSources.admin || fallbackSources.entity || dodSeal}
 								onError={(event) => {
 									handleImgSrcError(event, fallbackSources);
 									if (fallbackSources.admin) fallbackSources.admin = undefined;
 								}}
 							/>
 						)}
-						<p>{item.description}</p>
+						<p>{item.information}</p>
 					</StyledEntityTopicFrontCardContent>
 				);
 			}
