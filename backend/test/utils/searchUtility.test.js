@@ -1474,6 +1474,7 @@ describe('SearchUtility', function () {
 							order: 'desc',
 						},
 					},
+					{ _id: 'desc' },
 				],
 			};
 			assert.deepStrictEqual(actual, expected);
@@ -1495,7 +1496,7 @@ describe('SearchUtility', function () {
 				typeFilterString: [],
 				sort: 'Publishing Date',
 			});
-			assert.deepStrictEqual(actual.sort, [{ publication_date_dt: { order: 'desc' } }]);
+			assert.deepStrictEqual(actual.sort, [{ publication_date_dt: { order: 'desc' } }, { _id: 'desc' }]);
 		});
 
 		it('should return sorted ES query (alpha)', () => {
@@ -1514,7 +1515,7 @@ describe('SearchUtility', function () {
 				typeFilterString: [],
 				sort: 'Alphabetical',
 			});
-			assert.deepStrictEqual(actual.sort, [{ display_title_s: { order: 'desc' } }]);
+			assert.deepStrictEqual(actual.sort, [{ display_title_s: { order: 'desc' } }, { _id: 'desc' }]);
 		});
 
 		it('should return sorted ES query (References)', () => {
@@ -1541,6 +1542,7 @@ describe('SearchUtility', function () {
 						order: 'desc',
 					},
 				},
+				{ _id: 'desc' },
 			]);
 		});
 	});
@@ -1646,7 +1648,15 @@ describe('SearchUtility', function () {
 			const searchTerms = [`"requirement to conclude a bilateral agreement"`, 'rocket'];
 
 			const target = new SearchUtility(opts);
-			const actual = target.cleanUpEsResults(raw, searchTerms, user, null, [], 'gamechanger');
+			const actual = target.cleanUpEsResults({
+				raw,
+				searchTerms,
+				user,
+				selectedDocuments: null,
+				expansionDict: [],
+				index: 'gamechanger',
+				query: undefined,
+			});
 			const expected = {
 				doc_orgs: [],
 				doc_types: [],

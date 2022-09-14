@@ -3168,7 +3168,7 @@ describe('PolicyGraphHandler', function () {
 							type: 'unified',
 							boundary_scanner: 'word',
 						},
-						sort: [{ _score: { order: 'desc' } }],
+						sort: [{ _score: { order: 'desc' } }, { _id: 'desc' }],
 					},
 					totalCount: 1,
 					docs: [
