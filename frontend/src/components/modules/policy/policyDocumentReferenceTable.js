@@ -31,8 +31,9 @@ const buildGraph = (resp) => {
 	return graph;
 };
 
-const PolicyDocumentReferenceTable = ({ state, document, refList }) => {
+const PolicyDocumentReferenceTable = ({ state, document, zoom = 1 }) => {
 	const { cloneData } = state;
+	const refList = document?.ref_list;
 
 	const [refData, setRefData] = useState();
 	const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
@@ -40,7 +41,7 @@ const PolicyDocumentReferenceTable = ({ state, document, refList }) => {
 
 	const getDocRefLinks = useCallback(
 		(refList) => {
-			return refList.map((reference) => {
+			return refList?.map((reference) => {
 				const found = graphData.nodes.find((doc) => `${doc.doc_type} ${doc.doc_num}` === reference);
 				if (found) {
 					return {
@@ -91,7 +92,7 @@ const PolicyDocumentReferenceTable = ({ state, document, refList }) => {
 	return (
 		<SimpleTable
 			tableClass={'magellan-table'}
-			zoom={1}
+			zoom={zoom}
 			headerExtraStyle={{ backgroundColor: '#313541', color: 'white', border: 'unset' }}
 			rows={refData}
 			height={'auto'}
@@ -107,7 +108,7 @@ const PolicyDocumentReferenceTable = ({ state, document, refList }) => {
 PolicyDocumentReferenceTable.propTypes = {
 	state: PropTypes.object.isRequired,
 	document: PropTypes.object.isRequired,
-	refList: PropTypes.array.isRequired,
+	zoom: PropTypes.number,
 };
 
 export default PolicyDocumentReferenceTable;

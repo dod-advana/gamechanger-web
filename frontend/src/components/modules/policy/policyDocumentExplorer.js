@@ -8,7 +8,6 @@ import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import grey from '@material-ui/core/colors/grey';
 import {
-	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
@@ -19,6 +18,7 @@ import Pagination from 'react-js-pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
+import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -409,11 +409,7 @@ export default function DocumentExplorer({
 		policyData = [...policyMetadata(data[iframePreviewLink.dataIdx]), ...policyData];
 	}
 
-	const previewDataReflist =
-		(data.length > 0 &&
-			data[iframePreviewLink.dataIdx] &&
-			getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) ||
-		[];
+	const document = (data.length > 0 && data[iframePreviewLink.dataIdx]) || undefined;
 	const iframePanelSize =
 		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
@@ -425,7 +421,6 @@ export default function DocumentExplorer({
 		minWidth: '75%',
 		maxWidth: '75%',
 	};
-	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
 	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
 
@@ -635,16 +630,7 @@ export default function DocumentExplorer({
 				/>
 				<div style={{ marginTop: 0 }}>
 					{' '}
-					<SimpleTable
-						tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white', border: 'unset' }}
-						rows={previewDataReflist}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidthRefTable}
-						disableWrap={true}
-					/>
+					<PolicyDocumentReferenceTable state={state} document={document} zoom={0.8} />
 				</div>
 			</div>
 		</div>
