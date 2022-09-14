@@ -1680,6 +1680,7 @@ describe('SearchUtility', function () {
 									'"the export of defense items .( C ) Exception for defense trade cooperation treaties ( i ) In general The <em>requirement</em> <em>to</em> <em>conclude</em> <em>a</em> <em>bilateral</em> <em>agreement</em> in accordance with subparagraph"',
 							},
 						],
+						matchCount: 1,
 						page_count: 3355,
 						ref_list: [
 							'Title 50',
