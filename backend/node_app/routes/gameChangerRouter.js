@@ -107,6 +107,7 @@ router.get('/admin/getDataList', transformer.getDataList);
 router.get('/admin/getLoadedModels', transformer.getLoadedModels);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/getCache', transformer.getCache);
 router.get('/admin/initializeLTR', transformer.initializeLTR);
 router.get('/admin/createModelLTR', transformer.createModelLTR);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
@@ -116,6 +117,7 @@ router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/stopProcess', transformer.stopProcess);
 router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
+router.post('/admin/clearCache', transformer.clearCache);
 
 router.post('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
