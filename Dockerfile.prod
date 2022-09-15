@@ -102,6 +102,8 @@ COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build
 
 RUN cd "${APP_BACKEND_DIR}"
 
+RUN rm -rf /home/node/.cache
+
 # http & https
 EXPOSE 8990 8443
 WORKDIR "${APP_BACKEND_DIR}"
