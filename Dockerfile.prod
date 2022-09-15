@@ -63,8 +63,9 @@ ARG NPM_AUTH_TOKEN=""
 
 RUN cd "${APP_FRONTEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
+        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
+        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
     npm install --production
 
@@ -88,8 +89,9 @@ ARG NPM_AUTH_TOKEN=""
 
 RUN cd "${APP_BACKEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
-        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
+        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
+        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
     npm install --production
 
