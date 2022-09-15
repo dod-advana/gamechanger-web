@@ -1413,6 +1413,7 @@ class SearchUtility {
 				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
 				this.cleanUpEsResultsHandleHighlights(rawHit, result);
 				result.pageHitCount = pageSet.size;
+				result.matchCount = rawHit.inner_hits?.paragraphs?.hits?.total?.value;
 			} else if (rawHit.inner_hits.paragraphs && isCompareReturn) {
 				result.paragraphs = [];
 				result.score = 0;
