@@ -3,8 +3,6 @@ FROM $BASE_IMAGE AS base
 
 USER root
 
-RUN corepack prepare --all
-
 RUN yum install -y \
         git \
         make
@@ -48,7 +46,7 @@ RUN mkdir -p \
 USER "${APP_UID}":"${APP_GID}"
 
 RUN cd "$APP_SHARED_DIR" && \
-    yarn add -g nodemon sequelize-cli
+    npm install -g nodemon sequelize-cli
 
 FROM base AS builder
 
@@ -65,16 +63,15 @@ ARG NPM_AUTH_TOKEN=""
 
 RUN cd "${APP_FRONTEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
-        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
-        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
     )) && \
-    yarn install --production
+    npm install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
 
 RUN cd "${APP_FRONTEND_DIR}" && \
-    yarn build
+    npm run build
 
 FROM base
 
@@ -91,11 +88,10 @@ ARG NPM_AUTH_TOKEN=""
 
 RUN cd "${APP_BACKEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
-        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
-        echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
-        echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
+        _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') \
+        && npm set "//${_registry_fqdn}/:_authToken" "${NPM_AUTH_TOKEN}" \
     )) && \
-    yarn install --production
+    npm install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}/build"
