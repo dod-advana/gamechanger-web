@@ -428,6 +428,8 @@ const JBookSearchHandler = {
 		for (const setting in searchSettings) {
 			if (!searchSettings[setting]) {
 				delete searchSettings[setting];
+			} else if (typeof searchSettings[setting] === 'string') {
+				searchSettings[setting] = searchSettings[setting].trim();
 			}
 		}
 

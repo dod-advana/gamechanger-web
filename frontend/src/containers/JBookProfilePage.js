@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
+import { trackEvent } from '../components/telemetry/Matomo';
+import { getTrackingNameForFactory, encode } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -98,6 +100,15 @@ const JBookProfilePage = () => {
 
 	const [budgetYearProjectData, setBudgetYearProjectData] = useState({});
 	let [init, setInit] = useState(false);
+
+	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		window.open(
+			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+		);
+	};
 
 	useEffect(() => {
 		const getUserData = async () => {
@@ -1080,7 +1091,6 @@ const JBookProfilePage = () => {
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
 		}
-
 		return data;
 	};
 
@@ -1350,6 +1360,45 @@ const JBookProfilePage = () => {
 					/>
 				</StyledMainContainer>
 				<StyledRightContainer>
+					{projectData.dtic_pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(
+									projectData.dtic_pdf_location_s,
+									cloneData.clone_name,
+									projectData.dtic_pdf_page_s
+								);
+							}}
+						>
+							OPEN DOCUMENT
+						</GCPrimaryButton>
+					)}
+					{projectData.pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(projectData.pdf_location_s, cloneData.clone_name);
+							}}
+						>
+							OPEN FULL PDF
+						</GCPrimaryButton>
+					)}
+
 					<Metadata
 						budgetType={budgetType}
 						projectNum={projectNum}
