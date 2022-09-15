@@ -46,7 +46,7 @@ RUN mkdir -p \
 USER "${APP_UID}":"${APP_GID}"
 
 RUN cd "$APP_SHARED_DIR" && \
-    npm install -g nodemon sequelize-cli
+    npm install nodemon sequelize-cli
 
 FROM base AS builder
 
