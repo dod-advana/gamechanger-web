@@ -930,8 +930,8 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-	createMockGraphReturnFromEsResultsHelper(ref_list, docsRefDict, pubName, referencesRecords, linkIndex) {
-		ref_list.forEach((ref) => {
+	createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex) {
+		doc.ref_list.forEach((ref) => {
 			const refArr = ref.split(' ');
 			let newRef = '';
 			if (refArr.length < 2 && refArr[0].slice(0, 5) === 'Title') {
@@ -1021,13 +1021,7 @@ class PolicyGraphHandler extends GraphHandler {
 				if (!doc.ref_list) doc.ref_list = [];
 
 				// Ensure refs are good with spaces between type and num
-				this.createMockGraphReturnFromEsResultsHelper(
-					doc.ref_list,
-					docsRefDict,
-					pubName,
-					referencesRecords,
-					linkIndex
-				);
+				this.createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex);
 			});
 
 			result.records = [...documentsRecords, ...referencesRecords];
