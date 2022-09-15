@@ -80,6 +80,8 @@ const endpoints = {
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getCache: '/api/gamechanger/admin/getCache',
+	clearCache: '/api/gamechanger/admin/clearCache',
 	getUserSettings: '/api/gamechanger/getUserSettings',
 	getInternalUsers: '/api/gamechanger/getInternalUsers',
 	addInternalUser: '/api/gamechanger/admin/addInternalUser',
@@ -743,6 +745,16 @@ export default class GameChangerAPI {
 	getUserSettings = async () => {
 		const url = endpoints.getUserSettings;
 		return axiosGET(this.axios, url);
+	};
+
+	getCache = async () => {
+		const url = endpoints.getCache;
+		return axiosGET(this.axios, url);
+	};
+
+	clearCache = async (opts) => {
+		const url = endpoints.clearCache;
+		return axiosPOST(this.axios, url, opts);
 	};
 
 	queryEs = async (opts) => {
