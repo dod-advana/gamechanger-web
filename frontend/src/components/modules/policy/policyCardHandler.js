@@ -678,7 +678,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												handleTopicClick(cloneData.clone_name, topic);
+												handleTopicClick(topic, cloneData.clone_name);
 											}}
 										>
 											{topic}
@@ -693,7 +693,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											handleTopicClick(cloneData.clone_name, topic);
+											handleTopicClick(topic, cloneData.clone_name);
 										}}
 									>
 										{topic}
