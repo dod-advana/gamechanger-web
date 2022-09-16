@@ -14,7 +14,13 @@ module.exports = (sequelize, DataTypes) => {
 			description: {
 				type: DataTypes.TEXT,
 			},
+			creator: {
+				type: DataTypes.INTEGER,
+			},
 			user_ids: {
+				type: DataTypes.ARRAY(DataTypes.INTEGER),
+			},
+			admins: {
 				type: DataTypes.ARRAY(DataTypes.INTEGER),
 			},
 			tags: {

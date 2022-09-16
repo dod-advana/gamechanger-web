@@ -306,14 +306,18 @@ const JBookProfilePage = () => {
 
 		const getPortfolioData = async () => {
 			// grab the portfolio data
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 			await gameChangerAPI
 				.callDataFunction({
 					functionName: 'getPortfolios',
 					cloneName: 'jbook',
-					options: {},
+					options: { id: currentUserData.data.id },
 				})
 				.then((data) => {
-					let portfolioData = data.data !== undefined ? data.data : [];
+					let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
+					let privateData = data.data.privatePortfolios !== undefined ? data.data.privatePortfolios : [];
+					let portfolioData = [...publicData, ...privateData];
 					let map = {};
 					for (let item of portfolioData) {
 						map[item.name] = item;

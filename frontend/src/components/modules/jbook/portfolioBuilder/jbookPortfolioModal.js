@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import GameChangerAPI from '../../../api/gameChanger-service-api';
+
 const gameChangerAPI = new GameChangerAPI();
 
 const Pill = styled.button`
@@ -46,15 +47,17 @@ const Pill = styled.button`
  *
  * @class UserModal
  */
-export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
+export default ({ showModal, setShowModal, modalData, userList, userMap, user }) => {
 	const classes = useStyles();
 	// const [init, setInit] = useState(false);
 	const [showUsersModal, setShowUsersModal] = useState(false);
+	const [showAdminsModal, setShowAdminsModal] = useState(false);
 	const [showTagsModal, setShowTagsModal] = useState(false);
-
 	const emptyData = {
 		name: '',
 		description: '',
+		creator: user.id,
+		admins: [],
 		user_ids: [],
 		tags: [],
 		deleted: false,
@@ -87,6 +90,23 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 				}
 
 				handleDataChange(newList, 'user_ids');
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
+	const handleAddAdmin = (id) => {
+		try {
+			if (!isNaN(id)) {
+				let newList = [...data.admins];
+				let idIndex = newList.indexOf(id);
+				if (idIndex !== -1) {
+					newList.splice(idIndex, 1);
+				} else {
+					newList.push(id);
+				}
+				handleDataChange(newList, 'admins');
 			}
 		} catch (e) {
 			console.log(e);
@@ -154,6 +174,43 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 		}
 	};
 
+	// render the selected admins as pills on the portfolio editor
+	const renderSelectedAdmins = () => {
+		try {
+			let selectedUsers = [];
+			let userIDs = data.admins;
+			for (let i = 0; i < userIDs.length; i++) {
+				let user = userMap[userIDs[i]];
+				selectedUsers.push(
+					<Pill style={{ margin: '0 5px 10px' }}>
+						{user.first_name} {user.last_name}
+						<IconButton
+							aria-label="close"
+							style={{
+								backgroundColor: '#BDBDBD',
+								width: 17,
+								height: 17,
+								margin: '0 0 0 5px',
+								color: 'white',
+								padding: 0,
+								borderRadius: '15px',
+							}}
+							onClick={() => handleAddAdmin(userIDs[i])}
+						>
+							<CloseIcon style={{ fontSize: 11 }} />
+						</IconButton>
+					</Pill>
+				);
+			}
+
+			return selectedUsers;
+		} catch (e) {
+			console.log(e);
+			console.log('Error rendering selected admins on edit portfolio modal');
+			return '';
+		}
+	};
+
 	// render the selected users as pills on the portfolio editor
 	const renderSelectedTags = () => {
 		try {
@@ -211,6 +268,15 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 				portfolioData={data}
 				renderSelectedUsers={renderSelectedUsers}
 				handleAddUser={handleAddUser}
+			/>
+			<JbookAddUsersModal
+				showModal={showAdminsModal}
+				setShowModal={setShowAdminsModal}
+				userList={userList}
+				portfolioData={data}
+				renderSelectedUsers={renderSelectedAdmins}
+				handleAddUser={handleAddAdmin}
+				admin={true}
 			/>
 			<JbookAddTagsModal
 				showModal={showTagsModal}
@@ -270,6 +336,12 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 						</Grid>
 						<Grid container>
 							<Grid item xs={12}>
+								<div>
+									Creator:{' '}
+									{(userMap[data.creator] ? userMap[data.creator].first_name : '') +
+										' ' +
+										(userMap[data.creator] ? userMap[data.creator].last_name : '')}
+								</div>
 								<TextField
 									style={{ width: '100%', backgroundColor: 'white', marginTop: '10px' }}
 									label="Portfolio Name"
@@ -328,6 +400,31 @@ export default ({ showModal, setShowModal, modalData, userList, userMap }) => {
 									>
 										<AddIcon style={{ cursor: 'pointer' }} />
 									</IconButton>
+								</FormControl>
+								<hr />
+								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+									ADD ADMINISTRATORS
+								</Typography>
+								<FormControl
+									fullWidth
+									sx={{ m: 1 }}
+									variant="standard"
+									style={{ marginTop: 15, display: 'flex', flexDirection: 'row' }}
+								>
+									<IconButton
+										aria-label="close"
+										style={{
+											backgroundColor: styles.backgroundGreyLight,
+											marginRight: 15,
+											borderRadius: '30px',
+											height: '30px',
+											width: '30px',
+										}}
+										onClick={() => setShowAdminsModal(true)}
+									>
+										<AddIcon style={{ cursor: 'pointer' }} />
+									</IconButton>
+									<div style={{ minHeight: 35 }}>{renderSelectedAdmins()}</div>
 								</FormControl>
 								<hr />
 								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
