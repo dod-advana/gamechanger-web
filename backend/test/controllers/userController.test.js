@@ -114,6 +114,62 @@ describe('UserController', function () {
 		});
 	});
 
+	describe('#getUserDataByIDs', () => {
+		let users = [
+			{ id: 4, first_name: 'Testerson', last_name: 'Testerson', email: 'testerson@test.com' },
+			{ id: 19, first_name: 'Test', last_name: 'Testman', email: 'testman@test.com' },
+			{ id: 20, first_name: 'Test', last_name: 'Testinski', email: 'testinski@test.com' },
+		];
+		const opts = {
+			...constructorOptionsMock,
+			dataApi: {},
+			user: {
+				findAll(data) {
+					const ids = data.where[Symbol.for('or')];
+					const results = ids.map((idObj) => {
+						return users.find((user) => user.id === idObj.id);
+					});
+					return Promise.resolve(results);
+				},
+			},
+			constants: { GAME_CHANGER_OPTS: { index: 'gamechanger' } },
+		};
+		it('should return users by ids', async (done) => {
+			const target = new UserController(opts);
+
+			const req = {
+				...reqMock,
+				query: {
+					ids: '[4,19]',
+				},
+			};
+
+			let resCode;
+			let resMsg;
+
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				},
+			};
+
+			await target.getUserDataByIDs(req, res);
+			const expected = {
+				users: [
+					{ id: 4, first_name: 'Testerson', last_name: 'Testerson', email: 'testerson@test.com' },
+					{ id: 19, first_name: 'Test', last_name: 'Testman', email: 'testman@test.com' },
+				],
+			};
+			assert.deepStrictEqual(resMsg, expected);
+			done();
+		});
+	});
+
 	describe('#getUserData', () => {
 		let users = [];
 		const opts = {

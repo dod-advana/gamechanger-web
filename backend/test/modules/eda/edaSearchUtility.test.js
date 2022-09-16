@@ -1841,24 +1841,6 @@ describe('EDASearchUtility', function () {
 												should: [
 													{
 														query_string: {
-															default_field: 'fpds_ng_n.psc_desc_eda_ext',
-															fuzziness: 2,
-															query: '*test\\-*',
-														},
-													},
-												],
-											},
-										},
-									},
-								},
-								{
-									nested: {
-										path: 'fpds_ng_n',
-										query: {
-											bool: {
-												should: [
-													{
-														query_string: {
 															default_field: 'fpds_ng_n.piid_eda_ext',
 															fuzziness: 2,
 															query: '*test*',
@@ -1897,6 +1879,13 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.psc_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.psc_desc_eda_ext',
 															fuzziness: 2,
 															query: '*test*',
 														},
