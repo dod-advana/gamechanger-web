@@ -990,13 +990,39 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	// PORTFOLIO
-	async getPortfolios(userId) {
+	async getPortfolios(req, userId) {
 		try {
-			return await this.portfolio.findAll({
+			const { id } = req.body;
+			const publicPortfolios = await this.portfolio.findAll({
 				where: {
 					deleted: false,
+					isPrivate: false,
 				},
 			});
+
+			const privatePortfolios = await this.portfolio.findAll({
+				where: {
+					deleted: false,
+					isPrivate: true,
+					[Op.or]: [{ user_ids: { [Op.contains]: [id] } }, { creator: id }],
+				},
+			});
+
+			const adminPortfolios = await this.portfolio.findAll({
+				where: {
+					deleted: false,
+					isPrivate: true,
+					[Op.or]: [{ admins: { [Op.contains]: [id] } }, { creator: id ?? 0 }],
+				},
+			});
+
+			return new Promise((resolve) =>
+				resolve({
+					publicPortfolios,
+					privatePortfolios,
+					adminPortfolios,
+				})
+			);
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, '6QJASKC', userId);
@@ -1030,7 +1056,7 @@ class JBookDataHandler extends DataHandler {
 
 	async editPortfolio(req, userId) {
 		try {
-			const { id, name, description, isPrivate, user_ids, tags } = req.body;
+			const { id, name, description, isPrivate, user_ids, admins, tags } = req.body;
 
 			if (id) {
 				let update = await this.portfolio.update(
@@ -1038,6 +1064,7 @@ class JBookDataHandler extends DataHandler {
 						name,
 						description,
 						isPrivate,
+						admins,
 						user_ids,
 						tags,
 					},
@@ -1391,7 +1418,7 @@ class JBookDataHandler extends DataHandler {
 				case 'getContractTotals':
 					return await this.getContractTotals(req, userId);
 				case 'getPortfolios':
-					return await this.getPortfolios(userId);
+					return await this.getPortfolios(req, userId);
 				case 'getPortfolio':
 					return await this.getPortfolio(req, userId);
 				case 'editPortfolio':

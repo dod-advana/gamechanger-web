@@ -13,8 +13,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import JbookPortfolioModal from './jbookPortfolioModal';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
+import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GameChangerUserAPI();
 
 const portfolioStyles = {
 	portfolio: {
@@ -60,35 +62,21 @@ const Pill = styled.button`
  */
 const PortfolioBuilder = (props) => {
 	// State variables for the buttons
-	const [portfolios, setPortfolios] = useState([]);
+	const [publicPortfolios, setPublicPortfolios] = useState([]);
+	const [privatePortfolios, setPrivatePortfolios] = useState([]);
+
 	const [showModal, setShowModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
+	const [user, setUser] = useState({});
 	let [init, setInit] = useState(false);
 	const classes = useStyles();
 
 	useEffect(() => {
-		if (!init) {
-			gameChangerAPI
-				.callDataFunction({
-					functionName: 'getPortfolios',
-					cloneName: 'jbook',
-					options: {},
-				})
-				.then((data) => {
-					console.log(data);
-					let pData = data.data !== undefined ? data.data : [];
-					setPortfolios(pData);
-				});
-			setInit(true);
-		}
-	}, [init, setInit, portfolios, setPortfolios]);
-
-	useEffect(() => {
-		const getUserData = async () => {
+		const initFunction = async () => {
 			const data = await gameChangerAPI.getUserData('jbook');
 			setUserList(data.data.users);
 			const newMap = {};
@@ -96,13 +84,33 @@ const PortfolioBuilder = (props) => {
 				newMap[user.id] = user;
 			});
 			setUserMap(newMap);
+
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+			setUser(currentUserData.data);
+			gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {
+						id: currentUserData.data.id,
+					},
+				})
+				.then((data) => {
+					console.log(data);
+
+					let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
+					let adminData = data.data.adminPortfolios !== undefined ? data.data.adminPortfolios : [];
+
+					setPublicPortfolios(publicData);
+					setPrivatePortfolios(adminData);
+				});
 		};
 
 		if (!init) {
-			getUserData();
+			initFunction();
 			setInit(true);
 		}
-	}, [init, setInit, userList, setUserList]);
+	}, [init, setInit, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
 
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
@@ -147,6 +155,34 @@ const PortfolioBuilder = (props) => {
 						</div>
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
+					<div style={{ fontSize: '.8em', fontweight: 'bold' }}>
+						Creator:{' '}
+						{(userMap[portfolio.creator] ? userMap[portfolio.creator].first_name : '') +
+							' ' +
+							(userMap[portfolio.creator] ? userMap[portfolio.creator].last_name : '')}
+					</div>
+					<hr />
+					<div style={portfolioStyles.portfolioHeader}>
+						{' '}
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							Administrators
+						</Typography>
+					</div>
+					<div style={portfolioStyles.pillbox}>
+						{portfolio.user_ids.length === 0 &&
+							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
+						{portfolio.admins.map((user, index) => {
+							return (
+								<Pill>
+									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
+										{(userMap[user] ? userMap[user].first_name : '') +
+											' ' +
+											(userMap[user] ? userMap[user].last_name : '')}
+									</div>
+								</Pill>
+							);
+						})}
+					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
 						{' '}
@@ -233,8 +269,17 @@ const PortfolioBuilder = (props) => {
 						</GCButton>
 					</div>
 				</div>
+				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
+				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(portfolios)}
+					{listPortfolios(publicPortfolios)}
+				</div>
+				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>My Portfolios</p>
+				</div>
+				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+					{listPortfolios(privatePortfolios)}
 				</div>
 			</div>
 			<JbookPortfolioModal
@@ -246,6 +291,7 @@ const PortfolioBuilder = (props) => {
 				modalData={modalData}
 				userList={userList}
 				userMap={userMap}
+				user={user}
 			/>
 			<Dialog
 				open={deleteModal}

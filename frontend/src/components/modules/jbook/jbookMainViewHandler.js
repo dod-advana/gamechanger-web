@@ -68,7 +68,7 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { dispatch, state, gameChangerAPI } = props;
+	const { dispatch, state, gameChangerAPI, gameChangerUserAPI } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
@@ -80,14 +80,19 @@ const handlePageLoad = async (props) => {
 
 	// grab the portfolio data
 	let portfolios = [];
+
+	const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 	await gameChangerAPI
 		.callDataFunction({
 			functionName: 'getPortfolios',
 			cloneName: 'jbook',
-			options: {},
+			options: { id: currentUserData.data.id },
 		})
 		.then((data) => {
-			portfolios = data.data !== undefined ? data.data : [];
+			let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
+			let privateData = data.data.privatePortfolios !== undefined ? data.data.privatePortfolios : [];
+			portfolios = [...publicData, ...privateData];
 		});
 
 	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
@@ -498,14 +503,17 @@ const JBookMainViewHandler = (props) => {
 				searchHandler: tmpSearchHandler,
 				cancelToken,
 				gameChangerAPI,
+				gameChangerUserAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
+		const viewPanels = {
+			Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, gameChangerUserAPI, searchHandler }),
+		};
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
