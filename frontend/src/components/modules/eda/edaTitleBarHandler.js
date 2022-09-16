@@ -8,7 +8,7 @@ const getTitleBar = (props) => {
 	const { componentStepNumbers, onTitleClick, cloneData } = props;
 	return (
 		<div
-			className={`tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`}
+			className={`tutorial-step-${componentStepNumbers[cloneData.display_name + 'Title']}`}
 			onClick={onTitleClick}
 		>
 			<img
@@ -18,7 +18,7 @@ const getTitleBar = (props) => {
 				alt="contractSearch"
 				className={
 					componentStepNumbers
-						? `tutorial-step-${componentStepNumbers[`${cloneData.display_name} Title`]}`
+						? `tutorial-step-${componentStepNumbers[cloneData.display_name + 'Title']}`
 						: null
 				}
 			/>

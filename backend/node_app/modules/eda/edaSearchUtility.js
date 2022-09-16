@@ -273,6 +273,7 @@ class EDASearchUtility {
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
 			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, 'M6THI27', user);
@@ -761,11 +762,6 @@ class EDASearchUtility {
 				);
 			}
 
-			// PSC DESC
-			if (settings.pscDesc && settings.pscDesc.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.psc_desc_eda_ext', settings.pscDesc));
-			}
-
 			// PIID
 			if (settings.piid && settings.piid.length > 0) {
 				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.piid_eda_ext', settings.piid));
@@ -839,7 +835,7 @@ class EDASearchUtility {
 			}
 		}
 
-		return {
+		let query = {
 			nested: {
 				path: 'fpds_ng_n',
 				query: {
@@ -857,6 +853,18 @@ class EDASearchUtility {
 				},
 			},
 		};
+
+		if (esFieldName === 'fpds_ng_n.psc_eda_ext') {
+			query.nested.query.bool.should.push({
+				query_string: {
+					query: `*${fieldValue}*`,
+					default_field: 'fpds_ng_n.psc_desc_eda_ext',
+					fuzziness: 2,
+				},
+			});
+		}
+
+		return query;
 	}
 
 	cleanContractTotals(contractNoAgencyBucket, contractBuckets) {
