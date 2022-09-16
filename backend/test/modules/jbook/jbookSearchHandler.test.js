@@ -772,7 +772,7 @@ describe('JBookSearchHandler', function () {
 		});
 
 		it('should return data for filters', async (done) => {
-			const req = {};
+			const req = { body: { selectedPortfolio: 'AI Inventory' } };
 
 			const mockPGResults = [
 				[

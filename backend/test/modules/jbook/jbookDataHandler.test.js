@@ -114,7 +114,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -187,6 +187,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 
 			const actual = await target.getESProjectData(req, 'Test');
@@ -228,7 +229,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -301,6 +302,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -341,7 +343,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -414,6 +416,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
