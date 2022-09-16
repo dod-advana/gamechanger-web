@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
-	convertDCTScoreToText,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
 	getReferenceListMetadataPropertyTable,
@@ -19,7 +18,7 @@ import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
-import { Popover, TextField, Typography } from '@material-ui/core';
+import { Popover, TextField } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import GCAccordion from '../../common/GCAccordion';
@@ -419,39 +418,6 @@ const StyledEntityTopicFrontCardContent = styled.div`
 		.topics-header {
 			font-weight: bold;
 			margin-bottom: 5px;
-		}
-	}
-`;
-
-const StyledQuickCompareContent = styled.div`
-	background-color: ${'#E1E8EE'};
-	padding: 20px 0px;
-
-	.prev-next-buttons {
-		display: flex;
-		justify-content: right;
-		margin-right: 20px;
-		margin-bottom: 10px;
-	}
-
-	.paragraph-display {
-		display: flex;
-		place-content: space-evenly;
-
-		& .compare-block {
-			background-color: ${'#ffffff'};
-			border: 2px solid ${'#BCCBDB'};
-			border-radius: 6px;
-			width: 48%;
-			padding: 5px;
-
-			& .compare-header {
-				color: ${'#000000DE'};
-				font-size: 16px;
-				font-family: Montserrat;
-				font-weight: bold;
-				margin-bottom: 10px;
-			}
 		}
 	}
 `;
@@ -1112,68 +1078,6 @@ const cardHandler = {
 								</div>
 							</GCAccordion>
 						)}
-						{item.paragraphs?.length > 0 && (
-							<GCAccordion
-								header={`PARAGRAPH HITS: ${item.paragraphs.length}`}
-								headerBackground={'rgb(238,241,242)'}
-								headerTextColor={'black'}
-								headerTextWeight={'normal'}
-							>
-								<div className={'expanded-hits'}>
-									<div className={'page-hits'}>
-										{_.chain(item.paragraphs)
-											.map((paragraph, key) => {
-												return (
-													<div
-														className={'paragraph-hit'}
-														key={key}
-														style={{
-															...(hoveredHit === key && {
-																backgroundColor: '#E9691D',
-																color: 'white',
-															}),
-														}}
-														onMouseEnter={() => setHoveredHit(key)}
-														onClick={(e) => {
-															e.preventDefault();
-														}}
-													>
-														<div>
-															{paragraph.id && (
-																<div className={'par-hit'}>{`Page: ${
-																	paragraph.page_num_i
-																} Par: ${paragraph.id.split('_')[1]}`}</div>
-															)}
-															{paragraph.score && (
-																<div
-																	className={'par-hit'}
-																>{`Score: ${convertDCTScoreToText(
-																	paragraph.score
-																)}`}</div>
-															)}
-														</div>
-														<i
-															className="fa fa-chevron-right"
-															style={{
-																color:
-																	hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-															}}
-														/>
-													</div>
-												);
-											})
-											.value()}
-									</div>
-									<div className={'expanded-metadata'}>
-										<blockquote
-											dangerouslySetInnerHTML={{
-												__html: sanitizeHtml(contextHtml),
-											}}
-										/>
-									</div>
-								</div>
-							</GCAccordion>
-						)}
 						{!item.notInCorpus ? (
 							<GCAccordion
 								header={'DOCUMENT METADATA'}
@@ -1351,55 +1255,6 @@ const cardHandler = {
 					</StyledFrontCardContent>
 				);
 			}
-		},
-
-		getDocumentQuickCompare: (props) => {
-			const { item, compareIndex, handleChangeCompareIndex } = props;
-
-			return (
-				<StyledQuickCompareContent>
-					{item.paragraphs.length > 1 && (
-						<div className={'prev-next-buttons'}>
-							<GCButton
-								id={'prev'}
-								onClick={() => {
-									handleChangeCompareIndex(-1);
-								}}
-								isSecondaryBtn={true}
-								style={{ height: 36 }}
-								disabled={compareIndex === 0}
-							>
-								Previous
-							</GCButton>
-							<GCButton
-								id={'next'}
-								onClick={() => {
-									handleChangeCompareIndex(1);
-								}}
-								isSecondaryBtn={true}
-								style={{ height: 36 }}
-								disabled={compareIndex >= item.paragraphs.length - 1}
-							>
-								Next
-							</GCButton>
-						</div>
-					)}
-					<div className={'paragraph-display'}>
-						<div className={'compare-block'}>
-							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
-							{item.dataToQuickCompareTo[item.paragraphs[compareIndex].paragraphIdBeingMatched]}
-						</div>
-						<div className={'compare-block'}>
-							<Typography className={'compare-header'}>
-								Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph:{' '}
-								{item.paragraphs[compareIndex].id.split('_')[1]} Score:{' '}
-								{convertDCTScoreToText(item.paragraphs[compareIndex].score)}
-							</Typography>
-							{item.paragraphs[compareIndex]?.par_raw_text_t}
-						</div>
-					</div>
-				</StyledQuickCompareContent>
-			);
 		},
 
 		getCardBack: ({ item, state, dispatch }) => {

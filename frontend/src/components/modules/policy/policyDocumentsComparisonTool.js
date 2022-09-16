@@ -8,7 +8,6 @@ import {
 	getTypeQuery,
 	getTrackingNameForFactory,
 	exportToCsv,
-	convertDCTScoreToText,
 	handlePdfOnLoad,
 } from '../../../utils/gamechangerUtils';
 import { Collapse } from 'react-collapse';
@@ -24,6 +23,266 @@ import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import ExportIcon from '../../../images/icon/Export.svg';
 import { dctTutorialSteps } from '../../analystTools/tutotialSteps';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+
+const gameChangerAPI = new GameChangerAPI();
+
+const saveDocToFavorites = (filename, selectedParagraph, paragraphs, state, dispatch) => {
+	const text = paragraphs.find((input) => input.id === selectedParagraph.paragraphIdBeingMatched).text;
+	handleSaveFavoriteDocument(
+		{
+			filename,
+			is_favorite: true,
+			search_text: text,
+			favorite_summary: `Document Comparison result of "${text}"`,
+		},
+		state,
+		dispatch
+	);
+};
+
+const getExportDoc = (selectedParagraph, paragraphs, document) => {
+	const textInput = paragraphs.find((input) => selectedParagraph.paragraphIdBeingMatched === input.id).text;
+	return {
+		filename: document.filename,
+		title: document.title,
+		page: selectedParagraph.page_num_i + 1,
+		textInput,
+		textMatch: selectedParagraph.par_raw_text_t,
+		score: selectedParagraph.score_display,
+	};
+};
+
+const heandleExport = (exportList, type) => {
+	try {
+		trackEvent(getTrackingNameForFactory('gamechanger'), 'DocumentComparisonTool', type, exportList.length);
+		exportToCsv('DocumentComparisonData.csv', exportList, true);
+	} catch (e) {
+		console.error(e);
+		return [];
+	}
+};
+
+const DocumentParagraph = ({
+	doc,
+	docOpen,
+	paragraph,
+	selectedParagraph,
+	paragraphs,
+	setDocParagraph,
+	state,
+	dispatch,
+}) => {
+	const [feedbackList, setFeedbackList] = useState({});
+
+	const exportSingleDoc = (document) => {
+		const exportList = [];
+		document.paragraphs.forEach((paragraph) => {
+			exportList.push(getExportDoc(paragraph, paragraphs, document));
+		});
+		heandleExport(exportList, 'ExportSindleDocCSV');
+	};
+
+	const handleFeedback = (doc, paragraph, positiveFeedback) => {
+		let undo = false;
+		if (positiveFeedback === feedbackList[paragraph.id]) {
+			undo = true;
+			const newList = { ...feedbackList };
+			delete newList[paragraph.id];
+			setFeedbackList(newList);
+		} else {
+			setFeedbackList({ ...feedbackList, [paragraph.id]: positiveFeedback });
+		}
+
+		const searchedParagraph = paragraphs.find((input) => input.id === paragraph.paragraphIdBeingMatched).text;
+		const matchedParagraphId = paragraph.id;
+
+		gameChangerAPI.compareFeedbackPOST({
+			searchedParagraph,
+			matchedParagraphId,
+			docId: doc.id,
+			positiveFeedback,
+			undo,
+		});
+	};
+
+	let blockquoteClass = 'searchdemo-blockquote-sm';
+	const pOpen = selectedParagraph?.id === paragraph.id;
+	const isHighlighted = pOpen && docOpen;
+	if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
+	return (
+		<div key={paragraph.id} style={{ position: 'relative' }}>
+			{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
+			<div
+				className={blockquoteClass}
+				onClick={() => setDocParagraph(doc, paragraph)}
+				style={{
+					marginLeft: 20,
+					marginRight: 0,
+					border: isHighlighted ? 'none' : '1px solid #DCDCDC',
+					padding: '3px',
+					cursor: 'pointer',
+				}}
+			>
+				<span
+					className="gc-document-explorer-result-header-text"
+					style={{
+						color: isHighlighted ? 'white' : '#131E43',
+					}}
+				>
+					{isHighlighted
+						? `Page: ${paragraph.page_num_i + 1}, Par: ${paragraph.id.split('_')[1]}, Similarity Score: ${
+								paragraph.score_display
+						  }`
+						: paragraph.par_raw_text_t}
+				</span>
+			</div>
+			<Collapse isOpened={pOpen && docOpen}>
+				<div
+					className="searchdemo-blockquote-sm"
+					style={{
+						marginLeft: 20,
+						marginRight: 0,
+						border: '1px solid #DCDCDC',
+						padding: '10px',
+						whiteSpace: 'normal',
+					}}
+				>
+					<span className="gc-document-explorer-result-header-text" style={{ fontWeight: 'normal' }}>
+						{paragraph.par_raw_text_t}
+					</span>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'right',
+							marginTop: '10px',
+						}}
+					>
+						<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
+							<div>
+								<GCButton
+									onClick={() => exportSingleDoc(doc)}
+									style={{
+										marginLeft: 10,
+										height: 36,
+										padding: '0px, 10px',
+										minWidth: 0,
+										fontSize: '14px',
+										lineHeight: '15px',
+									}}
+								>
+									Export
+								</GCButton>
+							</div>
+						</GCTooltip>
+						<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
+							<div>
+								<GCButton
+									onClick={() =>
+										saveDocToFavorites(doc.filename, paragraph, paragraphs, state, dispatch)
+									}
+									style={{
+										marginLeft: 10,
+										height: 36,
+										padding: '0px, 10px',
+										minWidth: 0,
+										fontSize: '14px',
+										lineHeight: '15px',
+									}}
+								>
+									Save to Favorites
+								</GCButton>
+							</div>
+						</GCTooltip>
+						<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
+							<i
+								className="dct-feedback fa fa-thumbs-up"
+								style={
+									feedbackList[paragraph.id]
+										? {
+												color: '#939395',
+												WebkitTextStroke: '1px black',
+										  }
+										: {}
+								}
+								onClick={() => handleFeedback(doc, paragraph, true)}
+							/>
+						</GCTooltip>
+						<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
+							<i
+								className="dct-feedback fa fa-thumbs-down"
+								style={
+									feedbackList[paragraph.id] === false
+										? {
+												color: '#939395',
+												WebkitTextStroke: '1px black',
+										  }
+										: {}
+								}
+								onClick={() => handleFeedback(doc, paragraph, false)}
+							/>
+						</GCTooltip>
+					</div>
+				</div>
+			</Collapse>
+		</div>
+	);
+};
+
+const DocumentResult = ({
+	doc,
+	index,
+	selectedInput,
+	selectedParagraph,
+	paragraphs,
+	setDocParagraph,
+	state,
+	dispatch,
+}) => {
+	const [isOpen, setIsOpen] = useState(false);
+	const displayTitle = doc.display_title_s;
+	return (
+		<div key={doc.id} className={index === 0 ? 'dct-tutorial-step-7' : ''}>
+			<div
+				id={index === 0 ? 'first-dct-result' : ''}
+				className="searchdemo-modal-result-header"
+				style={{ marginTop: 0 }}
+				onClick={() => {
+					setIsOpen(!isOpen);
+				}}
+			>
+				<i
+					style={{
+						marginRight: isOpen ? 10 : 14,
+						fontSize: 20,
+						cursor: 'pointer',
+					}}
+					className={`fa fa-caret-${isOpen ? 'down' : 'right'}`}
+				/>
+				<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+			</div>
+			<div>
+				<Collapse isOpened={isOpen}>
+					{doc.paragraphs &&
+						doc.paragraphs
+							.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
+							.map((paragraph) => (
+								<DocumentParagraph
+									doc={doc}
+									docOpen={isOpen}
+									paragraph={paragraph}
+									selectedParagraph={selectedParagraph}
+									paragraphs={paragraphs}
+									setDocParagraph={setDocParagraph}
+									state={state}
+									dispatch={dispatch}
+								/>
+							))}
+				</Collapse>
+			</div>
+		</div>
+	);
+};
 
 const sortAlphabetically = (order) => {
 	return (docA, docB) => {
@@ -49,14 +308,7 @@ const sortByScore = (order) => {
 	};
 };
 
-const PolicyDocumentsComparisonTool = ({
-	context,
-	gameChangerAPI,
-	styles,
-	DocumentInputContainer,
-	resetAdvancedSettings,
-	classes,
-}) => {
+const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer, resetAdvancedSettings, classes }) => {
 	const { state, dispatch } = context;
 	const { analystToolsSearchSettings } = state;
 	const { allOrgsSelected, orgFilter, allTypesSelected, typeFilter, publicationDateFilter, includeRevoked } =
@@ -76,8 +328,6 @@ const PolicyDocumentsComparisonTool = ({
 	const [noResults, setNoResults] = useState(false);
 	const [filterChange, setFilterChange] = useState(false);
 	const [inputError, setInputError] = useState(false);
-	const [collapseKeys, setCollapseKeys] = useState([]);
-	const [feedbackList, setFeedbackList] = useState({});
 	const [sortType, setSortType] = useState('Similarity Score');
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
@@ -86,10 +336,7 @@ const PolicyDocumentsComparisonTool = ({
 
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
-
-	const resetPage = () => {
-		setStepIndex(0);
-	};
+	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -126,7 +373,26 @@ const PolicyDocumentsComparisonTool = ({
 			newSearchSettings.typeFilter = state.presearchTypes;
 			setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
 		}
-	}, [state, dispatch, gameChangerAPI]);
+	}, [state, dispatch]);
+
+	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
+	useEffect(() => {
+		if (stepIndex === 0 && showTutorial === true)
+			setParagraphText(
+				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
+			);
+		if (stepIndex === 2 && tutorialLogicSwitch) {
+			setReturnedDocs([]);
+			setViewableDocs([]);
+			setTutorialLogicSwitch(false);
+		}
+		if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
+		if (stepIndex === 3 && viewableDocs.length) {
+			setShowTutorial(true);
+			setTutorialLogicSwitch(true);
+		}
+		// if (stepIndex === 5) setCollapseKeys({});
+	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	useEffect(() => {
 		if (updateFilters) {
@@ -201,7 +467,6 @@ const PolicyDocumentsComparisonTool = ({
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
-			setCollapseKeys([]);
 
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
@@ -255,7 +520,6 @@ const PolicyDocumentsComparisonTool = ({
 		includeRevoked,
 		paragraphs,
 		selectedInput,
-		gameChangerAPI,
 	]);
 
 	useEffect(() => {
@@ -286,29 +550,6 @@ const PolicyDocumentsComparisonTool = ({
 		}
 	}, [needsSort, returnedDocs, selectedInput, sortType, viewableDocs, sortOrder, selectedParagraph]);
 
-	const handleFeedback = (doc, paragraph, positiveFeedback) => {
-		let undo = false;
-		if (positiveFeedback === feedbackList[paragraph.id]) {
-			undo = true;
-			const newList = { ...feedbackList };
-			delete newList[paragraph.id];
-			setFeedbackList(newList);
-		} else {
-			setFeedbackList({ ...feedbackList, [paragraph.id]: positiveFeedback });
-		}
-
-		const searchedParagraph = paragraphs.find((input) => input.id === paragraph.paragraphIdBeingMatched).text;
-		const matchedParagraphId = paragraph.id;
-
-		gameChangerAPI.compareFeedbackPOST({
-			searchedParagraph,
-			matchedParagraphId,
-			docId: doc.id,
-			positiveFeedback,
-			undo,
-		});
-	};
-
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null && compareDocument) {
@@ -316,7 +557,7 @@ const PolicyDocumentsComparisonTool = ({
 					gameChangerAPI
 						.dataStorageDownloadGET(
 							encode(compareDocument.filename || ''),
-							`"${selectedParagraph.par_raw_text_t}"`,
+							'',
 							selectedParagraph.page_num_i + 1,
 							true,
 							state.cloneData
@@ -327,7 +568,7 @@ const PolicyDocumentsComparisonTool = ({
 				}
 			}
 		},
-		[compareDocument, state.cloneData, selectedParagraph, gameChangerAPI]
+		[compareDocument, state.cloneData, selectedParagraph]
 	);
 
 	useEffect(() => {
@@ -383,63 +624,14 @@ const PolicyDocumentsComparisonTool = ({
 		setState(dispatch, { runDocumentComparisonSearch: true });
 	};
 
-	const saveDocToFavorites = (filename, paragraph) => {
-		const text = paragraphs.find((input) => input.id === paragraph.paragraphIdBeingMatched).text;
-		handleSaveFavoriteDocument(
-			{
-				filename,
-				is_favorite: true,
-				search_text: text,
-				favorite_summary: `Document Comparison result of "${text}"`,
-			},
-			state,
-			dispatch
-		);
-	};
-
-	const getExportDoc = (paragraph) => {
-		const textInput = paragraphs.find((input) => paragraph.paragraphIdBeingMatched === input.id).text;
-		return {
-			filename: document.filename,
-			title: document.title,
-			page: paragraph.page_num_i + 1,
-			textInput,
-			textMatch: paragraph.par_raw_text_t,
-			score: convertDCTScoreToText(paragraph.score),
-		};
-	};
-
-	const exportSingleDoc = (document) => {
-		const exportList = [];
-		document.paragraphs.forEach((paragraph) => {
-			exportList.push(getExportDoc(paragraph));
-		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
-	};
-
 	const exportAll = () => {
 		const exportList = [];
 		returnedDocs.forEach((document) => {
 			document.paragraphs.forEach((paragraph) => {
-				exportList.push(getExportDoc(paragraph));
+				exportList.push(getExportDoc(paragraph, paragraphs, document));
 			});
 		});
 		heandleExport(exportList, 'ExportSindleDocCSV');
-	};
-
-	const heandleExport = (exportList, type) => {
-		try {
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'DocumentComparisonTool',
-				type,
-				exportList.length
-			);
-			exportToCsv('DocumentComparisonData.csv', exportList, true);
-		} catch (e) {
-			console.error(e);
-			return [];
-		}
 	};
 
 	const setToFirstResultofInput = (inputId) => {
@@ -462,6 +654,11 @@ const PolicyDocumentsComparisonTool = ({
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
+		setNoResults(false);
+		setFilterChange(false);
+		setLeftPanelOpen(true);
+		setStepIndex(0);
+		setTutorialLogicSwitch(false);
 	};
 
 	const handleCheck = (id) => {
@@ -482,280 +679,9 @@ const PolicyDocumentsComparisonTool = ({
 		setNeedsSort(true);
 	};
 
-	const handleConditional = (bool, trueProp, falseProp) => {
-		return bool ? trueProp : falseProp;
-	};
-
-	const setDocParagraph = (e, doc, paragraph) => {
-		e.preventDefault();
+	const setDocParagraph = (doc, paragraph) => {
 		setCompareDocument(doc);
 		setSelectedParagraph(paragraph);
-	};
-
-	const renderDocParagraphs = (doc, docOpen) => {
-		if (doc.paragraphs) {
-			return doc.paragraphs
-				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph) => {
-					let blockquoteClass = 'searchdemo-blockquote-sm';
-					const pOpen = selectedParagraph?.id === paragraph.id;
-					const isHighlighted = pOpen && docOpen;
-					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
-					return (
-						<div key={paragraph.id} style={{ position: 'relative' }}>
-							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
-							<div
-								className={blockquoteClass}
-								onClick={(e) => setDocParagraph(e, doc, paragraph)}
-								style={{
-									marginLeft: 20,
-									marginRight: 0,
-									border: handleConditional(isHighlighted, 'none', '1px solid #DCDCDC'),
-									padding: '3px',
-									cursor: 'pointer',
-								}}
-							>
-								<span
-									className="gc-document-explorer-result-header-text"
-									style={{
-										color: handleConditional(isHighlighted, 'white', '#131E43'),
-									}}
-								>
-									{handleConditional(
-										isHighlighted,
-										`Page: ${paragraph.page_num_i + 1}, Par: ${
-											paragraph.id.split('_')[1]
-										}, Similarity Score: ${paragraph.score_display}`,
-										paragraph.par_raw_text_t
-									)}
-								</span>
-							</div>
-							<Collapse isOpened={pOpen && docOpen}>
-								<div
-									className="searchdemo-blockquote-sm"
-									style={{
-										marginLeft: 20,
-										marginRight: 0,
-										border: '1px solid #DCDCDC',
-										padding: '10px',
-										whiteSpace: 'normal',
-									}}
-								>
-									<span
-										className="gc-document-explorer-result-header-text"
-										style={{ fontWeight: 'normal' }}
-									>
-										{paragraph.par_raw_text_t}
-									</span>
-									<div
-										style={{
-											display: 'flex',
-											justifyContent: 'right',
-											marginTop: '10px',
-										}}
-									>
-										<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
-											<div>
-												<GCButton
-													onClick={() => exportSingleDoc(doc)}
-													style={{
-														marginLeft: 10,
-														height: 36,
-														padding: '0px, 10px',
-														minWidth: 0,
-														fontSize: '14px',
-														lineHeight: '15px',
-													}}
-												>
-													Export
-												</GCButton>
-											</div>
-										</GCTooltip>
-										<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
-											<div>
-												<GCButton
-													onClick={() => saveDocToFavorites(doc.filename, paragraph)}
-													style={{
-														marginLeft: 10,
-														height: 36,
-														padding: '0px, 10px',
-														minWidth: 0,
-														fontSize: '14px',
-														lineHeight: '15px',
-													}}
-												>
-													Save to Favorites
-												</GCButton>
-											</div>
-										</GCTooltip>
-										<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
-											<i
-												className={classes.feedback + ' fa fa-thumbs-up'}
-												style={handleConditional(
-													feedbackList[paragraph.id],
-													{
-														color: '#939395',
-														WebkitTextStroke: '1px black',
-													},
-													{}
-												)}
-												onClick={() => handleFeedback(doc, paragraph, true)}
-											/>
-										</GCTooltip>
-										<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
-											<i
-												className={classes.feedback + ' fa fa-thumbs-down'}
-												style={handleConditional(
-													feedbackList[paragraph.id] === false,
-													{
-														color: '#939395',
-														WebkitTextStroke: '1px black',
-													},
-													{}
-												)}
-												onClick={() => handleFeedback(doc, paragraph, false)}
-											/>
-										</GCTooltip>
-									</div>
-								</div>
-							</Collapse>
-						</div>
-					);
-				});
-		}
-		return <></>;
-	};
-
-	const renderPageHits = (doc, docOpen) => {
-		if (doc.pageHits) {
-			return doc.pageHits
-				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph) => {
-					let blockquoteClass = 'searchdemo-blockquote-sm';
-					const pOpen = selectedParagraph?.id === paragraph.id;
-					const isHighlighted = pOpen && docOpen;
-					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
-					return (
-						<div key={paragraph.id} style={{ position: 'relative' }}>
-							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
-							<div
-								className={blockquoteClass}
-								onClick={(e) => setDocParagraph(e, doc, paragraph)}
-								style={{
-									marginLeft: 20,
-									marginRight: 0,
-									border: isHighlighted ? 'none' : '1px solid #DCDCDC',
-									padding: '3px',
-									cursor: 'pointer',
-								}}
-							>
-								<span
-									className="gc-document-explorer-result-header-text"
-									style={{
-										color: handleConditional(isHighlighted, 'white', '#131E43'),
-									}}
-								>
-									{handleConditional(
-										isHighlighted,
-										`Page: ${paragraph.pageNumber}, Par: ${paragraph.id}, Similarity Score: ${paragraph.score_display}`,
-										paragraph.text
-									)}
-								</span>
-							</div>
-							<Collapse isOpened={pOpen && docOpen}>
-								<div
-									className="searchdemo-blockquote-sm"
-									style={{
-										marginLeft: 20,
-										marginRight: 0,
-										border: '1px solid #DCDCDC',
-										padding: '10px',
-										whiteSpace: 'normal',
-									}}
-								>
-									<span
-										className="gc-document-explorer-result-header-text"
-										style={{ fontWeight: 'normal' }}
-									>
-										{paragraph.text}
-									</span>
-									<div
-										style={{
-											display: 'flex',
-											justifyContent: 'right',
-											marginTop: '10px',
-										}}
-									>
-										<GCTooltip title={'Export document matches to CSV'} placement="bottom" arrow>
-											<div>
-												<GCButton
-													onClick={() => exportSingleDoc(doc)}
-													style={{
-														marginLeft: 10,
-														height: 36,
-														padding: '0px, 10px',
-														minWidth: 0,
-														fontSize: '14px',
-														lineHeight: '15px',
-													}}
-												>
-													Export
-												</GCButton>
-											</div>
-										</GCTooltip>
-										<GCTooltip title={'Save document to favorites'} placement="bottom" arrow>
-											<div>
-												<GCButton
-													onClick={() => saveDocToFavorites(doc.filename, paragraph)}
-													style={{
-														marginLeft: 10,
-														height: 36,
-														padding: '0px, 10px',
-														minWidth: 0,
-														fontSize: '14px',
-														lineHeight: '15px',
-													}}
-												>
-													Save to Favorites
-												</GCButton>
-											</div>
-										</GCTooltip>
-										<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
-											<i
-												className={classes.feedback + ' fa fa-thumbs-up'}
-												style={handleConditional(
-													feedbackList[paragraph.id],
-													{
-														color: '#939395',
-														WebkitTextStroke: '1px black',
-													},
-													{}
-												)}
-												onClick={() => handleFeedback(doc, paragraph, true)}
-											/>
-										</GCTooltip>
-										<GCTooltip title={'Was this result relevant?'} placement="bottom" arrow>
-											<i
-												className={classes.feedback + ' fa fa-thumbs-down'}
-												style={handleConditional(
-													feedbackList[paragraph.id] === false,
-													{
-														color: '#939395',
-														WebkitTextStroke: '1px black',
-													},
-													{}
-												)}
-												onClick={() => handleFeedback(doc, paragraph, false)}
-											/>
-										</GCTooltip>
-									</div>
-								</div>
-							</Collapse>
-						</div>
-					);
-				});
-		}
-		return <></>;
 	};
 
 	const handleLeftPanelToggle = () => {
@@ -768,6 +694,18 @@ const PolicyDocumentsComparisonTool = ({
 
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
+			{showTutorial && (
+				<div
+					style={{
+						position: 'absolute',
+						left: 0,
+						top: 0,
+						height: '100%',
+						width: '100%',
+						zIndex: 2,
+					}}
+				></div>
+			)}
 			<Grid item xs={12}>
 				<div style={{ display: 'flex' }}>
 					{/* different */}
@@ -779,15 +717,17 @@ const PolicyDocumentsComparisonTool = ({
 					</div>
 					<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
 						<HelpOutlineIcon
-							style={{ cursor: 'pointer' }}
+							style={{ cursor: 'pointer', marginRight: 20, alignSelf: 'center' }}
 							onClick={() => {
+								reset();
 								setShowTutorial(true);
 							}}
 						/>
 					</GCTooltip>
 					{!loading && returnedDocs.length > 0 && (
-						<div style={{ display: 'flex', marginLeft: 20 }}>
+						<div style={{ display: 'flex', alignSelf: 'center' }}>
 							<FormControl
+								className="dct-tutorial-step-9"
 								variant="outlined"
 								classes={{ root: classes.root }}
 								style={{ marginLeft: 'auto', margin: '-10px 0px 0px 0px', minWidth: 195 }}
@@ -861,6 +801,7 @@ const PolicyDocumentsComparisonTool = ({
 							<GCTooltip title="Export all results" placement="bottom" arrow>
 								<div style={{ marginTop: 6 }}>
 									<GCButton
+										className="dct-tutorial-step-10"
 										onClick={exportAll}
 										style={{
 											minWidth: 50,
@@ -891,7 +832,7 @@ const PolicyDocumentsComparisonTool = ({
 					flexBasis: 'calc(16.666667% + 20px)',
 				}}
 			>
-				<div style={{ marginRight: 20 }}>
+				<div className="dct-tutorial-step-2" style={{ marginRight: 20 }}>
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
@@ -932,7 +873,8 @@ const PolicyDocumentsComparisonTool = ({
 										<Grid item xs={12}>
 											<div className={'input-box'}>
 												<TextField
-													id="input-box"
+													id="dct-input-box"
+													className="dct-tutorial-step-1"
 													disabled={returnedDocs.length > 0}
 													multiline
 													rows={1000}
@@ -971,7 +913,12 @@ const PolicyDocumentsComparisonTool = ({
 						<Grid container style={{ justifyContent: 'flex-end' }}>
 							<GCTooltip title={'Compare Documents'} placement="top" arrow>
 								<div style={{ marginTop: 20 }}>
-									<GCButton disabled={inputError} onClick={handleCompare}>
+									<GCButton
+										id="compare-button"
+										disabled={inputError}
+										onClick={handleCompare}
+										className="dct-tutorial-step-3"
+									>
 										Submit
 									</GCButton>
 								</div>
@@ -1030,7 +977,7 @@ const PolicyDocumentsComparisonTool = ({
 								}}
 							/>
 						</div>
-						<div style={{ margin: '0px 20px', height: '800px' }}>
+						<div className="dct-tutorial-step-8" style={{ margin: '0px 20px', height: '800px' }}>
 							<iframe
 								title={'PDFViewer'}
 								className="aref"
@@ -1051,10 +998,11 @@ const PolicyDocumentsComparisonTool = ({
 						</div>
 					</div>
 					<div
+						id="dct-right-col"
 						style={{
 							marginTop: 20,
 							height: '800px',
-							overflowY: 'auto',
+							overflow: showTutorial ? 'hidden' : 'auto',
 							maxWidth: 'calc(33.333333% + 20px)',
 							flexBasis: 'calc(33.333333% + 20px)',
 							paddingLeft: '20px',
@@ -1062,12 +1010,14 @@ const PolicyDocumentsComparisonTool = ({
 						}}
 					>
 						<div
+							className="dct-tutorial-step-4"
 							style={{
 								padding: 20,
 								background: '#F6F8FA 0% 0% no-repeat padding-box',
 								border: '1px dashed #707070',
 								display: 'flex',
 								flexDirection: 'column',
+								position: 'relative',
 							}}
 						>
 							<Typography variant="body1" style={{ marginBottom: 10 }}>
@@ -1075,6 +1025,7 @@ const PolicyDocumentsComparisonTool = ({
 							</Typography>
 							{paragraphs.map((paragraph) => (
 								<div
+									id={`paragraph-input-${paragraph.id}`}
 									key={paragraph.id}
 									style={{
 										border: paragraph.id === selectedInput ? 'none' : `2px solid #B6C6D8`,
@@ -1134,27 +1085,18 @@ const PolicyDocumentsComparisonTool = ({
 								<GCButton
 									style={{ marginTop: 0, width: 'fit-content' }}
 									isSecondaryBtn
-									disabled={combineDisabled}
-									onClick={() => {
-										handleCombine();
-									}}
+									disabled={combineDisabled && !showTutorial}
+									onClick={handleCombine}
+									className="dct-tutorial-step-5"
 								>
 									Combine
 								</GCButton>
-								<GCButton
-									style={{ marginTop: 0, width: 'fit-content' }}
-									isSecondaryBtn
-									onClick={() => {
-										setNoResults(false);
-										setFilterChange(false);
-										return reset();
-									}}
-								>
+								<GCButton style={{ marginTop: 0, width: 'fit-content' }} isSecondaryBtn onClick={reset}>
 									Reset
 								</GCButton>
 							</div>
 						</div>
-						<div style={{ marginTop: 20 }}>
+						<div className="dct-tutorial-step-6" style={{ marginTop: 20 }}>
 							{viewableDocs.length ? (
 								<></>
 							) : (
@@ -1162,40 +1104,18 @@ const PolicyDocumentsComparisonTool = ({
 									<div className={'text'}>No results for paragraph found</div>
 								</div>
 							)}
-							{viewableDocs.map((doc) => {
-								const docOpen = collapseKeys[doc.filename] ?? false;
-								const displayTitle = doc.display_title_s;
-								return (
-									<div key={doc.id}>
-										<div
-											className="searchdemo-modal-result-header"
-											style={{ marginTop: 0 }}
-											onClick={(e) => {
-												e.preventDefault();
-												setCollapseKeys({ ...collapseKeys, [doc.filename]: !docOpen });
-											}}
-										>
-											<i
-												style={{
-													marginRight: handleConditional(docOpen, 10, 14),
-													fontSize: 20,
-													cursor: 'pointer',
-												}}
-												className={`fa fa-caret-${handleConditional(docOpen, 'down', 'right')}`}
-											/>
-											<span className="gc-document-explorer-result-header-text">
-												{displayTitle}
-											</span>
-										</div>
-										<div>
-											<Collapse isOpened={docOpen}>{renderDocParagraphs(doc, docOpen)}</Collapse>
-										</div>
-										<div>
-											<Collapse isOpened={docOpen}>{renderPageHits(doc, docOpen)}</Collapse>
-										</div>
-									</div>
-								);
-							})}
+							{viewableDocs.map((doc, i) => (
+								<DocumentResult
+									doc={doc}
+									index={i}
+									selectedInput={selectedInput}
+									selectedParagraph={selectedParagraph}
+									paragraphs={paragraphs}
+									setDocParagraph={setDocParagraph}
+									state={state}
+									dispatch={dispatch}
+								/>
+							))}
 						</div>
 					</div>
 				</>
@@ -1205,7 +1125,7 @@ const PolicyDocumentsComparisonTool = ({
 				setShowTutorial={setShowTutorial}
 				showTutorial={showTutorial}
 				buttonColor={gcOrange}
-				resetPage={resetPage}
+				resetPage={reset}
 				stepIndex={stepIndex}
 				setStepIndex={setStepIndex}
 				showSkipButton={false}
@@ -1215,7 +1135,7 @@ const PolicyDocumentsComparisonTool = ({
 };
 
 PolicyDocumentsComparisonTool.propTypes = {
-	context: propTypes.objectOf({}),
+	context: propTypes.object,
 };
 
 export default PolicyDocumentsComparisonTool;
