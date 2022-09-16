@@ -1054,34 +1054,9 @@ const JBookProfilePage = () => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
-	const scorecardData = (classification) => {
+	const scorecardData = () => {
 		let data = [];
-		if (
-			selectedPortfolio === 'AI Inventory' &&
-			classification &&
-			classification.confidence &&
-			classification.top_class
-		) {
-			let num = classification.confidence;
-			num = num.toString(); //If it's not already a String
-			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
-			Number(num); //If you need it back as a Number
-
-			data.push({
-				name: 'Predicted Tag',
-				description:
-					'The AI tool classified the BLI as "' +
-					classification.top_class +
-					'" with a confidence score of ' +
-					num,
-				value: num,
-			});
-		} else {
-			data.push({
-				name: 'No Prediction',
-				description: 'Classification data is not yet available for this exhibit',
-			});
-		}
+		console.log('here is reviewData', reviewData);
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
 				name: 'Reviewer Tag',
@@ -1338,7 +1313,7 @@ const JBookProfilePage = () => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.ai_predictions?.[selectedPortfolio])}
+							scores={scorecardData()}
 							commentThread={commentThread}
 							gameChangerAPI={gameChangerAPI}
 							docID={docID}
