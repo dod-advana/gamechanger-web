@@ -14,7 +14,7 @@ import {
 	policyMetadata,
 } from '../../../utils/gamechangerUtils';
 
-import Pagination from 'react-js-pagination';
+import Pagination from '../../common/Pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
@@ -232,7 +232,7 @@ const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHi
 	);
 };
 
-export default function DocumentExplorer({
+export default function PolicyDocumentExplorer({
 	totalCount,
 	resultsPerPage,
 	onPaginationClick,
@@ -505,6 +505,8 @@ export default function DocumentExplorer({
 							itemsCountPerPage={resultsPerPage}
 							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
+							showJumpToFirstLastPages={false}
+							showFirstPageWithEllipsis={true}
 							onChange={(page) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),
@@ -512,6 +514,9 @@ export default function DocumentExplorer({
 									'Pagination',
 									page
 								);
+								setState(dispatch, {
+									visitEarlierPage: page < resultsPage,
+								});
 								onPaginationClick(page);
 							}}
 						/>
