@@ -32,7 +32,6 @@ const filterNameMap = {
 	fundingOfficeCode: 'Funding Office DoDAAC',
 	fundingAgencyName: 'Funding Agency Name',
 	psc: 'PSC',
-	pscDesc: 'PSC Description',
 	naicsCode: 'NAICS',
 	duns: 'DUNS',
 	contractData: 'EDA Format',
@@ -209,8 +208,6 @@ const EDAViewHeaderHandler = (props) => {
 	};
 
 	const processFilters = (settings) => {
-		console.log(processFilters);
-		console.log(settings);
 		const processedFilters = [];
 		Object.keys(settings).forEach((type) => {
 			if (type in filterNameMap) {
@@ -253,7 +250,7 @@ const EDAViewHeaderHandler = (props) => {
 			<div
 				style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}
 			>
-				<Typography variant="h3" display="inline">
+				<Typography variant="h3" display="inline" data-cy="eda-results-found">
 					{!runningSearch ? numResultsText : ''}
 				</Typography>
 				<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>

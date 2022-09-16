@@ -15,7 +15,7 @@ const InputFilter = (props) => {
 	const { state, dispatch } = context;
 
 	const handleChange = (event) => {
-		setJBookSetting(field, event.target.value.trim(), state, dispatch);
+		setJBookSetting(field, event.target.value, state, dispatch);
 		debounce(event.target.value);
 	};
 

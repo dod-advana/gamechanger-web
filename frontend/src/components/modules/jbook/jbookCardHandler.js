@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
-import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { CARD_FONT_SIZE, getTrackingNameForFactory, encode } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -216,13 +216,6 @@ const metadataNameToSearchFilterName = {
 	'POC Reviewer': 'pocReviewer',
 };
 
-// helper functions
-const getBudgetSubActivity = (projectData) => {
-	return projectData.budgetType === 'odoc'
-		? projectData.budgetActivityTitle ?? 'N/A'
-		: projectData.budgetSubActivity ?? 'N/A';
-};
-
 const getToComplete = (projectData, budgetType) => {
 	return `${parseInt(projectData.budgetYear) + (budgetType === 'PDOC' ? 3 : 2)}` || 'N/A';
 };
@@ -239,6 +232,15 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 		types[budgetType]
 	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
+};
+
+const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	window.open(
+		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+	);
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
@@ -287,12 +289,20 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: projectData.appropriationNumber,
 		},
 		{
-			Key: 'Budget Activity',
+			Key: 'Budget Activity Title',
+			Value: projectData.budgetActivityTitle,
+		},
+		{
+			Key: 'Budget Activity Number',
 			Value: projectData.budgetActivityNumber,
 		},
 		{
-			Key: 'Budget Sub Activity',
-			Value: getBudgetSubActivity(projectData),
+			Key: 'Budget Sub Activity Title',
+			Value: projectData.budgetSubActivityTitle,
+		},
+		{
+			Key: 'Budget Sub Activity Number',
+			Value: projectData.budgetSubActivityNumber,
 		},
 		{
 			Key: 'Budget Year 1 Requested',
@@ -870,6 +880,8 @@ const cardHandler = {
 				'appropriationNumber',
 				'appropriationTitle',
 				'budgetActivityNumber',
+				'budgetSubActivityTitle',
+				'budgetSubActivityNumber',
 			];
 
 			for (let key of keys) {
@@ -961,6 +973,19 @@ const cardHandler = {
 			return (
 				<>
 					<>
+						{item.dtic_pdf_location_s !== undefined && (
+							<CardButton
+								target={'_blank'}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									clickFnPDF(item.dtic_pdf_location_s, cloneName, item.dtic_pdf_page_s);
+								}}
+							>
+								Open Document
+							</CardButton>
+						)}
 						<CardButton
 							target={'_blank'}
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
@@ -970,7 +995,7 @@ const cardHandler = {
 								clickFn(cloneName, searchText, item, selectedPortfolio);
 							}}
 						>
-							Open
+							Details
 						</CardButton>
 						{graphView && (
 							<CardButton
