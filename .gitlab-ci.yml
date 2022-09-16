@@ -1,10 +1,36 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - project: platform/promotion
+    file: "ci/container.yml"
+  - project: platform/promotion
+    file: "ci/helm.yml"
+
 stages:          # List of stages for jobs, and their order of execution.
-  - prepare
-  - static-test
-  - security-test
-  - setup-test-server
-  - integration-test
-  - deploy
+  - "📡 prepare"
+  - "🧪 static-test"
+  - "🧪 security-test"
+  - "🚧 build-chart"
+  - "🚧 override-chart dev"
+  - "🚧 override-chart test"
+  - "🚀 deploy"
+  - "🧪 integration-test"
+
+
+variables:
+  UPSTREAM_KANIKO: "true"
+  UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
+  HELM_CHART_DIR: "./chart"
+  HELM_RELEASE_NAME: "gamechanger-web-source"
+  DOCKERFILE_PATH: "./Dockerfile.prod"
+  HELM_UPGRADE_EXTRA_ARGS: >-
+    --set image.tag=${CI_COMMIT_SHA}-oci
+    --set appVersion=${BUILD_VERSION}
+  AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS: >-
+    --build-arg=BASE_IMAGE=${IRONBANK_NODEJS}
+    --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
+    --build-arg=APP_UID=1001
+    --build-arg=APP_GID=1001
+    --reproducible
 
 cache: &global_cache
   untracked: true
@@ -25,14 +51,13 @@ cache: &global_cache
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:14
-  stage: prepare
+  stage: "📡 prepare"
   cache:
     <<: *global_cache
     policy: pull-push
   extends: .setup-github-npm
   rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      - if: $DAILY_SCAN == "true"
   script:
     - |
       if [[ -d frontend/node_modules ]]; then
@@ -47,12 +72,38 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
     - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
 
-unit-backend-test-job:    # Job for the unit tests
-  image: node:14
-  stage: static-test
+sast:
+  stage: "🧪 static-test"
+  cache: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
+  script:
+    - echo "This works"
+
+eslint-sast:
+  stage: "🧪 static-test"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+nodejs-scan-sast:
+  stage: "🧪 static-test"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+semgrep-sast:
+  stage: "🧪 static-test"
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+
+unit-backend-test-job:    # Job for the unit tests
+  image: node:14
+  stage: "🧪 static-test"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - cd backend && npm run test:gitlab
   artifacts:
@@ -69,10 +120,9 @@ unit-backend-test-job:    # Job for the unit tests
 
 lint-test-job:  # lint-job
   image: node:14
-  stage: static-test
+  stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
   script:
     - cd backend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json node_app
     - cd ../frontend && npx eslint --max-warnings 0 -c .eslintrc.json --ext .js -f json -o eslintReport.json src
@@ -82,13 +132,12 @@ lint-test-job:  # lint-job
       - frontend/eslintReport.json
 
 sonar_scan-job:  # Run code through sonar scanner
-  stage: security-test
+  stage: "🧪 security-test"
   image:
     name: sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -133,48 +182,105 @@ sonar_scan-job:  # Run code through sonar scanner
       EOF
 
 
-setup-server:  # build dev server with the commit branch
-  stage: setup-test-server
-  variables:
-    BRANCH_TO_DEPLOY: "${CI_COMMIT_BRANCH}"
-    GITLAB_PROJECT_REPO: "advana/gamechanger/gamechanger-web-source"
-    APP_NAME: "gamechanger"
-    AWS_SERVER: "88"
+
+chart-publish:
+  cache: []
+  stage: "🚧 build-chart"
   rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  extends: ".helm-publish"
+  variables:
+    CHART: "${PLATFORM_PROMOTION_CHART}"
+  script:
+    - 'cd "${HELM_CHART_DIR}"'
+    - 'eval eval CHART="${CHART}"'
+    - "helm dependency update ."
+    - 'helm chart save . "${CHART}"'
+    - 'helm chart push "${CHART}"'
+
+dev-overrides:
+  cache: []
+  stage: "🚧 override-chart dev"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
-        BRANCH_TO_DEPLOY: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    - if: $DAILY_SCAN == "true"
+        VALUES_FILE: "ingress.dev.values.yaml"
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        VALUES_FILE: "dev.values.yaml"
+  extends:
+    - ".helm-overrides"
+  script:
+    - |
+      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+      rm -rf gamechanger-ci-cd
+
+
+test-overrides:
+  cache: []
+  stage: "🚧 override-chart test"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        VALUES_FILE: "test.values.yaml"
+  extends:
+    - ".helm-overrides"
+  script:
+    - |
+      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
+      rm -rf gamechanger-ci-cd
+
+trigger:
+  stage: "🚀 deploy"
+  rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        variables:
+          UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+          NO_TEST: "true"
+          ENVIRONMENT: "dev"
+          UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
+          HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
+          KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
+          DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
+          HELM_UPGRADE_EXTRA_ARGS: >-
+            --set image.tag=${CI_COMMIT_SHA}-oci
+            --set appVersion=${BUILD_VERSION}
+            --set ingress.enabled=true
+            --set ingress.web.hostname=${HELM_RELEASE_NAME}
+            --set env.REACT_APP_BACKEND_URL=${DEV_URL}
+            --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
+            --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
+            --set env.APPROVED_API_CALLERS=${DEV_URL}
+      - if: $CI_COMMIT_BRANCH == "main"
   trigger:
     strategy: "depend"
-    project: "advana/gamechanger/gamechanger-ci-cd"
-    branch: "main"
+    project: "platform/promotion"
 
 integration-testing-cypress-job:  # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
-  stage: integration-test
+  stage: "🧪 integration-test"
   rules:
-    - if: ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "dev" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main") && $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $DAILY_SCAN == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
-    AWS_SERVER: "88"
-    CYPRESS_BASE_URL: "http://10.194.9.${AWS_SERVER}:8080"
-    CYPRESS_API_URL: "http://10.194.9.${AWS_SERVER}:8990"
-    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_SSL_CLIENT_S_DN_CN}"
-    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_SSL_CLIENT_CERTIFICATE}"
+    HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
+    DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
+    CYPRESS_BASE_URL: "${DEV_URL}"
+    CYPRESS_API_URL: "${DEV_URL}"
+    CYPRESS_SSL_CLIENT_S_DN_CN: "${CYPRESS_CLIENT_S_DN_CN}"
+    CYPRESS_SSL_CLIENT_CERTIFICATE: "${CYPRESS_CLIENT_CERTIFICATE}"
   script:
-    - curl ${CYPRESS_BASE_URL}
     - cd frontend
-    - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
-    - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn add --cache-folder ../.yarn-cache cypress
-    - npm run cy:test
+    - npx cypress install
+    - yarn cy:test
   after_script:
     - |
       echo "Cypress tests finished"
       cd frontend
-      npm run report:merge
-      npm run report:send
+      yarn report:merge
+      yarn report:send
   artifacts:
     when: always
     expire_in: 1 days
@@ -182,14 +288,6 @@ integration-testing-cypress-job:  # Start the integration testing
       - frontend/results.json
       - frontend/cypress/screenshots
       - frontend/cypress/videos
-  allow_failure: true
+  allow_failure: true # Just until we get the tests working fully. It's hit or miss on what passes and what doesn't.
 
-deploy-job:       # This job runs the build for dev.
-  stage: deploy
-  rules:
-      - if: ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main") && $DAILY_SCAN == "true"
-      - if: $DO_DEPLOY == "true"
-  variables:
-    BRANCH_TO_BUILD: "${CI_COMMIT_BRANCH}"
-    CI_COMMIT_SHA: "${CI_COMMIT_SHA}"
-  trigger: "advana/gamechanger/gamechanger-web"
+

@@ -380,6 +380,7 @@ const initState = {
 	profileLoading: false,
 	primaryReviewLoading: false,
 	resultsPage: 1,
+	visitEarlierPage: false,
 	showSideFilters: true,
 	issuingOrgs: {},
 	resultsText: '',

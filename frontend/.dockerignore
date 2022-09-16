@@ -1,2 +1,3 @@
-/node_modules
-/postgres/data
+node_modules
+cypress
+test
