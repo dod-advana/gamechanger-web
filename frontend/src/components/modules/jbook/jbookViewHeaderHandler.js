@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _, { isArray } from 'lodash';
+import _, { isArray, isEqual } from 'lodash';
 import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
@@ -11,6 +11,10 @@ import GCTooltip from '../../common/GCToolTip';
 import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 import ExportIcon from '../../../images/icon/Export.svg';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
+import { filterSortFunction } from './jbookMainViewHelper';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+
+const gamechangerAPI = new GameChangerAPI();
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -270,6 +274,36 @@ const JbookViewHeaderHandler = (props) => {
 		});
 	};
 
+	const updateServiceFilters = async (portfolio) => {
+		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+		const newDefaultOptions = _.cloneDeep(state.defaultOptions);
+		const oldServiceFilter = newDefaultOptions.serviceAgency;
+		const { data } = await gamechangerAPI.callSearchFunction({
+			functionName: 'getUpdatedAgencyFilter',
+			cloneName: state.cloneData.clone_name,
+			options: { selectedPortfolio: portfolio },
+		});
+		newSearchSettings.serviceAgency = [];
+		newDefaultOptions.serviceAgency = data.serviceAgency
+			.map((item) => {
+				if (item !== null) {
+					return item;
+				}
+				return 'Blank';
+			})
+			.sort(filterSortFunction);
+
+		const isUpdated = !isEqual(oldServiceFilter, newDefaultOptions.serviceAgency);
+
+		if (isUpdated) {
+			setState(dispatch, {
+				jbookSearchSettings: newSearchSettings,
+				defaultOptions: newDefaultOptions,
+				runSearch: true,
+			});
+		}
+	};
+
 	return (
 		<div
 			className={'results-count-view-buttons-container'}
@@ -281,6 +315,8 @@ const JbookViewHeaderHandler = (props) => {
 					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
+					updateServiceFilters={updateServiceFilters}
+					pageDisplayed={state.pageDisplayed}
 				/>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
 					<>
@@ -431,6 +467,7 @@ const JbookViewHeaderHandler = (props) => {
 				</GCButton>
 
 				<GCButton
+					data-cy="export-button"
 					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 					onClick={async () => {
 						try {

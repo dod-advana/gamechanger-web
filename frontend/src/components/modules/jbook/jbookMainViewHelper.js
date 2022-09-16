@@ -125,7 +125,7 @@ export const populateDropDowns = async (state, _dispatch) => {
 	const { data } = await gamechangerAPI.callSearchFunction({
 		functionName: 'getDataForFilters',
 		cloneName: state.cloneData.clone_name,
-		options: {},
+		options: { selectedPortfolio: state.selectedPortfolio },
 	});
 
 	try {

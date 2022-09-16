@@ -30,6 +30,7 @@
 .* /api/gamechanger/tutorialOverlay .*
 .* /api/gamechanger/user/exportHistory .*
 .* /api/gamechanger/user/exportHistory/:historyId .*
+.* /api/gamechanger/user/getUserDataByIDs .*
 .* /api/gamechanger/favorites/document .*
 .* /api/gamechanger/favorites/search .*
 .* /api/gamechanger/favorites/topic .*

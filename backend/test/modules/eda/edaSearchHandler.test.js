@@ -494,7 +494,7 @@ describe('EDASearchHandler', function () {
 
 			const target = new EDASearchHandler(opts);
 			target.storeRecordOfSearchInPg = jest.fn(() => Promise.resolve());
-			target.storeEsRecord = jest.fn(() => Promise.resolve());
+
 			try {
 				const actual = await target.searchHelper(req, 'test', true);
 				const expected = {
@@ -741,7 +741,6 @@ describe('EDASearchHandler', function () {
 				};
 				assert.deepStrictEqual(actual, expected);
 				expect(target.storeRecordOfSearchInPg).toHaveBeenCalled();
-				expect(target.storeEsRecord).toHaveBeenCalled();
 			} catch (err) {
 				assert.fail(err);
 			}
@@ -1485,6 +1484,298 @@ describe('EDASearchHandler', function () {
 				assert.deepStrictEqual(actual, expected);
 				expect(target.storeRecordOfSearchInPg).not.toHaveBeenCalled();
 				expect(target.storeEsRecord).not.toHaveBeenCalled();
+			} catch (err) {
+				assert.fail(err);
+			}
+		});
+
+		it('should error and try storing results', async () => {
+			const req = {};
+			const opts = {
+				...constructorOptionsMock,
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(docSearchResultsMock);
+					},
+					putDocument() {},
+				},
+				mlApi: {
+					getExpandedSearchTerms() {
+						return Promise.resolve([]);
+					},
+				},
+				edaSearchUtility: {
+					getElasticsearchPagesQuery() {
+						return Promise.resolve();
+					},
+					cleanUpEsResults() {
+						return Promise.resolve({
+							query: {
+								_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
+								stored_fields: [
+									'filename',
+									'title',
+									'page_count',
+									'doc_type',
+									'doc_num',
+									'ref_list',
+									'id',
+									'summary_30',
+									'keyw_5',
+									'p_text',
+									'type',
+									'p_page',
+									'display_title_s',
+									'display_org_s',
+									'display_doc_type_s',
+									'*_eda_ext',
+								],
+								from: 0,
+								size: 20,
+								track_total_hits: true,
+								query: {
+									bool: {
+										must: [
+											{
+												bool: {
+													should: [
+														{
+															nested: {
+																path: 'pages',
+																inner_hits: {
+																	_source: false,
+																	stored_fields: [
+																		'pages.filename',
+																		'pages.p_raw_text',
+																	],
+																	from: 0,
+																	size: 5,
+																	highlight: {
+																		fields: {
+																			'pages.filename.search': {
+																				number_of_fragments: 0,
+																			},
+																			'pages.p_raw_text': {
+																				fragment_size: 180,
+																				number_of_fragments: 1,
+																			},
+																		},
+																		fragmenter: 'span',
+																	},
+																},
+																query: {
+																	bool: {
+																		should: [
+																			{
+																				wildcard: {
+																					'pages.filename.search': {
+																						value: 'test*',
+																						boost: 15,
+																					},
+																				},
+																			},
+																			{
+																				query_string: {
+																					query: 'test',
+																					default_field: 'pages.p_raw_text',
+																					default_operator: 'and',
+																					fuzzy_max_expansions: 100,
+																					fuzziness: 'AUTO',
+																				},
+																			},
+																		],
+																	},
+																},
+															},
+														},
+														{
+															multi_match: {
+																query: 'test',
+																fields: [
+																	'pdf_filename_eda_ext',
+																	'pds_contract_eda_ext',
+																	'pds_filename_eda_ext',
+																	'pdf_contract_eda_ext',
+																	'pds_modification_eda_ext',
+																],
+																operator: 'or',
+															},
+														},
+													],
+												},
+											},
+											{
+												nested: {
+													path: 'extracted_data_eda_n',
+													query: {
+														bool: {
+															should: [
+																{
+																	match: {
+																		'extracted_data_eda_n.dodaac_org_type_eda_ext':
+																			'army',
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												nested: {
+													path: 'extracted_data_eda_n',
+													query: {
+														bool: {
+															must: [
+																{
+																	match: {
+																		'extracted_data_eda_n.contract_issue_office_name_eda_ext':
+																			'Dept of Army',
+																	},
+																},
+															],
+														},
+													},
+												},
+											},
+											{
+												nested: {
+													path: 'extracted_data_eda_n',
+													query: {
+														range: {
+															'extracted_data_eda_n.signature_date_eda_ext_dt': {
+																gte: '2017-06-10',
+															},
+														},
+													},
+												},
+											},
+										],
+										should: [
+											{
+												multi_match: {
+													query: 'test',
+													fields: ['keyw_5^2', 'id^2', 'summary_30', 'pages.p_raw_text'],
+													operator: 'or',
+												},
+											},
+											{ rank_feature: { field: 'pagerank_r', boost: 0.5 } },
+											{ rank_feature: { field: 'kw_doc_score_r', boost: 0.1 } },
+										],
+									},
+								},
+							},
+							totalCount: 1,
+							docs: [
+								{
+									metadata_type_eda_ext: 'pds',
+									pds_grouping_eda_ext: 'pds_974_filenames_and_size',
+									pdf_ordernum_eda_ext: '0002',
+									pdf_modification_eda_ext: 'empty',
+									pds_ordernum_eda_ext: '0002',
+									doc_num:
+										'/var//tmp/tmp.vf4dXzVgIA/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf',
+									dir_location_eda_ext: 'eda/piee/unarchive_pdf/pdf_bah_2',
+									file_location_eda_ext:
+										'gamechanger/projects/eda/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf',
+									pds_contract_eda_ext: 'W911NF17D0002',
+									s3_path_eda_ext: '',
+									doc_type:
+										'/var//tmp/tmp.vf4dXzVgIA/gc/pdf/eda/piee/unarchive_pdf/pdf_bah_2/EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf',
+									pds_category_eda_ext: "'historic'",
+									type: 'document',
+									title: 'W911NF17D0002-0002-empty',
+									pdf_filename_eda_ext:
+										'EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf',
+									pdf_category_eda_ext: "'historic'",
+									pds_filename_eda_ext:
+										'EDAPDS-59C397E8DE995F6AE05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-22.json',
+									pdf_contract_eda_ext: 'W911NF17D0002',
+									filename:
+										'EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf',
+									pdf_grouping_eda_ext: 'pdf_log_217',
+									pds_modification_eda_ext: 'empty',
+									id: 'EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf_0',
+									page_count: 48,
+									topics_s: [],
+									pageHits: [
+										{
+											snippet:
+												'Report \nDI-QCIC-81891 - ACCEPTANCE <em>TEST</em> REPORT (ATR) \nDI-SESS-80255A - FAILURE SUMMARY & ANALYSIS REPORT \nDI-SESS-81628A - RELIABILITY <em>TEST</em> REPORT \nDI-TMSS-80527C - Commercial Off',
+											pageNumber: 9,
+										},
+										{ snippet: 'testing, and adjust units under <em>test</em>.', pageNumber: 12 },
+										{
+											snippet:
+												'and Demo Support \n \n3.2.14.1 The Contractor shall support scheduled and ad-hoc testing events and demonstrations, which may include events \nsuch as NIE, E15, <em>test</em> events at but not',
+											pageNumber: 16,
+										},
+										{
+											snippet:
+												'This includes a stool sample <em>test</em> for ova and parasites.',
+											pageNumber: 30,
+										},
+										{
+											snippet:
+												'., special \nradio <em>test</em> equipment, when the contractor is responsible for radio testing or repair) \n \n(End of Clause) \n \n5152.225-5910 \nCONTRACTOR HEALTH AND SAFETY \n(DEC 2011) \n \n(a',
+											pageNumber: 32,
+										},
+									],
+									pageHitCount: 5,
+									contract_issue_name_eda_ext: 'US ARMY ACC-APG-RTP W911NF',
+									contract_issue_dodaac_eda_ext: 'W911NF',
+									issuing_organization_eda_ext: 'Army',
+									vendor_name_eda_ext: 'Booz Allen Hamilton Inc.',
+									vendor_duns_eda_ext: '006928857',
+									vendor_cage_eda_ext: '17038',
+									contract_admin_name_eda_ext: 'S3101A',
+									contract_admin_office_dodaac_eda_ext: 'DCMA SPRINGFIELD',
+									paying_office_name_eda_ext: 'HQ0338',
+									paying_office_dodaac_eda_ext: 'DFAS COLUMBUS CENTER',
+									modification_eda_ext: 'Award',
+									award_id_eda_ext: '0002',
+									reference_idv_eda_ext: 'W911NF17D0002',
+									signature_date_eda_ext: '2017-09-21',
+									effective_date_eda_ext: '2017-09-21',
+									obligated_amounts_eda_ext: 6472000,
+									naics_eda_ext: '541330',
+									esIndex: 'gc_eda_2021_syn_pds',
+									keyw_5: '',
+									ref_list: [],
+								},
+							],
+							doc_types: [],
+							doc_orgs: [],
+							searchTerms: ['test'],
+							expansionDict: {
+								test: [
+									{ phrase: 'mental', source: 'thesaurus' },
+									{ phrase: 'psychometric', source: 'thesaurus' },
+									{ phrase: 'check', source: 'ML-QE' },
+									{ phrase: 'exam', source: 'thesaurus' },
+									{ phrase: 'examination', source: 'thesaurus' },
+									{ phrase: 'result', source: 'ML-QE' },
+								],
+							},
+						});
+					},
+				},
+				constants: {
+					EDA_ELASTIC_SEARCH_OPTS: 'test es opts',
+					GAME_CHANGER_OPTS: {
+						historyIndex: 'test index',
+					},
+				},
+				esSearchLib: {},
+				redisDB: 'redis://localhost',
+			};
+
+			const target = new EDASearchHandler(opts);
+
+			try {
+				assert.rejects(async () => {
+					await target.searchHelper(req, 'test', false);
+				});
 			} catch (err) {
 				assert.fail(err);
 			}

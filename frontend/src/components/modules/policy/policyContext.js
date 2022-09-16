@@ -133,6 +133,9 @@ const initState = {
 	timeFound: 0.0,
 	hasExpansionTerms: false,
 	noSearches: true,
+	search_after: [],
+	search_before: [],
+	visitEarlierPage: false,
 
 	count: 0,
 	resultsPage: 1,

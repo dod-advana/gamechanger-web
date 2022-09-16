@@ -12,7 +12,7 @@ import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
 import _ from 'lodash';
 import { makeStyles } from '@material-ui/core/styles';
-
+import GCTooltip from '../common/GCToolTip';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
@@ -291,11 +291,20 @@ const GCDataStatusTracker = (props) => {
 		gameChangerAPI.gcCrawlerSealData().then((res) => {
 			const map = {};
 			res.data.forEach((crawler) => {
+				crawler.displayName = getCrawlerDisplayName(crawler);
 				map[crawler.crawler] = crawler;
 			});
 			setCrawlerInfoMap(map);
 		});
 	}, []);
+
+	const getCrawlerDisplayName = (crawler) => {
+		const { data_source_s, source_title } = crawler;
+		return data_source_s && source_title && source_title !== 'none'
+			? `${data_source_s} - ${source_title}`
+			: data_source_s;
+	};
+
 	const handleFetchData = async ({ page, sorted, filtered }) => {
 		try {
 			// handle special case of filtering on the json_metadata field
@@ -493,17 +502,17 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Title',
 				accessor: 'pub_title',
 				width: 200,
-				Cell: (props) => (
+				Cell: (cellProps) => (
 					<TableRow>
 						<Link
 							href={'#'}
 							onClick={(event) => {
 								preventDefault(event);
-								fileClicked(props.original.doc_filename);
+								fileClicked(cellProps.original.doc_filename);
 							}}
 							style={{ color: '#386F94', textAlign: 'left' }}
 						>
-							<div>{props.original.pub_title}</div>
+							<div>{cellProps.original.pub_title}</div>
 						</Link>
 					</TableRow>
 				),
@@ -514,23 +523,19 @@ const GCDataStatusTracker = (props) => {
 				width: 300,
 				// filterable: true,
 				sortable: true,
-				Cell: (props) => {
-					const crawler = crawlerInfoMap[props.original.json_metadata.crawler_used];
+				Cell: (cellProps) => {
+					const crawler = crawlerInfoMap[cellProps.original.json_metadata.crawler_used];
 					return (
 						<TableRow>
 							<Link
 								href={'#'}
 								onClick={(event) => {
 									preventDefault(event);
-									window.open(props.original.json_metadata.source_page_url);
+									window.open(cellProps.original.json_metadata.source_page_url);
 								}}
 								style={{ color: '#386F94' }}
 							>
-								<div>
-									{crawler
-										? `${crawler.data_source_s} - ${crawler.source_title}`
-										: props.original.json_metadata.crawler_used}
-								</div>
+								<div>{crawler?.displayName || cellProps.original.json_metadata.crawler_used}</div>
 							</Link>
 						</TableRow>
 					);
@@ -549,21 +554,15 @@ const GCDataStatusTracker = (props) => {
 						<MenuItem value="">Show All</MenuItem>
 						{Object.keys(crawlerInfoMap)
 							.sort((crawlerA, crawlerB) => {
-								if (crawlerInfoMap[crawlerA].data_source_s < crawlerInfoMap[crawlerB].data_source_s)
+								if (crawlerInfoMap[crawlerA].displayName < crawlerInfoMap[crawlerB].displayName)
 									return -1;
-								else if (
-									crawlerInfoMap[crawlerA].data_source_s > crawlerInfoMap[crawlerB].data_source_s
-								)
-									return 1;
-								else if (crawlerInfoMap[crawlerA].source_title < crawlerInfoMap[crawlerB].source_title)
-									return -1;
-								else if (crawlerInfoMap[crawlerA].source_title > crawlerInfoMap[crawlerB].source_title)
+								else if (crawlerInfoMap[crawlerA].displayName > crawlerInfoMap[crawlerB].displayName)
 									return 1;
 								else return 0;
 							})
 							.map((crawler) => (
 								<MenuItem value={crawler} key={crawler}>
-									{`${crawlerInfoMap[crawler].data_source_s} - ${crawlerInfoMap[crawler].source_title}`}
+									{crawlerInfoMap[crawler].displayName}
 								</MenuItem>
 							))}
 					</Select>
@@ -720,12 +719,21 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Crawl and Download Complete',
 				accessor: 'status',
 				sortable: false,
-				Cell: (props) => (
+				Cell: (cellProps) => (
 					<CenterRow>
-						{crawl_download(props.original.status) ? (
+						{crawl_download(cellProps.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
@@ -734,12 +742,21 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Ingest In Progress',
 				accessor: 'status',
 				sortable: false,
-				Cell: (props) => (
+				Cell: (cellProps) => (
 					<CenterRow>
-						{ingest_progress(props.original.status) ? (
+						{ingest_progress(cellProps.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
@@ -748,12 +765,21 @@ const GCDataStatusTracker = (props) => {
 				Header: 'Ingest Complete',
 				accessor: 'status',
 				sortable: false,
-				Cell: (props) => (
+				Cell: (cellProps) => (
 					<CenterRow>
-						{ingest_complete(props.original.status) ? (
+						{ingest_complete(cellProps.original.status) ? (
 							<GoalIcon style={{ backgroundColor: green[500] }} />
 						) : (
-							<GoalIcon style={{ backgroundColor: red[500] }} />
+							<GCTooltip
+								title={
+									'We are actively investigating a fix to bring this data source up to date. Thanks for your patience as we implement a solution.'
+								}
+								placement="top-start"
+								style={{ color: 'white' }}
+								arrow
+							>
+								<GoalIcon style={{ backgroundColor: red[500] }} />
+							</GCTooltip>
 						)}
 					</CenterRow>
 				),
