@@ -1004,7 +1004,11 @@ class JBookDataHandler extends DataHandler {
 				where: {
 					deleted: false,
 					isPrivate: true,
-					[Op.or]: [{ user_ids: { [Op.contains]: [id] } }, { creator: id }],
+					[Op.or]: [
+						{ user_ids: { [Op.contains]: [id] } },
+						{ admins: { [Op.contains]: [id] } },
+						{ creator: id },
+					],
 				},
 			});
 
@@ -1105,6 +1109,8 @@ class JBookDataHandler extends DataHandler {
 			if (!id) {
 				where = { name };
 			}
+
+			let portfolio = await this.portfolio.findOne({ where });
 
 			let update = await this.portfolio.update({ deleted: true }, { where });
 

@@ -317,7 +317,7 @@ const JBookProfilePage = () => {
 					cloneName: 'jbook',
 					options: { id: currentUserData.data.id },
 				})
-				.then((data) => {
+				.then(async (data) => {
 					let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
 					let privateData = data.data.privatePortfolios !== undefined ? data.data.privatePortfolios : [];
 					let portfolioData = [...publicData, ...privateData];
