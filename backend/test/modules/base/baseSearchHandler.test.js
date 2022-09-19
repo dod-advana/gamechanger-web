@@ -3,7 +3,7 @@ const SearchHandler = require('../../../node_app/modules/base/searchHandler');
 const { constructorOptionsMock, reqMock } = require('../../resources/testUtility');
 
 describe('SearchHandler', function () {
-	let redisData = {gamechanger_f740af5d2e2819eeb0063eca402fcce8: JSON.stringify({test: ['test']})};
+	let redisData = { gamechanger_f740af5d2e2819eeb0063eca402fcce8: JSON.stringify({ test: ['test'] }) };
 
 	const opts = {
 		...constructorOptionsMock,
@@ -18,24 +18,37 @@ describe('SearchHandler', function () {
 				redisData[redisKey] = data;
 				return Promise.resolve(true);
 			},
-			select(id) {}
+			select(id) {},
 		},
 		gc_history: {
-			create(obj) {}
-		}
+			create(obj) {},
+		},
 	};
 
 	describe('#search', () => {
 		it('it should return the body passed to it sense it is the base and doesnt do a search', async () => {
-
 			const target = new SearchHandler(opts);
 			const searchHelperSpy = jest.spyOn(target, 'searchHelper');
 
 			try {
-				const actual = await target.search('test', 0, 20, {test: 'test'}, 'gamechanger', [], 'test', true);
-				const expected = {cloneName: 'gamechanger', limit: 20, offset: 0, searchText: 'test', test: 'test'};
+				const actual = await target.search({ test: 'test' }, 'gamechanger', [], 'test', true, undefined, {
+					searchText: 'test',
+					search_after: [],
+					search_before: [],
+					offset: 0,
+					limit: 20,
+				});
+				const expected = {
+					cloneName: 'gamechanger',
+					limit: 20,
+					offset: 0,
+					searchText: 'test',
+					search_after: [],
+					search_before: [],
+					test: 'test',
+				};
 				assert.deepStrictEqual(actual, expected);
-				expect(searchHelperSpy).toHaveBeenCalledWith({body: expected, permissions: []}, 'test', true);
+				expect(searchHelperSpy).toHaveBeenCalledWith({ body: expected, permissions: [] }, 'test', true);
 			} catch (e) {
 				assert.fail(e);
 			} finally {
@@ -46,7 +59,6 @@ describe('SearchHandler', function () {
 
 	describe('#getCachedResults', () => {
 		it('it should return fake cached results based off the request info', async () => {
-
 			const target = new SearchHandler(opts);
 
 			const req = {
@@ -55,11 +67,11 @@ describe('SearchHandler', function () {
 					searchText: 'test',
 					offest: 0,
 					limit: 20,
-					options: {test: 'test'},
+					options: { test: 'test' },
 					cloneName: 'gamechanger',
 					permissions: [],
-					userId: 'test'
-				}
+					userId: 'test',
+				},
 			};
 
 			const historyRec = {
@@ -69,13 +81,13 @@ describe('SearchHandler', function () {
 				request_bod: req.body,
 				search_version: 1,
 				clone_name: 'gamechanger',
-				showTutorial: false
+				showTutorial: false,
 			};
 			const cloneSpecificObject = {};
 
 			try {
 				const actual = await target.getCachedResults(req, historyRec, cloneSpecificObject, 'Test', true);
-				const expected = {isCached: true, test: ['test'], timeSinceCache: NaN};
+				const expected = { isCached: true, test: ['test'], timeSinceCache: NaN };
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
 				assert.fail(e);
@@ -85,7 +97,6 @@ describe('SearchHandler', function () {
 
 	describe('#storeCachedResults', () => {
 		it('it should store fake cached results based off the request info', async () => {
-
 			const target = new SearchHandler(opts);
 
 			const req = {
@@ -94,11 +105,11 @@ describe('SearchHandler', function () {
 					searchText: 'test',
 					offest: 0,
 					limit: 20,
-					options: {test: 'test'},
+					options: { test: 'test' },
 					cloneName: 'gamechanger',
 					permissions: [],
-					userId: 'test'
-				}
+					userId: 'test',
+				},
 			};
 
 			const historyRec = {
@@ -108,19 +119,22 @@ describe('SearchHandler', function () {
 				request_bod: req.body,
 				search_version: 1,
 				clone_name: 'gamechanger',
-				showTutorial: false
+				showTutorial: false,
 			};
-			const cloneSpecificObject = {test: 'test'};
+			const cloneSpecificObject = { test: 'test' };
 			const searchResults = ['Test'];
 
 			try {
 				await target.storeCachedResults(req, historyRec, searchResults, cloneSpecificObject, 'Test');
-				const expected = {gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e: '["Test"]', 'gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e:time': 'test', gamechanger_f740af5d2e2819eeb0063eca402fcce8: '{"test":["test"]}'};
+				const expected = {
+					gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e: '["Test"]',
+					'gamechanger_2f5d59d9ad2d29d94175d8b9bcd70e9e:time': 'test',
+					gamechanger_f740af5d2e2819eeb0063eca402fcce8: '{"test":["test"]}',
+				};
 				assert.deepStrictEqual(redisData, expected);
 			} catch (e) {
 				assert.fail(e);
 			}
 		});
 	});
-
 });

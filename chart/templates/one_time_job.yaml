@@ -1,0 +1,63 @@
+{{- if and .Values.scripts.runOneTimeJob ( .Values.scripts.oneTimeJobScript | default "" | trim ) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  {{- /* oneTimeJobName changes every time the script runs. which forced existing jobs and pods to be deleted and thereby works around issue with helm upgrade refusing to modify existing job object */}}
+  name: {{ include "chart.oneTimeJobName" . }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      annotations:
+        checksum/env-config-secret: {{ include (print .Template.BasePath "/env_config_secret.yaml") . | sha256sum }}
+        {{- if (include "chart.isFileConfigDefined" .) }}
+        checksum/file-config-secret: {{ include (print .Template.BasePath "/file_config_secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations -}}{{- toYaml . | nindent 8 }}{{- end }}
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if (include "chart.isFileConfigDefined" .) }}
+      volumes:
+        - name: file-config-vol
+          secret:
+            secretName: {{ include "chart.fileConfigSecretName" .  | quote }}
+      {{- end }}
+      containers:
+        - name: init-scripts
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              {{- .Values.scripts.oneTimeJobScript | trim | nindent 16 }}
+          {{- with .Values.appContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "chart.imageRepo" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if (include "chart.isFileConfigDefined" .) }}
+          volumeMounts:
+            - name: file-config-vol
+              mountPath: {{ .Values.fileConfig.baseMountPath | quote }}
+              readOnly: true
+          {{- end }}
+          env:
+            - name: REACT_APP_VERSION
+              value: {{ default "1.0.0" .Chart.AppVersion | quote }}
+            - name: REACT_APP_VERSION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chart.envConfigSecretName" .  | quote }}
+                  key: REACT_APP_VERSION
+                  optional: true
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.envConfigSecretName" .  | quote }}
+      restartPolicy: Never
+{{- end }}

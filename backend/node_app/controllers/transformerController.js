@@ -26,6 +26,7 @@ class TransformerController {
 			getLoadedModels: this.mlApi.getLoadedModels,
 			getFilesInCorpus: this.mlApi.getFilesInCorpus,
 			getProcessStatus: this.mlApi.getProcessStatus,
+			getCache: this.mlApi.getCache,
 			reloadModels: this.mlApi.reloadModels,
 			downloadCorpus: this.mlApi.downloadCorpus,
 			trainModel: this.mlApi.trainModel,
@@ -33,6 +34,7 @@ class TransformerController {
 			createModelLTR: this.mlApi.createModelLTR,
 			stopProcess: this.mlApi.stopProcess,
 			sendUserAggregations: this.mlApi.sendUserAggregations,
+			clearCache: this.mlApi.clearCache,
 		};
 
 		// Get methods
@@ -47,6 +49,7 @@ class TransformerController {
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
+		this.getCache = this.getData.bind(this, 'getCache');
 		// Post methods
 		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
@@ -56,6 +59,7 @@ class TransformerController {
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
+		this.clearCache = this.postData.bind(this, 'clearCache');
 	}
 	/**
 	 * A generic get method to query the ML API.

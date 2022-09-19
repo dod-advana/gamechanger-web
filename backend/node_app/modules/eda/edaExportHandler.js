@@ -11,6 +11,7 @@ class EdaExportHandler extends ExportHandler {
 			csvStringify = csvStringifyLib,
 			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS,
+			reports,
 		} = opts;
 
 		super(opts);
@@ -18,6 +19,7 @@ class EdaExportHandler extends ExportHandler {
 		this.csvStringify = csvStringify;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
+		this.reports = reports;
 	}
 
 	async exportHelper(req, res, userId) {
@@ -67,14 +69,7 @@ class EdaExportHandler extends ExportHandler {
 					esQuery
 				);
 
-				if (
-					results &&
-					results.body &&
-					results.body.hits &&
-					results.body.hits.total &&
-					results.body.hits.total.value &&
-					results.body.hits.total.value > 0
-				) {
+				if (results?.body?.hits?.total?.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(
 						results,
 						searchTerms,
@@ -107,6 +102,7 @@ class EdaExportHandler extends ExportHandler {
 					rest.index = index;
 					rest.orgFilter = orgFilter;
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
+					res.status(200);
 				} else if (format === 'csv') {
 					const csvStream = this.createCsvStream(searchResults, userId);
 					res.status(200);
