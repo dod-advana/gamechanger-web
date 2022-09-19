@@ -5,7 +5,6 @@ const { DataLibrary } = require('../../lib/dataLibrary');
 const GraphHandler = require('../base/graphHandler');
 const redisAsyncClientDB = 8;
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const { default: Helpers } = require('@elastic/elasticsearch/lib/Helpers');
 
 class PolicyGraphHandler extends GraphHandler {
 	constructor(opts = {}) {
