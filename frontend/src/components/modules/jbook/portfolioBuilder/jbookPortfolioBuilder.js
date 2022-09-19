@@ -137,21 +137,6 @@ const PortfolioBuilder = (props) => {
 							>
 								<EditIcon style={{ fontSize: 30 }} />
 							</IconButton>
-							<IconButton
-								aria-label="close"
-								style={{
-									height: 10,
-									width: 10,
-									color: 'red',
-									borderRadius: 0,
-								}}
-								onClick={() => {
-									setDeleteID(portfolio.id);
-									setDeleteModal(true);
-								}}
-							>
-								<CancelIcon style={{ fontSize: 30 }} />
-							</IconButton>
 						</div>
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
