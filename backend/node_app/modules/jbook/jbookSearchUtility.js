@@ -218,12 +218,11 @@ class JBookSearchUtility {
 		return pageHits;
 	}
 
-	cleanESResults(esResults, userId) {
+	cleanESResults(esResults, userId, reverseResultOrder = false) {
 		const results = [];
+		let searchResults = { totalCount: 0, docs: [] };
 
 		try {
-			let searchResults = { totalCount: 0, docs: [] };
-
 			const { body = {} } = esResults;
 			const { aggregations = {} } = body;
 			const { service_agency_aggs = {}, contract_totals = {} } = aggregations;
@@ -254,6 +253,7 @@ class JBookSearchUtility {
 				result.serviceAgency = agencyMapping[result.serviceAgency] || result.serviceAgency;
 
 				result.pageHits = this.getPageHits(hit);
+				result.sort = hit.sort;
 
 				switch (result.budgetType) {
 					case 'rdte':
@@ -274,12 +274,16 @@ class JBookSearchUtility {
 
 			searchResults.docs = results;
 
+			if (reverseResultOrder) {
+				searchResults.docs.reverse();
+			}
+
 			return searchResults;
 		} catch (e) {
 			console.log(e);
 			const { message } = e;
 			this.logger.error(message, '8V1IZLH', userId);
-			return results;
+			return searchResults;
 		}
 	}
 
@@ -647,7 +651,17 @@ class JBookSearchUtility {
 
 	// creates the ES query for jbook search
 	getElasticSearchQueryForJBook(
-		{ searchText = '', parsedQuery, offset, limit, jbookSearchSettings, operator = 'and', sortSelected },
+		{
+			searchText = '',
+			parsedQuery,
+			offset,
+			limit,
+			jbookSearchSettings,
+			operator = 'and',
+			sortSelected,
+			search_after = [],
+			search_before = [],
+		},
 		userId
 	) {
 		let query = {};
@@ -779,11 +793,11 @@ class JBookSearchUtility {
 			}
 
 			let sort = jbookSearchSettings.sort[0].desc ? 'desc' : 'asc';
+			if (search_before.length > 0) {
+				sort = sort === 'desc' ? 'asc' : 'desc';
+			}
 			// SORT
 			switch (sortText) {
-				case 'relevance':
-					query.sort = [{ _score: { order: sort } }];
-					break;
 				case 'budgetYear':
 					query.sort = [{ budgetYear_s: { order: sort } }];
 					break;
@@ -802,8 +816,18 @@ class JBookSearchUtility {
 				case 'budgetLineItem':
 					query.sort = [{ budgetLineItem_s: { order: sort } }];
 					break;
+				case 'relevance':
 				default:
+					query.sort = [{ _score: { order: sort } }];
 					break;
+			}
+			query.sort.push({ _id: sort });
+
+			// add search_after
+			if (search_before.length > 0) {
+				query.search_after = search_before;
+			} else if (search_after.length > 0) {
+				query.search_after = search_after;
 			}
 
 			return query;
@@ -831,7 +855,7 @@ class JBookSearchUtility {
 			shouldQuery.bool.should.push({
 				query_string: {
 					query: `*${jbookSearchSettings.budgetSubActivity}*`,
-					default_field: 'budgetActivityTitle_t',
+					default_field: 'budgetSubActivityNumber_s',
 				},
 			});
 		}
