@@ -14,7 +14,7 @@ jest/
 cypress/results
 cypress/screenshots
 cypress/videos
-
+cypress.env.json
 
 # production
 /build

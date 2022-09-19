@@ -53,7 +53,9 @@ const ReviewersValue = React.memo((props) => {
 			size="small"
 			options={Object.keys(reviewers)}
 			style={{ width: 300 }}
-			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
+			renderInput={(params) => (
+				<TextField {...params} label="Reviewer" data-cy="jbook-reviewer-label" variant="outlined" />
+			)}
 			value={primaryReviewer ?? null}
 			onChange={(_e, value) => {
 				setReviewDataMultiple({ primaryReviewer: value, primaryReviewerEmail: reviewers[value].email });
