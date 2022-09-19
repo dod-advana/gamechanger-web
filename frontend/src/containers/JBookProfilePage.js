@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
+import { trackEvent } from '../components/telemetry/Matomo';
+import { getTrackingNameForFactory, encode } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -99,18 +101,19 @@ const JBookProfilePage = () => {
 	const [budgetYearProjectData, setBudgetYearProjectData] = useState({});
 	let [init, setInit] = useState(false);
 
+	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		window.open(
+			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+		);
+	};
+
 	useEffect(() => {
 		const getUserData = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
-			const newMap = {};
-			data.data.users.forEach((user) => {
-				newMap[user.id] = user;
-			});
-
 			const currentUserData = await gameChangerUserAPI.getUserProfileData();
 			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
-
-			setUserMap(newMap);
 		};
 
 		if (!init) {
@@ -293,7 +296,7 @@ const JBookProfilePage = () => {
 
 		const userData = Auth.getTokenPayload();
 
-		if (userData.extra_fields && userData.extra_fields.jbook) {
+		if (userData?.extra_fields?.jbook) {
 			const tmpPermissions = {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
@@ -324,6 +327,17 @@ const JBookProfilePage = () => {
 					}
 					setMap(map);
 					setState(dispatch, { portfolios: portfolioData });
+
+					const userIdSet = [];
+					Object.keys(map).forEach((portfolio) => {
+						map[portfolio].user_ids.forEach((id) => {
+							if (!userIdSet.includes(id)) userIdSet.push(id);
+						});
+					});
+					const { data: userData } = await gameChangerAPI.getUserDataByIDs(userIdSet);
+					const newUserMap = {};
+					userData.users.forEach((user) => (newUserMap[user.id] = user));
+					setUserMap(newUserMap);
 				});
 		};
 		getPortfolioData();
@@ -389,14 +403,14 @@ const JBookProfilePage = () => {
 				// if there is an or, highlight terms separately
 				if (searchText.indexOf('or') !== -1) {
 					terms.forEach((term) => {
-						const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
+						const regex = new RegExp(`${term.replaceAll('"', '')}([a-z]+)?`, 'gi');
 						const tmpMatches = descriptions.value.match(regex);
 						matches = matches.concat(tmpMatches);
 					});
 				}
 				// else highlight as 1 phrase
 				else {
-					const regex = new RegExp(`${searchText}([a-z]+)?`, 'gi');
+					const regex = new RegExp(`${searchText.replaceAll('"', '')}([a-z]+)?`, 'gi');
 					const tmpMatches = descriptions.value.match(regex);
 					matches = matches.concat(tmpMatches);
 				}
@@ -405,7 +419,7 @@ const JBookProfilePage = () => {
 					for (const match of matches) {
 						descriptions.value = descriptions.value.replaceAll(
 							match,
-							`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+							`<span style="background-color: #1C2D64; color: white; padding: 0 4px;">${match}</span>`
 						);
 					}
 				}
@@ -964,15 +978,6 @@ const JBookProfilePage = () => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		await gameChangerAPI.callDataFunction({
-			functionName: 'createComment',
-			cloneName: 'jbook',
-			options: {
-				docID,
-				portfolioName: selectedPortfolio,
-				message: 'just another super cool comment',
-			},
-		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
@@ -1090,7 +1095,6 @@ const JBookProfilePage = () => {
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
 		}
-
 		return data;
 	};
 
@@ -1237,7 +1241,7 @@ const JBookProfilePage = () => {
 		);
 	};
 
-	const SimpleReviewerSection = React.memo(() => {
+	const renderSimpleReviewerSection = () => {
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1289,7 +1293,7 @@ const JBookProfilePage = () => {
 				</GCAccordion>
 			</StyledAccordionContainer>
 		);
-	}, []);
+	};
 
 	const renderReviewSection = () => {
 		switch (selectedPortfolio) {
@@ -1304,7 +1308,7 @@ const JBookProfilePage = () => {
 					</>
 				);
 			default:
-				return <SimpleReviewerSection />;
+				return <>{renderSimpleReviewerSection()}</>;
 		}
 	};
 
@@ -1322,6 +1326,7 @@ const JBookProfilePage = () => {
 							projectData={projectData}
 							docID={docID}
 							getCommentThread={getCommentThread}
+							pageDisplayed={state.pageDisplayed}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>
@@ -1359,6 +1364,45 @@ const JBookProfilePage = () => {
 					/>
 				</StyledMainContainer>
 				<StyledRightContainer>
+					{projectData.dtic_pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(
+									projectData.dtic_pdf_location_s,
+									cloneData.clone_name,
+									projectData.dtic_pdf_page_s
+								);
+							}}
+						>
+							OPEN DOCUMENT
+						</GCPrimaryButton>
+					)}
+					{projectData.pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(projectData.pdf_location_s, cloneData.clone_name);
+							}}
+						>
+							OPEN FULL PDF
+						</GCPrimaryButton>
+					)}
+
 					<Metadata
 						budgetType={budgetType}
 						projectNum={projectNum}
