@@ -35,6 +35,13 @@ declare namespace Cypress {
 		login(clone: string);
 
 		/**
+		 * Visits a page on the BASE_URL. Mostly used when you dont need to accept consent again.
+		 * @param page
+		 * @example cy.visit('gamechanger/userDashboard');
+		 */
+		visitGcPage(page: string);
+
+		/**
 		 * Types into the search bar and clicks the search button.
 		 * Also waits up to 60 seconds for search results to appear.
 		 * @param searchTerm
