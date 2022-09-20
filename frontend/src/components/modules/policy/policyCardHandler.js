@@ -1567,6 +1567,7 @@ const cardHandler = {
 								)}
 							</>
 							<div
+								data-cy="card-footer-more"
 								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
 									trackEvent(
