@@ -1170,7 +1170,6 @@ const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, s
 };
 
 const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
-	console.log('here is backbody', backBody);
 	return !item.notInCorpus ? (
 		<GCAccordion
 			header={'DOCUMENT METADATA'}
