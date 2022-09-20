@@ -726,7 +726,7 @@ const JBookProfilePage = () => {
 						serviceReviewer: '',
 						primaryPlannedTransitionPartner: null,
 						serviceAdditionalMissionPartners: null,
-						primaryReviewNotes: null,
+						primaryReviewNotes: '',
 					};
 					break;
 				case 'serviceForm':
@@ -736,15 +736,16 @@ const JBookProfilePage = () => {
 						serviceMissionPartnersChecklist: JSON.stringify(contractMapping),
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: null,
+						serviceClassLabel: null,
 						servicePTPAgreeLabel: 'Yes',
 						servicePlannedTransitionPartner: null,
 						otherMissionPartners: null,
-						servicePOCTitle: null,
-						servicePOCName: null,
-						servicePOCEmail: null,
-						servicePOCOrg: null,
-						servicePOCPhoneNumber: null,
-						serviceReviewerNotes: null,
+						servicePOCTitle: '',
+						servicePOCName: '',
+						servicePOCEmail: '',
+						servicePOCOrg: '',
+						servicePOCPhoneNumber: '',
+						serviceReviewerNotes: '',
 						serviceSecondaryReviewer: '',
 					};
 
@@ -761,8 +762,8 @@ const JBookProfilePage = () => {
 						altPOCPhoneNumber: '',
 						pocJointCapabilityArea: null,
 						pocAIType: null,
-						pocAIRoleDescription: null,
-						pocAITypeDescription: null,
+						pocAIRoleDescription: '',
+						pocAITypeDescription: '',
 						pocDollarsAttributedCategory: null,
 						pocPercentageAttributedCategory: null,
 						pocDollarsAttributed: '',
