@@ -67,7 +67,7 @@ const PortfolioBuilder = (props) => {
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
-	const [user, setUser] = useState({});
+	const [user, setUser] = useState(null);
 	let [init, setInit] = useState(false);
 
 	useEffect(() => {
@@ -105,7 +105,7 @@ const PortfolioBuilder = (props) => {
 			initFunction();
 			setInit(true);
 		}
-	}, [init, setInit, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
+	}, [init, setInit, setUser, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
 
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
@@ -238,16 +238,18 @@ const PortfolioBuilder = (props) => {
 							</ul>
 						</div>
 					</div>
-					<div>
-						<GCButton
-							onClick={() => {
-								setShowModal(true);
-							}}
-							style={{ minWidth: 'unset' }}
-						>
-							Create a New Portfolio
-						</GCButton>
-					</div>
+					{user && (
+						<div>
+							<GCButton
+								onClick={() => {
+									setShowModal(true);
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Create a New Portfolio
+							</GCButton>
+						</div>
+					)}
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
 					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
@@ -262,17 +264,19 @@ const PortfolioBuilder = (props) => {
 					{listPortfolios(privatePortfolios)}
 				</div>
 			</div>
-			<JbookPortfolioModal
-				showModal={showModal}
-				setShowModal={() => {
-					setShowModal(false);
-					setInit(false);
-				}}
-				modalData={modalData}
-				userList={userList}
-				userMap={userMap}
-				user={user}
-			/>
+			{user && (
+				<JbookPortfolioModal
+					showModal={showModal}
+					setShowModal={() => {
+						setShowModal(false);
+						setInit(false);
+					}}
+					modalData={modalData}
+					userList={userList}
+					userMap={userMap}
+					user={user}
+				/>
+			)}
 		</>
 	);
 };
