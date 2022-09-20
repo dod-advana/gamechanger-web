@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
+import { styles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
 // import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
-import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
 
@@ -66,14 +64,11 @@ const PortfolioBuilder = (props) => {
 	const [privatePortfolios, setPrivatePortfolios] = useState([]);
 
 	const [showModal, setShowModal] = useState(false);
-	const [deleteModal, setDeleteModal] = useState(false);
-	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
 	const [user, setUser] = useState({});
 	let [init, setInit] = useState(false);
-	const classes = useStyles();
 
 	useEffect(() => {
 		const initFunction = async () => {
@@ -278,74 +273,6 @@ const PortfolioBuilder = (props) => {
 				userMap={userMap}
 				user={user}
 			/>
-			<Dialog
-				open={deleteModal}
-				scroll={'paper'}
-				maxWidth="sm"
-				disableEscapeKeyDown
-				disableBackdropClick
-				classes={{
-					paperWidthSm: classes.dialogSm,
-				}}
-			>
-				<DialogTitle>
-					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
-							Are you sure you want to delete this portfolio?
-						</Typography>
-					</div>
-					<IconButton
-						aria-label="close"
-						style={{
-							position: 'absolute',
-							right: '0px',
-							top: '0px',
-							height: 60,
-							width: 60,
-							color: 'black',
-							backgroundColor: styles.backgroundGreyLight,
-							borderRadius: 0,
-						}}
-						onClick={() => {
-							setDeleteModal(false);
-						}}
-					>
-						<CloseIcon style={{ fontSize: 30 }} />
-					</IconButton>
-				</DialogTitle>
-				<DialogContent>
-					<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
-						This portolio will be immediately deleted. You cannot undo this action.
-					</Typography>
-				</DialogContent>
-				<DialogActions>
-					<GCButton
-						id={'editReviewerClose'}
-						onClick={() => {
-							setDeleteModal(false);
-						}}
-						style={{ margin: '10px' }}
-						buttonColor={'#8091A5'}
-					>
-						Cancel
-					</GCButton>
-					<GCButton
-						id={'editReviewerSubmit'}
-						onClick={async () => {
-							await gameChangerAPI.callDataFunction({
-								functionName: 'deletePortfolio',
-								cloneName: 'jbook',
-								options: { id: deleteID },
-							});
-							setInit(false);
-							setDeleteModal(false);
-						}}
-						style={{ margin: '10px' }}
-					>
-						Delete
-					</GCButton>
-				</DialogActions>
-			</Dialog>
 		</>
 	);
 };
