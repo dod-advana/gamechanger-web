@@ -168,8 +168,8 @@ const JbookViewHeaderHandler = (props) => {
 					})
 					.then((data) => {
 						console.log(data);
-						let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
-						let privateData = data.data.privatePortfolios !== undefined ? data.data.privatePortfolios : [];
+						let publicData = data.data ? data.data.publicPortfolios : [];
+						let privateData = data.data ? data.data.privatePortfolios : [];
 						let portfolios = [...publicData, ...privateData];
 						setPortfolios(portfolios);
 					});

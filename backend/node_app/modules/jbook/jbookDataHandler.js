@@ -1020,13 +1020,11 @@ class JBookDataHandler extends DataHandler {
 				},
 			});
 
-			return new Promise((resolve) =>
-				resolve({
-					publicPortfolios,
-					privatePortfolios,
-					adminPortfolios,
-				})
-			);
+			return Promise.resolve({
+				publicPortfolios: publicPortfolios.data ?? [],
+				privatePortfolios: privatePortfolios.data ?? [],
+				adminPortfolios: adminPortfolios.data ?? [],
+			});
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, '6QJASKC', userId);
@@ -1109,8 +1107,6 @@ class JBookDataHandler extends DataHandler {
 			if (!id) {
 				where = { name };
 			}
-
-			let portfolio = await this.portfolio.findOne({ where });
 
 			let update = await this.portfolio.update({ deleted: true }, { where });
 

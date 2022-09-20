@@ -93,8 +93,8 @@ const PortfolioBuilder = (props) => {
 				.then((data) => {
 					console.log(data);
 
-					let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
-					let adminData = data.data.adminPortfolios !== undefined ? data.data.adminPortfolios : [];
+					let publicData = data.data ? data.data.publicPortfolios : [];
+					let adminData = data.data ? data.data.adminPortfolios : [];
 
 					setPublicPortfolios(publicData);
 					setPrivatePortfolios(adminData);

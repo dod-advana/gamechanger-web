@@ -90,8 +90,8 @@ const handlePageLoad = async (props) => {
 			options: { id: currentUserData.data.id },
 		})
 		.then((data) => {
-			let publicData = data.data.publicPortfolios !== undefined ? data.data.publicPortfolios : [];
-			let privateData = data.data.privatePortfolios !== undefined ? data.data.privatePortfolios : [];
+			let publicData = data.data ? data.data.publicPortfolios : [];
+			let privateData = data.data ? data.data.privatePortfolios : [];
 			portfolios = [...publicData, ...privateData];
 		});
 
