@@ -489,7 +489,11 @@ const JbookViewHeaderHandler = (props) => {
 							alt="export"
 						/>
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
 				</GCButton>
