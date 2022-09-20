@@ -1056,7 +1056,6 @@ const JBookProfilePage = () => {
 
 	const scorecardData = () => {
 		let data = [];
-		console.log('here is reviewData', reviewData);
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
 				name: 'Reviewer Tag',
