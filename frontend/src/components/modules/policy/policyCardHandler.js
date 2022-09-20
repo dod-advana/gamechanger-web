@@ -1170,6 +1170,7 @@ const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, s
 };
 
 const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
+	console.log('here is backbody', backBody);
 	return !item.notInCorpus ? (
 		<GCAccordion
 			header={'DOCUMENT METADATA'}
@@ -1178,7 +1179,9 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			headerTextWeight={'normal'}
 		>
 			<div className={'metadata'}>
-				<div className={'inner-scroll-container'}>{backBody}</div>
+				<div className={'inner-scroll-container'} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+					{backBody}
+				</div>
 			</div>
 		</GCAccordion>
 	) : (
