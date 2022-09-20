@@ -1058,7 +1058,7 @@ class JBookDataHandler extends DataHandler {
 
 	async editPortfolio(req, userId) {
 		try {
-			const { id, name, description, isPrivate, user_ids, admins, tags } = req.body;
+			const { id, name, description, isPrivate, user_ids, admins, tags, user } = req.body;
 
 			if (id) {
 				let update = await this.portfolio.update(
@@ -1073,6 +1073,7 @@ class JBookDataHandler extends DataHandler {
 					{
 						where: {
 							id,
+							[Op.or]: [{ admins: { [Op.contains]: [user] } }, { creator: user }],
 						},
 					}
 				);

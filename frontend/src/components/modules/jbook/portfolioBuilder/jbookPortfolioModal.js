@@ -487,10 +487,16 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 					<GCButton
 						onClick={async () => {
 							try {
+								let createEditOptions = { ...data };
+								if (data.id !== undefined) {
+									// if we are editing, send over current user in api (for permission checking)
+									createEditOptions.user = user.id;
+								}
+
 								await gameChangerAPI.callDataFunction({
 									functionName: data.id === undefined ? 'createPortfolio' : 'editPortfolio',
 									cloneName: 'jbook',
-									options: { ...data },
+									options: createEditOptions,
 								});
 							} catch (e) {
 								console.log(e);
