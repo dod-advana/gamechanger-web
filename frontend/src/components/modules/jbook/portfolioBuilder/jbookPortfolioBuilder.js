@@ -116,22 +116,25 @@ const PortfolioBuilder = (props) => {
 							{portfolio.name}
 						</Typography>
 						<div>
-							<IconButton
-								aria-label="close"
-								style={{
-									height: 30,
-									width: 30,
-									color: 'grey',
-									borderRadius: 0,
-									marginRight: '10px',
-								}}
-								onClick={() => {
-									setModalData(portfolio);
-									setShowModal(true);
-								}}
-							>
-								<EditIcon style={{ fontSize: 30 }} />
-							</IconButton>
+							{(portfolio.admins.find((item) => item === user.id) !== undefined ||
+								portfolio.creator === user.id) && (
+								<IconButton
+									aria-label="close"
+									style={{
+										height: 30,
+										width: 30,
+										color: 'grey',
+										borderRadius: 0,
+										marginRight: '10px',
+									}}
+									onClick={() => {
+										setModalData(portfolio);
+										setShowModal(true);
+									}}
+								>
+									<EditIcon style={{ fontSize: 30 }} />
+								</IconButton>
+							)}
 						</div>
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
