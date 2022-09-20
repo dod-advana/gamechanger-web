@@ -1021,9 +1021,9 @@ class JBookDataHandler extends DataHandler {
 			});
 
 			return Promise.resolve({
-				publicPortfolios: publicPortfolios.data ?? [],
-				privatePortfolios: privatePortfolios.data ?? [],
-				adminPortfolios: adminPortfolios.data ?? [],
+				publicPortfolios: publicPortfolios ?? [],
+				privatePortfolios: privatePortfolios ?? [],
+				adminPortfolios: adminPortfolios ?? [],
 			});
 		} catch (e) {
 			const { message } = e;
