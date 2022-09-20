@@ -1179,7 +1179,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			headerTextWeight={'normal'}
 		>
 			<div className={'metadata'}>
-				<div className={'inner-scroll-container'} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
 					{backBody}
 				</div>
 			</div>
