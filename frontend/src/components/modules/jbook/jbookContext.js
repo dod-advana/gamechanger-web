@@ -22,7 +22,6 @@ const initState = {
 		last_name: false,
 		email: false,
 	},
-	exportLoading: false,
 	mainTabSelected: 0,
 	mainPageData: {},
 	dropdownData: {},
