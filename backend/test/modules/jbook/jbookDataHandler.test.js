@@ -66,9 +66,7 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve(portfolios[0]);
 				},
 				findAll() {
-					return Promise.resolve({
-						data: portfolios,
-					});
+					return Promise.resolve(portfolios);
 				},
 				update() {
 					return Promise.resolve([1]);
@@ -528,20 +526,18 @@ describe('JBookDataHandler', function () {
 				},
 				portfolio: {
 					findAll: () => {
-						return Promise.resolve({
-							data: [
-								{
-									name: 'testPortfolio',
-									description: 'testPortfolio description',
-									isPrivate: false,
-									tags: [],
-									user_ids: [],
-									creator: 1,
-									admins: [],
-									deleted: false,
-								},
-							],
-						});
+						return Promise.resolve([
+							{
+								name: 'testPortfolio',
+								description: 'testPortfolio description',
+								isPrivate: false,
+								tags: [],
+								user_ids: [],
+								creator: 1,
+								admins: [],
+								deleted: false,
+							},
+						]);
 					},
 				},
 			};
