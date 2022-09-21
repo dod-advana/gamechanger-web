@@ -74,6 +74,15 @@ const DocumentParagraph = ({
 	dispatch,
 }) => {
 	const [feedbackList, setFeedbackList] = useState({});
+	const [paragraphSelected, setParagraphSelected] = useState(false);
+
+	useEffect(() => {
+		if (docOpen && selectedParagraph?.id === paragraph.id) {
+			setParagraphSelected(true);
+		} else {
+			setParagraphSelected(false);
+		}
+	}, [docOpen, paragraph.id, selectedParagraph]);
 
 	const exportSingleDoc = (document) => {
 		const exportList = [];
@@ -107,19 +116,17 @@ const DocumentParagraph = ({
 	};
 
 	let blockquoteClass = 'searchdemo-blockquote-sm';
-	const pOpen = selectedParagraph?.id === paragraph.id;
-	const isHighlighted = pOpen && docOpen;
-	if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
+	if (paragraphSelected) blockquoteClass += ' searchdemo-blockquote-sm-active';
 	return (
 		<div key={paragraph.id} style={{ position: 'relative' }}>
-			{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
+			{paragraphSelected && <span className="searchdemo-arrow-left-sm"></span>}
 			<div
 				className={blockquoteClass}
 				onClick={() => setDocParagraph(doc, paragraph)}
 				style={{
 					marginLeft: 20,
 					marginRight: 0,
-					border: isHighlighted ? 'none' : '1px solid #DCDCDC',
+					border: paragraphSelected ? 'none' : '1px solid #DCDCDC',
 					padding: '3px',
 					cursor: 'pointer',
 				}}
@@ -127,17 +134,17 @@ const DocumentParagraph = ({
 				<span
 					className="gc-document-explorer-result-header-text"
 					style={{
-						color: isHighlighted ? 'white' : '#131E43',
+						color: paragraphSelected ? 'white' : '#131E43',
 					}}
 				>
-					{isHighlighted
+					{paragraphSelected
 						? `Page: ${paragraph.page_num_i + 1}, Par: ${paragraph.id.split('_')[1]}, Similarity Score: ${
 								paragraph.score_display
 						  }`
 						: paragraph.par_raw_text_t}
 				</span>
 			</div>
-			<Collapse isOpened={pOpen && docOpen}>
+			<Collapse isOpened={paragraphSelected}>
 				<div
 					className="searchdemo-blockquote-sm"
 					style={{
@@ -236,11 +243,17 @@ const DocumentResult = ({
 	selectedParagraph,
 	paragraphs,
 	setDocParagraph,
+	stepIndex,
 	state,
 	dispatch,
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const displayTitle = doc.display_title_s;
+
+	useEffect(() => {
+		if (index === 0 && stepIndex === 4) setIsOpen(false);
+	}, [index, stepIndex]);
+
 	return (
 		<div key={doc.id} className={index === 0 ? 'dct-tutorial-step-7' : ''}>
 			<div
@@ -391,7 +404,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			setShowTutorial(true);
 			setTutorialLogicSwitch(true);
 		}
-		// if (stepIndex === 5) setCollapseKeys({});
 	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	useEffect(() => {
@@ -1112,6 +1124,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 									selectedParagraph={selectedParagraph}
 									paragraphs={paragraphs}
 									setDocParagraph={setDocParagraph}
+									stepIndex={stepIndex}
 									state={state}
 									dispatch={dispatch}
 								/>
