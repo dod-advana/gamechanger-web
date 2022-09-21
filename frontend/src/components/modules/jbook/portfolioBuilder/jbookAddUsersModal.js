@@ -86,11 +86,7 @@ export default ({
 								{user.first_name}, {user.last_name}
 							</Typography>
 							<GCButton style={style} id={user.id} onClick={() => handleAddUser(user.id)}>
-								{added ? (
-									<CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} />
-								) : (
-									''
-								)}
+								{added && <CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} />}
 								Add
 							</GCButton>
 						</div>
