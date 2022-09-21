@@ -502,6 +502,7 @@ class EDASearchUtility {
 					army: 'W*',
 					navy: 'N* OR M*',
 					'air force': 'F*',
+					defense: 'H*',
 				};
 
 				let orgString = '';
