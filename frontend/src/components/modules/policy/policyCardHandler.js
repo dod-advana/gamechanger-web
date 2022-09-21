@@ -112,7 +112,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 			max-width: ${({ listView }) => (listView ? '60%' : '')};
 			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
@@ -883,9 +883,17 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 						{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
 						{displayType}
 					</div>
-					<div data-cy={'card-org'} className={'sub-header-two'}>
-						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
-					</div>
+					{displayOrg.length > 23 ? (
+						<GCTooltip title={displayOrg} placement="top" arrow>
+							<div data-cy={'card-org'} className={'sub-header-two'}>
+								{displayOrg.slice(0, 20)}...
+							</div>
+						</GCTooltip>
+					) : (
+						<div data-cy={'card-org'} className={'sub-header-two'}>
+							{displayOrg}
+						</div>
+					)}
 				</StyledFrontCardSubHeader>
 			)}
 		</>
