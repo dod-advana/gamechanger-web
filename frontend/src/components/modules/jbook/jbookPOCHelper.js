@@ -198,6 +198,87 @@ const renderDropdownRadioButtons = (
 	);
 };
 
+const JCACTier2CheckBox = ({ tier1, tier2, tier3List, setReviewData, tier1Checked, tier2Checked, finished }) => {
+	return (
+		<GCAccordion
+			contentPadding={0}
+			expanded={tier2Checked}
+			disabled={finished}
+			controlled={true}
+			key={tier2}
+			header={
+				<FormControlLabel
+					name={tier2}
+					value={tier2}
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '0px 10px 0px 5px',
+							}}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							checked={tier2Checked}
+							onClick={() => setReviewData('pocJointCapabilityArea2', tier2)}
+						/>
+					}
+					label={tier2}
+					labelPlacement="end"
+					style={{ ...styles.titleText, margin: '10px 0' }}
+					disabled={finished || !tier1Checked} //|| roleDisabled}
+				/>
+			}
+			headerBackground={'rgb(238,241,242)'}
+			headerTextColor={'black'}
+			headerTextWeight={'600'}
+		>
+			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
+				<div style={{ width: '100%', margin: '0 0 15px 0' }}>{JCAdata[tier1][tier2]['Description']}</div>
+				{tier3List}
+			</StyledAccordionDiv>
+		</GCAccordion>
+	);
+};
+
+const JCACTier3CheckBox = ({ tier1, tier2, tier3, setReviewData, reviewData, tier2Checked, finished }) => {
+	return (
+		<FormControlLabel
+			name={tier3}
+			value={tier3}
+			key={tier3}
+			style={{ width: '100%', margin: '10px 0' }}
+			control={
+				<Checkbox
+					style={{
+						backgroundColor: '#ffffff',
+						borderRadius: '5px',
+						padding: '2px',
+						border: '2px solid #bdccde',
+						pointerEvents: 'none',
+						margin: '0px 10px 0px 5px',
+					}}
+					onClick={() => setReviewData('pocJointCapabilityArea3', tier3)}
+					icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+					checked={tier2Checked && reviewData?.['pocJointCapabilityArea3'].indexOf(tier3) !== -1}
+					checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+					name={tier3}
+				/>
+			}
+			label={
+				<span style={{ fontSize: 13, lineHeight: '5px' }}>
+					<b>{tier3}</b>- {JCAdata[tier1][tier2][tier3]}
+				</span>
+			}
+			labelPlacement="end"
+			disabled={finished || !tier2Checked} //|| roleDisabled}
+		/>
+	);
+};
+
 const JCAChecklist = (props) => {
 	const { reviewData, setReviewData, finished } = props;
 	const radioDropdowns = [];
@@ -205,102 +286,35 @@ const JCAChecklist = (props) => {
 	let tier3List = [];
 
 	for (const tier1 in JCAdata) {
+		const tier1Checked = reviewData?.['pocJointCapabilityArea'] === tier1;
 		for (const tier2 in JCAdata[tier1]) {
+			const tier2Checked = tier1Checked && reviewData?.['pocJointCapabilityArea2'].indexOf(tier2) !== -1;
 			for (const tier3 in JCAdata[tier1][tier2]) {
 				if (tier3 !== 'Description') {
 					tier3List.push(
-						<FormControlLabel
-							name={tier3}
-							value={tier3}
-							key={tier3}
-							style={{ width: '100%', margin: '10px 0' }}
-							control={
-								<Checkbox
-									style={{
-										backgroundColor: '#ffffff',
-										borderRadius: '5px',
-										padding: '2px',
-										border: '2px solid #bdccde',
-										pointerEvents: 'none',
-										margin: '0px 10px 0px 5px',
-									}}
-									onClick={() => setReviewData('pocJointCapabilityArea3', tier3)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={
-										reviewData &&
-										reviewData['pocJointCapabilityArea3'] &&
-										reviewData['pocJointCapabilityArea3'].indexOf(tier3) !== -1
-									}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={tier3}
-								/>
-							}
-							label={
-								<span style={{ fontSize: 13, lineHeight: '5px' }}>
-									<b>{tier3}</b>- {JCAdata[tier1][tier2][tier3]}
-								</span>
-							}
-							labelPlacement="end"
-							disabled={finished} //|| roleDisabled}
+						<JCACTier3CheckBox
+							tier1={tier1}
+							tier2={tier2}
+							tier3={tier3}
+							setReviewData={setReviewData}
+							reviewData={reviewData}
+							tier2Checked={tier2Checked}
+							finished={finished}
 						/>
 					);
 				}
 			}
 			if (tier2 !== 'Description') {
 				tier2List.push(
-					<GCAccordion
-						contentPadding={0}
-						expanded={
-							reviewData &&
-							reviewData['pocJointCapabilityArea2'] &&
-							reviewData['pocJointCapabilityArea2'].indexOf(tier2) !== -1
-						}
-						disabled={finished}
-						controlled={true}
-						key={tier2}
-						header={
-							<FormControlLabel
-								name={tier2}
-								value={tier2}
-								control={
-									<Checkbox
-										style={{
-											backgroundColor: '#ffffff',
-											borderRadius: '5px',
-											padding: '2px',
-											border: '2px solid #bdccde',
-											pointerEvents: 'none',
-											margin: '0px 10px 0px 5px',
-										}}
-										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-										checked={
-											reviewData &&
-											reviewData['pocJointCapabilityArea2'] &&
-											reviewData['pocJointCapabilityArea2'].indexOf(tier2) !== -1
-										}
-										onClick={() => {
-											setReviewData('pocJointCapabilityArea2', tier2);
-										}}
-									/>
-								}
-								label={tier2}
-								labelPlacement="end"
-								style={{ ...styles.titleText, margin: '10px 0' }}
-								disabled={finished} //|| roleDisabled}
-							/>
-						}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'600'}
-					>
-						<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
-							<div style={{ width: '100%', margin: '0 0 15px 0' }}>
-								{JCAdata[tier1][tier2]['Description']}
-							</div>
-							{tier3List}
-						</StyledAccordionDiv>
-					</GCAccordion>
+					<JCACTier2CheckBox
+						tier1={tier1}
+						tier2={tier2}
+						tier3List={tier3List}
+						setReviewData={setReviewData}
+						tier1Checked={tier1Checked}
+						tier2Checked={tier2Checked}
+						finished={finished}
+					/>
 				);
 			}
 			tier3List = [];
@@ -309,7 +323,7 @@ const JCAChecklist = (props) => {
 		radioDropdowns.push(
 			<GCAccordion
 				contentPadding={0}
-				expanded={reviewData && reviewData['pocJointCapabilityArea'] === tier1}
+				expanded={tier1Checked}
 				disabled={finished}
 				controlled={true}
 				key={tier1}
@@ -322,7 +336,7 @@ const JCAChecklist = (props) => {
 								style={styles.radio}
 								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
 								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
-								checked={reviewData && reviewData['pocJointCapabilityArea'] === tier1}
+								checked={tier1Checked}
 								onClick={() => {
 									if (!finished) {
 										setReviewData('pocJointCapabilityArea', tier1);

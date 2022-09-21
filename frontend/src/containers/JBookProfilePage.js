@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackEvent } from '../components/telemetry/Matomo';
-import { getTrackingNameForFactory, encode } from '../utils/gamechangerUtils';
+import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -12,7 +12,6 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
-import { getQueryVariable } from '../utils/gamechangerUtils';
 import './gamechanger.css';
 import './jbook.css';
 import './jbook-styles.css';
@@ -760,6 +759,8 @@ const JBookProfilePage = () => {
 						altPOCOrg: '',
 						altPOCPhoneNumber: '',
 						pocJointCapabilityArea: null,
+						pocJointCapabilityArea2: null,
+						pocJointCapabilityArea3: null,
 						pocAIType: null,
 						pocAIRoleDescription: null,
 						pocAITypeDescription: null,
@@ -859,7 +860,9 @@ const JBookProfilePage = () => {
 					newReviewData[field].push(value);
 					break;
 				case 'clearJCA':
-					newReviewData.pocJointCapabilityArea = '';
+					newReviewData.pocJointCapabilityArea = null;
+					newReviewData.pocJointCapabilityArea2 = null;
+					newReviewData.pocJointCapabilityArea3 = null;
 					break;
 				case 'clearDomainTask':
 					newReviewData.domainTask = '';
