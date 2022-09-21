@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _, { isArray, isEqual } from 'lodash';
