@@ -8,7 +8,6 @@ import {
 	getReferenceListMetadataPropertyTable,
 	policyMetadata,
 	getTrackingNameForFactory,
-	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
