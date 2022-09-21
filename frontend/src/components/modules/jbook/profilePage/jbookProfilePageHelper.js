@@ -104,7 +104,7 @@ const ClassificationScoreCard = (props) => {
 		<StyledLeftContainer>
 			<div style={{ backgroundColor: 'rgb(239, 241, 246)', marginLeft: -6, marginRight: -8 }}>
 				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
-					{`Classification Scorecard`}
+					{`${portfolioName} Label`}
 				</Typography>
 				{scores.map((score) => {
 					return (
