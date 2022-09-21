@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { styles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-// import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import { Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
@@ -123,6 +122,28 @@ const PortfolioBuilder = (props) => {
 
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
+			const getName = (id) => {
+				if (userMap[id]) {
+					return `${userMap[id].first_name} ${userMap[id].last_name}`;
+				}
+				return '';
+			};
+
+			const portfolioAdmins = portfolio.admins.map((user, index) => {
+				return (
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+					</Pill>
+				);
+			});
+
+			const portfolioUsers = portfolio.user_ids.map((user, index) => {
+				return (
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+					</Pill>
+				);
+			});
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
@@ -153,10 +174,7 @@ const PortfolioBuilder = (props) => {
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
 					<div style={{ fontSize: '.8em', fontweight: 'bold' }}>
-						Creator:{' '}
-						{(userMap[portfolio.creator] ? userMap[portfolio.creator].first_name : '') +
-							' ' +
-							(userMap[portfolio.creator] ? userMap[portfolio.creator].last_name : '')}
+						Creator:{' ' + getName(portfolio.creator)}
 					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
@@ -168,17 +186,7 @@ const PortfolioBuilder = (props) => {
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.user_ids.length === 0 &&
 							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
-						{portfolio.admins.map((user, index) => {
-							return (
-								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
-										{(userMap[user] ? userMap[user].first_name : '') +
-											' ' +
-											(userMap[user] ? userMap[user].last_name : '')}
-									</div>
-								</Pill>
-							);
-						})}
+						{portfolioAdmins}
 					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
@@ -190,17 +198,7 @@ const PortfolioBuilder = (props) => {
 					<div style={portfolioStyles.pillbox}>
 						{portfolio.user_ids.length === 0 &&
 							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
-						{portfolio.user_ids.map((user, index) => {
-							return (
-								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
-										{(userMap[user] ? userMap[user].first_name : '') +
-											' ' +
-											(userMap[user] ? userMap[user].last_name : '')}
-									</div>
-								</Pill>
-							);
-						})}
+						{portfolioUsers}
 					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>

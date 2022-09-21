@@ -49,7 +49,6 @@ const Pill = styled.button`
  */
 export default ({ showModal, setShowModal, modalData, userList, userMap, user }) => {
 	const classes = useStyles();
-	// const [init, setInit] = useState(false);
 	const [showUsersModal, setShowUsersModal] = useState(false);
 	const [showAdminsModal, setShowAdminsModal] = useState(false);
 	const [showTagsModal, setShowTagsModal] = useState(false);
@@ -142,8 +141,8 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		try {
 			let selectedUsers = [];
 			let userIDs = data.user_ids;
-			for (let i = 0; i < userIDs.length; i++) {
-				let user = userMap[userIDs[i]];
+			for (let id of userIDs) {
+				let user = userMap[id];
 				selectedUsers.push(
 					<Pill style={{ margin: '0 5px 10px' }}>
 						{user.first_name} {user.last_name}
@@ -158,7 +157,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 								padding: 0,
 								borderRadius: '15px',
 							}}
-							onClick={() => handleAddUser(userIDs[i])}
+							onClick={() => handleAddUser(id)}
 						>
 							<CloseIcon style={{ fontSize: 11 }} />
 						</IconButton>
@@ -170,7 +169,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		} catch (e) {
 			console.log(e);
 			console.log('Error rendering selected users on edit portfolio modal');
-			return '';
+			return [];
 		}
 	};
 
@@ -179,8 +178,8 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		try {
 			let selectedUsers = [];
 			let userIDs = data.admins;
-			for (let i = 0; i < userIDs.length; i++) {
-				let user = userMap[userIDs[i]];
+			for (let id of userIDs) {
+				let user = userMap[id];
 				selectedUsers.push(
 					<Pill style={{ margin: '0 5px 10px' }}>
 						{user.first_name} {user.last_name}
@@ -195,7 +194,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 								padding: 0,
 								borderRadius: '15px',
 							}}
-							onClick={() => handleAddAdmin(userIDs[i])}
+							onClick={() => handleAddAdmin(id)}
 						>
 							<CloseIcon style={{ fontSize: 11 }} />
 						</IconButton>
@@ -207,7 +206,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		} catch (e) {
 			console.log(e);
 			console.log('Error rendering selected admins on edit portfolio modal');
-			return '';
+			return [];
 		}
 	};
 

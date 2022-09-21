@@ -318,8 +318,12 @@ const JBookProfilePage = () => {
 					options: { id: currentUserData.data.id },
 				})
 				.then(async (data) => {
-					let publicData = data.data ? data.data.publicPortfolios : [];
-					let privateData = data.data ? data.data.privatePortfolios : [];
+					let publicData = [];
+					let privateData = [];
+					if (data.data) {
+						publicData = data.data.publicPortfolios;
+						privateData = data.data.privatePortfolios;
+					}
 					let portfolioData = [...publicData, ...privateData];
 					let map = {};
 					for (let item of portfolioData) {
