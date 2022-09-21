@@ -94,10 +94,10 @@ const PortfolioBuilder = (props) => {
 					console.log(data);
 
 					let publicData = data.data ? data.data.publicPortfolios : [];
-					let adminData = data.data ? data.data.adminPortfolios : [];
+					let privatePortfolios = data.data ? data.data.privatePortfolios : [];
 
 					setPublicPortfolios(publicData);
-					setPrivatePortfolios(adminData);
+					setPrivatePortfolios(privatePortfolios);
 				});
 		};
 
