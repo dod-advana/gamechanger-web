@@ -1012,18 +1012,9 @@ class JBookDataHandler extends DataHandler {
 				},
 			});
 
-			const adminPortfolios = await this.portfolio.findAll({
-				where: {
-					deleted: false,
-					isPrivate: true,
-					[Op.or]: [{ admins: { [Op.contains]: [id] } }, { creator: id ?? 0 }],
-				},
-			});
-
 			return Promise.resolve({
 				publicPortfolios: publicPortfolios ?? [],
 				privatePortfolios: privatePortfolios ?? [],
-				adminPortfolios: adminPortfolios ?? [],
 			});
 		} catch (e) {
 			const { message } = e;

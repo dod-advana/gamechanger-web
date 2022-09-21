@@ -443,16 +443,6 @@ describe('JBookDataHandler', function () {
 			};
 
 			const expectedGetAll = {
-				adminPortfolios: [
-					{
-						deleted: false,
-						description: 'AI Inventory portfolio description',
-						id: 1,
-						name: 'AI Inventory',
-						tags: [],
-						user_ids: [],
-					},
-				],
 				privatePortfolios: [
 					{
 						deleted: false,
@@ -548,18 +538,6 @@ describe('JBookDataHandler', function () {
 			};
 			const target = new JBookDataHandler(opts);
 			const expected = {
-				adminPortfolios: [
-					{
-						name: 'testPortfolio',
-						description: 'testPortfolio description',
-						isPrivate: false,
-						tags: [],
-						user_ids: [],
-						creator: 1,
-						admins: [],
-						deleted: false,
-					},
-				],
 				privatePortfolios: [
 					{
 						name: 'testPortfolio',
