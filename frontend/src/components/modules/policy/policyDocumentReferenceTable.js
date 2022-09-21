@@ -48,8 +48,7 @@ const PolicyDocumentReferenceTable = ({ state, document, zoom = 1 }) => {
 						name: reference,
 						url: `/#/pdfviewer/gamechanger?filename=${encode(found.filename)}&cloneIndex=${
 							cloneData.clone_name
-						}&sourceUrl=${found.download_url_s}
-						}`,
+						}&sourceUrl=${found.download_url_s}`,
 					};
 				} else {
 					return reference;
