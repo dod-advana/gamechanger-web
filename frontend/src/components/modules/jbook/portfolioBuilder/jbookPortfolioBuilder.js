@@ -93,9 +93,23 @@ const PortfolioBuilder = (props) => {
 				.then((data) => {
 					console.log(data);
 
-					let publicData = data.data ? data.data.publicPortfolios : [];
-					let privatePortfolios = data.data ? data.data.privatePortfolios : [];
+					const alphaSort = (a, b) => {
+						const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+						const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+						if (nameA < nameB) {
+							return -1;
+						}
+						if (nameA > nameB) {
+							return 1;
+						}
+						// names must be equal
+						return 0;
+					};
 
+					let publicData = data.data ? data.data.publicPortfolios : [];
+					publicData.sort(alphaSort);
+					let privatePortfolios = data.data ? data.data.privatePortfolios : [];
+					privatePortfolios.sort(alphaSort);
 					setPublicPortfolios(publicData);
 					setPrivatePortfolios(privatePortfolios);
 				});
@@ -261,7 +275,7 @@ const PortfolioBuilder = (props) => {
 					{listPortfolios(publicPortfolios)}
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>My Portfolios</p>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
 				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
 					{listPortfolios(privatePortfolios)}
