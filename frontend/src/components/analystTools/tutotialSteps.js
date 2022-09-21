@@ -104,6 +104,8 @@ const dctTutorialSteps = [
 		title: 'Combine Paragraph Input',
 		content:
 			'Paragraph inputs can be combined to re-compare as a whole paragraph. First, select paragraphs by click the check mark next to the inputs to combine. Then, press the combine button to merge the selected paragraphs and reinitiate the comparison search with the combined text.',
+		clickButton: true,
+		buttonID: 'first-dct-result',
 	},
 	{
 		...tutorialObject,
@@ -111,8 +113,6 @@ const dctTutorialSteps = [
 		title: 'Results',
 		content: 'View results from the similar document query below the paragraph input section.',
 		placement: 'left-start',
-		clickButton: true,
-		buttonID: 'first-dct-result',
 	},
 	{
 		...tutorialObject,
