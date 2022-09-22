@@ -7,13 +7,10 @@ Cypress.Commands.add('login', (clone) => {
 });
 
 Cypress.Commands.add('search', (searchTerm) => {
+	cy.intercept('/api/gamechanger/modular/search').as('search');
 	cy.get('#gcSearchInput', { timeout: 10000 }).type(`${searchTerm}`);
 	cy.get('#gcSearchButton').click();
-	cy.getDataCy('searchCard', { timeout: 60000 })
-		.eq(0)
-		.should('exist')
-		.find('.spinner', { timeout: 60000 })
-		.should('not.exist');
+	cy.wait('@search', { timeout: 60000 });
 });
 
 Cypress.Commands.add('setSourceFilter', (filterName) => {
