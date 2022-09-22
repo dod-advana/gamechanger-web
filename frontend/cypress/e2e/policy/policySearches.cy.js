@@ -91,6 +91,11 @@ describe('User Dashboard Tests', () => {
 		cy.get('#accordion-header').get('p').contains('FAVORITE ORGANIZATIONS').click();
 		cy.get('#accordion-header').get('p').contains('FAVORITE DOCUMENTS').click();
 	};
+
+	const deleteIFrameIfExists = () => {
+		cy.get('iframe', { timeout: 500, force: true }).then((el) => el.remove());
+	};
+
 	beforeEach('Clear the favorites', () => {
 		cy.visitGcPage('gamechanger/userDashboard');
 		cy.get('.react-tabs').then(($tabs) => {
@@ -122,7 +127,11 @@ describe('User Dashboard Tests', () => {
 		cy.getCard(0).get('em').should('contain.text', searchTerm.toUpperCase());
 
 		cy.getDataCy('user-dashboard').click();
-		cy.getDataCy('favorite-star').click();
+		cy.getFavoriteCard(favoriteTitle)
+			.should('exist')
+			.parentsUntil('[data-cy="favorite-card"]')
+			.findDataCy('favorite-star')
+			.click();
 		cy.get('button').contains('Yes').click();
 		cy.getFavoriteCard(favoriteTitle).should('not.exist');
 	});
@@ -134,13 +143,16 @@ describe('User Dashboard Tests', () => {
 			.find('.text')
 			.then((card) => {
 				const titleText = card.text();
-
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
 				cy.get('#accordion-header').get('p').contains('FAVORITE DOCUMENTS').click();
-				cy.getFavoriteCard(titleText).should('exist');
-				cy.getDataCy('favorite-star').click();
+				cy.getFavoriteCard(titleText)
+					.should('exist')
+					.parentsUntil('[data-cy="favorite-card"]')
+					.findDataCy('favorite-star')
+					.click();
+				//cy.getDataCy('favorite-star').click();
 				cy.get('button').contains('Yes').click();
 				cy.getFavoriteCard(titleText).should('not.exist');
 			});
@@ -157,6 +169,7 @@ describe('User Dashboard Tests', () => {
 				const titleText = card.text();
 
 				cy.getCard(0).findDataCy('card-favorite-star').click();
+				deleteIFrameIfExists();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
 				cy.get('#accordion-header').get('p').contains('FAVORITE ORGANIZATIONS').click();
@@ -178,6 +191,7 @@ describe('User Dashboard Tests', () => {
 				const titleText = card.text();
 
 				cy.getCard(0).findDataCy('card-favorite-star').click();
+				deleteIFrameIfExists();
 				cy.get('button').contains('Save').click();
 				cy.getDataCy('user-dashboard').click();
 				cy.get('#accordion-header').get('p').contains('FAVORITE TOPICS').click();

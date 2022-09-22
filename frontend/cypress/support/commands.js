@@ -68,7 +68,7 @@ Cypress.Commands.add('setup', () => {
  */
 Cypress.Commands.add('visitGcPage', (page) => {
 	if (page.charAt(0) === '/') page = page.substring(1, page.length);
-	cy.visit(`${BASE_URL}/#/${page}`);
+	cy.visit(`/#/${page}`);
 });
 
 // this visits a page and clicks the consent agreement
