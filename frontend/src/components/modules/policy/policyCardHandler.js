@@ -1178,7 +1178,9 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			headerTextWeight={'normal'}
 		>
 			<div className={'metadata'}>
-				<div className={'inner-scroll-container'}>{backBody}</div>
+				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+					{backBody}
+				</div>
 			</div>
 		</GCAccordion>
 	) : (
@@ -1761,7 +1763,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
@@ -2025,7 +2029,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
