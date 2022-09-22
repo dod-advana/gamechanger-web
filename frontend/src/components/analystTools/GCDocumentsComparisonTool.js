@@ -93,7 +93,7 @@ const DocumentInputContainer = styled.div`
 	border-radius: 5px;
 	background-color: ${'#F6F8FA'};
 	padding: 20px;
-	margin: 20px 0px 0px 20px;
+	margin: ${(props) => (props.policy ? '20px 0px 0px 0px' : '20px 0px 0px 20px')};
 
 	.input-container-grid {
 		margin-top: 30px;
