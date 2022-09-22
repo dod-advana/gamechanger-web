@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _, { isArray, isEqual } from 'lodash';
@@ -116,7 +116,6 @@ const JbookViewHeaderHandler = (props) => {
 		currentOrder,
 		sortSelected,
 		searchText,
-		exportLoading,
 		runSearch,
 	} = state;
 
@@ -479,19 +478,14 @@ const JbookViewHeaderHandler = (props) => {
 						}
 					}}
 				>
-					{!exportLoading ? (
-						<img
-							src={ExportIcon}
-							style={{
-								margin: '0 0 3px 3px',
-								width: 15,
-							}}
-							alt="export"
-						/>
-					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
-					)}
-					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
+					<img
+						src={ExportIcon}
+						style={{
+							margin: '0 0 3px 3px',
+							width: 15,
+						}}
+						alt="export"
+					/>
 				</GCButton>
 			</div>
 			<FilterList
