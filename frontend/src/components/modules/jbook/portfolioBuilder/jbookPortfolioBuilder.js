@@ -184,8 +184,7 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>
-						{portfolio.user_ids.length === 0 &&
-							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
+						{portfolio.admins.length === 0 && '(none)'}
 						{portfolioAdmins}
 					</div>
 					<hr />
@@ -196,8 +195,7 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>
-						{portfolio.user_ids.length === 0 &&
-							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
+						{portfolio.user_ids.length === 0 && (portfolio.isPublic ? '(All JBOOK users)' : '(none)')}
 						{portfolioUsers}
 					</div>
 					<hr />
