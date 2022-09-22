@@ -1354,7 +1354,7 @@ const DataTypeValue = React.memo((props) => {
 						options={['Computer', 'Robotic']}
 						style={{ minWidth: 180 }}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-						value={reviewData ? reviewData.roboticsSystemAgree : null}
+						value={reviewData.roboticsSystemAgree ?? null}
 						onChange={(event, value) => setReviewData('roboticsSystemAgree', value)}
 						disabled={finished} //|| roleDisabled}
 						disableClearable
@@ -1377,7 +1377,7 @@ const DataTypeValue = React.memo((props) => {
 						options={['Yes', 'No']}
 						style={{ minWidth: 180 }}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-						value={reviewData ? reviewData.intelligentSystemsAgree : null}
+						value={reviewData?.intelligentSystemsAgree ?? null}
 						onChange={(event, value) => setReviewData('intelligentSystemsAgree', value)}
 						disabled={finished} //|| roleDisabled}
 						disableClearable
