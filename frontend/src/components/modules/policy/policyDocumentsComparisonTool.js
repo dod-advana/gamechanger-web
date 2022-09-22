@@ -452,6 +452,7 @@ const PolicyDocumentsComparisonTool = ({
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
+		setLeftPanelOpen(true);
 	};
 
 	const handleCheck = (id) => {
