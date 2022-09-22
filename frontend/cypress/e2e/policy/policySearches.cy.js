@@ -31,6 +31,23 @@ describe('Tests multiple types of policy searches.', () => {
 			.should('contain', searchTerm);
 	});
 
+	it("Runs a search and verifies a result's references", () => {
+		const searchTerm = 'CFR Title 24 Vol. 4: Housing And Urban Development';
+		cy.search(searchTerm);
+
+		cy.getDataCy('card-footer-more').first().click();
+		cy.getDataCy('simple-table')
+			.eq(1)
+			.should('contain', 'References')
+			.find('tbody')
+			.find('tr')
+			.first()
+			.find('td')
+			.first()
+			.find('a')
+			.should('exist');
+	});
+
 	it('Runs a search and verifies organization card results', () => {
 		const searchTerm = 'washington headquarters service';
 		cy.search(searchTerm);
