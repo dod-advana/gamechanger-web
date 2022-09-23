@@ -152,7 +152,7 @@ const DropdownRadioButton = ({
 	return (
 		<GCAccordion
 			contentPadding={0}
-			expanded={reviewData && reviewData[reviewDataProp] === radioButton}
+			expanded={reviewData?.[reviewDataProp] && reviewData[reviewDataProp] === radioButton}
 			disabled={finished}
 			controlled={true}
 			header={
