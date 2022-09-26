@@ -7,7 +7,6 @@ import {
 	getMetadataForPropertyTable,
 	policyMetadata,
 	getTrackingNameForFactory,
-	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
@@ -112,7 +111,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 			max-width: ${({ listView }) => (listView ? '60%' : '')};
 			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
@@ -153,21 +152,32 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
+		display: flex;
+		align-items: center;
 		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
 		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		padding: 8px;
-		display: flex;
-		align-items: center;
-
 		img {
 			width: 25px;
 			margin: 0px 10px 0px 0px;
+		}
+		p {
+			margin: 0;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 	}
 
 	.sub-header-two {
 		width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
@@ -204,6 +214,9 @@ const StyledFrontCardSubHeader = styled.div`
 
 	.list-sub-header-two {
 		width: 150px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		color: white;
 		padding: 2px 8px 8px;
 		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
@@ -805,9 +818,13 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 									{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
 									{displayType}
 								</div>
-								<div className={'list-sub-header-two'}>
-									{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
-								</div>
+								{displayOrg.length > 17 ? (
+									<GCTooltip title={displayOrg} placement="top" arrow>
+										<div className={'list-sub-header-two'}>{displayOrg}</div>
+									</GCTooltip>
+								) : (
+									<div className={'list-sub-header-two'}>{displayOrg}</div>
+								)}
 							</StyledFrontCardSubHeader>
 						)}
 						<div className={'selected-favorite'}>
@@ -879,13 +896,30 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 					docTypeColor={docTypeColor}
 					docOrgColor={docOrgColor}
 				>
-					<div data-cy={'card-type'} className={'sub-header-one'}>
-						{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
-						{displayType}
-					</div>
-					<div data-cy={'card-org'} className={'sub-header-two'}>
-						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
-					</div>
+					{displayType.length > 19 ? (
+						<GCTooltip title={displayType} placement="top" arrow>
+							<div data-cy={'card-type'} className={'sub-header-one'}>
+								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
+								<p>{displayType}</p>
+							</div>
+						</GCTooltip>
+					) : (
+						<div data-cy={'card-type'} className={'sub-header-one'}>
+							{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
+							<p>{displayType}</p>
+						</div>
+					)}
+					{displayOrg.length > 25 ? (
+						<GCTooltip title={displayOrg} placement="top" arrow>
+							<div data-cy={'card-org'} className={'sub-header-two'}>
+								{displayOrg}
+							</div>
+						</GCTooltip>
+					) : (
+						<div data-cy={'card-org'} className={'sub-header-two'}>
+							{displayOrg}
+						</div>
+					)}
 				</StyledFrontCardSubHeader>
 			)}
 		</>
