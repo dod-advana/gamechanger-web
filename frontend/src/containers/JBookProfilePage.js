@@ -235,6 +235,7 @@ const JBookProfilePage = () => {
 	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
+		const currentUserData = await gameChangerUserAPI.getUserProfileData();
 
 		try {
 			setProfileLoading(true);
@@ -245,8 +246,17 @@ const JBookProfilePage = () => {
 				cloneName: cloneData.clone_name,
 				options: {
 					id,
+					portfolioName,
+					userRowId: currentUserData.data.id,
 				},
 			});
+
+			if (allBYProjectData.data === 'Unauthorized Entry Detected') {
+				let newHref = window.location.href;
+				newHref = newHref.split('#')[0];
+				newHref += '#/unauthorized';
+				window.location.replace(newHref);
+			}
 
 			if (allBYProjectData?.data) {
 				allBYProjectData = allBYProjectData.data;
