@@ -139,62 +139,78 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 	);
 };
 
-const renderDropdownRadioButtons = (
+const DropdownRadioButton = ({
 	reviewData,
 	reviewDataProp,
 	setReviewData,
 	radioButtonData,
-	text = '',
-	finished
-) => {
-	const radioDropdowns = [];
-
-	for (const radioButton in radioButtonData) {
-		radioDropdowns.push(
-			<GCAccordion
-				contentPadding={0}
-				expanded={reviewData && reviewData[reviewDataProp] === radioButton}
-				disabled={finished}
-				controlled={true}
-				header={
-					<FormControlLabel
-						name={radioButton}
-						value={radioButton}
-						control={
-							<Radio
-								style={styles.radio}
-								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
-								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
-								checked={reviewData && reviewData[reviewDataProp] === radioButton}
-								onClick={() => {
-									if (!finished) {
-										setReviewData(reviewDataProp, radioButton);
-									}
-								}}
-							/>
-						}
-						label={radioButton}
-						labelPlacement="end"
-						style={{ ...styles.titleText, margin: '10px 0' }}
-						disabled={finished} //|| roleDisabled}
-					/>
-				}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'600'}
-			>
-				<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
-					{radioButtonData[radioButton]}
-				</StyledAccordionDiv>
-			</GCAccordion>
-		);
-	}
-
+	finished,
+	domainTaskOther,
+	setDomainTaskOther,
+}) => {
+	const { radioButton, data } = radioButtonData;
 	return (
-		<>
-			{text !== '' ? <div style={{ width: '100%', margin: '15px 30px' }}>{text}</div> : null}
-			<div style={{ width: '100%', margin: '15px 0px' }}>{radioDropdowns}</div>
-		</>
+		<GCAccordion
+			contentPadding={0}
+			expanded={reviewData?.[reviewDataProp] && reviewData[reviewDataProp] === radioButton}
+			disabled={finished}
+			controlled={true}
+			header={
+				<FormControlLabel
+					name={radioButton}
+					value={radioButton}
+					control={
+						<Radio
+							style={styles.radio}
+							icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
+							checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+							checked={reviewData && reviewData[reviewDataProp] === radioButton}
+							onClick={() => {
+								if (!finished) {
+									setReviewData(reviewDataProp, radioButton);
+								}
+							}}
+						/>
+					}
+					label={radioButton}
+					labelPlacement="end"
+					style={{ ...styles.titleText, margin: '10px 0' }}
+					disabled={finished} //|| roleDisabled}
+				/>
+			}
+			headerBackground={'rgb(238,241,242)'}
+			headerTextColor={'black'}
+			headerTextWeight={'600'}
+		>
+			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
+				<div style={{ display: 'flex', flexDirection: 'column' }}>
+					{radioButton !== 'Other' ? (
+						Object.keys(data).map((name) => {
+							return (
+								<DomainCheckbox
+									name={name}
+									secondary={data[name]}
+									reviewData={reviewData}
+									domainTask={radioButton}
+									setReviewData={setReviewData}
+									finished={finished}
+								/>
+							);
+						})
+					) : (
+						<TextField
+							placeholder=""
+							variant="outlined"
+							value={domainTaskOther}
+							style={{ backgroundColor: 'white', width: '100%' }}
+							onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
+							onChange={(_event, value) => setDomainTaskOther(value)}
+							disabled={finished || radioButton !== reviewData?.domainTask} //|| roleDisabled}
+						/>
+					)}
+				</div>
+			</StyledAccordionDiv>
+		</GCAccordion>
 	);
 };
 
@@ -370,74 +386,48 @@ const JCAChecklist = (props) => {
 	);
 };
 
-const renderDomainCheckboxes = (
-	secondaries,
-	reviewData,
-	domainTasks,
-	domainTaskOther,
-	setReviewData,
-	setDomainTaskOther,
-	finished
-) => {
-	let domainTask;
-	if (reviewData && reviewData.domainTask) {
-		domainTask = reviewData.domainTask;
-	}
+const DomainCheckbox = ({ secondary, domainTask, reviewData, setReviewData, finished, name }) => {
+	const [checked, setChecked] = useState(false);
 
-	const checkboxes = [];
-	if (secondaries) {
-		for (const name in secondaries) {
-			checkboxes.push(
-				<FormControlLabel
-					name={name}
-					value={name}
-					style={{ margin: '10px 0' }}
-					control={
-						<Checkbox
-							style={{
-								backgroundColor: '#ffffff',
-								borderRadius: '5px',
-								padding: '2px',
-								border: '2px solid #bdccde',
-								pointerEvents: 'none',
-								margin: '0px 10px 0px 5px',
-							}}
-							onClick={() => setReviewData('domainTaskSecondary', name)}
-							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={
-								reviewData &&
-								reviewData.domainTask &&
-								domainTasks[domainTask] &&
-								domainTasks[domainTask].length &&
-								domainTasks[domainTask].indexOf(name) !== -1
-							}
-							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-							name={name}
-						/>
-					}
-					label={
-						<span style={{ fontSize: 13, lineHeight: '5px' }}>
-							<b>{name}</b> {secondaries[name]}
-						</span>
-					}
-					labelPlacement="end"
-					disabled={finished} //|| roleDisabled}
-				/>
-			);
+	const selectedDomainTask = reviewData?.domainTask;
+
+	useEffect(() => {
+		if (domainTask === selectedDomainTask && reviewData.domainTaskSecondary?.includes(name)) {
+			setChecked(true);
+		} else {
+			setChecked(false);
 		}
-
-		return <div style={{ display: 'flex', flexDirection: 'column' }}>{checkboxes}</div>;
-	}
+	}, [domainTask, name, reviewData.domainTaskSecondary, selectedDomainTask]);
 
 	return (
-		<TextField
-			placeholder=""
-			variant="outlined"
-			value={domainTaskOther}
-			style={{ backgroundColor: 'white', width: '100%' }}
-			onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
-			onChange={(event, value) => setDomainTaskOther(value)}
-			disabled={finished} //|| roleDisabled}
+		<FormControlLabel
+			name={name}
+			value={name}
+			style={{ margin: '10px 0' }}
+			control={
+				<Checkbox
+					style={{
+						backgroundColor: '#ffffff',
+						borderRadius: '5px',
+						padding: '2px',
+						border: '2px solid #bdccde',
+						pointerEvents: 'none',
+						margin: '0px 10px 0px 5px',
+					}}
+					onClick={() => setReviewData('domainTaskSecondary', name)}
+					icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+					checked={checked}
+					checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+					name={name}
+				/>
+			}
+			label={
+				<span style={{ fontSize: 13, lineHeight: '5px' }}>
+					<b>{name}</b> {secondary}
+				</span>
+			}
+			labelPlacement="end"
+			disabled={finished || domainTask !== selectedDomainTask} //|| roleDisabled}
 		/>
 	);
 };
@@ -1099,8 +1089,100 @@ const AIDomainKey = React.memo(() => {
 	);
 });
 
+const radioButtonData = [
+	{
+		radioButton: 'Natural Language Processing',
+		data: {
+			'Information Extraction':
+				'– techniques to produce useful structured information (e.g. names, events, relationships) from unstructured source documents',
+			'Machine Translation': '– tools to convert text from one language to another',
+			'Information Retrieval':
+				'– methods to process and store documents to enable efficient identification of relevant documents in response to a user query',
+			'Automated Speech Recognition': '– methods to process spoken audio signals and generate text transcripts',
+			'Optical Character Recognition': '– Identification of text in images or scans',
+			'Natural Language Generation': '– Tools that produce realistic-looking text artificially',
+		},
+	},
+	{
+		radioButton: 'Sensing and Perception',
+		data: {
+			Detection: '– determining whether an item of interest is present in the input',
+			Classification: '– determining which of several categories an input best belongs to',
+			Tracking:
+				'– identifying and following an item of interest over a sequence of detections, often generating a trajectory over time',
+			Mapping:
+				'– constructing a map of the environment from collected sensor data (e.g. as a system moves about the environment)',
+		},
+	},
+	{
+		radioButton: 'Planning, Scheduling, and Reasoning',
+		data: {
+			'Action Planning': '– determining a sequence of actions to reach a desired goal',
+			'Planning in Uncertainty':
+				'– developing plans without perfect information (e.g. due to missing information, randomness, or the actions of others)',
+			'Multi-AgentPlanning':
+				'– coordinating the actions of a set of agents to achieve individual and/or shared goals',
+			'Knowledge Representation':
+				'– ways to structure information about the world in a format that a computer can reason about',
+			'Pattern Analysis': '– identifying rules or patterns that account for regularities observed in the data',
+			'Constraint Satisfaction':
+				'-  finding solutions subject to various restrictions or constraints (e.g. Sudoku)',
+			Scheduling: '– optimal allocation resources to a set of tasks',
+		},
+	},
+	{
+		radioButton: 'Prediction and Assessment',
+		data: {
+			'Predictive Analytics': '– estimation of future or hypothetical outcomes from historical data',
+			'Risk Assessment': '– identification and prediction of potential hazards and estimating their likelihoods',
+			'Recommender Systems':
+				'- systems that suggest potentially relevant items based on context, user activity, or queries (example: Amazon, Netflix)',
+			'Data Mining': '– techniques for finding patterns, rules, or insights from large volumes of data',
+		},
+	},
+	{
+		radioButton: 'Modeling and Simulation',
+		data: {
+			'Wargaming & "What-If" analysis':
+				'– analysis and/or simulation of alternative hypothetical scenarios to support planning, decision making, and risk assessment',
+			'Synthetic data generation':
+				'– methods for creating data artificially, often to augment real data or as a substitute for sensitive data, specifically for deep neural network classification systems',
+			'Model Analysis & Testing':
+				'– assessment of a computational or machine learning models to estimate features such as performance and reliability',
+			'Virtual Training':
+				'– the use of model or simulation environments in place of real-world testing for training and validation of machine learning systems',
+		},
+	},
+	{
+		radioButton: 'Human-Machine Interaction',
+		data: {
+			'User-centered design/interfaces':
+				'– iterative, use case / user-focused approaches to AI software development; also includes the use of AI to aid in User-Centered Design',
+			'Data visualization': '-  tools and techniques for effective visual presentation of data to humans',
+			'Shared control schemes': '– systems that integrate automation and human control',
+			'Human-Machine task allocation':
+				'– partitioning tasks between human operators and computer tools to make best use of the relative strengths of each',
+		},
+	},
+	{
+		radioButton: 'Responsible AI',
+		data: {
+			Explainability:
+				'– efforts related to explanations for AI decisions, including tools to generate human-understandable explanations for AI outputs and ways to train models that are explainable by design',
+			Adversarial:
+				'– efforts focused on the behavior of AI systems in the presence of adversaries attempting to mislead, control, poison, or otherwise disrupt system functionality, and countermeasures to such attempts',
+			Bias: '– work identifying and mitigating systematic errors or unintended consequences due to flawed assumptions implicit in the datasets, system design, or operational concept of AI systems',
+			Manipulation:
+				'– work concerning the potential of AI tools to mislead or manipulate human decisions or actions, as well as detections, mitigations, or countermeasures',
+			'Ethical AI':
+				'– methods and principles for assessing the ethical implications of AI deployments, and guidance for developing and deploying AI technologies in accordance with stated ethical principles',
+		},
+	},
+	{ radioButton: 'Other' },
+];
+
 const AIDomainValue = React.memo((props) => {
-	const { setReviewData, domainTasks } = props;
+	const { setReviewData } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1109,8 +1191,12 @@ const AIDomainValue = React.memo((props) => {
 	const [domainTaskOther, setDomainTaskOther] = useState('');
 
 	useEffect(() => {
-		setDomainTaskOther(domainTasks['Other'][0]);
-	}, [domainTasks]);
+		if (reviewData?.domainTask === 'Other') {
+			setDomainTaskOther(reviewData.domainTaskSecondary?.[0] ?? '');
+		} else {
+			setDomainTaskOther('');
+		}
+	}, [reviewData]);
 
 	return (
 		<StyledTableValueContainer>
@@ -1120,131 +1206,21 @@ const AIDomainValue = React.memo((props) => {
 			</Typography>
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				<div style={{ display: 'flex', flexDirection: 'row' }}>
-					{renderDropdownRadioButtons(reviewData, 'domainTask', setReviewData, {
-						'Natural Language Processing': renderDomainCheckboxes(
-							{
-								'Information Extraction':
-									'– techniques to produce useful structured information (e.g. names, events, relationships) from unstructured source documents',
-								'Machine Translation': '– tools to convert text from one language to another',
-								'Information Retrieval':
-									'– methods to process and store documents to enable efficient identification of relevant documents in response to a user query',
-								'Automated Speech Recognition':
-									'– methods to process spoken audio signals and generate text transcripts',
-								'Optical Character Recognition': '– Identification of text in images or scans',
-								'Natural Language Generation':
-									'– Tools that produce realistic-looking text artificially',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Sensing and Perception': renderDomainCheckboxes(
-							{
-								Detection: '– determining whether an item of interest is present in the input',
-								Classification: '– determining which of several categories an input best belongs to',
-								Tracking:
-									'– identifying and following an item of interest over a sequence of detections, often generating a trajectory over time',
-								Mapping:
-									'– constructing a map of the environment from collected sensor data (e.g. as a system moves about the environment)',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Planning, Scheduling, and Reasoning': renderDomainCheckboxes(
-							{
-								'Action Planning': '– determining a sequence of actions to reach a desired goal',
-								'Planning in Uncertainty':
-									'– developing plans without perfect information (e.g. due to missing information, randomness, or the actions of others)',
-								'Multi-AgentPlanning':
-									'– coordinating the actions of a set of agents to achieve individual and/or shared goals',
-								'Knowledge Representation':
-									'– ways to structure information about the world in a format that a computer can reason about',
-								'Pattern Analysis':
-									'– identifying rules or patterns that account for regularities observed in the data',
-								'Constraint Satisfaction':
-									'-  finding solutions subject to various restrictions or constraints (e.g. Sudoku)',
-								Scheduling: '– optimal allocation resources to a set of tasks',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Prediction and Assessment': renderDomainCheckboxes({
-							'Predictive Analytics':
-								'– estimation of future or hypothetical outcomes from historical data',
-							'Risk Assessment':
-								'– identification and prediction of potential hazards and estimating their likelihoods',
-							'Recommender Systems':
-								'- systems that suggest potentially relevant items based on context, user activity, or queries (example: Amazon, Netflix)',
-							'Data Mining':
-								'– techniques for finding patterns, rules, or insights from large volumes of data',
-						}),
-						'Modeling and Simulation': renderDomainCheckboxes(
-							{
-								'Wargaming & "What-If" analysis':
-									'– analysis and/or simulation of alternative hypothetical scenarios to support planning, decision making, and risk assessment',
-								'Synthetic data generation':
-									'– methods for creating data artificially, often to augment real data or as a substitute for sensitive data, specifically for deep neural network classification systems',
-								'Model Analysis & Testing':
-									'– assessment of a computational or machine learning models to estimate features such as performance and reliability',
-								'Virtual Training':
-									'– the use of model or simulation environments in place of real-world testing for training and validation of machine learning systems',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Human-Machine Interaction': renderDomainCheckboxes(
-							{
-								'User-centered design/interfaces':
-									'– iterative, use case / user-focused approaches to AI software development; also includes the use of AI to aid in User-Centered Design',
-								'Data visualization':
-									'-  tools and techniques for effective visual presentation of data to humans',
-								'Shared control schemes': '– systems that integrate automation and human control',
-								'Human-Machine task allocation':
-									'– partitioning tasks between human operators and computer tools to make best use of the relative strengths of each',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Responsible AI': renderDomainCheckboxes(
-							{
-								Explainability:
-									'– efforts related to explanations for AI decisions, including tools to generate human-understandable explanations for AI outputs and ways to train models that are explainable by design',
-								Adversarial:
-									'– efforts focused on the behavior of AI systems in the presence of adversaries attempting to mislead, control, poison, or otherwise disrupt system functionality, and countermeasures to such attempts',
-								Bias: '– work identifying and mitigating systematic errors or unintended consequences due to flawed assumptions implicit in the datasets, system design, or operational concept of AI systems',
-								Manipulation:
-									'– work concerning the potential of AI tools to mislead or manipulate human decisions or actions, as well as detections, mitigations, or countermeasures',
-								'Ethical AI':
-									'– methods and principles for assessing the ethical implications of AI deployments, and guidance for developing and deploying AI technologies in accordance with stated ethical principles',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						Other: renderDomainCheckboxes(null),
-					})}
+					<div style={{ width: '100%', margin: '15px 0px' }}>
+						{radioButtonData.map((data) => {
+							return (
+								<DropdownRadioButton
+									reviewData={reviewData}
+									reviewDataProp={'domainTask'}
+									setReviewData={setReviewData}
+									radioButtonData={data}
+									finished={finished}
+									domainTaskOther={domainTaskOther}
+									setDomainTaskOther={setDomainTaskOther}
+								/>
+							);
+						})}
+					</div>
 				</div>
 				<GCPrimaryButton
 					style={{
@@ -1638,8 +1614,6 @@ const FooterValue = React.memo(() => {
 
 export {
 	renderRadioButtons,
-	renderDropdownRadioButtons,
-	renderDomainCheckboxes,
 	JCAChecklist,
 	AltAIPOCKey,
 	AltAIPOCValue,
