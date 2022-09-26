@@ -10,7 +10,6 @@ import {
 	exportToCsv,
 	handlePdfOnLoad,
 } from '../../../utils/gamechangerUtils';
-import { Collapse } from 'react-collapse';
 import TextField from '@material-ui/core/TextField';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { Grid, Typography, Checkbox, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
@@ -18,6 +17,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import GCAnalystToolsSideBar from '../../analystTools/GCAnalystToolsSideBar';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import Collapse from 'react-collapse';
 import { gcOrange } from '../../common/gc-colors';
 import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
@@ -74,15 +74,6 @@ const DocumentParagraph = ({
 	dispatch,
 }) => {
 	const [feedbackList, setFeedbackList] = useState({});
-	const [paragraphSelected, setParagraphSelected] = useState(false);
-
-	useEffect(() => {
-		if (docOpen && selectedParagraph?.id === paragraph.id) {
-			setParagraphSelected(true);
-		} else {
-			setParagraphSelected(false);
-		}
-	}, [docOpen, paragraph.id, selectedParagraph]);
 
 	const exportSingleDoc = (document) => {
 		const exportList = [];
@@ -114,6 +105,8 @@ const DocumentParagraph = ({
 			undo,
 		});
 	};
+
+	const paragraphSelected = docOpen && selectedParagraph?.id === paragraph.id;
 
 	let blockquoteClass = 'searchdemo-blockquote-sm';
 	if (paragraphSelected) blockquoteClass += ' searchdemo-blockquote-sm-active';
@@ -248,6 +241,7 @@ const DocumentResult = ({
 	dispatch,
 }) => {
 	const [isOpen, setIsOpen] = useState(false);
+
 	const displayTitle = doc.display_title_s;
 
 	useEffect(() => {
@@ -274,25 +268,23 @@ const DocumentResult = ({
 				/>
 				<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
 			</div>
-			<div>
-				<Collapse isOpened={isOpen}>
-					{doc.paragraphs &&
-						doc.paragraphs
-							.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-							.map((paragraph) => (
-								<DocumentParagraph
-									doc={doc}
-									docOpen={isOpen}
-									paragraph={paragraph}
-									selectedParagraph={selectedParagraph}
-									paragraphs={paragraphs}
-									setDocParagraph={setDocParagraph}
-									state={state}
-									dispatch={dispatch}
-								/>
-							))}
-				</Collapse>
-			</div>
+			<Collapse isOpened={isOpen}>
+				{doc.paragraphs &&
+					doc.paragraphs
+						.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
+						.map((paragraph) => (
+							<DocumentParagraph
+								doc={doc}
+								docOpen={isOpen}
+								paragraph={paragraph}
+								selectedParagraph={selectedParagraph}
+								paragraphs={paragraphs}
+								setDocParagraph={setDocParagraph}
+								state={state}
+								dispatch={dispatch}
+							/>
+						))}
+			</Collapse>
 		</div>
 	);
 };
@@ -319,6 +311,51 @@ const sortByScore = (order) => {
 		if (docA.score < docB.score) return order;
 		return 0;
 	};
+};
+
+const TutorialCover = ({ showTutorial }) => {
+	return showTutorial ? (
+		<div
+			style={{
+				position: 'absolute',
+				left: 0,
+				top: 0,
+				height: '100%',
+				width: '100%',
+				zIndex: 2,
+			}}
+		></div>
+	) : (
+		<></>
+	);
+};
+
+const PanelToggle = ({ panelOpen, handlePanelToggle }) => {
+	return (
+		<div className="searchdemo-vertical-bar-toggle" style={{ bottom: '0px' }} onClick={handlePanelToggle}>
+			<i
+				className={`fa ${panelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+				style={{
+					color: 'white',
+					verticalAlign: 'sub',
+					height: 20,
+					width: 20,
+					margin: '20px 0 20px 2px',
+				}}
+			/>
+			<span>{panelOpen ? 'Hide' : 'Show'} Filters</span>
+			<i
+				className={`fa ${panelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+				style={{
+					color: 'white',
+					verticalAlign: 'sub',
+					height: 20,
+					width: 20,
+					margin: '20px 0 20px 2px',
+				}}
+			/>
+		</div>
+	);
 };
 
 const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer, resetAdvancedSettings, classes }) => {
@@ -706,18 +743,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
-			{showTutorial && (
-				<div
-					style={{
-						position: 'absolute',
-						left: 0,
-						top: 0,
-						height: '100%',
-						width: '100%',
-						zIndex: 2,
-					}}
-				></div>
-			)}
+			<TutorialCover showTutorial={showTutorial} />
 			<Grid item xs={12}>
 				<div style={{ display: 'flex' }}>
 					{/* different */}
@@ -962,33 +988,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							flexBasis: `calc(${getDocumentGridWidth() / 0.12}% - 20px)`,
 						}}
 					>
-						<div
-							className="searchdemo-vertical-bar-toggle"
-							style={{ bottom: '0px' }}
-							onClick={handleLeftPanelToggle}
-						>
-							<i
-								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
-							<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
-							<i
-								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
-						</div>
+						<PanelToggle panelOpen={leftPanelOpen} handlePanelToggle={handleLeftPanelToggle} />
 						<div className="dct-tutorial-step-8" style={{ margin: '0px 20px', height: '800px' }}>
 							<iframe
 								title={'PDFViewer'}
