@@ -21,7 +21,7 @@ describe('Tests multiple types of policy searches.', () => {
 		cy.search(searchTerm);
 
 		cy.getDataCy('card-footer-more').first().click();
-		cy.getDataCy('simple-table')
+		cy.get('.magellan-table')
 			.eq(1)
 			.should('contain', 'References')
 			.find('tbody')
@@ -96,8 +96,14 @@ describe('User Dashboard Tests', () => {
 		cy.get('iframe', { timeout: 500, force: true }).then((el) => el.remove());
 	};
 
+	const navigateToUserDash = () => {
+		cy.intercept('/api/gamechanger/user/getUserData').as('loadUserDash');
+		cy.getDataCy('user-dashboard').click();
+		cy.wait('@loadUserDash');
+	};
+
 	beforeEach('Clear the favorites', () => {
-		cy.visitGcPage('gamechanger/userDashboard');
+		navigateToUserDash();
 		cy.get('.react-tabs').then(($tabs) => {
 			if ($tabs.find('.main-info').length) {
 				openAllAccordions();
@@ -120,13 +126,13 @@ describe('User Dashboard Tests', () => {
 		cy.getDataCy('search-favorite-save-dialog').find('textarea').type('AutoTest Summary');
 		cy.getDataCy('search-favorite-save-dialog').find('button').contains('Save').click();
 
-		cy.getDataCy('user-dashboard').click();
+		navigateToUserDash();
 
 		cy.getFavoriteCard(favoriteTitle).invoke('removeAttr', 'target').click();
 
 		cy.getCard(0).get('em').should('contain.text', searchTerm.toUpperCase());
 
-		cy.getDataCy('user-dashboard').click();
+		navigateToUserDash();
 		cy.getFavoriteCard(favoriteTitle)
 			.should('exist')
 			.parentsUntil('[data-cy="favorite-card"]')
@@ -145,14 +151,13 @@ describe('User Dashboard Tests', () => {
 				const titleText = card.text();
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				cy.get('button').contains('Save').click();
-				cy.getDataCy('user-dashboard').click();
+				navigateToUserDash();
 				cy.get('#accordion-header').get('p').contains('FAVORITE DOCUMENTS').click();
 				cy.getFavoriteCard(titleText)
 					.should('exist')
 					.parentsUntil('[data-cy="favorite-card"]')
 					.findDataCy('favorite-star')
 					.click();
-				//cy.getDataCy('favorite-star').click();
 				cy.get('button').contains('Yes').click();
 				cy.getFavoriteCard(titleText).should('not.exist');
 			});
@@ -171,7 +176,7 @@ describe('User Dashboard Tests', () => {
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				deleteIFrameIfExists();
 				cy.get('button').contains('Save').click();
-				cy.getDataCy('user-dashboard').click();
+				navigateToUserDash();
 				cy.get('#accordion-header').get('p').contains('FAVORITE ORGANIZATIONS').click();
 				cy.getFavoriteCard(titleText).should('exist');
 				cy.getDataCy('favorite-star').click();
@@ -193,7 +198,7 @@ describe('User Dashboard Tests', () => {
 				cy.getCard(0).findDataCy('card-favorite-star').click();
 				deleteIFrameIfExists();
 				cy.get('button').contains('Save').click();
-				cy.getDataCy('user-dashboard').click();
+				navigateToUserDash();
 				cy.get('#accordion-header').get('p').contains('FAVORITE TOPICS').click();
 				cy.getFavoriteCard(titleText).should('exist');
 				cy.getDataCy('favorite-star').click();
