@@ -1518,6 +1518,25 @@ describe('EDASearchUtility', function () {
 					track_total_hits: true,
 					query: {
 						bool: {
+							filter: [
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															query: 'H*',
+															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+							],
 							must: [
 								{
 									bool: {
