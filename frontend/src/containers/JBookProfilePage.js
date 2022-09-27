@@ -1230,6 +1230,19 @@ const JBookProfilePage = () => {
 	};
 
 	const renderSimpleReviewerSection = () => {
+		let reviewers = [];
+		let tags = [];
+		if (pMap[selectedPortfolio]) {
+			reviewers = pMap[selectedPortfolio].user_ids.map((item) => ({
+				id: userMap[item].id,
+				name: userMap[item].last_name + ', ' + userMap[item].first_name,
+				email: userMap[item].email,
+			}));
+			tags = pMap[selectedPortfolio].tags.map((item) => ({
+				primary_class_label: item,
+			}));
+		}
+
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1266,14 +1279,8 @@ const JBookProfilePage = () => {
 						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						dropdownData={{
-							reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
-								id: userMap[item].id,
-								name: userMap[item].last_name + ', ' + userMap[item].first_name,
-								email: userMap[item].email,
-							})),
-							primaryClassLabel: pMap[selectedPortfolio].tags.map((item) => ({
-								primary_class_label: item,
-							})),
+							reviewers: reviewers,
+							primaryClassLabel: tags,
 						}}
 						reviewerProp={projectData.reviewer}
 						serviceReviewerProp={projectData.serviceReview}
