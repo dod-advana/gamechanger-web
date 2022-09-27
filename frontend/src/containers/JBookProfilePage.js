@@ -1151,6 +1151,9 @@ const JBookProfilePage = () => {
 			totalBudget = projectData.currentYearAmount;
 		}
 
+		console.log('what is permissions', Permissions.hasPermission('JBOOK Admin'));
+		console.log('what is email', Auth.getTokenPayload());
+
 		return (
 			<StyledAccordionContainer id={'POC Reviewer Section'}>
 				<GCAccordion
@@ -1174,15 +1177,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										Permissions.hasPermission('JBOOK POC Reviewer') &&
-										(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-											Auth.getTokenPayload().email === reviewData.altPOCEmail)
-								  )
-						}
+						roleDisabled={!Permissions.hasPermission('JBOOK POC Reviewer')}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
