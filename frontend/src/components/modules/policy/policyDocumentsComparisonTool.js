@@ -22,6 +22,30 @@ import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import ExportIcon from '../../../images/icon/Export.svg';
 
+const sortAlphabetically = (order) => {
+	return (docA, docB) => {
+		if (docA.display_title_s > docB.display_title_s) return order;
+		if (docA.display_title_s < docB.display_title_s) return -order;
+		return 0;
+	};
+};
+const sortByDate = (order) => {
+	return (docA, docB) => {
+		if (docA.publication_date_dt > docB.publication_date_dt) return -order;
+		if (docA.publication_date_dt < docB.publication_date_dt) return order;
+		if (!docA.publication_date_dt) return 1;
+		if (!docB.publication_date_dt) return -1;
+		return 0;
+	};
+};
+const sortByScore = (order) => {
+	return (docA, docB) => {
+		if (docA.score > docB.score) return -order;
+		if (docA.score < docB.score) return order;
+		return 0;
+	};
+};
+
 const PolicyDocumentsComparisonTool = ({
 	context,
 	gameChangerAPI,
@@ -231,30 +255,16 @@ const PolicyDocumentsComparisonTool = ({
 				return doc.paragraphs.find((match) => match.paragraphIdBeingMatched === selectedInput);
 			});
 			const order = sortOrder === 'desc' ? 1 : -1;
-			let sortFunc = {};
+			let sortFunc;
 			switch (sortType) {
 				case 'Alphabetically':
-					sortFunc = (docA, docB) => {
-						if (docA.title > docB.title) return order;
-						if (docA.title < docB.title) return -order;
-						return 0;
-					};
+					sortFunc = sortAlphabetically(order);
 					break;
 				case 'Date Published':
-					sortFunc = (docA, docB) => {
-						if (docA.publication_date_dt > docB.publication_date_dt) return -order;
-						if (docA.publication_date_dt < docB.publication_date_dt) return order;
-						if (!docA.publication_date_dt) return 1;
-						if (!docB.publication_date_dt) return -1;
-						return 0;
-					};
+					sortFunc = sortByDate(order);
 					break;
 				default:
-					sortFunc = (docA, docB) => {
-						if (docA.score > docB.score) return -order;
-						if (docA.score < docB.score) return order;
-						return 0;
-					};
+					sortFunc = sortByScore(order);
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
@@ -1137,7 +1147,7 @@ const PolicyDocumentsComparisonTool = ({
 							)}
 							{viewableDocs.map((doc) => {
 								const docOpen = collapseKeys[doc.filename] ?? false;
-								const displayTitle = doc.title;
+								const displayTitle = doc.display_title_s;
 								return (
 									<div key={doc.id}>
 										<div
