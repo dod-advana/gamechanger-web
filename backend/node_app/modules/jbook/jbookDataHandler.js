@@ -294,8 +294,15 @@ class JBookDataHandler extends DataHandler {
 			if (portfolioName !== 'General') {
 				const portfolios = await this.getPortfolios({ body: { id: userRowId } }, userId);
 				// looking for a match on portfolio
-				const foundPortfolio = portfolios.privatePortfolios.find((porty) => porty.name === portfolioName);
-				if (foundPortfolio !== -1) {
+				const portfolioList = [...portfolios.publicPortfolios, ...portfolios.privatePortfolios];
+				console.log(portfolioList);
+				let foundPortfolio = false;
+				for (let portfolio of portfolioList) {
+					if (portfolio.name === portfolioName) {
+						foundPortfolio = true;
+					}
+				}
+				if (!foundPortfolio) {
 					return 'Unauthorized Entry Detected';
 				}
 			}
