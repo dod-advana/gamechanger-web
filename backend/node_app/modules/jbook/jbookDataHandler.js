@@ -295,7 +295,6 @@ class JBookDataHandler extends DataHandler {
 				const portfolios = await this.getPortfolios({ body: { id: userRowId } }, userId);
 				// looking for a match on portfolio
 				const portfolioList = [...portfolios.publicPortfolios, ...portfolios.privatePortfolios];
-				console.log(portfolioList);
 				let foundPortfolio = false;
 				for (let portfolio of portfolioList) {
 					if (portfolio.name === portfolioName) {

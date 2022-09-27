@@ -195,8 +195,8 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>
-						{portfolio.user_ids.length === 0 && (portfolio.isPublic ? '(All JBOOK users)' : '(none)')}
-						{portfolioUsers}
+						{portfolio.user_ids.length === 0 && portfolio.isPrivate && '(none)'}
+						{!portfolio.isPrivate ? '(All JBOOK users)' : portfolioUsers}
 					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
