@@ -63,6 +63,14 @@ Cypress.Commands.add('setup', () => {
 	cy.clearCookies();
 });
 
+/**
+ * Visits a page using the BASE_URL, mostly used for when you dont need to accept consent banner again
+ */
+Cypress.Commands.add('visitGcPage', (page) => {
+	if (page.charAt(0) === '/') page = page.substring(1, page.length);
+	cy.visit(`/#/${page}`);
+});
+
 // this visits a page and clicks the consent agreement
 Cypress.Commands.add('visit_accept_consent', (page) => {
 	// Visit the main page
@@ -73,5 +81,5 @@ Cypress.Commands.add('visit_accept_consent', (page) => {
 });
 
 Cypress.Commands.add('accept_consent', () => {
-	cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
+	cy.get('[data-cy="consent-agreement-okay"]').click();
 });

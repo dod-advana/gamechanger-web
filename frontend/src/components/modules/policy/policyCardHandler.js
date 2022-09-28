@@ -5,10 +5,8 @@ import {
 	convertDCTScoreToText,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
-	getReferenceListMetadataPropertyTable,
 	policyMetadata,
 	getTrackingNameForFactory,
-	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
@@ -30,6 +28,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
+import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -1464,14 +1463,13 @@ const cardHandler = {
 
 		getCardBack: ({ item, state, dispatch }) => {
 			if (item.notInCorpus) return <></>;
-			const { ref_list = [] } = item;
-			const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list);
 			const data = getMetadataForPropertyTable(item);
 			let favoritableData = policyMetadata(item);
 			favoritableData = [
 				...favoritableData,
 				...addFavoriteTopicToMetadata(data, state.userData, dispatch, state.cloneData, state.searchText),
 			];
+
 			return (
 				<div>
 					<SimpleTable
@@ -1487,16 +1485,7 @@ const cardHandler = {
 						hideHeader={!!state.listView}
 					/>
 					<div>
-						<SimpleTable
-							tableClass={'magellan-table'}
-							zoom={1}
-							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={previewDataReflist}
-							height={'auto'}
-							dontScroll={true}
-							colWidth={{ minWidth: '25%', maxWidth: '25%' }}
-							disableWrap={true}
-						/>
+						<PolicyDocumentReferenceTable state={state} document={item} />
 					</div>
 				</div>
 			);
@@ -1579,6 +1568,7 @@ const cardHandler = {
 								)}
 							</>
 							<div
+								data-cy="card-footer-more"
 								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
 									trackEvent(
