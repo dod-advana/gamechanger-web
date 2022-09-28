@@ -442,16 +442,28 @@ describe('JBookDataHandler', function () {
 				deleted: false,
 			};
 
-			const expectedGetAll = [
-				{
-					id: 1,
-					name: 'AI Inventory',
-					description: 'AI Inventory portfolio description',
-					user_ids: [],
-					tags: [],
-					deleted: false,
-				},
-			];
+			const expectedGetAll = {
+				privatePortfolios: [
+					{
+						deleted: false,
+						description: 'AI Inventory portfolio description',
+						id: 1,
+						name: 'AI Inventory',
+						tags: [],
+						user_ids: [],
+					},
+				],
+				publicPortfolios: [
+					{
+						deleted: false,
+						description: 'AI Inventory portfolio description',
+						id: 1,
+						name: 'AI Inventory',
+						tags: [],
+						user_ids: [],
+					},
+				],
+			};
 
 			const expectedDelete = {
 				deleted: true,
@@ -464,6 +476,7 @@ describe('JBookDataHandler', function () {
 			const expectedEdit = {
 				name: 'AI',
 				description: undefined,
+				isPrivate: undefined,
 				user_ids: undefined,
 				tags: undefined,
 			};
@@ -503,31 +516,54 @@ describe('JBookDataHandler', function () {
 				},
 				portfolio: {
 					findAll: () => {
-						return Promise.resolve({
-							data: [
-								{
-									name: 'testPortfolio',
-									description: 'testPortfolio description',
-									tags: [],
-									user_ids: [],
-								},
-							],
-						});
+						return Promise.resolve([
+							{
+								name: 'testPortfolio',
+								description: 'testPortfolio description',
+								isPrivate: false,
+								tags: [],
+								user_ids: [],
+								creator: 1,
+								admins: [],
+								deleted: false,
+							},
+						]);
 					},
 				},
 			};
-			const req = {};
+			const req = {
+				body: {
+					id: 1,
+				},
+			};
 			const target = new JBookDataHandler(opts);
 			const expected = {
-				data: [
+				privatePortfolios: [
 					{
 						name: 'testPortfolio',
 						description: 'testPortfolio description',
+						isPrivate: false,
 						tags: [],
 						user_ids: [],
+						creator: 1,
+						admins: [],
+						deleted: false,
+					},
+				],
+				publicPortfolios: [
+					{
+						name: 'testPortfolio',
+						description: 'testPortfolio description',
+						isPrivate: false,
+						tags: [],
+						user_ids: [],
+						creator: 1,
+						admins: [],
+						deleted: false,
 					},
 				],
 			};
+
 			const actual = await target.getPortfolios(req, 'Test');
 			assert.deepStrictEqual(expected, actual);
 			done();
