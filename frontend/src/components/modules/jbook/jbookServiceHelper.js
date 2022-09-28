@@ -504,11 +504,11 @@ const AIPOCValue = React.memo((props) => {
 					value={servicePOCName ?? null}
 					disabled={finished} //|| roleDisabled}
 					disableClearable
-					noOptionsText={
-						<Tooltip placement="top" arrow title={'This is a tooltip'}>
-							<div>No Options</div>
-						</Tooltip>
-					}
+					// noOptionsText={
+					// 	<Tooltip placement="top" arrow title={'This is a tooltip'}>
+					// 		<div>No Options</div>
+					// 	</Tooltip>
+					// }
 				/>
 			</StyledInlineContainer>
 			<StyledInlineContainer justifyContent={'left'}>
