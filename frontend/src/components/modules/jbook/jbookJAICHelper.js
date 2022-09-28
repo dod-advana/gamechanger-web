@@ -319,7 +319,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Reset Form'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -330,7 +330,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Save (Partial Review)'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -341,7 +341,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Submit'
 				) : (
-					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#FFFFFF" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 		</StyledFooterDiv>
@@ -371,7 +371,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Reset Form'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -382,7 +382,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Save (Partial Review)'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -393,7 +393,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Submit'
 				) : (
-					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#FFFFFF" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 		</StyledFooterDiv>
