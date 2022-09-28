@@ -502,13 +502,8 @@ const AIPOCValue = React.memo((props) => {
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					onChange={(_event, value) => setReviewData('servicePOC', dropdownData.pocReviewers[value])}
 					value={servicePOCName ?? null}
-					disabled={finished} //|| roleDisabled}
+					disabled={finished}
 					disableClearable
-					// noOptionsText={
-					// 	<Tooltip placement="top" arrow title={'This is a tooltip'}>
-					// 		<div>No Options</div>
-					// 	</Tooltip>
-					// }
 				/>
 			</StyledInlineContainer>
 			<StyledInlineContainer justifyContent={'left'}>
