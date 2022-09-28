@@ -1151,8 +1151,16 @@ const JBookProfilePage = () => {
 			totalBudget = projectData.currentYearAmount;
 		}
 
-		console.log('what is permissions', Permissions.hasPermission('JBOOK Admin'));
+		console.log('Do I have admin permissions with permissions', Permissions.hasPermission('JBOOK Admin'));
+		console.log('Do I have admin permissions with userData', Auth.getTokenPayload().extra_fields.jbook.is_admin);
+		console.log('Do I have POC permissions with permissions', Permissions.hasPermission('JBOOK POC Reviewer'));
+		console.log('What is hasPermission ', Permissions.hasPermission);
+		console.log(
+			'Do I have POC permissions with userData',
+			Auth.getTokenPayload().extra_fields.jbook.is_poc_reviewer
+		);
 		console.log('what is email', Auth.getTokenPayload());
+		console.log('what is userData', userData);
 
 		return (
 			<StyledAccordionContainer id={'POC Reviewer Section'}>
@@ -1177,7 +1185,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={!Permissions.hasPermission('JBOOK POC Reviewer')}
+						roleDisabled={!Auth.getTokenPayload().extra_fields.jbook.is_poc_reviewer}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
