@@ -1914,6 +1914,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		budgetSubActivityNumber_s: {
+			newName: 'budgetSubActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		budgetActivityTitle_t: {
 			newName: 'budgetActivityTitle',
 			defaultValue: '',
@@ -1951,11 +1956,6 @@ module.exports = {
 		},
 		continuing_b: {
 			newName: 'continuing',
-			defaultValue: '',
-			processValue: (value) => value,
-		},
-		currentYearAmount_l: {
-			newName: 'currentYearAmount',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -2025,7 +2025,7 @@ module.exports = {
 			processValue: (value) => value,
 		},
 		'P40-13_BSA_Title_t': {
-			newName: 'budgetSubActivity',
+			newName: 'budgetSubActivityTitle',
 			defaultValue: '',
 			processValue: (value) => value,
 		},

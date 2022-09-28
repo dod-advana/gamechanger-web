@@ -1,0 +1,35 @@
+{{- $fqdn := include "app.web.fqdn" . }}
+{{- if eq .Values.ingress.controller "gce" }}
+  {{- $_ := set . "web_path" "/*" -}}
+{{- else if eq .Values.ingress.controller "ncp" }}
+  {{- $_ := set . "web_path" "/.*" -}}
+{{- else }}
+  {{- $_ := set . "web_path" "/" -}}
+{{- end }}
+{{- if eq .Values.ingress.enabled true }}
+apiVersion: {{ template "chart.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ include "chart.fullname" . }}
+  labels: {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    meta.helm.sh/release-name: {{ include "chart.fullname" . }}
+    meta.helm.sh/release-namespace: {{ include "chart.fullname" . }}
+spec:
+  rules:
+    - host: {{ $fqdn | quote }}
+      http:
+        paths:
+        - backend:
+            service:
+              name: {{ include "chart.fullname" . }}
+              port:
+                number: 80
+          path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - {{ $fqdn | quote }}
+      secretName: {{ .Values.ingress.web.tlsSecretName }}
+{{- end }}
