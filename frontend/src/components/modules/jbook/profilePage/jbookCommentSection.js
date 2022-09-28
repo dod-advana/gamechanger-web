@@ -166,8 +166,8 @@ const JBookCommentSection = ({
 						</CloseButton>
 					</div>
 					<Typography variant="body2" style={{ width: '100%', fontSize: '15px', marginBottom: 20 }}>
-						This action can't be undone and it will be removed from the comment section and the portfolio
-						page.
+						This action cannot be undone and will remove the comment from the classification scorecard and
+						portfolio page.
 					</Typography>
 					<div style={{ display: 'flex' }}>
 						<div style={{ marginLeft: 'auto' }}>

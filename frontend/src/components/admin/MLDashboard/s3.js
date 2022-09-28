@@ -130,7 +130,7 @@ export default (props) => {
 		const processList = [];
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
-				const status = props.processes.process_status[key]['process'].split(': ');
+				const status = key !== 'flags' ? props.processes.process_status[key]['process'].split(': ') : [''];
 				if (['s3', 'corpus'].includes(status[0])) {
 					processList.push({
 						...props.processes.process_status[key],

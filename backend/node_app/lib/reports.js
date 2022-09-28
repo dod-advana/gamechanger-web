@@ -146,7 +146,7 @@ class Reports {
 					docData.projectTitle,
 					docData.budgetActivityNumber,
 					docData.budgetActivityTitle ?? docData['P40-13_BSA_Title_t'],
-					docData.programElement,
+					docData.programElement ?? docData.budgetLineItem_s,
 					docData.projectNum,
 					docData.totalCost,
 					docData.currentYearAmount,
