@@ -235,6 +235,7 @@ const JBookProfilePage = () => {
 	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
+		const currentUserData = await gameChangerUserAPI.getUserProfileData();
 
 		try {
 			setProfileLoading(true);
@@ -245,8 +246,17 @@ const JBookProfilePage = () => {
 				cloneName: cloneData.clone_name,
 				options: {
 					id,
+					portfolioName,
+					userRowId: currentUserData.data.id,
 				},
 			});
+
+			if (allBYProjectData.data === 'Unauthorized Entry Detected') {
+				let newHref = window.location.href;
+				newHref = newHref.split('#')[0];
+				newHref += '#/unauthorized';
+				window.location.replace(newHref);
+			}
 
 			if (allBYProjectData?.data) {
 				allBYProjectData = allBYProjectData.data;
@@ -309,14 +319,22 @@ const JBookProfilePage = () => {
 
 		const getPortfolioData = async () => {
 			// grab the portfolio data
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 			await gameChangerAPI
 				.callDataFunction({
 					functionName: 'getPortfolios',
 					cloneName: 'jbook',
-					options: {},
+					options: { id: currentUserData.data.id },
 				})
-				.then(async ({ data }) => {
-					let portfolioData = data !== undefined ? data : [];
+				.then(async (data) => {
+					let publicData = [];
+					let privateData = [];
+					if (data.data) {
+						publicData = data.data.publicPortfolios;
+						privateData = data.data.privatePortfolios;
+					}
+					let portfolioData = [...publicData, ...privateData];
 					let map = {};
 					for (let item of portfolioData) {
 						map[item.name] = item;
@@ -1054,34 +1072,8 @@ const JBookProfilePage = () => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
-	const scorecardData = (classification) => {
+	const scorecardData = () => {
 		let data = [];
-		if (
-			selectedPortfolio === 'AI Inventory' &&
-			classification &&
-			classification.confidence &&
-			classification.top_class
-		) {
-			let num = classification.confidence;
-			num = num.toString(); //If it's not already a String
-			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
-			Number(num); //If you need it back as a Number
-
-			data.push({
-				name: 'Predicted Tag',
-				description:
-					'The AI tool classified the BLI as "' +
-					classification.top_class +
-					'" with a confidence score of ' +
-					num,
-				value: num,
-			});
-		} else {
-			data.push({
-				name: 'No Prediction',
-				description: 'Classification data is not yet available for this exhibit',
-			});
-		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			data.push({
 				name: 'Reviewer Tag',
@@ -1238,6 +1230,19 @@ const JBookProfilePage = () => {
 	};
 
 	const renderSimpleReviewerSection = () => {
+		let reviewers = [];
+		let tags = [];
+		if (pMap[selectedPortfolio]) {
+			reviewers = pMap[selectedPortfolio].user_ids.map((item) => ({
+				id: userMap[item].id,
+				name: userMap[item].last_name + ', ' + userMap[item].first_name,
+				email: userMap[item].email,
+			}));
+			tags = pMap[selectedPortfolio].tags.map((item) => ({
+				primary_class_label: item,
+			}));
+		}
+
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1274,14 +1279,8 @@ const JBookProfilePage = () => {
 						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						dropdownData={{
-							reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
-								id: userMap[item].id,
-								name: userMap[item].last_name + ', ' + userMap[item].first_name,
-								email: userMap[item].email,
-							})),
-							primaryClassLabel: pMap[selectedPortfolio].tags.map((item) => ({
-								primary_class_label: item,
-							})),
+							reviewers: reviewers,
+							primaryClassLabel: tags,
 						}}
 						reviewerProp={projectData.reviewer}
 						serviceReviewerProp={projectData.serviceReview}
@@ -1338,7 +1337,7 @@ const JBookProfilePage = () => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.ai_predictions?.[selectedPortfolio])}
+							scores={scorecardData()}
 							commentThread={commentThread}
 							gameChangerAPI={gameChangerAPI}
 							docID={docID}

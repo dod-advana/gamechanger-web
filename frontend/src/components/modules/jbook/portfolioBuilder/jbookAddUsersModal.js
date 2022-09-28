@@ -22,7 +22,15 @@ import SearchIcon from '@mui/icons-material/Search';
  *
  * @class Add Users Modal
  */
-export default ({ showModal, setShowModal, userList, portfolioData, handleAddUser, renderSelectedUsers }) => {
+export default ({
+	showModal,
+	setShowModal,
+	userList,
+	portfolioData,
+	handleAddUser,
+	renderSelectedUsers,
+	admin = false,
+}) => {
 	const classes = useStyles();
 
 	const [searchFilterText, setSearchFilterText] = useState('');
@@ -53,7 +61,10 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddUse
 				}
 
 				for (const user of filteredList) {
-					let added = portfolioData.user_ids.indexOf(user.id) !== -1;
+					let added = admin
+						? portfolioData.admins.indexOf(user.id) !== -1
+						: portfolioData.user_ids.indexOf(user.id) !== -1;
+
 					let style = {
 						margin: '10px',
 						minWidth: 60,
@@ -75,11 +86,7 @@ export default ({ showModal, setShowModal, userList, portfolioData, handleAddUse
 								{user.first_name}, {user.last_name}
 							</Typography>
 							<GCButton style={style} id={user.id} onClick={() => handleAddUser(user.id)}>
-								{added ? (
-									<CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} />
-								) : (
-									''
-								)}
+								{added && <CheckIcon id={user.id} fontSize="large" style={{ marginRight: '7px' }} />}
 								Add
 							</GCButton>
 						</div>
