@@ -466,8 +466,8 @@ const AIPOCKey = React.memo(() => {
 			<strong>AI Point of Contact (POC) for Effort</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Enter the AI Point of Contact for this Program/Project in the POC section of the Service Reviewer
-				Section. A suitable type of POC would be the Program Element Monitor. We ask that you enter the POC
-				Title, Name, Email address, Organization and Phone number in this section.
+				Section. A suitable type of POC would be the Program Element Monitor. Select the POC's name from the
+				drop-down. If they are not an option please follow this link.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -477,6 +477,7 @@ const AIPOCValue = React.memo((props) => {
 	const {
 		setReviewData,
 		finished,
+		dropdownData,
 		serviceValidated,
 		serviceValidation,
 		servicePOCTitle, // from reviewData
@@ -486,36 +487,30 @@ const AIPOCValue = React.memo((props) => {
 		servicePOCPhoneNumber, //
 	} = props;
 
-	const [pocTitle, setPOCTitle] = useState(servicePOCTitle);
-	const [pocName, setPOCName] = useState(servicePOCName);
-	const [pocEmail, setPOCEmail] = useState(servicePOCEmail);
-	const [pocOrg, setPOCOrg] = useState(servicePOCOrg);
-	const [pocPhoneNumber, setPOCPhoneNumber] = useState(servicePOCPhoneNumber);
-
 	const classes = useStyles();
-
-	useEffect(() => {
-		setPOCTitle(servicePOCTitle);
-	}, [servicePOCTitle]);
-
-	useEffect(() => {
-		setPOCName(servicePOCName);
-	}, [servicePOCName]);
-
-	useEffect(() => {
-		setPOCEmail(servicePOCEmail);
-	}, [servicePOCEmail]);
-
-	useEffect(() => {
-		setPOCOrg(servicePOCOrg);
-	}, [servicePOCOrg]);
-
-	useEffect(() => {
-		setPOCPhoneNumber(servicePOCPhoneNumber);
-	}, [servicePOCPhoneNumber]);
 
 	return (
 		<StyledTableValueContainer>
+			<StyledInlineContainer justifyContent={'left'}>
+				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
+					POC Name
+				</Typography>
+				<Autocomplete
+					style={{ backgroundColor: 'white', width: '40%' }}
+					size="small"
+					options={Object.keys(dropdownData.pocReviewers).map((poc) => poc)}
+					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+					onChange={(_event, value) => setReviewData('servicePOC', dropdownData.pocReviewers[value])}
+					value={servicePOCName ?? null}
+					disabled={finished} //|| roleDisabled}
+					disableClearable
+					noOptionsText={
+						<Tooltip placement="top" arrow title={'This is a tooltip'}>
+							<div>No Options</div>
+						</Tooltip>
+					}
+				/>
+			</StyledInlineContainer>
 			<StyledInlineContainer justifyContent={'left'}>
 				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
 					POC Title
@@ -523,41 +518,12 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Title"
 					variant="outlined"
-					value={pocTitle}
-					defaultValue={pocTitle}
+					value={servicePOCTitle ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCTitle(value)}
-					onBlur={(event) => setReviewData('servicePOCTitle', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocTitle
-							? {
-									classes: {
-										root: classes.cssOutlinedInput,
-										focused: classes.cssFocused,
-										notchedOutline: classes.notchedOutline,
-									},
-							  }
-							: {}
-					}
-				/>
-			</StyledInlineContainer>
-			<StyledInlineContainer justifyContent={'left'}>
-				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
-					POC Name
-				</Typography>
-				<TextField
-					placeholder="Name"
-					variant="outlined"
-					value={pocName}
-					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCName(value)}
-					onBlur={(event) => setReviewData('servicePOCName', event.target.value)}
-					size="small"
-					disabled={finished} //|| roleDisabled}
-					InputProps={
-						!serviceValidated && !serviceValidation.pocName
 							? {
 									classes: {
 										root: classes.cssOutlinedInput,
@@ -576,12 +542,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Email"
 					variant="outlined"
-					value={pocEmail}
+					value={servicePOCEmail ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCEmail(value)}
-					onBlur={(event) => setReviewData('servicePOCEmail', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocEmail
 							? {
@@ -602,12 +566,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Org"
 					variant="outlined"
-					value={pocOrg}
+					value={servicePOCOrg ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCOrg(value)}
-					onBlur={(event) => setReviewData('servicePOCOrg', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocOrg
 							? {
@@ -628,12 +590,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Phone Number"
 					variant="outlined"
-					value={pocPhoneNumber}
+					value={servicePOCPhoneNumber ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCPhoneNumber(value)}
-					onBlur={(event) => setReviewData('servicePOCPhoneNumber', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocPhoneNumber
 							? {

@@ -890,6 +890,14 @@ const JBookProfilePage = () => {
 					newReviewData.pocDollarsAttributed = value.pocDollarsAttributed;
 					newReviewData.pocPercentageAttributed = value.pocPercentageAttributed;
 					break;
+				case 'servicePOC':
+					const { first_name, last_name, organization, job_title, email, phone_number } = value;
+					newReviewData.servicePOCTitle = job_title ?? '';
+					newReviewData.servicePOCName = `${first_name} ${last_name}`;
+					newReviewData.servicePOCEmail = email ?? '';
+					newReviewData.servicePOCOrg = organization ?? '';
+					newReviewData.servicePOCPhoneNumber = phone_number ?? '';
+					break;
 				default:
 					newReviewData[field] = value !== null ? value : '';
 					break;
