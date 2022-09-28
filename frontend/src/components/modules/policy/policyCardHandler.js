@@ -678,7 +678,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												handleTopicClick(cloneData.clone_name, topic);
+												handleTopicClick(topic, cloneData.clone_name);
 											}}
 										>
 											{topic}
@@ -693,7 +693,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											handleTopicClick(cloneData.clone_name, topic);
+											handleTopicClick(topic, cloneData.clone_name);
 										}}
 									>
 										{topic}
@@ -813,7 +813,11 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 						<div className={'selected-favorite'}>
 							<div style={{ display: 'flex' }}>
 								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(item.filename, item.display_title_s, item.id)}
+								{checkboxComponent(
+									item.filename,
+									`${item.doc_type} ${item.doc_num}: ${item.title}`,
+									item.id
+								)}
 								{favoriteComponent()}
 							</div>
 						</div>
@@ -1174,7 +1178,9 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			headerTextWeight={'normal'}
 		>
 			<div className={'metadata'}>
-				<div className={'inner-scroll-container'}>{backBody}</div>
+				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+					{backBody}
+				</div>
 			</div>
 		</GCAccordion>
 	) : (
@@ -1757,7 +1763,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
@@ -2021,7 +2029,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>

@@ -147,6 +147,8 @@ const GCFooter = LoadableVisibility({
 					display: 'flex',
 					height: '90px',
 					width: '100%',
+					position: 'absolute',
+					bottom: '-30px',
 					backgroundColor: 'black',
 				}}
 			/>
