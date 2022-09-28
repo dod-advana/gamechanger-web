@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackEvent } from '../components/telemetry/Matomo';
-import { getTrackingNameForFactory, encode } from '../utils/gamechangerUtils';
+import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -12,7 +12,6 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
-import { getQueryVariable } from '../utils/gamechangerUtils';
 import './gamechanger.css';
 import './jbook.css';
 import './jbook-styles.css';
@@ -61,7 +60,6 @@ const JBookProfilePage = () => {
 		keywordsChecked,
 		selectedPortfolio,
 		cloneData,
-		domainTasks,
 		portfolios,
 		profilePageBudgetYear,
 		serviceValidation,
@@ -141,12 +139,7 @@ const JBookProfilePage = () => {
 	};
 
 	const setProjectReviewData = (newProjectData, tempMapping, portfolioName) => {
-		let newDomainTasks = _.cloneDeep(domainTasks);
 		let review = newProjectData.reviews[portfolioName] ?? {};
-
-		if (review.domainTask && review.domainTaskSecondary) {
-			newDomainTasks[review.domainTask] = review.domainTaskSecondary;
-		}
 
 		if (review.serviceMissionPartnersChecklist === null || review.serviceMissionPartnersChecklist === undefined) {
 			review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
@@ -173,7 +166,7 @@ const JBookProfilePage = () => {
 			review.pocMPAgreeLabel = 'Yes';
 		}
 
-		setState(dispatch, { reviewData: review, domainTasks: newDomainTasks });
+		setState(dispatch, { reviewData: review });
 	};
 
 	const selectBudgetYearProjectData = (allBYProjectData, year, portfolioName) => {
@@ -675,23 +668,6 @@ const JBookProfilePage = () => {
 		);
 	};
 
-	const setDomainTaskSecondary = useCallback(
-		(domainTask, newDomainTasks, value) => {
-			if (domainTasks[domainTask]) {
-				const index = newDomainTasks[domainTask].indexOf(value);
-
-				if (index !== -1) {
-					newDomainTasks[domainTask].splice(index, 1);
-				} else {
-					newDomainTasks[domainTask].push(value);
-				}
-			}
-
-			return newDomainTasks;
-		},
-		[domainTasks]
-	);
-
 	const updateValidation = useCallback(
 		(field, value, stateObject) => {
 			let newServiceValidation;
@@ -730,9 +706,6 @@ const JBookProfilePage = () => {
 		(field, value) => {
 			let newReviewData = _.cloneDeep(reviewData);
 
-			const { domainTask } = reviewData;
-			let newDomainTasks = _.cloneDeep(domainTasks);
-
 			let stateObject = {};
 
 			switch (field) {
@@ -744,7 +717,7 @@ const JBookProfilePage = () => {
 						serviceReviewer: '',
 						primaryPlannedTransitionPartner: null,
 						serviceAdditionalMissionPartners: null,
-						primaryReviewNotes: null,
+						primaryReviewNotes: '',
 					};
 					break;
 				case 'serviceForm':
@@ -754,15 +727,16 @@ const JBookProfilePage = () => {
 						serviceMissionPartnersChecklist: JSON.stringify(contractMapping),
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: null,
+						serviceClassLabel: null,
 						servicePTPAgreeLabel: 'Yes',
 						servicePlannedTransitionPartner: null,
 						otherMissionPartners: null,
-						servicePOCTitle: null,
-						servicePOCName: null,
-						servicePOCEmail: null,
-						servicePOCOrg: null,
-						servicePOCPhoneNumber: null,
-						serviceReviewerNotes: null,
+						servicePOCTitle: '',
+						servicePOCName: '',
+						servicePOCEmail: '',
+						servicePOCOrg: '',
+						servicePOCPhoneNumber: '',
+						serviceReviewerNotes: '',
 						serviceSecondaryReviewer: '',
 					};
 
@@ -778,9 +752,11 @@ const JBookProfilePage = () => {
 						altPOCOrg: '',
 						altPOCPhoneNumber: '',
 						pocJointCapabilityArea: null,
+						pocJointCapabilityArea2: null,
+						pocJointCapabilityArea3: null,
 						pocAIType: null,
-						pocAIRoleDescription: null,
-						pocAITypeDescription: null,
+						pocAIRoleDescription: '',
+						pocAITypeDescription: '',
 						pocDollarsAttributedCategory: null,
 						pocPercentageAttributedCategory: null,
 						pocDollarsAttributed: '',
@@ -800,29 +776,19 @@ const JBookProfilePage = () => {
 					};
 
 					stateObject.pocValidated = true;
-
-					newDomainTasks = {
-						'Natural Language Processing': [],
-						'Sensing and Perception': [],
-						'Planning, Scheduling, and Reasoning': [],
-						'Prediction and Assessment': [],
-						'Modeling and Simulation': [],
-						'Human-Machine Interaction': [],
-						'Responsible AI': [],
-						Other: [],
-					};
 					break;
 				case 'domainTaskSecondary':
-					newDomainTasks = setDomainTaskSecondary(domainTask, newDomainTasks, value);
-					newReviewData.domainTaskSecondary = newDomainTasks[domainTask];
+					const newDomainTasks = newReviewData.domainTaskSecondary ?? [];
+					if (newDomainTasks.includes(value)) {
+						newDomainTasks.splice(newDomainTasks.indexOf(value), 1);
+					} else {
+						newDomainTasks.push(value);
+					}
+					newReviewData.domainTaskSecondary = newDomainTasks;
 					break;
 				case 'domainTaskOther':
-					if (domainTasks['Other'].length > 0) {
-						newDomainTasks['Other'][0] = value;
-					} else {
-						newDomainTasks['Other'].push(value);
-					}
-					newReviewData.domainTaskSecondary = newDomainTasks['Other'];
+					const newOther = [value];
+					newReviewData.domainTaskSecondary = newOther;
 					break;
 				case 'setMissionPartners':
 					newReviewData.serviceMissionPartnersList = value.join('|');
@@ -837,8 +803,9 @@ const JBookProfilePage = () => {
 					newReviewData.pocMissionPartnersChecklist = JSON.stringify(value);
 					break;
 				case 'domainTask':
+					newReviewData.domainTaskSecondary = null;
 					if (newReviewData.domainTask === value) {
-						newReviewData.domainTask = '';
+						newReviewData.domainTask = null;
 						break;
 					}
 					newReviewData[field] = value;
@@ -877,21 +844,13 @@ const JBookProfilePage = () => {
 					newReviewData[field].push(value);
 					break;
 				case 'clearJCA':
-					newReviewData.pocJointCapabilityArea = '';
+					newReviewData.pocJointCapabilityArea = null;
+					newReviewData.pocJointCapabilityArea2 = null;
+					newReviewData.pocJointCapabilityArea3 = null;
 					break;
 				case 'clearDomainTask':
 					newReviewData.domainTask = '';
 					newReviewData.domainTaskSecondary = [];
-					newDomainTasks = {
-						'Natural Language Processing': [],
-						'Sensing and Perception': [],
-						'Planning, Scheduling, and Reasoning': [],
-						'Prediction and Assessment': [],
-						'Modeling and Simulation': [],
-						'Human-Machine Interaction': [],
-						'Responsible AI': [],
-						Other: [],
-					};
 					break;
 				case 'clearDataType':
 					newReviewData.pocAIType = '';
@@ -906,13 +865,12 @@ const JBookProfilePage = () => {
 			}
 
 			stateObject.reviewData = newReviewData;
-			stateObject.domainTasks = newDomainTasks;
 
 			stateObject = updateValidation(field, value, stateObject);
 
 			setState(dispatch, stateObject);
 		},
-		[dispatch, contractMapping, domainTasks, reviewData, setDomainTaskSecondary, updateValidation]
+		[dispatch, contractMapping, reviewData, updateValidation]
 	);
 
 	const validString = (text) => {
