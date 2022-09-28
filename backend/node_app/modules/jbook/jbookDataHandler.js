@@ -293,7 +293,21 @@ class JBookDataHandler extends DataHandler {
 
 	async getAllBYProjectData(req, userId) {
 		try {
-			const { id } = req.body;
+			const { id, portfolioName, userRowId } = req.body;
+			if (portfolioName !== 'General') {
+				const portfolios = await this.getPortfolios({ body: { id: userRowId } }, userId);
+				// looking for a match on portfolio
+				const portfolioList = [...portfolios.publicPortfolios, ...portfolios.privatePortfolios];
+				let foundPortfolio = false;
+				for (let portfolio of portfolioList) {
+					if (portfolio.name === portfolioName) {
+						foundPortfolio = true;
+					}
+				}
+				if (!foundPortfolio) {
+					return 'Unauthorized Entry Detected';
+				}
+			}
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
