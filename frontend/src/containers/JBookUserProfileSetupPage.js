@@ -1,9 +1,6 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './jbook.css';
-import { setState } from '../utils/sharedFunctions';
-import SideNavigation from '../components/navigation/SideNavigation';
-import { JBookContext } from '../components/modules/jbook/JBookContext';
-import { getQueryVariable } from '../utils/gamechangerUtils';
+import { Typography } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GamechangerUserManagementAPI from '../components/api/GamechangerUserManagement';
 
@@ -21,33 +18,18 @@ export const scrollToContentTop = () => {
 };
 
 const JBookUserProfileSetupPage = (props) => {
-	const { cloneData, history } = props;
-
-	const context = useContext(JBookContext);
-	const { state, dispatch } = context;
-
+	const { history } = props;
 	const [profileLoading, setProfileLoading] = useState(true);
-
-	useEffect(() => {
-		if (!state.cloneDataSet) {
-			setState(dispatch, { cloneData: cloneData, cloneDataSet: true });
-		}
-
-		if (!state.historySet) {
-			setState(dispatch, { history: history, historySet: true });
-		}
-	}, [cloneData, state, dispatch, history]);
 
 	const hasSetUpUserProfile = useRef(false);
 	useEffect(() => {
 		if (!hasSetUpUserProfile.current) {
-			const url = window.location.href;
-			const email = getQueryVariable('email', url);
-			const permissions = getQueryVariable('permissions', url).split(',');
-
-			gameChangerUserAPI.setupUserProfile({ email, permissions }).then((data) => {
+			gameChangerUserAPI.setupUserProfile().then((data) => {
 				setProfileLoading(false);
-				history.push('/summary');
+				let newHref = window.location.href;
+				newHref = newHref.split('#')[0];
+				newHref += '#/jbook/userDashboard';
+				window.location.replace(newHref);
 			});
 			hasSetUpUserProfile.current = true;
 		}
@@ -55,16 +37,17 @@ const JBookUserProfileSetupPage = (props) => {
 
 	return (
 		<div className="main-container">
-			{state.cloneDataSet && (
-				<>
-					{/* Side Navigation */}
-					<SideNavigation context={context} />
-
+			<>
+				<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+					<Typography style={{ marginTop: '10%' }}>Providing Permissions...</Typography>
 					{profileLoading && (
-						<LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />
+						<LoadingIndicator
+							customColor={'#1C2D64'}
+							style={{ width: '50px', height: '50px', margin: 0 }}
+						/>
 					)}
-				</>
-			)}
+				</div>
+			</>
 		</div>
 	);
 };
