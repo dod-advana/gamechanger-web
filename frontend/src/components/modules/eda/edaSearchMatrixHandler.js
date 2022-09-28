@@ -290,7 +290,7 @@ const renderMajcoms = (state, dispatch, org) => {
 			'Defense Information Systems Agency',
 			'Missile Defense Agency',
 			'Other DoD/OASD Activities',
-			'US Special Operations  Command',
+			'U.S. Special Operations Command',
 		],
 		navy: [
 			'Command, Pacific Fleet',
