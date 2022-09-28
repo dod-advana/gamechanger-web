@@ -1402,9 +1402,14 @@ const SliderKey = React.memo(() => {
 
 const SliderValue = React.memo((props) => {
 	const { setReviewData, totalBudget } = props;
+	console.log('what is in props', props);
 	const context = useContext(JBookContext);
 	const { state } = context;
+	console.log('what is in state', state);
 	const { pocValidated, pocValidation, reviewData } = state;
+	console.log('here is reviewData', reviewData);
+	console.log('what is pocvalidated', pocValidated);
+	console.log('what is pocvalidation', pocValidation);
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const { pocDollarsAttributed, pocPercentageAttributed } = reviewData;
 
@@ -1437,6 +1442,8 @@ const SliderValue = React.memo((props) => {
 			label: `$${parseFloat(totalBudgetValue).toFixed(2)} M`,
 		},
 	];
+
+	console.log('What is finished???', finished);
 
 	return (
 		<StyledTableValueContainer>
