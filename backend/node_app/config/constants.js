@@ -1,7 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const axios = require('axios');
-const https = require('https');
 
 /**
  * Get cert/key provided env vars

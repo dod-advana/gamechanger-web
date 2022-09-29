@@ -7,7 +7,6 @@ const RDOC = require('../models').rdoc;
 const ODOC = require('../models').om;
 const SearchUtility = require('../utils/searchUtility');
 const constantsFile = require('../config/constants');
-const { Op } = require('sequelize');
 const Excel = require('exceljs');
 const EmailUtility = require('../utils/emailUtility');
 const JBookSearchUtility = require('../modules/jbook/jbookSearchUtility');

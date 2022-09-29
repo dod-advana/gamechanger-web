@@ -50,7 +50,7 @@ class EDASearchUtility {
 			// add additional search fields to the query
 			let filterQueries = [];
 
-			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings, user));
 
 			storedFields = [...storedFields, ...extStoredFields];
 
@@ -281,42 +281,14 @@ class EDASearchUtility {
 	}
 
 	getElasticsearchStatsQuery(
-		{
-			searchText,
-			parsedQuery,
-			limit = 20,
-			charsPadding = 90,
-			operator = 'and',
-			storedFields = [
-				'filename',
-				'title',
-				'page_count',
-				'doc_type',
-				'doc_num',
-				'ref_list',
-				'id',
-				'summary_30',
-				'keyw_5',
-				'p_text',
-				'type',
-				'p_page',
-				'display_title_s',
-				'display_org_s',
-				'display_doc_type_s',
-			],
-			extStoredFields = [],
-			extSearchFields = [],
-			edaSearchSettings = {},
-		},
+		{ searchText, parsedQuery, limit = 20, operator = 'and', extSearchFields = [], edaSearchSettings = {} },
 		user
 	) {
 		try {
 			// add additional search fields to the query
 			let filterQueries = [];
 
-			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
-
-			storedFields = [...storedFields, ...extStoredFields];
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings, user));
 
 			let query = {
 				_source: {
@@ -449,7 +421,7 @@ class EDASearchUtility {
 		}
 	}
 
-	getEDASearchQuery(settings) {
+	getEDASearchQuery(settings, user) {
 		const filterQueries = [];
 
 		try {

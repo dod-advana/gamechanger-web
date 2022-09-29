@@ -21,17 +21,9 @@ class PolicyExportHandler extends ExportHandler {
 				index,
 				format,
 				historyId,
-				cloneData = {},
-				limit = 20,
-				searchFields = {},
 				expansionDict = {},
 				orgFilter,
-				typeFilter,
-				operator,
-				offset,
 				selectedDocuments,
-				sort = 'Relevance',
-				order = 'desc',
 				...rest
 			} = req.body;
 

@@ -1,6 +1,5 @@
 const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
-const CryptoJS = require('crypto-js');
 const axiosLib = require('axios');
 const https = require('https');
 const AWS = require('aws-sdk');
@@ -9,7 +8,6 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
-const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
 
@@ -330,13 +328,13 @@ class DataLibrary {
 				this.awsS3Client
 					.getObject(params)
 					.createReadStream()
-					.on('error', function (err) {
+					.on('error', function (_err) {
 						//Handles errors on the read stream
 						res.status(500);
 						res.end();
 					})
 					.pipe(res)
-					.on('error', function (err) {
+					.on('error', function (_err) {
 						//Handles errors on the write stream
 						res.status(500);
 						res.end();

@@ -6,15 +6,15 @@ class SimpleGraphHandler extends GraphHandler {
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, _userId) {
 		return req.body;
 	}
 
-	async queryHelper(req, userId, code) {
+	async queryHelper(req, _userId, _code) {
 		return req.body;
 	}
 
-	async callFunctionHelper(req, userId) {
+	async callFunctionHelper(req, _userId) {
 		return req.body;
 	}
 }

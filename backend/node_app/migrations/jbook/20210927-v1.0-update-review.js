@@ -1,8 +1,8 @@
 'use strict';
-const tablename = 'review';
+// const tablename = 'review';
 
 module.exports = {
-	up: async (queryInterface, Sequelize) => {
+	up: async (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			// return Promise.all([
 			//     queryInterface.removeColumn(tablename, 'rev_review_stat'),
@@ -28,7 +28,7 @@ module.exports = {
 		});
 	},
 
-	down: async (queryInterface, Sequelize) => {
+	down: async (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			// return Promise.all([
 			// queryInterface.removeColumn(tablename, 'jaic_review_status'),
