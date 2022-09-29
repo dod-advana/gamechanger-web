@@ -37,6 +37,17 @@ const DatePickerWrapper = styled.div`
 	}
 `;
 
+const AccordianWrapper = styled.div`
+	.MuiAccordionSummary-root {
+		display: flex !important;
+		padding: 0px 10px !important;
+	}
+	.MuiIconButton-edgeEnd {
+		margin-right: -12px;
+		padding: 12px;
+	}
+`;
+
 const renderSources = (state, dispatch, classes, results) => {
 	const { orgFilter, orgCount } = state.analystToolsSearchSettings;
 	const sortedOrgs = Object.keys(orgFilter).map((org) => [org, orgCount?.[org] || 0]);
@@ -263,64 +274,73 @@ const PolicyAnalyticsToolsHandler = {
 					<div style={{ marginBottom: 20 }}>Apply filters to your search</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							header={
-								<>
-									SOURCE{' '}
-									<span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span>
-								</>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							{renderSources(state, dispatch, classes, results)}
-						</GCAccordion>
+						<AccordianWrapper>
+							<GCAccordion
+								header={
+									<>
+										SOURCE{' '}
+										<span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span>
+									</>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								{renderSources(state, dispatch, classes, results)}
+							</GCAccordion>
+						</AccordianWrapper>
 					</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							header={
-								<>
-									TYPE <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span>
-								</>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							{renderTypes(state, dispatch, classes, results)}
-						</GCAccordion>
+						<AccordianWrapper>
+							<GCAccordion
+								header={
+									<>
+										TYPE <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span>
+									</>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								{renderTypes(state, dispatch, classes, results)}
+							</GCAccordion>
+						</AccordianWrapper>
 					</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							header={
-								<>
-									PUBLICATION DATE <span style={styles.filterCount}>{dateActive ? '(1)' : ''}</span>
-								</>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							{renderDates(state, dispatch)}
-						</GCAccordion>
+						<AccordianWrapper>
+							<GCAccordion
+								header={
+									<>
+										PUBLICATION DATE{' '}
+										<span style={styles.filterCount}>{dateActive ? '(1)' : ''}</span>
+									</>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								{renderDates(state, dispatch)}
+							</GCAccordion>
+						</AccordianWrapper>
 					</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
-						<GCAccordion
-							header={
-								<>
-									STATUS <span style={styles.filterCount}>{statusActive ? '(1)' : ''}</span>
-								</>
-							}
-							headerBackground={'rgb(238,241,242)'}
-							headerTextColor={'black'}
-							headerTextWeight={'normal'}
-						>
-							{renderStatus(state, dispatch, classes)}
-						</GCAccordion>
+						<AccordianWrapper>
+							<GCAccordion
+								header={
+									<>
+										STATUS <span style={styles.filterCount}>{statusActive ? '(1)' : ''}</span>
+									</>
+								}
+								headerBackground={'rgb(238,241,242)'}
+								headerTextColor={'black'}
+								headerTextWeight={'normal'}
+							>
+								{renderStatus(state, dispatch, classes)}
+							</GCAccordion>
+						</AccordianWrapper>
 					</div>
 				</div>
 			</>

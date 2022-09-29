@@ -3,11 +3,19 @@ import { Typography } from '@material-ui/core';
 import { getTitleBarStyle, styles } from '../default/defaultTitleBarHandler';
 import PropTypes from 'prop-types';
 import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
+import GamechangerLogo from '../../../images/logos/GAMECHANGER-NoPentagon.png';
 
 const getTitleBar = (props) => {
 	const { detailsType } = props;
 	return (
-		<div style={{ display: 'flex', marginLeft: '3%' }}>
+		<div style={{ display: 'flex', marginLeft: '3%', alignItems: 'center' }}>
+			<img
+				src={GamechangerLogo}
+				style={{ ...styles.title, width: 300 }}
+				onClick={() => (window.location.href = window.location.href.split('#')[0] + '#')}
+				alt="gamechanger"
+				id={'titleButton'}
+			/>
 			<Typography variant="h1" data-cy="details-type" style={styles.wording} display="inline">
 				{detailsType}
 			</Typography>
