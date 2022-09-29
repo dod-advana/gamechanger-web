@@ -20,6 +20,7 @@ const getCert = (certEnvVar, certFileEnvVar) => {
 };
 
 module.exports = Object.freeze({
+	USE_ML_API: process.env.USE_ML_API === 'true',
 	VERSION: '#DYNAMIC_VERSION',
 	APPROVED_API_CALLERS: process.env.APPROVED_API_CALLERS ? process.env.APPROVED_API_CALLERS.split(' ') : [],
 	TLS_CERT: getCert('TLS_CERT', 'TLS_CERT_FILEPATH'),
