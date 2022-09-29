@@ -1,6 +1,14 @@
 {
   "extends": [ "prettier", "plugin:prettier/recommended"],
   "rules": {
+    "no-useless-escape": 2,
+    "no-undef": 2,
+    "no-unused-vars": [
+      "error",
+      {
+         "argsIgnorePattern": "^_+\\w+$"
+      }
+    ],
     "prettier/prettier": [
       "error",
       {
@@ -22,7 +30,8 @@
     ]
   },
   "env": {
-    "es6": true
+    "es6": true,
+    "node": true
   },
   "parserOptions": {
     "ecmaVersion": 2020
