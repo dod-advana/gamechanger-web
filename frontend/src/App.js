@@ -153,6 +153,7 @@ const styles = {
 		marginLeft: '50px',
 		paddingTop: '2em',
 		background: '#ffffff',
+		position: 'relative',
 	},
 };
 

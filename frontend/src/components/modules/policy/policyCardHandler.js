@@ -5,10 +5,8 @@ import {
 	convertDCTScoreToText,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
-	getReferenceListMetadataPropertyTable,
 	policyMetadata,
 	getTrackingNameForFactory,
-	getTypeDisplay,
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
@@ -30,6 +28,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
+import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -112,7 +111,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 			max-width: ${({ listView }) => (listView ? '60%' : '')};
 			overflow-wrap: ${({ listView }) => (listView ? '' : 'anywhere')};
@@ -153,21 +152,32 @@ const StyledFrontCardSubHeader = styled.div`
 	position: relative;
 
 	.sub-header-one {
+		display: flex;
+		align-items: center;
 		color: ${({ typeTextColor }) => (typeTextColor ? typeTextColor : '#ffffff')};
 		background-color: ${({ docTypeColor }) => (docTypeColor ? docTypeColor : '#000000')};
 		width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		padding: 8px;
-		display: flex;
-		align-items: center;
-
 		img {
 			width: 25px;
 			margin: 0px 10px 0px 0px;
+		}
+		p {
+			margin: 0;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 	}
 
 	.sub-header-two {
 		width: 50%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		color: white;
 		padding: 10px 8px 8px;
 		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
@@ -204,6 +214,9 @@ const StyledFrontCardSubHeader = styled.div`
 
 	.list-sub-header-two {
 		width: 150px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 		color: white;
 		padding: 2px 8px 8px;
 		background-color: ${({ docOrgColor }) => (docOrgColor ? docOrgColor : '#000000')};
@@ -678,7 +691,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												handleTopicClick(cloneData.clone_name, topic);
+												handleTopicClick(topic, cloneData.clone_name);
 											}}
 										>
 											{topic}
@@ -693,7 +706,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											handleTopicClick(cloneData.clone_name, topic);
+											handleTopicClick(topic, cloneData.clone_name);
 										}}
 									>
 										{topic}
@@ -805,15 +818,23 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 									{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
 									{displayType}
 								</div>
-								<div className={'list-sub-header-two'}>
-									{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
-								</div>
+								{displayOrg.length > 17 ? (
+									<GCTooltip title={displayOrg} placement="top" arrow>
+										<div className={'list-sub-header-two'}>{displayOrg}</div>
+									</GCTooltip>
+								) : (
+									<div className={'list-sub-header-two'}>{displayOrg}</div>
+								)}
 							</StyledFrontCardSubHeader>
 						)}
 						<div className={'selected-favorite'}>
 							<div style={{ display: 'flex' }}>
 								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(item.filename, item.display_title_s, item.id)}
+								{checkboxComponent(
+									item.filename,
+									`${item.doc_type} ${item.doc_num}: ${item.title}`,
+									item.id
+								)}
 								{favoriteComponent()}
 							</div>
 						</div>
@@ -875,13 +896,30 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 					docTypeColor={docTypeColor}
 					docOrgColor={docOrgColor}
 				>
-					<div data-cy={'card-type'} className={'sub-header-one'}>
-						{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
-						{displayType}
-					</div>
-					<div data-cy={'card-org'} className={'sub-header-two'}>
-						{item.display_org_s ? item.display_org_s : getTypeDisplay(displayOrg)}
-					</div>
+					{displayType.length > 19 ? (
+						<GCTooltip title={displayType} placement="top" arrow>
+							<div data-cy={'card-type'} className={'sub-header-one'}>
+								{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
+								<p>{displayType}</p>
+							</div>
+						</GCTooltip>
+					) : (
+						<div data-cy={'card-type'} className={'sub-header-one'}>
+							{iconSrc.length > 0 && <img src={iconSrc} alt="type logo" />}
+							<p>{displayType}</p>
+						</div>
+					)}
+					{displayOrg.length > 25 ? (
+						<GCTooltip title={displayOrg} placement="top" arrow>
+							<div data-cy={'card-org'} className={'sub-header-two'}>
+								{displayOrg}
+							</div>
+						</GCTooltip>
+					) : (
+						<div data-cy={'card-org'} className={'sub-header-two'}>
+							{displayOrg}
+						</div>
+					)}
 				</StyledFrontCardSubHeader>
 			)}
 		</>
@@ -1174,7 +1212,9 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
 			headerTextWeight={'normal'}
 		>
 			<div className={'metadata'}>
-				<div className={'inner-scroll-container'}>{backBody}</div>
+				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+					{backBody}
+				</div>
 			</div>
 		</GCAccordion>
 	) : (
@@ -1458,14 +1498,13 @@ const cardHandler = {
 
 		getCardBack: ({ item, state, dispatch }) => {
 			if (item.notInCorpus) return <></>;
-			const { ref_list = [] } = item;
-			const previewDataReflist = getReferenceListMetadataPropertyTable(ref_list);
 			const data = getMetadataForPropertyTable(item);
 			let favoritableData = policyMetadata(item);
 			favoritableData = [
 				...favoritableData,
 				...addFavoriteTopicToMetadata(data, state.userData, dispatch, state.cloneData, state.searchText),
 			];
+
 			return (
 				<div>
 					<SimpleTable
@@ -1481,16 +1520,7 @@ const cardHandler = {
 						hideHeader={!!state.listView}
 					/>
 					<div>
-						<SimpleTable
-							tableClass={'magellan-table'}
-							zoom={1}
-							headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-							rows={previewDataReflist}
-							height={'auto'}
-							dontScroll={true}
-							colWidth={{ minWidth: '25%', maxWidth: '25%' }}
-							disableWrap={true}
-						/>
+						<PolicyDocumentReferenceTable state={state} document={item} />
 					</div>
 				</div>
 			);
@@ -1573,6 +1603,7 @@ const cardHandler = {
 								)}
 							</>
 							<div
+								data-cy="card-footer-more"
 								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
 									trackEvent(
@@ -1757,7 +1788,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
@@ -2021,7 +2054,9 @@ const cardHandler = {
 							headerTextWeight={'normal'}
 						>
 							<div className={'metadata'}>
-								<div className={'inner-scroll-container'}>{backBody}</div>
+								<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
+									{backBody}
+								</div>
 							</div>
 						</GCAccordion>
 					</StyledListViewFrontCardContent>
