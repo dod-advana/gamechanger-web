@@ -8,6 +8,7 @@ import {
 	policyMetadata,
 	getTrackingNameForFactory,
 	getTypeIcon,
+	getTypeDisplay,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
 import { handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
