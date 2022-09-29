@@ -62,7 +62,7 @@ class ReviewerController {
 		}
 	}
 
-	async updateOrCreateReviewerHelper(reviewerData, userId, fromApp = false) {
+	async updateOrCreateReviewerHelper(reviewerData, userId) {
 		try {
 			const foundItem = await this.reviewer.findOne({ where: { id: reviewerData.id || 0 } });
 

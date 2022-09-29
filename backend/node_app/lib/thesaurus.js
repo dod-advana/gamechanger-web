@@ -62,7 +62,7 @@ class Thesaurus {
 	}
 
 	async waitForLoad() {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			if (isLoaded) {
 				resolve(true);
 			} else {

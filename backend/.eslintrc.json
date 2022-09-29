@@ -1,7 +1,6 @@
 {
   "extends": [ "prettier", "plugin:prettier/recommended"],
   "rules": {
-    "no-useless-escape": 2,
     "no-undef": 2,
     "no-unused-vars": [
       "error",
