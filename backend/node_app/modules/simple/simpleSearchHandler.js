@@ -1,4 +1,4 @@
-const SearchUtility = require('../../utils/this.searchUtility');
+const SearchUtility = require('../../utils/searchUtility');
 const constants = require('../../config/constants');
 const asyncRedisLib = require('async-redis');
 const redisAsyncClient = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost');
