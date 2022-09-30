@@ -121,9 +121,9 @@ const createFilteredPubs = (docs) => {
 	}));
 };
 
-const getImagesForFilteredPubs = (filteredPubs, state, gameChangerAPI, cancelToken, dispatch) => {
-	filteredPubs.forEach((pub) => {
-		gameChangerAPI
+const getImagesForFilteredPubs = async (filteredPubs, state, gameChangerAPI, cancelToken) => {
+	filteredPubs.forEach(async (pub) => {
+		await gameChangerAPI
 			.thumbnailStorageDownloadPOST([pub], 'thumbnails', state.cloneData, cancelToken)
 			.then((pngs) => {
 				const buffers = pngs.data;
@@ -134,12 +134,13 @@ const getImagesForFilteredPubs = (filteredPubs, state, gameChangerAPI, cancelTok
 						pub.imgSrc = DefaultPub;
 					}
 				});
-				setState(dispatch, { recDocs: filteredPubs });
 			})
 			.catch(() => {
 				//Do nothing
 			});
 	});
+
+	return filteredPubs;
 };
 
 const recRecentlyViewedOnClick = (cloneData, dispatch, pub) => {
@@ -226,7 +227,8 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 		}));
 		setState(dispatch, { searchMajorPubs: filteredPubs });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { searchMajorPubs: pubsWithImages });
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -248,7 +250,8 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, 
 		setState(dispatch, { lastOpened: filteredPubs });
 		setState(dispatch, { loadingLastOpened: false });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { lastOpened: pubsWithImages });
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -263,10 +266,10 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken, gameChanger
 		setState(dispatch, { recDocs: filteredPubs });
 		setState(dispatch, { loadingrecDocs: false });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { recDocs: pubsWithImages });
 	} catch (e) {
 		//Do nothing
-		console.log(e);
 		setState(dispatch, { recDocs: filteredPubs });
 	}
 };
