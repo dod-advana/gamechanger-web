@@ -44,36 +44,55 @@ const JBookPOCReviewForm = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, primaryReviewLoading, reviewData } = state;
+	console.log('TELL ME WHAT IS ROLEDISABLED??', roleDisabled);
 
 	const pocReviewerData = () => {
 		const pocReviewerData = [
 			{
 				Key: <AltAIPOCKey />,
-				Value: <AltAIPOCValue setReviewData={setReviewData} />,
+				Value: <AltAIPOCValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <LabelingValidationKey />,
-				Value: <LabelingValidationValue setReviewData={setReviewData} dropdownData={dropdownData} />,
+				Value: (
+					<LabelingValidationValue
+						setReviewData={setReviewData}
+						dropdownData={dropdownData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <TransitionPartnerKey />,
-				Value: <TransitionPartnerValue setReviewData={setReviewData} dropdownData={dropdownData} />,
+				Value: (
+					<TransitionPartnerValue
+						setReviewData={setReviewData}
+						dropdownData={dropdownData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <MissionPartnersKey />,
-				Value: <MissionPartnersValue setReviewData={setReviewData} vendorData={vendorData} />,
+				Value: (
+					<MissionPartnersValue
+						setReviewData={setReviewData}
+						vendorData={vendorData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <JCAKey />,
-				Value: <JCAValue setReviewData={setReviewData} />,
+				Value: <JCAValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <AIDomainKey />,
-				Value: <AIDomainValue setReviewData={setReviewData} />,
+				Value: <AIDomainValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <DataTypeKey />,
-				Value: <DataTypeValue setReviewData={setReviewData} />,
+				Value: <DataTypeValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 		];
 
@@ -92,7 +111,9 @@ const JBookPOCReviewForm = React.memo((props) => {
 		if (showSlider) {
 			pocReviewerData.push({
 				Key: <SliderKey />,
-				Value: <SliderValue totalBudget={totalBudget} setReviewData={setReviewData} />,
+				Value: (
+					<SliderValue totalBudget={totalBudget} setReviewData={setReviewData} roleDisabled={roleDisabled} />
+				),
 			});
 		}
 
@@ -121,6 +142,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 				}}
 				hideHeader={true}
 				firstColWidth={firstColWidth}
+				disabled={finished || roleDisabled}
 			/>
 			<StyledFooterDiv>
 				{!pocValidated && <span style={{ color: errorColor }}>Please fill out the highlighted fields</span>}

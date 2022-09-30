@@ -100,7 +100,7 @@ const StyledChip = withStyles({
 	},
 })(Chip);
 
-const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButtonOptions, finished) => {
+const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButtonOptions, finished, roleDisabled) => {
 	const radioButtons = [];
 
 	const examples = [];
@@ -122,7 +122,7 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 				label={option.name}
 				labelPlacement="end"
 				style={{ ...styles.titleText, margin: '10px 0' }}
-				disabled={finished} //|| roleDisabled}
+				disabled={finished || roleDisabled}
 			/>
 		);
 
@@ -147,13 +147,14 @@ const DropdownRadioButton = ({
 	finished,
 	domainTaskOther,
 	setDomainTaskOther,
+	roleDisabled,
 }) => {
 	const { radioButton, data } = radioButtonData;
 	return (
 		<GCAccordion
 			contentPadding={0}
 			expanded={reviewData?.[reviewDataProp] && reviewData[reviewDataProp] === radioButton}
-			disabled={finished}
+			disabled={finished || roleDisabled}
 			controlled={true}
 			header={
 				<FormControlLabel
@@ -175,7 +176,7 @@ const DropdownRadioButton = ({
 					label={radioButton}
 					labelPlacement="end"
 					style={{ ...styles.titleText, margin: '10px 0' }}
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 				/>
 			}
 			headerBackground={'rgb(238,241,242)'}
@@ -193,7 +194,7 @@ const DropdownRadioButton = ({
 									reviewData={reviewData}
 									domainTask={radioButton}
 									setReviewData={setReviewData}
-									finished={finished}
+									finished={finished || roleDisabled}
 								/>
 							);
 						})
@@ -205,7 +206,7 @@ const DropdownRadioButton = ({
 							style={{ backgroundColor: 'white', width: '100%' }}
 							onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
 							onChange={(_event, value) => setDomainTaskOther(value)}
-							disabled={finished || radioButton !== reviewData?.domainTask} //|| roleDisabled}
+							disabled={finished || radioButton !== reviewData?.domainTask || roleDisabled}
 						/>
 					)}
 				</div>
@@ -296,7 +297,8 @@ const JCACTier3CheckBox = ({ tier1, tier2, tier3, setReviewData, reviewData, tie
 };
 
 const JCAChecklist = (props) => {
-	const { reviewData, setReviewData, finished } = props;
+	const { reviewData, setReviewData, finished, roleDisabled } = props;
+	console.log('jcachecklist', props);
 	const radioDropdowns = [];
 	let tier2List = [];
 	let tier3List = [];
@@ -315,7 +317,7 @@ const JCAChecklist = (props) => {
 							setReviewData={setReviewData}
 							reviewData={reviewData}
 							tier2Checked={tier2Checked}
-							finished={finished}
+							finished={finished || roleDisabled}
 						/>
 					);
 				}
@@ -329,7 +331,7 @@ const JCAChecklist = (props) => {
 						setReviewData={setReviewData}
 						tier1Checked={tier1Checked}
 						tier2Checked={tier2Checked}
-						finished={finished}
+						finished={finished || roleDisabled}
 					/>
 				);
 			}
@@ -340,7 +342,7 @@ const JCAChecklist = (props) => {
 			<GCAccordion
 				contentPadding={0}
 				expanded={tier1Checked}
-				disabled={finished}
+				disabled={finished || roleDisabled}
 				controlled={true}
 				key={tier1}
 				header={
@@ -363,7 +365,7 @@ const JCAChecklist = (props) => {
 						label={tier1}
 						labelPlacement="end"
 						style={{ ...styles.titleText, margin: '10px 0' }}
-						disabled={finished} //|| roleDisabled}
+						disabled={finished || roleDisabled}
 					/>
 				}
 				headerBackground={'rgb(238,241,242)'}
@@ -450,7 +452,7 @@ const AltAIPOCKey = React.memo(() => {
 });
 
 const AltAIPOCValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 
 	const context = useContext(JBookContext);
 	const { state } = context;
@@ -498,7 +500,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCTitle(value)}
 					onBlur={(event) => setReviewData('altPOCTitle', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCTitle ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -521,7 +523,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCName(value)}
 					onBlur={(event) => setReviewData('altPOCName', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCName ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -544,7 +546,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCEmail(value)}
 					onBlur={(event) => setReviewData('altPOCEmail', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCEmail ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -567,7 +569,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCOrg(value)}
 					onBlur={(event) => setReviewData('altPOCOrg', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCOrg ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -590,7 +592,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCPhoneNumber(value)}
 					onBlur={(event) => setReviewData('altPOCPhoneNumber', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCPhoneNumber ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -659,7 +661,7 @@ const LabelingValidationKey = React.memo(() => {
 });
 
 const LabelingValidationValue = React.memo((props) => {
-	const { setReviewData, dropdownData } = props;
+	const { setReviewData, dropdownData, roleDisabled } = props;
 
 	const classes = useStyles();
 
@@ -685,7 +687,7 @@ const LabelingValidationValue = React.memo((props) => {
 							: 'Yes'
 					}
 					onChange={(event, value) => setReviewData('pocAgreeLabel', value)}
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					disableClearable
 					renderInput={(params) => (
 						<TextField
@@ -731,7 +733,7 @@ const LabelingValidationValue = React.memo((props) => {
 							  }
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocAgreeLabel === 'Yes')} //|| roleDisabled}
+					disabled={finished || (!finished && reviewData.pocAgreeLabel === 'Yes') || roleDisabled}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -795,7 +797,7 @@ const TransitionPartnerKey = React.memo(() => {
 });
 
 const TransitionPartnerValue = React.memo((props) => {
-	const { setReviewData, dropdownData } = props;
+	const { setReviewData, dropdownData, roleDisabled } = props;
 	const classes = useStyles();
 	const context = useContext(JBookContext);
 	const { state } = context;
@@ -819,7 +821,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							? reviewData.pocPTPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					disableClearable
 					classes={{
 						inputRoot: !pocValidated && !pocValidation.pocPTPAgreeLabel ? classes.autocompleteError : '',
@@ -846,7 +848,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							  reviewData.primaryPlannedTransitionPartner
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocPTPAgreeLabel === 'Yes')} //|| roleDisabled}
+					disabled={finished || (!finished && reviewData.pocPTPAgreeLabel === 'Yes') || roleDisabled}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -877,7 +879,7 @@ const MissionPartnersKey = React.memo(() => {
 });
 
 const MissionPartnersValue = React.memo((props) => {
-	const { setReviewData, vendorData } = props;
+	const { setReviewData, vendorData, roleDisabled } = props;
 	const classes = useStyles();
 	const context = useContext(JBookContext);
 	const { state } = context;
@@ -950,7 +952,7 @@ const MissionPartnersValue = React.memo((props) => {
 							? reviewData.pocMPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -994,7 +996,7 @@ const MissionPartnersValue = React.memo((props) => {
 					setReviewData('setPOCMissionPartners', value);
 				}}
 				value={pocMissionPartners}
-				disabled={finished || (!finished && reviewData.pocMPAgreeLabel === 'Yes')}
+				disabled={finished || (!finished && reviewData.pocMPAgreeLabel === 'Yes') || roleDisabled}
 			/>
 		</StyledTableValueContainer>
 	);
@@ -1013,7 +1015,7 @@ const JCAKey = React.memo(() => {
 });
 
 const JCAValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1036,7 +1038,12 @@ const JCAValue = React.memo((props) => {
 					''
 				)}
 			</Typography>
-			<JCAChecklist reviewData={reviewData} setReviewData={setReviewData} finished={finished} />
+			<JCAChecklist
+				reviewData={reviewData}
+				setReviewData={setReviewData}
+				finished={finished}
+				roleDisabled={roleDisabled}
+			/>
 			<GCPrimaryButton
 				style={{
 					...ButtonStyles.main,
@@ -1045,6 +1052,7 @@ const JCAValue = React.memo((props) => {
 				onClick={() => {
 					setReviewData('clearJCA', '', state, dispatch);
 				}}
+				disabled={finished || roleDisabled}
 			>
 				Clear Selection
 			</GCPrimaryButton>
@@ -1060,7 +1068,7 @@ const JCAValue = React.memo((props) => {
 				onChange={(event, value) => setAIRoleDescription(value)}
 				rows={6}
 				multiline
-				disabled={finished} //|| roleDisabled}
+				disabled={finished || roleDisabled}
 				InputProps={
 					!pocValidated && !pocValidation.pocAIRoleDescription
 						? {
@@ -1182,7 +1190,7 @@ const radioButtonData = [
 ];
 
 const AIDomainValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1217,6 +1225,7 @@ const AIDomainValue = React.memo((props) => {
 									finished={finished}
 									domainTaskOther={domainTaskOther}
 									setDomainTaskOther={setDomainTaskOther}
+									roleDisabled={roleDisabled}
 								/>
 							);
 						})}
@@ -1231,6 +1240,7 @@ const AIDomainValue = React.memo((props) => {
 					onClick={() => {
 						setReviewData('clearDomainTask', '', state, dispatch);
 					}}
+					disabled={finished || roleDisabled}
 				>
 					Clear Selection
 				</GCPrimaryButton>
@@ -1251,7 +1261,7 @@ const DataTypeKey = React.memo(() => {
 });
 
 const DataTypeValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1296,7 +1306,8 @@ const DataTypeValue = React.memo((props) => {
 						{ name: 'Graph / Network', example: 'Social network data' },
 						{ name: 'Computer / Network', example: 'Binary, executable, communication data' },
 					],
-					finished
+					finished,
+					roleDisabled
 				)}
 				<GCPrimaryButton
 					style={{
@@ -1307,6 +1318,7 @@ const DataTypeValue = React.memo((props) => {
 					onClick={() => {
 						setReviewData('clearDataType', '', state, dispatch);
 					}}
+					disabled={finished || roleDisabled}
 				>
 					Clear Selection
 				</GCPrimaryButton>
@@ -1322,7 +1334,7 @@ const DataTypeValue = React.memo((props) => {
 					onChange={(event, value) => setAITypeDescription(value)}
 					rows={6}
 					multiline
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					InputProps={
 						!pocValidated && !pocValidation.pocAITypeDescription
 							? {
@@ -1346,7 +1358,7 @@ const DataTypeValue = React.memo((props) => {
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						value={reviewData.roboticsSystemAgree ?? null}
 						onChange={(event, value) => setReviewData('roboticsSystemAgree', value)}
-						disabled={finished} //|| roleDisabled}
+						disabled={finished || roleDisabled}
 						disableClearable
 						classes={{
 							inputRoot:
@@ -1369,7 +1381,7 @@ const DataTypeValue = React.memo((props) => {
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 						value={reviewData?.intelligentSystemsAgree ?? null}
 						onChange={(event, value) => setReviewData('intelligentSystemsAgree', value)}
-						disabled={finished} //|| roleDisabled}
+						disabled={finished || roleDisabled}
 						disableClearable
 						classes={{
 							inputRoot:
@@ -1401,15 +1413,10 @@ const SliderKey = React.memo(() => {
 });
 
 const SliderValue = React.memo((props) => {
-	const { setReviewData, totalBudget } = props;
-	console.log('what is in props', props);
+	const { setReviewData, totalBudget, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state } = context;
-	console.log('what is in state', state);
 	const { pocValidated, pocValidation, reviewData } = state;
-	console.log('here is reviewData', reviewData);
-	console.log('what is pocvalidated', pocValidated);
-	console.log('what is pocvalidation', pocValidation);
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const { pocDollarsAttributed, pocPercentageAttributed } = reviewData;
 
@@ -1442,8 +1449,6 @@ const SliderValue = React.memo((props) => {
 			label: `$${parseFloat(totalBudgetValue).toFixed(2)} M`,
 		},
 	];
-
-	console.log('What is finished???', finished);
 
 	return (
 		<StyledTableValueContainer>
@@ -1507,7 +1512,7 @@ const SliderValue = React.memo((props) => {
 					// ValueLabelComponent={}
 					style={{ fontSize: 14, margin: '0 20px 0 0', width: '70%' }}
 					marks={marks}
-					disabled={finished || attributionUnits === ''} //|| roleDisabled}
+					disabled={finished || attributionUnits === '' || roleDisabled}
 				/>
 
 				<div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px', marginLeft: '10px' }}>
@@ -1547,7 +1552,7 @@ const SliderValue = React.memo((props) => {
 									setReviewData('pocSlider', newData);
 								}
 							}}
-							disabled={finished || attributionUnits === ''} //|| roleDisabled}
+							disabled={finished || attributionUnits === '' || roleDisabled}
 							classes={{
 								inputRoot:
 									!pocValidated &&
@@ -1594,7 +1599,7 @@ const SliderValue = React.memo((props) => {
 						setAttributionUnits(value);
 					}}
 					disableClearable
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					defaultValue={'$'}
 				/>
 			</StyledInlineContainer>
