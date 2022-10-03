@@ -225,8 +225,6 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 			...item,
 			imgSrc: DefaultPub,
 		}));
-		setState(dispatch, { searchMajorPubs: filteredPubs });
-
 		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
 		setState(dispatch, { searchMajorPubs: pubsWithImages });
 	} catch (e) {
@@ -247,11 +245,8 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, 
 	try {
 		filteredPubs = createFilteredPubs(cleanedDocs);
 
-		setState(dispatch, { lastOpened: filteredPubs });
-		setState(dispatch, { loadingLastOpened: false });
-
 		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
-		setState(dispatch, { lastOpened: pubsWithImages });
+		setState(dispatch, { lastOpened: pubsWithImages, loadingLastOpened: false });
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -263,11 +258,9 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken, gameChanger
 	let filteredPubs = [];
 	try {
 		filteredPubs = createFilteredPubs(rec_docs);
-		setState(dispatch, { recDocs: filteredPubs });
-		setState(dispatch, { loadingrecDocs: false });
 
 		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
-		setState(dispatch, { recDocs: pubsWithImages });
+		setState(dispatch, { recDocs: pubsWithImages, loadingrecDocs: false });
 	} catch (e) {
 		//Do nothing
 		setState(dispatch, { recDocs: filteredPubs });
