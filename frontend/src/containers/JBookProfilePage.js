@@ -68,6 +68,7 @@ const JBookProfilePage = () => {
 		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
+		is_admin: false,
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
 		is_poc_reviewer: false,
@@ -304,7 +305,7 @@ const JBookProfilePage = () => {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
 				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
-				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+				is_poc_reviewer: userData.extra_fields.jbook.is_poc_reviewer,
 			};
 
 			setPermissions(tmpPermissions);
@@ -1142,17 +1143,6 @@ const JBookProfilePage = () => {
 		if (projectData.currentYearAmount > 0) {
 			totalBudget = projectData.currentYearAmount;
 		}
-
-		console.log('Do I have admin permissions with permissions', Permissions.hasPermission('JBOOK Admin'));
-		console.log('Do I have admin permissions with userData', Auth.getTokenPayload().extra_fields.jbook.is_admin);
-		console.log('Do I have POC permissions with permissions', Permissions.hasPermission('JBOOK POC Reviewer'));
-		console.log('What is hasPermission ', Permissions.hasPermission);
-		console.log(
-			'Do I have POC permissions with userData',
-			Auth.getTokenPayload().extra_fields.jbook.is_poc_reviewer
-		);
-		console.log('what is email', Auth.getTokenPayload());
-		console.log('what is userData', userData);
 
 		return (
 			<StyledAccordionContainer id={'POC Reviewer Section'}>

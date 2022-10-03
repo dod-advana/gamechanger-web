@@ -44,7 +44,6 @@ const JBookPOCReviewForm = React.memo((props) => {
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, primaryReviewLoading, reviewData } = state;
-	console.log('TELL ME WHAT IS ROLEDISABLED??', roleDisabled);
 
 	const pocReviewerData = () => {
 		const pocReviewerData = [
