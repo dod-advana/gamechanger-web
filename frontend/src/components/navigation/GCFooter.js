@@ -59,8 +59,10 @@ const useStyles = makeStyles((theme) => ({
 
 const FooterDiv = styled.div`
 	width: 100%;
+	align-items: center;
 	-webkit-align-items: center;
-	display: flex;
+	position: relative;
+	bottom: -30px;
 	& button {
 		margin: 0 8px;
 	}

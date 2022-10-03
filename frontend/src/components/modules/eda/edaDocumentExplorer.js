@@ -243,7 +243,7 @@ export default function EDADocumentExplorer({
 	if (!rightPanelOpen) rightBarExtraStyles = { right: '10px', borderBottomRightRadius: 10 };
 
 	return (
-		<div className="row" style={{ height: 'calc(100% - 12px)', marginTop: '10px' }}>
+		<div className="row" style={{ height: 'calc(100% - 90px)', marginTop: '10px' }}>
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
