@@ -1167,7 +1167,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={!Auth.getTokenPayload().extra_fields.jbook.is_poc_reviewer}
+						roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !permissions.is_poc_reviewer}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
