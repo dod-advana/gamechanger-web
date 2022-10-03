@@ -703,11 +703,15 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
+<<<<<<< HEAD
 		setNoResults(false);
 		setFilterChange(false);
 		setLeftPanelOpen(true);
 		setStepIndex(0);
 		setTutorialLogicSwitch(false);
+=======
+		setLeftPanelOpen(true);
+>>>>>>> dev
 	};
 
 	const handleCheck = (id) => {

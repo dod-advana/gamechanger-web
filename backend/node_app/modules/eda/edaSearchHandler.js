@@ -174,6 +174,8 @@ class EdaSearchHandler extends SearchHandler {
 					esIndex,
 					esQuery
 				);
+			} else if (results?.body?.hits?.total?.value === 0) {
+				return { totalCount: 0, docs: [] };
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JY3IIJ3', userId);
 				return { totalCount: 0, docs: [] };
