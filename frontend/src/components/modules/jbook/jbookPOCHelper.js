@@ -298,7 +298,6 @@ const JCACTier3CheckBox = ({ tier1, tier2, tier3, setReviewData, reviewData, tie
 
 const JCAChecklist = (props) => {
 	const { reviewData, setReviewData, finished, roleDisabled } = props;
-	console.log('jcachecklist', props);
 	const radioDropdowns = [];
 	let tier2List = [];
 	let tier3List = [];
