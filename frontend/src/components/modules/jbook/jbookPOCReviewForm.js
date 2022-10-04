@@ -141,7 +141,6 @@ const JBookPOCReviewForm = React.memo((props) => {
 				}}
 				hideHeader={true}
 				firstColWidth={firstColWidth}
-				disabled={finished || roleDisabled}
 			/>
 			<StyledFooterDiv>
 				{!pocValidated && <span style={{ color: errorColor }}>Please fill out the highlighted fields</span>}
