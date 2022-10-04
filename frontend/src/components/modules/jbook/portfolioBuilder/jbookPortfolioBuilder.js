@@ -129,21 +129,28 @@ const PortfolioBuilder = (props) => {
 				return '';
 			};
 
-			const portfolioAdmins = portfolio.admins.map((user, index) => {
-				return (
-					<Pill>
-						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
-					</Pill>
-				);
-			});
+			const portfolioAdmins = [];
+			for (let user of portfolio.admins) {
+				if (getName(user) !== '') {
+					portfolioAdmins.push(
+						<Pill>
+							<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+						</Pill>
+					);
+				}
+			}
 
-			const portfolioUsers = portfolio.user_ids.map((user, index) => {
-				return (
-					<Pill>
-						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
-					</Pill>
-				);
-			});
+			const portfolioUsers = [];
+			for (let user of portfolio.user_ids) {
+				if (getName(user) !== '') {
+					portfolioUsers.push(
+						<Pill>
+							<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+						</Pill>
+					);
+				}
+			}
+
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
