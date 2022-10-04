@@ -120,15 +120,48 @@ const PortfolioBuilder = (props) => {
 		}
 	}, [init, setInit, setUser, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
 
+	// helper function for listportfolio
+	const getName = (id) => {
+		if (userMap[id]) {
+			return `${userMap[id].first_name} ${userMap[id].last_name}`;
+		}
+		return '';
+	};
+
+	// helper function for listportfolio
+	const renderUsers = (users) => {
+		const portfolioUsers = [];
+		for (let user of users) {
+			if (getName(user) !== '') {
+				portfolioUsers.push(
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+					</Pill>
+				);
+			}
+		}
+
+		return portfolioUsers;
+	};
+
+	// helper function for listportfolio
+	const getTags = (tags) => {
+		let portfolioTags = '(none)';
+		if (tags.length > 0) {
+			portfolioTags = tags.map((tag, index) => {
+				return (
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
+					</Pill>
+				);
+			});
+		}
+
+		return portfolioTags;
+	};
+
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
-			const getName = (id) => {
-				if (userMap[id]) {
-					return `${userMap[id].first_name} ${userMap[id].last_name}`;
-				}
-				return '';
-			};
-
 			const portfolioAdmins = [];
 			for (let user of portfolio.admins) {
 				if (getName(user) !== '') {
@@ -140,15 +173,14 @@ const PortfolioBuilder = (props) => {
 				}
 			}
 
-			const portfolioUsers = [];
-			for (let user of portfolio.user_ids) {
-				if (getName(user) !== '') {
-					portfolioUsers.push(
-						<Pill>
-							<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
-						</Pill>
-					);
-				}
+			let editIcon =
+				portfolio.admins.find((item) => item === user.id) !== undefined || portfolio.creator === user.id;
+
+			let userText = renderUsers(portfolio.user_ids);
+			if (!portfolio.isPrivate) {
+				userText = '(All JBOOK users)';
+			} else if (portfolio.user_ids.length === 0) {
+				userText = '(none)';
 			}
 
 			return (
@@ -158,8 +190,7 @@ const PortfolioBuilder = (props) => {
 							{portfolio.name}
 						</Typography>
 						<div>
-							{(portfolio.admins.find((item) => item === user.id) !== undefined ||
-								portfolio.creator === user.id) && (
+							{editIcon && (
 								<IconButton
 									aria-label="close"
 									style={{
@@ -201,26 +232,14 @@ const PortfolioBuilder = (props) => {
 							People with Access
 						</Typography>
 					</div>
-					<div style={portfolioStyles.pillbox}>
-						{portfolio.user_ids.length === 0 && portfolio.isPrivate && '(none)'}
-						{!portfolio.isPrivate ? '(All JBOOK users)' : portfolioUsers}
-					</div>
+					<div style={portfolioStyles.pillbox}>{userText}</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
 						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
 							Associated Tags
 						</Typography>
 					</div>
-					<div style={portfolioStyles.pillbox}>
-						{portfolio.tags.length === 0 && '(none)'}
-						{portfolio.tags.map((tag, index) => {
-							return (
-								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
-								</Pill>
-							);
-						})}
-					</div>
+					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
 				</div>
 			);
 		});
