@@ -301,6 +301,7 @@ const JCAChecklist = (props) => {
 	const radioDropdowns = [];
 	let tier2List = [];
 	let tier3List = [];
+	const disabled = finished || roleDisabled;
 
 	for (const tier1 in JCAdata) {
 		const tier1Checked = reviewData?.['pocJointCapabilityArea'] === tier1;
@@ -316,7 +317,7 @@ const JCAChecklist = (props) => {
 							setReviewData={setReviewData}
 							reviewData={reviewData}
 							tier2Checked={tier2Checked}
-							finished={finished || roleDisabled}
+							finished={finished}
 						/>
 					);
 				}
@@ -330,7 +331,7 @@ const JCAChecklist = (props) => {
 						setReviewData={setReviewData}
 						tier1Checked={tier1Checked}
 						tier2Checked={tier2Checked}
-						finished={finished || roleDisabled}
+						finished={finished}
 					/>
 				);
 			}
@@ -341,7 +342,7 @@ const JCAChecklist = (props) => {
 			<GCAccordion
 				contentPadding={0}
 				expanded={tier1Checked}
-				disabled={finished || roleDisabled}
+				disabled={disabled}
 				controlled={true}
 				key={tier1}
 				header={
@@ -364,7 +365,7 @@ const JCAChecklist = (props) => {
 						label={tier1}
 						labelPlacement="end"
 						style={{ ...styles.titleText, margin: '10px 0' }}
-						disabled={finished || roleDisabled}
+						disabled={disabled}
 					/>
 				}
 				headerBackground={'rgb(238,241,242)'}
@@ -668,7 +669,8 @@ const LabelingValidationValue = React.memo((props) => {
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
-
+	const disabled = finished || roleDisabled;
+	console.log('I just want to see reviewData', reviewData);
 	return (
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
@@ -686,7 +688,7 @@ const LabelingValidationValue = React.memo((props) => {
 							: 'Yes'
 					}
 					onChange={(event, value) => setReviewData('pocAgreeLabel', value)}
-					disabled={finished || roleDisabled}
+					disabled={disabled}
 					disableClearable
 					renderInput={(params) => (
 						<TextField
@@ -732,7 +734,7 @@ const LabelingValidationValue = React.memo((props) => {
 							  }
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocAgreeLabel === 'Yes') || roleDisabled}
+					disabled={disabled || (!finished && reviewData.pocAgreeLabel === 'Yes')}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -802,6 +804,7 @@ const TransitionPartnerValue = React.memo((props) => {
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
+	const disabled = finished || roleDisabled;
 
 	return (
 		<StyledTableValueContainer>
@@ -820,7 +823,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							? reviewData.pocPTPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished || roleDisabled}
+					disabled={disabled}
 					disableClearable
 					classes={{
 						inputRoot: !pocValidated && !pocValidation.pocPTPAgreeLabel ? classes.autocompleteError : '',
@@ -847,7 +850,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							  reviewData.primaryPlannedTransitionPartner
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocPTPAgreeLabel === 'Yes') || roleDisabled}
+					disabled={disabled || (!finished && reviewData.pocPTPAgreeLabel === 'Yes')}
 					disableClearable
 					classes={{
 						inputRoot:
