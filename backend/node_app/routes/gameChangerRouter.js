@@ -102,6 +102,7 @@ router.post('/responsibilities/getUpdates', responsibility.getResponsibilityUpda
 
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);
+router.get('/admin/getAPIInformationTrain', transformer.getAPIInformationTrain);
 router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getS3DataList', transformer.getS3DataList);
 router.get('/admin/getModelsList', transformer.getModelsList);
