@@ -4,6 +4,7 @@ const axiosLib = require('axios');
 
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
+const mlTrainBaseUrl = constants.GAMECHANGER_ML_API_TRAIN_BASE_URL;
 
 const MLRoutes = {
 	getLoadedModels: `${transformerBaseUrl}/getLoadedModels`,
@@ -13,6 +14,7 @@ const MLRoutes = {
 	deleteLocalModel: `${transformerBaseUrl}/deleteLocalModel`,
 	downloadDependencies: `${transformerBaseUrl}/download`,
 	getAPIInformation: `${transformerBaseUrl}/`,
+	getAPIInformationTrain: `${mlTrainBaseUrl}/`,
 	getModelsList: `${transformerBaseUrl}/getModelsList`,
 	getDataList: `${transformerBaseUrl}/getDataList`,
 	getFilesInCorpus: `${transformerBaseUrl}/getFilesInCorpus`,
@@ -27,12 +29,12 @@ const MLRoutes = {
 	transformResults: `${transformerBaseUrl}/transformerSearch`,
 	reloadModels: `${transformerBaseUrl}/reloadModels`,
 	downloadCorpus: `${transformerBaseUrl}/downloadCorpus`,
-	trainModel: `${transformerBaseUrl}/trainModel`,
+	trainModel: `${mlTrainBaseUrl}/trainModel`,
 	initializeLTR: `${transformerBaseUrl}/LTR/initLTR`,
-	createModelLTR: `${transformerBaseUrl}/LTR/createModel`,
+	createModelLTR: `${mlTrainBaseUrl}/LTR/createModel`,
 	recommender: `${transformerBaseUrl}/recommender`,
 	stopProcess: `${transformerBaseUrl}/stopProcess`,
-	sendUserAggregations: `${transformerBaseUrl}/sendUserAggregations`,
+	sendUserAggregations: `${mlTrainBaseUrl}/sendUserAggregations`,
 	clearCache: `${transformerBaseUrl}/clearCache`,
 };
 /**
@@ -56,6 +58,7 @@ class MLApiClient {
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
 		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
+		this.getAPIInformationTrain = this.getData.bind(this, 'getAPIInformationTrain');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');

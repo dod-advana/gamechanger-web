@@ -16,6 +16,7 @@ class TransformerController {
 		// A mapping to the methods in MLApiClient
 		this.registry = {
 			getAPIInformation: this.mlApi.getAPIInformation,
+			getAPIInformationTrain: this.mlApi.getAPIInformationTrain,
 			getS3List: this.mlApi.getS3List,
 			getS3DataList: this.mlApi.getS3DataList,
 			downloadDependencies: this.mlApi.downloadDependencies,
@@ -39,6 +40,7 @@ class TransformerController {
 
 		// Get methods
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
+		this.getAPIInformationTrain = this.getData.bind(this, 'getAPIInformationTrain');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');

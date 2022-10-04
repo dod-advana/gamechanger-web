@@ -45,6 +45,7 @@ const apiColumns = [
 export default (props) => {
 	// Set state variables
 	const [APIData, setAPIData] = useState({});
+	const [APITrainData, setAPITrainData] = useState({});
 
 	/**
 	 * Load all the initial data on transformers and s3
@@ -52,6 +53,7 @@ export default (props) => {
 	 */
 	const onload = async () => {
 		getAPIInformation();
+		getAPIInformationTrain();
 	};
 
 	/**
@@ -66,6 +68,22 @@ export default (props) => {
 			props.updateLogs('Successfully queried api information', 0);
 		} catch (e) {
 			props.updateLogs('Error querying api information: ' + e.toString(), 2);
+			throw e;
+		}
+	};
+
+	/**
+	 * Get the general information for the API
+	 * @method getAPIInformationTrain
+	 */
+	const getAPIInformationTrain = async () => {
+		try {
+			// set APIData
+			const info = await gameChangerAPI.getAPIInformationTrain();
+			setAPITrainData(info.data);
+			props.updateTrainLogs('Successfully queried train api information', 0);
+		} catch (e) {
+			props.updateTrainLogs('Error querying train api information: ' + e.toString(), 2);
 			throw e;
 		}
 	};
@@ -88,10 +106,10 @@ export default (props) => {
 	 * @method getConnectionStatus
 	 * @return integer 0-3
 	 */
-	const getConnectionStatus = () => {
+	const getConnectionStatus = (type) => {
 		let success = false;
 		let error = false;
-		for (const message of props.apiErrors) {
+		for (const message of type === 'train' ? props.apiTrainErrors : props.apiErrors) {
 			if (message.status === 'OK') {
 				success = true;
 			}
@@ -146,11 +164,11 @@ export default (props) => {
 					>
 						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Current State:</div>
 						<Tooltip
-							title={'Connection ' + status[getConnectionStatus()].toUpperCase()}
+							title={'Connection ' + status[getConnectionStatus('inference')].toUpperCase()}
 							placement="right"
 							arrow
 						>
-							<StatusCircle className={status[getConnectionStatus()]} />
+							<StatusCircle className={status[getConnectionStatus('inference')]} />
 						</Tooltip>
 					</div>
 					<fieldset className={'field'}>
@@ -164,9 +182,10 @@ export default (props) => {
 								Elasticsearch Status: <br />
 							</div>
 							<div style={{ width: '65%' }} className="half">
-								{APIData.API_Name} <br />
+								{APIData.API_Name} {APIData.Container_Type}
+								<br />
 								{APIData.Version} <br />
-								{status[getConnectionStatus()].toUpperCase()} <br />
+								{status[getConnectionStatus('inference')].toUpperCase()} <br />
 								{getLastQueried()} <br />
 								{APIData.Elasticsearch_Host} <br />
 								{APIData.Elasticsearch_Status} <br />
@@ -189,12 +208,52 @@ export default (props) => {
 					<fieldset className={'field'}>
 						<div className="info-container">
 							<ReactTable
-								data={props.apiErrors}
+								data={props.apiErrors.concat(props.apiTrainErrors)}
 								columns={apiColumns}
 								className="striped -highlight"
 								defaultSorted={[{ id: 'searchtime', desc: true }]}
 								defaultPageSize={5}
 							/>
+						</div>
+					</fieldset>
+				</BorderDiv>
+				<BorderDiv className="half">
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Current State:</div>
+						<Tooltip
+							title={'Connection ' + status[getConnectionStatus('train')].toUpperCase()}
+							placement="right"
+							arrow
+						>
+							<StatusCircle className={status[getConnectionStatus('train')]} />
+						</Tooltip>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
+								Application: <br />
+								Version: <br />
+								Connection Status: <br />
+								Last Queried: <br />
+								Elasticsearch Host: <br />
+								Elasticsearch Status: <br />
+							</div>
+							<div style={{ width: '65%' }} className="half">
+								{APITrainData.API_Name} {APITrainData.Container_Type}
+								<br />
+								{APITrainData.Version} <br />
+								{status[getConnectionStatus('train')].toUpperCase()} <br />
+								{getLastQueried()} <br />
+								{APITrainData.Elasticsearch_Host} <br />
+								{APITrainData.Elasticsearch_Status} <br />
+								<br />
+							</div>
 						</div>
 					</fieldset>
 				</BorderDiv>

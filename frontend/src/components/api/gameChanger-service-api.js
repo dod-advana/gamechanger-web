@@ -75,6 +75,7 @@ const endpoints = {
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
+	getAPIInformationTrain: '/api/gamechanger/admin/getAPIInformationTrain',
 	getModelsList: '/api/gamechanger/admin/getModelsList',
 	getDataList: '/api/gamechanger/admin/getDataList',
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
@@ -691,6 +692,11 @@ export default class GameChangerAPI {
 
 	getAPIInformation = async () => {
 		const url = endpoints.getAPIInformation;
+		return axiosGET(this.axios, url);
+	};
+
+	getAPIInformationTrain = async () => {
+		const url = endpoints.getAPIInformationTrain;
 		return axiosGET(this.axios, url);
 	};
 

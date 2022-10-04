@@ -11,6 +11,7 @@ import Models from './models';
 const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
 const logs = [];
+const trainLogs = [];
 let processTimer;
 /**
  * This class queries the ml api information and provides controls
@@ -20,7 +21,9 @@ let processTimer;
 export default () => {
 	const [tabIndex, setTabIndex] = useState('info');
 	const [apiErrors, setApiErrors] = useState([]);
+	const [apiTrainErrors, setApiTrainErrors] = useState([]);
 	const [processes, setProcesses] = useState({});
+
 	/**
 	 * Creates log objects with the inital message,
 	 * status level, and time it was triggered.
@@ -36,6 +39,23 @@ export default () => {
 			status: enterStatus,
 		});
 		setApiErrors([].concat(logs));
+	};
+
+	/**
+	 * Creates log objects with the inital message,
+	 * status level, and time it was triggered.
+	 * @method updateTrainLogs
+	 * @param {String} log - the message
+	 * @param {Number} logStatus - 0,1,2 which correlate to a status const
+	 */
+	const updateTrainLogs = (log, logStatus) => {
+		const enterStatus = status[logStatus].toUpperCase();
+		trainLogs.push({
+			response: log,
+			timeStamp: new Date(Date.now()).toLocaleString(),
+			status: enterStatus,
+		});
+		setApiTrainErrors([].concat(trainLogs));
 	};
 
 	/**
@@ -161,7 +181,12 @@ export default () => {
 
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>
-						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
+						<Info
+							apiErrors={apiErrors}
+							apiTrainErrors={apiTrainErrors}
+							updateLogs={updateLogs}
+							updateTrainLogs={updateTrainLogs}
+						/>
 					</TabPanel>
 					<TabPanel>
 						<S3 processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
