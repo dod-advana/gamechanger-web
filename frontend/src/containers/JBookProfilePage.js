@@ -1053,7 +1053,7 @@ const JBookProfilePage = () => {
 					headerWidth="100%"
 					header={
 						<StyledAccordionHeader headerWidth="100%">
-							<strong>PRIMARY REVIEWER</strong>
+							<strong>INITIAL REVIEWER</strong>
 							<FiberManualRecordIcon
 								style={{
 									color: reviewData.primaryReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',

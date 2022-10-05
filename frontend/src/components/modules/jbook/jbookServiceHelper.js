@@ -98,11 +98,11 @@ const ReviewStatus = React.memo((props) => {
 const SecondaryReviewerKey = React.memo(() => {
 	return (
 		<StyledTableKeyContainer>
-			<strong>Secondary Reviewer</strong>
+			<strong>RAI Reviewer</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Service Level Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu.
-				Once selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer
-				checklist tab and the review will be the responsibility of the Secondary Reviewer.
+				Service Level Reviewers can select a RAI reviewer for this Program/Project from the dropdown menu. Once
+				selected and saved, the RAI Reviewer Name will populate as the Reviewer on the Reviewer checklist tab
+				and the review will be the responsibility of the RAI Reviewer.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -131,7 +131,7 @@ const SecondaryReviewerValue = React.memo((props) => {
 					size="small"
 					options={Object.keys(reviewers)}
 					style={{ width: 300, backgroundColor: 'white' }}
-					renderInput={(params) => <TextField {...params} label="Secondary" variant="outlined" />}
+					renderInput={(params) => <TextField {...params} label="RAI" variant="outlined" />}
 					value={serviceSecondaryReviewer ?? null}
 					onChange={(_event, value) => {
 						setReviewDataMultiple({

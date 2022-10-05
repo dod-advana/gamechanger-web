@@ -211,7 +211,7 @@ const metadataNameToSearchFilterName = {
 	'Main Account': 'appropriationNumber',
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
-	'Primary Reviewer': 'primaryReviewer',
+	'Initial Reviewer': 'primaryReviewer',
 	'Service Reviewer': 'serviceReviewer',
 	'POC Reviewer': 'pocReviewer',
 };
@@ -911,7 +911,7 @@ const cardHandler = {
 				const reviewers = getReviewerNames(projectData);
 
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 				metadata.push({
@@ -925,7 +925,7 @@ const cardHandler = {
 			} else if (selectedPortfolio !== 'General') {
 				const reviewers = getReviewerNames(projectData);
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 			}

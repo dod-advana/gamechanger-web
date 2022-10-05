@@ -383,7 +383,7 @@ const initState = {
 			'Project #',
 			'Project Title',
 			'Service / Agency',
-			'Primary Reviewer',
+			'Initial Reviewer',
 			'Service Reviewer',
 			'POC Reviewer',
 			'Source',
