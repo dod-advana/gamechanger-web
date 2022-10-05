@@ -35,6 +35,13 @@ declare namespace Cypress {
 		login(clone: string);
 
 		/**
+		 * Visits a page on the BASE_URL. Mostly used when you dont need to accept consent again.
+		 * @param page
+		 * @example cy.visit('gamechanger/userDashboard');
+		 */
+		visitGcPage(page: string);
+
+		/**
 		 * Types into the search bar and clicks the search button.
 		 * Also waits up to 60 seconds for search results to appear.
 		 * @param searchTerm
@@ -73,6 +80,32 @@ declare namespace Cypress {
 		 * @param tabName
 		 * @example cy.switchResultsTab('Organizations');
 		 */
-		switchResultsTab(tabName: String);
+		switchResultsTab(tabName: string);
+
+		/**
+		 * Switch tabs from within Data Status Tracker.
+		 * Valid Data Cy tags = {'progress-tab' | 'documents-tab' | 'knowledge-graph-tab'}
+		 * @param dstTabDataCyTag
+		 * @example cy.switchDstTab('progress-tab');
+		 */
+		switchDstTab(dstTabDataCyTags: string);
+
+		/**
+		 * Sets up the API Intercepts for the DST Tables, This allows you to use the waitFor____TableToLoad commands
+		 * Should probably be used in the BeforeAll or BeforeEach test step
+		 */
+		setupDSTIntercepts();
+
+		/**
+		 * Waits for the Progress table to load.
+		 * MUST HAVE CALLED setupDSTIntercepts() before this is called
+		 */
+		waitForProgressTableToLoad();
+
+		/**
+		 * Waits for the Documents table to load.
+		 * MUST HAVE CALLED setupDSTIntercepts() before this is called
+		 */
+		waitForDocumentsTableToLoad();
 	}
 }

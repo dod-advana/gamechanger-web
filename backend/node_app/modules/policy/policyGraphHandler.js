@@ -5,7 +5,6 @@ const { DataLibrary } = require('../../lib/dataLibrary');
 const GraphHandler = require('../base/graphHandler');
 const redisAsyncClientDB = 8;
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
-const { default: Helpers } = require('@elastic/elasticsearch/lib/Helpers');
 
 class PolicyGraphHandler extends GraphHandler {
 	constructor(opts = {}) {
@@ -215,20 +214,35 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getReferencesPolicyGraphHelper(req, userId) {
 		try {
-			const { ref_name, isUnknown, isTest = false } = req.body;
+			const { ref_name, doc_id, isUnknown, isTest = false } = req.body;
 
-			const [refData] = await this.getGraphData(
-				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
-					isUnknown ? 'UKN_Document' : 'Document'
-				})
-				WHERE d2.ref_name = $ref_name AND NOT d = d2
-				RETURN ref;`,
-				{ ref_name: ref_name },
-				isTest,
-				userId
-			);
+			if (ref_name) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.ref_name = $ref_name AND NOT d = d2
+					RETURN ref;`,
+					{ ref_name: ref_name },
+					isTest,
+					userId
+				);
 
-			return refData;
+				return refData;
+			} else if (doc_id) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.doc_id = $doc_id AND NOT d = d2
+					RETURN ref;`,
+					{ doc_id: doc_id },
+					isTest,
+					userId
+				);
+
+				return refData;
+			}
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '9F2QSP6', userId);
@@ -930,8 +944,8 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-	createMockGraphReturnFromEsResultsHelper(ref_list, docsRefDict, pubName, referencesRecords, linkIndex) {
-		ref_list.forEach((ref) => {
+	createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex) {
+		doc.ref_list.forEach((ref) => {
 			const refArr = ref.split(' ');
 			let newRef = '';
 			if (refArr.length < 2 && refArr[0].slice(0, 5) === 'Title') {
@@ -1021,13 +1035,7 @@ class PolicyGraphHandler extends GraphHandler {
 				if (!doc.ref_list) doc.ref_list = [];
 
 				// Ensure refs are good with spaces between type and num
-				this.createMockGraphReturnFromEsResultsHelper(
-					doc.ref_list,
-					docsRefDict,
-					pubName,
-					referencesRecords,
-					linkIndex
-				);
+				this.createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex);
 			});
 
 			result.records = [...documentsRecords, ...referencesRecords];

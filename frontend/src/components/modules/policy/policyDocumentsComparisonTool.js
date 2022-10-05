@@ -22,6 +22,30 @@ import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import ExportIcon from '../../../images/icon/Export.svg';
 
+const sortAlphabetically = (order) => {
+	return (docA, docB) => {
+		if (docA.display_title_s > docB.display_title_s) return order;
+		if (docA.display_title_s < docB.display_title_s) return -order;
+		return 0;
+	};
+};
+const sortByDate = (order) => {
+	return (docA, docB) => {
+		if (docA.publication_date_dt > docB.publication_date_dt) return -order;
+		if (docA.publication_date_dt < docB.publication_date_dt) return order;
+		if (!docA.publication_date_dt) return 1;
+		if (!docB.publication_date_dt) return -1;
+		return 0;
+	};
+};
+const sortByScore = (order) => {
+	return (docA, docB) => {
+		if (docA.score > docB.score) return -order;
+		if (docA.score < docB.score) return order;
+		return 0;
+	};
+};
+
 const PolicyDocumentsComparisonTool = ({
 	context,
 	gameChangerAPI,
@@ -55,6 +79,7 @@ const PolicyDocumentsComparisonTool = ({
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -230,30 +255,16 @@ const PolicyDocumentsComparisonTool = ({
 				return doc.paragraphs.find((match) => match.paragraphIdBeingMatched === selectedInput);
 			});
 			const order = sortOrder === 'desc' ? 1 : -1;
-			let sortFunc = {};
+			let sortFunc;
 			switch (sortType) {
 				case 'Alphabetically':
-					sortFunc = (docA, docB) => {
-						if (docA.title > docB.title) return order;
-						if (docA.title < docB.title) return -order;
-						return 0;
-					};
+					sortFunc = sortAlphabetically(order);
 					break;
 				case 'Date Published':
-					sortFunc = (docA, docB) => {
-						if (docA.publication_date_dt > docB.publication_date_dt) return -order;
-						if (docA.publication_date_dt < docB.publication_date_dt) return order;
-						if (!docA.publication_date_dt) return 1;
-						if (!docB.publication_date_dt) return -1;
-						return 0;
-					};
+					sortFunc = sortByDate(order);
 					break;
 				default:
-					sortFunc = (docA, docB) => {
-						if (docA.score > docB.score) return -order;
-						if (docA.score < docB.score) return order;
-						return 0;
-					};
+					sortFunc = sortByScore(order);
 					break;
 			}
 			const sortedDocs = newViewableDocs.sort(sortFunc);
@@ -441,6 +452,7 @@ const PolicyDocumentsComparisonTool = ({
 		setInputError(false);
 		setReturnedDocs([]);
 		setViewableDocs([]);
+		setLeftPanelOpen(true);
 	};
 
 	const handleCheck = (id) => {
@@ -737,6 +749,14 @@ const PolicyDocumentsComparisonTool = ({
 		return <></>;
 	};
 
+	const handleLeftPanelToggle = () => {
+		setLeftPanelOpen(!leftPanelOpen);
+	};
+
+	const getDocumentGridWidth = () => {
+		return leftPanelOpen ? 6 : 8;
+	};
+
 	return (
 		<Grid container style={{ marginTop: 20, paddingBottom: 20 }}>
 			<Grid item xs={12}>
@@ -846,33 +866,42 @@ const PolicyDocumentsComparisonTool = ({
 					)}
 				</div>
 			</Grid>
-			<Grid item xs={2} style={{ marginTop: 20 }}>
-				<GCAnalystToolsSideBar context={context} results={returnedDocs} />
-				<GCButton
-					isSecondaryBtn
-					onClick={() => resetAdvancedSettings(dispatch)}
-					style={{ margin: 0, width: '100%' }}
-				>
-					Clear Filters
-				</GCButton>
-				{!loading && returnedDocs.length > 0 && (
+			<div
+				style={{
+					marginTop: 20,
+					display: leftPanelOpen ? 'block' : 'none',
+					maxWidth: 'calc(16.666667% + 20px)',
+					flexBasis: 'calc(16.666667% + 20px)',
+				}}
+			>
+				<div style={{ marginRight: 20 }}>
+					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
-						onClick={() => {
-							setNoResults(false);
-							setReturnedDocs([]);
-							setNeedsSort(true);
-							setState(dispatch, { runDocumentComparisonSearch: true });
-						}}
-						style={{ margin: '10px 0 0 0', width: '100%' }}
-						disabled={!filterChange}
+						isSecondaryBtn
+						onClick={() => resetAdvancedSettings(dispatch)}
+						style={{ margin: 0, width: '100%' }}
 					>
-						Apply filters
+						Clear Filters
 					</GCButton>
-				)}
-			</Grid>
+					{!loading && returnedDocs.length > 0 && (
+						<GCButton
+							onClick={() => {
+								setNoResults(false);
+								setReturnedDocs([]);
+								setNeedsSort(true);
+								setState(dispatch, { runDocumentComparisonSearch: true });
+							}}
+							style={{ margin: '10px 0 0 0', width: '100%' }}
+							disabled={!filterChange}
+						>
+							Apply filters
+						</GCButton>
+					)}
+				</div>
+			</div>
 			{returnedDocs.length <= 0 && !loading && (
-				<Grid item xs={10}>
-					<DocumentInputContainer>
+				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
+					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
 								<Grid container style={{ display: 'flex', flexDirection: 'column' }}>
@@ -937,18 +966,53 @@ const PolicyDocumentsComparisonTool = ({
 							<div className={'text'}>No results found</div>
 						</div>
 					)}
-				</Grid>
+				</div>
 			)}
 			{loading && (
-				<Grid item xs={10}>
+				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
 					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
 						<LoadingIndicator customColor={gcOrange} />
 					</div>
-				</Grid>
+				</div>
 			)}
 			{!loading && returnedDocs.length > 0 && (
 				<>
-					<Grid item xs={6} style={{ marginTop: 20 }}>
+					<div
+						style={{
+							marginTop: 20,
+							position: 'relative',
+							height: '800px',
+							maxWidth: `calc(${getDocumentGridWidth() / 0.12}% - 20px)`,
+							flexBasis: `calc(${getDocumentGridWidth() / 0.12}% - 20px)`,
+						}}
+					>
+						<div
+							className="searchdemo-vertical-bar-toggle"
+							style={{ bottom: '0px' }}
+							onClick={handleLeftPanelToggle}
+						>
+							<i
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+								style={{
+									color: 'white',
+									verticalAlign: 'sub',
+									height: 20,
+									width: 20,
+									margin: '20px 0 20px 2px',
+								}}
+							/>
+							<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
+							<i
+								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+								style={{
+									color: 'white',
+									verticalAlign: 'sub',
+									height: 20,
+									width: 20,
+									margin: '20px 0 20px 2px',
+								}}
+							/>
+						</div>
 						<div style={{ margin: '0px 20px', height: '800px' }}>
 							<iframe
 								title={'PDFViewer'}
@@ -960,22 +1024,22 @@ const PolicyDocumentsComparisonTool = ({
 										'pdfViewer',
 										'viewerContainer',
 										compareDocument.filename,
-										'PDF Viewer'
+										'PDF Viewer',
+										'gamechanger',
+										gameChangerAPI
 									)
 								}
-								style={{ width: '100%', height: '100%' }}
+								style={{ width: '100%', height: '100%', border: 'none' }}
 							/>
 						</div>
-					</Grid>
-					<Grid
-						item
-						xs={4}
+					</div>
+					<div
 						style={{
 							marginTop: 20,
 							height: '800px',
 							overflowY: 'auto',
 							maxWidth: 'calc(33.333333% + 20px)',
-							flexBasis: 'calc((33.333333% + 20px)',
+							flexBasis: 'calc(33.333333% + 20px)',
 							paddingLeft: '20px',
 							marginLeft: '-20px',
 						}}
@@ -1083,7 +1147,7 @@ const PolicyDocumentsComparisonTool = ({
 							)}
 							{viewableDocs.map((doc) => {
 								const docOpen = collapseKeys[doc.filename] ?? false;
-								const displayTitle = doc.title;
+								const displayTitle = doc.display_title_s;
 								return (
 									<div key={doc.id}>
 										<div
@@ -1116,7 +1180,7 @@ const PolicyDocumentsComparisonTool = ({
 								);
 							})}
 						</div>
-					</Grid>
+					</div>
 				</>
 			)}
 		</Grid>

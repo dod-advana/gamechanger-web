@@ -314,7 +314,7 @@ const getCardViewPanel = (props) => {
 											style={{ position: 'absolute', right: 15, top: 5 }}
 											onClick={() => {
 												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e'
 												);
 											}}
 										>

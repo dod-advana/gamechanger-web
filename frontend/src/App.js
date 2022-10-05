@@ -115,6 +115,11 @@ const GamechangerLiteAdminPage = LoadableVisibility({
 	loading: () => emptyPage(),
 });
 
+const JbookUserProfileSetupPage = LoadableVisibility({
+	loader: () => import('./containers/JBookUserProfileSetupPage'),
+	loading: () => emptyPage(),
+});
+
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
 	siteId: Config.MATOMO_SITE_ID || 2,
@@ -148,6 +153,7 @@ const styles = {
 		marginLeft: '50px',
 		paddingTop: '2em',
 		background: '#ffffff',
+		position: 'relative',
 	},
 };
 
@@ -367,6 +373,12 @@ const App = () => {
 													exact
 													path="/gamechanger-details"
 													component={GameChangerDetailsPage}
+													location={location}
+												/>
+												<Route
+													exact
+													path="/jbook-register-poc"
+													component={JbookUserProfileSetupPage}
 													location={location}
 												/>
 												<PrivateTrackedRoute
