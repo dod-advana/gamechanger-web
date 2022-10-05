@@ -662,15 +662,12 @@ const LabelingValidationKey = React.memo(() => {
 
 const LabelingValidationValue = React.memo((props) => {
 	const { setReviewData, dropdownData, roleDisabled } = props;
-
 	const classes = useStyles();
-
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const disabled = finished || roleDisabled;
-	console.log('I just want to see reviewData', reviewData);
 	return (
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
@@ -682,11 +679,7 @@ const LabelingValidationValue = React.memo((props) => {
 					options={['Yes', 'No']}
 					style={{ width: 300 }}
 					//renderInput={(params) => <TextField {...params} label="Select" variant="outlined" classes={{ focused: classes.focused }} />}
-					value={
-						reviewData && reviewData.pocAgreeLabel && reviewData.pocAgreeLabel !== null
-							? reviewData.pocAgreeLabel
-							: 'Yes'
-					}
+					value={reviewData?.pocAgreeLabel === undefined ? 'Yes' : reviewData.pocAgreeLabel}
 					onChange={(event, value) => setReviewData('pocAgreeLabel', value)}
 					disabled={disabled}
 					disableClearable
@@ -714,22 +707,17 @@ const LabelingValidationValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={
-						dropdownData && reviewData && dropdownData.primaryClassLabel
-							? dropdownData.primaryClassLabel
-							: []
-					}
+					options={dropdownData?.primaryClassLabel === undefined ? [] : dropdownData.primaryClassLabel}
 					getOptionLabel={(option) => option.primary_class_label ?? ''}
 					getOptionSelected={(option, value) => option.primary_class_label === value.primary_class_label}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					onChange={(event, value) => setReviewData('pocClassLabel', value.primary_class_label)}
 					value={
-						reviewData &&
-						(reviewData.serviceClassLabel || reviewData.primaryClassLabel || reviewData.pocClassLabel)
+						reviewData?.pocClassLabel || reviewData?.serviceClassLabel || reviewData?.primaryClassLabel
 							? {
 									primary_class_label:
-										reviewData.pocClassLabel ??
-										reviewData.serviceClassLabel ??
+										reviewData.pocClassLabel ||
+										reviewData.serviceClassLabel ||
 										reviewData.primaryClassLabel,
 							  }
 							: null
