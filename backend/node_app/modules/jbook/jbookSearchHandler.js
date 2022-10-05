@@ -5,7 +5,6 @@ const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
 const ACCOMP = require('../../models').accomp;
-const KEYWORD = require('../../models').keyword;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc_archive;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
@@ -212,35 +211,6 @@ class JBookSearchHandler extends SearchHandler {
 			this.logger.error(message, 'D03Z7K7', userId);
 			throw err;
 		}
-	}
-
-	getGiantQuery(pQuery, rQuery, oQuery) {
-		let giantQuery = ``;
-
-		if (!jbookSearchSettings.budgetType) {
-			giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
-		}
-
-		for (let btype of jbookSearchSettings.budgetType) {
-			let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
-			switch (btype) {
-				case 'Procurement':
-					giantQuery = pQuery;
-					break;
-				case 'RDT&E':
-					giantQuery += unionAll + rQuery;
-					break;
-				case 'O&M':
-					giantQuery += unionAll + oQuery;
-					break;
-				default:
-					break;
-			}
-		}
-
-		giantQuery += ';';
-
-		return giantQuery;
 	}
 
 	// retrieving the data used to populate the filter options on the frontend
