@@ -5,7 +5,6 @@ const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
 const constants = require('../config/constants');
 const https = require('https');
-const fs = require('fs');
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { JIRA_CONFIG } = constants;
 const axios = require('axios').default;
