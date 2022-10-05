@@ -467,9 +467,10 @@ const AIPOCKey = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Enter the AI Point of Contact for this Program/BLI in the POC section of the Service Reviewer Section. A
 				suitable type of POC would be the Program Element Monitor. Select the POC's name from the drop-down. If
-				they are not an option, please direct them to{' '}
-				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added as a POC, and then, click
-				'Save (Partial Service Review)'. Once their information has been updated, the review can be updated.
+				the POC name is not available as an option, please direct the POC to{' '}
+				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added to the list and select `Save
+				(Partial Service Review)`. Once the POC has completed the steps at the link above, you can return to
+				this budget exhibit, select the POC name, and click `Submit`.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
