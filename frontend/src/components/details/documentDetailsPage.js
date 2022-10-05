@@ -400,7 +400,9 @@ const DocumentDetailsPage = (props) => {
 			<MainContainer>
 				<div className={'details'}>
 					<Paper>
-						<div className={'name'}>{document?.display_title_s || 'Loading...'}</div>
+						<div className={'name'}>
+							{document ? `${document.doc_type} ${document.doc_num}: ${document.title}` : 'Loading...'}
+						</div>
 
 						<div>
 							<GCButton

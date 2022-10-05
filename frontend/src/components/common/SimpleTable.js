@@ -5,6 +5,7 @@ import parse from 'html-react-parser';
 import { primary } from './gc-colors';
 import CONFIG from '../../config/config';
 import sanitizeHtml from 'sanitize-html';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const defaultColWidth = {
 	maxWidth: 250,
@@ -17,6 +18,7 @@ const titleWidth = {
 	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
+	border: 'unset',
 };
 
 const stickyHeader = {
@@ -30,6 +32,17 @@ const noWrapStyle = {
 	whiteSpace: 'normal',
 	// maxWidth: '100%',
 	// width: '100%'
+};
+
+const loadingStyle = {
+	color: '#fff',
+};
+
+const getCellText = (content, useParser) => {
+	if (useParser) return parse(content || '');
+	else if (Array.isArray(content)) return content.join(', ');
+	else if (typeof content === 'boolean') return content.toString();
+	else return content;
 };
 
 export default class SimpleTable extends React.Component {
@@ -50,14 +63,62 @@ export default class SimpleTable extends React.Component {
 		useParser: false,
 		hideSubheader: false,
 		useInnerHtml: false,
+		loading: false,
 	};
 
 	state = {
 		selectedRow: null,
 	};
 
+	renderSubHeaderWithoutColMap = (cols, colWidth, firstColWidth, headerExtraStyle, title, loading) => {
+		return _.map(cols, (col, idx) => {
+			if (idx === 0) {
+				return (
+					<th
+						style={{
+							...(this.props.stickyHeader && stickyHeader),
+							...firstColWidth,
+							...headerExtraStyle,
+						}}
+						key={idx}
+					>
+						{col}
+					</th>
+				);
+			} else if (!title && loading && idx === cols.length - 1 && !col.trim()) {
+				return (
+					<th
+						style={{
+							...(this.props.stickyHeader && stickyHeader),
+							...colWidth,
+							...headerExtraStyle,
+						}}
+						key={idx}
+					>
+						<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+							<CircularProgress size={24} sx={loadingStyle} />
+						</div>
+					</th>
+				);
+			} else {
+				return (
+					<th
+						style={{
+							...(this.props.stickyHeader && stickyHeader),
+							...colWidth,
+							...headerExtraStyle,
+						}}
+						key={idx}
+					>
+						{col}
+					</th>
+				);
+			}
+		});
+	};
+
 	getHeader = (cols, colMap) => {
-		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title } = this.props;
+		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title, loading } = this.props;
 
 		if (hideHeader) return <thead></thead>;
 		return (
@@ -67,7 +128,13 @@ export default class SimpleTable extends React.Component {
 						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
 							{title}
 						</th>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}></th>
+						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}>
+							{loading && (
+								<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+									<CircularProgress size={24} sx={loadingStyle} />
+								</div>
+							)}
+						</th>
 					</tr>
 				)}
 				{!hideSubheader && (
@@ -103,45 +170,83 @@ export default class SimpleTable extends React.Component {
 								}
 							})}
 						{!colMap &&
-							_.map(cols, (col, idx) => {
-								if (idx === 0) {
-									return (
-										<th
-											style={{
-												...(this.props.stickyHeader && stickyHeader),
-												...firstColWidth,
-												...headerExtraStyle,
-											}}
-											key={idx}
-										>
-											{col}
-										</th>
-									);
-								} else {
-									return (
-										<th
-											style={{
-												...(this.props.stickyHeader && stickyHeader),
-												...colWidth,
-												...headerExtraStyle,
-											}}
-											key={idx}
-										>
-											{col}
-										</th>
-									);
-								}
-							})}
+							this.renderSubHeaderWithoutColMap(
+								cols,
+								colWidth,
+								firstColWidth,
+								headerExtraStyle,
+								title,
+								loading
+							)}
 					</tr>
 				)}
 			</thead>
 		);
 	};
 
+	buildRow = (r, c, useInnerHtml, rowCells, cIdx, rIdx, firstColWidth, colWidth, extraWrapStyle, useParser) => {
+		let value = r[c] ?? '';
+		if (useInnerHtml) {
+			if (!value || _.isBoolean(value)) value = '';
+			rowCells.push(
+				<td style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }} key={`${rIdx}_${cIdx}`}>
+					<blockquote
+						style={{ borderLeft: 'none' }}
+						dangerouslySetInnerHTML={{
+							__html: sanitizeHtml(value, {
+								allowedAttributes: { span: ['style'], br: [] },
+							}),
+						}}
+					/>
+				</td>
+			);
+		} else {
+			const editIcon = this.props.showEditIcon && cIdx === 0 && (
+				<i style={{ marginRight: 10, color: 'blue' }} className="fa fa-pencil" />
+			);
+			rowCells.push(
+				<td style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }} key={`${rIdx}_${cIdx}`}>
+					{editIcon}
+					{getCellText(r[c], useParser)}
+				</td>
+			);
+		}
+	};
+
+	buildRowItemsForBody = (isSelectedRow, activeRow, r, returnRowOnClick, onRowClick, rIdx, rowCells, rowItems) => {
+		rowItems.push(
+			<tr
+				style={isSelectedRow ? activeRow : {}}
+				onClick={() => {
+					this.setState({ selectedRow: r.id });
+					if (returnRowOnClick) {
+						onRowClick(r)();
+					} else {
+						onRowClick(r.id || r)();
+					}
+				}}
+				key={rIdx}
+			>
+				{rowCells}
+			</tr>
+		);
+	};
+
+	buildRowWithColMap = (colMap, rowCells, colWidth, extraWrapStyle, rIdx, r) => {
+		colMap.forEach((c, cIdx) => {
+			let innerVal = c.format ? c.format(r[c.col]) : r[c.col];
+
+			rowCells.push(
+				<td style={{ ...colWidth, ...extraWrapStyle }} key={`${rIdx}_${cIdx}`}>
+					{innerVal}
+				</td>
+			);
+		});
+	};
+
 	getBody = (rows, cols, colMap, onRowClick) => {
 		const rowItems = [];
-		let extraWrapStyle = {};
-		if (this.props.disableWrap) extraWrapStyle = noWrapStyle;
+		const extraWrapStyle = this.props.disableWrap ? noWrapStyle : {};
 		const selectedRow = this.state.selectedRow ? this.state.selectedRow : this.props.defaultRow;
 		const { highlightSelectedRow, colWidth, firstColWidth, returnRowOnClick, useParser, useInnerHtml } = this.props;
 		const tbodyStyle = {
@@ -161,57 +266,22 @@ export default class SimpleTable extends React.Component {
 			let r = rows[rIdx];
 
 			if (colMap) {
-				_.each(colMap, (c, cIdx) => {
-					let innerVal = c.format ? c.format(r[c.col]) : r[c.col];
-
-					rowCells.push(
-						<td style={{ ...colWidth, ...extraWrapStyle }} key={`${rIdx}_${cIdx}`}>
-							{innerVal}
-						</td>
-					);
-				});
+				this.buildRowWithColMap(colMap, rowCells, colWidth, extraWrapStyle, rIdx);
 			} else {
 				if (!r.Hidden) {
 					_.each(cols, (c, cIdx) => {
-						let value = r[c] ?? '';
-						if (useInnerHtml) {
-							if (!value || _.isBoolean(value)) value = '';
-							rowCells.push(
-								<td
-									style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
-									key={`${rIdx}_${cIdx}`}
-								>
-									<blockquote
-										style={{ borderLeft: 'none' }}
-										dangerouslySetInnerHTML={{
-											__html: sanitizeHtml(value, {
-												allowedAttributes: { span: ['style'], br: [] },
-											}),
-										}}
-									/>
-								</td>
-							);
-						} else {
-							const editIcon = this.props.showEditIcon && cIdx === 0 && (
-								<i style={{ marginRight: 10, color: 'blue' }} className="fa fa-pencil" />
-							);
-							if (!value || _.isBoolean(value)) value = '';
-							rowCells.push(
-								<td
-									style={{ ...(cIdx === 0 ? firstColWidth : colWidth), ...extraWrapStyle }}
-									key={`${rIdx}_${cIdx}`}
-								>
-									{editIcon}
-									{useParser
-										? parse(r[c])
-										: Array.isArray(r[c])
-										? r[c].join(', ')
-										: typeof r[c] === 'boolean'
-										? r[c].toString()
-										: r[c]}
-								</td>
-							);
-						}
+						this.buildRow(
+							r,
+							c,
+							useInnerHtml,
+							rowCells,
+							cIdx,
+							rIdx,
+							firstColWidth,
+							colWidth,
+							extraWrapStyle,
+							useParser
+						);
 					});
 				}
 			}
@@ -219,21 +289,15 @@ export default class SimpleTable extends React.Component {
 
 			onGoingCellCount += rowCells.length;
 
-			rowItems.push(
-				<tr
-					style={isSelectedRow ? activeRow : {}}
-					onClick={() => {
-						this.setState({ selectedRow: r.id });
-						if (returnRowOnClick) {
-							onRowClick(r)();
-						} else {
-							onRowClick(r.id || r)();
-						}
-					}}
-					key={rIdx}
-				>
-					{rowCells}
-				</tr>
+			this.buildRowItemsForBody(
+				isSelectedRow,
+				activeRow,
+				r,
+				returnRowOnClick,
+				onRowClick,
+				rIdx,
+				rowCells,
+				rowItems
 			);
 
 			if (onGoingCellCount > CONFIG.MAX_SIMPLE_TABLE_CELLS) break;
