@@ -524,11 +524,13 @@ class JBookDataHandler extends DataHandler {
 				}
 				return 0;
 			});
-
+			console.log('pocList: ', pocList);
 			const pocReviewers = {};
-			pocList.forEach(
-				(poc) => (pocReviewers[`${poc.first_name} ${poc.last_name} ${poc.email ? `(${poc.email})` : ''}`] = poc)
-			);
+			pocList.forEach((poc) => {
+				const emailDisp = poc.email ? `(${poc.email})` : '';
+				pocReviewers[`${poc.first_name} ${poc.last_name} ${emailDisp}`] = poc;
+			});
+			console.log('pocReviewers: ', pocReviewers);
 
 			// hardcode from mitr if col doesn't exist/can't find it yet.. currently none
 			const data = {
