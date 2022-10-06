@@ -3,39 +3,38 @@ const loggerLib = require('@dod-advana/advana-logger');
 const axiosLib = require('axios');
 
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
-const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 const mlTrainBaseUrl = constants.GAMECHANGER_ML_API_TRAIN_BASE_URL;
 
 const MLRoutes = {
-	getLoadedModels: `${transformerBaseUrl}/getLoadedModels`,
-	getS3List: `${transformerBaseUrl}/s3?function=models`,
-	getS3DataList: `${transformerBaseUrl}/s3?function=data`,
-	downloadS3File: `${transformerBaseUrl}/downloadS3File`,
-	deleteLocalModel: `${transformerBaseUrl}/deleteLocalModel`,
-	downloadDependencies: `${transformerBaseUrl}/download`,
-	getAPIInformation: `${transformerBaseUrl}/`,
+	getLoadedModels: `${mlBaseUrl}/getLoadedModels`,
+	getS3List: `${mlBaseUrl}/s3?function=models`,
+	getS3DataList: `${mlBaseUrl}/s3?function=data`,
+	downloadS3File: `${mlBaseUrl}/downloadS3File`,
+	deleteLocalModel: `${mlBaseUrl}/deleteLocalModel`,
+	downloadDependencies: `${mlBaseUrl}/download`,
+	getAPIInformation: `${mlBaseUrl}/`,
 	getAPIInformationTrain: `${mlTrainBaseUrl}/`,
-	getModelsList: `${transformerBaseUrl}/getModelsList`,
-	getDataList: `${transformerBaseUrl}/getDataList`,
-	getFilesInCorpus: `${transformerBaseUrl}/getFilesInCorpus`,
-	getProcessStatus: `${transformerBaseUrl}/getProcessStatus`,
-	getCache: `${transformerBaseUrl}/getCache`,
+	getModelsList: `${mlBaseUrl}/getModelsList`,
+	getDataList: `${mlBaseUrl}/getDataList`,
+	getFilesInCorpus: `${mlBaseUrl}/getFilesInCorpus`,
+	getProcessStatus: `${mlBaseUrl}/getProcessStatus`,
+	getCache: `${mlBaseUrl}/getCache`,
 
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
-	transSentenceSearch: `${transformerBaseUrl}/transSentenceSearch`,
-	textExtractions: `${transformerBaseUrl}/textExtractions`,
-	documentCompare: `${transformerBaseUrl}/documentCompare`,
-	transformResults: `${transformerBaseUrl}/transformerSearch`,
-	reloadModels: `${transformerBaseUrl}/reloadModels`,
-	downloadCorpus: `${transformerBaseUrl}/downloadCorpus`,
+	transSentenceSearch: `${mlBaseUrl}/transSentenceSearch`,
+	textExtractions: `${mlBaseUrl}/textExtractions`,
+	documentCompare: `${mlBaseUrl}/documentCompare`,
+	transformResults: `${mlBaseUrl}/transformerSearch`,
+	reloadModels: `${mlBaseUrl}/reloadModels`,
+	downloadCorpus: `${mlBaseUrl}/downloadCorpus`,
 	trainModel: `${mlTrainBaseUrl}/trainModel`,
-	initializeLTR: `${transformerBaseUrl}/LTR/initLTR`,
+	initializeLTR: `${mlBaseUrl}/LTR/initLTR`,
 	createModelLTR: `${mlTrainBaseUrl}/LTR/createModel`,
-	recommender: `${transformerBaseUrl}/recommender`,
-	stopProcess: `${transformerBaseUrl}/stopProcess`,
+	recommender: `${mlBaseUrl}/recommender`,
+	stopProcess: `${mlBaseUrl}/stopProcess`,
 	sendUserAggregations: `${mlTrainBaseUrl}/sendUserAggregations`,
-	clearCache: `${transformerBaseUrl}/clearCache`,
+	clearCache: `${mlBaseUrl}/clearCache`,
 };
 /**
  * @class MLApiClient
