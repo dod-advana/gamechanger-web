@@ -218,6 +218,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Activity Number': 'budgetActivity',
 	'Budget Sub Activity Number': 'budgetSubActivity',
 	'Budget Year 1 Requested': ['maxBY1Funding', 'minBY1Funding'],
+	Tags: 'classLabel',
 };
 
 const getToComplete = (projectData, budgetType) => {
