@@ -1287,10 +1287,10 @@ class UserController {
 					attachment,
 					userId
 				)
-				.then((success) => {
+				.then(() => {
 					res.status(200).send({ status: 'good' });
 				})
-				.catch((failure) => {
+				.catch(() => {
 					res.status(500).send({ status: 'bad' });
 				});
 		} catch (err) {
@@ -1320,10 +1320,10 @@ class UserController {
 					null,
 					userId
 				)
-				.then((success) => {
+				.then(() => {
 					res.status(200).send({ status: 'good' });
 				})
-				.catch((failure) => {
+				.catch(() => {
 					res.status(500).send({ status: 'bad' });
 				});
 		} catch (err) {
@@ -1411,7 +1411,7 @@ class UserController {
 				id_values.push(value);
 			});
 
-			const [count, rows] = await this.gcUser.update({ api_requests: 3 }, { where: { id: id_values } });
+			const [count] = await this.gcUser.update({ api_requests: 3 }, { where: { id: id_values } });
 			this.logger.info(`Finished resetting; ${count} rows affected.`);
 			return count;
 		} catch (e) {

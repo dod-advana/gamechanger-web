@@ -28,7 +28,7 @@ module.exports = {
 			updatedAt: Sequelize.DATE,
 		});
 	},
-	down: async (queryInterface, Sequelize) => {
+	down: async (queryInterface, _Sequelize) => {
 		await queryInterface.dropTable('compare_feedback');
 	},
 };

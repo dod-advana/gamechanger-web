@@ -3,7 +3,7 @@ const tablename = 'portfolio';
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
-		return queryInterface.describeTable(tablename).then((tableDefinition) => {
+		return queryInterface.describeTable(tablename).then(() => {
 			let queries = [];
 			queries.push(queryInterface.renameColumn(tablename, 'private', 'isPrivate'));
 			queries.push(
