@@ -47,7 +47,7 @@ const filterNameMap = {
 	maxBY1Funding: 'BY1 Fund Max',
 	minTotalCost: 'Total Fund Min',
 	maxTotalCost: 'Total Fund Max',
-	primaryReviewer: 'Primary Reviewer',
+	primaryReviewer: 'Initial Reviewer',
 	serviceReviewer: 'Service Reviewer',
 	pocReviewer: 'POC Reviewer',
 	reviewStatus: 'Review Status',
