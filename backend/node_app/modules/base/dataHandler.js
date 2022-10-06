@@ -21,7 +21,7 @@ class DataHandler {
 		return await this.callFunctionHelper({ body: proxyBody, permissions }, userId, res);
 	}
 
-	async callFunctionHelper(req, userId, res) {
+	async callFunctionHelper(req, _userId, _res) {
 		return req.body;
 	}
 }

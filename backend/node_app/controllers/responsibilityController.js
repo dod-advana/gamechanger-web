@@ -116,7 +116,7 @@ class ResponsibilityController {
 		return query;
 	}
 
-	oneDocQuery(filename) {
+	oneDocQuery(filename, userId) {
 		// get contents of single document searching by filename
 		try {
 			return {
@@ -163,7 +163,7 @@ class ResponsibilityController {
 			let rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			const paragraphNum = await this.getParagraphNum(rawResults, userId);
 
-			esQuery = this.oneDocQuery(filename);
+			esQuery = this.oneDocQuery(filename, userId);
 			rawResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			const results = await this.cleanUpEsResults(rawResults, userId);
 
@@ -399,7 +399,7 @@ class ResponsibilityController {
 					subQuery: false,
 				}
 			);
-			res.status(200).send();
+			res.status(200).send({ result });
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'UYDC4856', userId);
