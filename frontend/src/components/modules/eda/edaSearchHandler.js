@@ -257,7 +257,8 @@ const EdaSearchHandler = {
 
 		let { orgFilterText } = getOrgMajcomFilters(organizations, majcoms, allOrgsSelected);
 
-		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
+		const issueOfficeDoDAACText =
+			issueOfficeDoDAAC && issueOfficeDoDAAC.length > 0 ? issueOfficeDoDAAC.join('__') : undefined;
 		const issueOfficeNameText = issueOfficeName ?? undefined;
 		const fiscalYearsText =
 			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
@@ -289,6 +290,34 @@ const EdaSearchHandler = {
 			endDateText,
 			issueAgencyText,
 		});
+	},
+
+	async getPresearchData(state, dispatch) {
+		const { cloneData } = state;
+		if (!state.filterDataFetched) {
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getPresearchData',
+				cloneName: cloneData.clone_name,
+				options: {},
+			});
+			const newFilterData = {
+				fiscalYear: resp.data.fiscal_year,
+				majcom: resp.data.majcom,
+				issueOfficeName: resp.data.issue_office_name,
+				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()),
+				vendorName: resp.data.vendor_name,
+				fundingOfficeDoDAAC: resp.data.funding_office_dodaac,
+				fundingOfficeName: resp.data.funding_office_name,
+				psc: resp.data.psc,
+				naics: resp.data.naics,
+				duns: resp.data.duns,
+				idvPIID: resp.data.idv_piid,
+				PIID: resp.data.piid,
+				modNumber: resp.data.mod_number,
+			};
+
+			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
+		}
 	},
 
 	async handleSearch(state, dispatch) {
@@ -552,7 +581,7 @@ const EdaSearchHandler = {
 		}
 
 		if (!isNullish(dodaacURL)) {
-			newSearchSettings.issueOfficeDoDAAC = dodaacURL;
+			newSearchSettings.issueOfficeDoDAAC = dodaacURL.split('__');
 		}
 
 		if (!isNullish(officeNameURL)) {
@@ -595,10 +624,6 @@ const EdaSearchHandler = {
 		parsed.edaSearchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.edaSearchSettings));
 
 		return parsed;
-	},
-
-	getPresearchData() {
-		// intentional
 	},
 };
 
