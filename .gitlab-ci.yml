@@ -31,11 +31,8 @@ variables:
     --build-arg=APP_GID=1001
     --reproducible
   DEPLOY_TO_PERSONAL:
-    description: "Optional: SKIP validation steps and deploy to dev cluster at personal url for testing?"
+    description: "Optional: SKIP most validation steps and deploy to dev cluster at personal url for testing?"
     value: "false"
-  # PERSONAL_BRANCH_TO_BUILD:
-  #   description: "Optional: Set if DEPLOY_TO_PERSONAL is set. Branch to deploy to personal url for testing."
-  #   value: "main"
 
 cache: &global_cache
   untracked: true
@@ -191,9 +188,7 @@ chart-publish:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
-    - if: $DEPLOY_TO_PERSONAL != "false" #&& $PERSONAL_BRANCH_TO_BUILD != ""
-      # variables:
-      #   CI_COMMIT_BRANCH: "${PERSONAL_BRANCH_TO_BUILD}"
+    - if: $DEPLOY_TO_PERSONAL != "false"
   extends: ".helm-publish"
   variables:
     CHART: "${PLATFORM_PROMOTION_CHART}"
@@ -211,10 +206,9 @@ dev-overrides:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         VALUES_FILE: "ingress.dev.values.yaml"
-    - if: $DEPLOY_TO_PERSONAL != "false" # && $PERSONAL_BRANCH_TO_BUILD != ""
+    - if: $DEPLOY_TO_PERSONAL != "false"
       variables:
         VALUES_FILE: "ingress.dev.values.yaml"
-        # CI_COMMIT_BRANCH: "${PERSONAL_BRANCH_TO_BUILD}"
     - if: $CI_COMMIT_BRANCH == "main"
       variables:
         VALUES_FILE: "dev.values.yaml"
@@ -250,7 +244,7 @@ trigger:
         NO_TEST: "true"
         ENVIRONMENT: "dev"
         UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
-        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
+        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
         KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
         DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
         HELM_UPGRADE_EXTRA_ARGS: >-
@@ -262,13 +256,13 @@ trigger:
           --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
           --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
           --set env.APPROVED_API_CALLERS=${DEV_URL}
-    - if: $DEPLOY_TO_PERSONAL != "false" # && $PERSONAL_BRANCH_TO_BUILD != ""
+    - if: $DEPLOY_TO_PERSONAL != "false"
       variables:
         UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
         NO_TEST: "true"
         ENVIRONMENT: "dev"
         UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
-        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
+        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
         KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
         DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
         HELM_UPGRADE_EXTRA_ARGS: >-
@@ -291,7 +285,7 @@ integration-testing-cypress-job: # Start the integration testing
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
-    HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN}-gc"
+    HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
     DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
     CYPRESS_BASE_URL: "${DEV_URL}"
     CYPRESS_API_URL: "${DEV_URL}"
