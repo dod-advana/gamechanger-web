@@ -11,6 +11,7 @@ import { gcOrange } from '../../common/gc-colors';
 import GCButton from '../../common/GCButton';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
+import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
 
 const styles = {
 	titleText: {
@@ -95,6 +96,9 @@ const styles = {
 	},
 	boldText: {
 		fontSize: '0.8em',
+	},
+	width100: {
+		width: '100%',
 	},
 };
 
@@ -1070,14 +1074,24 @@ const EDASearchMatrixHandler = (props) => {
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.issueOfficeDoDAAC}
+						expanded={edaSearchSettings.issueOfficeDoDAAC && edaSearchSettings.issueOfficeDoDAAC.length > 0}
 						header={'ISSUE OFFICE DODAAC'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 						id={'issueOfficeDoDAACAccordion'}
 					>
-						{renderTextFieldFilter(state, dispatch, 'Issue Office DoDAAC', 'issueOfficeDoDAAC')}
+						<div style={styles.width100}>
+							<MultiSelectAutocomplete
+								value={state.edaSearchSettings.issueOfficeDoDAAC}
+								setValue={(value) => {
+									setEDASearchSetting('issueOfficeDoDAAC', value, state, dispatch);
+								}}
+								options={state.edaFilterData.issueOfficeDoDAAC}
+								placeholder="Search DoDAACs"
+								label="Issue Office DoDAAC"
+							/>
+						</div>
 					</GCAccordion>
 
 					<GCAccordion

@@ -2,6 +2,22 @@ import React, { useReducer } from 'react';
 import { orgFilters } from '../../../utils/gamechangerUtils';
 
 const initState = {
+	filterDataFetched: false,
+	edaFilterData: {
+		fiscalYear: [],
+		majcom: [],
+		issueOfficeName: [],
+		issueOfficeDoDAAC: [],
+		vendorName: [],
+		fundingOfficeDODAAC: [],
+		fundingOfficeName: [],
+		psc: [],
+		naics: [],
+		duns: [],
+		idvPIID: [],
+		PIID: [],
+		modNumber: [],
+	},
 	edaSearchSettings: {
 		allOrgsSelected: true,
 		organizations: [],
@@ -9,7 +25,7 @@ const initState = {
 		startDate: '',
 		endDate: '',
 		issueAgency: '',
-		issueOfficeDoDAAC: '',
+		issueOfficeDoDAAC: [],
 		issueOfficeName: '',
 		allYearsSelected: true,
 		fiscalYears: [],

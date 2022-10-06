@@ -1151,5 +1151,17 @@ html {
 	.MuiMenu-list > li {
 		display: block !important;
 	}
+
+	.MuiAutocomplete-inputRoot .MuiAutocomplete-input {
+		min-width: 100% !important;
+	}
+
+	.MuiAutocomplete-inputRoot[class*="MuiInput-root"] {
+		padding-top: 5px !important;
+	}
   
+	.width-100 {
+		width: 100%;
+	}
+
   /** End data-mil styles **/
