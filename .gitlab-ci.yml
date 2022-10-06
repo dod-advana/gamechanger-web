@@ -244,7 +244,7 @@ trigger:
         NO_TEST: "true"
         ENVIRONMENT: "dev"
         UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
-        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
+        HELM_RELEASE_NAME: ${GITLAB_USER_LOGIN//_/-}-gc
         KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
         DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
         HELM_UPGRADE_EXTRA_ARGS: >-
@@ -262,7 +262,7 @@ trigger:
         NO_TEST: "true"
         ENVIRONMENT: "dev"
         UPSTREAM_DEPLOYER_JOB_NAME: "dev-overrides"
-        HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
+        HELM_RELEASE_NAME: ${GITLAB_USER_LOGIN//_/-}-gc
         KUBE_NAMESPACE: "${HELM_RELEASE_NAME}"
         DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
         HELM_UPGRADE_EXTRA_ARGS: >-
@@ -285,7 +285,7 @@ integration-testing-cypress-job: # Start the integration testing
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
-    HELM_RELEASE_NAME: "${GITLAB_USER_LOGIN//_/-}-gc"
+    HELM_RELEASE_NAME: ${GITLAB_USER_LOGIN//_/-}-gc
     DEV_URL: "https://${HELM_RELEASE_NAME}.dev.advana.us"
     CYPRESS_BASE_URL: "${DEV_URL}"
     CYPRESS_API_URL: "${DEV_URL}"
