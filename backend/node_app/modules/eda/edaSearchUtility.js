@@ -784,9 +784,26 @@ class EDASearchUtility {
 
 			// ISSUE OFFICE NAME
 			if (settings.issueOfficeName && settings.issueOfficeName.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.contracting_office_name_eda_ext', settings.issueOfficeName)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const issueOfficeName of settings.issueOfficeName) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.contracting_office_name_eda_ext',
+							default_operator: 'or',
+							query: issueOfficeName,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// FISCAL YEARS
@@ -942,9 +959,26 @@ class EDASearchUtility {
 
 			// FUNDING OFFICE CODE
 			if (settings.fundingOfficeCode && settings.fundingOfficeCode.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.funding_office_code_eda_ext', settings.fundingOfficeCode)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const fundingOfficeCode of settings.fundingOfficeCode) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.funding_office_code_eda_ext',
+							default_operator: 'or',
+							query: fundingOfficeCode,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// IDV PIID
@@ -978,9 +1012,26 @@ class EDASearchUtility {
 
 			// FUNDING AGENCY NAME
 			if (settings.fundingAgencyName && settings.fundingAgencyName.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.funding_agency_name_eda_ext', settings.fundingAgencyName)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const fundingAgencyName of settings.fundingAgencyName) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.funding_agency_name_eda_ext',
+							default_operator: 'or',
+							query: fundingAgencyName,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// NAICS

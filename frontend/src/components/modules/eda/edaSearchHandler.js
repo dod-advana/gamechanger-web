@@ -259,7 +259,8 @@ const EdaSearchHandler = {
 
 		const issueOfficeDoDAACText =
 			issueOfficeDoDAAC && issueOfficeDoDAAC.length > 0 ? issueOfficeDoDAAC.join('__') : undefined;
-		const issueOfficeNameText = issueOfficeName ?? undefined;
+		const issueOfficeNameText =
+			issueOfficeName && issueOfficeName.length > 0 ? issueOfficeName.join('__') : undefined;
 		const fiscalYearsText =
 			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
 		const contractDataText =
@@ -300,14 +301,15 @@ const EdaSearchHandler = {
 				cloneName: cloneData.clone_name,
 				options: {},
 			});
+			console.log(resp.data);
 			const newFilterData = {
 				fiscalYear: resp.data.fiscal_year,
 				majcom: resp.data.majcom,
-				issueOfficeName: resp.data.issue_office_name,
-				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()),
+				issueOfficeName: resp.data.issue_office_name.map((e) => e.toUpperCase()).sort(),
+				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()).sort(),
 				vendorName: resp.data.vendor_name,
-				fundingOfficeDoDAAC: resp.data.funding_office_dodaac,
-				fundingOfficeName: resp.data.funding_office_name,
+				fundingOfficeDoDAAC: resp.data.funding_office_dodaac.map((e) => e.toUpperCase()).sort(),
+				fundingAgencyName: resp.data.funding_agency_name.map((e) => e.toUpperCase()).sort(),
 				psc: resp.data.psc,
 				naics: resp.data.naics,
 				duns: resp.data.duns,
@@ -524,7 +526,7 @@ const EdaSearchHandler = {
 				'DEFENSE LOGISTICS AGENCY': 'DLA',
 			};
 
-			data.forEach((org) => {
+			data?.forEach((org) => {
 				const orgName = orgNames[org.key.toUpperCase()] ? orgNames[org.key.toUpperCase()] : 'ODA';
 				issuingOrgs[orgName].count += org.count;
 				issuingOrgs[orgName].obligatedAmount += org.value;
@@ -585,7 +587,7 @@ const EdaSearchHandler = {
 		}
 
 		if (!isNullish(officeNameURL)) {
-			newSearchSettings.issueOfficeName = officeNameURL;
+			newSearchSettings.issueOfficeName = officeNameURL.split('__');
 		}
 
 		if (!isNullish(fiscalYearsURL)) {
