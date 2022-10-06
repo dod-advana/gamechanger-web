@@ -958,12 +958,12 @@ const JBookProfilePage = () => {
 		) {
 			setState(dispatch, { [loading]: true });
 
-			reviewData.latest_class_label_s = reviewData.primaryClassLabel;
+			reviewData.latestClassLabel = reviewData.primaryClassLabel;
 			if (reviewData.serviceAgreeLabel === 'No') {
-				reviewData.latest_class_label_s = reviewData.serviceClassLabel;
+				reviewData.latestClassLabel = reviewData.serviceClassLabel;
 			}
 			if (reviewData.pocAgreeLabel === 'No') {
-				reviewData.latest_class_label_s = reviewData.pocClassLabel;
+				reviewData.latestClassLabel = reviewData.pocClassLabel;
 			}
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
