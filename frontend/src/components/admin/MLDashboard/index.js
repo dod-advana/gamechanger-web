@@ -62,7 +62,6 @@ export default () => {
 			let checkProcess = false;
 			const flags = processesData.process_status.flags;
 			for (const key in flags) {
-				console.log(key);
 				if (flags[key]) {
 					checkProcess = true;
 				}
