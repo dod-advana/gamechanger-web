@@ -76,7 +76,7 @@ const initState = {
 		minBY1Funding: '',
 		maxBY1Funding: '',
 
-		budgetActivity: '',
+		budgetActivity: [],
 
 		minTotalCost: '',
 		maxTotalCost: '',
