@@ -123,6 +123,18 @@ export default (props) => {
 	};
 
 	/**
+	 * Pass a file from s3 to download into the ml-api
+	 * @method downloadS3File
+	 */
+	const downloadS3FileTrain = async (row, type) => {
+		await gameChangerAPI.downloadS3FileTrain({
+			file: row.original.file,
+			type: type,
+		});
+		props.getProcesses();
+	};
+
+	/**
 	 * Get a list of all the proccesses running and completed
 	 * @method getAllProcessData
 	 */
@@ -230,13 +242,29 @@ export default (props) => {
 			Cell: (row) => <TableRow>{row.value}</TableRow>,
 		},
 		{
-			Header: 'Download',
+			Header: 'Inference',
 			accessor: '',
 			Cell: (row) => (
 				<TableRow>
 					<IconButton
 						onClick={() => {
 							downloadS3File(row, 'models');
+						}}
+						style={{ color: 'white' }}
+					>
+						<CloudDownload fontSize="large" />
+					</IconButton>
+				</TableRow>
+			),
+		},
+		{
+			Header: 'Training',
+			accessor: '',
+			Cell: (row) => (
+				<TableRow>
+					<IconButton
+						onClick={() => {
+							downloadS3FileTrain(row, 'models');
 						}}
 						style={{ color: 'white' }}
 					>
@@ -265,7 +293,7 @@ export default (props) => {
 				<TableRow>
 					<IconButton
 						onClick={() => {
-							downloadS3File(row, 'ml-data');
+							downloadS3FileTrain(row, 'ml-data');
 						}}
 						style={{ color: 'white' }}
 					>
