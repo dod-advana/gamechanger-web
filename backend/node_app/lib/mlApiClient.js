@@ -8,14 +8,16 @@ const mlTrainBaseUrl = constants.GAMECHANGER_ML_API_TRAIN_BASE_URL;
 const MLRoutes = {
 	getLoadedModels: `${mlBaseUrl}/getLoadedModels`,
 	getS3List: `${mlBaseUrl}/s3?function=models`,
-	getS3DataList: `${mlBaseUrl}/s3?function=data`,
+	getS3DataList: `${mlTrainBaseUrl}/s3?function=data`,
 	downloadS3File: `${mlBaseUrl}/downloadS3File`,
+	downloadS3FileTrain: `${mlTrainBaseUrl}/downloadS3File`,
 	deleteLocalModel: `${mlBaseUrl}/deleteLocalModel`,
 	downloadDependencies: `${mlBaseUrl}/download`,
 	getAPIInformation: `${mlBaseUrl}/`,
 	getAPIInformationTrain: `${mlTrainBaseUrl}/`,
 	getModelsList: `${mlBaseUrl}/getModelsList`,
-	getDataList: `${mlBaseUrl}/getDataList`,
+	getModelsListTrain: `${mlTrainBaseUrl}/getModelsList`,
+	getDataList: `${mlTrainBaseUrl}/getDataList`,
 	getFilesInCorpus: `${mlBaseUrl}/getFilesInCorpus`,
 	getProcessStatus: `${mlBaseUrl}/getProcessStatus`,
 	getCache: `${mlBaseUrl}/getCache`,
@@ -27,9 +29,9 @@ const MLRoutes = {
 	documentCompare: `${mlBaseUrl}/documentCompare`,
 	transformResults: `${mlBaseUrl}/transformerSearch`,
 	reloadModels: `${mlBaseUrl}/reloadModels`,
-	downloadCorpus: `${mlBaseUrl}/downloadCorpus`,
+	downloadCorpus: `${mlTrainBaseUrl}/downloadCorpus`,
 	trainModel: `${mlTrainBaseUrl}/trainModel`,
-	initializeLTR: `${mlBaseUrl}/LTR/initLTR`,
+	initializeLTR: `${mlTrainBaseUrl}/LTR/initLTR`,
 	createModelLTR: `${mlTrainBaseUrl}/LTR/createModel`,
 	recommender: `${mlBaseUrl}/recommender`,
 	stopProcess: `${mlBaseUrl}/stopProcess`,
@@ -55,6 +57,7 @@ class MLApiClient {
 
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getModelsListTrain = this.getData.bind(this, 'getModelsListTrain');
 		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getAPIInformationTrain = this.getData.bind(this, 'getAPIInformationTrain');
@@ -72,6 +75,7 @@ class MLApiClient {
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
+		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');

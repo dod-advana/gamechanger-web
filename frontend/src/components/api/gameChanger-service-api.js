@@ -72,11 +72,13 @@ const endpoints = {
 	getS3List: '/api/gamechanger/admin/getS3List',
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
+	downloadS3FileTrain: '/api/gamechanger/admin/downloadS3FileTrain',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getAPIInformationTrain: '/api/gamechanger/admin/getAPIInformationTrain',
 	getModelsList: '/api/gamechanger/admin/getModelsList',
+	getModelsListTrain: '/api/gamechanger/admin/getModelsListTrain',
 	getDataList: '/api/gamechanger/admin/getDataList',
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
@@ -720,6 +722,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	downloadS3FileTrain = async (opts) => {
+		const url = endpoints.downloadS3FileTrain;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	stopProcess = async (opts) => {
 		const url = endpoints.stopProcess;
 		return axiosPOST(this.axios, url, opts);
@@ -729,11 +736,16 @@ export default class GameChangerAPI {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
+
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	};
 
+	getModelsListTrain = async () => {
+		const url = endpoints.getModelsListTrain;
+		return axiosGET(this.axios, url);
+	};
 	getDataList = async () => {
 		const url = endpoints.getDataList;
 		return axiosGET(this.axios, url);

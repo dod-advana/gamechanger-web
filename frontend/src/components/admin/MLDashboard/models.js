@@ -28,6 +28,11 @@ const modelColumns = [
 		accessor: 'model',
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
+	{
+		Header: 'Container',
+		accessor: 'container',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
 ];
 const dataColumns = [
 	{
@@ -138,6 +143,7 @@ const getModelsList = async (setDownloadedModelsList, setModelTable, props) => {
 	try {
 		// set downloadedModelsList
 		const list = await gameChangerAPI.getModelsList();
+		const listTrain = await gameChangerAPI.getModelsListTrain();
 		setDownloadedModelsList(list.data);
 		const modelList = [];
 		for (const type in list.data) {
@@ -146,6 +152,17 @@ const getModelsList = async (setDownloadedModelsList, setModelTable, props) => {
 					type,
 					model,
 					config: JSON.stringify(list.data[type][model], null, 2),
+					container: 'inference',
+				});
+			}
+		}
+		for (const type in listTrain.data) {
+			for (const model in list.data[type]) {
+				modelList.push({
+					type,
+					model,
+					config: JSON.stringify(list.data[type][model], null, 2),
+					container: 'training',
 				});
 			}
 		}

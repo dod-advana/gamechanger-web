@@ -21,8 +21,10 @@ class TransformerController {
 			getS3DataList: this.mlApi.getS3DataList,
 			downloadDependencies: this.mlApi.downloadDependencies,
 			downloadS3File: this.mlApi.downloadS3File,
+			downloadS3FileTrain: this.mlApi.downloadS3FileTrain,
 			deleteLocalModel: this.mlApi.deleteLocalModel,
 			getModelsList: this.mlApi.getModelsList,
+			getModelsListTrain: this.mlApi.getModelsListTrain,
 			getDataList: this.mlApi.getDataList,
 			getLoadedModels: this.mlApi.getLoadedModels,
 			getFilesInCorpus: this.mlApi.getFilesInCorpus,
@@ -44,6 +46,7 @@ class TransformerController {
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
+		this.getModelsListTrain = this.getData.bind(this, 'getModelsListTrain');
 		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
@@ -58,6 +61,7 @@ class TransformerController {
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
+		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
