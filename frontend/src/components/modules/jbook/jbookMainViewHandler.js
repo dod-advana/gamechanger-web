@@ -38,6 +38,7 @@ import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import JBookProfilePage from '../../../containers/JBookProfilePage';
 import Pagination from '../../common/Pagination';
+import { checkForTinyURL } from '../default/defaultMainViewHandler';
 
 const _ = require('lodash');
 
@@ -68,9 +69,15 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { dispatch, state, gameChangerAPI, gameChangerUserAPI } = props;
+	const { dispatch, state, gameChangerAPI, gameChangerUserAPI, history } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
+
+	// redirect the page if using tinyurl
+	const tinyURL = await checkForTinyURL(window.location, gameChangerAPI);
+	if (tinyURL) {
+		history.replace(`#/${tinyURL}`);
+	}
 
 	const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
