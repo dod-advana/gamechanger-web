@@ -121,6 +121,14 @@ const handlePageLoad = async (props) => {
 			portfolios = [...publicData, ...privateData];
 		});
 
+	const portPerm = portfolios.some((port) => port.name === selectedPortfolio);
+	if (selectedPortfolio !== 'General' && !portPerm) {
+		let newHref = window.location.href;
+		newHref = newHref.split('#')[0];
+		newHref += '#/unauthorized';
+		window.location.replace(newHref);
+	}
+
 	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
 		// the main setstate that triggers the initial search (only on main page)
 		setState(dispatch, {
