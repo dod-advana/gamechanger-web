@@ -668,6 +668,8 @@ const LabelingValidationValue = React.memo((props) => {
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const disabled = finished || roleDisabled;
+	const isPocSecIncomplete = (...args) =>
+		!pocValidated && args.reduce((a, b) => pocValidation[a] && pocValidation[b]);
 	return (
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
@@ -687,7 +689,7 @@ const LabelingValidationValue = React.memo((props) => {
 						<TextField
 							{...params}
 							InputLabelProps={{
-								className: !pocValidated && !pocValidation.pocAgreeLabel ? classes.labelError : '',
+								className: isPocSecIncomplete('pocAgreeLabel') ? classes.labelError : '',
 							}}
 							InputProps={{ ...params.InputProps }}
 							FormHelperTextProps={{ className: classes.helperText }}
@@ -696,7 +698,7 @@ const LabelingValidationValue = React.memo((props) => {
 						/>
 					)}
 					classes={{
-						inputRoot: !pocValidated && !pocValidation.pocAgreeLabel ? classes.autocompleteError : '',
+						inputRoot: isPocSecIncomplete('pocAgreeLabel') ? classes.autocompleteError : '',
 					}}
 				/>
 			</StyledInlineContainer>
@@ -725,10 +727,9 @@ const LabelingValidationValue = React.memo((props) => {
 					disabled={disabled || (!finished && reviewData.pocAgreeLabel === 'Yes')}
 					disableClearable
 					classes={{
-						inputRoot:
-							!pocValidated && !pocValidation.pocClassLabel && pocValidation.pocAgreeLabel === 'No'
-								? classes.autocompleteError
-								: '',
+						inputRoot: isPocSecIncomplete('pocClassLabel', 'pocAgreeLabel')
+							? classes.autocompleteError
+							: '',
 					}}
 				/>
 			</StyledInlineContainer>
@@ -875,7 +876,7 @@ const MissionPartnersValue = React.memo((props) => {
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
-
+	const disabled = finished || roleDisabled;
 	const [pocMissionPartners, setPOCMissionPartners] = useState([]);
 	const [pocMissionPartnersChecklist, setPOCMissionPartnersChecklist] = useState({});
 
@@ -938,11 +939,11 @@ const MissionPartnersValue = React.memo((props) => {
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					onChange={(event, value) => setReviewData('pocMPAgreeLabel', value)}
 					value={
-						reviewData && reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null
+						reviewData?.pocMPAgreeLabel && reviewData?.pocMPAgreeLabel !== null
 							? reviewData.pocMPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished || roleDisabled}
+					disabled={disabled}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -986,7 +987,7 @@ const MissionPartnersValue = React.memo((props) => {
 					setReviewData('setPOCMissionPartners', value);
 				}}
 				value={pocMissionPartners}
-				disabled={finished || (!finished && reviewData.pocMPAgreeLabel === 'Yes') || roleDisabled}
+				disabled={disabled || (!finished && reviewData.pocMPAgreeLabel === 'Yes')}
 			/>
 		</StyledTableValueContainer>
 	);
@@ -1409,7 +1410,7 @@ const SliderValue = React.memo((props) => {
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const { pocDollarsAttributed, pocPercentageAttributed } = reviewData;
-
+	const disabled = finished || roleDisabled;
 	const classes = useStyles();
 
 	const [attributionUnits, setAttributionUnits] = useState('%');
@@ -1502,7 +1503,7 @@ const SliderValue = React.memo((props) => {
 					// ValueLabelComponent={}
 					style={{ fontSize: 14, margin: '0 20px 0 0', width: '70%' }}
 					marks={marks}
-					disabled={finished || attributionUnits === '' || roleDisabled}
+					disabled={disabled || attributionUnits === ''}
 				/>
 
 				<div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px', marginLeft: '10px' }}>
@@ -1542,7 +1543,7 @@ const SliderValue = React.memo((props) => {
 									setReviewData('pocSlider', newData);
 								}
 							}}
-							disabled={finished || attributionUnits === '' || roleDisabled}
+							disabled={disabled || attributionUnits === ''}
 							classes={{
 								inputRoot:
 									!pocValidated &&
@@ -1589,7 +1590,7 @@ const SliderValue = React.memo((props) => {
 						setAttributionUnits(value);
 					}}
 					disableClearable
-					disabled={finished || roleDisabled}
+					disabled={disabled}
 					defaultValue={'$'}
 				/>
 			</StyledInlineContainer>
