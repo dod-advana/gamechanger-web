@@ -60,6 +60,9 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 				case 'secondary':
 					tmpData['title'] = 'Secondary Reviewer';
 					break;
+				case 'inactive':
+					tmpData['title'] = 'Inactive Reviewer';
+					break;
 				default:
 					break;
 			}
@@ -148,7 +151,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 						<Grid item xs={6}>
 							<Autocomplete
 								size="small"
-								options={['primary', 'service', 'secondary']}
+								options={['primary', 'service', 'secondary', 'inactive']}
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
 								defaultValue={editReviewerData?.type}
