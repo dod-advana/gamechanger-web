@@ -30,11 +30,11 @@ class TextSuggestionController {
 			const index = req.body.index
 				? req.body.index
 				: [
-						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
-						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
-				  ];
+					this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
+					this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
+				];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
-			const esClientName = req.body.esClientName ? req.body.esClientName:'gamechanger';
+			const esClientName = req.body.esClientName ? req.body.esClientName : 'gamechanger';
 			let corrected;
 			let presearchTitle;
 			let presearchHistory;
@@ -51,8 +51,8 @@ class TextSuggestionController {
 					req.body.searchText = corrected;
 				}
 				if (suggestionsFlag === true) {
-					const data_presearch = await this.getPresearchSuggestion({ body:{...req.body}, index:index, userId:userId, esClientName:esClientName});
-					if (esClientName === 'eda'){
+					const data_presearch = await this.getPresearchSuggestion({ body: { ...req.body }, index: index, userId: userId, esClientName: esClientName });
+					if (esClientName === 'eda') {
 
 						try {
 							presearchHistory = this.getPreHistoryCorrectedEDA(
@@ -63,13 +63,13 @@ class TextSuggestionController {
 							this.logger.error(message, 'JBVZKTZ', userId);
 						}
 					}
-					else{ 
+					else {
 						try {
 							presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
-							} catch (err) {
-								const { message } = err;
+						} catch (err) {
+							const { message } = err;
 							this.logger.error(message, 'JBVZKTF', userId);
-							}
+						}
 
 						try {
 							presearchHistory = this.getPreHistoryCorrected(
@@ -113,16 +113,16 @@ class TextSuggestionController {
 		}
 	}
 
-	async getPresearchSuggestion({body, index, userId, esClientName}) {
+	async getPresearchSuggestion({ body, index, userId, esClientName }) {
 		try {
 			let esQueryArray;
-			if (esClientName==='eda'){
+			if (esClientName === 'eda') {
 				esQueryArray = this.searchUtility.getESpresearchMultiQueryEDA(body);
 			}
-			else{
+			else {
 				esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			}
-			
+
 			const results = await this.dataApi.mulitqueryElasticSearch(
 				esClientName,
 				this.constants.GAME_CHANGER_OPTS.textSuggestIndex,
