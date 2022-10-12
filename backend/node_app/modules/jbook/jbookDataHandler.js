@@ -580,7 +580,7 @@ class JBookDataHandler extends DataHandler {
 			if (
 				(reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) ||
 				(reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) ||
-				(reviewType === 'poc' && !permissions.includes('JBOOK POC Reviewer'))
+				(reviewType === 'poc' && !permissions.includes(' '))
 			) {
 				throw new Error('Unauthorized');
 			}
