@@ -988,9 +988,26 @@ class EDASearchUtility {
 
 			// MOD NUMBER
 			if (settings.modNumber && settings.modNumber.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.modification_number_eda_ext', settings.modNumber)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const modNumber of settings.modNumber) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.modification_number_eda_ext',
+							default_operator: 'or',
+							query: modNumber,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// PIID
@@ -1007,7 +1024,26 @@ class EDASearchUtility {
 
 			// PSC
 			if (settings.psc && settings.psc.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.psc_eda_ext', settings.psc));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const psc of settings.psc) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.psc_eda_ext',
+							default_operator: 'or',
+							query: psc,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// FUNDING AGENCY NAME
@@ -1036,12 +1072,50 @@ class EDASearchUtility {
 
 			// NAICS
 			if (settings.naicsCode && settings.naicsCode.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.naics_code_eda_ext', settings.naicsCode));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const naicsCode of settings.naicsCode) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.naics_code_eda_ext',
+							default_operator: 'or',
+							query: naicsCode,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// DUNS
 			if (settings.duns && settings.duns.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.duns_eda_ext', settings.duns));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const duns of settings.duns) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.duns_eda_ext',
+							default_operator: 'or',
+							query: duns,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// CONTRACT SOW

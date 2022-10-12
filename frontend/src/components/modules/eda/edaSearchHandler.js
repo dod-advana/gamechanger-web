@@ -301,7 +301,7 @@ const EdaSearchHandler = {
 				cloneName: cloneData.clone_name,
 				options: {},
 			});
-			console.log(resp.data);
+
 			const newFilterData = {
 				fiscalYear: resp.data.fiscal_year,
 				majcom: resp.data.majcom,
@@ -310,12 +310,12 @@ const EdaSearchHandler = {
 				vendorName: resp.data.vendor_name,
 				fundingOfficeDoDAAC: resp.data.funding_office_dodaac.map((e) => e.toUpperCase()).sort(),
 				fundingAgencyName: resp.data.funding_agency_name.map((e) => e.toUpperCase()).sort(),
-				psc: resp.data.psc,
-				naics: resp.data.naics,
-				duns: resp.data.duns,
+				psc: resp.data.psc.map((e) => e.toUpperCase()).sort(),
+				naics: resp.data.naic.map((e) => e.toUpperCase()).sort(),
+				duns: resp.data.duns.map((e) => e.toUpperCase()).sort(),
 				idvPIID: resp.data.idv_piid,
 				PIID: resp.data.piid,
-				modNumber: resp.data.mod_number,
+				modNumber: resp.data.mod_number.map((e) => e.toUpperCase()).sort(),
 			};
 
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });

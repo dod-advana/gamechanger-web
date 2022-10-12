@@ -1202,38 +1202,68 @@ const EDASearchMatrixHandler = (props) => {
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.psc}
+						expanded={edaSearchSettings.psc && edaSearchSettings.psc.length > 0}
 						header={'PSC'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 						id={'pscAccordion'}
 					>
-						{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}
+						<div style={styles.width100}>
+							<MultiSelectAutocomplete
+								value={state.edaSearchSettings.psc}
+								setValue={(value) => {
+									setEDASearchSetting('psc', value, state, dispatch);
+								}}
+								options={state.edaFilterData.psc}
+								placeholder="Search PSCs"
+								label="PSC"
+							/>
+						</div>
 					</GCAccordion>
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.naicsCode}
+						expanded={edaSearchSettings.naicsCode && edaSearchSettings.naicsCode.length > 0}
 						header={'NAICS'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 						id={'naicsAccordion'}
 					>
-						{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}
+						<div style={styles.width100}>
+							<MultiSelectAutocomplete
+								value={state.edaSearchSettings.naicsCode}
+								setValue={(value) => {
+									setEDASearchSetting('naicsCode', value, state, dispatch);
+								}}
+								options={state.edaFilterData.naics}
+								placeholder="Search NAICS"
+								label="NAICS"
+							/>
+						</div>
 					</GCAccordion>
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.duns}
+						expanded={edaSearchSettings.duns && edaSearchSettings.duns.length > 0}
 						header={'DUNS'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 						id={'dunsAccordion'}
 					>
-						{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}
+						<div style={styles.width100}>
+							<MultiSelectAutocomplete
+								value={state.edaSearchSettings.duns}
+								setValue={(value) => {
+									setEDASearchSetting('duns', value, state, dispatch);
+								}}
+								options={state.edaFilterData.duns}
+								placeholder="Search DUNS"
+								label="DUNS"
+							/>
+						</div>
 					</GCAccordion>
 
 					<GCAccordion
@@ -1292,14 +1322,24 @@ const EDASearchMatrixHandler = (props) => {
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.modNumber}
+						expanded={edaSearchSettings.modNumber && edaSearchSettings.modNumber.length > 0}
 						header={'MOD NUMBER'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
 						id={'modNumberAccordion'}
 					>
-						{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
+						<div style={styles.width100}>
+							<MultiSelectAutocomplete
+								value={state.edaSearchSettings.modNumber}
+								setValue={(value) => {
+									setEDASearchSetting('modNumber', value, state, dispatch);
+								}}
+								options={state.edaFilterData.modNumber}
+								placeholder="Search Numbers"
+								label="Mod Number"
+							/>
+						</div>
 					</GCAccordion>
 
 					<GCButton
