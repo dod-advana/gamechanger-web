@@ -702,6 +702,15 @@ const JBookProfilePage = () => {
 		[dispatch, reviewData]
 	);
 
+	const setServicePOC = (value, reviewData) => {
+		const { first_name, last_name, organization, job_title, email, phone_number } = value;
+		reviewData.servicePOCTitle = job_title ?? '';
+		reviewData.servicePOCName = `${first_name} ${last_name}`;
+		reviewData.servicePOCEmail = email ?? '';
+		reviewData.servicePOCOrg = organization ?? '';
+		reviewData.servicePOCPhoneNumber = phone_number ?? '';
+	};
+
 	const setReviewData = useCallback(
 		(field, value) => {
 			let newReviewData = _.cloneDeep(reviewData);
@@ -858,6 +867,9 @@ const JBookProfilePage = () => {
 				case 'pocSlider':
 					newReviewData.pocDollarsAttributed = value.pocDollarsAttributed;
 					newReviewData.pocPercentageAttributed = value.pocPercentageAttributed;
+					break;
+				case 'servicePOC':
+					setServicePOC(value, newReviewData);
 					break;
 				default:
 					newReviewData[field] = value !== null ? value : '';
