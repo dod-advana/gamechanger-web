@@ -466,7 +466,7 @@ const AIPOCKey = React.memo(() => {
 			<strong>AI Point of Contact (POC) for Effort</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Enter the AI Point of Contact for this Program/BLI in the POC section of the Service Reviewer Section. A
-				suitable type of POC would be the Program Element Monitor. Select the POC's name from the drop-down. If
+				suitable type of POC would be the Program Element Monitor. Select the POC's name from the dropdown. If
 				the POC name is not available as an option, please direct the POC to{' '}
 				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added to the list and select `Save
 				(Partial Service Review)`. Once the POC has completed the steps at the link above, you can return to
