@@ -877,7 +877,6 @@ const resetAdvancedSettings = (dispatch) => {
 
 export const getAdvancedOptions = (props) => {
 	const { state, dispatch, handleSubmit } = props;
-	const { searchText } = state;
 
 	return (
 		<div style={{ height: 500, overflow: 'scroll' }}>
