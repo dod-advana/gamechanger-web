@@ -151,6 +151,9 @@ class MLApiClient {
 	 * @returns an object with the ml api response data
 	 */
 	async postData(key, userId, postData, queryString) {
+		if (!constants.USE_ML_API) {
+			return {};
+		}
 		const headers = {
 			ssl_client_s_dn_cn: userId,
 		};
@@ -158,7 +161,6 @@ class MLApiClient {
 			let url = MLRoutes[key];
 
 			if (queryString) url += queryString;
-			console.log(url, postData);
 			const { data } = await this.axios({
 				url,
 				method: 'post',
