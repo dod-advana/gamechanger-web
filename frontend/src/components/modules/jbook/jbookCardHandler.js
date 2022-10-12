@@ -238,9 +238,9 @@ const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-	window.open(
-		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
-	);
+	let url = `/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`;
+	let myWindow = window.open(url);
+	setTimeout(() => (myWindow.document.title = 'ADVANA | JBOOK SEARCH'), 500);
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
