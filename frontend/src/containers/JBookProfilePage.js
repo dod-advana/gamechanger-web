@@ -68,6 +68,7 @@ const JBookProfilePage = () => {
 		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
+		is_admin: false,
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
 		is_poc_reviewer: false,
@@ -304,7 +305,7 @@ const JBookProfilePage = () => {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
 				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
-				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+				is_poc_reviewer: userData.extra_fields.jbook.is_poc_reviewer,
 			};
 
 			setPermissions(tmpPermissions);
@@ -1178,15 +1179,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										Permissions.hasPermission('JBOOK POC Reviewer') &&
-										(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-											Auth.getTokenPayload().email === reviewData.altPOCEmail)
-								  )
-						}
+						roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !permissions.is_poc_reviewer}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
