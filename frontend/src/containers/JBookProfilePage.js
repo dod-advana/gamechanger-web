@@ -68,6 +68,7 @@ const JBookProfilePage = () => {
 		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
+		is_admin: false,
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
 		is_poc_reviewer: false,
@@ -304,7 +305,7 @@ const JBookProfilePage = () => {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
 				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
-				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+				is_poc_reviewer: userData.extra_fields.jbook.is_poc_reviewer,
 			};
 
 			setPermissions(tmpPermissions);
@@ -702,6 +703,15 @@ const JBookProfilePage = () => {
 		[dispatch, reviewData]
 	);
 
+	const setServicePOC = (value, reviewData) => {
+		const { first_name, last_name, organization, job_title, email, phone_number } = value;
+		reviewData.servicePOCTitle = job_title ?? '';
+		reviewData.servicePOCName = `${first_name} ${last_name}`;
+		reviewData.servicePOCEmail = email ?? '';
+		reviewData.servicePOCOrg = organization ?? '';
+		reviewData.servicePOCPhoneNumber = phone_number ?? '';
+	};
+
 	const setReviewData = useCallback(
 		(field, value) => {
 			let newReviewData = _.cloneDeep(reviewData);
@@ -858,6 +868,9 @@ const JBookProfilePage = () => {
 				case 'pocSlider':
 					newReviewData.pocDollarsAttributed = value.pocDollarsAttributed;
 					newReviewData.pocPercentageAttributed = value.pocPercentageAttributed;
+					break;
+				case 'servicePOC':
+					setServicePOC(value, newReviewData);
 					break;
 				default:
 					newReviewData[field] = value !== null ? value : '';
@@ -1053,7 +1066,7 @@ const JBookProfilePage = () => {
 					headerWidth="100%"
 					header={
 						<StyledAccordionHeader headerWidth="100%">
-							<strong>PRIMARY REVIEWER</strong>
+							<strong>INITIAL REVIEWER</strong>
 							<FiberManualRecordIcon
 								style={{
 									color: reviewData.primaryReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
@@ -1166,15 +1179,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										Permissions.hasPermission('JBOOK POC Reviewer') &&
-										(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-											Auth.getTokenPayload().email === reviewData.altPOCEmail)
-								  )
-						}
+						roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !permissions.is_poc_reviewer}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
