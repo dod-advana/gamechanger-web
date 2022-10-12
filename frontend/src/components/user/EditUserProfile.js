@@ -175,7 +175,13 @@ const EditUserProfile = React.memo((props) => {
 	};
 
 	return (
-		<StyledDialog open={showModal} scroll={'paper'} disableEscapeKeyDown disableBackdropClick>
+		<StyledDialog
+			open={showModal}
+			scroll={'paper'}
+			disableEscapeKeyDown
+			disableBackdropClick
+			data-cy={'EditProfile'}
+		>
 			<DialogTitle sx={{ m: 3, p: 0 }}>
 				<Typography
 					variant="h3"
@@ -253,6 +259,7 @@ const EditUserProfile = React.memo((props) => {
 										variant="outlined"
 										value={editUserData.first_name || ''}
 										onChange={(event) => handleTextChange(event, 'first_name')}
+										data-cy="firstName"
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('last_name')}
@@ -261,6 +268,7 @@ const EditUserProfile = React.memo((props) => {
 										variant="outlined"
 										value={editUserData.last_name || ''}
 										onChange={(event) => handleTextChange(event, 'last_name')}
+										data-cy="lastName"
 									/>
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
@@ -272,6 +280,7 @@ const EditUserProfile = React.memo((props) => {
 										value={editUserData.email || ''}
 										onChange={(event) => handleTextChange(event, 'email')}
 										sx={{ width: 400 }}
+										data-cy="email"
 									/>
 									<StyledTextField
 										required={REQUIRED_FIELDS.includes('phone_number')}
