@@ -477,20 +477,20 @@ class SearchUtility {
 										size: paragraphLimit,
 										highlight: hasHighlights
 											? {
-													fields: {
-														'paragraphs.par_raw_text_t': {
-															fragment_size: 3 * charsPadding,
-															number_of_fragments: 1,
-															type: 'plain',
-														},
-														'paragraphs.par_raw_text_t.gc_english': {
-															fragment_size: 3 * charsPadding,
-															number_of_fragments: 1,
-															type: 'plain',
-														},
+												fields: {
+													'paragraphs.par_raw_text_t': {
+														fragment_size: 3 * charsPadding,
+														number_of_fragments: 1,
+														type: 'plain',
 													},
-													fragmenter: 'span',
-											  }
+													'paragraphs.par_raw_text_t.gc_english': {
+														fragment_size: 3 * charsPadding,
+														number_of_fragments: 1,
+														type: 'plain',
+													},
+												},
+												fragmenter: 'span',
+											}
 											: {},
 									},
 									query: {
@@ -568,20 +568,20 @@ class SearchUtility {
 				},
 				highlight: hasHighlights
 					? {
-							require_field_match: false,
-							fields: {
-								'display_title_s.search': {},
-								keyw_5: {},
-								'filename.search': {},
-								'display_source_s.search': {},
-								top_entities_t: {},
-								topics_s: {},
-							},
-							fragment_size: 10,
-							fragmenter: 'simple',
-							type: 'unified',
-							boundary_scanner: 'word',
-					  }
+						require_field_match: false,
+						fields: {
+							'display_title_s.search': {},
+							keyw_5: {},
+							'filename.search': {},
+							'display_source_s.search': {},
+							top_entities_t: {},
+							topics_s: {},
+						},
+						fragment_size: 10,
+						fragmenter: 'simple',
+						type: 'unified',
+						boundary_scanner: 'word',
+					}
 					: {},
 			};
 			switch (sort) {
@@ -1168,13 +1168,14 @@ class SearchUtility {
 					size: 8,
 					query: {
 						multi_match: {
-						query: `${plainQuery}`,
-						type: 'bool_prefix',
-						fields: [
-							'search_query',
-							'search_query._2gram',
-							'search_query._3gram'
-						]}
+							query: `${plainQuery}`,
+							type: 'bool_prefix',
+							fields: [
+								'search_query',
+								'search_query._2gram',
+								'search_query._3gram'
+							]
+						}
 					}
 				}
 			];
