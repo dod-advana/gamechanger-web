@@ -10,6 +10,7 @@ import AdvancedDropdown from '../../searchBar/AdvancedDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
+import { setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 const gameChangerAPI = new GameChangerAPI();
 
@@ -28,6 +29,8 @@ const EDASearchBarHandler = {
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
+				suggestions: true,
+				esClientName: 'eda',
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
 			setPresearchTitle(data?.presearchTitle?.map((item) => ({ text: item })) ?? []);
@@ -42,6 +45,7 @@ const EDASearchBarHandler = {
 		const {
 			context,
 			state,
+			dispatch,
 			classes,
 			searchFavoritePopperAnchorEl,
 			advancedSearchOpen,
@@ -95,6 +99,7 @@ const EDASearchBarHandler = {
 						onFocus={() => {
 							setDropdownOpen(true);
 						}}
+						onClick={() => setState(dispatch, { inputActive: 'searchInput' })}
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>

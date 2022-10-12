@@ -34,6 +34,7 @@ class TextSuggestionController {
 						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
 				  ];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
+			const esClientName = req.body.esClientName ? req.body.esClientName:'gamechanger';
 			let corrected;
 			let presearchTitle;
 			let presearchHistory;
@@ -50,29 +51,42 @@ class TextSuggestionController {
 					req.body.searchText = corrected;
 				}
 				if (suggestionsFlag === true) {
-					const data_presearch = await this.getPresearchSuggestion({ ...req.body, index }, userId);
-					try {
-						presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
-					} catch (err) {
-						const { message } = err;
-						this.logger.error(message, 'JBVZKTF', userId);
-					}
+					const data_presearch = await this.getPresearchSuggestion({ body:{...req.body}, index:index, userId:userId, esClientName:esClientName});
+					if (esClientName === 'eda'){
 
-					try {
-						presearchHistory = this.getPreHistoryCorrected(
-							data_presearch.responses[1].aggregations.search_query.buckets
-						);
-					} catch (err) {
-						const { message } = err;
-						this.logger.error(message, 'JBVZKTG', userId);
+						try {
+							presearchHistory = this.getPreHistoryCorrectedEDA(
+								data_presearch.responses[0].hits.hits
+							);
+						} catch (err) {
+							const { message } = err;
+							this.logger.error(message, 'JBVZKTZ', userId);
+						}
 					}
-					// for future use
-					// let predictions = [];
-					try {
-						presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
-					} catch (err) {
-						const { message } = err;
-						this.logger.error(message, 'JBVZKTF', userId);
+					else{ 
+						try {
+							presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
+							} catch (err) {
+								const { message } = err;
+							this.logger.error(message, 'JBVZKTF', userId);
+							}
+
+						try {
+							presearchHistory = this.getPreHistoryCorrected(
+								data_presearch.responses[1].aggregations.search_query.buckets
+							);
+						} catch (err) {
+							const { message } = err;
+							this.logger.error(message, 'JBVZKTG', userId);
+						}
+						// for future use
+						// let predictions = [];
+						try {
+							presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
+						} catch (err) {
+							const { message } = err;
+							this.logger.error(message, 'JBVZKTF', userId);
+						}
 					}
 				}
 				return res.send({
@@ -99,11 +113,16 @@ class TextSuggestionController {
 		}
 	}
 
-	async getPresearchSuggestion(body, index, userId) {
+	async getPresearchSuggestion({body, index, userId, esClientName}) {
 		try {
-			const esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
-			let esClientName = 'gamechanger';
-
+			let esQueryArray;
+			if (esClientName==='eda'){
+				esQueryArray = this.searchUtility.getESpresearchMultiQueryEDA(body);
+			}
+			else{
+				esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
+			}
+			
 			const results = await this.dataApi.mulitqueryElasticSearch(
 				esClientName,
 				this.constants.GAME_CHANGER_OPTS.textSuggestIndex,
@@ -133,6 +152,19 @@ class TextSuggestionController {
 		// only first two terms
 		unique = unique.slice(0, 2);
 
+		return unique;
+	}
+	getPreHistoryCorrectedEDA(suggesterArray) {
+		const presearch = [];
+		if (suggesterArray.length > 0) {
+			suggesterArray.forEach((term) => {
+				presearch.push(term['_source']['search_query']);
+			})
+		}
+		// incase same
+		let unique = [...new Set(presearch)];
+		// Display only top 8 unique results
+		unique = unique.slice(0, 8);
 		return unique;
 	}
 
