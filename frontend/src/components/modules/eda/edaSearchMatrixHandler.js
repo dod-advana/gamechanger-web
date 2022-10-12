@@ -353,7 +353,7 @@ const renderMajcoms = (state, dispatch, org) => {
 
 const renderOrganizationFilters = (state, dispatch) => {
 	return (
-		<div style={styles.container}>
+		<div style={{ ...styles.container, padding: 0 }}>
 			<FormControl>
 				<FormGroup>
 					<FormControlLabel
@@ -956,62 +956,51 @@ const EDASearchMatrixHandler = (props) => {
 			>
 				<div style={styles.width100}>
 					<GCAccordion
-						contentPadding={0}
-						expanded={
-							!edaSearchSettings.allOrgsSelected &&
-							edaSearchSettings.organizations &&
-							edaSearchSettings.organizations.length > 0
-						}
-						header={'ISSUE ORGANIZATION'}
+						header={'ISSUED BY'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
-						id={'issueOrganizationAccordion'}
-					>
-						{renderOrganizationFilters(state, dispatch)}
-					</GCAccordion>
-
-					<GCAccordion
-						contentPadding={15}
-						expanded={edaSearchSettings.issueOfficeDoDAAC && edaSearchSettings.issueOfficeDoDAAC.length > 0}
-						header={'ISSUE OFFICE DODAAC'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-						id={'issueOfficeDoDAACAccordion'}
+						id={'issuedByAccordion'}
 					>
 						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.issueOfficeDoDAAC}
-								setValue={(value) => {
-									setEDASearchSetting('issueOfficeDoDAAC', value, state, dispatch);
-								}}
-								options={state.edaFilterData.issueOfficeDoDAAC}
-								placeholder="Search DoDAACs"
-								label="Issue Office DoDAAC"
-							/>
-						</div>
-					</GCAccordion>
-
-					<GCAccordion
-						contentPadding={15}
-						expanded={edaSearchSettings.issueOfficeName && edaSearchSettings.issueOfficeName.length > 0}
-						header={'ISSUE OFFICE NAME'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-						id={'issueOfficeNameAccordion'}
-					>
-						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.issueOfficeName}
-								setValue={(value) => {
-									setEDASearchSetting('issueOfficeName', value, state, dispatch);
-								}}
-								options={state.edaFilterData.issueOfficeName}
-								placeholder="Search Names"
-								label="Issue Office Name"
-							/>
+							<div>
+								<p style={{ fontSize: 15, color: 'black', margin: '5px 0px', textAlign: 'left' }}>
+									ISSUE ORGANIZATION
+								</p>
+								{renderOrganizationFilters(state, dispatch)}
+							</div>
+							<div>
+								<p style={{ fontSize: 15, color: 'black', margin: '5px 0px', textAlign: 'left' }}>
+									ISSUE OFFICE DODAAC
+								</p>
+								<div style={styles.width100}>
+									<MultiSelectAutocomplete
+										value={state.edaSearchSettings.issueOfficeDoDAAC}
+										setValue={(value) => {
+											setEDASearchSetting('issueOfficeDoDAAC', value, state, dispatch);
+										}}
+										options={state.edaFilterData.issueOfficeDoDAAC}
+										placeholder="Search DoDAACs"
+										label=""
+									/>
+								</div>
+							</div>
+							<div>
+								<p style={{ fontSize: 15, color: 'black', margin: '5px 0px', textAlign: 'left' }}>
+									ISSUE OFFICE NAME
+								</p>
+								<div style={styles.width100}>
+									<MultiSelectAutocomplete
+										value={state.edaSearchSettings.issueOfficeName}
+										setValue={(value) => {
+											setEDASearchSetting('issueOfficeName', value, state, dispatch);
+										}}
+										options={state.edaFilterData.issueOfficeName}
+										placeholder="Search Names"
+										label=""
+									/>
+								</div>
+							</div>
 						</div>
 					</GCAccordion>
 
@@ -1056,46 +1045,45 @@ const EDASearchMatrixHandler = (props) => {
 					</GCAccordion>
 
 					<GCAccordion
-						contentPadding={15}
-						expanded={edaSearchSettings.fundingOfficeCode && edaSearchSettings.fundingOfficeCode.length > 0}
-						header={'FUNDING OFFICE DoDAAC'}
+						header={'FUNDED BY'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
 						headerTextWeight={'normal'}
-						id={'fundingOfficeCodeAccordion'}
+						id={'fundedByAccordion'}
 					>
 						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.fundingOfficeCode}
-								setValue={(value) => {
-									setEDASearchSetting('fundingOfficeCode', value, state, dispatch);
-								}}
-								options={state.edaFilterData.fundingOfficeDoDAAC}
-								placeholder="Search DoDAACs"
-								label="Funding Office DoDAAC"
-							/>
-						</div>
-					</GCAccordion>
-
-					<GCAccordion
-						contentPadding={15}
-						expanded={edaSearchSettings.fundingAgencyName && edaSearchSettings.fundingAgencyName.length > 0}
-						header={'FUNDING AGENCY NAME'}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'normal'}
-						id={'fundingAgencyNameAccordion'}
-					>
-						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.fundingAgencyName}
-								setValue={(value) => {
-									setEDASearchSetting('fundingAgencyName', value, state, dispatch);
-								}}
-								options={state.edaFilterData.fundingAgencyName}
-								placeholder="Search Names"
-								label="Funding Agency Name"
-							/>
+							<div>
+								<p style={{ fontSize: 15, color: 'black', margin: '5px 0px', textAlign: 'left' }}>
+									FUNDING OFFICE DODAAC
+								</p>
+								<div style={styles.width100}>
+									<MultiSelectAutocomplete
+										value={state.edaSearchSettings.fundingOfficeCode}
+										setValue={(value) => {
+											setEDASearchSetting('fundingOfficeCode', value, state, dispatch);
+										}}
+										options={state.edaFilterData.fundingOfficeDoDAAC}
+										placeholder="Search DoDAACs"
+										label=""
+									/>
+								</div>
+							</div>
+							<div>
+								<p style={{ fontSize: 15, color: 'black', margin: '5px 0px', textAlign: 'left' }}>
+									FUNDING AGENCY NAME
+								</p>
+								<div style={styles.width100}>
+									<MultiSelectAutocomplete
+										value={state.edaSearchSettings.fundingAgencyName}
+										setValue={(value) => {
+											setEDASearchSetting('fundingAgencyName', value, state, dispatch);
+										}}
+										options={state.edaFilterData.fundingAgencyName}
+										placeholder="Search Names"
+										label=""
+									/>
+								</div>
+							</div>
 						</div>
 					</GCAccordion>
 
