@@ -43,7 +43,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { pocValidated, primaryReviewLoading, reviewData, domainTasks } = state;
+	const { pocValidated, primaryReviewLoading, reviewData } = state;
 
 	const pocReviewerData = () => {
 		const pocReviewerData = [
@@ -69,7 +69,7 @@ const JBookPOCReviewForm = React.memo((props) => {
 			},
 			{
 				Key: <AIDomainKey />,
-				Value: <AIDomainValue setReviewData={setReviewData} domainTasks={domainTasks} />,
+				Value: <AIDomainValue setReviewData={setReviewData} />,
 			},
 			{
 				Key: <DataTypeKey />,
@@ -142,7 +142,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Reset Form'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
@@ -153,7 +157,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Save (Partial Review)'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
@@ -164,7 +172,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Submit (Finished Review)'
 					) : (
-						<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#FFFFFF"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</StyledFooterDiv>
