@@ -1157,7 +1157,7 @@ class SearchUtility {
 		searchText,
 	}) {
 		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
-		// multi search in ES if text is more than 3
+		// search in ES if text is more than 2
 		if (searchText.length >= 2) {
 			let query = [];
 			let searchHistoryQuery = [
@@ -1184,7 +1184,7 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
-	
+
 	async autocorrect(text, index, userId) {
 		try {
 			const esQuery = this.getESSuggesterQuery({ searchText: text, index: index });
