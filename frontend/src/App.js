@@ -148,6 +148,7 @@ const styles = {
 		marginLeft: '50px',
 		paddingTop: '2em',
 		background: '#ffffff',
+		position: 'relative',
 	},
 };
 
@@ -188,8 +189,7 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	useEffect(() => {
 		// On route load we want to log this to matomo, that is all this use effect does
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
 		trackPageView({
 			// documentTitle and href get logged automatically

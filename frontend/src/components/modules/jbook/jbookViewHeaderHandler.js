@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _, { isArray, isEqual } from 'lodash';
@@ -98,7 +98,7 @@ const processFilters = (settings, options) => {
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
-	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
+	const { context = {}, extraStyle = {}, gameChangerAPI, gameChangerUserAPI } = props;
 
 	const { state, dispatch } = context;
 	const {
@@ -116,7 +116,6 @@ const JbookViewHeaderHandler = (props) => {
 		currentOrder,
 		sortSelected,
 		searchText,
-		exportLoading,
 		runSearch,
 	} = state;
 
@@ -159,15 +158,31 @@ const JbookViewHeaderHandler = (props) => {
 	useEffect(() => {
 		try {
 			const fetchPortfolios = async () => {
-				gameChangerAPI
+				let user = await gameChangerUserAPI.getUserProfileData();
+				await gameChangerAPI
 					.callDataFunction({
 						functionName: 'getPortfolios',
 						cloneName: 'jbook',
-						options: {},
+						options: { id: user.data.id },
 					})
 					.then((data) => {
-						let pData = data.data !== undefined ? data.data : [];
-						setPortfolios(pData);
+						console.log(data);
+						let publicData = data.data ? data.data.publicPortfolios : [];
+						let privateData = data.data ? data.data.privatePortfolios : [];
+						let portfolios = [...publicData, ...privateData];
+						portfolios.sort((a, b) => {
+							const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+							const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+							if (nameA < nameB) {
+								return -1;
+							}
+							if (nameA > nameB) {
+								return 1;
+							}
+							// names must be equal
+							return 0;
+						});
+						setPortfolios(portfolios);
 					});
 			};
 
@@ -176,7 +191,7 @@ const JbookViewHeaderHandler = (props) => {
 			console.log('Error fetching jbook portfolios');
 			console.log(e);
 		}
-	}, [gameChangerAPI]);
+	}, [gameChangerAPI, gameChangerUserAPI]);
 
 	const handleFilterChange = (option, type) => {
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -479,19 +494,14 @@ const JbookViewHeaderHandler = (props) => {
 						}
 					}}
 				>
-					{!exportLoading ? (
-						<img
-							src={ExportIcon}
-							style={{
-								margin: '0 0 3px 3px',
-								width: 15,
-							}}
-							alt="export"
-						/>
-					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
-					)}
-					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
+					<img
+						src={ExportIcon}
+						style={{
+							margin: '0 0 3px 3px',
+							width: 15,
+						}}
+						alt="export"
+					/>
 				</GCButton>
 			</div>
 			<FilterList
