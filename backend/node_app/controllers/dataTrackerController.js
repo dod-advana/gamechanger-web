@@ -9,7 +9,6 @@ const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
 const { DataLibrary } = require('../lib/dataLibrary');
 const SearchUtility = require('../utils/searchUtility');
-const moment = require('moment');
 
 class DataTrackerController {
 	constructor(opts = {}) {
@@ -169,7 +168,7 @@ class DataTrackerController {
 		return order === 'ASC' ? -1 : 1;
 	}
 
-	async getAllCrawlerMeta(res, req) {
+	async getAllCrawlerMeta(res, req, userId) {
 		try {
 			const { limit = 10, offset = 0, order = [], where = {} } = req.body;
 			const crawlerData = await this.crawlerStatus.findAndCountAll({
@@ -274,7 +273,7 @@ class DataTrackerController {
 		}
 	}
 
-	async getLastCrawlerMetaStatus(res, req) {
+	async getLastCrawlerMetaStatus(res, req, userId) {
 		try {
 			const { limit = 10, offset = 0 } = req.body;
 			let crawlerStatusList;
@@ -311,11 +310,11 @@ class DataTrackerController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			if (option === 'all') {
-				return await this.getAllCrawlerMeta(res, req);
+				return await this.getAllCrawlerMeta(res, req, userId);
 			} else if (option === 'status') {
 				return await this.getCrawlerMetaStatus(res, req, userId);
 			} else if (option === 'last') {
-				this.getLastCrawlerMetaStatus(res, req);
+				this.getLastCrawlerMetaStatus(res, req, userId);
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UXV7V8R', userId);

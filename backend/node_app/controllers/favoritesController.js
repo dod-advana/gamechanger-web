@@ -7,7 +7,6 @@ const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
-const { getTenDigitUserId } = require('../utils/userUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility');

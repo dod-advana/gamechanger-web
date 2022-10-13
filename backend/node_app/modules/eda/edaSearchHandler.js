@@ -2,7 +2,6 @@ const SearchUtility = require('../../utils/searchUtility');
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
-const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 
 const SearchHandler = require('../base/searchHandler');
@@ -43,17 +42,17 @@ class EdaSearchHandler extends SearchHandler {
 			request_body: {},
 		};
 
-		try {
-			const {
-				searchText,
-				searchVersion,
-				cloneName,
-				offset,
-				showTutorial = false,
-				tiny_url,
-				forCacheReload = false,
-			} = req.body;
+		const {
+			searchText,
+			searchVersion,
+			cloneName,
+			offset,
+			showTutorial = false,
+			tiny_url,
+			forCacheReload = false,
+		} = req.body;
 
+		try {
 			historyRec.search = searchText;
 			historyRec.searchText = searchText;
 			historyRec.tiny_url = tiny_url;
