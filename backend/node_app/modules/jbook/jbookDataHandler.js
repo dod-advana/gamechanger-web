@@ -10,7 +10,7 @@ const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const COMMENTS = require('../../models').comments;
 const constantsFile = require('../../config/constants');
-const { Sequelize, Op } = require('sequelize');
+const { Op } = require('sequelize');
 const DB = require('../../models/index');
 const EmailUtility = require('../../utils/emailUtility');
 const DataHandler = require('../base/dataHandler');
@@ -271,7 +271,7 @@ class JBookDataHandler extends DataHandler {
 		return review;
 	}
 
-	async parseESReviews(doc) {
+	async parseESReviews(doc, userId) {
 		for (let idx in doc.review_n) {
 			let tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
 
@@ -332,7 +332,7 @@ class JBookDataHandler extends DataHandler {
 
 			for (let doc of docs) {
 				doc.reviews = {};
-				await this.parseESReviews(doc);
+				await this.parseESReviews(doc, userId);
 				yearToDoc[doc.budgetYear] = doc;
 			}
 
@@ -392,7 +392,7 @@ class JBookDataHandler extends DataHandler {
 
 			doc.reviews = {};
 
-			await this.parseESReviews(doc);
+			await this.parseESReviews(doc, userId);
 
 			delete doc.review_n;
 
@@ -548,7 +548,7 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	checkReviewerPermissions(permissions) {
+	checkReviewerPermissions(permissions, reviewType) {
 		if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
 			if (
 				(reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) ||
@@ -598,7 +598,7 @@ class JBookDataHandler extends DataHandler {
 			let wasUpdated = false;
 
 			// check permissions
-			this.checkReviewerPermissions(permissions);
+			this.checkReviewerPermissions(permissions, reviewType);
 
 			// Review Status Update
 			this.updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName);
@@ -832,7 +832,7 @@ class JBookDataHandler extends DataHandler {
 					jbookSearchSettings[type + 'ReviewerForUserDash'] = [reviewer];
 					break;
 				case 'secondary':
-					if (jbookSearchSettings.hasOwnProperty(serviceReviewer)) {
+					if (jbookSearchSettings.hasOwnProperty('serviceReviewer')) {
 						jbookSearchSettings['serviceReviewerForUserDash'].push(reviewer);
 					} else {
 						jbookSearchSettings['serviceReviewerForUserDash'] = [reviewer];

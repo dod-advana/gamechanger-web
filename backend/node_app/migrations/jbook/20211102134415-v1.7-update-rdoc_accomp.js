@@ -1,7 +1,7 @@
 'use strict';
 const tablename = 'rdoc_accomp';
 module.exports = {
-	up: (queryInterface, Sequelize) => {
+	up: (queryInterface, _Sequelize) => {
 		return queryInterface.describeTable(tablename).then((tableDefinition) => {
 			const queries = [];
 
@@ -14,7 +14,7 @@ module.exports = {
 		});
 	},
 
-	down: (queryInterface, Sequelize) => {
+	down: (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			Promise.all([queryInterface.renameColumn(tablename, 'Proj_Number', 'Project_Number')]);
 		});

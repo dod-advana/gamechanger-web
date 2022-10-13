@@ -37,7 +37,7 @@ module.exports = {
 			},
 		});
 	},
-	down: (queryInterface, Sequelize) => {
+	down: (queryInterface, _Sequelize) => {
 		return queryInterface.dropTable('gc_entities');
 	},
 };

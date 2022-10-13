@@ -1191,11 +1191,16 @@ const JBookProfilePage = () => {
 		let reviewers = [];
 		let tags = [];
 		if (pMap[selectedPortfolio]) {
-			reviewers = pMap[selectedPortfolio].user_ids.map((item) => ({
-				id: userMap[item].id,
-				name: userMap[item].last_name + ', ' + userMap[item].first_name,
-				email: userMap[item].email,
-			}));
+			reviewers = [];
+			for (let id of pMap[selectedPortfolio].user_ids) {
+				if (userMap[id]) {
+					reviewers.push({
+						id: userMap[id].id,
+						name: userMap[id].last_name + ', ' + userMap[id].first_name,
+						email: userMap[id].email,
+					});
+				}
+			}
 			tags = pMap[selectedPortfolio].tags.map((item) => ({
 				primary_class_label: item,
 			}));

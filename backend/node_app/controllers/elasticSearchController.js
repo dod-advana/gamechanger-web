@@ -8,7 +8,6 @@ const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
 const CACHE_IS_NOT_RELOADING = 'not-reloading';
-const MAX_RELOAD_TIME_MINS = 6 * 60;
 
 class ElasticSearchController {
 	constructor(opts = {}) {

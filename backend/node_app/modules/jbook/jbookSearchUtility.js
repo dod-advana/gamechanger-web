@@ -290,9 +290,8 @@ class JBookSearchUtility {
 	cleanESUserReviews(esResults, userId) {
 		const results = [];
 
+		let searchResults = { totalCount: 0, docs: [] };
 		try {
-			let searchResults = { totalCount: 0, docs: [] };
-
 			const { body = {} } = esResults;
 			const { hits: esHits = {} } = body;
 			const {
