@@ -285,7 +285,7 @@ class AppStatsController {
 					matomo_log_action b 
 				where 
 					a.idaction_name = b.idaction  
-					and b.name like 'PDFViewer%'
+					and b.name like 'PDFViewer%gamechanger'
 					and hex(a.idvisitor) in (?)
 				order by 
 					documenttime desc
