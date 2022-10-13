@@ -280,7 +280,7 @@ const JCACTier3CheckBox = ({ tier1, tier2, tier3, setReviewData, reviewData, tie
 					}}
 					onClick={() => setReviewData('pocJointCapabilityArea3', tier3)}
 					icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-					checked={tier2Checked && reviewData?.['pocJointCapabilityArea3'].indexOf(tier3) !== -1}
+					checked={tier2Checked && reviewData?.['pocJointCapabilityArea3']?.includes(tier3)}
 					checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 					name={tier3}
 				/>
@@ -306,7 +306,7 @@ const JCAChecklist = (props) => {
 	for (const tier1 in JCAdata) {
 		const tier1Checked = reviewData?.['pocJointCapabilityArea'] === tier1;
 		for (const tier2 in JCAdata[tier1]) {
-			const tier2Checked = tier1Checked && reviewData?.['pocJointCapabilityArea2'].indexOf(tier2) !== -1;
+			const tier2Checked = tier1Checked && reviewData?.['pocJointCapabilityArea2']?.includes(tier2);
 			for (const tier3 in JCAdata[tier1][tier2]) {
 				if (tier3 !== 'Description') {
 					tier3List.push(
