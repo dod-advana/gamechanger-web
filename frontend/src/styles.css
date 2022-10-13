@@ -110,6 +110,10 @@ html {
 	font-weight: normal !important;
 	margin-top: 1px;
   }
+
+  .jbook-main-view .react-tabs__tab-list {
+	margin-right: 0px !important;
+  }
   
   .react-tabs {
 	border: 0 !important;
@@ -1111,5 +1115,9 @@ html {
   .slick-slider:hover .custom-carousel-arrows {
 	  display: flex;
   }
+
+	.MuiMenu-list > li {
+		display: block !important;
+	}
   
   /** End data-mil styles **/

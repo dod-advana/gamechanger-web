@@ -130,19 +130,17 @@ export default (props) => {
 		const processList = [];
 		if (props.processes.process_status) {
 			for (const key in props.processes.process_status) {
-				if (key !== 'flags') {
-					const status = props.processes.process_status[key]['process'].split(': ');
-					if (['s3', 'corpus'].includes(status[0])) {
-						processList.push({
-							...props.processes.process_status[key],
-							thread_id: key,
-							date: 'Currently Running',
-						});
-					}
+				const status = props.processes.process_status[key]['process'].split(': ');
+				if (['s3', 'corpus'].includes(status[0])) {
+					processList.push({
+						...props.processes.process_status[key],
+						thread_id: key,
+						date: 'Currently Running',
+					});
 				}
 			}
 		}
-		if (props.processes && props.processes.completed_process) {
+		if (props.processes.completed_process) {
 			for (const completed of props.processes.completed_process) {
 				const completed_process = completed.process.split(': ');
 				if (['s3', 'corpus'].includes(completed_process[0])) {
@@ -188,10 +186,6 @@ export default (props) => {
 		}
 	};
 
-	// const checkCorpusDownloading = () => {
-	// 	return checkFlag('corpus:');
-	// };
-
 	const handleDateChange = (date, setFunction) => {
 		setFunction(date);
 	};
@@ -199,7 +193,7 @@ export default (props) => {
 	 * Get user aggregations data and sends that to the ml-api
 	 * @method sendUserAggData
 	 */
-	const sendUserAggData = async (startDate, endDate) => {
+	const sendUserAggData = async () => {
 		try {
 			const params = {
 				startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
@@ -216,26 +210,6 @@ export default (props) => {
 			console.error(e);
 		}
 	};
-
-	// /**
-	//  * Takes a String and checks if it is in any of the flag keys and checks
-	//  * those values. If any of them are true it returns true
-	//  * @method checkFlag
-	//  * @param {String} flag
-	//  * @returns boolean
-	//  */
-	// const checkFlag = (flag) => {
-	// 	let flagged = false;
-	// 	if (props.processes.process_status && props.processes.process_status.flags) {
-	// 		const flags = props.processes.process_status.flags;
-	// 		for (const key in flags) {
-	// 			if (key.includes(flag) && flags[key]) {
-	// 				flagged = true;
-	// 			}
-	// 		}
-	// 	}
-	// 	return flagged;
-	// };
 
 	useEffect(() => {
 		getS3List();
@@ -273,6 +247,34 @@ export default (props) => {
 		},
 	];
 
+	const s3ColumnsData = [
+		{
+			Header: 'Tar File',
+			accessor: 'file',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Upload Time',
+			accessor: 'upload',
+			Cell: (row) => <TableRow>{row.value}</TableRow>,
+		},
+		{
+			Header: 'Download',
+			accessor: '',
+			Cell: (row) => (
+				<TableRow>
+					<IconButton
+						onClick={() => {
+							downloadS3File(row, 'ml-data');
+						}}
+						style={{ color: 'white' }}
+					>
+						<CloudDownload fontSize="large" />
+					</IconButton>
+				</TableRow>
+			),
+		},
+	];
 	return (
 		<div>
 			<div
@@ -364,7 +366,7 @@ export default (props) => {
 						</DatePickerWrapper>
 						<GCPrimaryButton
 							onClick={() => {
-								sendUserAggData(startDate, endDate);
+								sendUserAggData();
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
@@ -436,7 +438,7 @@ export default (props) => {
 						<div className="info-container">
 							<ReactTable
 								data={s3DataList}
-								columns={s3Columns}
+								columns={s3ColumnsData}
 								className="striped -highlight"
 								defaultPageSize={5}
 							/>

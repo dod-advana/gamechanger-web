@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { getUserProfilePage } from '../../mainView/commonFunctions';
 import { styles } from '../../mainView/commonStyles';
-import GetQAResults from '../default/qaResults';
 import ViewHeader from '../../mainView/ViewHeader';
 import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
@@ -16,9 +15,16 @@ import {
 	PAGE_DISPLAYED,
 	scrollToContentTop,
 	StyledCenterContainer,
+	getOrgToOrgQuery,
+	getTypeQuery,
 } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { getNonMainPageOuterContainer, setState } from '../../../utils/sharedFunctions';
+import {
+	getNonMainPageOuterContainer,
+	getSearchObjectFromString,
+	getUserData,
+	setState,
+} from '../../../utils/sharedFunctions';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
@@ -30,6 +36,8 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
+import ExportResultsDialog from '../../export/ExportResultsDialog';
+import JBookProfilePage from '../../../containers/JBookProfilePage';
 
 const _ = require('lodash');
 
@@ -69,9 +77,6 @@ const handlePageLoad = async (props) => {
 	const url = window.location.href;
 	const searchText = getQueryVariable('q', url) ?? '';
 	let mainTabSelected = 0;
-	// if (window.location.hash.indexOf('#/jbook/checklist') !== -1) {
-	// 	mainTabSelected = 1;
-	// }
 
 	// grab the portfolio data
 	let portfolios = [];
@@ -82,38 +87,74 @@ const handlePageLoad = async (props) => {
 			options: {},
 		})
 		.then((data) => {
-			console.log(data);
 			portfolios = data.data !== undefined ? data.data : [];
 		});
 
-	// the main setstate that triggers the initial search
-	setState(dispatch, {
-		searchText,
-		loading: true,
-		runSearch: true,
-		mainTabSelected,
-		urlSearch: true,
-		jbookSearchSettings,
-		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
-		dropdownData,
-		portfolios,
-	});
+	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
+		// the main setstate that triggers the initial search (only on main page)
+		setState(dispatch, {
+			searchText,
+			loading: true,
+			runSearch: true,
+			mainTabSelected,
+			urlSearch: true,
+			jbookSearchSettings,
+			defaultOptions: { ...state.defaultOptions, ...defaultOptions },
+			dropdownData,
+			portfolios,
+		});
+	}
 };
 
-const renderHideTabs = (props) => {
+const renderHideTabs = () => {
 	return <></>;
 };
 
 const getMainView = (props) => {
-	const { state, dispatch, getViewPanels, pageLoaded } = props;
+	const { state, dispatch, getViewPanels, setCurrentTime, searchHandler } = props;
 
-	const { loading, rawSearchResults, viewNames, currentViewName } = state;
-
-	const noResults = Boolean(!rawSearchResults || rawSearchResults?.length === 0);
-	const hideSearchResults = noResults && loading;
+	const {
+		exportDialogVisible,
+		searchSettings,
+		prevSearchText,
+		selectedDocuments,
+		loading,
+		viewNames,
+		edaSearchSettings,
+		currentSort,
+		currentOrder,
+		currentViewName,
+	} = state;
+	const { allOrgsSelected, orgFilter, searchType, searchFields, allTypesSelected, typeFilter } = searchSettings;
+	const isSelectedDocs = selectedDocuments && selectedDocuments.size ? true : false;
 
 	return (
 		<>
+			{exportDialogVisible && (
+				<ExportResultsDialog
+					state={state}
+					dispatch={dispatch}
+					searchHandler={searchHandler}
+					open={exportDialogVisible}
+					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
+					searchObject={getSearchObjectFromString(prevSearchText)}
+					setCurrentTime={setCurrentTime}
+					selectedDocuments={selectedDocuments}
+					isSelectedDocs={isSelectedDocs}
+					orgFilterString={getOrgToOrgQuery(allOrgsSelected, orgFilter)}
+					typeFilterString={getTypeQuery(allTypesSelected, typeFilter)}
+					orgFilter={orgFilter}
+					typeFilter={typeFilter}
+					getUserData={() => getUserData(dispatch)}
+					isClone={true}
+					cloneData={state.cloneData}
+					searchType={searchType}
+					searchFields={searchFields}
+					edaSearchSettings={edaSearchSettings}
+					sort={currentSort}
+					order={currentOrder}
+				/>
+			)}
 			<FeedbackModal state={state} dispatch={dispatch} />
 			<JBookWelcome dispatch={dispatch} state={state} />
 			{loading &&
@@ -122,22 +163,87 @@ const getMainView = (props) => {
 						<LoadingIndicator customColor={GC_COLORS.primary} />
 					</div>
 				)}
-			{!hideSearchResults && pageLoaded && (
-				<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
-					<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
-					<div style={styles.spacer} />
-				</div>
-			)}
+			<div style={{ ...styles.tabButtonContainer, backgroundColor: '#ffffff', paddingTop: 20 }}>
+				<ResultView context={{ state, dispatch }} viewNames={viewNames} viewPanels={getViewPanels()} />
+				<div style={styles.spacer} />
+			</div>
 		</>
 	);
 };
 
-const getViewNames = (props) => {
+const getViewNames = (_props) => {
 	return [{ name: 'Card', title: 'Card View', id: 'gcCardView' }];
 };
 
-const getExtraViewPanels = (props) => {
+const getExtraViewPanels = (_props) => {
 	return [];
+};
+
+const getSideFilters = (context, cloneData, showSideFilters, expansionDict) => {
+	return (
+		showSideFilters && (
+			<div className={'left-container'}>
+				<div className={'side-bar-container'} data-cy="jbook-filters">
+					<GameChangerSearchMatrix context={context} />
+					{expansionDict && Object.keys(expansionDict).length > 0 && (
+						<>
+							<div className={'sidebar-section-title'} style={{ marginLeft: 5 }}>
+								RELATED
+							</div>
+							<JBookSideBar context={context} cloneData={cloneData} />
+						</>
+					)}
+				</div>
+			</div>
+		)
+	);
+};
+
+const getPagination = (state, dispatch, edaCloneData, edaLoading, edaSearchResults, edaResultsPage, edaCount) => {
+	return (
+		(Permissions.permissionValidator(`${edaCloneData.clone_name} Admin`, true) ||
+			Permissions.permissionValidator(`View ${edaCloneData.clone_name}`, true)) && (
+			<>
+				{edaLoading && (
+					<div style={{ margin: '0 auto' }}>
+						<LoadingIndicator customColor={GC_COLORS.primary} />
+					</div>
+				)}
+				{!edaLoading && (
+					<div className="row" style={{ padding: 5 }}>
+						{getSearchResults(
+							edaSearchResults ? edaSearchResults : [],
+							state,
+							dispatch,
+							edaCloneData.card_module
+						)}
+						<div className="jbookPagination col-xs-12 text-center">
+							<Pagination
+								activePage={edaResultsPage}
+								itemsCountPerPage={18}
+								totalItemsCount={edaCount}
+								pageRangeDisplayed={8}
+								onChange={(page) => {
+									trackEvent(
+										getTrackingNameForFactory(edaCloneData.clone_name),
+										'PaginationChanged',
+										'page',
+										page
+									);
+									setState(dispatch, {
+										edaResultsPage: page,
+										runSearch: true,
+										edaPaginationSearch: true,
+									});
+									scrollToContentTop();
+								}}
+							/>
+						</div>
+					</div>
+				)}
+			</>
+		)
+	);
 };
 
 const getCardViewPanel = (props) => {
@@ -149,7 +255,6 @@ const getCardViewPanel = (props) => {
 		resultsPage,
 		hideTabs,
 		iframePreviewLink,
-		loading,
 		showSideFilters,
 		rawSearchResults,
 		mainTabSelected,
@@ -159,26 +264,39 @@ const getCardViewPanel = (props) => {
 		edaCloneData,
 		edaResultsPage,
 		edaCount,
+		expansionDict,
+		cloneData,
 	} = state;
 
-	let sideScroll = {
-		height: '72vh',
-	};
-	if (!iframePreviewLink) sideScroll = {};
+	const sideScroll = !iframePreviewLink
+		? {}
+		: {
+				height: '72vh',
+		  };
 
 	return (
-		<div key={'cardView'}>
+		<div key={'cardView'} className={'jbook-main-view'}>
 			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
-				<div>
-					<div id="game-changer-content-top" />
+				<div id="game-changer-content-top" />
 
-					<StyledCenterContainer showSideFilters={showSideFilters}>
-						<div className={'top-container'}>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+				<StyledCenterContainer showSideFilters={showSideFilters}>
+					{getSideFilters(context, cloneData, showSideFilters, expansionDict)}
+
+					<div className={'right-container'}>
+						<div className={'top-container'} style={{ marginLeft: 10 }}>
+							<div>
 								{!hideTabs && <ViewHeader {...props} extraStyle={{ marginRight: -15, marginTop: 5 }} />}
 							</div>
-							<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-								<div style={{ paddingTop: 0, zIndex: 99, marginRight: '20px' }}>
+						</div>
+						<div
+							className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
+							style={{ padding: 0 }}
+						>
+							<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
+								<div
+									className={'col-xs-12'}
+									style={{ ...sideScroll, padding: 0, position: 'relative' }}
+								>
 									<GCTooltip
 										title="View JBOOK Search Summary Analytics available on our Qlik Dashboard"
 										placement="bottom"
@@ -186,119 +304,93 @@ const getCardViewPanel = (props) => {
 									>
 										<GCButton
 											buttonColor={'rgb(28, 45, 101)'}
+											style={{ position: 'absolute', right: 15, top: 5 }}
 											onClick={() => {
 												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/f793302e-f294-4af9-b5f7-3cc8b941bd53/state/analysis'
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
 												);
 											}}
 										>
-											Qlik Dashboard
+											Budget Insights & Dashboards
 										</GCButton>
 									</GCTooltip>
-								</div>
-							</div>
-						</div>
-						{showSideFilters && (
-							<div className={'left-container'} style={{ marginTop: -130 }}>
-								<div className={'side-bar-container'}>
-									<GameChangerSearchMatrix context={context} />
-									{state.expansionDict && Object.keys(state.expansionDict).length > 0 && (
-										<>
-											<div className={'sidebar-section-title'} style={{ marginLeft: 5 }}>
-												RELATED
-											</div>
-											<JBookSideBar context={context} cloneData={state.cloneData} />
-										</>
-									)}
-								</div>
-							</div>
-						)}
-
-						<div className={'right-container'} style={{ marginTop: '-50px' }}>
-							<div
-								className={`row tutorial-step-${componentStepNumbers['Search Results Section']} card-container`}
-								style={{ padding: 0 }}
-							>
-								<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-									<div className="row" style={{ marginLeft: 0, marginRight: 0, padding: 0 }}>
-										{false && !loading && <GetQAResults context={context} />}
-									</div>
-									<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
-										<Tabs selectedIndex={mainTabSelected ?? 0}>
-											<div
-												style={{
-													...styles.tabButtonContainer,
-													backgroundColor: '#ffffff',
-													paddingTop: 20,
-													background: 'transparent',
-												}}
-											>
-												<TabList style={styles.tabsList}>
-													<div style={{ flex: 1, display: 'flex' }}>
+									<Tabs selectedIndex={mainTabSelected ?? 0}>
+										<div
+											style={{
+												...styles.tabButtonContainer,
+												backgroundColor: '#ffffff',
+												paddingTop: 20,
+												background: 'transparent',
+											}}
+										>
+											<TabList style={styles.tabsList}>
+												<div style={{ flex: 1, display: 'flex' }}>
+													<Tab
+														style={{
+															...styles.tabStyle,
+															...(mainTabSelected === 0 ? styles.tabSelectedStyle : {}),
+															borderRadius: `5px 5px 0 0`,
+														}}
+														title="summaryFAQ"
+														onClick={() => handleTabClicked(dispatch, state, 0)}
+													>
+														<Typography variant="h6" display="inline" title="jbookSearch">
+															JBOOK SEARCH ({count})
+														</Typography>
+													</Tab>
+													{(Permissions.permissionValidator(
+														`${edaCloneData.clone_name} Admin`,
+														true
+													) ||
+														Permissions.permissionValidator(
+															`View ${edaCloneData.clone_name}`,
+															true
+														)) && (
 														<Tab
 															style={{
 																...styles.tabStyle,
-																...(mainTabSelected === 0
+																...(mainTabSelected === 1
 																	? styles.tabSelectedStyle
 																	: {}),
 																borderRadius: `5px 5px 0 0`,
 															}}
-															title="summaryFAQ"
-															onClick={() => handleTabClicked(dispatch, state, 0)}
+															title="reviewerChecklist"
+															onClick={() => handleTabClicked(dispatch, state, 1)}
 														>
 															<Typography
 																variant="h6"
 																display="inline"
-																title="jbookSearch"
+																title="contractSearch"
 															>
-																JBOOK SEARCH ({count})
+																CONTRACT SEARCH
 															</Typography>
 														</Tab>
-														{(Permissions.permissionValidator(
-															`${edaCloneData.clone_name} Admin`,
-															true
-														) ||
-															Permissions.permissionValidator(
-																`View ${edaCloneData.clone_name}`,
-																true
-															)) && (
-															<Tab
-																style={{
-																	...styles.tabStyle,
-																	...(mainTabSelected === 1
-																		? styles.tabSelectedStyle
-																		: {}),
-																	borderRadius: `5px 5px 0 0`,
-																}}
-																title="reviewerChecklist"
-																onClick={() => handleTabClicked(dispatch, state, 1)}
-															>
-																<Typography
-																	variant="h6"
-																	display="inline"
-																	title="contractSearch"
-																>
-																	CONTRACT SEARCH
-																</Typography>
-															</Tab>
-														)}
-													</div>
-												</TabList>
+													)}
+												</div>
+											</TabList>
 
-												<div style={styles.panelContainer}>
-													<TabPanel>
-														{runningSearch && (
-															<div style={{ margin: '0 auto' }}>
-																<LoadingIndicator customColor={GC_COLORS.primary} />
-															</div>
-														)}
-														{!runningSearch && (
-															<div className="row" style={{ padding: 5 }}>
-																{getSearchResults(
-																	rawSearchResults ? rawSearchResults : [],
-																	state,
-																	dispatch
-																)}
+											<div style={styles.panelContainer}>
+												<TabPanel>
+													{runningSearch && (
+														<div style={{ margin: '0 auto' }} data-cy="jbook-search-load">
+															<LoadingIndicator customColor={GC_COLORS.primary} />
+														</div>
+													)}
+													{!runningSearch && (
+														<div
+															className="row"
+															style={{ padding: 5 }}
+															data-cy="jbook-search-results"
+														>
+															{getSearchResults(
+																rawSearchResults ? rawSearchResults : [],
+																state,
+																dispatch
+															)}
+															<div
+																className="jbookPagination col-xs-12 text-center"
+																style={{ marginTop: 10 }}
+															>
 																<div
 																	className="jbookPagination col-xs-12 text-center"
 																	style={{ marginTop: 10 }}
@@ -311,7 +403,7 @@ const getCardViewPanel = (props) => {
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
-																					state.cloneData.clone_name
+																					cloneData.clone_name
 																				),
 																				'PaginationChanged',
 																				'page',
@@ -328,87 +420,51 @@ const getCardViewPanel = (props) => {
 																	/>
 																</div>
 															</div>
-														)}
-													</TabPanel>
-													<TabPanel>
-														{(Permissions.permissionValidator(
-															`${edaCloneData.clone_name} Admin`,
-															true
-														) ||
-															Permissions.permissionValidator(
-																`View ${edaCloneData.clone_name}`,
-																true
-															)) && (
-															<>
-																{edaLoading && (
-																	<div style={{ margin: '0 auto' }}>
-																		<LoadingIndicator
-																			customColor={GC_COLORS.primary}
-																		/>
-																	</div>
-																)}
-																{!edaLoading && (
-																	<div className="row" style={{ padding: 5 }}>
-																		{getSearchResults(
-																			edaSearchResults ? edaSearchResults : [],
-																			state,
-																			dispatch,
-																			edaCloneData.card_module
-																		)}
-																		<div className="jbookPagination col-xs-12 text-center">
-																			<Pagination
-																				activePage={edaResultsPage}
-																				itemsCountPerPage={18}
-																				totalItemsCount={edaCount}
-																				pageRangeDisplayed={8}
-																				onChange={(page) => {
-																					trackEvent(
-																						getTrackingNameForFactory(
-																							edaCloneData.clone_name
-																						),
-																						'PaginationChanged',
-																						'page',
-																						page
-																					);
-																					setState(dispatch, {
-																						edaResultsPage: page,
-																						runSearch: true,
-																						edaPaginationSearch: true,
-																					});
-																					scrollToContentTop();
-																				}}
-																			/>
-																		</div>
-																	</div>
-																)}
-															</>
-														)}
-													</TabPanel>
-												</div>
+														</div>
+													)}
+												</TabPanel>
+												<TabPanel>
+													{getPagination(
+														state,
+														dispatch,
+														edaCloneData,
+														edaLoading,
+														edaSearchResults,
+														edaResultsPage,
+														edaCount
+													)}
+												</TabPanel>
 											</div>
-										</Tabs>
-										{/*
-													<div className="col-xs-12">
-														<LoadingIndicator customColor={gcOrange} />
-													</div>
-										*/}
-									</div>
+										</div>
+									</Tabs>
 								</div>
 							</div>
 						</div>
-					</StyledCenterContainer>
-				</div>
+					</div>
+				</StyledCenterContainer>
 			</div>
 		</div>
 	);
 };
 
 const getAboutUs = (props) => {
-	return <JBookAboutUs />;
+	const { state, dispatch } = props;
+	return (
+		<>
+			<FeedbackModal state={state} dispatch={dispatch} />
+			<JBookAboutUs />
+		</>
+	);
 };
 
-const displayUserRelatedItems = () => {
-	return <JBookUserDashboard />;
+const displayUserRelatedItems = (props) => {
+	const { state, dispatch } = props;
+	return (
+		<>
+			<FeedbackModal state={state} dispatch={dispatch} />
+			<JBookUserDashboard />
+		</>
+	);
 };
 
 const JBookMainViewHandler = (props) => {
@@ -449,7 +505,7 @@ const JBookMainViewHandler = (props) => {
 	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI }) };
+		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -462,12 +518,20 @@ const JBookMainViewHandler = (props) => {
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(
-				getUserProfilePage(displayUserRelatedItems(), gameChangerUserAPI),
+				getUserProfilePage(displayUserRelatedItems(props), gameChangerUserAPI),
 				state,
-				dispatch
+				dispatch,
+				searchHandler
 			);
 		case PAGE_DISPLAYED.aboutUs:
-			return getNonMainPageOuterContainer(getAboutUs, state, dispatch);
+			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
+		case PAGE_DISPLAYED.profile:
+			return (
+				<>
+					<FeedbackModal state={state} dispatch={dispatch} />
+					<JBookProfilePage {...props} />
+				</>
+			);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({
@@ -477,6 +541,7 @@ const JBookMainViewHandler = (props) => {
 				renderHideTabs,
 				pageLoaded,
 				getViewPanels,
+				searchHandler,
 			});
 	}
 };

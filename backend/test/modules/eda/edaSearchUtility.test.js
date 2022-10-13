@@ -2,6 +2,73 @@ const assert = require('assert');
 const EDASearchUtility = require('../../../node_app/modules/eda/edaSearchUtility');
 const { constructorOptionsMock } = require('../../resources/testUtility');
 
+const contractAggQuery = {
+	contractTotals: {
+		aggs: {
+			agencies: {
+				aggs: {
+					docs: {
+						aggs: {
+							obligatedAmounts: {
+								aggs: {
+									sum_agg: {
+										sum: {
+											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+										},
+									},
+								},
+								nested: {
+									path: 'extracted_data_eda_n',
+								},
+							},
+						},
+						reverse_nested: {},
+					},
+				},
+				terms: {
+					field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+					size: 1000000,
+				},
+			},
+		},
+		nested: {
+			path: 'fpds_ng_n',
+		},
+	},
+	contractTotalsNoAgency: {
+		aggs: {
+			obligatedAmounts: {
+				aggs: {
+					sum_agg: {
+						sum: {
+							field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+						},
+					},
+				},
+				nested: {
+					path: 'extracted_data_eda_n',
+				},
+			},
+		},
+		filter: {
+			bool: {
+				must_not: [
+					{
+						nested: {
+							path: 'fpds_ng_n',
+							query: {
+								exists: {
+									field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+								},
+							},
+						},
+					},
+				],
+			},
+		},
+	},
+};
+
 describe('EDASearchUtility', function () {
 	describe('getElasticsearchPagesQuery', function () {
 		it('should return an ES query for a search with Issue Org, Signature Start Date, and Issue Agency included', async (done) => {
@@ -67,6 +134,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -87,6 +155,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -261,6 +330,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -281,6 +351,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -464,6 +535,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -484,6 +556,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -665,6 +738,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -685,6 +759,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -819,6 +894,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -839,6 +915,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1001,6 +1078,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1021,6 +1099,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1199,6 +1278,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1219,6 +1299,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1410,6 +1491,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1430,6 +1512,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1580,6 +1663,7 @@ describe('EDASearchUtility', function () {
 							'fpds*',
 							'sow_pws_text_eda_ext_t',
 							'clins_text_n',
+							'clins_parsed_n',
 						],
 					},
 					stored_fields: [
@@ -1600,6 +1684,7 @@ describe('EDASearchUtility', function () {
 						'display_doc_type_s',
 						'*_eda_ext',
 					],
+					aggs: contractAggQuery,
 					from: 0,
 					size: 18,
 					track_total_hits: true,
@@ -1756,24 +1841,6 @@ describe('EDASearchUtility', function () {
 												should: [
 													{
 														query_string: {
-															default_field: 'fpds_ng_n.psc_desc_eda_ext',
-															fuzziness: 2,
-															query: '*test\\-*',
-														},
-													},
-												],
-											},
-										},
-									},
-								},
-								{
-									nested: {
-										path: 'fpds_ng_n',
-										query: {
-											bool: {
-												should: [
-													{
-														query_string: {
 															default_field: 'fpds_ng_n.piid_eda_ext',
 															fuzziness: 2,
 															query: '*test*',
@@ -1812,6 +1879,13 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.psc_eda_ext',
+															fuzziness: 2,
+															query: '*test*',
+														},
+													},
+													{
+														query_string: {
+															default_field: 'fpds_ng_n.psc_desc_eda_ext',
 															fuzziness: 2,
 															query: '*test*',
 														},
@@ -2132,6 +2206,8 @@ describe('EDASearchUtility', function () {
 										total_obligated_amount_eda_ext_f: 6472000,
 										contract_payment_office_name_eda_ext: 'DFAS COLUMBUS CENTER',
 									},
+									clins_parsed_n: 'test',
+									clins_parsed_successfully_b: 'test',
 									pagerank_r: 0.00001,
 								},
 								fields: {
@@ -2593,6 +2669,7 @@ describe('EDASearchUtility', function () {
 						},
 					},
 					totalCount: 1,
+					totalObligatedAmount: 0,
 					docs: [
 						{
 							metadata_type_eda_ext: 'syn',
@@ -2666,6 +2743,8 @@ describe('EDASearchUtility', function () {
 							modification_eda_ext: 'Award',
 							naics_eda_ext: undefined,
 							award_id_eda_ext: 'W911NF17D0002-0002',
+							clins: undefined,
+							clins_parsed_successfully_b: undefined,
 							reference_idv_eda_ext: 'W911NF17D0002',
 							signature_date_eda_ext: '2017-09-21',
 							effective_date_eda_ext: '2017-09-21',
@@ -2677,10 +2756,11 @@ describe('EDASearchUtility', function () {
 							keyw_5: '',
 							ref_list: [],
 							score: 8.036867,
+							clins: 'test',
+							clins_parsed_successfully_b: 'test',
 						},
 					],
-					doc_types: [],
-					doc_orgs: [],
+					issuingOrgs: [],
 					searchTerms: ['army'],
 					expansionDict: {
 						army: [
@@ -2712,7 +2792,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, false, false, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, false, false);
 				const expected = {
 					_source: {
 						includes: [
@@ -2782,7 +2862,7 @@ describe('EDASearchUtility', function () {
 			const target = new EDASearchUtility(opts);
 
 			try {
-				const actual = await target.getEDAContractQuery(award, idv, true, true, 'test user');
+				const actual = await target.getEDAContractQuery('test user', award, idv, true, true);
 				const expected = {
 					_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', '*_eda_n*'] },
 					from: 0,

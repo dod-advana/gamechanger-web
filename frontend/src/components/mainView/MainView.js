@@ -94,9 +94,23 @@ const MainView = (props) => {
 	}, [state.runningSearch]);
 
 	useEffect(() => {
-		const urlArray = window.location.href.split('/');
-		setState(dispatch, { pageDisplayed: urlArray[urlArray.length - 1] });
-	}, [dispatch]);
+		const baseUrl = window.location.origin;
+		const fullUrl = window.location.href;
+		const pathname = fullUrl.replace(baseUrl, '');
+		const { url } = state?.cloneData;
+		const urlEnd = pathname.slice(pathname.indexOf(url) + url.length);
+		let pageDisplayed = '';
+		if (urlEnd.charAt(0) === '?') {
+			// ignore rest of url, go to main
+			pageDisplayed = 'main';
+		} else {
+			pageDisplayed =
+				urlEnd
+					.slice(1) // skip next character
+					.match(/^([\w-]+)/g)?.[0] ?? 'main';
+		}
+		setState(dispatch, { pageDisplayed });
+	}, [dispatch, state.cloneData]);
 
 	useEffect(() => {
 		const favSearchUrls = state.userData?.favorite_searches?.map((search) => {
@@ -119,7 +133,8 @@ const MainView = (props) => {
 				(state.activeCategoryTab !== 'all' || state.cloneData.clone_name.toLowerCase() === 'cdo') &&
 				!state.docsLoading &&
 				!state.docsPagination &&
-				state.cloneData.clone_name.toLowerCase() !== 'jbook' // disabling infinite scroll for jbook
+				state.cloneData.clone_name.toLowerCase() !== 'jbook' &&
+				state.currentViewName !== 'Explorer'
 			) {
 				setState(dispatch, {
 					docsLoading: true,

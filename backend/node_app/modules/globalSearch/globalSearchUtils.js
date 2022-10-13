@@ -1,46 +1,149 @@
 const axios = require('axios');
 const https = require('https');
+const _ = require('lodash');
 const constantsFile = require('../../config/constants');
 
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
+let {
+	QLIK_URL,
+	CA,
+	KEY,
+	CERT,
+	AD_DOMAIN,
+	QLIK_SYS_ACCOUNT,
+	QLIK_EXCLUDE_CUST_PROP_NAME,
+	QLIK_EXCLUDE_CUST_PROP_VAL,
+	QLIK_BUSINESS_DOMAIN_PROP_NAME,
+} = constantsFile.QLIK_OPTS;
 
 const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
 const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
-const QLIK_ES_FIELDS = ['name_s', 'description_t', 'streamName_s'];
+const QLIK_ES_FIELDS = [
+	'name_t',
+	'description_t',
+	'streamName_t',
+	'streamCustomProperties_n',
+	'appCustomProperties_n',
+	'businessDomains_n',
+	'tags_n',
+];
 
 const QLIK_ES_MAPPING = {
 	created_dt: { newName: 'createdDate' },
 	modified_dt: { newName: 'modifiedDate' },
-	name_s: { newName: 'name' },
+	name_t: { newName: 'name' },
 	publishTime_dt: { newName: 'publishTime' },
 	published_b: { newName: 'published' },
 	tags_n: { newName: 'tags' },
 	description_t: { newName: 'description' },
-	streamName_s: { newName: 'streamName' },
+	streamName_t: { newName: 'streamName' },
 	fileSize_i: { newName: 'fileSize' },
 	lastReloadTime_dt: { newName: 'lastReloadTime' },
-	thumbnail_s: { newName: 'thumbnail' },
+	thumbnail_t: { newName: 'thumbnail' },
 	dynamicColor_s: { newName: 'dynamicColor' },
+	streamCustomProperties_n: { newName: 'streamCustomProperties' },
+	appCustomProperties_n: { newName: 'appCustomProperties' },
+	businessDomains_n: { newName: 'businessDomains' },
 };
 
-const getQlikApps = async (params = {}, userId, logger, getCount = false, getFull = false) => {
+const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 	try {
-		let url = `${QLIK_URL}/qrs/app`;
+		let url = `${QLIK_URL}/qrs/app/full`;
 
 		if (getCount) {
 			url = `${QLIK_URL}/qrs/app/count`;
-		} else if (getFull) {
-			url = `${QLIK_URL}/qrs/app/full`;
 		}
 
-		return await axios.get(url, getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
+		const qlikAppReq = axios.get(url, getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
+
+		const qlikStreamReq = axios.get(
+			`${QLIK_URL}/qrs/stream/full`,
+			getRequestConfigs({ filter: STREAM_PROD_FILTER }, userId)
+		);
+
+		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
+		return processQlikApps(qlikApps.data, qlikStreams.data, logger);
 	} catch (err) {
 		if (!userId)
 			// most common error is user wont have a qlik account which we dont need to log on every single search/hub hit
 			logger.error(err, 'O799J51', userId);
 
 		return {};
+	}
+};
+
+const determineIfExcluded = (app, { excludeName, excludeValue }) => {
+	return app.customProperties.some(
+		(property) => property.definition.name === excludeName && property.value === excludeValue
+	);
+};
+
+const separateBusinessDomainsAndCustomProps = (
+	customProperties = [],
+	businessDomainPropName = QLIK_BUSINESS_DOMAIN_PROP_NAME
+) => {
+	const businessDomains = [];
+	const otherCustomProps = [];
+
+	for (const customProp of customProperties) {
+		if (customProp.definition.name === businessDomainPropName) {
+			businessDomains.push(customProp.value);
+		} else {
+			otherCustomProps.push(customProp.value);
+		}
+	}
+
+	return { businessDomains, otherCustomProps };
+};
+
+const processQlikApps = (
+	apps,
+	streams,
+	logger,
+	opts = {
+		excludeName: QLIK_EXCLUDE_CUST_PROP_NAME,
+		excludeValue: QLIK_EXCLUDE_CUST_PROP_VAL,
+		businessDomainPropName: QLIK_BUSINESS_DOMAIN_PROP_NAME,
+	}
+) => {
+	try {
+		const processedApps = [];
+		for (const app of apps) {
+			if (
+				!determineIfExcluded(app, {
+					excludeName: opts.excludeName,
+					excludeValue: opts.excludeValue,
+				})
+			) {
+				const appsFullStreamData = _.find(streams, (stream) => {
+					return stream.id === app.stream.id;
+				});
+				let allBusinessDomains = [];
+				app.stream.customProperties = [];
+
+				const { businessDomains: streamBDs, otherCustomProps: streamOtherProps } =
+					separateBusinessDomainsAndCustomProps(
+						appsFullStreamData?.customProperties,
+						opts.businessDomainPropName
+					);
+
+				allBusinessDomains = allBusinessDomains.concat(streamBDs);
+				app.stream.customProperties = app.stream.customProperties.concat(streamOtherProps);
+
+				const { businessDomains: appBDs, otherCustomProps: appOtherProps } =
+					separateBusinessDomainsAndCustomProps(app.customProperties, opts.businessDomainPropName);
+
+				allBusinessDomains = allBusinessDomains.concat(appBDs);
+
+				app.customProperties = appOtherProps;
+				app.businessDomains = allBusinessDomains;
+				processedApps.push(app);
+			}
+		}
+		return processedApps;
+	} catch (err) {
+		logger.error(err, 'W290KC1');
+		throw err;
 	}
 };
 
@@ -69,11 +172,14 @@ const getUserHeader = (userid = QLIK_SYS_ACCOUNT) => {
 };
 
 const getElasticSearchQueryForQlikApps = (
-	{ searchText = '', parsedQuery, plainQuery, offset, limit, operator = 'and' },
+	{ parsedQuery, offset, limit, isVerbatimSearch, searchText, isForFavorites = false, favoriteApps = [] },
 	userId,
 	logger
 ) => {
 	try {
+		const textFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_t') !== -1);
+		const nestedFields = QLIK_ES_FIELDS.filter((field) => field.indexOf('_n') !== -1);
+		const wildcardSearchText = isVerbatimSearch ? [parsedQuery] : parsedQuery.split(' ');
 		let query = {
 			track_total_hits: true,
 			from: offset,
@@ -82,13 +188,16 @@ const getElasticSearchQueryForQlikApps = (
 				bool: {
 					should: [
 						{
-							multi_match: {
-								query: `${parsedQuery}`,
-								fields: QLIK_ES_FIELDS,
-								type: 'best_fields',
-								operator: `${operator}`,
-								fuzziness: 'AUTO',
-								analyzer: 'standard',
+							match_phrase: {
+								name_t: searchText,
+							},
+						},
+						{
+							query_string: {
+								fields: textFields,
+								query: parsedQuery,
+								boost: 0.5,
+								analyzer: 'my_analyzer',
 							},
 						},
 					],
@@ -102,26 +211,55 @@ const getElasticSearchQueryForQlikApps = (
 			},
 		};
 
-		QLIK_ES_FIELDS.forEach((field) => {
-			query.highlight.fields[field] = {};
-		});
-
-		const wildcardList = {
-			id: 6,
-			name_s: 5,
-			streamName_s: 4,
-		};
-
-		Object.keys(wildcardList).forEach((wildCardKey) => {
-			query.query.bool.should.push({
-				wildcard: {
-					[wildCardKey]: {
-						value: `*${plainQuery}*`,
-						boost: wildcardList[wildCardKey],
+		if (isForFavorites) {
+			query.query = {
+				terms: { 'id.keyword': favoriteApps },
+			};
+		} else {
+			nestedFields.forEach((field) => {
+				query.query.bool.should.push({
+					nested: {
+						path: field,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {
+									[`${field}.items`]: {
+										fragmenter: 'simple',
+										type: 'unified',
+									},
+								},
+							},
+						},
+						query: {
+							bool: {
+								should: wildcardSearchText.map((wildcardSearch) => {
+									return {
+										wildcard: {
+											[`${field}.items`]: `*${wildcardSearch}*`,
+										},
+									};
+								}),
+							},
+						},
 					},
-				},
+				});
 			});
-		});
+
+			textFields.forEach((field) => {
+				wildcardSearchText.forEach((wildcardSearch) => {
+					query.query.bool.should.push({
+						wildcard: {
+							[field]: `*${wildcardSearch}*`,
+						},
+					});
+				});
+			});
+
+			QLIK_ES_FIELDS.forEach((field) => {
+				query.highlight.fields[field] = {};
+			});
+		}
 
 		return query;
 	} catch (e) {
@@ -156,6 +294,24 @@ const cleanQlikESResults = (esResults, userId, logger) => {
 					});
 				});
 			}
+
+			const innerHits = hit.inner_hits || {};
+
+			Object.keys(innerHits).forEach((innerHitKey) => {
+				const innerHitObj = innerHits[innerHitKey];
+				const innerHitHits = innerHitObj?.hits?.hits || [];
+
+				innerHitHits.forEach((innerHitsHit) => {
+					if (innerHitsHit.highlight) {
+						Object.keys(innerHitsHit.highlight).forEach((hitKey) => {
+							result.highlights.push({
+								title: QLIK_ES_MAPPING[innerHitKey].newName,
+								fragment: innerHitsHit.highlight[hitKey][0],
+							});
+						});
+					}
+				});
+			});
 
 			searchResults.hits.push(result);
 		});
@@ -199,4 +355,5 @@ module.exports = {
 	getQlikApps,
 	getElasticSearchQueryForQlikApps,
 	cleanQlikESResults,
+	processQlikApps,
 };

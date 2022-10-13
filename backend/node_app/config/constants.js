@@ -1,4 +1,4 @@
-var path = require('path');
+const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const https = require('https');
@@ -83,7 +83,7 @@ module.exports = Object.freeze({
 		},
 	},
 	GAMECHANGER_BACKEND_BASE_URL: `http://${process.env.GAMECHANGER_BACKEND_HOST}:8990`,
-	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}:8990`,
+	GAMECHANGER_BACKEND_EDA_URL: `http://${process.env.EDA_DATA_HOST}`,
 	EDL_UPLOAD_DIRECTORY: path.dirname(require.main.filename) + '/volumes/uploads/',
 	LOG_FILE: path.dirname(require.main.filename) + '/logs/gc-node-api/gc-node-api',
 	LOG_FOLDER: path.dirname(require.main.filename) + '/logs/',
@@ -167,6 +167,11 @@ module.exports = Object.freeze({
 		auxSearchFields: [''],
 		auxRetrieveFields: [''],
 	},
+	AMHS_ELASTIC_SEARCH_OPTS: {
+		index: process.env.AMHS_ELASTICSEARCH_INDEX,
+		auxSearchFields: [''],
+		auxRetrieveFields: [''],
+	},
 	CDO_ELASTIC_SEARCH_OPTS: {
 		index: process.env.CDO_ELASTICSEARCH_INDEX,
 		auxSearchFields: [''],
@@ -175,11 +180,14 @@ module.exports = Object.freeze({
 	QLIK_OPTS: {
 		QLIK_URL: process.env.QLIK_URL,
 		QLIK_WS_URL: process.env.QLIK_WS_URL,
-		CA: process.env.QLIK_CERT_CA ? process.env.QLIK_CERT_CA.replace(/\\n/g, '\n') : '',
-		KEY: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT_KEY.replace(/\\n/g, '\n') : '',
-		CERT: process.env.QLIK_CERT_KEY ? process.env.QLIK_CERT.replace(/\\n/g, '\n') : '',
+		CA: getCert('QLIK_CERT_CA', 'QLIK_CERT_CA_FILEPATH'),
+		KEY: getCert('QLIK_CERT_KEY', 'QLIK_CERT_KEY_FILEPATH'),
+		CERT: getCert('QLIK_CERT', 'QLIK_CERT_FILEPATH'),
 		QLIK_SYS_ACCOUNT: process.env.QLIK_SYS_ACCOUNT,
 		AD_DOMAIN: process.env.QLIK_AD_DOMAIN,
+		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
+		QLIK_EXCLUDE_CUST_PROP_VAL: process.env.QLIK_EXCLUDE_CUST_PROP_VAL || 'ExcludeSearch',
+		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain',
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,
@@ -470,16 +478,37 @@ module.exports = Object.freeze({
 		COLLIBRA_CACHE_POLL_INTERVAL: process.env.COLLIBRA_CACHE_POLL_INTERVAL,
 		ES_MAPPING: {
 			settings: {
-				index: {
-					number_of_shards: 3,
-					number_of_replicas: 2,
+				analysis: {
+					filter: {
+						english_stemmer: {
+							type: 'stemmer',
+							language: 'english',
+						},
+						english_possessive_stemmer: {
+							type: 'stemmer',
+							language: 'possessive_english',
+						},
+					},
+					normalizer: {
+						lowercase_normalizer: {
+							filter: ['lowercase'],
+							type: 'custom',
+							char_filter: [],
+						},
+					},
+					analyzer: {
+						my_analyzer: {
+							type: 'custom',
+							tokenizer: 'standard',
+							filter: ['english_possessive_stemmer', 'lowercase', 'english_stemmer'],
+						},
+					},
 				},
 			},
 			mappings: {
 				dynamic_templates: [
 					{
 						string: {
-							match_mapping_type: 'string',
 							match: '*_s',
 							mapping: {
 								type: 'keyword',
@@ -490,19 +519,17 @@ module.exports = Object.freeze({
 					{
 						text: {
 							match: '*_t',
-							match_mapping_type: 'string',
-							mapping: { type: 'text' },
+							mapping: { type: 'text', analyzer: 'my_analyzer' },
 						},
 					},
 					{
 						string_and_text: {
 							match: '*_ks',
-							match_mapping_type: 'string',
 							mapping: {
 								type: 'keyword',
 								ignore_above: 256,
 								fields: {
-									search: { type: 'text' },
+									search: { type: 'text', analyzer: 'my_analyzer' },
 								},
 							},
 						},
@@ -510,70 +537,60 @@ module.exports = Object.freeze({
 					{
 						integer: {
 							match: '*_i',
-							match_mapping_type: 'string',
 							mapping: { type: 'integer' },
 						},
 					},
 					{
 						integer: {
 							match: '*_l',
-							match_mapping_type: 'string',
 							mapping: { type: 'long' },
 						},
 					},
 					{
 						boolean: {
 							match: '*_b',
-							match_mapping_type: 'string',
 							mapping: { type: 'boolean' },
 						},
 					},
 					{
 						double: {
 							match: '*_d',
-							match_mapping_type: 'string',
 							mapping: { type: 'double' },
 						},
 					},
 					{
 						float: {
 							match: '*_f',
-							match_mapping_type: 'string',
 							mapping: { type: 'float' },
 						},
 					},
 					{
 						date: {
 							match: '*_dt',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" },
 						},
 					},
 					{
 						date_year_only: {
 							match: '*_year_only',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: 'yyyy' },
 						},
 					},
 					{
 						date_year_month_only: {
 							match: '*_year_month_only',
-							match_mapping_type: 'string',
 							mapping: { type: 'date', format: 'yyyy-MM' },
 						},
 					},
 					{
 						rank_feature: {
 							match: '*_r',
-							match_mapping_type: 'string',
 							mapping: { type: 'rank_feature' },
 						},
 					},
 					{
 						rank_features: {
 							match: '*_rs',
-							match_mapping_type: 'string',
 							mapping: { type: 'rank_features' },
 						},
 					},
@@ -586,6 +603,6 @@ module.exports = Object.freeze({
 				],
 			},
 		},
-		ES_INDEX: 'global_search_qlik',
+		ES_INDEX: process.env.GLOBAL_SEARCH_ELASTICSEARCH_INDEX || 'global_search_qlik',
 	},
 });

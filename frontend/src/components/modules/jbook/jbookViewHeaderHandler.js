@@ -1,57 +1,96 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
+import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { gcOrange } from '../../common/gc-colors';
-import PortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
+import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
+import ExportIcon from '../../../images/icon/Export.svg';
+import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
-const IS_IE = /*@cc_on!@*/ false || !!document.documentMode;
+const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
-const useStyles = makeStyles({
-	root: {
-		paddingTop: '16px',
-		marginRight: '10px',
-		'& .MuiInputBase-root': {
-			height: '50px',
-			fontSize: 20,
-		},
-		'& .MuiFormLabel-root': {
-			fontSize: 20,
-		},
-		'&:hover .MuiInput-underline:before': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .MuiInput-underline:before': {
-			borderBottom: `3px solid rgba(0, 0, 0, 0.42)`,
-		},
-		'& .MuiInput-underline:after': {
-			borderBottom: `3px solid ${gcOrange}`,
-		},
-		'& .Mui-focused': {
-			borderColor: `${gcOrange}`,
-			color: `${gcOrange}`,
-		},
-	},
-	selectRoot: {
-		color: '#3F4A56',
-	},
-	selectIcon: {
-		marginTop: '4px',
-	},
-	formlabel: {
-		paddingTop: '16px',
-	},
-});
+const PORTFOLIO_FILTERS = [
+	'reviewStatus',
+	'primaryReviewStatus',
+	'primaryReviewer',
+	'serviceReviewer',
+	'pocReviewer',
+	'sourceTag',
+	'hasKeyword',
+	'primaryClassLabel',
+	'budgetType',
+];
+
+const filterNameMap = {
+	budgetYear: 'Budget Year',
+	budgetType: 'PL Title',
+	serviceAgency: 'Service/Agency',
+	raccts: 'Main Account',
+	budgetActivity: 'Budget Activity',
+	budgetSubActivity: 'Budget Sub Activity',
+	programElement: 'BLI',
+	projectNum: 'Project #',
+	minBY1Funding: 'BY1 Fund Min',
+	maxBY1Funding: 'BY1 Fund Max',
+	minTotalCost: 'Total Fund Min',
+	maxTotalCost: 'Total Fund Max',
+	primaryReviewer: 'Primary Reviewer',
+	serviceReviewer: 'Service Reviewer',
+	pocReviewer: 'POC Reviewer',
+	reviewStatus: 'Review Status',
+	hasKeywords: 'Keywords',
+	primaryClassLabel: 'Tag',
+	sourceTag: 'Source',
+};
+
+const createFilterArray = (settings, options) => {
+	const processedFilters = [];
+	Object.keys(settings).forEach((type) => {
+		if (Object.keys(options).includes(type) && type !== 'sort') {
+			if (isArray(settings[type])) {
+				settings[type].forEach((option) => {
+					processedFilters.push({ type, optionName: option });
+				});
+			} else {
+				processedFilters.push({ type, optionName: settings[type] });
+			}
+		}
+	});
+	return processedFilters;
+};
+
+const processFilters = (settings, options) => {
+	const searchSettings = _.cloneDeep(settings);
+	for (const optionType in options) {
+		if (
+			options[optionType] &&
+			searchSettings[optionType] &&
+			options[optionType].length === searchSettings[optionType].length
+		) {
+			delete searchSettings[optionType];
+		}
+
+		if (searchSettings?.[optionType]?.length === 0) {
+			delete searchSettings[optionType];
+		}
+	}
+
+	for (const setting in searchSettings) {
+		if (!searchSettings[setting]) {
+			delete searchSettings[setting];
+		}
+	}
+	return createFilterArray(searchSettings, options);
+};
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
@@ -62,6 +101,8 @@ const JbookViewHeaderHandler = (props) => {
 		cloneData,
 		componentStepNumbers,
 		currentViewName,
+		jbookSearchSettings,
+		defaultOptions,
 		listView,
 		viewNames,
 		projectData,
@@ -71,10 +112,11 @@ const JbookViewHeaderHandler = (props) => {
 		currentOrder,
 		sortSelected,
 		searchText,
+		exportLoading,
+		runSearch,
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
-	const [selectedPortfolio, setSelectedPortfolio] = useState('General');
 	const [portfolios, setPortfolios] = useState([]);
 
 	// if the user hasn't manually chosen a sort and they have entered search text, change the sort to Relevance
@@ -85,6 +127,22 @@ const JbookViewHeaderHandler = (props) => {
 			setState(dispatch, { currentSort: 'Budget Year' });
 		}
 	}, [dispatch, currentSort, searchText, sortSelected]);
+
+	//If portfolio filters are present when selecting a different portfolio, resets those filters and runs updates search
+	useEffect(() => {
+		let search = false;
+		PORTFOLIO_FILTERS.forEach((filter) => {
+			if (!_.isEqual(jbookSearchSettings[filter], defaultOptions[filter])) {
+				search = true;
+			}
+		});
+
+		if (search) {
+			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
+			setState(dispatch, { runSearch: true });
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [state.selectedPortfolio, dispatch]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -115,6 +173,31 @@ const JbookViewHeaderHandler = (props) => {
 			console.log(e);
 		}
 	}, [gameChangerAPI]);
+
+	const handleFilterChange = (option, type) => {
+		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+
+		if (isArray(newSearchSettings[type])) {
+			const index = newSearchSettings[type].indexOf(option);
+
+			if (index !== -1) {
+				newSearchSettings[type].splice(index, 1);
+			} else {
+				newSearchSettings[type].push(option);
+			}
+		} else {
+			newSearchSettings[type] = '';
+		}
+
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings[`${type}Update`] = true;
+		setState(dispatch, {
+			jbookSearchSettings: newSearchSettings,
+			metricsCounted: false,
+			runSearch: true,
+			runGraphSearch: true,
+		});
+	};
 
 	// handle view selector change
 	const handleChangeView = useCallback(
@@ -188,12 +271,14 @@ const JbookViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div className={'results-count-view-buttons-container'} style={extraStyle}>
-			<div className={'view-buttons-container'} style={{ marginRight: 35, zIndex: 99 }}>
-				<PortfolioSelector
-					setPortfolio={setSelectedPortfolio}
+		<div
+			className={'results-count-view-buttons-container'}
+			style={{ ...extraStyle, flexDirection: 'column', margin: '5px 0px 0px 0px' }}
+		>
+			<div className={'view-buttons-container'} style={{ marginRight: 10, zIndex: 99, justifyContent: 'right' }}>
+				<JBookPortfolioSelector
 					portfolios={portfolios}
-					selectedPortfolio={selectedPortfolio}
+					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
 				/>
@@ -344,7 +429,42 @@ const JbookViewHeaderHandler = (props) => {
 						<i className="fa fa-share" style={{ margin: '0 0 0 5px' }} />
 					</GCTooltip>
 				</GCButton>
+
+				<GCButton
+					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
+					onClick={async () => {
+						try {
+							setState(dispatch, {
+								exportDialogVisible: true,
+							});
+						} catch (e) {
+							console.log(e);
+						}
+					}}
+				>
+					{!exportLoading ? (
+						<img
+							src={ExportIcon}
+							style={{
+								margin: '0 0 3px 3px',
+								width: 15,
+							}}
+							alt="export"
+						/>
+					) : (
+						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
+					)}
+					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
+				</GCButton>
 			</div>
+			<FilterList
+				filterNameMap={filterNameMap}
+				searchSettings={jbookSearchSettings}
+				handleFilterChange={handleFilterChange}
+				processFilters={processFilters}
+				runSearch={runSearch}
+				defaultOptions={defaultOptions}
+			/>
 		</div>
 	);
 };

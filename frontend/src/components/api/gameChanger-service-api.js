@@ -5,66 +5,66 @@ import { axiosGET, axiosDELETE, axiosPOST, axiosPUT } from '../../utils/axiosUti
 import html2pdf from 'html2pdf.js';
 
 const endpoints = {
-	getCloneMeta: '/api/gameChanger/modular/getCloneMeta',
-	modularSearch: '/api/gameChanger/modular/search',
-	modularExport: '/api/gameChanger/modular/export',
-	gameChangerSemanticSearchDownloadPOST: '/api/gameChanger/semanticSearch/download',
-	gameChangerGraphSearchPOST: '/api/gameChanger/modular/graphSearch',
-	graphQueryPOST: '/api/gameChanger/modular/graphQuery',
-	getDocumentsToAnnotate: '/api/gameChanger/assist/getDocumentsToAnnotate',
-	saveDocumentAnnotationsPOST: '/api/gameChanger/assist/saveDocumentAnnotationsPOST',
-	sendFeedbackPOST: '/api/gameChanger/sendFeedback',
-	sendClassificationAlertPOST: '/api/gameChanger/sendClassificationAlert',
-	intelligentSearchFeedback: '/api/gameChanger/sendFeedback/intelligentSearch',
-	dataStorageDownloadGET: '/api/gameChanger/v2/data/storage/download',
-	thumbnailStorageDownloadPOST: '/api/gameChanger/thumbnailDownload',
+	getCloneMeta: '/api/gamechanger/modular/getCloneMeta',
+	modularSearch: '/api/gamechanger/modular/search',
+	modularExport: '/api/gamechanger/modular/export',
+	gameChangerSemanticSearchDownloadPOST: '/api/gamechanger/semanticSearch/download',
+	gameChangerGraphSearchPOST: '/api/gamechanger/modular/graphSearch',
+	graphQueryPOST: '/api/gamechanger/modular/graphQuery',
+	getDocumentsToAnnotate: '/api/gamechanger/assist/getDocumentsToAnnotate',
+	saveDocumentAnnotationsPOST: '/api/gamechanger/assist/saveDocumentAnnotationsPOST',
+	sendFeedbackPOST: '/api/gamechanger/sendFeedback',
+	sendClassificationAlertPOST: '/api/gamechanger/sendClassificationAlert',
+	intelligentSearchFeedback: '/api/gamechanger/sendFeedback/intelligentSearch',
+	dataStorageDownloadGET: '/api/gamechanger/v2/data/storage/download',
+	thumbnailStorageDownloadPOST: '/api/gamechanger/thumbnailDownload',
 	gcCloneDataGET: '/api/gamechanger/modular/getAllCloneMeta',
 	gcCloneTableDataGET: '/api/gamechanger/modular/admin/getCloneTableStructure',
 	reloadHandlerMapGET: '/api/gamechanger/modular/admin/reloadHandlerMap',
-	gcCloneDataPOST: '/api/gameChanger/modular/admin/storeCloneMeta',
-	gcCloneDataDeletePOST: '/api/gameChanger/modular/admin/deleteCloneMeta',
-	gcDataTrackerDataPOST: '/api/gameChanger/dataTracker/getTrackedData',
-	getDocIngestionStats: '/api/gameChanger/getDocIngestionStats',
-	gcBrowsingLibraryPOST: '/api/gameChanger/dataTracker/getBrowsingLibrary',
-	gcAdminDataGET: '/api/gameChanger/admin/getAdminData',
-	gcAdminDataPOST: '/api/gameChanger/admin/storeAdminData',
-	gcAdminDataDeletePOST: '/api/gameChanger/admin/deleteAdminData',
-	getHomepageEditorData: '/api/gameChanger/getHomepageEditorData',
-	setHomepageEditorData: '/api/gameChanger/admin/setHomepageEditorData',
-	getGCCacheStatus: '/api/gameChanger/admin/getGCCacheStatus',
-	toggleGCCacheStatus: '/api/gameChanger/admin/toggleGCCacheStatus',
-	getElasticSearchIndex: '/api/gameChanger/getElasticSearchIndex',
-	setElasticSearchIndex: '/api/gameChanger/admin/setElasticSearchIndex',
-	queryEs: '/api/gameChanger/admin/queryEs',
-	notificationsPOST: '/api/gameChanger/getNotifications',
-	notificationCreatePOST: '/api/gameChanger/admin/createNotification',
-	notificationEditActivePOST: '/api/gameChanger/admin/editNotificationActive',
-	notificationDeletePOST: '/api/gameChanger/admin/deleteNotification',
-	gcCreateSearchHistoryCache: '/api/gameChanger/admin/createSearchHistoryCache',
-	gcClearSearchHistoryCache: '/api/gameChanger/admin/clearSearchHistoryCache',
-	gcCreateAbbreviationsCache: '/api/gameChanger/admin/createAbbreviationsCache',
-	gcClearAbbreviationsCache: '/api/gameChanger/admin/clearAbbreviationsCache',
-	gcCreateGraphDataCache: '/api/gameChanger/admin/createGraphDataCache',
-	gcClearGraphDataCache: '/api/gameChanger/admin/clearGraphDataCache',
-	gcShortenSearchURLPOST: '/api/gameChanger/shortenSearchURL',
-	gcConvertTinyURLPOST: '/api/gameChanger/convertTinyURL',
-	gcCrawlerTrackerData: '/api/gameChanger/getCrawlerMetadata',
-	gcCrawlerSealData: '/api/gameChanger/getCrawlerSeals',
-	gcOrgSealData: '/api/gameChanger/getOrgSeals',
-	favoriteDocumentPOST: '/api/gameChanger/favorites/document',
-	favoriteGroupPOST: '/api/gameChanger/favorites/group',
-	addTofavoriteGroupPOST: '/api/gameChanger/favorites/addToGroup',
-	deleteFavoriteFromGroupPOST: '/api/gameChanger/favorites/removeFromGroup',
-	getRecentlyOpenedDocs: '/api/gameChanger/getRecentlyOpenedDocs',
-	recentSearchesPOST: '/api/gameChanger/getRecentSearches',
-	trendingSearchesPOST: '/api/gameChanger/trending/trendingSearches',
-	getTrendingBlacklist: '/api/gameChanger/trending/getTrendingBlacklist',
-	setTrendingBlacklist: '/api/gameChanger/admin/trending/setTrendingBlacklist',
-	deleteTrendingBlacklist: '/api/gameChanger/admin/trending/deleteTrendingBlacklist',
-	getWeeklySearchCount: '/api/gameChanger/trending/getWeeklySearchCount',
-	favoriteSearchPOST: '/api/gameChanger/favorites/search',
-	favoriteTopicPOST: '/api/gameChanger/favorites/topic',
-	favoriteOrganizationPOST: '/api/gameChanger/favorites/organization',
+	gcCloneDataPOST: '/api/gamechanger/modular/admin/storeCloneMeta',
+	gcCloneDataDeletePOST: '/api/gamechanger/modular/admin/deleteCloneMeta',
+	gcDataTrackerDataPOST: '/api/gamechanger/dataTracker/getTrackedData',
+	getDocIngestionStats: '/api/gamechanger/getDocIngestionStats',
+	gcBrowsingLibraryPOST: '/api/gamechanger/dataTracker/getBrowsingLibrary',
+	gcAdminDataGET: '/api/gamechanger/admin/getAdminData',
+	gcAdminDataPOST: '/api/gamechanger/admin/storeAdminData',
+	gcAdminDataDeletePOST: '/api/gamechanger/admin/deleteAdminData',
+	getHomepageEditorData: '/api/gamechanger/getHomepageEditorData',
+	setHomepageEditorData: '/api/gamechanger/admin/setHomepageEditorData',
+	getGCCacheStatus: '/api/gamechanger/admin/getGCCacheStatus',
+	toggleGCCacheStatus: '/api/gamechanger/admin/toggleGCCacheStatus',
+	getElasticSearchIndex: '/api/gamechanger/getElasticSearchIndex',
+	setElasticSearchIndex: '/api/gamechanger/admin/setElasticSearchIndex',
+	queryEs: '/api/gamechanger/admin/queryEs',
+	notificationsPOST: '/api/gamechanger/getNotifications',
+	notificationCreatePOST: '/api/gamechanger/admin/createNotification',
+	notificationEditActivePOST: '/api/gamechanger/admin/editNotificationActive',
+	notificationDeletePOST: '/api/gamechanger/admin/deleteNotification',
+	gcCreateSearchHistoryCache: '/api/gamechanger/admin/createSearchHistoryCache',
+	gcClearSearchHistoryCache: '/api/gamechanger/admin/clearSearchHistoryCache',
+	gcCreateAbbreviationsCache: '/api/gamechanger/admin/createAbbreviationsCache',
+	gcClearAbbreviationsCache: '/api/gamechanger/admin/clearAbbreviationsCache',
+	gcCreateGraphDataCache: '/api/gamechanger/admin/createGraphDataCache',
+	gcClearGraphDataCache: '/api/gamechanger/admin/clearGraphDataCache',
+	gcShortenSearchURLPOST: '/api/gamechanger/shortenSearchURL',
+	gcConvertTinyURLPOST: '/api/gamechanger/convertTinyURL',
+	gcCrawlerTrackerData: '/api/gamechanger/getCrawlerMetadata',
+	gcCrawlerSealData: '/api/gamechanger/getCrawlerSeals',
+	gcOrgSealData: '/api/gamechanger/getOrgSeals',
+	favoriteDocumentPOST: '/api/gamechanger/favorites/document',
+	favoriteGroupPOST: '/api/gamechanger/favorites/group',
+	addTofavoriteGroupPOST: '/api/gamechanger/favorites/addToGroup',
+	deleteFavoriteFromGroupPOST: '/api/gamechanger/favorites/removeFromGroup',
+	getRecentlyOpenedDocs: '/api/gamechanger/getRecentlyOpenedDocs',
+	recentSearchesPOST: '/api/gamechanger/getRecentSearches',
+	trendingSearchesPOST: '/api/gamechanger/trending/trendingSearches',
+	getTrendingBlacklist: '/api/gamechanger/trending/getTrendingBlacklist',
+	setTrendingBlacklist: '/api/gamechanger/admin/trending/setTrendingBlacklist',
+	deleteTrendingBlacklist: '/api/gamechanger/admin/trending/deleteTrendingBlacklist',
+	getWeeklySearchCount: '/api/gamechanger/trending/getWeeklySearchCount',
+	favoriteSearchPOST: '/api/gamechanger/favorites/search',
+	favoriteTopicPOST: '/api/gamechanger/favorites/topic',
+	favoriteOrganizationPOST: '/api/gamechanger/favorites/organization',
 	reloadModels: '/api/gamechanger/admin/reloadModels',
 	downloadCorpus: '/api/gamechanger/admin/downloadCorpus',
 	trainModel: '/api/gamechanger/admin/trainModel',
@@ -75,44 +75,44 @@ const endpoints = {
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
-	getModelsList: '/api/gameChanger/admin/getModelsList',
-	getDataList: '/api/gameChanger/admin/getDataList',
-	getLoadedModels: '/api/gameChanger/admin/getLoadedModels',
-	getProcessStatus: '/api/gameChanger/admin/getProcessStatus',
-	getFilesInCorpus: '/api/gameChanger/admin/getFilesInCorpus',
-	getUserSettings: '/api/gameChanger/getUserSettings',
-	getInternalUsers: '/api/gameChanger/getInternalUsers',
-	addInternalUser: '/api/gameChanger/admin/addInternalUser',
-	deleteInternalUser: '/api/gameChanger/admin/deleteInternalUser',
-	getAppStats: '/api/gameChanger/getAppStats',
-	getClonesMatomo: '/api/gameChanger/admin/getClonesMatomo',
-	getSearchPdfMapping: '/api/gameChanger/admin/getSearchPdfMapping',
-	exportUserData: '/api/gameChanger/admin/exportUserData',
-	getDocumentUsage: '/api/gameChanger/admin/getDocumentUsage',
-	getUserAggregations: '/api/gameChanger/admin/getUserAggregations',
-	sendUserAggregations: '/api/gameChanger/admin/sendUserAggregations',
-	getDocumentProperties: '/api/gameChanger/getDocumentProperties',
-	clearDashboardNotification: '/api/gameChanger/clearDashboardNotification',
-	clearFavoriteSearchUpdate: '/api/gameChanger/clearFavoriteSearchUpdate',
-	callGraphFunctionPOST: '/api/gameChanger/modular/callGraphFunction',
-	callSearchFunctionPOST: '/api/gameChanger/modular/callSearchFunction',
-	textSuggestionPOST: '/api/gameChanger/textSuggestion',
-	getResponsibilityData: '/api/gameChanger/responsibilities/get',
-	getResponsibilityDocTitles: '/api/gameChanger/responsibilities/getDocTitles',
-	getResponsibilityDoc: '/api/gameChanger/responsibilities/getDoc',
-	getResponsibilityDocLink: '/api/gameChanger/responsibilities/getDocLink',
-	setRejectionStatus: '/api/gameChanger/responsibilities/setRejectionStatus',
-	updateResponsibility: '/api/gameChanger/responsibilities/updateResponsibility',
-	updateResponsibilityReport: '/api/gameChanger/responsibilities/updateResponsibilityReport',
-	getOtherEntityFilterList: '/api/gameChanger/responsibilities/getOtherEntityFilterList',
-	storeResponsibilityReportData: '/api/gameChanger/responsibilities/storeReport',
-	getResponsibilityUpdates: '/api/gameChanger/responsibilities/getUpdates',
-	approveRejectAPIKeyRequestPOST: '/api/gameChanger/admin/approveRejectAPIKeyRequest',
-	revokeAPIKeyRequestPOST: '/api/gameChanger/admin/revokeAPIKeyRequest',
-	updateAPIKeyDescriptionPOST: '/api/gameChanger/admin/updateAPIKeyDescription',
-	getAPIKeyRequestsGET: '/api/gameChanger/admin/getAPIKeyRequests',
-	createAPIKeyRequestPOST: '/api/gameChanger/createAPIKeyRequest',
-	updateUserAPIRequestLimit: '/api/gameChanger/updateUserAPIRequestLimit',
+	getModelsList: '/api/gamechanger/admin/getModelsList',
+	getDataList: '/api/gamechanger/admin/getDataList',
+	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
+	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
+	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getUserSettings: '/api/gamechanger/getUserSettings',
+	getInternalUsers: '/api/gamechanger/getInternalUsers',
+	addInternalUser: '/api/gamechanger/admin/addInternalUser',
+	deleteInternalUser: '/api/gamechanger/admin/deleteInternalUser',
+	getAppStats: '/api/gamechanger/getAppStats',
+	getClonesMatomo: '/api/gamechanger/admin/getClonesMatomo',
+	getSearchPdfMapping: '/api/gamechanger/admin/getSearchPdfMapping',
+	exportUserData: '/api/gamechanger/admin/exportUserData',
+	getDocumentUsage: '/api/gamechanger/admin/getDocumentUsage',
+	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
+	getUserDashboard: '/api/gamechanger/admin/getUserDashboard',
+	sendUserAggregations: '/api/gamechanger/admin/sendUserAggregations',
+	getDocumentProperties: '/api/gamechanger/getDocumentProperties',
+	clearDashboardNotification: '/api/gamechanger/clearDashboardNotification',
+	clearFavoriteSearchUpdate: '/api/gamechanger/clearFavoriteSearchUpdate',
+	callGraphFunctionPOST: '/api/gamechanger/modular/callGraphFunction',
+	callSearchFunctionPOST: '/api/gamechanger/modular/callSearchFunction',
+	textSuggestionPOST: '/api/gamechanger/textSuggestion',
+	getResponsibilityData: '/api/gamechanger/responsibilities/get',
+	getResponsibilityDocTitles: '/api/gamechanger/responsibilities/getDocTitles',
+	getResponsibilityDoc: '/api/gamechanger/responsibilities/getDoc',
+	getResponsibilityDocLink: '/api/gamechanger/responsibilities/getDocLink',
+	setRejectionStatus: '/api/gamechanger/responsibilities/setRejectionStatus',
+	updateResponsibility: '/api/gamechanger/responsibilities/updateResponsibility',
+	updateResponsibilityReport: '/api/gamechanger/responsibilities/updateResponsibilityReport',
+	storeResponsibilityReportData: '/api/gamechanger/responsibilities/storeReport',
+	getResponsibilityUpdates: '/api/gamechanger/responsibilities/getUpdates',
+	approveRejectAPIKeyRequestPOST: '/api/gamechanger/admin/approveRejectAPIKeyRequest',
+	revokeAPIKeyRequestPOST: '/api/gamechanger/admin/revokeAPIKeyRequest',
+	updateAPIKeyDescriptionPOST: '/api/gamechanger/admin/updateAPIKeyDescription',
+	getAPIKeyRequestsGET: '/api/gamechanger/admin/getAPIKeyRequests',
+	createAPIKeyRequestPOST: '/api/gamechanger/createAPIKeyRequest',
+	updateUserAPIRequestLimit: '/api/gamechanger/updateUserAPIRequestLimit',
 	combinedSearchMode: '/api/gamechanger/appSettings/combinedSearch',
 	intelligentAnswers: '/api/gamechanger/appSettings/intelligentAnswers',
 	entitySearch: '/api/gamechanger/appSettings/entitySearch',
@@ -120,19 +120,20 @@ const endpoints = {
 	ltr: '/api/gamechanger/appSettings/ltr',
 	sendJiraFeedback: '/api/gamechanger/sendFeedback/jira',
 	requestDocIngest: '/api/gamechanger/sendFeedback/requestDoc',
-	getThumbnail: '/api/gameChanger/getThumbnail',
+	getThumbnail: '/api/gamechanger/getThumbnail',
 	topicSearch: '/api/gamechanger/appSettings/topicSearch',
-	qaSearchFeedback: '/api/gameChanger/sendFeedback/QA',
-	getFeedbackData: '/api/gameChanger/sendFeedback/getFeedbackData',
-	sendFrontendErrorPOST: '/api/gameChanger/sendFrontendError',
-	getOrgImageOverrideURLs: '/api/gameChanger/getOrgImageOverrideURLs',
-	saveOrgImageOverrideURL: '/api/gameChanger/saveOrgImageOverrideURL',
+	qaSearchFeedback: '/api/gamechanger/sendFeedback/QA',
+	getFeedbackData: '/api/gamechanger/sendFeedback/getFeedbackData',
+	getJbookFeedbackData: '/api/gamechanger/sendFeedback/getJbookFeedbackData',
+	sendFrontendErrorPOST: '/api/gamechanger/sendFrontendError',
+	getOrgImageOverrideURLs: '/api/gamechanger/getOrgImageOverrideURLs',
+	saveOrgImageOverrideURL: '/api/gamechanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
 	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
-	updateClonesVisitedPOST: '/api/gameChanger/user/updateClonesVisited',
+	updateClonesVisitedPOST: '/api/gamechanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
@@ -280,11 +281,6 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, body);
 	};
 
-	// graphQueryPOST = async (query, code = 'D7RIO21', cloneName, options  = {params: {}}) => {
-	// 	const url = endpoints.graphQueryPOST;
-	// 	return axiosPOST(this.axios, url, { query, code, cloneName, options });
-	// }
-
 	getDocumentsToAnnotate = async ({ clone, cloneData }) => {
 		const url = endpoints.getDocumentsToAnnotate;
 		return axiosPOST(this.axios, url, { clone, cloneData });
@@ -371,7 +367,7 @@ export default class GameChangerAPI {
 			const s3Bucket = cloneData?.s3_bucket ?? 'advana-data-zone/bronze';
 
 			let filename = encodeURIComponent(
-				`gamechanger${cloneData.clone_name !== 'gamechanger' ? `/projects/${cloneData.clone_name}` : ''}/${
+				`gamechanger${cloneData.clone_name !== 'gamechanger' ? '/projects/' + cloneData.clone_name : ''}/${
 					isDLA ? 'pdf-assist' : 'pdf'
 				}/${fileName}`
 			);
@@ -517,11 +513,6 @@ export default class GameChangerAPI {
 	updateResponsibilityReport = async (options) => {
 		const url = endpoints.updateResponsibilityReport;
 		return axiosPOST(this.axios, url, options);
-	};
-
-	getOtherEntityFilterList = async (options) => {
-		const url = endpoints.getOtherEntityFilterList;
-		return axiosGET(this.axios, url, options);
 	};
 
 	storeResponsibilityReportData = async (data) => {
@@ -802,7 +793,10 @@ export default class GameChangerAPI {
 		const url = endpoints.getUserAggregations;
 		return axiosGET(this.axios, url, { params: body });
 	};
-
+	getUserDashboard = async (body) => {
+		const url = endpoints.getUserDashboard;
+		return axiosGET(this.axios, url, { params: body });
+	};
 	sendUserAggregations = async (body) => {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });
@@ -875,15 +869,6 @@ export default class GameChangerAPI {
 	getTextSuggestion = async (body) => {
 		const url = endpoints.textSuggestionPOST;
 		return axiosPOST(this.axios, url, body);
-	};
-
-	getDescriptionFromWikipedia = async (title) => {
-		const api = `https://en.wikipedia.org/w/api.php?origin=*&format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles=${title}`;
-		const body = { method: 'GET', dataType: 'json' };
-		const myRequest = new Request(api, body);
-		return await fetch(myRequest).then((res) => {
-			return res.json();
-		});
 	};
 
 	getAPIKeyRequestData = async () => {
@@ -1040,6 +1025,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
+	getJbookFeedbackData = async (body) => {
+		const url = endpoints.getJbookFeedbackData;
+		return axiosPOST(this.axios, url, body);
+	};
+
 	getThumbnail = async (body) => {
 		const url = endpoints.getThumbnail;
 		return axiosGET(this.axios, url, { params: body });
@@ -1133,7 +1123,7 @@ export default class GameChangerAPI {
 	queryExp = async (data) => {
 		const querydata = { searchText: data };
 		const url = endpoints.queryExp;
-		return axiosPOST(this.axios, url, (data = querydata));
+		return axiosPOST(this.axios, url, querydata);
 	};
 
 	getReviewerData = async () => {
@@ -1170,17 +1160,17 @@ export default class GameChangerAPI {
 
 	exportProfilePage = async (body) => {
 		const url = endpoints.exportProfilePage;
-		const options = {}; //{responseType: 'blob'};
+		const options = {};
 		return axiosPOST(this.axios, url, body, options);
 	};
 
 	getUserFavoriteHomeApps = async () => {
-		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		const url = endpoints.getUserFavoriteHomeApps;
 		return axiosGET(this.axios, url);
 	};
 
 	putUserFavoriteHomeApps = async (data) => {
-		const url = endpoints.getUserFavoriteHomeApps; //`${Config.HOME_APP_BASE_URL}${endpoints.getUserFavoriteHomeApps}`;
+		const url = endpoints.getUserFavoriteHomeApps;
 		return axiosPUT(this.axios, url, data);
 	};
 }

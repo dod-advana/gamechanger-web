@@ -1,6 +1,5 @@
 import React from 'react';
 import GCAccordion from '../../common/GCAccordion';
-// import SimpleTable from '../../common/SimpleTable';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
 import { setState } from '../../../utils/sharedFunctions';
@@ -12,8 +11,6 @@ import { gcOrange } from '../../common/gc-colors';
 import GCButton from '../../common/GCButton';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
-
-const _ = require('lodash');
 
 const styles = {
 	titleText: {
@@ -102,11 +99,12 @@ const styles = {
 };
 
 const setEDASearchSetting = (field, value, state, dispatch) => {
-	const edaSettings = _.cloneDeep(state.edaSearchSettings);
+	const edaSettings = structuredClone(state.edaSearchSettings);
 
 	switch (field) {
 		case 'allOrgs':
 			edaSettings.allOrgsSelected = true;
+			edaSettings.organizations = [];
 			break;
 		case 'specOrgs':
 			edaSettings.allOrgsSelected = false;
@@ -133,6 +131,7 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 			break;
 		case 'allYears':
 			edaSettings.allYearsSelected = true;
+			edaSettings.fiscalYears = [];
 			break;
 		case 'specYears':
 			edaSettings.allYearsSelected = false;
@@ -147,6 +146,12 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 			break;
 		case 'allData':
 			edaSettings.allDataSelected = true;
+			edaSettings.contractData = {
+				pds: false,
+				syn: false,
+				fpds: false,
+				none: false,
+			};
 			break;
 		case 'specData':
 			edaSettings.allDataSelected = false;
@@ -164,7 +169,6 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 		case 'fundingOfficeCode':
 		case 'idvPIID':
 		case 'modNumber':
-		case 'pscDesc':
 		case 'piid':
 		case 'reqDesc':
 		case 'psc':
@@ -212,7 +216,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let amount = 0;
 
 	if (!isNaN(totalObligatedAmount)) {
-		amount = numberWithCommas(Math.floor(totalObligatedAmount / 1000000)) ?? 0;
+		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
 	}
 
 	const renderChartLabel = (entry) => {
@@ -222,8 +226,8 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	const CustomTooltip = ({ payload }) => {
 		let tooltipText = '';
 		if (payload.length > 0) {
-			let data = payload[0];
-			tooltipText += data.name + ': ' + data.payload.obligatedAmount;
+			let agency = payload[0];
+			tooltipText += agency.name + ': ' + agency.payload.obligatedAmount;
 		}
 		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
 	};
@@ -242,7 +246,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					label={renderChartLabel}
 					isAnimationActive={false}
 				>
-					{data.map((entry, index) => (
+					{data.map((_entry, index) => (
 						<Cell key={`cell-${index}`} fill={data[index].color} />
 					))}
 				</Pie>
@@ -381,6 +385,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 						label="Specific organization(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id={'specificOrgCheckbox'}
 					/>
 				</FormGroup>
 
@@ -406,6 +411,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Air Force"
 							labelPlacement="end"
+							id="airForceCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('air force') !== -1 &&
@@ -430,6 +436,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Army"
 							labelPlacement="end"
+							id="armyCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('army') !== -1 &&
@@ -454,6 +461,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="DOD"
 							labelPlacement="end"
+							id="dodCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('defense') !== -1 &&
@@ -478,6 +486,7 @@ const renderOrganizationFilters = (state, dispatch) => {
 							}
 							label="Navy"
 							labelPlacement="end"
+							id="navyCheckbox"
 						/>
 						{state.edaSearchSettings.organizations &&
 							state.edaSearchSettings.organizations.indexOf('navy') !== -1 &&
@@ -495,15 +504,16 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 		<TextField
 			placeholder={displayName}
 			variant="outlined"
-			defaultValue={state.edaSearchSettings[fieldName]}
+			value={state.edaSearchSettings[fieldName]}
 			style={{ backgroundColor: 'white', width: '100%' }}
 			fullWidth={true}
-			onBlur={(event) => setEDASearchSetting(fieldName, event.target.value, state, dispatch)}
+			onChange={(event) => setEDASearchSetting(fieldName, event.target.value, state, dispatch)}
 			inputProps={{
 				style: {
 					height: 19,
 					width: '100%',
 				},
+				id: fieldName + 'Filter',
 			}}
 		/>
 	);
@@ -538,6 +548,7 @@ const renderFiscalYearFilter = (state, dispatch) => {
 				}
 				label={i.toString()}
 				labelPlacement="end"
+				id={'year' + i.toString() + 'Checkbox'}
 			/>
 		);
 	}
@@ -579,6 +590,7 @@ const renderFiscalYearFilter = (state, dispatch) => {
 						label="Specific fiscal year(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id={'specificFiscalYearCheckbox'}
 					/>
 				</FormGroup>
 
@@ -628,6 +640,7 @@ const renderContractDataFilter = (state, dispatch) => {
 						label="Specific data source(s)"
 						labelPlacement="end"
 						style={styles.titleText}
+						id="specificContractDataCheckbox"
 					/>
 				</FormGroup>
 
@@ -653,6 +666,7 @@ const renderContractDataFilter = (state, dispatch) => {
 							}
 							label="PDS"
 							labelPlacement="end"
+							id={'pdsCheckbox'}
 						/>
 						<FormControlLabel
 							name="SYN"
@@ -731,34 +745,36 @@ const renderObligatedAmountFilter = (state, dispatch) => {
 				placeholder="Min"
 				variant="outlined"
 				type="number"
-				defaultValue={state.edaSearchSettings && state.edaSearchSettings.minObligatedAmount}
+				value={state.edaSearchSettings && state.edaSearchSettings.minObligatedAmount}
 				style={{
 					backgroundColor: 'white',
 					width: '100%',
 					margin: '0 0 15px 0',
 				}}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('minObligatedAmount', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('minObligatedAmount', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
 						width: '100%',
 					},
+					id: 'minObligatedAmountFilter',
 				}}
 			/>
 			<TextField
 				placeholder="Max"
 				variant="outlined"
 				type="number"
-				defaultValue={state.edaSearchSettings && state.edaSearchSettings.maxObligatedAmount}
+				value={state.edaSearchSettings && state.edaSearchSettings.maxObligatedAmount}
 				style={{ backgroundColor: 'white', width: '100%' }}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('maxObligatedAmount', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('maxObligatedAmount', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
 						width: '100%',
 					},
+					id: 'maxObligatedAmountFilter',
 				}}
 			/>
 		</div>
@@ -835,10 +851,10 @@ const renderExcludeTerms = (state, dispatch) => {
 			<TextField
 				placeholder="Enter Text to Exclude"
 				variant="outlined"
-				defaultValue={state.edaSearchSettings.excludeTerms}
+				value={state.edaSearchSettings.excludeTerms}
 				style={{ backgroundColor: 'white', width: '100%' }}
 				fullWidth={true}
-				onBlur={(event) => setEDASearchSetting('excludeTerms', event.target.value, state, dispatch)}
+				onChange={(event) => setEDASearchSetting('excludeTerms', event.target.value, state, dispatch)}
 				inputProps={{
 					style: {
 						height: 19,
@@ -852,73 +868,139 @@ const renderExcludeTerms = (state, dispatch) => {
 
 const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+	setState(dispatch, { runSearch: true });
 };
 
 export const getAdvancedOptions = (props) => {
 	const { state, dispatch, handleSubmit } = props;
+	const { searchText } = state;
 
 	return (
 		<div style={{ height: 500, overflow: 'scroll' }}>
 			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE ORGANIZATION</strong>
+				<strong style={styles.boldText}>EXCLUDED TERMS</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderOrganizationFilters(state, dispatch)}</div>
+				<div>{renderExcludeTerms(state, dispatch)}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
+				<strong style={styles.boldText}>DESCRIPTION OF REQS</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
+				<div>{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}</div>
 			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>FISCAL YEAR</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderFiscalYearFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>EDA CONTRACT DATA</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderContractDataFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderObligatedAmountFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderModificationFilter(state, dispatch)}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>IDV PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>PIID</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
-			</div>
-			<div style={styles.advFilterDiv}>
-				<strong style={styles.boldText}>MOD NUMBER</strong>
-				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
-				<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
-			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>CONTRACT SOW</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'Contract SOW', 'contractSOW')}</div>
 			</div>
+
 			<div style={styles.advFilterDiv}>
 				<strong style={styles.boldText}>CLIN DATA</strong>
 				<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
 				<div>{renderTextFieldFilter(state, dispatch, 'CLIN DATA', 'clinText')}</div>
 			</div>
+
+			{(!searchText || searchText.length === 0) && (
+				<>
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE ORGANIZATION</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderOrganizationFilters(state, dispatch)}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE OFFICE DODAAC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE DODAAC', 'issueOfficeDoDAAC')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>ISSUE OFFICE NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'ISSUE OFFICE NAME', 'issueOfficeName')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FISCAL YEAR</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderFiscalYearFilter(state, dispatch)}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>OBLIGATED AMOUNT</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderObligatedAmountFilter(state, dispatch)}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>VENDOR NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FUNDING OFFICE DoDAAC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>FUNDING AGENCY NAME</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>PSC</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>NAICS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>DUNS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>AVAILABLE EDA FORMAT</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderContractDataFilter(state, dispatch)}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>CONTRACTS OR MODS</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderModificationFilter(state, dispatch)}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>IDV PIID</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div> {renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>PIID</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}</div>
+					</div>
+
+					<div style={styles.advFilterDiv}>
+						<strong style={styles.boldText}>MOD NUMBER</strong>
+						<hr style={{ marginTop: '5px', marginBottom: '10px' }} />
+						<div>{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}</div>
+					</div>
+				</>
+			)}
+
 			<div style={{ display: 'flex', margin: '10px' }}>
 				<div style={{ width: '120px', height: '40px', marginRight: '20px' }}>
 					<GCButton
@@ -950,9 +1032,14 @@ const EDASearchMatrixHandler = (props) => {
 
 	const { edaSearchSettings, totalObligatedAmount, issuingOrgs } = state;
 
+	const resetSearchSettings = () => {
+		dispatch({ type: 'RESET_SEARCH_SETTINGS' });
+		setState(dispatch, { runSearch: true });
+	};
+
 	return (
-		<div>
-			<div className={'sidebar-section-title'} style={{ paddingTop: 20 }}>
+		<div data-cy="eda-filter-container">
+			<div className={'sidebar-section-title'} style={{ paddingTop: 10 }}>
 				FILTERS
 				<p style={{ fontSize: 10, color: 'gray', margin: '5px 0px' }}>Data sources: PDS, SYN, FPDS</p>
 			</div>
@@ -967,6 +1054,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOrganizationAccordion'}
 			>
 				{renderOrganizationFilters(state, dispatch)}
 			</GCAccordion>
@@ -978,6 +1066,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOfficeDoDAACAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Issue Office DoDAAC', 'issueOfficeDoDAAC')}
 			</GCAccordion>
@@ -989,6 +1078,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'issueOfficeNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Issue Office Name', 'issueOfficeName')}
 			</GCAccordion>
@@ -1004,6 +1094,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fiscalYearAccordion'}
 			>
 				{renderFiscalYearFilter(state, dispatch)}
 			</GCAccordion>
@@ -1015,6 +1106,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'obligatedAmountAccordion'}
 			>
 				{renderObligatedAmountFilter(state, dispatch)}
 			</GCAccordion>
@@ -1026,6 +1118,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'vendorNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Vendor Name', 'vendorName')}
 			</GCAccordion>
@@ -1037,6 +1130,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fundingOfficeCodeAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Funding Office Code', 'fundingOfficeCode')}
 			</GCAccordion>
@@ -1048,6 +1142,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'fundingAgencyNameAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Funding Agency Name', 'fundingAgencyName')}
 			</GCAccordion>
@@ -1059,19 +1154,9 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'pscAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PSC', 'psc')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.pscDesc}
-				header={'PSC DESCRIPTION'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'PSC Description', 'pscDesc')}
 			</GCAccordion>
 
 			<GCAccordion
@@ -1081,6 +1166,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'naicsAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'NAICS', 'naicsCode')}
 			</GCAccordion>
@@ -1088,10 +1174,11 @@ const EDASearchMatrixHandler = (props) => {
 			<GCAccordion
 				contentPadding={15}
 				expanded={edaSearchSettings.duns}
-				header={'UEI'}
+				header={'DUNS'}
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'dunsAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'DUNS', 'duns')}
 			</GCAccordion>
@@ -1109,30 +1196,9 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'contractDataAccordion'}
 			>
 				{renderContractDataFilter(state, dispatch)}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.excludeTerms !== null}
-				header={'EXCLUDED TERMS'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderExcludeTerms(state, dispatch)}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.reqDesc}
-				header={'DESCRIPTION OF REQS'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'Description of Requirements', 'reqDesc')}
 			</GCAccordion>
 
 			<GCAccordion
@@ -1142,6 +1208,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'contractsOrModsAccordion'}
 			>
 				{renderModificationFilter(state, dispatch)}
 			</GCAccordion>
@@ -1153,6 +1220,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'idvPIIDAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'IDV PIID', 'idvPIID')}
 			</GCAccordion>
@@ -1164,6 +1232,7 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'piidAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'PIID', 'piid')}
 			</GCAccordion>
@@ -1175,30 +1244,9 @@ const EDASearchMatrixHandler = (props) => {
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				id={'modNumberAccordion'}
 			>
 				{renderTextFieldFilter(state, dispatch, 'Mod Number', 'modNumber')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.contractSOW}
-				header={'CONTRACT SOW'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'Contract SOW', 'contractSOW')}
-			</GCAccordion>
-
-			<GCAccordion
-				contentPadding={15}
-				expanded={edaSearchSettings.clinText}
-				header={'CLIN DATA'}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				{renderTextFieldFilter(state, dispatch, 'CLIN DATA', 'clinText')}
 			</GCAccordion>
 
 			<GCButton
@@ -1208,6 +1256,13 @@ const EDASearchMatrixHandler = (props) => {
 				}}
 			>
 				Update Search
+			</GCButton>
+			<GCButton
+				style={{ width: '100%', marginBottom: '10px', marginLeft: '-1px' }}
+				onClick={resetSearchSettings}
+				isSecondaryBtn
+			>
+				Clear Filters
 			</GCButton>
 
 			<div className={'filters-container sidebar-section-title'} style={{ marginBottom: 5 }}>

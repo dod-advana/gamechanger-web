@@ -92,6 +92,9 @@ export const downloadFile = async (data, format, cloneData) => {
 };
 
 const ExportResultsDialog = ({
+	state,
+	dispatch,
+	searchHandler,
 	open,
 	handleClose,
 	searchObject,
@@ -159,6 +162,9 @@ const ExportResultsDialog = ({
 			url = url.replace('#/', '');
 			const res = await gameChangerAPI.shortenSearchURLPOST(url);
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
+			const cleanSearchSettings =
+				searchHandler !== undefined ? searchHandler.processSearchSettings(state, dispatch) : {};
+
 			const exportInput = {
 				cloneName: cloneData.clone_name,
 				format: selectedFormat,
@@ -178,6 +184,8 @@ const ExportResultsDialog = ({
 					edaSearchSettings,
 					sort,
 					order,
+					jbookSearchSettings: cleanSearchSettings,
+					portfolio: state !== undefined ? state.selectedPortfolio || 'AI Inventory' : null,
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
@@ -278,9 +286,6 @@ const ExportResultsDialog = ({
 									PDF
 								</MenuItem>
 							)}
-							<MenuItem style={styles.menuItem} value="json" key="json">
-								JSON
-							</MenuItem>
 							<MenuItem style={styles.menuItem} value="csv" key="csv">
 								CSV
 							</MenuItem>

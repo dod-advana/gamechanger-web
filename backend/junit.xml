@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="10" failures="0" errors="0" time="2.928">
+  <testsuite name="EDASearchHandler" errors="0" failures="0" skipped="0" timestamp="2022-09-02T00:38:04" time="2.849" tests="10">
+    <testcase classname="EDASearchHandler #searchHelper should return data for a search" name="EDASearchHandler #searchHelper should return data for a search" time="0.008">
+    </testcase>
+    <testcase classname="EDASearchHandler #searchHelper should not store history when requested" name="EDASearchHandler #searchHelper should not store history when requested" time="0.002">
+    </testcase>
+    <testcase classname="EDASearchHandler #searchHelper should error and try storing results" name="EDASearchHandler #searchHelper should error and try storing results" time="0.003">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" name="EDASearchHandler queryContractMods should return contract mod (number, sig date, effective date) from a contract award ID (isSearch is false)" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" name="EDASearchHandler queryContractMods should return contract mod data from a contract award ID (isSearch is true)" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler queryContractMods should return ES error" name="EDASearchHandler queryContractMods should return ES error" time="0">
+    </testcase>
+    <testcase classname="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" name="EDASearchHandler queryBaseAwardContract should return data for a base award contract using awardID" time="0">
+    </testcase>
+    <testcase classname="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" name="EDASearchHandler callFunctionHelper should call the correct function (queryBaseAwardContract)" time="0">
+    </testcase>
+    <testcase classname="EDASearchHandler callFunctionHelper should not find the function" name="EDASearchHandler callFunctionHelper should not find the function" time="0.001">
+    </testcase>
+    <testcase classname="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" name="EDASearchHandler querySimilarDocs should return search results that are &quot;similar&quot; to contract award data provided" time="0.021">
+    </testcase>
+  </testsuite>
+</testsuites>

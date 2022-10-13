@@ -28,7 +28,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Other Procurement, Army',
 						budgetActivityNumber_s: '02',
 						budgetActivityTitle_t: 'Communications and Electronics Equipment',
-						budgetLineItem_s: '0131B89000',
+						budgetLineItem_t: '0131B89000',
 						projectTitle_s: 'Insider Threat Program - Unit Activity Monitoring',
 						p1LineNumber_s: '54',
 						projectMissionDescription_t:
@@ -156,7 +156,7 @@ const elasticSearchResultsMock = {
 						appropriationTitle_t: 'Procurement, Defense-Wide',
 						budgetActivityNumber_s: '01',
 						budgetActivityTitle_t: 'Major Equipment',
-						budgetLineItem_s: '0902298J',
+						budgetLineItem_t: '0902298J',
 						projectTitle_s: 'Management Headquarters',
 						p1LineNumber_s: '40',
 						projectMissionDescription_t:
@@ -766,78 +766,10 @@ describe('JBookSearchHandler', function () {
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();
 		});
-
-		// it('should return data for PDF Export',
-		// 	async (done) => {
-		// 		const req = {
-		// 			body: {
-		//
-		// 			}
-		// 		};
-		//
-		// 		const mockQueryForPDF = ['pSelect', 'rSelect', 'oSelect'];
-		// 		const mockWhereQuery = ['pWhere', 'rWhere', 'oWhere'];
-		// 		const keywordAssocMock = [[{pdoc_ids: [1, 2, 3]}]];
-		// 		// const mockEndQuery = {};
-		//
-		// 		// update when we add jbook profile page export to gc
-		// 		const mockPGResults = [[{
-		// 			type:'Procurement',
-		// 			id: 1
-		// 		}]];
-		//
-		// 		const opts = {
-		// 			keyword_assoc: {
-		// 				sequelize: {
-		// 					query() {
-		// 						return Promise.resolve(keywordAssocMock);
-		// 					}
-		// 				}
-		// 			},
-		// 			jbookSearchUtility: {
-		// 				buildSelectQueryForFullPDF() {
-		// 					return mockQueryForPDF;
-		// 				},
-		// 				buildWhereQuery() {
-		// 					return mockWhereQuery;
-		// 				},
-		// 				// buildEndQuery() {
-		// 				// 	return mockEndQuery;
-		// 				// }
-		// 			},
-		// 			db: {
-		// 				jbook: {
-		// 					query () {
-		// 						return Promise.resolve(mockPGResults);
-		// 					}
-		// 				}
-		// 			}
-		// 		};
-		//
-		// 		const target = new JBookSearchHandler(opts);
-		//
-		// 		try {
-		// 			const actual = await target.getDataForFullPDFExport(req, true);
-		// 			const expected = [
-		// 				{
-		// 					hasKeywords: true,
-		// 					id: 1,
-		// 					type: 'Procurement'
-		// 				}
-		// 			];
-		// 			assert.deepStrictEqual(actual, expected);
-		//
-		// 		} catch (e) {
-		// 			console.log(e);
-		// 			assert.fail(e);
-		// 		}
-		// 		done();
-		// 	});
 
 		it('should return data for filters', async (done) => {
 			const req = {};
@@ -853,38 +785,19 @@ describe('JBookSearchHandler', function () {
 				],
 			];
 
-			const mockAgencyYearData = [
-				[
-					{
-						budgetyear: ['2020', '2021', '2022'],
-						serviceagency: ['Army', 'Air Force'],
-					},
-					{
-						budgetyear: ['2015', '2016'],
-						serviceagency: ['Navy', 'Marine Corp'],
-					},
-				],
-			];
-
 			const mockESBudgetYear = {
 				body: {
 					aggregations: {
 						values: {
 							buckets: [
 								{
-									key: {
-										budgetYear_s: '2020',
-									},
+									key: '2020',
 								},
 								{
-									key: {
-										budgetYear_s: '2021',
-									},
+									key: '2021',
 								},
 								{
-									key: {
-										budgetYear_s: '2022',
-									},
+									key: '2022',
 								},
 							],
 						},
@@ -898,27 +811,109 @@ describe('JBookSearchHandler', function () {
 						values: {
 							buckets: [
 								{
-									key: {
-										serviceAgency_s: 'AF',
-									},
+									key: 'AF',
 								},
 								{
-									key: {
-										serviceAgency_s: 'DCMA',
-									},
+									key: 'DCMA',
 								},
 								{
-									key: {
-										serviceAgency_s: 'CAAF',
-									},
+									key: 'CAAF',
 								},
 							],
 						},
 					},
 				},
 			};
+			const mockESAppropriationNumber = {
+				body: {
+					aggregations: {
+						raccts: {
+							doc_count: 23468,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '2040', doc_count: 6815 },
+									{ key: '1319', doc_count: 5978 },
+									{ key: '0400', doc_count: 4948 },
+									{ key: '3600', doc_count: 4474 },
+									{ key: '0130', doc_count: 1007 },
+									{ key: '3620', doc_count: 216 },
+									{ key: '0460', doc_count: 30 },
+								],
+							},
+						},
+						paccts: {
+							doc_count: 9136,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '2035', doc_count: 1798 },
+									{ key: '1810', doc_count: 1423 },
+									{ key: '3010', doc_count: 806 },
+									{ key: '0300', doc_count: 684 },
+									{ key: '3080', doc_count: 642 },
+									{ key: '1506', doc_count: 625 },
+									{ key: '1109', doc_count: 537 },
+									{ key: '1507', doc_count: 383 },
+									{ key: '2033', doc_count: 383 },
+									{ key: '2031', doc_count: 372 },
+									{ key: '2034', doc_count: 306 },
+									{ key: '1508', doc_count: 228 },
+									{ key: '2032', doc_count: 226 },
+									{ key: '3020', doc_count: 207 },
+									{ key: '1611', doc_count: 167 },
+									{ key: '3011', doc_count: 145 },
+									{ key: '3021', doc_count: 123 },
+									{ key: '3022', doc_count: 63 },
+									{ key: '0360', doc_count: 10 },
+									{ key: '0303', doc_count: 6 },
+									{ key: '2093', doc_count: 2 },
+								],
+							},
+						},
+						oaccts: {
+							doc_count: 393,
+							proc_accts: {
+								doc_count_error_upper_bound: 0,
+								sum_other_doc_count: 0,
+								buckets: [
+									{ key: '1804', doc_count: 63 },
+									{ key: '2020', doc_count: 57 },
+									{ key: '0100', doc_count: 50 },
+									{ key: '3400', doc_count: 45 },
+									{ key: '1106', doc_count: 21 },
+									{ key: '2065', doc_count: 20 },
+									{ key: '2080', doc_count: 20 },
+									{ key: '0130', doc_count: 19 },
+									{ key: '1806', doc_count: 16 },
+									{ key: '2091', doc_count: 16 },
+									{ key: '3740', doc_count: 12 },
+									{ key: '3410', doc_count: 11 },
+									{ key: '3840', doc_count: 10 },
+									{ key: '1107', doc_count: 5 },
+									{ key: '0105', doc_count: 4 },
+									{ key: '0107', doc_count: 4 },
+									{ key: '0810', doc_count: 4 },
+									{ key: '2099', doc_count: 3 },
+									{ key: '5188', doc_count: 3 },
+									{ key: '5189', doc_count: 3 },
+									{ key: '0104', doc_count: 1 },
+									{ key: '0111', doc_count: 1 },
+									{ key: '0134', doc_count: 1 },
+									{ key: '0811', doc_count: 1 },
+									{ key: '0819', doc_count: 1 },
+									{ key: '0838', doc_count: 1 },
+									{ key: '5751', doc_count: 1 },
+								],
+							},
+						},
+					},
+				},
+			};
 
-			let esQueryCalled = false;
+			let esQueryCalled = 0;
 			const opts = {
 				db: {
 					jbook: {
@@ -926,18 +921,24 @@ describe('JBookSearchHandler', function () {
 							if (query.indexOf('primary_reviewer') !== -1) {
 								return mockPGResults;
 							}
-							return mockAgencyYearData;
 						},
 					},
 				},
 				redisDB: {},
 				dataLibrary: {
 					queryElasticSearch() {
-						if (esQueryCalled) {
-							return Promise.resolve(mockESServiceAgency);
-						} else {
-							esQueryCalled = true;
-							return Promise.resolve(mockESBudgetYear);
+						switch (esQueryCalled) {
+							case 0:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESBudgetYear);
+							case 1:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESServiceAgency);
+							case 2:
+								esQueryCalled += 1;
+								return Promise.resolve(mockESAppropriationNumber);
+							default:
+								break;
 						}
 					},
 				},
@@ -948,22 +949,74 @@ describe('JBookSearchHandler', function () {
 			try {
 				const actual = await target.getDataForFilters(req, 'test');
 				const expected = {
-					budgetYearES: ['2020', '2021', '2022'],
-					serviceAgencyES: [
+					budgetYear: ['2020', '2021', '2022'],
+					reviewstatus: [null],
+					serviceAgency: [
 						'Air Force (AF)',
 						'Defense Contract Management Agency (DCMA)',
 						'Court of Appeals for the Armed Forces (CAAF)',
 					],
-					budgetYear: ['2015', '2016', '2020', '2021', '2022'],
-					reviewstatus: [null],
-					serviceAgency: ['Air Force', 'Army', 'Navy', null],
 					serviceagency: 'service agency',
 					servicereviewer: ['service reviewer'],
 					servicesecondaryreviewer: ['service secondary reviewer'],
+					appropriationNumber: {
+						raccts: ['2040', '1319', '0400', '3600', '0130', '3620', '0460'],
+						paccts: [
+							'2035',
+							'1810',
+							'3010',
+							'0300',
+							'3080',
+							'1506',
+							'1109',
+							'1507',
+							'2033',
+							'2031',
+							'2034',
+							'1508',
+							'2032',
+							'3020',
+							'1611',
+							'3011',
+							'3021',
+							'3022',
+							'0360',
+							'0303',
+							'2093',
+						],
+						oaccts: [
+							'1804',
+							'2020',
+							'0100',
+							'3400',
+							'1106',
+							'2065',
+							'2080',
+							'0130',
+							'1806',
+							'2091',
+							'3740',
+							'3410',
+							'3840',
+							'1107',
+							'0105',
+							'0107',
+							'0810',
+							'2099',
+							'5188',
+							'5189',
+							'0104',
+							'0111',
+							'0134',
+							'0811',
+							'0819',
+							'0838',
+							'5751',
+						],
+					},
 				};
 				assert.deepStrictEqual(actual, expected);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();
@@ -1304,7 +1357,6 @@ describe('JBookSearchHandler', function () {
 				assert.equal(resStatus, true);
 				assert.equal(setHeader, 2);
 			} catch (e) {
-				console.log(e);
 				assert.fail(e);
 			}
 			done();

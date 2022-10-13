@@ -3,24 +3,21 @@ const JBookDataHandler = require('../../../node_app/modules/jbook/jbookDataHandl
 const { constructorOptionsMock } = require('../../resources/testUtility');
 
 const {
-	profileData,
 	keywordData,
-	reviewData,
 	esData,
 	portfolioData,
+	reviewData,
+	userReviews,
+	commentData,
+	budgetDropdownData,
 } = require('../../resources/mockResponses/jbookMockData');
 
 describe('JBookDataHandler', function () {
 	describe('#getProjectData', () => {
-		const docs = profileData;
-		let keywords = keywordData['pdoc'];
 		let review = reviewData['pdoc'];
+		let keywords = keywordData['pdoc'];
 		let esReturn = esData['pdoc'];
 		let portfolios = portfolioData;
-
-		const findOneFromDocs = (id, type) => {
-			return docs[type][id];
-		};
 
 		const opts = {
 			...constructorOptionsMock,
@@ -30,33 +27,18 @@ describe('JBookDataHandler', function () {
 				EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 			},
 			pdoc: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'pdoc') });
+				findAll() {
+					return Promise.resolve();
 				},
 			},
 			rdoc: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'rdoc') });
+				findAll() {
+					return Promise.resolve();
 				},
 			},
 			om: {
-				findOne(where) {
-					return Promise.resolve({ dataValues: findOneFromDocs(where.where.id, 'odoc') });
-				},
-			},
-			gl_contracts: {
 				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			obligations: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			accomp: {
-				findAll() {
-					return Promise.resolve([]);
+					return Promise.resolve();
 				},
 			},
 			db: {
@@ -66,43 +48,17 @@ describe('JBookDataHandler', function () {
 					},
 				},
 			},
-			review: {
-				findOne() {
-					return Promise.resolve({ dataValues: review });
-				},
-				findAll() {
-					return Promise.resolve([{ dataValues: review }]);
-				},
-				create() {
-					return Promise.resolve({});
-				},
-			},
 			reviewer: {
 				findOne() {
 					return Promise.resolve([]);
 				},
 			},
-			vendors: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
-			keyword: {
-				findAll() {
-					return Promise.resolve([]);
-				},
-			},
 			dataLibrary: {
-				queryElasticSearch(name, index, query, userId) {
+				queryElasticSearch() {
 					return Promise.resolve(esReturn);
 				},
-				updateDocument(clientName, index, updatedDoc, docId, userId) {
+				updateDocument() {
 					return Promise.resolve(true);
-				},
-			},
-			jbook_classification: {
-				findOne() {
-					return Promise.resolve({ dataValues: {} });
 				},
 			},
 			portfolio: {
@@ -116,15 +72,19 @@ describe('JBookDataHandler', function () {
 					return Promise.resolve([1]);
 				},
 			},
+			review: {
+				findAll() {
+					return Promise.resolve(review);
+				},
+			},
+			gl: {},
+			userRequest: {},
+			feedback: {},
 		};
 
 		it('should get the pdoc project data for ES', async (done) => {
-			review = reviewData['pdoc'];
-
 			const req = {
 				body: {
-					useElasticSearch: true,
-					type: 'Procurement',
 					id: 'pdoc#000075#2022#3010#07#Air%20Force%20(AF)',
 					portfolioName: 'AI Inventory',
 				},
@@ -181,8 +141,13 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
+					'Test AI Inventory': {
+						portfolioName: 'Test AI Inventory',
+						primaryReviewerEmail: null,
+						serviceReviewerEmail: null,
+						serviceSecondaryReviewerEmail: null,
+					},
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
 						id: 233170,
@@ -221,22 +186,15 @@ describe('JBookDataHandler', function () {
 						serviceReviewerEmail: null,
 						serviceSecondaryReviewerEmail: null,
 					},
-					'Test AI Inventory': {
-						portfolioName: 'Test AI Inventory',
-						primaryReviewerEmail: null,
-						serviceReviewerEmail: null,
-						serviceSecondaryReviewerEmail: null,
-					},
 				},
 			};
+
 			const actual = await target.getESProjectData(req, 'Test');
-			assert.deepStrictEqual(actual, expected);
+			assert.deepEqual(actual, expected);
 			done();
 		});
 
 		it('should get the rdoc project data for ES', async (done) => {
-			review = reviewData['rdoc'];
-
 			const req = {
 				body: {
 					useElasticSearch: true,
@@ -297,7 +255,6 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
@@ -351,8 +308,6 @@ describe('JBookDataHandler', function () {
 		});
 
 		it('should get the odoc project data for ES', async (done) => {
-			review = reviewData['odoc'];
-
 			const req = {
 				body: {
 					useElasticSearch: true,
@@ -413,7 +368,6 @@ describe('JBookDataHandler', function () {
 				keywords: [],
 				hasKeywords: false,
 				pageHits: [],
-				classification: {},
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
@@ -527,7 +481,7 @@ describe('JBookDataHandler', function () {
 		});
 	});
 
-	describe('#getPortfolios', () => {
+	describe('#portfolios', () => {
 		it('should get all portfolios', async (done) => {
 			const opts = {
 				...constructorOptionsMock,
@@ -537,7 +491,7 @@ describe('JBookDataHandler', function () {
 					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
 				},
 				dataLibrary: {
-					queryElasticSearch(name, index, query, userId) {
+					queryElasticSearch() {
 						return Promise.resolve(esReturn);
 					},
 					getESRequestConfig() {
@@ -573,6 +527,234 @@ describe('JBookDataHandler', function () {
 			};
 			const actual = await target.getPortfolios(req, 'Test');
 			assert.deepStrictEqual(expected, actual);
+			done();
+		});
+	});
+
+	// just for cog complexity..
+	const updateForVote = ({ upvotes, downvotes }, { where }) => {
+		if (upvotes && upvotes[0] === 'test' && downvotes && downvotes.length === 0 && where.id) {
+			return [1];
+		}
+		return [0];
+	};
+
+	describe('#comments', () => {
+		it('should get all comments of a specific thread', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					findAll: ({ where: { docID, portfolioName } }) => {
+						if (docID && portfolioName) {
+							return Promise.resolve({
+								data: commentData,
+							});
+						}
+						return Promise.resolve('missing a field to get comment thread');
+					},
+				},
+			};
+			const req = { body: { docID: 3, portfolioName: 'AI Inventory' } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = { data: commentData };
+			const actual = await target.getCommentThread(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should get create a comment with docID, portfolioName, and message', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					create: ({ docID, portfolioName, message, deleted }) => {
+						return docID && portfolioName && message && deleted === false;
+					},
+				},
+			};
+			const req = { body: { docID: 3, portfolioName: 'AI Inventory', message: 'test message' } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = true;
+			const actual = await target.createComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should get delete a comment (set deleted to true) using comment ID', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					update: ({ deleted }, { where }) => {
+						if (deleted === true && where.id) {
+							return [1];
+						}
+						return [0];
+					},
+				},
+			};
+			const req = { body: { id: 3 } };
+
+			const target = new JBookDataHandler(opts);
+			const expected = { deleted: true };
+			const actual = await target.deleteComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+
+		it('should vote on a comment depending on comment ID and field (upvotes or downvotes)', async (done) => {
+			let opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				comments: {
+					findOne: ({ where }) => {
+						if (where.id) {
+							return commentData[0];
+						}
+					},
+					update: updateForVote,
+				},
+			};
+			const req = { body: { id: 3, field: 'upvotes', author: 'test' } };
+			const target = new JBookDataHandler(opts);
+			const expected = { updated: true };
+			const actual = await target.voteComment(req, 'test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+	});
+
+	describe('#getUserSpecificReviews', () => {
+		it('should get all reviews for user', async (done) => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve(userReviews);
+					},
+				},
+			};
+			const req = {
+				body: {
+					email: 'test@test.com',
+				},
+			};
+			const target = new JBookDataHandler(opts);
+			const expected = {
+				docs: [
+					{
+						appropriationNumber: '2040',
+						budgetActivityNumber: '03',
+						budgetLineItem: 'MO2',
+						budgetType: 'rdoc',
+						budgetYear: '2023',
+						createdAt: '2022-07-29T15:35:42.958Z',
+						hasKeywords: false,
+						id: 'rdoc#2023#PB#03#0603002A#21#N/A#2040#MO2',
+						keywords: [],
+						portfolioName: 'AI Inventory',
+						programElement: '0603002A',
+						projectNum: 'MO2',
+						projectTitle: 'Traumatic Brain Injury (TBI) Treatment Adv Tech',
+						reviewStatus: 'Needs Review',
+						serviceAgency: 'Army',
+						serviceReviewStatus: 'Partial Review',
+						serviceSecondaryReviewer: 'Test',
+						serviceSecondaryReviewerEmail: 'test@test.com',
+						updatedAt: '2022-07-29T15:35:42.958Z',
+					},
+				],
+			};
+			const actual = await target.getUserSpecificReviews(req, 'Test');
+			assert.deepStrictEqual(actual, expected);
+			done();
+		});
+	});
+
+	describe('#getBudgetDropdownData', () => {
+		it('get all options for review dropdowns', async (done) => {
+			const opts = {
+				...constructorOptionsMock,
+				constants: {
+					GAME_CHANGER_OPTS: { downloadLimit: 1000, allow_daterange: true },
+					GAMECHANGER_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+					EDA_ELASTIC_SEARCH_OPTS: { index: 'Test', assist_index: 'Test' },
+				},
+				dataLibrary: {
+					queryElasticSearch() {
+						return Promise.resolve({
+							body: {
+								aggregations: {
+									transitionPartners: {
+										buckets: [
+											{
+												key: 'Army',
+												doc_count: 10018,
+											},
+											{
+												key: 'Navy',
+												doc_count: 9447,
+											},
+											{
+												key: 'Air Force (AF)',
+												doc_count: 6754,
+											},
+										],
+									},
+								},
+							},
+						});
+					},
+				},
+				reviewer: {
+					findAll: ({ where }) => {
+						let name = 'Test Testerson';
+						switch (where.type) {
+							case 'service':
+								name = 'Test Testerman';
+								break;
+							case 'secondary':
+								name = 'Test Testeroni';
+								break;
+							default:
+								break;
+						}
+						return Promise.resolve([
+							{
+								name,
+							},
+						]);
+					},
+				},
+			};
+			const req = {};
+			const target = new JBookDataHandler(opts);
+			const actual = await target.getBudgetDropdownData(req, 'Test');
+			assert.deepStrictEqual(actual, budgetDropdownData);
 			done();
 		});
 	});
