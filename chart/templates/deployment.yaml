@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- /* checksum/<x> annotations are used here to force helm to redeploy when associated config values change */}}
+        checksum/env-config-secret: {{ include (print .Template.BasePath "/env_config_secret.yaml") . | sha256sum }}
+        {{- if (include "chart.isFileConfigDefined" .) }}
+        checksum/file-config-secret: {{ include (print .Template.BasePath "/file_config_secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations -}}{{- toYaml . | nindent 8 }}{{- end }}
+      labels:
+        {{- include "chart.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+        imagePullSecrets:
+         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if (include "chart.isFileConfigDefined" .) }}
+      volumes:
+        - name: file-config-vol
+          secret:
+            secretName: {{ include "chart.fileConfigSecretName" .  | quote }}
+      {{- end }}
+      {{- if and .Values.scripts.runInitJob ( .Values.scripts.initJobScript | default "" | trim ) }}
+      initContainers:
+        - name: init-job
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              {{- .Values.scripts.initJobScript | trim | nindent 16 }}
+          {{- with .Values.appContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "chart.imageRepo" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if (include "chart.isFileConfigDefined" .) }}
+          volumeMounts:
+            - name: file-config-vol
+              mountPath: {{ .Values.fileConfig.baseMountPath | quote }}
+              readOnly: true
+          {{- end }}
+          env:
+            - name: REACT_APP_VERSION
+              value: {{ default "1.0.0" .Chart.AppVersion | quote }}
+            - name: REACT_APP_VERSION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chart.envConfigSecretName" .  | quote }}
+                  key: REACT_APP_VERSION
+                  optional: true
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.envConfigSecretName" .  | quote }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.startCommand }}
+          command:
+            {{- range . }}
+            {{- printf "- %s" (. | quote) | nindent 12 }}
+            {{- end -}}
+          {{- end }}
+          {{- if (include "chart.isFileConfigDefined" .) }}
+          volumeMounts:
+            - name: file-config-vol
+              mountPath: {{ .Values.fileConfig.baseMountPath | quote }}
+              readOnly: true
+          {{- end }}
+          {{- with .Values.appContainerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "chart.imageRepo" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: REACT_APP_VERSION
+              value: {{ default "1.0.0" .Chart.AppVersion | quote }}
+            - name: REACT_APP_VERSION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chart.envConfigSecretName" .  | quote }}
+                  key: REACT_APP_VERSION
+                  optional: true
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.envConfigSecretName" .  | quote }}
+          {{- with .Values.service }}
+          ports:
+            {{- range (list .http .https) }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+              protocol: {{ .protocol }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.probes -}}{{- toYaml . | nindent 10}}{{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

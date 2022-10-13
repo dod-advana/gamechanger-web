@@ -12,6 +12,9 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import { setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import GCToolTip from '../../common/GCToolTip';
+import InfoIcon from '@material-ui/icons/Info';
+
 const gameChangerAPI = new GameChangerAPI();
 
 const EDASearchBarHandler = {
@@ -60,7 +63,6 @@ const EDASearchBarHandler = {
 			handleFavoriteSearchClicked,
 			dataRows,
 			cursor,
-			hideSearchResults,
 			setAdvancedSearchOpen,
 			searchFavoritePopperOpen,
 			favoriteName,
@@ -102,33 +104,47 @@ const EDASearchBarHandler = {
 						onClick={() => setState(dispatch, { inputActive: 'searchInput' })}
 						placeholder="Search..."
 						id="gcSearchInput"
+						padding="0 40px 0 36px"
 					/>
+
+					<GCToolTip
+						title={
+							<>
+								To search A or B, enter 'A or B' <br />
+								To search A and B, enter 'A B' or 'A and B' <br />
+								To search a phrase together, add quotes around it like '"machine learning"'
+							</>
+						}
+						arrow
+						enterDelay={500}
+					>
+						<InfoIcon style={{ position: 'absolute', right: '165px' }} />
+					</GCToolTip>
 
 					{dropdownOpen && !advancedSearchOpen && (
 						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
 					)}
-					{hideSearchResults && (
-						<AdvancedDropdown
-							context={context}
-							handleSubmit={handleSubmit}
-							open={advancedSearchOpen}
-							close={() => {
-								setAdvancedSearchOpen(false);
-							}}
-						></AdvancedDropdown>
-					)}
-					{hideSearchResults && (
-						<AdvancedSearchButton
-							type="button"
-							id="advancedSearchButton"
-							onClick={() => {
-								setAdvancedSearchOpen(!advancedSearchOpen);
-							}}
-						>
-							Advanced
-							<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
-						</AdvancedSearchButton>
-					)}
+
+					<AdvancedDropdown
+						context={context}
+						handleSubmit={handleSubmit}
+						open={advancedSearchOpen}
+						close={() => {
+							setAdvancedSearchOpen(false);
+						}}
+					></AdvancedDropdown>
+
+					<AdvancedSearchButton
+						type="button"
+						id="advancedSearchButton"
+						onClick={() => {
+							setAdvancedSearchOpen(!advancedSearchOpen);
+						}}
+						data-cy="eda-advanced-settings"
+					>
+						Advanced
+						<i className="fa fa-chevron-down" style={{ marginLeft: '5px' }} />
+					</AdvancedSearchButton>
 				</SearchBarForm>
 				<SearchButton id="gcSearchButton" onClick={handleSubmit}>
 					<i className="fa fa-search" />

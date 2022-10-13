@@ -37,15 +37,23 @@ const boldKeys = (data) => {
 };
 
 const JBookJAICReviewForm = React.memo((props) => {
-	const { submitReviewForm, dropdownData, setReviewData, reviewStatus, finished, renderReenableModal, roleDisabled } =
-		props;
+	const {
+		submitReviewForm,
+		dropdownData,
+		setReviewData,
+		setReviewDataMultiple,
+		reviewStatus,
+		finished,
+		renderReenableModal,
+		roleDisabled,
+	} = props;
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { reviewData, primaryReviewLoading } = state;
 
 	const getPrimaryReviewData = () => {
-		const primaryReviewData = [
+		return [
 			{
 				// this is a column in pdoc/rdoc, but not review
 				Key: 'Reviewers',
@@ -54,7 +62,7 @@ const JBookJAICReviewForm = React.memo((props) => {
 						primaryReviewer={reviewData.primaryReviewer}
 						finished={finished}
 						dropdownData={dropdownData}
-						setReviewData={setReviewData}
+						setReviewDataMultiple={setReviewDataMultiple}
 					/>
 				),
 			},
@@ -76,7 +84,7 @@ const JBookJAICReviewForm = React.memo((props) => {
 						serviceReviewer={reviewData.serviceReviewer}
 						finished={finished}
 						dropdownData={dropdownData}
-						setReviewData={setReviewData}
+						setReviewDataMultiple={setReviewDataMultiple}
 					/>
 				),
 			},
@@ -104,7 +112,6 @@ const JBookJAICReviewForm = React.memo((props) => {
 				),
 			},
 		];
-		return primaryReviewData;
 	};
 
 	return (

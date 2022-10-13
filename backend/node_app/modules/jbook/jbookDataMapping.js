@@ -555,8 +555,18 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		primary_reviewer_email: {
+			newName: 'primaryReviewerEmail', //'jaicReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		service_reviewer: {
 			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_email: {
+			newName: 'serviceReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -669,6 +679,11 @@ module.exports = {
 		},
 		service_secondary_reviewer: {
 			newName: 'serviceSecondaryReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_secondary_reviewer_email: {
+			newName: 'serviceSecondaryReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -862,7 +877,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		service_mp_list_n: {
+		service_mp_list_s: {
 			newName: 'serviceMissionPartnersList', //'missionPartnersList',
 			defaultValue: '',
 			processValue: (value) => {
@@ -947,8 +962,18 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		primary_reviewer_email_s: {
+			newName: 'primaryReviewerEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		service_reviewer_s: {
 			newName: 'serviceReviewer',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		service_reviewer_email_s: {
+			newName: 'serviceReviewerEmail',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -997,7 +1022,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		poc_joint_capability_area2_n: {
+		poc_joint_capability_area2_s: {
 			newName: 'pocJointCapabilityArea2', //'jointCapabilityArea',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1008,7 +1033,7 @@ module.exports = {
 				}
 			},
 		},
-		poc_joint_capability_area3_n: {
+		poc_joint_capability_area3_s: {
 			newName: 'pocJointCapabilityArea3', //'jointCapabilityArea',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1064,6 +1089,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		service_secondary_reviewer_email_s: {
+			newName: 'serviceSecondaryReviewerEmail',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		primary_ptp_s: {
 			newName: 'primaryPlannedTransitionPartner',
 			defaultValue: '',
@@ -1074,7 +1104,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		domain_task_secondary_n: {
+		domain_task_secondary_s: {
 			newName: 'domainTaskSecondary',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1140,7 +1170,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		poc_mp_list_n: {
+		poc_mp_list_s: {
 			newName: 'pocMissionPartnersList',
 			defaultValue: '',
 			processValue: (value) => {
@@ -1894,7 +1924,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		budgetLineItem_s: {
+		budgetLineItem_t: {
 			newName: 'budgetLineItem',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -1914,8 +1944,28 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		by1_request_d: {
+			newName: 'by1Request',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		continuing_b: {
+			newName: 'continuing',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		currentYearAmount_l: {
+			newName: 'currentYearAmount',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		currentYearAmount_d: {
 			newName: 'currentYearAmount',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		lineNumber_s: {
+			newName: 'lineNumber',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -2074,7 +2124,7 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
-		totalCost_s: {
+		totalCost_d: {
 			newName: 'totalCost',
 			defaultValue: '',
 			processValue: (value) => value,
@@ -2119,7 +2169,9 @@ module.exports = {
 		'P40-13_BSA_Title_t',
 		'P40-15_Justification_t',
 		'projectTitle_s',
-		'budgetActivityTitle_s',
+		'budgetActivityTitle_t',
+		'budgetLineItem_t',
+		'programElement_t',
 	],
 
 	esTopLevelFieldsNameMapping: {
@@ -2139,7 +2191,8 @@ module.exports = {
 		p3a_contract_data_n: 'Contracts',
 		r4a_schedule_details_n: 'Schedule Details',
 		p3a_dev_milestones_n: 'Milestones',
-		budgetActivityTitle_s: 'Activity Title',
+		budgetLineItem_t: 'BLI',
+		programElement_t: 'BLI',
 		// unaccounted for (and ignored for now):
 		// r2a_other_program_funding_n
 		// p3a_rdte_n
@@ -2214,6 +2267,7 @@ module.exports = {
 		'DEPARTMENT OF THE ARMY': 'Army',
 		'DEPARTMENT OF THE NAVY': 'Navy',
 		'DEPARTMENT OF THE AIR FORCE': 'Air Force (AF)',
+		'DEPARTMENT OF THE DEFENSE': 'Department of Defense (DOD)',
 		ARMY: 'Army',
 		NAVY: 'Navy',
 		AF: 'Air Force (AF)',

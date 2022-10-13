@@ -64,12 +64,79 @@ class EDASearchUtility {
 						'fpds*',
 						'sow_pws_text_eda_ext_t',
 						'clins_text_n',
+						'clins_parsed_n',
 					],
 				},
 				stored_fields: storedFields,
 				from: offset,
 				size: limit,
 				track_total_hits: true,
+				aggs: {
+					contractTotals: {
+						nested: {
+							path: 'fpds_ng_n',
+						},
+						aggs: {
+							agencies: {
+								terms: {
+									field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+									size: 1000000,
+								},
+								aggs: {
+									docs: {
+										reverse_nested: {},
+										aggs: {
+											obligatedAmounts: {
+												nested: {
+													path: 'extracted_data_eda_n',
+												},
+												aggs: {
+													sum_agg: {
+														sum: {
+															field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					contractTotalsNoAgency: {
+						filter: {
+							bool: {
+								must_not: [
+									{
+										nested: {
+											path: 'fpds_ng_n',
+											query: {
+												exists: {
+													field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+												},
+											},
+										},
+									},
+								],
+							},
+						},
+						aggs: {
+							obligatedAmounts: {
+								nested: {
+									path: 'extracted_data_eda_n',
+								},
+								aggs: {
+									sum_agg: {
+										sum: {
+											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 				query: {
 					bool: {
 						must: [
@@ -695,11 +762,6 @@ class EDASearchUtility {
 				);
 			}
 
-			// PSC DESC
-			if (settings.pscDesc && settings.pscDesc.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.psc_desc_eda_ext', settings.pscDesc));
-			}
-
 			// PIID
 			if (settings.piid && settings.piid.length > 0) {
 				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.piid_eda_ext', settings.piid));
@@ -744,8 +806,6 @@ class EDASearchUtility {
 				});
 			}
 
-			console.log(settings);
-
 			// CLIN TEXT
 			if (settings.clinText && settings.clinText.length > 0) {
 				filterQueries.push({
@@ -770,12 +830,12 @@ class EDASearchUtility {
 		const matches = fieldValue.match(regex);
 
 		if (matches) {
-			for (let i = 0; i < matches.length; i++) {
-				fieldValue = fieldValue.replace(matches[i], `\\${matches[i]}`);
+			for (const match of matches) {
+				fieldValue = fieldValue.replace(match, `\\${match}`);
 			}
 		}
 
-		return {
+		let query = {
 			nested: {
 				path: 'fpds_ng_n',
 				query: {
@@ -793,6 +853,124 @@ class EDASearchUtility {
 				},
 			},
 		};
+
+		if (esFieldName === 'fpds_ng_n.psc_eda_ext') {
+			query.nested.query.bool.should.push({
+				query_string: {
+					query: `*${fieldValue}*`,
+					default_field: 'fpds_ng_n.psc_desc_eda_ext',
+					fuzziness: 2,
+				},
+			});
+		}
+
+		return query;
+	}
+
+	cleanContractTotals(contractNoAgencyBucket, contractBuckets) {
+		let totalObligatedAmount = 0;
+		const cleanedContractTotals = contractBuckets.map((bucket) => {
+			totalObligatedAmount += bucket.docs.obligatedAmounts.sum_agg.value;
+			return {
+				key: bucket.key,
+				count: bucket.doc_count,
+				value: bucket.docs.obligatedAmounts.sum_agg.value,
+			};
+		});
+		if (contractNoAgencyBucket)
+			cleanedContractTotals.push({
+				key: 'No Agency',
+				count: contractNoAgencyBucket.doc_count,
+				value: contractNoAgencyBucket.sum_agg.value,
+			});
+		return { totalObligatedAmount, cleanedContractTotals };
+	}
+
+	cleanHitsWithPage(hit, pageSet, result, user) {
+		hit.inner_hits.pages.hits.hits.forEach((phit) => {
+			const pageIndex = phit._nested.offset;
+			let pageNumber = pageIndex + 1;
+			// one hit per page max
+			if (!pageSet.has(pageNumber)) {
+				const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+				if (usePageZero) {
+					if (pageSet.has(0)) {
+						return;
+					} else {
+						pageNumber = 0;
+						pageSet.add(0);
+					}
+				}
+				pageSet.add(pageNumber);
+				result.pageHits.push({ snippet, pageNumber });
+			}
+		});
+	}
+
+	cleanHitsNoGivenPage(hit, pageSet, result, _source, _score, user) {
+		Object.keys(hit.inner_hits).forEach((id) => {
+			const { file_location_eda_ext } = _source;
+			result.file_location_eda_ext = file_location_eda_ext;
+			result.score = _score;
+			hit.inner_hits[id].hits.hits.forEach((phit) => {
+				const pageIndex = phit._nested.offset;
+				const paragraphIdBeingMatched = parseInt(id);
+				const text = phit.fields['pages.p_raw_text'][0];
+				const score = phit._score;
+				let pageNumber = pageIndex + 1;
+
+				// one hit per page max
+				if (!pageSet.has(pageNumber)) {
+					const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
+					if (usePageZero) {
+						if (pageSet.has(0)) {
+							return;
+						} else {
+							pageNumber = 0;
+							pageSet.add(0);
+						}
+					}
+					pageSet.add(pageNumber);
+					result.pageHits.push({
+						snippet,
+						pageNumber,
+						paragraphIdBeingMatched,
+						score,
+						text,
+						id,
+					});
+				}
+			});
+		});
+	}
+
+	cleanInnerHits(hit, pageSet, result, _source, _score, user) {
+		if (hit.inner_hits) {
+			if (hit.inner_hits.pages) {
+				this.cleanHitsWithPage(hit, pageSet, result, user);
+			} else {
+				this.cleanHitsNoGivenPage(hit, pageSet, result, _source, _score, user);
+			}
+		}
+	}
+
+	cleanKeyw_5(result) {
+		if (Array.isArray(result['keyw_5'])) {
+			result['keyw_5'] = result['keyw_5'].join(', ');
+		} else {
+			result['keyw_5'] = '';
+		}
+	}
+
+	cleanHighlights(hit, result) {
+		if (hit.highlight) {
+			if (hit.highlight['title.search']) {
+				result.pageHits.push({ title: 'Title', snippet: hit.highlight['title.search'][0] });
+			}
+			if (hit.highlight.keyw_5) {
+				result.pageHits.push({ title: 'Keywords', snippet: hit.highlight.keyw_5[0] });
+			}
+		}
 	}
 
 	cleanUpEsResults(raw, searchTerms, user, selectedDocuments, expansionDict, index, query) {
@@ -806,25 +984,17 @@ class EDASearchUtility {
 				docs: [],
 			};
 
-			let docTypes = [];
-			let docOrgs = [];
-
 			const { body = {} } = raw;
 			const { aggregations = {} } = body;
-			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
-			const type_buckets = doc_type_aggs.buckets ? doc_type_aggs.buckets : [];
-			const org_buckets = doc_org_aggs.buckets ? doc_org_aggs.buckets : [];
+			const { contractTotals = {}, contractTotalsNoAgency = {} } = aggregations;
+			const contractBuckets = contractTotals?.agencies?.buckets ? contractTotals.agencies.buckets : [];
+			const contractNoAgencyBucket = contractTotalsNoAgency?.obligatedAmounts;
 
-			type_buckets.forEach((agg) => {
-				docTypes.push(agg);
-			});
+			let cleanContractObject = this.cleanContractTotals(contractNoAgencyBucket, contractBuckets);
+			const { cleanedContractTotals, totalObligatedAmount } = cleanContractObject;
 
-			org_buckets.forEach((agg) => {
-				docOrgs.push(agg);
-			});
-
-			results.doc_types = docTypes;
-			results.doc_orgs = docOrgs;
+			results.issuingOrgs = cleanedContractTotals;
+			results.totalObligatedAmount = totalObligatedAmount;
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.searchUtility.transformEsFields(r.fields);
@@ -841,77 +1011,12 @@ class EDASearchUtility {
 					result.pageHits = [];
 					const pageSet = new Set();
 
-					if (r.inner_hits) {
-						if (r.inner_hits.pages) {
-							r.inner_hits.pages.hits.hits.forEach((phit) => {
-								const pageIndex = phit._nested.offset;
-								// const snippet =  phit.fields["pages.p_raw_text"][0];
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(phit, user);
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-						} else {
-							Object.keys(r.inner_hits).forEach((id) => {
-								const { file_location_eda_ext } = _source;
-								result.file_location_eda_ext = file_location_eda_ext;
-								result.score = _score;
-								r.inner_hits[id].hits.hits.forEach((phit) => {
-									const pageIndex = phit._nested.offset;
-									const paragraphIdBeingMatched = parseInt(id);
-									const text = phit.fields['pages.p_raw_text'][0];
-									const score = phit._score;
-									let pageNumber = pageIndex + 1;
-
-									// one hit per page max
-									if (!pageSet.has(pageNumber)) {
-										const [snippet, usePageZero] = this.searchUtility.getESHighlightContent(
-											phit,
-											user
-										);
-										if (usePageZero) {
-											if (pageSet.has(0)) {
-												return;
-											} else {
-												pageNumber = 0;
-												pageSet.add(0);
-											}
-										}
-										pageSet.add(pageNumber);
-										result.pageHits.push({
-											snippet,
-											pageNumber,
-											paragraphIdBeingMatched,
-											score,
-											text,
-											id,
-										});
-									}
-								});
-							});
-						}
-					}
+					this.cleanInnerHits(r, pageSet, result, _source, _score, user);
 
 					result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-					if (r.highlight) {
-						if (r.highlight['title.search']) {
-							result.pageHits.push({ title: 'Title', snippet: r.highlight['title.search'][0] });
-						}
-						if (r.highlight.keyw_5) {
-							result.pageHits.push({ title: 'Keywords', snippet: r.highlight.keyw_5[0] });
-						}
-					}
+
+					this.cleanHighlights(r, result);
+
 					result.pageHitCount = pageSet.size;
 
 					try {
@@ -925,11 +1030,8 @@ class EDASearchUtility {
 
 					result.esIndex = index;
 
-					if (Array.isArray(result['keyw_5'])) {
-						result['keyw_5'] = result['keyw_5'].join(', ');
-					} else {
-						result['keyw_5'] = '';
-					}
+					this.cleanKeyw_5(result);
+
 					if (!result.ref_list) {
 						result.ref_list = [];
 					}
@@ -946,78 +1048,88 @@ class EDASearchUtility {
 		}
 	}
 
+	setMajcoms(org, result, adminPresent) {
+		if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) {
+			// match issue office
+			result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+		} else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) {
+			// match paying office
+			result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+		} else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) {
+			// match admin office
+			result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
+		}
+
+		return result;
+	}
+
 	getExtractedFields(source, result) {
-		const { extracted_data_eda_n, fpds_ng_n } = source;
+		const { extracted_data_eda_n, fpds_ng_n, clins_parsed_n, clins_parsed_successfully_b } = source;
 		const data = extracted_data_eda_n;
+
+		result.clins_parsed_successfully_b = clins_parsed_successfully_b;
+		result.clins = clins_parsed_n;
 
 		// temporarily pull in all fpds data
 		if (fpds_ng_n) {
 			let fpdsKeys = Object.keys(fpds_ng_n);
-			for (let i = 0; i < fpdsKeys.length; i++) {
-				result['fpds_' + fpdsKeys[i]] = fpds_ng_n[fpdsKeys[i]];
+			for (const key of fpdsKeys) {
+				result['fpds_' + key] = fpds_ng_n[key];
 			}
 		}
 
-		if (data) {
-			// Contract Issuing Office Name and Contract Issuing Office DoDaaC
-			result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
-			result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
+		if (!data) {
+			return result;
+		}
+		// Contract Issuing Office Name and Contract Issuing Office DoDaaC
+		result.contract_issue_name_eda_ext = data.contract_issue_office_name_eda_ext;
+		result.contract_issue_dodaac_eda_ext = data.contract_issue_office_dodaac_eda_ext; // issue dodaac
 
-			// Vendor Name, Vendor DUNS, and Vendor CAGE
-			result.vendor_name_eda_ext = data.vendor_name_eda_ext;
-			result.vendor_duns_eda_ext = data.vendor_duns_eda_ext;
-			result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
+		// Vendor Name, Vendor DUNS, and Vendor CAGE
+		result.vendor_name_eda_ext = data.vendor_name_eda_ext;
+		result.vendor_duns_eda_ext = data.vendor_duns_eda_ext;
+		result.vendor_cage_eda_ext = data.vendor_cage_eda_ext;
 
-			// Contract Admin Agency Name and Contract Admin Office DoDAAC
-			const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
-			if (adminPresent) {
-				result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
-				result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
-			}
+		// Contract Admin Agency Name and Contract Admin Office DoDAAC
+		const adminPresent = data.contract_issue_office_dodaac_eda_ext != data.contract_admin_office_dodaac_eda_ext;
+		if (adminPresent) {
+			result.contract_admin_name_eda_ext = data.contract_admin_agency_name_eda_ext;
+			result.contract_admin_office_dodaac_eda_ext = data.contract_admin_office_dodaac_eda_ext; // admin dodaac
+		}
 
-			// Paying Office
-			result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
-			result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
+		// Paying Office
+		result.paying_office_name_eda_ext = data.contract_payment_office_name_eda_ext;
+		result.paying_office_dodaac_eda_ext = data.contract_payment_office_dodaac_eda_ext; // paying dodaac
 
-			// Modifications
-			result.modification_eda_ext = data.modification_number_eda_ext;
+		// Modifications
+		result.modification_eda_ext = data.modification_number_eda_ext;
 
-			// Award ID and Reference IDV
-			if (data.award_id_eda_ext && data.award_id_eda_ext.length === 4) {
-				result.award_id_eda_ext = data.referenced_idv_eda_ext + '-' + data.award_id_eda_ext;
-			} else {
-				result.award_id_eda_ext = data.award_id_eda_ext;
-			}
-			result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
+		// Award ID and Reference IDV
+		result.award_id_eda_ext = data.award_id_eda_ext;
+		if (data.award_id_eda_ext?.length === 4) {
+			result.award_id_eda_ext = data.referenced_idv_eda_ext + '-' + data.award_id_eda_ext;
+		}
 
-			// Signature Date and Effective Date
-			result.signature_date_eda_ext = data.signature_date_eda_ext_dt;
-			result.effective_date_eda_ext = data.effective_date_eda_ext_dt;
+		result.reference_idv_eda_ext = data.referenced_idv_eda_ext;
 
-			// Obligated Amounts
-			result.obligated_amounts_eda_ext = data.total_obligated_amount_eda_ext_f;
+		// Signature Date and Effective Date
+		result.signature_date_eda_ext = data.signature_date_eda_ext_dt;
+		result.effective_date_eda_ext = data.effective_date_eda_ext_dt;
 
-			// NAICS
-			result.naics_eda_ext = data.naics_eda_ext;
-			result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
+		// Obligated Amounts
+		result.obligated_amounts_eda_ext = data.total_obligated_amount_eda_ext_f;
 
-			// get paying, admin, issue
-			if (data.vendor_org_hierarchy_eda_n && data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n) {
-				const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
+		// NAICS
+		result.naics_eda_ext = data.naics_eda_ext;
+		result.issuing_organization_eda_ext = data.dodaac_org_type_eda_ext;
 
-				for (const org of orgData) {
-					if (org.dodaac_eda_ext) {
-						if (org.dodaac_eda_ext === result.contract_issue_dodaac_eda_ext) {
-							// match issue office
-							result.contract_issue_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-						} else if (org.dodaac_eda_ext === result.paying_office_dodaac_eda_ext) {
-							// match paying office
-							result.paying_office_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-						} else if (adminPresent && org.dodaac_eda_ext === result.contract_admin_name_eda_ext) {
-							// match admin office
-							result.contract_admin_majcom_eda_ext = org.majcom_display_name_eda_ext; // majcom
-						}
-					}
+		// get paying, admin, issue
+		if (data.vendor_org_hierarchy_eda_n?.vendor_org_eda_ext_n) {
+			const orgData = data.vendor_org_hierarchy_eda_n.vendor_org_eda_ext_n;
+
+			for (const org of orgData) {
+				if (org.dodaac_eda_ext) {
+					result = this.setMajcoms(org, result, adminPresent);
 				}
 			}
 		}
@@ -1025,7 +1137,7 @@ class EDASearchUtility {
 		return result;
 	}
 
-	getEDAContractQuery(award = '', idv = '', isAward = false, isSearch = false, user) {
+	getEDAContractQuery(user, award = '', idv = '', isAward = false, isSearch = false) {
 		try {
 			let query = {
 				_source: {
@@ -1170,7 +1282,7 @@ class EDASearchUtility {
 			};
 		});
 
-		const query = {
+		return {
 			track_total_hits: true,
 			size: 10,
 			_source: {
@@ -1205,8 +1317,6 @@ class EDASearchUtility {
 				},
 			},
 		};
-
-		return query;
 	}
 }
 

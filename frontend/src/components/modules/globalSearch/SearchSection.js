@@ -16,7 +16,7 @@ export default function SearchSection(props) {
 				</span>
 			</div>
 
-			<div className="row" style={styles.childContainer}>
+			<div className="row" style={styles.childContainer} data-cy={`results-${section}`}>
 				{children}
 			</div>
 		</div>
@@ -45,6 +45,7 @@ const styles = {
 	childContainer: {
 		paddingLeft: 20,
 		paddingTop: 20,
+		width: '100%',
 	},
 	icon: {
 		height: 20,

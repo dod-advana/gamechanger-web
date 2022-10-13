@@ -42,17 +42,17 @@ export const StyledSideNavContainer = styled.div`
 `;
 
 export const StyledNavButton = styled.div`
-    background-color: ${({ selected }) => (selected ? '#1C2D64' : '')};
-    color: ${({ selected }) => (selected ? 'white' : '#8A9AAD')};
-    padding: 5px 18px
-    font-weight: 600;
-    border-left: ${({ first }) => (first ? '' : '2px solid white')}
-    border-right: ${({ last }) => (last ? '' : '2px solid white')}
-    text-align: center;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 13px;
+	background-color: ${({ selected }) => (selected ? '#1C2D64' : '')};
+	color: ${({ selected }) => (selected ? 'white' : '#8A9AAD')};
+	padding: 5px 18px;
+	font-weight: 600;
+	border-left: ${({ first }) => (first ? '' : '2px solid white')};
+	border-right: ${({ last }) => (last ? '' : '2px solid white')};
+	text-align: center;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 13px;
 `;
 
 export const StyledContainer = styled.div`

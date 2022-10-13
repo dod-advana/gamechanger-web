@@ -1,4 +1,5 @@
 const FEEDBACK = require('../models').feedback;
+const FEEDBACK_JBOOK = require('../models').feedback_jbook;
 const DOC_INGEST_REQUEST = require('../models').doc_ingest_requests;
 const LOGGER = require('@dod-advana/advana-logger');
 const Sequelize = require('sequelize');
@@ -11,15 +12,22 @@ const axios = require('axios').default;
 
 class FeedbackController {
 	constructor(opts = {}) {
-		const { logger = LOGGER, feedback = FEEDBACK, doc_ingest_request = DOC_INGEST_REQUEST } = opts;
+		const {
+			logger = LOGGER,
+			feedback = FEEDBACK,
+			doc_ingest_request = DOC_INGEST_REQUEST,
+			feedback_jbook = FEEDBACK_JBOOK,
+		} = opts;
 
 		this.logger = logger;
 		this.feedback = feedback;
+		this.feedback_jbook = feedback_jbook;
 		this.doc_ingest_request = doc_ingest_request;
 
 		this.sendIntelligentSearchFeedback = this.sendIntelligentSearchFeedback.bind(this);
 		this.sendQAFeedback = this.sendQAFeedback.bind(this);
 		this.getFeedbackData = this.getFeedbackData.bind(this);
+		this.getJbookFeedbackData = this.getJbookFeedbackData.bind(this);
 		this.sendJiraFeedback = this.sendJiraFeedback.bind(this);
 		this.requestDocIngest = this.requestDocIngest.bind(this);
 	}
@@ -28,7 +36,7 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
-			const feedback = await this.feedback.create({
+			await this.feedback.create({
 				event_name: eventName,
 				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'search_text: ' + searchText,
@@ -46,7 +54,7 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, question, answer, qaContext, params } = req.body;
 		try {
-			const feedback = await this.feedback.create({
+			await this.feedback.create({
 				event_name: eventName,
 				user_id: getUserIdFromSAMLUserId(req),
 				value_1: 'question: ' + question,
@@ -66,7 +74,7 @@ class FeedbackController {
 	async getFeedbackData(req, res) {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		try {
-			const { limit = 100, offset = 0, order = ['createdAt'], where = {} } = req.body;
+			const { limit = 100, offset = 0, order = [['createdAt', 'DESC']], where = {} } = req.body;
 			const results = await this.feedback.findAndCountAll({
 				limit,
 				offset,
@@ -85,6 +93,33 @@ class FeedbackController {
 				],
 			});
 			res.status(200).send({ totalCount: results.count, results: results.rows });
+		} catch (err) {
+			this.logger.error(err, '9FCQYV2', userId);
+			res.status(500).send(err);
+		}
+	}
+
+	async getJbookFeedbackData(req, res) {
+		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const { limit = 15, offset = 0, order = [], where = {} } = req.body;
+
+		const new_where = {};
+		where.forEach((object, idx) => {
+			const col = Object.keys(object)[0];
+			new_where[col] = { [Sequelize.Op.iLike]: where[idx][col]['$iLike'] };
+		});
+
+		try {
+			const totalCount = await this.feedback_jbook.count({ where: new_where });
+			const docs = await this.feedback_jbook.findAll({
+				limit,
+				offset,
+				order,
+				where: new_where,
+				attributes: ['id', 'first_name', 'last_name', 'email', 'type', 'description', 'createdAt'],
+			});
+
+			res.status(200).send({ totalCount, docs });
 		} catch (err) {
 			this.logger.error(err, '9FCQYV2', userId);
 			res.status(500).send(err);

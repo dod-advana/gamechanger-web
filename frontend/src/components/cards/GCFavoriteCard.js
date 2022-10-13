@@ -1,5 +1,5 @@
 // Package Imports
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
@@ -14,7 +14,6 @@ import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
-/*eslint-disable */
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
 	height: 250px;
@@ -22,7 +21,8 @@ const StyledFavoriteDocumentCard = styled.div`
 	border-radius: 6px;
 	margin: 10px !important;
 	position: relative;
-	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')}
+	border: ${({ updated }) => (updated ? '1px solid #069FD9' : 'none')};
+
 	> .main-info {
 		height: 100%;
 		display: flex;
@@ -177,7 +177,7 @@ const StyledFavoriteDocumentCard = styled.div`
 						width: 20px;
 						margin-bottom: -8px;
 						padding-left: 2px;
-						font-size: inherit
+						font-size: inherit;
 					}
 				}
 			}
@@ -230,7 +230,6 @@ const StyledFavoriteDocumentCard = styled.div`
 		}
 	}
 `;
-/*eslint-disable */
 
 const CloseButton = styled.div`
 	padding: 6px;
@@ -248,31 +247,125 @@ const CloseButton = styled.div`
 	top: 15px;
 `;
 
-const FavoriteCard = (props) => {
+const getCardTitle = (favoriteObject, favoriteType) => {
+	switch (favoriteType) {
+		case 'document':
+			return favoriteObject.title;
+		case 'organization':
+			return favoriteObject.organization_name;
+		case 'topic':
+			return favoriteObject.topic_name;
+		case 'search':
+			return favoriteObject.search_name;
+		default:
+			return '';
+	}
+};
+
+const getTitleDiv = (favoriteObject, favoriteType, handleClearNotification) => {
+	switch (favoriteType) {
+		case 'document':
+		case 'organization':
+		case 'topic':
+			return getCardTitle(favoriteObject, favoriteType);
+		case 'search':
+			return (
+				<>
+					<Link
+						className={'summary-title-link'}
+						href={`#/${favoriteObject.tiny_url}`}
+						target={'_blank'}
+						onClick={handleClearNotification}
+					>
+						{favoriteObject.search_name}
+					</Link>
+					{favoriteObject.updated_results && (
+						<Chip
+							label="New Results"
+							onDelete={handleClearNotification}
+							style={{
+								backgroundColor: '#069FD9',
+								color: 'white',
+								marginLeft: 10,
+								fontSize: 14,
+							}}
+						/>
+					)}
+				</>
+			);
+		default:
+			return 'No Title';
+	}
+};
+
+const getSummary = (favoriteObject, favoriteType) => {
+	switch (favoriteType) {
+		case 'document':
+			return favoriteObject.summary;
+		case 'organization':
+			break;
+		case 'topic':
+			break;
+		case 'search':
+			return favoriteObject.summary;
+		default:
+			break;
+	}
+};
+
+const getOverlayText = (favoriteObject, favoriteType) => {
+	switch (favoriteType) {
+		case 'document':
+			return favoriteObject.favorite_summary;
+		case 'organization':
+			return favoriteObject.organization_summary;
+		case 'topic':
+			return favoriteObject.topic_summary;
+		case 'search':
+			return favoriteObject.overlayText;
+		default:
+			break;
+	}
+};
+
+const getActive = (favoriteObject, favoriteType) => {
+	switch (favoriteType) {
+		case 'document':
+		case 'organization':
+		case 'topic':
+		case 'search':
+			return favoriteObject.active;
+		default:
+			return false;
+	}
+};
+
+const GCFavoriteCard = (props) => {
 	const {
-		cardTitle,
-		tiny_url,
 		handleDeleteFavorite,
 		handleClearFavoriteSearchNotification,
 		details,
-		overlayText,
-		summary,
 		reload,
 		setReload,
 		idx,
-		active,
 		toggleActive,
-		isDocument,
-		documentObject,
-		updated,
-		isTopic,
-		isOrganization,
+		favoriteObject,
 		cloneData,
+		favoriteType,
 	} = props;
 
 	const [popoverOpen, setPopoverOpen] = useState(false);
 	const [popoverAnchorEl, setPopoverAnchorEl] = useState(null);
 	const [popoverIdx, setPopoverIdx] = useState(-1);
+	const [cardTitle, setCardTitle] = useState('');
+	const [updated, setUpdated] = useState(false);
+
+	useEffect(() => {
+		setCardTitle(getCardTitle(favoriteObject, favoriteType));
+		if (favoriteType === 'search') {
+			setUpdated(favoriteObject.updated_results);
+		}
+	}, [favoriteObject, favoriteType]);
 
 	const handleStarClicked = (event) => {
 		if (!popoverOpen && popoverIdx !== idx) {
@@ -297,79 +390,59 @@ const FavoriteCard = (props) => {
 		handleClearFavoriteSearchNotification(idx);
 	};
 
+	const getSummaryTitleOnClick = (thisType) => {
+		switch (thisType) {
+			case 'document':
+				return () => {
+					trackEvent(
+						getTrackingNameForFactory(cloneData.clone_name),
+						'UserDashboardFavoritesInteraction',
+						'PDFOpen',
+						favoriteObject.filename
+					);
+					window.open(
+						`/#/pdfviewer/gamechanger?filename=${encode(favoriteObject.filename)}&prevSearchText=${
+							favoriteObject.search_text
+						}&pageNumber=${1}&isClone=${true}&cloneIndex=${cloneData.clone_name}&sourceUrl=${
+							favoriteObject.download_url_s
+						}`
+					);
+				};
+			case 'topic':
+				return () => {
+					trackEvent('GAMECHANGER', 'TopicOpened', cardTitle);
+					window.open(
+						`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`
+					);
+				};
+			case 'organization':
+				return () => {
+					// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
+					window.open(
+						`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
+					);
+				};
+			default:
+				return null;
+		}
+	};
+
 	return (
 		<StyledFavoriteDocumentCard key={idx} updated={updated}>
-			<div className={'main-info'}>
+			<div className={'main-info'} data-cy="favorite-card">
 				<div className={'top-buttons'}>
 					<GCTooltip title={cardTitle} placement="top">
 						<div
 							className={'summary-title'}
-							onClick={
-								isDocument
-									? () => {
-											trackEvent(
-												getTrackingNameForFactory(cloneData.clone_name),
-												'UserDashboardFavoritesInteraction',
-												'PDFOpen',
-												documentObject.filename
-											);
-											window.open(
-												`/#/pdfviewer/gamechanger?filename=${encode(
-													documentObject.filename
-												)}&prevSearchText=${
-													documentObject.search_text
-												}&pageNumber=${1}&isClone=${true}&cloneIndex=${
-													cloneData.clone_name
-												}&sourceUrl=${documentObject.download_url_s}`
-											);
-									  }
-									: isTopic
-									? () => {
-											trackEvent('GAMECHANGER', 'TopicOpened', cardTitle);
-											window.open(
-												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=topic&topicName=${cardTitle}`
-											);
-									  }
-									: isOrganization
-									? () => {
-											// trackEvent('GAMECHANGER', 'TopicOpened', cardTitle)
-											window.open(
-												`#/gamechanger-details?&cloneName=${cloneData.clone_name}&type=entity&entityName=${cardTitle}`
-											);
-									  }
-									: null
-							}
+							data-cy="favorite-card-title"
+							onClick={getSummaryTitleOnClick(favoriteType)}
 						>
-							{isDocument || isTopic || isOrganization ? (
-								cardTitle
-							) : (
-								<>
-									<Link
-										className={'summary-title-link'}
-										href={`#/${tiny_url}`}
-										target={'_blank'}
-										onClick={handleClearNotification}
-									>
-										{cardTitle}
-									</Link>
-									{updated && (
-										<Chip
-											label="New Results"
-											onDelete={handleClearNotification}
-											style={{
-												backgroundColor: '#069FD9',
-												color: 'white',
-												marginLeft: 10,
-												fontSize: 14,
-											}}
-										/>
-									)}
-								</>
-							)}
+							{getTitleDiv(favoriteObject, favoriteType, handleClearNotification)}
 						</div>
 					</GCTooltip>
 					<div className={'check-div'}>
 						<GCButton
+							data-cy="favorite-star"
 							onClick={(event) => handleStarClicked(event)}
 							style={{
 								height: 37,
@@ -445,11 +518,11 @@ const FavoriteCard = (props) => {
 					</div>
 				</div>
 				<div className={'summary-details'}>
-					<div className={'summary-summary'}>{summary}</div>
+					<div className={'summary-summary'}>{getSummary(favoriteObject, favoriteType)}</div>
 				</div>
 				{details}
 			</div>
-			<div className={'overlay-details'} hidden={!active}>
+			<div className={'overlay-details'} hidden={!getActive(favoriteObject, favoriteType)}>
 				<div className={'overlay-buttons'}>
 					<Button
 						className={'title-bar-close'}
@@ -461,13 +534,13 @@ const FavoriteCard = (props) => {
 						<CloseIcon fontSize={'large'} />
 					</Button>
 				</div>
-				<div className={'overlay-text'}>{overlayText}</div>
+				<div className={'overlay-text'}>{getOverlayText(favoriteObject, favoriteType)}</div>
 			</div>
 		</StyledFavoriteDocumentCard>
 	);
 };
 
-FavoriteCard.propTypes = {
+GCFavoriteCard.propTypes = {
 	cardTitle: PropTypes.string.isRequired,
 	handleDeleteFavorite: PropTypes.func.isRequired,
 	handleClearFavoriteSearchNotification: PropTypes.func.isRequired,
@@ -481,7 +554,8 @@ FavoriteCard.propTypes = {
 	active: PropTypes.bool,
 	toggleActive: PropTypes.func,
 	isDocument: PropTypes.bool,
-	documentObject: PropTypes.object,
+	favoriteObject: PropTypes.object,
+	favoriteType: PropTypes.string,
 	updated: PropTypes.bool,
 	isTopic: PropTypes.bool,
 	isOrganization: PropTypes.bool,
@@ -490,4 +564,4 @@ FavoriteCard.propTypes = {
 	}),
 };
 
-export default FavoriteCard;
+export default GCFavoriteCard;

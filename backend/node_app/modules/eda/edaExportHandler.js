@@ -11,6 +11,7 @@ class EdaExportHandler extends ExportHandler {
 			csvStringify = csvStringifyLib,
 			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS,
+			reports,
 		} = opts;
 
 		super(opts);
@@ -18,6 +19,7 @@ class EdaExportHandler extends ExportHandler {
 		this.csvStringify = csvStringify;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
+		this.reports = reports;
 	}
 
 	async exportHelper(req, res, userId) {
@@ -27,13 +29,11 @@ class EdaExportHandler extends ExportHandler {
 				index,
 				format,
 				historyId,
-				cloneData = {},
-				limit = 20,
-				searchFields = {},
 				expansionDict = {},
 				orgFilter,
 				typeFilter,
 				operator,
+				selectedDocuments,
 				offset,
 				...rest
 			} = req.body;
@@ -55,7 +55,7 @@ class EdaExportHandler extends ExportHandler {
 					clientObj.esClientName = 'eda';
 					clientObj.esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 				} else {
-					throw { message: 'Unauthorized' };
+					throw new Error('Unauthorized');
 				}
 				const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 
@@ -69,14 +69,7 @@ class EdaExportHandler extends ExportHandler {
 					esQuery
 				);
 
-				if (
-					results &&
-					results.body &&
-					results.body.hits &&
-					results.body.hits.total &&
-					results.body.hits.total.value &&
-					results.body.hits.total.value > 0
-				) {
+				if (results?.body?.hits?.total?.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(
 						results,
 						searchTerms,
@@ -85,21 +78,6 @@ class EdaExportHandler extends ExportHandler {
 						expansionDict,
 						clientObj.esIndex
 					);
-					const filenames = searchResults.docs.map((a) => a.filename);
-
-					//Removing because will not work in prod
-					// const tables = ['"pds_parsed"."line_item_details"'];
-					// const columns = ['filename', 'prod_or_svc_des', 'buying_currency'];
-
-					// const pgResults = await this.dataLibrary.queryLineItemPostgres(columns, tables, filenames);
-
-					// for (const result of searchResults.docs) {
-					// 	if (result.filename && pgResults) {
-					// 		result.line_items = pgResults.filter(
-					// 			(lineItem) => lineItem.pdf_filename === result.filename
-					// 		);
-					// 	}
-					// }
 				} else {
 					this.logger.error('Error with Elasticsearch download results', 'T5GRJ4Lzdf', userId);
 					searchResults = { totalCount: 0, docs: [] };
@@ -114,17 +92,6 @@ class EdaExportHandler extends ExportHandler {
 			}
 
 			try {
-				const { docs } = searchResults;
-
-				// if (historyId) {
-				// 	await this.exportHistory.updateExportHistoryDate(res, historyId, userId);
-				// } else {
-				// 	await this.exportHistory.storeExportHistory(res, req.body, {
-				// 		totalCount: docs.length,
-				// 		searchTerms
-				// 	}, userId);
-				// }
-
 				if (format === 'pdf') {
 					const sendDataCallback = (buffer) => {
 						const pdfBase64String = buffer.toString('base64');
@@ -135,6 +102,7 @@ class EdaExportHandler extends ExportHandler {
 					rest.index = index;
 					rest.orgFilter = orgFilter;
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
+					res.status(200);
 				} else if (format === 'csv') {
 					const csvStream = this.createCsvStream(searchResults, userId);
 					res.status(200);
@@ -183,11 +151,19 @@ class EdaExportHandler extends ExportHandler {
 				// '',
 				// 'CLINS',
 				// 'Prod or Svc',
-				'PCS Code',
-				'PSC Description',
+				'PCS Code (FPDS-NG)',
+				'PSC Description (FPDS-NG)',
 				// 'Base',
 				// 'Type',
 				'Obligated Amount',
+				'Clin Number',
+				'Unit',
+				'Unit Price',
+				'Amount',
+				'Purchase Request Number',
+				'Supply Services',
+				'PCS Code',
+				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
 			];
@@ -204,25 +180,29 @@ class EdaExportHandler extends ExportHandler {
 				];
 				stringifier.write(item);
 
-				// for (const item of doc.line_items) {
-				// 	const line_item = [
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		'',
-				// 		item.prod_or_svc,
-				// 		item.prod_or_svc_desc,
-				// 		item.li_base,
-				// 		item.li_type,
-				// 		item.obligated_amount,
-				// 		item.obligated_amount_cin,
-				// 		item.row_id,
-				// 	];
-				// 	stringifier.write(line_item);
-				// }
+				//
+				if (doc.clins) {
+					for (const clinData of doc.clins) {
+						const line_item = [
+							'see previous filename*',
+							'',
+							'',
+							'',
+							doc.fpds_psc_eda_ext,
+							'',
+							'',
+							clinData.clin_num_eda_ext,
+							clinData.unit_eda_ext,
+							clinData.unit_price_eda_ext,
+							clinData.amount_eda_ext,
+							clinData.purchase_request_number_eda_ext,
+							[clinData.supplies_services_eda_ext],
+							clinData.psc_code_eda_ext,
+							clinData.naics_code_clin_eda_ext,
+						];
+						stringifier.write(line_item);
+					}
+				}
 			});
 		}
 	}
@@ -230,22 +210,21 @@ class EdaExportHandler extends ExportHandler {
 	getDisplayTitle(item) {
 		if (item.title && item.title !== 'NA') {
 			return item.title.replace(/-empty/g, '');
-		} else {
-			try {
-				const rootfile = item.filename.substr(item.filename.lastIndexOf('/') + 1);
-				const pieces = rootfile.split('-');
-				const first = pieces[7];
-				if (first === 'empty' || !first) {
-					throw new Error('parsing failed');
-				}
-				const second = pieces[8] === 'empty' ? '' : `-${pieces[8]}`;
-				const mod = pieces[9] === 'empty' ? '' : `-${pieces[9]}`;
-				const mod2 = pieces[10] === 'empty' ? '' : `-${pieces[10]}`;
-
-				return `${first}${second}${mod}${mod2}`;
-			} catch (e) {
-				return `${item.filename.substr(item.filename.lastIndexOf('/') + 1) ? 'Not Available' : ''}`;
+		}
+		try {
+			const rootfile = item.filename.substr(item.filename.lastIndexOf('/') + 1);
+			const pieces = rootfile.split('-');
+			const first = pieces[7];
+			if (first === 'empty' || !first) {
+				throw new Error('parsing failed');
 			}
+			const second = pieces[8] === 'empty' ? '' : `-${pieces[8]}`;
+			const mod = pieces[9] === 'empty' ? '' : `-${pieces[9]}`;
+			const mod2 = pieces[10] === 'empty' ? '' : `-${pieces[10]}`;
+
+			return `${first}${second}${mod}${mod2}`;
+		} catch (e) {
+			return `${item.filename.substr(item.filename.lastIndexOf('/') + 1) ? 'Not Available' : ''}`;
 		}
 	}
 }

@@ -109,7 +109,19 @@ const SecondaryReviewerKey = React.memo(() => {
 });
 
 const SecondaryReviewerValue = React.memo((props) => {
-	const { dropdownData, serviceSecondaryReviewer, setReviewData, finished } = props;
+	const { dropdownData, serviceSecondaryReviewer, setReviewDataMultiple, finished } = props;
+	const reviewers = {};
+	if (dropdownData.secondaryReviewers) {
+		dropdownData.secondaryReviewers.forEach((reviewer) => {
+			const display = `${reviewer.name}${
+				reviewer?.organization?.length > 1 ? ` (${reviewer.organization})` : ''
+			}`;
+			reviewers[display] = {
+				display,
+				...reviewer,
+			};
+		});
+	}
 
 	return (
 		<StyledTableValueContainer>
@@ -117,25 +129,16 @@ const SecondaryReviewerValue = React.memo((props) => {
 				<div />
 				<Autocomplete
 					size="small"
-					options={
-						dropdownData && dropdownData.secondaryReviewers
-							? dropdownData.secondaryReviewers
-									.map((reviewer) => {
-										return `${reviewer.name}${
-											reviewer.organization &&
-											reviewer.organization.length &&
-											reviewer.organization.length > 1
-												? ` (${reviewer.organization})`
-												: ''
-										}`;
-									})
-									.sort()
-							: []
-					}
+					options={Object.keys(reviewers)}
 					style={{ width: 300, backgroundColor: 'white' }}
 					renderInput={(params) => <TextField {...params} label="Secondary" variant="outlined" />}
 					value={serviceSecondaryReviewer ?? null}
-					onChange={(event, value) => setReviewData('serviceSecondaryReviewer', value)}
+					onChange={(_event, value) => {
+						setReviewDataMultiple({
+							serviceSecondaryReviewer: value,
+							serviceSecondaryReviewerEmail: reviewers[value]?.email,
+						});
+					}}
 					disabled={finished}
 				/>
 			</StyledInlineContainer>
@@ -149,7 +152,7 @@ const LabelingValidationKey = React.memo(() => {
 	return (
 		<StyledTableKeyContainer>
 			<strong>
-				Labeling Validation
+				Tagging Validation
 				<Tooltip
 					classes={{ tooltip: classes.customWidth }}
 					placement="right"
@@ -188,10 +191,10 @@ const LabelingValidationKey = React.memo(() => {
 				</Tooltip>
 			</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Select whether you agree or disagree with the JAIC’s determination of the label for this Program/Project
-				as Core AI, AI Enabled, AI Enabling or Not AI. If you disagree with the JAIC’s labelling, simply select
-				No from the Agree/Disagree dropdown and enter your assessment of the correct label based on the
-				definitions above in the “How would you label this effort” dropdown.
+				Select whether you agree or disagree with the JAIC’s determination of the tag for this Program/Project
+				as Core AI, AI Enabled, AI Enabling or Not AI. If you disagree with the JAIC’s tagging, simply select No
+				from the Agree/Disagree dropdown and enter your assessment of the correct tag based on the definitions
+				above in the “How would you tag this effort” dropdown.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -215,7 +218,7 @@ const LabelingValidationValue = React.memo((props) => {
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Do you agree with the labeling validation for this effort?
+					Do you agree with the tagging validation for this effort?
 				</Typography>
 				<Autocomplete
 					size="small"
@@ -230,7 +233,7 @@ const LabelingValidationValue = React.memo((props) => {
 			</StyledInlineContainer>
 			<StyledInlineContainer>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					If not, how would you label this effort?{' '}
+					If not, how would you tag this effort?{' '}
 				</Typography>
 				<Autocomplete
 					size="small"
@@ -335,7 +338,7 @@ const TransitionPartnersValue = React.memo((props) => {
 					size="small"
 					options={['Yes', 'No']}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePTPAgreeLabel', value)}
+					onChange={(_event, value) => setReviewData('servicePTPAgreeLabel', value)}
 					value={servicePTPAgreeLabel ?? 'Yes'}
 					disabled={finished} //|| roleDisabled}
 					disableClearable
@@ -348,9 +351,9 @@ const TransitionPartnersValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={dropdownData && dropdownData.transitionPartner ? dropdownData.transitionPartner : []}
+					options={dropdownData && dropdownData.transitionPartners ? dropdownData.transitionPartners : []}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-					onChange={(event, value) => setReviewData('servicePlannedTransitionPartner', value)}
+					onChange={(_event, value) => setReviewData('servicePlannedTransitionPartner', value)}
 					value={
 						servicePlannedTransitionPartner || primaryPlannedTransitionPartner
 							? servicePlannedTransitionPartner ?? primaryPlannedTransitionPartner

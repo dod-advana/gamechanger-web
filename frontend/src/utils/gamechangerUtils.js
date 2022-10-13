@@ -3,13 +3,10 @@ import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
 import Config from '../config/config.js';
-import { getTextColorBasedOnBackground } from './graphUtils';
 import { useEffect } from 'react';
 import styled from 'styled-components';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { setState } from './sharedFunctions';
-
-const Color = require('color');
 
 export const RESULTS_PER_PAGE = 18;
 
@@ -40,6 +37,8 @@ export const PAGE_DISPLAYED = {
 	analystTools: 'analystTools',
 	aboutUs: 'aboutUs',
 	faq: 'faq',
+	searchFavorites: 'searchFavorites',
+	profile: 'profile',
 };
 
 export const SEARCH_TYPES = {
@@ -47,6 +46,21 @@ export const SEARCH_TYPES = {
 	simple: 'Simple',
 	keyword: 'Keyword',
 	contextual: 'Intelligent',
+};
+
+const processRow = (row) => {
+	let finalVal = '';
+	for (let j = 0; j < row.length; j++) {
+		let innerValue = row[j] === null ? '' : row[j].toString();
+		if (row[j] instanceof Date) {
+			innerValue = row[j].toLocaleString();
+		}
+		let result = innerValue.replace(/"/g, '""');
+		if (result.search(/\("|,|\n\)/g) >= 0) result = '"' + result + '"';
+		if (j > 0) finalVal += ',';
+		finalVal += result;
+	}
+	return finalVal + '\n';
 };
 
 //https://stackoverflow.com/a/24922761
@@ -65,39 +79,25 @@ export const exportToCsv = (filename, data, isJson = false) => {
 		);
 	};
 
-	let rows = [];
-	if (isJson) rows = getRowsForExport(data, _.keys(data[0]));
-	else rows = data;
-	var processRow = function (row) {
-		var finalVal = '';
-		for (var j = 0; j < row.length; j++) {
-			var innerValue = row[j] === null ? '' : row[j].toString();
-			if (row[j] instanceof Date) {
-				innerValue = row[j].toLocaleString();
-			}
-			var result = innerValue.replace(/"/g, '""');
-			if (result.search(/("|,|\n)/g) >= 0) result = '"' + result + '"';
-			if (j > 0) finalVal += ',';
-			finalVal += result;
-		}
-		return finalVal + '\n';
-	};
+	let tmpRows = [];
+	if (isJson) tmpRows = getRowsForExport(data, _.keys(data[0]));
+	else tmpRows = data;
 
-	var csvFile = '';
-	for (var i = 0; i < rows.length; i++) {
-		csvFile += processRow(rows[i]);
-	}
+	let csvFile = '';
+	tmpRows.forEach((row) => {
+		csvFile += processRow(row);
+	});
 
-	var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+	const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
 	if (navigator.msSaveBlob) {
 		// IE 10+
 		navigator.msSaveBlob(blob, filename);
 	} else {
-		var link = document.createElement('a');
+		const link = document.createElement('a');
 		if (link.download !== undefined) {
 			// feature detection
 			// Browsers that support HTML5 download attribute
-			var url = URL.createObjectURL(blob);
+			const url = URL.createObjectURL(blob);
 			link.setAttribute('href', url);
 			link.setAttribute('download', filename);
 			link.style.visibility = 'hidden';
@@ -239,9 +239,6 @@ export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
 		let y = {};
 		x.forEach((element, index) => {
 			switch (index) {
-				default:
-					y['References'] = element;
-					break;
 				case 1:
 					y[' '] = element;
 					break;
@@ -250,6 +247,9 @@ export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
 					break;
 				case 3:
 					y['   '] = element;
+					break;
+				default:
+					y['References'] = element;
 					break;
 			}
 		});
@@ -289,6 +289,20 @@ export const getMetadataForPropertyTable = (item) => {
 	return data;
 };
 
+const getPublicationDate = (item) => {
+	if (item.publication_date_dt !== undefined && item.publication_date_dt !== '') {
+		const currentDate = new Date(item.publication_date_dt);
+		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
+		const month = new Intl.DateTimeFormat('en', {
+			month: '2-digit',
+		}).format(currentDate);
+		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
+		return `${month}-${day}-${year}`;
+	} else {
+		return `unknown`;
+	}
+};
+
 export const policyMetadata = (item) => {
 	const labelText = item.isRevoked ? 'Cancel Date' : 'Verification Date';
 	let dateText = 'Unknown';
@@ -302,18 +316,7 @@ export const policyMetadata = (item) => {
 		dateText = `${month}-${day}-${year}`;
 	}
 
-	let publicationDate;
-	if (item.publication_date_dt !== undefined && item.publication_date_dt !== '') {
-		const currentDate = new Date(item.publication_date_dt);
-		const year = new Intl.DateTimeFormat('en', { year: '2-digit' }).format(currentDate);
-		const month = new Intl.DateTimeFormat('en', {
-			month: '2-digit',
-		}).format(currentDate);
-		const day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(currentDate);
-		publicationDate = `${month}-${day}-${year}`;
-	} else {
-		publicationDate = `unknown`;
-	}
+	let publicationDate = getPublicationDate(item);
 
 	let source_item;
 	if (
@@ -361,14 +364,13 @@ export const policyMetadata = (item) => {
 		source_file_item = 'unknown';
 	}
 
-	const favoritableData = [
+	return [
 		{ Key: 'Published', Value: publicationDate },
 		{ Key: labelText, Value: dateText },
 		{ Key: 'Source', Value: source_item },
 		{ Key: 'File Origin', Value: file_origin_item },
 		{ Key: 'Source File', Value: source_file_item },
 	];
-	return favoritableData;
 };
 
 export function commaThousands(value) {
@@ -548,13 +550,6 @@ export const getTypeDisplay = (docType = '') => {
 	return docType;
 };
 
-export const getSubTypes = (docType = '') => {
-	if (docType.length > 0 && docType[0] === '$') {
-		return docType.substring(1);
-	}
-	return docType;
-};
-
 export const getDocTypeStyles = (docType, docOrg) => {
 	if (!docType) {
 		return { docTypeColor: '', docOrg: '', docOrgColor: '' };
@@ -564,7 +559,7 @@ export const getDocTypeStyles = (docType, docOrg) => {
 
 	docOrg = docOrg ?? 'GOV';
 
-	let docOrgColor = '#964B00';
+	let docOrgColor;
 	if (docOrg === 'Classif.') {
 		docOrgColor = orgColorMap[docType] ?? '#964B00'; // brown
 	} else {
@@ -643,66 +638,6 @@ export const convertHexToRgbA = (hexVal, alpha) => {
 	}
 };
 
-export const getNodeOutlineColors = (node, alpha, selectedItemId, isChild, connectedLevel) => {
-	// if (selectedItemId === node.id){
-	// 	return convertHexToRgbA('#008000', alpha);
-	// }
-
-	if (isChild) {
-		return convertHexToRgbA('#FFFF00', alpha);
-	}
-
-	const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
-	const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
-
-	switch (connectedLevel) {
-		case 0:
-			return convertHexToRgbA('#ffe89c', alpha);
-		case 1:
-			return convertHexToRgbA('#ff9c50', alpha);
-		default:
-			let nodeColor = '';
-			switch (node.label) {
-				case 'Entity':
-					nodeColor = typeColorMap.organization;
-					break;
-				case 'Topic':
-					nodeColor = typeColorMap.topic;
-					break;
-				default:
-					const { docOrgColor } = getDocTypeStyles(displayType, displayOrg);
-					nodeColor = docOrgColor;
-					break;
-			}
-			return convertHexToRgbA(Color(nodeColor).darken(0.3).hex(), alpha);
-	}
-};
-
-export const getNodeColors = (node, alpha) => {
-	let nodeColor = '#ffffff';
-
-	const displayOrg = node['display_org_s'] ? node['display_org_s'] : 'Uncategorized';
-	const displayType = node['display_doc_type_s'] ? node['display_doc_type_s'] : 'Document';
-
-	switch (node.label) {
-		case 'Entity':
-			nodeColor = convertHexToRgbA(typeColorMap.organization, alpha);
-			break;
-		case 'Topic':
-			nodeColor = convertHexToRgbA(typeColorMap.topic, alpha);
-			break;
-		default:
-			const { docOrgColor } = getDocTypeStyles(displayType, displayOrg);
-			nodeColor = convertHexToRgbA(docOrgColor, alpha);
-			break;
-	}
-
-	return {
-		nodeColor: nodeColor,
-		nodeTextColor: convertHexToRgbA(getTextColorBasedOnBackground(nodeColor), alpha),
-	};
-};
-
 export const getLinkColor = (link, alpha) => {
 	return convertHexToRgbA(getDocLinkTypeStyles(link.label), alpha);
 };
@@ -749,48 +684,48 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 	const iframe = document.getElementById(iframeID);
 	const iframeDoc = iframe?.contentWindow?.document;
 
-	if (iframeDoc) {
-		const element = iframeDoc.getElementById(elementID);
+	if (!iframeDoc) return;
 
-		if (element === null) {
-			setTimeout(handlePdfOnLoad, 500);
-		} else {
-			element.onscroll = function (event) {
-				if (!start) {
-					start = element.scrollTop;
-				}
+	const element = iframeDoc.getElementById(elementID);
 
-				clearTimeout(isScrolling);
+	if (element === null) {
+		setTimeout(handlePdfOnLoad, 500);
+	} else {
+		element.onscroll = function () {
+			if (!start) {
+				start = element.scrollTop;
+			}
 
-				isScrolling = setTimeout(function () {
-					end = element.scrollTop;
-					distance = end - start;
+			clearTimeout(isScrolling);
 
-					distance = distance / (element.getBoundingClientRect().height - element.scrollHeight + 62);
+			isScrolling = setTimeout(function () {
+				end = element.scrollTop;
+				distance = end - start;
 
-					handleOnScroll(distance, filename, category);
+				distance = distance / (element.getBoundingClientRect().height - element.scrollHeight + 62);
 
-					start = null;
-					end = null;
-					distance = null;
-				}, 120);
-			};
-			element.addEventListener('mouseup', function (event) {
-				const win = iframe.contentWindow;
-				const doc = win.document;
-				var text;
+				handleOnScroll(distance, filename, category);
 
-				if (win.getSelection) {
-					text = win.getSelection().toString();
-				} else if (doc.selection && doc.selection.createRange) {
-					text = doc.selection.createRange().text;
-				}
-				if (text !== '') {
-					trackEvent(getTrackingNameForFactory(cloneName), 'Highlight', filename);
-					gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
-				}
-			});
-		}
+				start = null;
+				end = null;
+				distance = null;
+			}, 120);
+		};
+		element.addEventListener('mouseup', function () {
+			const win = iframe.contentWindow;
+			const doc = win.document;
+			let text;
+
+			if (win.getSelection) {
+				text = win.getSelection().toString();
+			} else if (doc.selection && doc.selection.createRange) {
+				text = doc.selection.createRange().text;
+			}
+			if (text !== '') {
+				trackEvent(getTrackingNameForFactory(cloneName), 'Highlight', filename);
+				gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
+			}
+		});
 	}
 };
 
@@ -916,7 +851,7 @@ export const encode = (filename) => {
 		//' ': '%20'
 	};
 
-	return filename.replace(/([+!"#$&'*+:;=?@])/gim, (match) => encodings[match]);
+	return filename.replace(/([+!"#$&'*:;=?@])/gim, (match) => encodings[match]);
 };
 
 export const exactMatch = (phrase, word, split) => {
@@ -930,7 +865,7 @@ export const exactMatch = (phrase, word, split) => {
 	return exists;
 };
 
-export const displayBackendError = (resp, dispatch = () => {}) => {
+export const displayBackendError = (resp, dispatch = () => Function.prototype) => {
 	if (resp?.data?.error) {
 		const errorMessage = Permissions.permissionValidator('Gamechanger Super Admin', true)
 			? `An error occurred with ${resp.data.error.category}. Error code ${resp.data.error.code}`

@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 
 const initState = {
 	runSearch: false,
-	runningSearch: false,
+	runningSearch: true,
 	useElasticSearch: true,
 	welcomeModalClosed: false,
 	consentModalClosed: false,
@@ -41,6 +41,7 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		programElement: '',
@@ -59,7 +60,7 @@ const initState = {
 		],
 		pocReviewer: '',
 		sort: [],
-		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
+		classLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
 		sourceTag: [
 			'Unknown',
 			'JAIC 2021 Review',
@@ -71,7 +72,7 @@ const initState = {
 			'OSD CIO|NSCAI',
 			'OSD CIO',
 		],
-		hasKeywords: ['Yes', 'No'],
+		hasKeywords: [],
 
 		minBY1Funding: '',
 		maxBY1Funding: '',
@@ -81,7 +82,11 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 
-		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+		paccts: [],
+		raccts: [],
+		oaccts: [],
 
 		budgetSubActivity: '',
 
@@ -104,14 +109,20 @@ const initState = {
 		hasKeywordsSpecificSelected: false,
 		hasKeywordsAllSelected: true,
 
-		primaryClassLabelSpecificSelected: false,
-		primaryClassLabelAllSelected: true,
+		classLabelSpecificSelected: false,
+		classLabelAllSelected: true,
 
 		sourceTagSpecificSelected: false,
 		sourceTagAllSelected: true,
 
 		reviewStatusSpecificSelected: false,
 		reviewStatusAllSelected: true,
+
+		primaryReviewStatusSpecificSelected: false,
+		primaryReviewStatusAllSelected: true,
+
+		budgetActivitySpecificSelected: false,
+		budgetActivityAllSelected: true,
 	},
 	defaultOptions: {
 		clearText: true,
@@ -123,6 +134,8 @@ const initState = {
 			'Partial Review (POC)',
 			'Finished Review',
 		],
+		budgetActivity: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'],
+		primaryReviewStatus: ['Finished Review', 'Partial Review', 'Not Reviewed'],
 		serviceAgency: ['Air Force', 'Army', 'Navy', 'OTED', 'US SOC'],
 		budgetYear: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022'],
 		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
@@ -137,7 +150,7 @@ const initState = {
 			'Unknown',
 		],
 		pocReviewer: '',
-		primaryClassLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
+		classLabel: ['Unknown', 'Not AI', 'AI Enabling', 'AI Enabled', 'Core AI'],
 		sourceTag: [
 			'Unknown',
 			'JAIC 2021 Review',
@@ -153,7 +166,7 @@ const initState = {
 		projectNum: '',
 		projectTitle: '',
 		sort: [],
-		hasKeywords: ['Yes', 'No'],
+		hasKeywords: [],
 		secondaryReviewer: [
 			'Vicki Belleau',
 			'Robert Brooks',
@@ -189,7 +202,17 @@ const initState = {
 			'Matt Poe',
 			'Erik Kirk',
 		],
+		minBY1Funding: '',
+		maxBY1Funding: '',
+		minTotalCost: '',
+		maxTotalCost: '',
+		appropriationNumber: '', // this is labeled as Main Account to the viewer
+		paccts: [],
+		raccts: [],
+		oaccts: [],
+		budgetSubActivity: '',
 	},
+	modifiedSearchSettings: [],
 	serviceReviewersOnly: [],
 	secondaryReviewersOnly: [],
 	projectData: {},
@@ -250,7 +273,9 @@ const initState = {
 		serviceReviewStatus: null,
 		pocReviewStatus: null,
 		primaryReviewer: null,
+		primaryReviewerEmail: null,
 		serviceReviewer: null,
+		serviceReviewerEmail: null,
 		pocReviewer: null,
 		otherMissionPartners: null,
 		serviceReviewerNotes: null,
@@ -272,6 +297,7 @@ const initState = {
 		pocAITypeDescription: null,
 		pocAIType: null,
 		serviceSecondaryReviewer: null,
+		serviceSecondaryReviewerEmail: null,
 		servicePOCOrg: null,
 		servicePOCPhoneNumber: null,
 		domainTask: null,
@@ -296,7 +322,7 @@ const initState = {
 	primaryReviewerDropdown: false,
 	serviceReviewerDropdown: false,
 	// pocReviewerDropdown: false,
-	primaryClassLabelDropdown: false,
+	classLabelDropdown: false,
 	sourceTagDropdown: false,
 	hasKeywordsDropdown: false,
 	JAICModelOpen: false,
@@ -398,7 +424,7 @@ const initState = {
 	listView: false,
 
 	// contract totals
-	contractTotals: {},
+	contractTotals: [],
 	statsLoading: false,
 
 	paginationSearch: false,
@@ -413,6 +439,10 @@ const initState = {
 	// jbook portfolios
 	portfolios: [],
 	selectedPortfolio: 'General',
+
+	// profile page
+	profilePageBudgetYear: '2023',
+	commentThread: [],
 };
 
 const init = (initialState) => {
@@ -438,6 +468,46 @@ function reducer(state, action) {
 			return {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
+				modifiedSearchSettings: [],
+			};
+		case 'RESET_PORTFOLIO_FILTERS':
+			return {
+				...state,
+				jbookSearchSettings: {
+					...state.jbookSearchSettings,
+
+					primaryReviewerSpecificSelected: false,
+					primaryReviewerAllSelected: true,
+
+					serviceReviewerSpecificSelected: false,
+					serviceReviewerAllSelected: true,
+
+					hasKeywordsSpecificSelected: false,
+					hasKeywordsAllSelected: true,
+
+					classLabelSpecificSelected: false,
+					classLabelAllSelected: true,
+
+					sourceTagSpecificSelected: false,
+					sourceTagAllSelected: true,
+
+					reviewStatusSpecificSelected: false,
+					reviewStatusAllSelected: true,
+
+					primaryReviewStatusSpecificSelected: false,
+					primaryReviewStatusAllSelected: true,
+
+					budgetType: state.defaultOptions.budgetType,
+					reviewStatus: state.defaultOptions.reviewStatus,
+					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
+					primaryReviewer: state.defaultOptions.primaryReviewer,
+					serviceReviewer: state.defaultOptions.serviceReviewer,
+					pocReviewer: state.defaultOptions.pocReviewer,
+					sourceTag: state.defaultOptions.sourceTag,
+					hasKeyword: state.defaultOptions.hasKeyword,
+					classLabel: state.defaultOptions.classLabel,
+				},
+				modifiedSearchSettings: [],
 			};
 		default:
 			return state;
