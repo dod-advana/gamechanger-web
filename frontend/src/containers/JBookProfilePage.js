@@ -833,24 +833,28 @@ const JBookProfilePage = () => {
 
 					break;
 				case 'pocJointCapabilityArea2':
-					const JCAindex2 = newReviewData['pocJointCapabilityArea2'].indexOf(value);
-					if (JCAindex2 !== -1) {
+					const JCAindex2 = newReviewData['pocJointCapabilityArea2']?.indexOf(value);
+					if (JCAindex2 != null && JCAindex2 !== -1) {
 						const tier3 = Object.keys(jca_data[newReviewData.pocJointCapabilityArea][value]);
-						newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(
-							(val) => tier3.indexOf(val) === -1
-						);
+						if (newReviewData.pocJointCapabilityArea3) {
+							newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(
+								(val) => tier3.indexOf(val) === -1
+							);
+						}
 						newReviewData.pocJointCapabilityArea2.splice(JCAindex2, 1);
 						break;
 					}
+					if (!newReviewData[field]) newReviewData[field] = [];
 					newReviewData[field].push(value);
 
 					break;
 				case 'pocJointCapabilityArea3':
-					const JCAindex3 = newReviewData['pocJointCapabilityArea3'].indexOf(value);
-					if (JCAindex3 !== -1) {
+					const JCAindex3 = newReviewData['pocJointCapabilityArea3']?.indexOf(value);
+					if (JCAindex3 != null && JCAindex3 !== -1) {
 						newReviewData.pocJointCapabilityArea3.splice(JCAindex3, 1);
 						break;
 					}
+					if (!newReviewData[field]) newReviewData[field] = [];
 					newReviewData[field].push(value);
 					break;
 				case 'clearJCA':
