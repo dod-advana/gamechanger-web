@@ -139,6 +139,8 @@ sonar_scan-job: # Run code through sonar scanner
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $DEPLOY_TO_PERSONAL != "false"
+      when: never
   cache:
     key: "${CI_JOB_NAME}"
     paths:
