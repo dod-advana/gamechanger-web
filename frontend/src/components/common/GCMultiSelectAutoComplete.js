@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) =>
 );
 
 const MultiSelectAutocomplete = (props) => {
-	const { value, setValue, options, optionsDisplayKey, placeholder, label } = props;
+	const { value, setValue, options, optionsDisplayKey, placeholder, label, inputId } = props;
 	const classes = useStyles();
 
 	return (
@@ -30,11 +30,13 @@ const MultiSelectAutocomplete = (props) => {
 					setValue(newValue);
 				}}
 				multiple
-				id="tags-filled"
+				id={inputId}
 				options={optionsDisplayKey ? options.map((option) => option.name) : options}
 				freeSolo
 				renderTags={(value, getTagProps) =>
-					value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+					value.map((option, index) => (
+						<Chip variant="outlined" key={option} label={option} {...getTagProps({ index })} />
+					))
 				}
 				renderInput={(params) => (
 					<div className={classes.fullWidth}>
@@ -49,6 +51,7 @@ const MultiSelectAutocomplete = (props) => {
 MultiSelectAutocomplete.defaultProps = {
 	optionsDisplayKey: '',
 	placeholder: 'Search',
+	inputId: 'tags-filled',
 };
 
 MultiSelectAutocomplete.propTypes = {
@@ -58,6 +61,7 @@ MultiSelectAutocomplete.propTypes = {
 	label: PropTypes.string.isRequired,
 	optionsDisplayKey: PropTypes.string,
 	placeholder: PropTypes.string,
+	inputId: PropTypes.string,
 };
 
 export default MultiSelectAutocomplete;
