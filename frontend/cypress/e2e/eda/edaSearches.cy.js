@@ -36,28 +36,11 @@ describe('Test search and filters', () => {
 
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
-
-		cy.get('iframe').then((el) => el.remove());
-
-		// find DoDAAC filter and type 'N00'
-		cy.get('#issueOfficeDoDAACAccordion', { timeout: 10000 }).click();
-		cy.get('#issueOfficeDoDAACFilter', { timeout: 10000 }).type('N00');
-
-		// find Issue Office Name and type 'N'
-		cy.get('#issueOfficeNameAccordion', { timeout: 10000 }).click();
-		cy.get('#issueOfficeNameFilter', { timeout: 10000 }).type('N');
+		cy.get('[data-cy="eda-filter-accordion-header"]', { timeout: 20000 }).click();
 
 		// find Vendor Name and type 'Booz'
 		cy.get('#vendorNameAccordion', { timeout: 10000 }).click();
 		cy.get('#vendorNameFilter', { timeout: 10000 }).type('Booz');
-
-		// find Funding Office DoDAAC and type 'N'
-		cy.get('#fundingOfficeCodeAccordion', { timeout: 10000 }).click();
-		cy.get('#fundingOfficeCodeFilter', { timeout: 10000 }).type('N');
-
-		// find Funding Agency Name and type 'navy'
-		cy.get('#fundingAgencyNameAccordion', { timeout: 10000 }).click();
-		cy.get('#fundingAgencyNameFilter', { timeout: 10000 }).type('navy');
 
 		cy.get('#gcSearchButton').click();
 
@@ -76,11 +59,10 @@ describe('Test search and filters', () => {
 
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
-
-		cy.get('iframe').then((el) => el.remove());
+		cy.get('[data-cy="eda-filter-accordion-header"]', { timeout: 20000 }).click();
 
 		// open issue organization and make selections
-		cy.get('#issueOrganizationAccordion', { timeout: 15000 }).click();
+		cy.get('#issuedByAccordion', { timeout: 15000 }).click();
 		cy.get('#specificOrgCheckbox', { timeout: 10000 }).click();
 		cy.get('#airForceCheckbox', { timeout: 10000 }).click();
 
@@ -111,14 +93,45 @@ describe('Test search and filters', () => {
 
 		// check that filter container shows up
 		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
-
-		cy.get('iframe').then((el) => el.remove());
+		cy.get('[data-cy="eda-filter-accordion-header"]', { timeout: 20000 }).click();
 
 		// enter amount for obligated amount filters
 		cy.get('#obligatedAmountAccordion', { timeout: 10000 }).click();
 		cy.get('#minObligatedAmountFilter', { timeout: 10000 }).type('100000');
 		cy.get('#maxObligatedAmountFilter', { timeout: 10000 }).type('500000');
 
+		cy.get('#gcSearchButton').click();
+
+		cy.get('.eda-card-front').should('have.length.greaterThan', 0);
+		cy.get('.eda-card-front').should('have.length.lessThan', 1000);
+	});
+
+	it.only('test out multiselect filters', () => {
+		// type in "defense"
+		cy.get('#gcSearchInput').type('defense');
+
+		// click search button
+		cy.get('#gcSearchButton').click();
+
+		// check that filter container shows up
+		cy.get('[data-cy="eda-filter-container"]', { timeout: 20000 }).should('exist');
+		cy.get('[data-cy="eda-filter-accordion-header"]', { timeout: 20000 }).click();
+
+		// open "issued by" group of filters
+		cy.get('#issuedByAccordion').click();
+
+		cy.get('#issueOfficeDoDAAC-multiselect-input').type('FA8075').type('{enter}');
+		cy.get('#issueOfficeName-multiselect-input').type('FA8075 774 ESS').type('{enter}');
+
+		// open "funded by" group of filters
+		cy.get('#fundedByAccordion').click();
+
+		cy.get('#fundingOfficeDoDAAC-multiselect-input').type('HJ4701').type('{enter}');
+		cy.get('#fundingAgencyName-multiselect-input')
+			.type('IMMEDIATE OFFICE OF THE SECRETARY OF DEFENSE')
+			.type('{enter}');
+
+		// click search button
 		cy.get('#gcSearchButton').click();
 
 		cy.get('.eda-card-front').should('have.length.greaterThan', 0);
