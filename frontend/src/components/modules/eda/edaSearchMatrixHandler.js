@@ -944,7 +944,11 @@ const EDASearchMatrixHandler = (props) => {
 		<div data-cy="eda-filter-container">
 			<GCAccordion
 				header={
-					<div className={'sidebar-section-title'} style={{ paddingTop: 10, paddingLeft: 0 }}>
+					<div
+						className={'sidebar-section-title'}
+						style={{ paddingTop: 10, paddingLeft: 0 }}
+						data-cy="eda-filter-accordion-header"
+					>
 						FILTERS
 						<p style={{ fontSize: 10, color: 'gray', margin: '5px 0px' }}>Data sources: PDS, SYN, FPDS</p>
 					</div>
@@ -982,6 +986,7 @@ const EDASearchMatrixHandler = (props) => {
 										options={state.edaFilterData.issueOfficeDoDAAC}
 										placeholder="Search DoDAACs"
 										label=""
+										inputId="issueOfficeDoDAAC-multiselect-input"
 									/>
 								</div>
 							</div>
@@ -998,6 +1003,7 @@ const EDASearchMatrixHandler = (props) => {
 										options={state.edaFilterData.issueOfficeName}
 										placeholder="Search Names"
 										label=""
+										inputId="issueOfficeName-multiselect-input"
 									/>
 								</div>
 							</div>
@@ -1065,6 +1071,7 @@ const EDASearchMatrixHandler = (props) => {
 										options={state.edaFilterData.fundingOfficeDoDAAC}
 										placeholder="Search DoDAACs"
 										label=""
+										inputId="fundingOfficeDoDAAC-multiselect-input"
 									/>
 								</div>
 							</div>
@@ -1081,6 +1088,7 @@ const EDASearchMatrixHandler = (props) => {
 										options={state.edaFilterData.fundingAgencyName}
 										placeholder="Search Names"
 										label=""
+										inputId="fundingAgencyName-multiselect-input"
 									/>
 								</div>
 							</div>
