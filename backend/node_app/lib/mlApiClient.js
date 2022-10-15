@@ -12,6 +12,7 @@ const MLRoutes = {
 	downloadS3File: `${mlBaseUrl}/downloadS3File`,
 	downloadS3FileTrain: `${mlTrainBaseUrl}/downloadS3File`,
 	deleteLocalModel: `${mlBaseUrl}/deleteLocalModel`,
+	deleteLocalModelTrain: `${mlTrainBaseUrl}/deleteLocalModel`,
 	downloadDependencies: `${mlBaseUrl}/download`,
 	getAPIInformation: `${mlBaseUrl}/`,
 	getAPIInformationTrain: `${mlTrainBaseUrl}/`,
@@ -77,6 +78,7 @@ class MLApiClient {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 		this.clearCache = this.postData.bind(this, 'clearCache');
@@ -165,7 +167,6 @@ class MLApiClient {
 		};
 		try {
 			let url = MLRoutes[key];
-
 			if (queryString) url += queryString;
 			const { data } = await this.axios({
 				url,

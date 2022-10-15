@@ -23,6 +23,7 @@ class TransformerController {
 			downloadS3File: this.mlApi.downloadS3File,
 			downloadS3FileTrain: this.mlApi.downloadS3FileTrain,
 			deleteLocalModel: this.mlApi.deleteLocalModel,
+			deleteLocalModelTrain: this.mlApi.deleteLocalModelTrain,
 			getModelsList: this.mlApi.getModelsList,
 			getModelsListTrain: this.mlApi.getModelsListTrain,
 			getDataList: this.mlApi.getDataList,
@@ -63,6 +64,7 @@ class TransformerController {
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
 		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
+		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 		this.clearCache = this.postData.bind(this, 'clearCache');
