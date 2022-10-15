@@ -4,9 +4,8 @@ import { Typography } from '@material-ui/core';
 import TabStyles from '../../common/TabStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { styles } from '../util/GCAdminStyles';
-import Info from './info';
-import S3 from './s3';
-import Models from './models';
+import Training from './training';
+import Inference from './inference';
 
 const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
@@ -19,7 +18,7 @@ let processTimer;
  * @class MLDashboard
  */
 export default () => {
-	const [tabIndex, setTabIndex] = useState('info');
+	const [tabIndex, setTabIndex] = useState('train');
 	const [apiErrors, setApiErrors] = useState([]);
 	const [apiTrainErrors, setApiTrainErrors] = useState([]);
 	const [processes, setProcesses] = useState({});
@@ -122,19 +121,6 @@ export default () => {
 					}}
 				>
 					<TabList style={TabStyles.tabsList}>
-						<Tab
-							style={{
-								...TabStyles.tabStyle,
-								...(tabIndex === 'info' ? TabStyles.tabSelectedStyle : {}),
-								borderRadius: `5px 0 0 0`,
-							}}
-							title="info"
-							onClick={() => setTabIndex('info')}
-						>
-							<Typography variant="h6" display="inline">
-								INFORMATION
-							</Typography>
-						</Tab>
 						{/* <Tab
 							style={{
 								...TabStyles.tabStyle,
@@ -151,48 +137,49 @@ export default () => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 's3' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 'train' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 0 0 0`,
 							}}
-							title="s3"
-							onClick={() => setTabIndex('s3')}
+							title="train"
+							onClick={() => setTabIndex('train')}
 						>
 							<Typography variant="h6" display="inline">
-								DATA CONTROL
+								TRAINING
 							</Typography>
 						</Tab>
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'models' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 'infer' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 5px 0 0`,
 							}}
-							title="models"
-							onClick={() => setTabIndex('models')}
+							title="infer"
+							onClick={() => setTabIndex('infer')}
 						>
 							<Typography variant="h6" display="inline">
-								MODEL CONTROL
+								INFERENCE
 							</Typography>
 						</Tab>
 					</TabList>
-
 					<div style={TabStyles.spacer} />
 				</div>
 
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>
-						<Info
-							apiErrors={apiErrors}
+						<Training
 							apiTrainErrors={apiTrainErrors}
-							updateLogs={updateLogs}
 							updateTrainLogs={updateTrainLogs}
+							processes={processes}
+							getProcesses={getProcesses}
 						/>
 					</TabPanel>
 					<TabPanel>
-						<S3 processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
-					</TabPanel>
-					<TabPanel>
-						<Models processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
+						<Inference
+							apiErrors={apiErrors}
+							updateLogs={updateLogs}
+							processes={processes}
+							getProcesses={getProcesses}
+						/>
 					</TabPanel>
 				</div>
 			</Tabs>

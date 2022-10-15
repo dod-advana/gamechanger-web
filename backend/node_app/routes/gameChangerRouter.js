@@ -120,6 +120,7 @@ router.post('/admin/reloadModels', transformer.reloadModels);
 router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/downloadS3FileTrain', transformer.downloadS3FileTrain);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
+router.post('/admin/deleteLocalModelTrain', transformer.deleteLocalModelTrain);
 router.post('/admin/stopProcess', transformer.stopProcess);
 router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
 router.post('/admin/clearCache', transformer.clearCache);

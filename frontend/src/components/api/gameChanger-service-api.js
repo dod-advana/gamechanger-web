@@ -74,6 +74,7 @@ const endpoints = {
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
 	downloadS3FileTrain: '/api/gamechanger/admin/downloadS3FileTrain',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	deleteLocalModelTrain: '/api/gamechanger/admin/deleteLocalModelTrain',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
 	getAPIInformationTrain: '/api/gamechanger/admin/getAPIInformationTrain',
@@ -734,6 +735,11 @@ export default class GameChangerAPI {
 
 	deleteLocalModel = async (opts) => {
 		const url = endpoints.deleteLocalModel;
+		return axiosPOST(this.axios, url, opts);
+	};
+
+	deleteLocalModelTrain = async (opts) => {
+		const url = endpoints.deleteLocalModelTrain;
 		return axiosPOST(this.axios, url, opts);
 	};
 
