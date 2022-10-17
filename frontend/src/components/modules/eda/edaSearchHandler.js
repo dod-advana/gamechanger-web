@@ -257,8 +257,10 @@ const EdaSearchHandler = {
 
 		let { orgFilterText } = getOrgMajcomFilters(organizations, majcoms, allOrgsSelected);
 
-		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
-		const issueOfficeNameText = issueOfficeName ?? undefined;
+		const issueOfficeDoDAACText =
+			issueOfficeDoDAAC && issueOfficeDoDAAC.length > 0 ? issueOfficeDoDAAC.join('__') : undefined;
+		const issueOfficeNameText =
+			issueOfficeName && issueOfficeName.length > 0 ? issueOfficeName.join('__') : undefined;
 		const fiscalYearsText =
 			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
 		const contractDataText =
@@ -289,6 +291,35 @@ const EdaSearchHandler = {
 			endDateText,
 			issueAgencyText,
 		});
+	},
+
+	async getPresearchData(state, dispatch) {
+		const { cloneData } = state;
+		if (!state.filterDataFetched) {
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getPresearchData',
+				cloneName: cloneData.clone_name,
+				options: {},
+			});
+
+			const newFilterData = {
+				fiscalYear: resp.data.fiscal_year,
+				majcom: resp.data.majcom,
+				issueOfficeName: resp.data.issue_office_name.map((e) => e.toUpperCase()).sort(),
+				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()).sort(),
+				vendorName: resp.data.vendor_name,
+				fundingOfficeDoDAAC: resp.data.funding_office_dodaac.map((e) => e.toUpperCase()).sort(),
+				fundingAgencyName: resp.data.funding_agency_name.map((e) => e.toUpperCase()).sort(),
+				psc: resp.data.psc.map((e) => e.toUpperCase()).sort(),
+				naics: resp.data.naic.map((e) => e.toUpperCase()).sort(),
+				duns: resp.data.duns.map((e) => e.toUpperCase()).sort(),
+				idvPIID: resp.data.idv_piid,
+				PIID: resp.data.piid,
+				modNumber: resp.data.mod_number.map((e) => e.toUpperCase()).sort(),
+			};
+
+			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
+		}
 	},
 
 	async handleSearch(state, dispatch) {
@@ -495,7 +526,7 @@ const EdaSearchHandler = {
 				'DEFENSE LOGISTICS AGENCY': 'DLA',
 			};
 
-			data.forEach((org) => {
+			data?.forEach((org) => {
 				const orgName = orgNames[org.key.toUpperCase()] ? orgNames[org.key.toUpperCase()] : 'ODA';
 				issuingOrgs[orgName].count += org.count;
 				issuingOrgs[orgName].obligatedAmount += org.value;
@@ -552,11 +583,11 @@ const EdaSearchHandler = {
 		}
 
 		if (!isNullish(dodaacURL)) {
-			newSearchSettings.issueOfficeDoDAAC = dodaacURL;
+			newSearchSettings.issueOfficeDoDAAC = dodaacURL.split('__');
 		}
 
 		if (!isNullish(officeNameURL)) {
-			newSearchSettings.issueOfficeName = officeNameURL;
+			newSearchSettings.issueOfficeName = officeNameURL.split('__');
 		}
 
 		if (!isNullish(fiscalYearsURL)) {
@@ -595,10 +626,6 @@ const EdaSearchHandler = {
 		parsed.edaSearchSettings = _.defaults(newSearchSettings, _.cloneDeep(defaultState.edaSearchSettings));
 
 		return parsed;
-	},
-
-	getPresearchData() {
-		// intentional
 	},
 };
 

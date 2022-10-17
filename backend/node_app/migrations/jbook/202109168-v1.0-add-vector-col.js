@@ -1,15 +1,9 @@
 'use strict';
-const vectorName = '_search';
-
-const searchObjects = {
-	rdoc: ['PE_MSN_Desc', 'BA_Title', 'proj_title'],
-	pdoc: ['P3a-20_Milestone_Desc', 'P40-01_LI_Number', 'P40-11_BA_Title', 'P40-02_LI_Title'],
-};
 
 module.exports = {
-	up: async (queryInterface, Sequelize) => {
+	up: async (queryInterface, _Sequelize) => {
 		const { sequelize } = queryInterface;
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			try {
 				return sequelize
 					.query(`ALTER TABLE pdoc ADD COLUMN "P3a-20_Milestone_Desc_search" TSVECTOR;`)
@@ -45,9 +39,9 @@ module.exports = {
 		});
 	},
 
-	down: async (queryInterface, Sequelize) => {
+	down: async (queryInterface, _Sequelize) => {
 		const { sequelize } = queryInterface;
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
 			try {
 				return sequelize
 					.query(`ALTER TABLE pdoc DROP COLUMN "P3a-20_Milestone_Desc_search";`)

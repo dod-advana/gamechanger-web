@@ -416,7 +416,7 @@ const NavButtons = () => {
 		'The Basics',
 		'Accomplishment',
 		'Contracts',
-		'Primary Reviewer Section',
+		'Initial Reviewer Section',
 		'Service / DoD Component Reviewer Section',
 		'POC Reviewer Section',
 	];
