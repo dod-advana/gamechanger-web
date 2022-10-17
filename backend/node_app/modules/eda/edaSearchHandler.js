@@ -2,7 +2,6 @@ const SearchUtility = require('../../utils/searchUtility');
 const EDASearchUtility = require('./edaSearchUtility');
 const CONSTANTS = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
-const sparkMD5 = require('spark-md5');
 const { DataLibrary } = require('../../lib/dataLibrary');
 
 const SearchHandler = require('../base/searchHandler');
@@ -43,17 +42,17 @@ class EdaSearchHandler extends SearchHandler {
 			request_body: {},
 		};
 
-		try {
-			const {
-				searchText,
-				searchVersion,
-				cloneName,
-				offset,
-				showTutorial = false,
-				tiny_url,
-				forCacheReload = false,
-			} = req.body;
+		const {
+			searchText,
+			searchVersion,
+			cloneName,
+			offset,
+			showTutorial = false,
+			tiny_url,
+			forCacheReload = false,
+		} = req.body;
 
+		try {
 			historyRec.search = searchText;
 			historyRec.searchText = searchText;
 			historyRec.tiny_url = tiny_url;
@@ -330,6 +329,28 @@ class EdaSearchHandler extends SearchHandler {
 		}
 	}
 
+	async getPresearchData(userId) {
+		try {
+			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			let esClientName = 'eda';
+			const query = this.edaSearchUtility.getElasticsearchFilterOptionsQuery();
+
+			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, query, userId);
+
+			let cleanedResults = {};
+			for (let aggregation of Object.keys(results.body.aggregations)) {
+				cleanedResults[aggregation] = results.body.aggregations[aggregation].val.buckets
+					.map((item) => item.key_as_string || item.key)
+					.filter((item) => item !== null);
+			}
+
+			return cleanedResults;
+		} catch (e) {
+			this.logger.error(e.message, 'OICE7JS');
+			return { orgs: [], types: [] };
+		}
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -343,6 +364,8 @@ class EdaSearchHandler extends SearchHandler {
 						return await this.queryBaseAwardContract(req, userId);
 					case 'querySimilarDocs':
 						return await this.querySimilarDocs(req, userId);
+					case 'getPresearchData':
+						return await this.getPresearchData(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,

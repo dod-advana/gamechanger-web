@@ -20,7 +20,7 @@ class SimpleDataHandler extends DataHandler {
 					);
 					return {};
 			}
-		} catch (err) {
+		} catch (e) {
 			console.log(e);
 			const { message } = e;
 			this.logger.error(message, '90C713Z', userId);

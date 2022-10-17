@@ -36,7 +36,6 @@ class CronJobs {
 	}
 
 	getReloadJob() {
-		const userId = this.constants.GAME_CHANGER_OPTS.cacheReloadUserId;
 		// https://www.npmjs.com/package/node-cron
 		const timingPattern = this.constants.GAME_CHANGER_OPTS.cacheReloadCronTimingPattern;
 
