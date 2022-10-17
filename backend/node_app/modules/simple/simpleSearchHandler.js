@@ -31,7 +31,7 @@ class SimpleSearchHandler extends SearchHandler {
 		this.mlApi = mlApi;
 	}
 
-	searchHelperCleanAbbreviations(abbreviationExpansions) {
+	searchHelperCleanAbbreviations(abbreviationExpansions, termsArray) {
 		// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 		let cleanedAbbreviations = [];
 		abbreviationExpansions.forEach((abb) => {
@@ -159,7 +159,7 @@ class SimpleSearchHandler extends SearchHandler {
 			}
 
 			const abbreviationExpansions = await this.searchHelperExpandAbbreviations(termsArray);
-			const cleanedAbbreviations = this.searchHelperCleanAbbreviations(abbreviationExpansions);
+			const cleanedAbbreviations = this.searchHelperCleanAbbreviations(abbreviationExpansions, termsArray);
 
 			expansionDict = this.searchUtility.combineExpansionTerms(
 				expansionDict,

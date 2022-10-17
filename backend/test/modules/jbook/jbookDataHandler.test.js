@@ -789,6 +789,21 @@ describe('JBookDataHandler', function () {
 						]);
 					},
 				},
+				user: {
+					findAll: () => {
+						return Promise.resolve([
+							{
+								id: 88,
+								first_name: 'Test',
+								last_name: 'Testo',
+								organization: 'Booz Allen Hamilton',
+								job_title: 'Software Engineer',
+								email: 'test@test.com',
+								phone_number: '5555555555',
+							},
+						]);
+					},
+				},
 			};
 			const req = {};
 			const target = new JBookDataHandler(opts);

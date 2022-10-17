@@ -56,18 +56,7 @@ class JBookExportHandler extends ExportHandler {
 
 	async exportHelper(req, res, userId) {
 		try {
-			const {
-				searchText,
-				index,
-				format,
-				historyId,
-				orgFilter,
-				typeFilter,
-				operator,
-				offset,
-				portfolio,
-				...rest
-			} = req.body;
+			const { index, format, historyId, orgFilter, portfolio, ...rest } = req.body;
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;

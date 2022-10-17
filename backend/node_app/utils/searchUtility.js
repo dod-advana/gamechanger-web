@@ -5,12 +5,6 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary } = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
-const fs = require('fs');
-const { include } = require('underscore');
-const { performance } = require('perf_hooks');
-const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
-
-const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 class SearchUtility {
 	constructor(opts = {}) {
@@ -259,7 +253,7 @@ class SearchUtility {
 			return this.getQueryAndSearchTerms(terms);
 		} catch (e) {
 			console.log('Error getting es search terms');
-			this.logger.error(e.message, 'D2O1YIB', user);
+			this.logger.error(e.message, 'D2O1YIB');
 			return [];
 		}
 	}
@@ -1671,8 +1665,8 @@ class SearchUtility {
 					},
 				},
 			};
-		} catch {
-			this.logger.error(e, '17I8XO8', user);
+		} catch (e) {
+			this.logger.error(e, '17I8XO8');
 		}
 	}
 
@@ -2295,6 +2289,7 @@ class SearchUtility {
 		edgeIds,
 		relationships,
 		relProperties,
+		docIds,
 	}) {
 		result.records.forEach((record) => {
 			const recObj = record.toObject();
@@ -2386,6 +2381,7 @@ class SearchUtility {
 				edgeIds,
 				relationships,
 				relProperties,
+				docIds,
 			});
 
 			if (docIds.length > 0) {
