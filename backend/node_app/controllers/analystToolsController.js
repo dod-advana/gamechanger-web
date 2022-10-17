@@ -5,7 +5,6 @@ const EDASearchUtility = require('../modules/eda/edaSearchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
 const { MLApiClient } = require('../lib/mlApiClient');
 const sparkMD5Lib = require('spark-md5');
-const { result } = require('underscore');
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 
 class AnalystToolsController {

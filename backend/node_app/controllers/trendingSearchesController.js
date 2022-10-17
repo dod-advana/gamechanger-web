@@ -3,7 +3,6 @@ const GC_TRENDING_BLACKLIST = require('../models').gc_trending_blacklist;
 const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../utils/searchUtility');
 const sequelize = require('sequelize');
-const Op = sequelize.Op;
 
 class TrendingSearchesController {
 	constructor(opts = {}) {
@@ -32,7 +31,7 @@ class TrendingSearchesController {
 
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-			const { cloneData = {}, daysBack } = req.body;
+			const { daysBack } = req.body;
 			const blacklist = [];
 			try {
 				const blacklistItems = await this.gcTrendingBlacklist.findAll({

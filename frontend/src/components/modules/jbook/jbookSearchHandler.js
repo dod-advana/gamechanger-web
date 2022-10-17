@@ -397,7 +397,7 @@ const JBookSearchHandler = {
 			case 'Service / Agency':
 				searchSettings.sort = [{ id: 'serviceAgency', desc: sortDesc }];
 				break;
-			case 'Primary Reviewer':
+			case 'Initial Reviewer':
 				searchSettings.sort = [{ id: 'primaryReviewer', desc: sortDesc }];
 				break;
 			case 'Service Reviewer':

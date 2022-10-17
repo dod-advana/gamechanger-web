@@ -75,6 +75,9 @@ export default () => {
 
 	useEffect(() => {
 		getProcesses();
+		return () => {
+			clearTimeout(processTimer);
+		};
 		// eslint-disable-next-line
 	}, []);
 
