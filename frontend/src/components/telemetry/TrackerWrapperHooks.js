@@ -10,8 +10,7 @@ export default function TrackerWrapperHooks(ComposedComponent, documentTitle) {
 	function WrappedComponent(props) {
 		useEffect(() => {
 			const userId = Auth.getUserId() || ' ';
-			const regex = /\d{10}/g;
-			const id = regex.exec(userId);
+			const id = userId.split('@');
 
 			pushInstruction('setUserId', id, SparkMD5.hash(id ? id[0] : userId));
 			trackPageView({
