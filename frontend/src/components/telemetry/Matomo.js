@@ -73,8 +73,7 @@ export function trackPageView(documentTitle, customDimensions) {
 
 		// Set User
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		// Set URL and Document Title
@@ -118,8 +117,7 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		}
 		// Set User
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 		// Set custom dimensions
 		setupDimensions(customDimensions, useMatomo);
@@ -144,8 +142,7 @@ export function trackError(e, eventName) {
 		}
 		// Set User
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 
 		matomo.trackError(e, eventName);
@@ -167,8 +164,7 @@ export function trackSearch(keyword, category, count, customDimensions) {
 
 		// Set User
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
 		matomo.push(['trackSiteSearch', keyword, category, count]);
 	} catch (error) {

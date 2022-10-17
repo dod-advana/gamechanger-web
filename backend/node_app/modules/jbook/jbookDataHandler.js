@@ -9,6 +9,7 @@ const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const COMMENTS = require('../../models').comments;
+const USER = require('../../models').user;
 const constantsFile = require('../../config/constants');
 const { Op } = require('sequelize');
 const DB = require('../../models/index');
@@ -44,6 +45,7 @@ class JBookDataHandler extends DataHandler {
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 			comments = COMMENTS,
+			user = USER,
 		} = opts;
 
 		super({ ...opts });
@@ -65,6 +67,7 @@ class JBookDataHandler extends DataHandler {
 		this.dataLibrary = dataLibrary;
 		this.jbook_classification = jbook_classification;
 		this.comments = comments;
+		this.user = user;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -504,6 +507,29 @@ class JBookDataHandler extends DataHandler {
 				},
 			});
 
+			const pocList = await this.user.findAll({
+				where: {
+					'extra_fields.jbook.is_poc_reviewer': true,
+				},
+				attributes: ['id', 'first_name', 'last_name', 'organization', 'job_title', 'email', 'phone_number'],
+			});
+			pocList.sort((a, b) => {
+				const aName = `${a.first_name} ${a.last_name}`.toUpperCase();
+				const bName = `${b.first_name} ${b.last_name}`.toUpperCase();
+				if (aName < bName) {
+					return -1;
+				}
+				if (aName > bName) {
+					return 1;
+				}
+				return 0;
+			});
+			const pocReviewers = {};
+			pocList.forEach((poc) => {
+				const emailDisp = poc.email ? `(${poc.email})` : '';
+				pocReviewers[`${poc.first_name} ${poc.last_name} ${emailDisp}`] = poc;
+			});
+
 			// hardcode from mitr if col doesn't exist/can't find it yet.. currently none
 			const data = {
 				reviewers,
@@ -528,6 +554,7 @@ class JBookDataHandler extends DataHandler {
 					{ current_msn_part: 'Other' },
 				],
 				secondaryReviewers,
+				pocReviewers,
 			};
 			data.secondaryReviewers.sort(function (a, b) {
 				let nameA = a.name.toUpperCase(); // ignore upper and lowercase
@@ -553,7 +580,7 @@ class JBookDataHandler extends DataHandler {
 			if (
 				(reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) ||
 				(reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) ||
-				(reviewType === 'poc' && !permissions.includes('JBOOK POC Reviewer'))
+				(reviewType === 'poc' && !permissions.includes(' '))
 			) {
 				throw new Error('Unauthorized');
 			}

@@ -208,12 +208,17 @@ const metadataNameToSearchFilterName = {
 	Project: 'projectTitle',
 	Keywords: 'hasKeywords',
 	'Total Cost': ['minTotalCost', 'maxTotalCost'],
-	'Main Account': 'appropriationNumber',
+	'Main Account': ['oaccts', 'paccts', 'raccts'],
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
-	'Primary Reviewer': 'primaryReviewer',
+	'Initial Reviewer': 'primaryReviewer',
 	'Service Reviewer': 'serviceReviewer',
 	'POC Reviewer': 'pocReviewer',
+	'Appropriation Title': 'budgetType',
+	'Budget Activity Number': 'budgetActivity',
+	'Budget Sub Activity Number': 'budgetSubActivity',
+	'Budget Year 1 Requested': ['maxBY1Funding', 'minBY1Funding'],
+	Tags: 'classLabel',
 };
 
 const getToComplete = (projectData, budgetType) => {
@@ -263,16 +268,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: budgetType === 'ODOC' ? projectData.budgetActivityTitle : projectData.projectTitle,
 		},
 		{
-			Key: 'Program Element',
-			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
-			Hidden: budgetType === 'PDOC',
-		},
-		{
-			Key: 'Project Number',
-			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
-			Hidden: budgetType === 'PDOC',
-		},
-		{
 			Key: 'Budget Year (FY)',
 			Value: projectData.budgetYear,
 		},
@@ -289,24 +284,38 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: projectData.appropriationNumber,
 		},
 		{
-			Key: 'Budget Activity Title',
-			Value: projectData.budgetActivityTitle,
-		},
-		{
 			Key: 'Budget Activity Number',
 			Value: projectData.budgetActivityNumber,
 		},
 		{
-			Key: 'Budget Sub Activity Title',
-			Value: projectData.budgetSubActivityTitle,
+			Key: 'Budget Activity Title',
+			Value: projectData.budgetActivityTitle,
 		},
 		{
 			Key: 'Budget Sub Activity Number',
 			Value: projectData.budgetSubActivityNumber,
 		},
 		{
+			Key: 'Budget Sub Activity Title',
+			Value: projectData.budgetSubActivityTitle,
+		},
+		{
+			Key: 'Program Element',
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Project Number',
+			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
 			Key: 'Budget Year 1 Requested',
 			Value: getTableFormattedCost(projectData.by1Request),
+		},
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
 		},
 		{
 			Key: 'Current Year Amount',
@@ -319,10 +328,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		{
 			Key: 'All Prior Years Amount',
 			Value: getTableFormattedCost(projectData.allPriorYearsAmount),
-		},
-		{
-			Key: 'Total Cost',
-			Value: getFormattedTotalCost(projectData),
 		},
 		{
 			Key: 'BY2',
@@ -462,11 +467,12 @@ const getItemPageHits = (item) => {
 	returns true if that metadata field represents a search setting that has been modified
 	false otherwise */
 const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
-	if (metadataName === 'Total Cost') {
-		return (
-			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][0]) ||
-			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][1])
-		);
+	if (Array.isArray(metadataNameToSearchFilterName[metadataName])) {
+		let included = false;
+		metadataNameToSearchFilterName[metadataName].forEach((option) => {
+			if (modifiedSearchSettings.includes(option)) included = true;
+		});
+		return included;
 	}
 	return modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName]);
 };
@@ -911,7 +917,7 @@ const cardHandler = {
 				const reviewers = getReviewerNames(projectData);
 
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 				metadata.push({
@@ -925,7 +931,7 @@ const cardHandler = {
 			} else if (selectedPortfolio !== 'General') {
 				const reviewers = getReviewerNames(projectData);
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 			}

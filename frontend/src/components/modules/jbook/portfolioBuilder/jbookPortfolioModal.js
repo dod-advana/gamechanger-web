@@ -143,26 +143,28 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 			let userIDs = data.user_ids;
 			for (let id of userIDs) {
 				let user = userMap[id];
-				selectedUsers.push(
-					<Pill style={{ margin: '0 5px 10px' }}>
-						{user.first_name} {user.last_name}
-						<IconButton
-							aria-label="close"
-							style={{
-								backgroundColor: '#BDBDBD',
-								width: 17,
-								height: 17,
-								margin: '0 0 0 5px',
-								color: 'white',
-								padding: 0,
-								borderRadius: '15px',
-							}}
-							onClick={() => handleAddUser(id)}
-						>
-							<CloseIcon style={{ fontSize: 11 }} />
-						</IconButton>
-					</Pill>
-				);
+				if (user) {
+					selectedUsers.push(
+						<Pill style={{ margin: '0 5px 10px' }}>
+							{user.first_name} {user.last_name}
+							<IconButton
+								aria-label="close"
+								style={{
+									backgroundColor: '#BDBDBD',
+									width: 17,
+									height: 17,
+									margin: '0 0 0 5px',
+									color: 'white',
+									padding: 0,
+									borderRadius: '15px',
+								}}
+								onClick={() => handleAddUser(id)}
+							>
+								<CloseIcon style={{ fontSize: 11 }} />
+							</IconButton>
+						</Pill>
+					);
+				}
 			}
 
 			return selectedUsers;
@@ -180,26 +182,28 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 			let userIDs = data.admins;
 			for (let id of userIDs) {
 				let user = userMap[id];
-				selectedUsers.push(
-					<Pill style={{ margin: '0 5px 10px' }}>
-						{user.first_name} {user.last_name}
-						<IconButton
-							aria-label="close"
-							style={{
-								backgroundColor: '#BDBDBD',
-								width: 17,
-								height: 17,
-								margin: '0 0 0 5px',
-								color: 'white',
-								padding: 0,
-								borderRadius: '15px',
-							}}
-							onClick={() => handleAddAdmin(id)}
-						>
-							<CloseIcon style={{ fontSize: 11 }} />
-						</IconButton>
-					</Pill>
-				);
+				if (user) {
+					selectedUsers.push(
+						<Pill style={{ margin: '0 5px 10px' }}>
+							{user.first_name} {user.last_name}
+							<IconButton
+								aria-label="close"
+								style={{
+									backgroundColor: '#BDBDBD',
+									width: 17,
+									height: 17,
+									margin: '0 0 0 5px',
+									color: 'white',
+									padding: 0,
+									borderRadius: '15px',
+								}}
+								onClick={() => handleAddAdmin(id)}
+							>
+								<CloseIcon style={{ fontSize: 11 }} />
+							</IconButton>
+						</Pill>
+					);
+				}
 			}
 
 			return selectedUsers;

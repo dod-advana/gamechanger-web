@@ -47,7 +47,7 @@ const filterNameMap = {
 	maxBY1Funding: 'BY1 Fund Max',
 	minTotalCost: 'Total Fund Min',
 	maxTotalCost: 'Total Fund Max',
-	primaryReviewer: 'Primary Reviewer',
+	primaryReviewer: 'Initial Reviewer',
 	serviceReviewer: 'Service Reviewer',
 	pocReviewer: 'POC Reviewer',
 	reviewStatus: 'Review Status',
@@ -166,7 +166,6 @@ const JbookViewHeaderHandler = (props) => {
 						options: { id: user.data.id },
 					})
 					.then((data) => {
-						console.log(data);
 						let publicData = data.data ? data.data.publicPortfolios : [];
 						let privateData = data.data ? data.data.privatePortfolios : [];
 						let portfolios = [...publicData, ...privateData];
@@ -195,6 +194,7 @@ const JbookViewHeaderHandler = (props) => {
 
 	const handleFilterChange = (option, type) => {
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+		let filterTypeStillPresent = false;
 
 		if (isArray(newSearchSettings[type])) {
 			const index = newSearchSettings[type].indexOf(option);
@@ -204,13 +204,19 @@ const JbookViewHeaderHandler = (props) => {
 			} else {
 				newSearchSettings[type].push(option);
 			}
+			if (newSearchSettings[type].length) filterTypeStillPresent = true;
 		} else {
 			newSearchSettings[type] = '';
 		}
 
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[`${type}Update`] = true;
+
+		let diffSearchSettings = [...state.modifiedSearchSettings];
+		if (!filterTypeStillPresent) diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
+
 		setState(dispatch, {
+			modifiedSearchSettings: diffSearchSettings,
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
 			runSearch: true,
