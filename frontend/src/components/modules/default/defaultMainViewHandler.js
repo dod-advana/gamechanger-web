@@ -80,6 +80,20 @@ export const checkForTinyURL = async (location, gameChangerAPI) => {
 	}
 };
 
+function getObjectDiff(obj1, obj2) {
+	const diff = Object.keys(obj1).reduce((result, key) => {
+		if (!obj2.hasOwnProperty(key)) {
+			result.push(key);
+		} else if (_.isEqual(obj1[key], obj2[key])) {
+			const resultKeyIndex = result.indexOf(key);
+			result.splice(resultKeyIndex, 1);
+		}
+		return result;
+	}, Object.keys(obj2));
+
+	return diff;
+}
+
 export const handlePageLoad = async (props) => {
 	const { state, dispatch, history, searchHandler, gameChangerAPI } = props;
 
@@ -147,7 +161,18 @@ export const handlePageLoad = async (props) => {
 	const parsedURL = searchHandler.parseSearchURL(newState);
 	if (parsedURL.searchText) {
 		newState = { ...newState, ...parsedURL, runSearch: true };
-		setState(dispatch, newState);
+
+		/* 
+			only setState with the fields that have actually changed
+			otherwise this can overwrite other changes to state that may have happened
+				while this function was running
+		*/
+		const newStateDiff = getObjectDiff(state, newState);
+		const updatedState = {};
+		for (let updatedField of newStateDiff) {
+			updatedState[updatedField] = newState[updatedField];
+		}
+		setState(dispatch, updatedState);
 
 		searchHandler.setSearchURL(newState);
 	}

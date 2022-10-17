@@ -106,6 +106,7 @@ const JBookServiceReviewForm = React.memo((props) => {
 					servicePOCEmail={reviewData.servicePOCEmail}
 					servicePOCOrg={reviewData.servicePOCOrg}
 					servicePOCPhoneNumber={reviewData.servicePOCPhoneNumber}
+					dropdownData={dropdownData}
 				/>
 			),
 		},
