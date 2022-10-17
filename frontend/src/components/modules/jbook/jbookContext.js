@@ -46,7 +46,7 @@ const initState = {
 		programElement: '',
 		projectNum: '',
 		projectTitle: '',
-		primaryReviewer: ['Gregory Allen', 'Sridhar Srinivasan', 'Jeff MacKinnon', 'Tomeka Williams'],
+		primaryReviewer: ['Andrew Brooks', 'Michael Nolan'],
 		serviceReviewer: [
 			'Brett Vaughan (Navy)',
 			'Ruben Cruz (Army)',
@@ -383,7 +383,7 @@ const initState = {
 			'Project #',
 			'Project Title',
 			'Service / Agency',
-			'Primary Reviewer',
+			'Initial Reviewer',
 			'Service Reviewer',
 			'POC Reviewer',
 			'Source',
