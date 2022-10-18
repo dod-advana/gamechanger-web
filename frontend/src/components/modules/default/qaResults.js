@@ -102,7 +102,7 @@ const GetQAResults = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 	const { question, answers, qaContext, params } = state.qaResults;
-	const sentenceResults = state.sentenceResults;
+	// const sentenceResults = state.sentenceResults;
 	const { intelligentSearchResult } = state;
 	const isFavorite =
 		_.findIndex(state.userData.favorite_documents, (item) => item.id === intelligentSearchResult.id) !== -1;
@@ -216,7 +216,7 @@ const GetQAResults = (props) => {
 								onClick={() => {
 									if (feedback === '') {
 										setFeedback('thumbsUp');
-										if (type === 'QA') {
+										if (type === 'QA 123') {
 											gameChangerAPI.sendQAFeedback(
 												'qa_thumbs_up',
 												question,
@@ -547,7 +547,9 @@ const GetQAResults = (props) => {
 				{feedbackComponent(
 					{
 						title: intelligentSearchResult.display_title_s,
-						sentenceResults: sentenceResults,
+						sentenceResults: _.truncate(intelligentSearchResult.pageHits[0].snippet, {
+							length: 255,
+						}),
 					},
 					'intelligentSearch'
 				)}
