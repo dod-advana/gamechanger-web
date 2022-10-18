@@ -20,6 +20,7 @@ const MLRoutes = {
 	getModelsListTrain: `${mlTrainBaseUrl}/getModelsList`,
 	getDataList: `${mlTrainBaseUrl}/getDataList`,
 	getFilesInCorpus: `${mlBaseUrl}/getFilesInCorpus`,
+	getFilesInCorpusTrain: `${mlTrainBaseUrl}/getFilesInCorpus`,
 	getProcessStatus: `${mlBaseUrl}/getProcessStatus`,
 	getCache: `${mlBaseUrl}/getCache`,
 
@@ -67,6 +68,7 @@ class MLApiClient {
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
+		this.getFilesInCorpusTrain = this.getData.bind(this, 'getFilesInCorpusTrain');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
