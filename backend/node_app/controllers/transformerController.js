@@ -29,6 +29,7 @@ class TransformerController {
 			getDataList: this.mlApi.getDataList,
 			getLoadedModels: this.mlApi.getLoadedModels,
 			getFilesInCorpus: this.mlApi.getFilesInCorpus,
+			getFilesInCorpusTrain: this.mlApi.getFilesInCorpusTrain,
 			getProcessStatus: this.mlApi.getProcessStatus,
 			getCache: this.mlApi.getCache,
 			reloadModels: this.mlApi.reloadModels,
@@ -53,6 +54,7 @@ class TransformerController {
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
+		this.getFilesInCorpusTrain = this.getData.bind(this, 'getFilesInCorpusTrain');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		this.getCache = this.getData.bind(this, 'getCache');

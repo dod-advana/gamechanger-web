@@ -212,6 +212,22 @@ const getModelsList = async (setModelTable, props) => {
 };
 
 /**
+ * Get a list of all the downloaded sentence index, qexp, and transformers.
+ * @method getCorpusCount
+ */
+const getCorpusCount = async (setCorpusCount, props) => {
+	try {
+		// set downloadedModelsList
+		const count = await gameChangerAPI.getFilesInCorpusTrain();
+		setCorpusCount(count.data);
+		props.updateLogs('Successfully queried files in corpus', 0);
+	} catch (e) {
+		props.updateLogs('Error querying files in corpus: ' + e.toString(), 2);
+		throw e;
+	}
+};
+
+/**
  * @method triggerDownloadModel
  */
 const triggerDownloadModel = async (props, setDownloading) => {
@@ -390,6 +406,7 @@ export default (props) => {
 
 	const [ltrInitializedStatus, setLTRInitializedStatus] = useState(null);
 	const [ltrModelCreatedStatus, setLTRModelCreatedStatus] = useState(null);
+	const [corpusCount, setCorpusCount] = useState(0);
 
 	// flags that parameters have been changed and on
 	// blur or enter press we should update the query
@@ -403,6 +420,7 @@ export default (props) => {
 		getAPIInformationTrain();
 		getModelsList(setModelTable, props);
 		getLocalData(setDataTable);
+		getCorpusCount(setCorpusCount, props);
 	};
 
 	useEffect(() => {
@@ -706,6 +724,7 @@ export default (props) => {
 								Last Queried: <br />
 								Elasticsearch Host: <br />
 								Elasticsearch Status: <br />
+								Files in corpus: <br />
 							</div>
 							<div style={{ width: '65%' }} className="half">
 								{APITrainData.API_Name} {APITrainData.Container_Type}
@@ -715,6 +734,7 @@ export default (props) => {
 								{getLastQueried()} <br />
 								{APITrainData.Elasticsearch_Host} <br />
 								{APITrainData.Elasticsearch_Status} <br />
+								{corpusCount} <br />
 								<br />
 							</div>
 						</div>

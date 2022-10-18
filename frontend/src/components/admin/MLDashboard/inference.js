@@ -86,7 +86,7 @@ const getAllProcessData = (props) => {
 	if (props.processes.process_status) {
 		for (const key in props.processes.process_status) {
 			const status = key !== 'flags' ? props.processes.process_status[key]['container'] : '';
-			if (status !== 'training') {
+			if (status === 'inference') {
 				processList.push({
 					...props.processes.process_status[key],
 					thread_id: key,
@@ -98,7 +98,7 @@ const getAllProcessData = (props) => {
 	if (props.processes.completed_process) {
 		for (const completed of props.processes.completed_process) {
 			const completed_process = completed.process.split(': ');
-			if (completed.container !== 'training') {
+			if (completed.container === 'inference') {
 				processList.push({
 					...completed,
 					process: completed_process[1],
@@ -429,7 +429,6 @@ export default (props) => {
 		props.getProcesses();
 		getModelsList(setDownloadedModelsList, setModelTable, props);
 	};
-
 	/**
 	 * Get the general information for the API
 	 * @method getAPIInformation

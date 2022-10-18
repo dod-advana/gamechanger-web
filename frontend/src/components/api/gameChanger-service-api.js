@@ -84,6 +84,7 @@ const endpoints = {
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getFilesInCorpusTrain: '/api/gamechanger/admin/getFilesInCorpusTrain',
 	getCache: '/api/gamechanger/admin/getCache',
 	clearCache: '/api/gamechanger/admin/clearCache',
 	getUserSettings: '/api/gamechanger/getUserSettings',
@@ -764,6 +765,10 @@ export default class GameChangerAPI {
 
 	getFilesInCorpus = async () => {
 		const url = endpoints.getFilesInCorpus;
+		return axiosGET(this.axios, url);
+	};
+	getFilesInCorpusTrain = async () => {
+		const url = endpoints.getFilesInCorpusTrain;
 		return axiosGET(this.axios, url);
 	};
 	// End ML endpoints
