@@ -301,6 +301,7 @@ const PolicyDocumentsComparisonTool = ({
 
 	const measuredRef = useCallback(
 		(node) => {
+			console.log('Please tell me if this hits');
 			if (node !== null && compareDocument) {
 				if (compareDocument && selectedParagraph) {
 					gameChangerAPI
