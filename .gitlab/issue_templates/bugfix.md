@@ -12,4 +12,4 @@
 <!--- Give a screenshot of what and where you're noticing the bug -->
 
 
-<!-- Remember to add labels (which clone, what priority) -->
+<!-- Remember to add labels (which clone, what priority--high/low) -->

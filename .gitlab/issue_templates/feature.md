@@ -8,4 +8,4 @@
 <!--- Attach mockups/wireframes  -->
 
 
-<!-- Remember to add labels (which clone, what priority) -->
+<!-- Remember to add labels (which clone, what priority--high/low) -->
