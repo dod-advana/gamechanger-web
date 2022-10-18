@@ -89,7 +89,6 @@ const JBookServiceReviewForm = React.memo((props) => {
 					vendorData={vendorData}
 					finished={finished}
 					serviceMissionPartners={reviewData.serviceMissionPartnersList}
-					serviceMissionPartnersChecklist={reviewData.serviceMissionPartnersChecklist}
 				/>
 			),
 		},
