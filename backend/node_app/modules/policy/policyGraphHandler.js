@@ -21,7 +21,34 @@ class PolicyGraphHandler extends GraphHandler {
 		this.constants = constants;
 		this.dataLibrary = dataLibrary;
 		this.dataTracker = dataTracker;
+		this.searchUtility = searchUtility;
 		this.error = {};
+	}
+
+	searchHelperMockNodes(totalCount, docs, userId, loadAll, results, limit) {
+		// mock nodes from elastic results
+		if (totalCount > this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT) {
+			// return only the top GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT results, sorted by page rank
+			const docIDsSortedByPageRank = this.createMockGraphReturnFromEsResults(docs, userId)
+				.nodes.sort((a, b) => b.pageRank - a.pageRank)
+				.map((node) => node.doc_id)
+				.slice(
+					0,
+					loadAll
+						? this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED
+						: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT
+				);
+			results = this.createMockGraphReturnFromEsResults(
+				docs.filter((doc) => docIDsSortedByPageRank.includes(doc.doc_id)),
+				userId
+			);
+			limit = loadAll
+				? { maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED }
+				: { warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
+		} else {
+			results = this.createMockGraphReturnFromEsResults(docs, userId);
+		}
+		return [results, limit];
 	}
 
 	async searchHelper(req, userId) {
@@ -47,7 +74,6 @@ class PolicyGraphHandler extends GraphHandler {
 			// get results
 			const { isTest = false, expandTerms = false, searchText } = req.body;
 
-			const gT0 = new Date().getTime();
 			req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 			const [parsedQuery, parsedTerms] = this.searchUtility.getEsSearchTerms(req.body);
 			req.body.searchTerms = parsedTerms;
@@ -65,7 +91,6 @@ class PolicyGraphHandler extends GraphHandler {
 			];
 			req.body.includeHighlights = false;
 
-			//const esQuery = this.getElasticsearchQueryForGraph(req.body, userId);
 			const esQuery = this.searchUtility.getElasticsearchQuery(req.body, userId);
 			let clientObj = this.searchUtility.getESClient(cloneData.clone_name, permissions);
 
@@ -76,12 +101,8 @@ class PolicyGraphHandler extends GraphHandler {
 				userId
 			);
 
-			// const searchResults = this.searchUtility.cleanUpIdEsResults(esResults, parsedTerms, userId, expandTerms);
 			const searchResults = this.cleanUpEsResultsForGraph(esResults, parsedTerms, userId, expandTerms);
 
-			// const gT1 = new Date().getTime();
-
-			// const { docIds, pubIds, searchTerms } = searchResults;
 			const { docs, searchTerms, totalCount } = searchResults;
 
 			let results = {};
@@ -102,59 +123,14 @@ class PolicyGraphHandler extends GraphHandler {
 					userId
 				);
 			} else {
-				// mock nodes from elastic results
-				if (totalCount > this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT) {
-					// return only the top GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT results, sorted by page rank
-					const docIDsSortedByPageRank = this.createMockGraphReturnFromEsResults(docs, userId)
-						.nodes.sort((a, b) => b.pageRank - a.pageRank)
-						.map((node) => node.doc_id)
-						.slice(
-							0,
-							loadAll
-								? this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED
-								: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT
-						);
-					results = this.createMockGraphReturnFromEsResults(
-						docs.filter((doc) => docIDsSortedByPageRank.includes(doc.doc_id)),
-						userId
-					);
-					limit = loadAll
-						? { maxLimit: this.constants.GRAPH_CONFIG.MAX_GRAPH_VIEW_NODES_DISPLAYED }
-						: { warningLimit: this.constants.GRAPH_CONFIG.GRAPH_VIEW_NODES_DISPLAYED_WARNING_LIMIT };
-				} else {
-					results = this.createMockGraphReturnFromEsResults(docs, userId);
-				}
+				[results, limit] = this.searchHelperMockNodes(totalCount, docs, userId, loadAll, results, limit);
 				query = 'Mocked from ES';
 				params = [];
 			}
 
-			// const [results, query, params] = await this.getGraphData(
-			// 	`MATCH (d:Document) WHERE d.doc_id in $ids
-			// 	OPTIONAL MATCH pt=(d)-[ref:REFERENCES]->(d2:Document)
-			// 	WHERE NOT d = d2 AND d2.doc_id in $ids
-			// 	RETURN d, pt;`,
-			// 	{ids: docIds, pub_ids: pubIds}, isTest, userId
-			// );
-
-			// console.log(`Time for ES Search = ${(gT1 - gT0) / 1000}`);
-			// const gT2 = new Date().getTime();
-			// console.log(`Time for Graph Query = ${(gT2 - gT1) / 1000}`);
-
 			const graphData = { graphData: results, searchTerms };
 
 			this.addDocIdsToPubs(graphData.graphData, userId);
-
-			// await this.render2dNodeLocations(graphData.graphData.nodes, graphData.graphData.edges, userId);
-			// graphData.graphData.nodes.forEach(node => {
-			// 	node.coords2d = { fx: node.x, fy: node.y };
-			// 	// node.x = 0;
-			// 	// node.vx = 0;
-			// 	// node.y = 0;
-			// 	// node.vy = 0;
-			// });
-
-			// const gT3 = new Date().getTime();
-			// console.log(`Time for Overall = ${(gT3 - gT0) / 1000}`);
 
 			// try to store to cache
 			if (useGCCache && graphData) {
@@ -174,15 +150,14 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
-	async queryHelper(req, userId, code) {
+	async queryHelper(req, userId, _code) {
 		let tmpCode = 'V7IUJNL';
 		let graphData = { nodes: [], edges: [], labels: [], relationships: [], nodeProperties: [], relProperties: [] };
 
 		try {
-			const { code, query, params, isTest = false } = req.body;
-			tmpCode = code || tmpCode;
+			const { query, params, isTest = false } = req.body;
 
-			const [graphData] = await this.getGraphData(query, params, isTest, userId);
+			[graphData] = await this.getGraphData(query, params, isTest, userId);
 			graphData.query = { query, params };
 			return graphData;
 		} catch (err) {
@@ -199,35 +174,35 @@ class PolicyGraphHandler extends GraphHandler {
 
 		switch (functionName) {
 			case 'getDataForSearch':
-				return await this.getDataForSearchHelper(req, userId);
+				return this.getDataForSearchHelper(req, userId);
 			case 'getDocumentsForEntity':
-				return await this.getDocumentsForEntityHelper(req, userId);
+				return this.getDocumentsForEntityHelper(req, userId);
 			case 'getDocumentsForTopic':
-				return await this.getDocumentsForTopicHelper(req, userId);
+				return this.getDocumentsForTopicHelper(req, userId);
 			case 'getSingleDocument':
-				return await this.getSingleDocumentHelper(req, userId);
+				return this.getSingleDocumentHelper(req, userId);
 			case 'getDocumentDetailsPageDataFull':
-				return await this.getDocumentDetailsPageDataFullHelper(req, userId);
+				return this.getDocumentDetailsPageDataFullHelper(req, userId);
 			case 'getEntityDataDetailsPage':
-				return await this.getEntityDataDetailsPageHelper(req, userId);
+				return this.getEntityDataDetailsPageHelper(req, userId);
 			case 'getTopicDataDetailsPage':
-				return await this.getTopicDataDetailsPageHelper(req, userId);
+				return this.getTopicDataDetailsPageHelper(req, userId);
 			case 'getHeadDataDetailsPage':
-				return await this.getHeadDataDetailsPageHelper(req, userId);
+				return this.getHeadDataDetailsPageHelper(req, userId);
 			case 'getTypeDataDetailsPage':
-				return await this.getTypeDataDetailsPageHelper(req, userId);
+				return this.getTypeDataDetailsPageHelper(req, userId);
 			case 'getTopicDataPolicyGraph':
-				return await this.getTopicDataPolicyGraphHelper(req, userId);
+				return this.getTopicDataPolicyGraphHelper(req, userId);
 			case 'getReferencesPolicyGraph':
-				return await this.getReferencesPolicyGraphHelper(req, userId);
+				return this.getReferencesPolicyGraphHelper(req, userId);
 			case 'getEntitiesForNode':
-				return await this.getEntitiesForNodeHelper(req, userId);
+				return this.getEntitiesForNodeHelper(req, userId);
 			case 'getTopicsForNode':
-				return await this.getTopicsForNodeHelper(req, userId);
+				return this.getTopicsForNodeHelper(req, userId);
 			case 'getGraphSchema':
-				return await this.getGraphSchemaHelper(req, userId);
+				return this.getGraphSchemaHelper(req, userId);
 			case 'getTopicCardData':
-				return await this.getTopicCardDataHelper(req, userId);
+				return this.getTopicCardDataHelper(req, userId);
 			default:
 				this.logger.error(
 					`There is no function called ${functionName} defined in the policyGraphHandler`,
@@ -239,20 +214,35 @@ class PolicyGraphHandler extends GraphHandler {
 
 	async getReferencesPolicyGraphHelper(req, userId) {
 		try {
-			const { ref_name, isUnknown, isTest = false } = req.body;
+			const { ref_name, doc_id, isUnknown, isTest = false } = req.body;
 
-			const [refData] = await this.getGraphData(
-				`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
-					isUnknown ? 'UKN_Document' : 'Document'
-				})
-				WHERE d2.ref_name = $ref_name AND NOT d = d2
-				RETURN ref;`,
-				{ ref_name: ref_name },
-				isTest,
-				userId
-			);
+			if (ref_name) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.ref_name = $ref_name AND NOT d = d2
+					RETURN ref;`,
+					{ ref_name: ref_name },
+					isTest,
+					userId
+				);
 
-			return refData;
+				return refData;
+			} else if (doc_id) {
+				const [refData] = await this.getGraphData(
+					`MATCH ref = (d:Document)<-[:${isUnknown ? 'REFERENCES_UKN' : 'REFERENCES'}]-(d2:${
+						isUnknown ? 'UKN_Document' : 'Document'
+					})
+					WHERE d2.doc_id = $doc_id AND NOT d = d2
+					RETURN ref;`,
+					{ doc_id: doc_id },
+					isTest,
+					userId
+				);
+
+				return refData;
+			}
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, '9F2QSP6', userId);
@@ -628,20 +618,6 @@ class PolicyGraphHandler extends GraphHandler {
 				});
 				resp[0].edges.forEach((edge) => {
 					if (!edgeIds.includes(edge.id)) {
-						// let source = edge.source;
-						// let target = edge.target;
-						// if (typeof source !== {}) {
-						// 	source = graph.nodes.filter(node => {
-						// 		return node.id === source;
-						// 	})[0];
-						// }
-						// if (typeof target !== {}) {
-						// 	target = graph.nodes.filter(node => {
-						// 		return node.id === target;
-						// 	})[0];
-						// }
-						// edge.source = source;
-						// edge.target = target;
 						graph.edges.push(edge);
 						edgeIds.push(edge.id);
 					}
@@ -694,7 +670,6 @@ class PolicyGraphHandler extends GraphHandler {
 				hasHighlights: false,
 			};
 
-			// const gT0 = new Date().getTime();
 			searchBody.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(searchBody);
 			searchBody.searchTerms = searchTerms;
@@ -716,8 +691,6 @@ class PolicyGraphHandler extends GraphHandler {
 				const convertedIds = docIds.map((docId) => {
 					return docId.replace(/'/g, '');
 				});
-
-				// const gT1 = new Date().getTime();
 
 				try {
 					const [entityResp, entityQuery, entityParams] = await this.getGraphData(
@@ -749,12 +722,6 @@ class PolicyGraphHandler extends GraphHandler {
 						isTest,
 						userId
 					);
-
-					// const gT2 = new Date().getTime();
-
-					// console.log(`Time for ES Search = ${(gT1 - gT0) / 1000}`);
-					// console.log(`Time for Graph Query = ${(gT2 - gT1) / 1000}`);
-					// console.log(`Time for Overall = ${(gT2 - gT0) / 1000}`);
 
 					const topics = topicResp.nodes;
 					return {
@@ -885,15 +852,15 @@ class PolicyGraphHandler extends GraphHandler {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				const searchResults = this.searchUtility.cleanUpEsResults(
-					esResults,
+				const searchResults = this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
-					null,
-					clientObj.esIndex,
-					esQuery
-				);
+					user: userId,
+					selectedDocuments: null,
+					expansionDict: null,
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 				// insert crawler dates into search results
 				return await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			} else {
@@ -977,6 +944,41 @@ class PolicyGraphHandler extends GraphHandler {
 		}
 	}
 
+	createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex) {
+		doc.ref_list.forEach((ref) => {
+			const refArr = ref.split(' ');
+			let newRef = '';
+			if (refArr.length < 2 && refArr[0].slice(0, 5) === 'Title') {
+				newRef = refArr[0].slice(0, 5) + ' ' + refArr[0].slice(5, refArr[0].length);
+			} else if (refArr.length < 2) {
+				console.log(ref);
+				return;
+			} else {
+				newRef = ref;
+			}
+
+			if (docsRefDict.hasOwnProperty(newRef) && newRef !== pubName) {
+				docsRefDict[newRef].forEach((refEntry) => {
+					referencesRecords.push(
+						new Record(
+							['references'],
+							[
+								{
+									end: { low: refEntry, high: 0 },
+									identity: { low: linkIndex++, high: 0 },
+									properties: {},
+									start: { low: doc.index, high: 0 },
+									type: 'REFERENCES',
+								},
+							],
+							{ references: 0 }
+						)
+					);
+				});
+			}
+		});
+	}
+
 	createMockGraphReturnFromEsResults(docs, userId) {
 		try {
 			const result = { records: [] };
@@ -1033,40 +1035,7 @@ class PolicyGraphHandler extends GraphHandler {
 				if (!doc.ref_list) doc.ref_list = [];
 
 				// Ensure refs are good with spaces between type and num
-				doc.ref_list.forEach((ref) => {
-					const refArr = ref.split(' ');
-					let newRef = '';
-					if (refArr.length < 2) {
-						if (refArr[0].slice(0, 5) === 'Title') {
-							newRef = refArr[0].slice(0, 5) + ' ' + refArr[0].slice(5, refArr[0].length);
-						} else {
-							console.log(ref);
-							return;
-						}
-					} else {
-						newRef = ref;
-					}
-
-					if (docsRefDict.hasOwnProperty(newRef) && newRef !== pubName) {
-						docsRefDict[newRef].forEach((ref) => {
-							referencesRecords.push(
-								new Record(
-									['references'],
-									[
-										{
-											end: { low: ref, high: 0 },
-											identity: { low: linkIndex++, high: 0 },
-											properties: {},
-											start: { low: doc.index, high: 0 },
-											type: 'REFERENCES',
-										},
-									],
-									{ references: 0 }
-								)
-							);
-						});
-					}
-				});
+				this.createMockGraphReturnFromEsResultsHelper(doc, docsRefDict, pubName, referencesRecords, linkIndex);
 			});
 
 			result.records = [...documentsRecords, ...referencesRecords];
@@ -1126,7 +1095,5 @@ class Record {
 		}
 	}
 }
-
-// const policyGraphHandler = new PolicyGraphHandler();
 
 module.exports = PolicyGraphHandler;

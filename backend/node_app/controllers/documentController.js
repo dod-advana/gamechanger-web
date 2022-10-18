@@ -4,13 +4,12 @@ const GC_ASSISTS = require('../models').gc_assists;
 const ORGANIZATION_URLS = require('../models').organization_urls;
 const { DataLibrary } = require('../lib/dataLibrary');
 const sparkMD5Lib = require('spark-md5');
-const fs = require('fs');
 const axios = require('axios');
 const https = require('https');
 const url = require('url');
 const { Op } = require('sequelize');
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
-const { QLIK_URL, QLIK_WS_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
+const { QLIK_URL, CA, KEY, CERT, AD_DOMAIN, QLIK_SYS_ACCOUNT } = constantsFile.QLIK_OPTS;
 
 class DocumentController {
 	constructor(opts = {}) {
@@ -299,9 +298,6 @@ class DocumentController {
 		let userId = 'webapp_unknown';
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-			const { clone = false, cloneData = {} } = req.body;
-
-			const index = clone ? cloneData.clone_data.project_name : this.constants.GAME_CHANGER_OPTS.index;
 
 			res.status(200).send([
 				{ name: 'abbreviations_n', searchField: false },

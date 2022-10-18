@@ -7,7 +7,6 @@ import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { Typography } from '@material-ui/core';
-import Pagination from 'react-js-pagination';
 import '../../../containers/jbook.css';
 import {
 	getQueryVariable,
@@ -38,6 +37,7 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import JBookProfilePage from '../../../containers/JBookProfilePage';
+import Pagination from '../../common/Pagination';
 
 const _ = require('lodash');
 
@@ -68,7 +68,7 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { dispatch, state, gameChangerAPI } = props;
+	const { dispatch, state, gameChangerAPI, gameChangerUserAPI } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
 
@@ -80,14 +80,19 @@ const handlePageLoad = async (props) => {
 
 	// grab the portfolio data
 	let portfolios = [];
+
+	const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 	await gameChangerAPI
 		.callDataFunction({
 			functionName: 'getPortfolios',
 			cloneName: 'jbook',
-			options: {},
+			options: { id: currentUserData.data.id },
 		})
 		.then((data) => {
-			portfolios = data.data !== undefined ? data.data : [];
+			let publicData = data.data ? data.data.publicPortfolios : [];
+			let privateData = data.data ? data.data.privatePortfolios : [];
+			portfolios = [...publicData, ...privateData];
 		});
 
 	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
@@ -222,6 +227,8 @@ const getPagination = (state, dispatch, edaCloneData, edaLoading, edaSearchResul
 								activePage={edaResultsPage}
 								itemsCountPerPage={18}
 								totalItemsCount={edaCount}
+								showJumpToFirstLastPages={true}
+								showFirstPageWithEllipsis={false}
 								pageRangeDisplayed={8}
 								onChange={(page) => {
 									trackEvent(
@@ -307,7 +314,7 @@ const getCardViewPanel = (props) => {
 											style={{ position: 'absolute', right: 15, top: 5 }}
 											onClick={() => {
 												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e'
 												);
 											}}
 										>
@@ -399,7 +406,9 @@ const getCardViewPanel = (props) => {
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
 																		totalItemsCount={count}
-																		pageRangeDisplayed={8}
+																		pageRangeDisplayed={3}
+																		showJumpToFirstLastPages={false}
+																		showFirstPageWithEllipsis={true}
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
@@ -414,6 +423,7 @@ const getCardViewPanel = (props) => {
 																				runSearch: true,
 																				loading: true,
 																				paginationSearch: true,
+																				visitEarlierPage: page < resultsPage,
 																			});
 																			scrollToContentTop();
 																		}}
@@ -498,14 +508,17 @@ const JBookMainViewHandler = (props) => {
 				searchHandler: tmpSearchHandler,
 				cancelToken,
 				gameChangerAPI,
+				gameChangerUserAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
+		const viewPanels = {
+			Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, gameChangerUserAPI, searchHandler }),
+		};
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {

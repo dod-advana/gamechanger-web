@@ -24,19 +24,7 @@ class EdaExportHandler extends ExportHandler {
 
 	async exportHelper(req, res, userId) {
 		try {
-			const {
-				searchText,
-				index,
-				format,
-				historyId,
-				expansionDict = {},
-				orgFilter,
-				typeFilter,
-				operator,
-				selectedDocuments,
-				offset,
-				...rest
-			} = req.body;
+			const { index, format, expansionDict = {}, orgFilter, ...rest } = req.body;
 
 			const clientObj = {};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);

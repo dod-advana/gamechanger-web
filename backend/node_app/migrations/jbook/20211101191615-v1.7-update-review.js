@@ -16,7 +16,7 @@ module.exports = {
 		});
 	},
 
-	down: (queryInterface, Sequelize) => {
+	down: (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			Promise.all([
 				queryInterface.renameColumn(tablename, 'service_ptp_agree_label', 'rev_stp'),

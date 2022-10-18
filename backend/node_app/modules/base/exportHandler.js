@@ -39,7 +39,7 @@ class ExportHandler {
 		}
 	}
 
-	async exportHelper(req, res, userId) {
+	async exportHelper(req, _res, _userId) {
 		return req.body;
 	}
 
@@ -52,7 +52,7 @@ class ExportHandler {
 		}
 	}
 
-	async exportReviewHelper(req, res, userId) {
+	async exportReviewHelper(req, _res, _userId) {
 		return req.body;
 	}
 
@@ -65,7 +65,7 @@ class ExportHandler {
 		}
 	}
 
-	async exportUsersHelper(req, res, userId) {
+	async exportUsersHelper(req, _res, _userId) {
 		return req.body;
 	}
 
@@ -78,7 +78,7 @@ class ExportHandler {
 		}
 	}
 
-	async exportChecklistHelper(req, res, userId) {
+	async exportChecklistHelper(req, _res, _userId) {
 		return req.body;
 	}
 
@@ -91,7 +91,7 @@ class ExportHandler {
 		}
 	}
 
-	async exportProfilePageHelper(req, res, userId) {
+	async exportProfilePageHelper(req, _res, _userId) {
 		return req.body;
 	}
 }

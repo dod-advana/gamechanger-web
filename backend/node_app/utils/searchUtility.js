@@ -1,15 +1,10 @@
 const LOGGER = require('@dod-advana/advana-logger');
+const _ = require('lodash');
 const sparkMD5Lib = require('spark-md5');
 const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary } = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
-const fs = require('fs');
-const { include } = require('underscore');
-const { performance } = require('perf_hooks');
-const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
-
-const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 class SearchUtility {
 	constructor(opts = {}) {
@@ -28,14 +23,30 @@ class SearchUtility {
 		this.dataLibrary = dataApi;
 
 		this.combineExpansionTerms = this.combineExpansionTerms.bind(this);
+		// helpers for combineExpansionTerms
+		this.getWordsList = this.getWordsList.bind(this);
+		this.expandRelatedSearches = this.expandRelatedSearches.bind(this);
+		this.combineExpansionTermsLoopHelper = this.combineExpansionTermsLoopHelper.bind(this);
+
 		this.getEsSearchTerms = this.getEsSearchTerms.bind(this);
 		this.getElasticsearchQueryForGraphCache = this.getElasticsearchQueryForGraphCache.bind(this);
 		this.getElasticsearchQuery = this.getElasticsearchQuery.bind(this);
+		//  helpers for getElasticsearchQuery
+		this.getSearchFieldsWildcardQueries = this.getSearchFieldsWildcardQueries.bind(this);
+		this.setQuerySort = this.setQuerySort.bind(this);
+		this.setQueryMainSearchText = this.setQueryMainSearchText.bind(this);
+		this.setQueryExtSearchFields = this.setQueryExtSearchFields.bind(this);
+		this.setQueryPubDate = this.setQueryPubDate.bind(this);
+		this.setQueryCancelledDocs = this.setQueryCancelledDocs.bind(this);
+		this.setQueryOrgFilter = this.setQueryOrgFilter.bind(this);
+		this.setQueryTypeFilter = this.setQueryTypeFilter.bind(this);
+		this.setQueryRescore = this.setQueryRescore.bind(this);
+		this.setQuerySearchAfter = this.setQuerySearchAfter.bind(this);
+
 		this.getESHighlightContent = this.getESHighlightContent.bind(this);
 		this.cleanUpIdEsResults = this.cleanUpIdEsResults.bind(this);
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
-		// this.combinedSearchHandler = this.combinedSearchHandler.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
@@ -58,10 +69,67 @@ class SearchUtility {
 
 	/********** RELATED SEARCH AND EXPANSION FUNCTIONS **********/
 
+	// helper for combineExpansionTerms
+	getWordsList(similarWords, expandedWords) {
+		let wordsList = [];
+		for (let word in similarWords) {
+			wordsList = wordsList.concat(similarWords[word]);
+		}
+		for (let word in expandedWords) {
+			wordsList = wordsList.concat(expandedWords[word]);
+		}
+		return wordsList;
+	}
+
+	// helper for combineExpansionTerms
+	expandRelatedSearches(relatedSearches, result, key) {
+		if (relatedSearches && relatedSearches.length > 0) {
+			relatedSearches.forEach((term) => {
+				result[key].push({ phrase: term, source: 'related' });
+			});
+		}
+		return relatedSearches;
+	}
+
+	// helper for combineExpansionTerms
+	combineExpansionTermsLoopHelper(
+		checkSyns,
+		checkAbbs,
+		checkWordList,
+		phraseSets,
+		indexes,
+		timesSinceLastAdd,
+		results
+	) {
+		let { nextSynIndex, nextAbbIndex, nextMlIndex } = indexes;
+		let { synonyms, abbreviationExpansions, wordsList } = phraseSets;
+		if (checkSyns) {
+			let syn = synonyms[nextSynIndex];
+			if (!_.find(results, { phrase: syn })) {
+				results.push({ phrase: syn, source: 'thesaurus' });
+			}
+			nextSynIndex++;
+		} else if (checkAbbs) {
+			let abb = abbreviationExpansions[nextAbbIndex];
+			if (!_.find(results, { phrase: abb })) {
+				results.unshift({ phrase: abb, source: 'abbreviations' });
+			}
+			nextAbbIndex++;
+		} else if (checkWordList) {
+			let phrase = wordsList[nextMlIndex];
+			if (phrase && phrase !== '' && !_.find(results, { phrase })) {
+				results.push({ phrase: phrase, source: 'ML-QE' });
+			}
+			nextMlIndex++;
+		} else {
+			timesSinceLastAdd++;
+		}
+		return { results, timesSinceLastAdd, nextSynIndex, nextAbbIndex, nextMlIndex };
+	}
+
 	combineExpansionTerms(expansionDict, synonyms, relatedSearches, key, abbreviationExpansions, userId) {
 		try {
 			let result = {};
-			let toReturn;
 			result[key] = [];
 
 			let nextSynIndex = 0;
@@ -73,68 +141,32 @@ class SearchUtility {
 
 			let expandedWords = {};
 			let similarWords = {};
-			//let expandedWords= (typeof expansionDict['qexp']  === 'undefined') ? [] : expansionDict['qexp'] ;
 			if (expansionDict) {
 				expandedWords = expansionDict['qexp'];
 				similarWords = expansionDict['wordsim'];
 			}
 
-			let wordsList = [];
-			for (var word in similarWords) {
-				wordsList = wordsList.concat(similarWords[word]);
-			}
-			for (var word in expandedWords) {
-				wordsList = wordsList.concat(expandedWords[word]);
-			}
+			const wordsList = this.getWordsList(similarWords, expandedWords);
+			this.expandRelatedSearches(relatedSearches, result, key);
 
-			if (relatedSearches && relatedSearches.length > 0) {
-				relatedSearches.forEach((term) => {
-					result[key].push({ phrase: term, source: 'related' });
-				});
-			}
 			while (result[key].length < 12 && timesSinceLastAdd < 18) {
-				if (nextIsSyn && synonyms && synonyms[nextSynIndex]) {
-					let syn = synonyms[nextSynIndex];
-					let found = false;
-					result[key].forEach((r) => {
-						if (r.phrase === syn) {
-							found = true;
-						}
-					});
-					if (!found) {
-						result[key].push({ phrase: syn, source: 'thesaurus' });
-					}
-					nextSynIndex++;
-				} else if (nextIsAbb && abbreviationExpansions && abbreviationExpansions[nextAbbIndex]) {
-					let abb = abbreviationExpansions[nextAbbIndex];
-					let found = false;
-					result[key].forEach((r) => {
-						if (r.phrase === abb) {
-							found = true;
-						}
-					});
-					if (!found) {
-						result[key].unshift({ phrase: abb, source: 'abbreviations' });
-					}
-					nextAbbIndex++;
-				} else if (!nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex]) {
-					let phrase = wordsList[nextMlIndex];
-					//let cleanedPhrase = this.removeOriginalTermFromExpansion(key, phrase);
-					if (phrase && phrase !== '') {
-						let found = false;
-						result[key].forEach((r) => {
-							if (r.phrase === phrase) {
-								found = true;
-							}
-						});
-						if (!found) {
-							result[key].push({ phrase: phrase, source: 'ML-QE' });
-						}
-					}
-					nextMlIndex++;
-				} else {
-					timesSinceLastAdd++;
-				}
+				const checkSynonyms = nextIsSyn && synonyms && synonyms[nextSynIndex];
+				const checkAbbreviations = nextIsAbb && abbreviationExpansions && abbreviationExpansions[nextAbbIndex];
+				const checkWordList = !nextIsAbb && !nextIsSyn && expandedWords && wordsList && wordsList[nextMlIndex];
+				const helperResult = this.combineExpansionTermsLoopHelper(
+					checkSynonyms,
+					checkAbbreviations,
+					checkWordList,
+					{ synonyms, abbreviationExpansions, wordsList },
+					{ nextSynIndex, nextAbbIndex, nextMlIndex },
+					timesSinceLastAdd,
+					result[key]
+				);
+				result[key] = helperResult.results;
+				timesSinceLastAdd = helperResult.timesSinceLastAdd;
+				nextSynIndex = helperResult.nextSynIndex;
+				nextAbbIndex = helperResult.nextAbbIndex;
+				nextMlIndex = helperResult.nextMlIndex;
 
 				if (nextIsSyn) {
 					nextIsSyn = false;
@@ -146,12 +178,7 @@ class SearchUtility {
 				}
 			}
 
-			toReturn = result;
-			let cleaned = this.cleanExpansions(key, toReturn);
-
-			// this.logger.info('cleaned: ' + cleaned);
-
-			return cleaned;
+			return this.cleanExpansions(key, result);
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'NOIROJE', userId);
@@ -159,12 +186,12 @@ class SearchUtility {
 	}
 
 	cleanExpansions(key, toReturn) {
-		let cleaned = {};
+		const cleaned = {};
 		cleaned[key] = [];
 		if (toReturn && toReturn[key] && toReturn[key].length) {
-			var ordered = [];
-			var currList = [];
-			let orig = key.replace(/[^\w\s]|_/g, '').trim();
+			const ordered = [];
+			const currList = [];
+			const orig = key.replace(/[^\w\s]|_/g, '').trim();
 			currList.push(orig);
 			toReturn[key].forEach((y) => {
 				y.phrase = y.phrase.replace(/[^\w\s]|_/g, '').trim();
@@ -174,7 +201,6 @@ class SearchUtility {
 				}
 			});
 			cleaned[key] = ordered;
-			('');
 		}
 
 		return cleaned;
@@ -207,8 +233,8 @@ class SearchUtility {
 		const stopwords = this.constants.STOP_WORDS;
 		let res = [];
 		const words = str.toLowerCase().split(' ');
-		for (let i = 0; i < words.length; i++) {
-			const word_clean = words[i].split('.').join('');
+		for (let word of words) {
+			const word_clean = word.split('.').join('');
 			if (!stopwords.includes(word_clean)) {
 				res.push(word_clean);
 			}
@@ -227,7 +253,7 @@ class SearchUtility {
 			return this.getQueryAndSearchTerms(terms);
 		} catch (e) {
 			console.log('Error getting es search terms');
-			this.logger.error(e.message, 'D2O1YIB', user);
+			this.logger.error(e.message, 'D2O1YIB');
 			return [];
 		}
 	}
@@ -237,7 +263,7 @@ class SearchUtility {
 		const searchTextLower = searchText.toLowerCase();
 
 		//replace forward slashes will break ES query
-		let cleanSearch = searchTextLower.replace(/\/|{|}/g, '');
+		let cleanSearch = searchTextLower.replace(/[\/{}]/g, '');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -301,7 +327,7 @@ class SearchUtility {
 
 	findQuoted(searchText) {
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
-		return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>'|").*?\k<quote>)/g) || [];
+		return searchText.match(/(?!\s*(and|or))(?<words>(?<quote>['"]).*?\k<quote>)/g) || [];
 	}
 
 	findLowerCaseWordsOrAcronyms(searchText) {
@@ -316,7 +342,7 @@ class SearchUtility {
 		return JSON.parse(JSON.stringify(`"${phrase.slice(1, -1)}"`));
 	}
 
-	getElasticsearchQueryForGraphCache({ limit = 1000, offset = 0, searchAfter = null }, user) {
+	getElasticsearchQueryForGraphCache({ limit = 1000, _offset = 0, searchAfter = null }, user) {
 		try {
 			const query = {
 				_source: false,
@@ -350,26 +376,220 @@ class SearchUtility {
 		}
 	}
 
+	// helper for getElasticsearchQuery
+	getSearchFieldsWildcardQueries(searchFields) {
+		const mustQueries = [];
+		for (const key in searchFields) {
+			const searchField = searchFields[key];
+			if (searchField.field && searchField.field.name && searchField.input && searchField.input.length !== 0) {
+				const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
+
+				mustQueries.push(wildcard);
+			}
+		}
+		return mustQueries;
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySort(sort, order, query) {
+		switch (sort) {
+			case 'Relevance':
+				query.sort = [{ _score: { order: order } }];
+				break;
+			case 'Publishing Date':
+				query.sort = [{ publication_date_dt: { order: order } }];
+				break;
+			case 'Alphabetical':
+				query.sort = [{ display_title_s: { order: order } }];
+				break;
+			case 'Popular':
+				query.sort = [{ pop_score: { order: order } }];
+				break;
+			case 'References':
+				query.sort = [
+					{
+						_script: {
+							type: 'number',
+							script: 'doc.ref_list.size()',
+							order: order,
+						},
+					},
+				];
+				break;
+			default:
+				break;
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryMainSearchText(searchText, mainKeywords, query, analyzer) {
+		if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
+			const titleMainSearch = {
+				query_string: {
+					fields: ['display_title_s.search'],
+					query: `*${mainKeywords}*`,
+					type: 'best_fields',
+					boost: 10,
+					analyzer,
+				},
+			};
+			query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryExtSearchFields(extSearchFields, searchText, query) {
+		if (extSearchFields.length > 0) {
+			const extQuery = {
+				multi_match: {
+					query: searchText,
+					fields: [],
+					operator: 'or',
+				},
+			};
+			extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
+			query.query.bool.should = query.query.bool.should.concat(extQuery);
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryPubDate(publicationDateAllTime, publicationDateFilter, query) {
+		if (
+			this.constants.GAME_CHANGER_OPTS.allow_daterange &&
+			!publicationDateAllTime &&
+			publicationDateFilter[0] &&
+			publicationDateFilter[1]
+		) {
+			query.query.bool.must.push({
+				range: {
+					publication_date_dt: {
+						gte: publicationDateFilter[0].split('.')[0],
+						lte: publicationDateFilter[1].split('.')[0],
+					},
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryCancelledDocs(includeRevoked, query) {
+		if (!includeRevoked) {
+			// if includeRevoked, get return cancelled docs
+			query.query.bool.filter.push({
+				term: {
+					is_revoked_b: 'false',
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySelectedDocs(selectedDocuments, query) {
+		if (selectedDocuments?.length > 0) {
+			// filter selected documents
+			query.query.bool.filter.push({
+				terms: {
+					filename: selectedDocuments,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryOrgFilter(orgFilterString, query) {
+		if (orgFilterString.length > 0) {
+			query.query.bool.filter.push({
+				terms: {
+					display_org_s: orgFilterString,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryTypeFilter(typeFilterString, query) {
+		if (typeFilterString.length > 0) {
+			query.query.bool.filter.push({
+				terms: {
+					display_doc_type_s: typeFilterString,
+				},
+			});
+		}
+	}
+
+	// helper for getElasticsearchQuery
+	setQueryRescore(parsedQuery, query) {
+		query.rescore = [
+			{
+				window_size: 50,
+				query: {
+					rescore_query: {
+						sltr: {
+							params: { keywords: `${parsedQuery}` },
+							model: 'ltr_model',
+						},
+					},
+				},
+			},
+			{
+				window_size: 500,
+				query: {
+					rescore_query: {
+						bool: {
+							must: [
+								{
+									rank_feature: {
+										field: 'pagerank_r',
+										boost: 10,
+									},
+								},
+							],
+						},
+					},
+					query_weight: 0.7,
+					rescore_query_weight: 2,
+				},
+			},
+		];
+	}
+
+	// helper for getElasticsearchQuery
+	setQuerySearchAfter(search_before, search_after, order, query) {
+		if (search_before.length > 0) {
+			order = order === 'desc' ? 'asc' : 'desc';
+		}
+		if (query.sort[0]) {
+			query.sort[0][Object.keys(query.sort[0])[0]].order = order;
+		}
+		query.sort.push({ _id: order });
+		// add search_after
+		if (search_before.length > 0) {
+			query.search_after = search_before;
+		} else if (search_after.length > 0) {
+			query.search_after = search_after;
+		}
+	}
+
 	getElasticsearchQuery(
 		{
 			searchText,
-			searchTerms,
+			_searchTerms,
 			parsedQuery,
 			orgFilterString = '',
 			typeFilterString = '',
-			index,
+			_index,
 			offset = 0,
 			limit = 20,
-			format = 'json',
-			getIdList = false,
-			expandTerms = false,
+			_format = 'json',
+			_getIdList = false,
+			_expandTerms = false,
 			isClone = false,
-			cloneData = {},
+			_cloneData = {},
 			charsPadding = 90,
 			operator = 'and',
 			searchFields = {},
 			mainMaxkeywords = 3,
-			accessDateFilter = [],
+			_accessDateFilter = [],
 			publicationDateFilter = [],
 			publicationDateAllTime = true,
 			storedFields = [
@@ -409,26 +629,15 @@ class SearchUtility {
 			ltr = false,
 			paragraphLimit = 100,
 			hasHighlights = true,
+			search_after = [],
+			search_before = [],
 		},
 		user
 	) {
 		try {
 			// add additional search fields to the query
-			const mustQueries = [];
-			for (const key in searchFields) {
-				const searchField = searchFields[key];
-				if (
-					searchField.field &&
-					searchField.field.name &&
-					searchField.input &&
-					searchField.input.length !== 0
-				) {
-					const wildcard = { query_string: { query: `${searchField.field.name}:*${searchField.input}*` } };
-					// wildcard.wildcard[`${searchField.field.name}${searchField.field.searchField ? '.search' : ''}`] = { value: `*${searchField.input}*` };
+			const mustQueries = this.getSearchFieldsWildcardQueries(searchFields);
 
-					mustQueries.push(wildcard);
-				}
-			}
 			storedFields = [...storedFields, ...extStoredFields];
 			const default_field = this.isVerbatim(searchText)
 				? 'paragraphs.par_raw_text_t'
@@ -436,7 +645,7 @@ class SearchUtility {
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
 			let mainKeywords = this.remove_stopwords(plainQuery)
-				.replace(/"|'/gi, '')
+				.replace(/["']/gi, '')
 				.replace(/ OR | AND /gi, ' ')
 				.split(' ')
 				.slice(0, mainMaxkeywords)
@@ -584,151 +793,38 @@ class SearchUtility {
 					}
 					: {},
 			};
-			switch (sort) {
-				case 'Relevance':
-					query.sort = [{ _score: { order: order } }];
-					break;
-				case 'Publishing Date':
-					query.sort = [{ publication_date_dt: { order: order } }];
-					break;
-				case 'Alphabetical':
-					query.sort = [{ display_title_s: { order: order } }];
-					break;
-				case 'Popular':
-					query.sort = [{ pop_score: { order: order } }];
-					break;
-				case 'References':
-					query.sort = [
-						{
-							_script: {
-								type: 'number',
-								script: 'doc.ref_list.size()',
-								order: order,
-							},
-						},
-					];
-				default:
-					break;
-			}
-			if (!this.isVerbatim(searchText) && mainKeywords.length > 2) {
-				const titleMainSearch = {
-					query_string: {
-						fields: ['display_title_s.search'],
-						query: `*${mainKeywords}*`,
-						type: 'best_fields',
-						boost: 10,
-						analyzer,
-					},
-				};
-				query.query.bool.should = query.query.bool.should.concat(titleMainSearch);
-			}
-			if (extSearchFields.length > 0) {
-				const extQuery = {
-					multi_match: {
-						query: searchText,
-						fields: [],
-						operator: 'or',
-					},
-				};
-				extQuery.multi_match.fields = extSearchFields.map((field) => field.toLowerCase());
-				query.query.bool.should = query.query.bool.should.concat(extQuery);
-			}
 
-			if (
-				this.constants.GAME_CHANGER_OPTS.allow_daterange &&
-				!publicationDateAllTime &&
-				publicationDateFilter[0] &&
-				publicationDateFilter[1]
-			) {
-				if (!publicationDateAllTime && publicationDateFilter[0] && publicationDateFilter[1]) {
-					query.query.bool.must.push({
-						range: {
-							publication_date_dt: {
-								gte: publicationDateFilter[0].split('.')[0],
-								lte: publicationDateFilter[1].split('.')[0],
-							},
-						},
-					});
-				}
-			}
+			this.setQuerySort(sort, order, query);
+			this.setQueryMainSearchText(searchText, mainKeywords, query, analyzer);
+			this.setQueryExtSearchFields(extSearchFields, searchText, query);
+			this.setQueryPubDate(publicationDateAllTime, publicationDateFilter, query);
 
-			if (!includeRevoked && !isClone) {
-				// if includeRevoked, get return cancelled docs
-				query.query.bool.filter.push({
-					term: {
-						is_revoked_b: 'false',
-					},
-				});
-			}
-
-			if (selectedDocuments?.length > 0 && !isClone) {
-				// filter selected documents
-				query.query.bool.filter.push({
-					terms: {
-						filename: selectedDocuments,
-					},
-				});
+			if (!isClone) {
+				this.setQueryCancelledDocs(includeRevoked, query);
+				this.setQuerySelectedDocs(selectedDocuments, query);
+				this.setQueryOrgFilter(orgFilterString, query);
+				this.setQueryTypeFilter(typeFilterString, query);
 			}
 
 			if (mustQueries.length > 0) {
 				query.query.bool.must = query.query.bool.must.concat(mustQueries);
 			}
 
-			if (!isClone && orgFilterString.length > 0) {
-				query.query.bool.filter.push({
-					terms: {
-						display_org_s: orgFilterString,
-					},
-				});
-			}
-			if (!isClone && typeFilterString.length > 0) {
-				query.query.bool.filter.push({
-					terms: {
-						display_doc_type_s: typeFilterString,
-					},
-				});
-			}
-			if (includeHighlights == false) {
+			if (!includeHighlights) {
 				delete query.query.bool.should[0].nested.inner_hits;
 				delete query.highlight;
 			}
+
 			if (Object.keys(docIds).length !== 0) {
 				query.query.bool.filter.push({ terms: { id: docIds } });
 			}
+
 			if (ltr && sort === 'Relevance') {
-				query.rescore = [
-					{
-						window_size: 50,
-						query: {
-							rescore_query: {
-								sltr: {
-									params: { keywords: `${parsedQuery}` },
-									model: 'ltr_model',
-								},
-							},
-						},
-					},
-					{
-						window_size: 500,
-						query: {
-							rescore_query: {
-								bool: {
-									must: [
-										{
-											rank_feature: {
-												field: 'pagerank_r',
-												boost: 10,
-											},
-										},
-									],
-								},
-							},
-							query_weight: 0.7,
-							rescore_query_weight: 2,
-						},
-					},
-				];
+				this.setQueryRescore(parsedQuery, query);
+			} else {
+				this.setQuerySearchAfter(search_before, search_after, order, query);
 			}
+
 			return query;
 		} catch (err) {
 			this.logger.error(err, '2OQQD7D', user);
@@ -927,10 +1023,10 @@ class SearchUtility {
 			let aliasResults = await this.dataLibrary.queryElasticSearch(esClientName, entitiesIndex, aliasQuery, user);
 			if (aliasResults.body.hits.hits[0]) {
 				let aliases = aliasResults.body.hits.hits[0]._source.aliases.map((item) => item.name);
-				for (var i = 0; i < aliases.length; i++) {
-					if (aliases[i].split(/\s+/).length === 1 && aliases[i] === aliases[i].toUpperCase()) {
+				for (let alias of aliases) {
+					if (alias.split(/\s+/).length === 1 && alias === alias.toUpperCase()) {
 						matchingAlias = aliasResults.body.hits.hits[0];
-						matchingAlias.match = aliases[i];
+						matchingAlias.match = alias;
 						break;
 					}
 				}
@@ -950,7 +1046,7 @@ class SearchUtility {
 		// multi search in ES
 		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
 
-		let query = {
+		return {
 			suggest: {
 				suggester: {
 					text: plainQuery,
@@ -962,10 +1058,9 @@ class SearchUtility {
 				},
 			},
 		};
-		return query;
 	}
 	getSearchCountQuery(daysBack, filterWords) {
-		const query = {
+		return {
 			size: 1,
 			query: {
 				bool: {
@@ -1005,8 +1100,8 @@ class SearchUtility {
 				},
 			},
 		};
-		return query;
 	}
+
 	async getSearchCount(daysBack, filterWords, userId, esClientName = 'gamechanger', maxSearches = 10) {
 		// need to caps all search text for ID and Title since it's stored like that in ES
 		const searchHistoryIndex = this.constants.GAME_CHANGER_OPTS.historyIndex;
@@ -1254,17 +1349,147 @@ class SearchUtility {
 		}
 	}
 
-	cleanUpEsResults(
+	cleanUpEsResultsAddOneHitPerPage(pageSet, hits, user, result) {
+		hits.forEach((parahit) => {
+			const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
+			let pageNumber = pageIndex + 1;
+			// one hit per page max
+			if (!pageSet.has(pageNumber)) {
+				const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
+				// use page 0 for title matches or errors
+				// but only allow 1
+				if (usePageZero) {
+					if (pageSet.has(0)) {
+						return;
+					} else {
+						pageNumber = 0;
+						pageSet.add(0);
+					}
+				}
+
+				pageSet.add(pageNumber);
+				result.pageHits.push({ snippet, pageNumber });
+			}
+		});
+	}
+
+	cleanUpEsResultsHandleHighlights(rawHit, result) {
+		if (rawHit.highlight) {
+			if (rawHit.highlight['display_title_s.search']) {
+				result.pageHits.push({
+					title: 'Title',
+					snippet: rawHit.highlight['display_title_s.search'][0],
+				});
+			}
+			if (rawHit.highlight.keyw_5) {
+				result.pageHits.push({
+					title: 'Keywords',
+					snippet: this.highlight_keywords(result.keyw_5, rawHit.highlight.keyw_5),
+				});
+			}
+			if (rawHit.highlight['filename.search']) {
+				result.pageHits.push({
+					title: 'Filename',
+					snippet: rawHit.highlight['filename.search'][0],
+				});
+			}
+			if (rawHit.highlight['display_source_s.search']) {
+				result.pageHits.push({
+					title: 'Source',
+					snippet: rawHit.highlight['display_source_s.search'][0],
+				});
+			}
+			if (rawHit.highlight.top_entities_t) {
+				result.pageHits.push({
+					title: 'Entities',
+					snippet: this.highlight_keywords(result.top_entities_t, rawHit.highlight.top_entities_t),
+				});
+			}
+			if (rawHit.highlight.topics_s) {
+				result.pageHits.push({
+					title: 'Topics',
+					snippet: this.highlight_keywords(result.topics_s, rawHit.highlight.topics_s),
+				});
+			}
+		}
+	}
+
+	cleanUpEsResultsHandleParagraphsScore(rawHit, result, paragraphResults) {
+		rawHit.inner_hits.paragraphs.hits.hits.forEach((paragraph) => {
+			let entities = [];
+			Object.keys(paragraph._source.entities).forEach((entKey) => {
+				entities = entities.concat(paragraph._source.entities[entKey]);
+			});
+			result.score += paragraphResults[paragraph._source.id].score;
+			result.paragraphs.push({
+				id: paragraph._source.id,
+				par_raw_text_t: paragraph._source.par_raw_text_t,
+				page_num_i: paragraph._source.page_num_i,
+				entities: entities,
+				score: paragraphResults[paragraph._source.id].score,
+				transformTextMatch: paragraphResults[paragraph._source.id].text,
+				paragraphIdBeingMatched: paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
+				score_display: paragraphResults[paragraph._source.id].score_display,
+			});
+		});
+	}
+
+	cleanUpEsResultsHandleInnerHits(rawHit, isCompareReturn, pageSet, user, result, paragraphResults) {
+		if (rawHit.inner_hits) {
+			if (rawHit.inner_hits.paragraphs && !isCompareReturn) {
+				this.cleanUpEsResultsAddOneHitPerPage(pageSet, rawHit.inner_hits.paragraphs.hits.hits, user, result);
+				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+				this.cleanUpEsResultsHandleHighlights(rawHit, result);
+				result.pageHitCount = pageSet.size;
+				result.matchCount = rawHit.inner_hits?.paragraphs?.hits?.total?.value;
+			} else if (rawHit.inner_hits.paragraphs && isCompareReturn) {
+				result.paragraphs = [];
+				result.score = 0;
+				this.cleanUpEsResultsHandleParagraphsScore(rawHit, result, paragraphResults);
+				result.paragraphs.sort((a, b) => b.score - a.score);
+				result.score /= result.paragraphs.length;
+			} else {
+				this.cleanUpEsResultsAddOneHitPerPage(pageSet, rawHit.inner_hits.pages.hits.hits, user, result);
+
+				result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
+				this.cleanUpEsResultsHandleHighlights(rawHit, result);
+				result.pageHitCount = pageSet.size;
+			}
+		}
+	}
+
+	cleanUpEsResultsHandleKeyW5(result) {
+		if (Array.isArray(result['keyw_5'])) {
+			result['keyw_5'] = result['keyw_5'].join(', ');
+		} else {
+			result['keyw_5'] = '';
+		}
+	}
+
+	cleanUpEsResultsHandleEmptyRefList(result) {
+		if (!result.ref_list) {
+			result.ref_list = [];
+		}
+	}
+
+	cleanUpEsResultsHandleSort(rawHit, result) {
+		if (rawHit.sort) {
+			result.sort = rawHit.sort;
+		}
+	}
+
+	cleanUpEsResults({
 		raw,
 		searchTerms,
 		user,
-		selectedDocuments = [],
+		selectedDocuments,
 		expansionDict,
 		index,
 		query,
 		isCompareReturn = false,
-		paragraphResults = []
-	) {
+		paragraphResults = [],
+	}) {
+		if (!selectedDocuments) selectedDocuments = [];
 		try {
 			let results = {
 				query,
@@ -1275,25 +1500,11 @@ class SearchUtility {
 				docs: [],
 			};
 
-			let docTypes = [];
-			let docOrgs = [];
-
 			const { body = {} } = raw;
 			const { aggregations = {} } = body;
 			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
-			const type_buckets = doc_type_aggs.buckets ? doc_type_aggs.buckets : [];
-			const org_buckets = doc_org_aggs.buckets ? doc_org_aggs.buckets : [];
-
-			type_buckets.forEach((agg) => {
-				docTypes.push(agg);
-			});
-
-			org_buckets.forEach((agg) => {
-				docOrgs.push(agg);
-			});
-
-			results.doc_types = docTypes;
-			results.doc_orgs = docOrgs;
+			results.doc_types = doc_type_aggs.buckets || [];
+			results.doc_orgs = doc_org_aggs.buckets || [];
 
 			raw.body.hits.hits.forEach((r) => {
 				let result = this.transformEsFields(r.fields);
@@ -1305,167 +1516,16 @@ class SearchUtility {
 				) {
 					result.pageHits = [];
 					const pageSet = new Set();
-					if (r.inner_hits) {
-						if (r.inner_hits.paragraphs && !isCompareReturn) {
-							r.inner_hits.paragraphs.hits.hits.forEach((parahit) => {
-								const pageIndex = parahit.fields['paragraphs.page_num_i'][0];
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.getESHighlightContent(parahit, user);
-									// use page 0 for title matches or errors
-									// but only allow 1
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
 
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-
-							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-							if (r.highlight) {
-								if (r.highlight['display_title_s.search']) {
-									result.pageHits.push({
-										title: 'Title',
-										snippet: r.highlight['display_title_s.search'][0],
-									});
-								}
-								if (r.highlight.keyw_5) {
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
-									result.pageHits.push({ title: 'Keywords', snippet: new_highlights });
-								}
-								if (r.highlight['filename.search']) {
-									result.pageHits.push({
-										title: 'Filename',
-										snippet: r.highlight['filename.search'][0],
-									});
-								}
-								if (r.highlight['display_source_s.search']) {
-									result.pageHits.push({
-										title: 'Source',
-										snippet: r.highlight['display_source_s.search'][0],
-									});
-								}
-								if (r.highlight.top_entities_t) {
-									var new_highlights = this.highlight_keywords(
-										result.top_entities_t,
-										r.highlight.top_entities_t
-									);
-									result.pageHits.push({ title: 'Entities', snippet: new_highlights });
-								}
-								if (r.highlight.topics_s) {
-									var new_highlights = this.highlight_keywords(result.topics_s, r.highlight.topics_s);
-									result.pageHits.push({ title: 'Topics', snippet: new_highlights });
-								}
-							}
-							result.pageHitCount = pageSet.size;
-						} else if (r.inner_hits.paragraphs && isCompareReturn) {
-							result.paragraphs = [];
-							result.score = 0;
-
-							r.inner_hits.paragraphs.hits.hits.forEach((paragraph) => {
-								const entities = [];
-								Object.keys(paragraph._source.entities).forEach((entKey) => {
-									paragraph._source.entities[entKey].forEach((org) => {
-										entities.push(org);
-									});
-								});
-								result.score += paragraphResults[paragraph._source.id].score;
-								result.paragraphs.push({
-									id: paragraph._source.id,
-									par_raw_text_t: paragraph._source.par_raw_text_t,
-									page_num_i: paragraph._source.page_num_i,
-									entities: entities,
-									score: paragraphResults[paragraph._source.id].score,
-									transformTextMatch: paragraphResults[paragraph._source.id].text,
-									paragraphIdBeingMatched:
-										paragraphResults[paragraph._source.id].paragraphIdBeingMatched,
-									score_display: paragraphResults[paragraph._source.id].score_display,
-								});
-							});
-
-							result.paragraphs.sort((a, b) => b.score - a.score);
-
-							result.score /= result.paragraphs.length;
-						} else {
-							r.inner_hits.pages.hits.hits.forEach((phit) => {
-								const pageIndex = phit._nested.offset;
-								// const snippet =  phit.fields["pages.p_raw_text"][0];
-								let pageNumber = pageIndex + 1;
-								// one hit per page max
-								if (!pageSet.has(pageNumber)) {
-									const [snippet, usePageZero] = this.getESHighlightContent(phit, user);
-									if (usePageZero) {
-										if (pageSet.has(0)) {
-											return;
-										} else {
-											pageNumber = 0;
-											pageSet.add(0);
-										}
-									}
-									pageSet.add(pageNumber);
-									result.pageHits.push({ snippet, pageNumber });
-								}
-							});
-
-							result.pageHits.sort((a, b) => a.pageNumber - b.pageNumber);
-							if (r.highlight) {
-								if (r.highlight['display_title_s.search']) {
-									result.pageHits.push({
-										title: 'Title',
-										snippet: r.highlight['display_title_s.search'][0],
-									});
-								}
-								if (r.highlight.keyw_5) {
-									var new_highlights = this.highlight_keywords(result.keyw_5, r.highlight.keyw_5);
-									result.pageHits.push({ title: 'Keywords', snippet: new_highlights });
-								}
-								if (r.highlight['filename.search']) {
-									result.pageHits.push({
-										title: 'Filename',
-										snippet: r.highlight['filename.search'][0],
-									});
-								}
-								if (r.highlight['display_source_s.search']) {
-									result.pageHits.push({
-										title: 'Source',
-										snippet: r.highlight['display_source_s.search'][0],
-									});
-								}
-								if (r.highlight.top_entities_t) {
-									var new_highlights = this.highlight_keywords(
-										result.top_entities_t,
-										r.highlight.top_entities_t
-									);
-									result.pageHits.push({ title: 'Entities', snippet: new_highlights });
-								}
-								if (r.highlight.topics_s) {
-									var new_highlights = this.highlight_keywords(result.topics_s, r.highlight.topics_s);
-									result.pageHits.push({ title: 'Topics', snippet: new_highlights });
-								}
-							}
-							result.pageHitCount = pageSet.size;
-						}
-					}
+					// handle r.inner_hits
+					this.cleanUpEsResultsHandleInnerHits(r, isCompareReturn, pageSet, user, result, paragraphResults);
 
 					result.esIndex = index;
 
-					if (Array.isArray(result['keyw_5'])) {
-						result['keyw_5'] = result['keyw_5'].join(', ');
-					} else {
-						result['keyw_5'] = '';
-					}
+					this.cleanUpEsResultsHandleKeyW5(result);
+					this.cleanUpEsResultsHandleEmptyRefList(result);
+					this.cleanUpEsResultsHandleSort(r, result);
 
-					if (!result.ref_list) {
-						result.ref_list = [];
-					}
 					results.docs.push(result);
 				}
 			});
@@ -1481,24 +1541,25 @@ class SearchUtility {
 			this.logger.error(err.message, 'GL7EDI3', user);
 		}
 	}
+
 	highlight_keywords(all_words, highlights) {
 		// purpose is to highlight words from the entire list.
-		var resultHighlights = highlights.map(function (x) {
+		const resultHighlights = highlights.map(function (x) {
 			return x.replace(/<em>/g, '').replace(`</em>`, '');
 		});
+		let all_words_str;
 		if (all_words instanceof Array) {
-			var all_words_str = all_words.join(', ');
+			all_words_str = all_words.join(', ');
 		} else {
-			var all_words_str = all_words;
+			all_words_str = all_words;
 		}
 		for (let ind in resultHighlights) {
-			var word = resultHighlights[ind];
+			const word = resultHighlights[ind];
 			all_words_str = all_words_str.replace(word, `<em>` + word + `</em>`);
 		}
-		let complete_words = all_words_str.split(', ');
-
-		return complete_words;
+		return all_words_str.split(', ');
 	}
+
 	cleanUpIdEsResults(raw, searchTerms, user, expansionDict) {
 		try {
 			if (
@@ -1533,6 +1594,16 @@ class SearchUtility {
 			return results;
 		} catch (err) {
 			this.logger.error(err, 'BG9peM4', user);
+		}
+	}
+
+	getESHighlightContentFieldTextFieldFilename(fieldTextArray, fieldFilenameArray2) {
+		if (fieldTextArray.length > 0 && fieldTextArray[0]) {
+			return [fieldTextArray[0], false];
+		} else if (fieldFilenameArray2.length > 0 && fieldFilenameArray2[0]) {
+			return [fieldFilenameArray2[0].replace(/.pdf/g, ''), true];
+		} else {
+			throw new Error('failed to highlight');
 		}
 	}
 
@@ -1573,14 +1644,8 @@ class SearchUtility {
 				return [pageHighlightTextArray[0], false];
 			} else if (pageFieldFilenameArray.length > 0 && pageFieldFilenameArray[0]) {
 				return [pageFieldFilenameArray[0].replace(/.pdf/g, ''), true];
-			} else if (fieldTextArray.length > 0 && fieldTextArray[0]) {
-				return [fieldTextArray[0], false];
-			} else if (fieldFilenameArray2.length > 0 && fieldFilenameArray2[0]) {
-				return [fieldFilenameArray2[0].replace(/.pdf/g, ''), true];
 			}
-			{
-				throw new Error('failed to highlight');
-			}
+			return this.getESHighlightContentFieldTextFieldFilename(fieldTextArray, fieldFilenameArray2);
 		} catch (e) {
 			this.logger.error(e, 'x983Nsiw', user);
 			return ['Error highlighting', true];
@@ -1626,7 +1691,7 @@ class SearchUtility {
 
 	getSearchWikiQuery(searchTerm) {
 		try {
-			let query = {
+			return {
 				size: 5,
 				query: {
 					query_string: {
@@ -1634,13 +1699,12 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
-		} catch {
-			this.logger.error(e, '17I8XO8', user);
+		} catch (e) {
+			this.logger.error(e, '17I8XO8');
 		}
 	}
 
-	async documentSearchOneID(req, body, clientObj, userId) {
+	async documentSearchOneID(_req, body, clientObj, userId) {
 		try {
 			const { id = '', searchTerms = [], expansionDict = {}, limit = 20, maxLength = 200 } = body;
 
@@ -1650,7 +1714,15 @@ class SearchUtility {
 			const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 
 			if (this.checkValidResults(esResults)) {
-				return this.cleanUpEsResults(esResults, searchTerms, userId, null, expansionDict, esIndex);
+				return this.cleanUpEsResults({
+					raw: esResults,
+					searchTerms,
+					user: userId,
+					selectedDocuments: null,
+					expansionDict,
+					index: esIndex,
+					query: null,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
 				if (this.checkESResultsEmpty(esResults)) {
@@ -1665,9 +1737,43 @@ class SearchUtility {
 		}
 	}
 
-	async documentSearch(req, body, clientObj, userId) {
+	documentSearchHandleValidResults({
+		titleResults,
+		results,
+		getIdList,
+		searchTerms,
+		userId,
+		expansionDict,
+		forGraphCache,
+		selectedDocuments,
+		esIndex,
+		esQuery,
+	}) {
+		if (this.checkValidResults(titleResults)) {
+			results = this.reorderFirst(results, titleResults);
+		}
+		if (getIdList) {
+			return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+		}
+
+		if (forGraphCache) {
+			return this.cleanUpIdEsResultsForGraphCache(results, userId);
+		} else {
+			return this.cleanUpEsResults({
+				raw: results,
+				searchTerms,
+				user: userId,
+				selectedDocuments,
+				expansionDict,
+				index: esIndex,
+				query: esQuery,
+			});
+		}
+	}
+
+	async documentSearch(_req, body, clientObj, userId) {
 		try {
-			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false, searchType } = body;
+			const { getIdList, selectedDocuments, expansionDict = {}, forGraphCache = false } = body;
 			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
 			body.searchTerms = searchTerms;
 			body.parsedQuery = parsedQuery;
@@ -1686,26 +1792,18 @@ class SearchUtility {
 
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
 			if (this.checkValidResults(results)) {
-				if (this.checkValidResults(titleResults)) {
-					results = this.reorderFirst(results, titleResults);
-				}
-				if (getIdList) {
-					return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
-				}
-
-				if (forGraphCache) {
-					return this.cleanUpIdEsResultsForGraphCache(results, userId);
-				} else {
-					return this.cleanUpEsResults(
-						results,
-						searchTerms,
-						userId,
-						selectedDocuments,
-						expansionDict,
-						esIndex,
-						esQuery
-					);
-				}
+				return this.documentSearchHandleValidResults({
+					titleResults,
+					results,
+					getIdList,
+					searchTerms,
+					userId,
+					expansionDict,
+					forGraphCache,
+					selectedDocuments,
+					esIndex,
+					esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'MKZMJXD', userId);
 				if (this.checkESResultsEmpty(results)) {
@@ -1720,20 +1818,18 @@ class SearchUtility {
 			throw e;
 		}
 	}
+
 	checkValidResults(results) {
-		if (
+		return (
 			results &&
 			results.body &&
 			results.body.hits &&
 			results.body.hits.total &&
 			results.body.hits.total.value &&
 			results.body.hits.total.value > 0
-		) {
-			return true;
-		} else {
-			return false;
-		}
+		);
 	}
+
 	reorderFirst(results, titleResults) {
 		// reorders a matching title result to the top of the results
 		let reorderedHits = [];
@@ -1760,7 +1856,7 @@ class SearchUtility {
 
 	getEntityQuery(searchText, offset = 0, limit = 6) {
 		try {
-			let query = {
+			return {
 				from: offset,
 				size: limit,
 				query: {
@@ -1796,7 +1892,6 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'JAEIWMF', '');
 		}
@@ -1804,7 +1899,7 @@ class SearchUtility {
 
 	getTopicQuery(searchText, offset = 0, limit = 6) {
 		try {
-			let query = {
+			return {
 				from: offset,
 				size: limit,
 				query: {
@@ -1814,7 +1909,6 @@ class SearchUtility {
 					},
 				},
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'YTP3YF0', '');
 		}
@@ -1822,7 +1916,7 @@ class SearchUtility {
 
 	getPopularDocsQuery(offset = 0, limit = 10) {
 		try {
-			let query = {
+			return {
 				_source: ['title', 'filename', 'pop_score', 'id'],
 				from: offset,
 				size: limit,
@@ -1841,7 +1935,6 @@ class SearchUtility {
 					},
 				],
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'PTF390A', '');
 		}
@@ -1870,9 +1963,10 @@ class SearchUtility {
 			return popDocs;
 		}
 	}
-	getSourceQuery(searchText, offset, limit) {
+
+	getSourceQuery(searchText, _offset, _limit) {
 		try {
-			let query = {
+			return {
 				_source: {
 					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs'],
 				},
@@ -1939,11 +2033,11 @@ class SearchUtility {
 					},
 				],
 			};
-			return query;
 		} catch (err) {
 			this.logger.error(err, 'G3WEJ64', '');
 		}
 	}
+
 	getOrgQuery() {
 		return {
 			_source: 'false',
@@ -2039,7 +2133,7 @@ class SearchUtility {
 	}
 
 	getESClient(cloneName, permissions) {
-		let esClientName = 'gamechanger';
+		let esClientName = '';
 		let esIndex = '';
 		try {
 			esIndex = [
@@ -2051,31 +2145,248 @@ class SearchUtility {
 			esIndex = 'gamechanger';
 		}
 
-		switch (cloneName) {
-			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-					esClientName = 'eda';
-					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
-				} else {
-					throw 'Unauthorized';
-				}
-				break;
-			default:
-				esClientName = 'gamechanger';
+		if (cloneName === 'eda') {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esClientName = 'eda';
+				esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			} else {
+				throw new Error('Unauthorized');
+			}
+		} else {
+			esClientName = 'gamechanger';
 		}
 
 		return { esClientName, esIndex };
 	}
+
 	checkESResultsEmpty(results) {
-		if (results && results.body && results.body.hits) {
-			if (results.body.hits.total.value == 0) {
-				return true;
-			} else {
-				return false;
+		return results && results.body && results.body.hits && results.body.hits.total.value == 0;
+	}
+
+	addNode(nodes, node, nodeIds, nodeProperties, labels) {
+		nodes[node.id] = node;
+		if (nodeIds.indexOf(node.id) === -1) {
+			nodeIds.push(node.id);
+			if (labels.indexOf(node.label) === -1) {
+				labels.push(node.label);
+				nodeProperties[node.label] = node.properties;
 			}
-		} else {
-			return false;
 		}
+	}
+
+	addEdge(edges, edge, edgeIds, relationships, relProperties) {
+		try {
+			edges[edge.id] = edge;
+			if (edgeIds.indexOf(edge.id) === -1) {
+				edgeIds.push(edge.id);
+				if (relationships.indexOf(edge.label) === -1) {
+					relationships.push(edge.label);
+					relProperties[edge.label] = edge.properties;
+				}
+			}
+
+			const tmpEdges = edgeIds.filter((edgeId) => {
+				if (edges[edgeId].source === edge.source && edges[edgeId].target === edge.target) {
+					return edgeId;
+				}
+			});
+
+			const edgeCount = tmpEdges.length;
+			const oddEdges = edgeCount % 2 !== 0;
+			tmpEdges.forEach((edgeId, index) => {
+				if (oddEdges && index === 0) {
+					edges[edgeId].rotation = 0;
+					edges[edgeId].curvature = 0;
+				} else {
+					edges[edgeId].rotation = Math.PI * (index / 6);
+					edges[edgeId].curvature = (edgeCount / 10) * (index % 2 !== 0 ? -1 : 1);
+				}
+			});
+		} catch (err) {
+			console.log(edge);
+		}
+	}
+
+	cleanNeo4jDataHandlePathRecType({
+		nodes,
+		v,
+		isTest,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		this.addNode(nodes, this.buildNodeVisObject(v.start, isTest, user), nodeIds, nodeProperties, labels);
+		this.addNode(nodes, this.buildNodeVisObject(v.end, isTest, user), nodeIds, nodeProperties, labels);
+
+		for (let obj of v.segments) {
+			this.addNode(nodes, this.buildNodeVisObject(obj.start, isTest, user), nodeIds, nodeProperties, labels);
+			this.addNode(nodes, this.buildNodeVisObject(obj.end, isTest, user), nodeIds, nodeProperties, labels);
+			this.addEdge(
+				edges,
+				this.buildEdgeVisObject(obj.relationship, isTest, user),
+				edgeIds,
+				relationships,
+				relProperties
+			);
+		}
+	}
+
+	cleanNeo4jDataHandleArrayRecType({
+		v,
+		isTest,
+		nodes,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		for (let obj of v) {
+			const recTypeV = this.getNeo4jType(obj, isTest);
+			if (recTypeV === 'Node') {
+				this.addNode(nodes, this.buildNodeVisObject(obj, isTest, user), nodeIds, nodeProperties, labels);
+			} else if (recTypeV === 'Relationship') {
+				this.addEdge(edges, this.buildEdgeVisObject(obj, isTest, user), edgeIds, relationships, relProperties);
+			}
+		}
+	}
+
+	cleanNeo4jDataHandleRecType({
+		recType,
+		v,
+		isTest,
+		nodes,
+		user,
+		nodeIds,
+		nodeProperties,
+		labels,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+	}) {
+		if (recType === 'Node') {
+			this.addNode(nodes, this.buildNodeVisObject(v, isTest, user), nodeIds, nodeProperties, labels);
+		} else if (recType === 'Relationship') {
+			this.addEdge(edges, this.buildEdgeVisObject(v, isTest, user), edgeIds, relationships, relProperties);
+		} else if (recType === 'Path') {
+			this.cleanNeo4jDataHandlePathRecType({
+				nodes,
+				v,
+				isTest,
+				user,
+				nodeIds,
+				nodeProperties,
+				labels,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
+			});
+		} else if (recType === 'Array') {
+			this.cleanNeo4jDataHandleArrayRecType({
+				v,
+				isTest,
+				nodes,
+				user,
+				nodeIds,
+				nodeProperties,
+				labels,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
+			});
+		} else if (v !== null) {
+			console.log(v);
+		}
+	}
+
+	cleanNeo4jDataHandleRecords({
+		result,
+		isTest,
+		user,
+		nodes,
+		nodeIds,
+		nodeProperties,
+		labels,
+		graphMetaData,
+		edges,
+		edgeIds,
+		relationships,
+		relProperties,
+		docIds,
+	}) {
+		result.records.forEach((record) => {
+			const recObj = record.toObject();
+
+			if (recObj.hasOwnProperty('entityScore')) {
+				const node = this.buildNodeVisObject(recObj.node, isTest, user);
+				node.entityScore = recObj.entityScore;
+				node.mentions = recObj.mentions.low;
+				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
+			} else if (recObj.hasOwnProperty('topicScore')) {
+				const node = this.buildNodeVisObject(recObj.node, isTest, user);
+				node.topicScore = recObj.topicScore;
+				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
+			} else if (recObj.hasOwnProperty('doc_id')) {
+				docIds.push({ doc_id: recObj.doc_id, mentions: recObj.mentions?.low });
+			} else if (recObj.hasOwnProperty('primary_key')) {
+				graphMetaData.push({
+					label: recObj.label,
+					property: recObj.property,
+					type: recObj.type,
+					primary_key: recObj.primary_key,
+				});
+			} else if (recObj.hasOwnProperty('relTypesCount')) {
+				graphMetaData.push({
+					relationship_counts: recObj.relTypesCount,
+					node_counts: recObj.labels,
+				});
+			} else if (recObj.hasOwnProperty('topic')) {
+				this.addNode(
+					nodes,
+					this.buildNodeVisObject(recObj.topic, isTest, user),
+					nodeIds,
+					nodeProperties,
+					labels
+				);
+				nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
+			} else if (recObj.hasOwnProperty('topic_name')) {
+				recObj.doc_count = recObj.doc_count.low;
+				graphMetaData.push(recObj);
+			} else if (recObj.hasOwnProperty('doc_count')) {
+				graphMetaData.push({
+					documents: recObj.doc_count.low,
+				});
+			} else {
+				Object.values(recObj).map(async (v) => {
+					const recType = this.getNeo4jType(v, isTest);
+					this.cleanNeo4jDataHandleRecType({
+						recType,
+						v,
+						isTest,
+						nodes,
+						user,
+						nodeIds,
+						nodeProperties,
+						labels,
+						edges,
+						edgeIds,
+						relationships,
+						relProperties,
+					});
+				});
+			}
+		});
 	}
 
 	cleanNeo4jData(result, isTest, user) {
@@ -2091,118 +2402,20 @@ class SearchUtility {
 		const graphMetaData = [];
 
 		try {
-			const addNode = (node) => {
-				nodes[node.id] = node;
-				if (nodeIds.indexOf(node.id) === -1) {
-					nodeIds.push(node.id);
-					if (labels.indexOf(node.label) === -1) {
-						labels.push(node.label);
-						nodeProperties[node.label] = node.properties;
-					}
-				}
-			};
-
-			const addEdge = (edge) => {
-				try {
-					edges[edge.id] = edge;
-					if (edgeIds.indexOf(edge.id) === -1) {
-						edgeIds.push(edge.id);
-						if (relationships.indexOf(edge.label) === -1) {
-							relationships.push(edge.label);
-							relProperties[edge.label] = edge.properties;
-						}
-					}
-
-					const tmpEdges = edgeIds.filter((edgeId) => {
-						if (edges[edgeId].source === edge.source && edges[edgeId].target === edge.target) {
-							return edgeId;
-						}
-					});
-
-					const edgeCount = tmpEdges.length;
-					const oddEdges = edgeCount % 2 !== 0;
-					tmpEdges.forEach((edgeId, index) => {
-						if (oddEdges && index === 0) {
-							edges[edgeId].rotation = 0;
-							edges[edgeId].curvature = 0;
-						} else {
-							edges[edgeId].rotation = Math.PI * (index / 6);
-							edges[edgeId].curvature = (edgeCount / 10) * (index % 2 !== 0 ? -1 : 1);
-						}
-					});
-				} catch (err) {
-					console.log(edge);
-				}
-			};
-
-			result.records.forEach((record) => {
-				const recObj = record.toObject();
-
-				if (recObj.hasOwnProperty('entityScore')) {
-					const node = this.buildNodeVisObject(recObj.node, isTest, user);
-					node.entityScore = recObj.entityScore;
-					node.mentions = recObj.mentions.low;
-					addNode(node);
-				} else if (recObj.hasOwnProperty('topicScore')) {
-					const node = this.buildNodeVisObject(recObj.node, isTest, user);
-					node.topicScore = recObj.topicScore;
-					addNode(node);
-				} else if (recObj.hasOwnProperty('doc_id')) {
-					docIds.push({ doc_id: recObj.doc_id, mentions: recObj.mentions?.low });
-				} else if (recObj.hasOwnProperty('primary_key')) {
-					graphMetaData.push({
-						label: recObj.label,
-						property: recObj.property,
-						type: recObj.type,
-						primary_key: recObj.primary_key,
-					});
-				} else if (recObj.hasOwnProperty('relTypesCount')) {
-					graphMetaData.push({
-						relationship_counts: recObj.relTypesCount,
-						node_counts: recObj.labels,
-					});
-				} else if (recObj.hasOwnProperty('topic')) {
-					addNode(this.buildNodeVisObject(recObj.topic, isTest, user));
-					nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
-				} else if (recObj.hasOwnProperty('topic_name')) {
-					recObj.doc_count = recObj.doc_count.low;
-					graphMetaData.push(recObj);
-				} else if (recObj.hasOwnProperty('doc_count')) {
-					graphMetaData.push({
-						documents: recObj.doc_count.low,
-					});
-				} else {
-					Object.values(recObj).map(async (v) => {
-						const recType = this.getNeo4jType(v, isTest);
-						if (recType === 'Node') {
-							addNode(this.buildNodeVisObject(v, isTest, user));
-						} else if (recType === 'Relationship') {
-							addEdge(this.buildEdgeVisObject(v, isTest, user));
-						} else if (recType === 'Path') {
-							addNode(this.buildNodeVisObject(v.start, isTest, user));
-							addNode(this.buildNodeVisObject(v.end, isTest, user));
-
-							for (let obj of v.segments) {
-								addNode(this.buildNodeVisObject(obj.start, isTest, user));
-								addNode(this.buildNodeVisObject(obj.end, isTest, user));
-								addEdge(this.buildEdgeVisObject(obj.relationship, isTest, user));
-							}
-						} else if (recType === 'Array') {
-							for (let obj of v) {
-								const recType = this.getNeo4jType(obj, isTest);
-								if (recType === 'Node') {
-									addNode(this.buildNodeVisObject(obj, isTest, user));
-								} else if (recType === 'Relationship') {
-									addEdge(this.buildEdgeVisObject(obj, isTest, user));
-								}
-							}
-						} else {
-							if (v !== null) {
-								console.log(v);
-							}
-						}
-					});
-				}
+			this.cleanNeo4jDataHandleRecords({
+				result,
+				isTest,
+				user,
+				nodes,
+				nodeIds,
+				nodeProperties,
+				labels,
+				graphMetaData,
+				edges,
+				edgeIds,
+				relationships,
+				relProperties,
+				docIds,
 			});
 
 			if (docIds.length > 0) {
@@ -2324,29 +2537,33 @@ class SearchUtility {
 		return edge;
 	}
 
+	getNeo4jTypeIsTest(v) {
+		const keys = Object.keys(v);
+		if (keys.includes('identity') && keys.includes('labels') && keys.includes('properties')) return 'Node';
+		else if (
+			keys.includes('identity') &&
+			keys.includes('start') &&
+			keys.includes('end') &&
+			keys.includes('type') &&
+			keys.includes('properties')
+		)
+			return 'Relationship';
+		else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
+		else if (v instanceof Array) return 'Array';
+		else return '';
+	}
+
 	getNeo4jType(v, isTest) {
-		if (v === null) return false;
+		if (v === null) return '';
 
 		if (isTest) {
-			const keys = Object.keys(v);
-			if (keys.includes('identity') && keys.includes('labels') && keys.includes('properties')) return 'Node';
-			else if (
-				keys.includes('identity') &&
-				keys.includes('start') &&
-				keys.includes('end') &&
-				keys.includes('type') &&
-				keys.includes('properties')
-			)
-				return 'Relationship';
-			else if (keys.includes('start') && keys.includes('end') && keys.includes('segments')) return 'Path';
-			else if (v instanceof Array) return 'Array';
-			else return false;
+			return this.getNeo4jTypeIsTest(v);
 		} else {
 			if (v instanceof neo4jLib.types.Node) return 'Node';
 			else if (v instanceof neo4jLib.types.Relationship) return 'Relationship';
 			else if (v instanceof neo4jLib.types.Path) return 'Path';
 			else if (v instanceof Array) return 'Array';
-			else return false;
+			else return '';
 		}
 	}
 

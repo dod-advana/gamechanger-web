@@ -8,7 +8,7 @@ module.exports = {
 		});
 	},
 
-	down: (queryInterface, Sequelize) => {
+	down: (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			return Promise.all([queryInterface.removeColumn(tablename, 'userId')]);
 		});

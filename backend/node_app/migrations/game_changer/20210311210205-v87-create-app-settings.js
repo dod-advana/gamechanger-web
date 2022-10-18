@@ -21,7 +21,7 @@ module.exports = {
 			.then(() => queryInterface.bulkInsert(tablename, [{ key: 'combined_search', value: 'true' }]));
 	},
 
-	down: async (queryInterface, Sequelize) => {
+	down: async (queryInterface, _Sequelize) => {
 		return queryInterface.dropTable(tablename);
 	},
 };

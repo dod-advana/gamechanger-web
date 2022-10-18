@@ -43,37 +43,55 @@ const JBookPOCReviewForm = React.memo((props) => {
 
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
-	const { pocValidated, primaryReviewLoading, reviewData, domainTasks } = state;
+	const { pocValidated, primaryReviewLoading, reviewData } = state;
 
 	const pocReviewerData = () => {
 		const pocReviewerData = [
 			{
 				Key: <AltAIPOCKey />,
-				Value: <AltAIPOCValue setReviewData={setReviewData} />,
+				Value: <AltAIPOCValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <LabelingValidationKey />,
-				Value: <LabelingValidationValue setReviewData={setReviewData} dropdownData={dropdownData} />,
+				Value: (
+					<LabelingValidationValue
+						setReviewData={setReviewData}
+						dropdownData={dropdownData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <TransitionPartnerKey />,
-				Value: <TransitionPartnerValue setReviewData={setReviewData} dropdownData={dropdownData} />,
+				Value: (
+					<TransitionPartnerValue
+						setReviewData={setReviewData}
+						dropdownData={dropdownData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <MissionPartnersKey />,
-				Value: <MissionPartnersValue setReviewData={setReviewData} vendorData={vendorData} />,
+				Value: (
+					<MissionPartnersValue
+						setReviewData={setReviewData}
+						vendorData={vendorData}
+						roleDisabled={roleDisabled}
+					/>
+				),
 			},
 			{
 				Key: <JCAKey />,
-				Value: <JCAValue setReviewData={setReviewData} />,
+				Value: <JCAValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <AIDomainKey />,
-				Value: <AIDomainValue setReviewData={setReviewData} domainTasks={domainTasks} />,
+				Value: <AIDomainValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 			{
 				Key: <DataTypeKey />,
-				Value: <DataTypeValue setReviewData={setReviewData} />,
+				Value: <DataTypeValue setReviewData={setReviewData} roleDisabled={roleDisabled} />,
 			},
 		];
 
@@ -92,7 +110,9 @@ const JBookPOCReviewForm = React.memo((props) => {
 		if (showSlider) {
 			pocReviewerData.push({
 				Key: <SliderKey />,
-				Value: <SliderValue totalBudget={totalBudget} setReviewData={setReviewData} />,
+				Value: (
+					<SliderValue totalBudget={totalBudget} setReviewData={setReviewData} roleDisabled={roleDisabled} />
+				),
 			});
 		}
 
@@ -142,7 +162,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Reset Form'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
@@ -153,7 +177,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Save (Partial Review)'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 				<GCPrimaryButton
@@ -164,7 +192,11 @@ const JBookPOCReviewForm = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Submit (Finished Review)'
 					) : (
-						<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#FFFFFF"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</StyledFooterDiv>

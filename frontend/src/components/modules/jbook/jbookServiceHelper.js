@@ -98,11 +98,11 @@ const ReviewStatus = React.memo((props) => {
 const SecondaryReviewerKey = React.memo(() => {
 	return (
 		<StyledTableKeyContainer>
-			<strong>Secondary Reviewer</strong>
+			<strong>RAI Reviewer</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Service Level Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu.
-				Once selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer
-				checklist tab and the review will be the responsibility of the Secondary Reviewer.
+				Service Level Reviewers can select a RAI reviewer for this Program/Project from the dropdown menu. Once
+				selected and saved, the RAI Reviewer Name will populate as the Reviewer on the Reviewer checklist tab
+				and the review will be the responsibility of the RAI Reviewer.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -131,7 +131,7 @@ const SecondaryReviewerValue = React.memo((props) => {
 					size="small"
 					options={Object.keys(reviewers)}
 					style={{ width: 300, backgroundColor: 'white' }}
-					renderInput={(params) => <TextField {...params} label="Secondary" variant="outlined" />}
+					renderInput={(params) => <TextField {...params} label="RAI" variant="outlined" />}
 					value={serviceSecondaryReviewer ?? null}
 					onChange={(_event, value) => {
 						setReviewDataMultiple({
@@ -465,9 +465,12 @@ const AIPOCKey = React.memo(() => {
 		<StyledTableKeyContainer>
 			<strong>AI Point of Contact (POC) for Effort</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Enter the AI Point of Contact for this Program/Project in the POC section of the Service Reviewer
-				Section. A suitable type of POC would be the Program Element Monitor. We ask that you enter the POC
-				Title, Name, Email address, Organization and Phone number in this section.
+				Enter the AI Point of Contact for this Program/BLI in the POC section of the Service Reviewer Section. A
+				suitable type of POC would be the Program Element Monitor. Select the POC's name from the dropdown. If
+				the POC name is not available as an option, please direct the POC to{' '}
+				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added to the list and select `Save
+				(Partial Service Review)`. Once the POC has completed the steps at the link above, you can return to
+				this budget exhibit, select the POC name, and click `Submit`.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -477,6 +480,7 @@ const AIPOCValue = React.memo((props) => {
 	const {
 		setReviewData,
 		finished,
+		dropdownData,
 		serviceValidated,
 		serviceValidation,
 		servicePOCTitle, // from reviewData
@@ -486,36 +490,25 @@ const AIPOCValue = React.memo((props) => {
 		servicePOCPhoneNumber, //
 	} = props;
 
-	const [pocTitle, setPOCTitle] = useState(servicePOCTitle);
-	const [pocName, setPOCName] = useState(servicePOCName);
-	const [pocEmail, setPOCEmail] = useState(servicePOCEmail);
-	const [pocOrg, setPOCOrg] = useState(servicePOCOrg);
-	const [pocPhoneNumber, setPOCPhoneNumber] = useState(servicePOCPhoneNumber);
-
 	const classes = useStyles();
-
-	useEffect(() => {
-		setPOCTitle(servicePOCTitle);
-	}, [servicePOCTitle]);
-
-	useEffect(() => {
-		setPOCName(servicePOCName);
-	}, [servicePOCName]);
-
-	useEffect(() => {
-		setPOCEmail(servicePOCEmail);
-	}, [servicePOCEmail]);
-
-	useEffect(() => {
-		setPOCOrg(servicePOCOrg);
-	}, [servicePOCOrg]);
-
-	useEffect(() => {
-		setPOCPhoneNumber(servicePOCPhoneNumber);
-	}, [servicePOCPhoneNumber]);
 
 	return (
 		<StyledTableValueContainer>
+			<StyledInlineContainer justifyContent={'left'}>
+				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
+					POC Name
+				</Typography>
+				<Autocomplete
+					style={{ backgroundColor: 'white', width: '40%' }}
+					size="small"
+					options={Object.keys(dropdownData.pocReviewers).map((poc) => poc)}
+					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+					onChange={(_event, value) => setReviewData('servicePOC', dropdownData.pocReviewers[value])}
+					value={servicePOCName ?? null}
+					disabled={finished}
+					disableClearable
+				/>
+			</StyledInlineContainer>
 			<StyledInlineContainer justifyContent={'left'}>
 				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
 					POC Title
@@ -523,41 +516,12 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Title"
 					variant="outlined"
-					value={pocTitle}
-					defaultValue={pocTitle}
+					value={servicePOCTitle ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCTitle(value)}
-					onBlur={(event) => setReviewData('servicePOCTitle', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocTitle
-							? {
-									classes: {
-										root: classes.cssOutlinedInput,
-										focused: classes.cssFocused,
-										notchedOutline: classes.notchedOutline,
-									},
-							  }
-							: {}
-					}
-				/>
-			</StyledInlineContainer>
-			<StyledInlineContainer justifyContent={'left'}>
-				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
-					POC Name
-				</Typography>
-				<TextField
-					placeholder="Name"
-					variant="outlined"
-					value={pocName}
-					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCName(value)}
-					onBlur={(event) => setReviewData('servicePOCName', event.target.value)}
-					size="small"
-					disabled={finished} //|| roleDisabled}
-					InputProps={
-						!serviceValidated && !serviceValidation.pocName
 							? {
 									classes: {
 										root: classes.cssOutlinedInput,
@@ -576,12 +540,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Email"
 					variant="outlined"
-					value={pocEmail}
+					value={servicePOCEmail ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCEmail(value)}
-					onBlur={(event) => setReviewData('servicePOCEmail', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocEmail
 							? {
@@ -602,12 +564,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Org"
 					variant="outlined"
-					value={pocOrg}
+					value={servicePOCOrg ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCOrg(value)}
-					onBlur={(event) => setReviewData('servicePOCOrg', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocOrg
 							? {
@@ -628,12 +588,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Phone Number"
 					variant="outlined"
-					value={pocPhoneNumber}
+					value={servicePOCPhoneNumber ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCPhoneNumber(value)}
-					onBlur={(event) => setReviewData('servicePOCPhoneNumber', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocPhoneNumber
 							? {
@@ -753,7 +711,11 @@ const ButtonFooter = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Reset Form'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>
@@ -766,7 +728,11 @@ const ButtonFooter = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Save (Partial Service Review)'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>
@@ -783,7 +749,11 @@ const ButtonFooter = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Submit (Finished Service Review)'
 					) : (
-						<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#FFFFFF"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>

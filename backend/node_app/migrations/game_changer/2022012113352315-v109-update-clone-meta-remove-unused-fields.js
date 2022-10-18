@@ -2,7 +2,7 @@
 const tablename = 'clone_meta';
 
 module.exports = {
-	up: (queryInterface, Sequelize) => {
+	up: (queryInterface, _Sequelize) => {
 		return queryInterface.sequelize.transaction(function () {
 			return Promise.all([
 				queryInterface.removeColumn(tablename, 'data_source_name'),

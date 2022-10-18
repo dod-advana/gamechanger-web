@@ -1513,6 +1513,17 @@ const budgetDropdownData = {
 		{ current_msn_part: 'Other' },
 	],
 	secondaryReviewers: [{ name: 'Test Testeroni' }],
+	pocReviewers: {
+		'Test Testo (test@test.com)': {
+			email: 'test@test.com',
+			first_name: 'Test',
+			id: 88,
+			job_title: 'Software Engineer',
+			last_name: 'Testo',
+			organization: 'Booz Allen Hamilton',
+			phone_number: '5555555555',
+		},
+	},
 };
 
 module.exports = {
