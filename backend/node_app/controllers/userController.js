@@ -114,6 +114,7 @@ class UserController {
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
 		this.getUserDataForUserList = this.getUserDataForUserList.bind(this);
+		this.getUserDataByIDs = this.getUserDataByIDs.bind(this);
 		this.updateOrCreateUser = this.updateOrCreateUser.bind(this);
 		this.updateOrCreateUserHelper = this.updateOrCreateUserHelper.bind(this);
 		this.sendFeedback = this.sendFeedback.bind(this);
@@ -290,6 +291,28 @@ class UserController {
 		} catch (err) {
 			this.logger.error(err, 'RQ0WSQP', userId);
 			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
+	async getUserDataByIDs(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+
+			const ids = JSON.parse(req.query.ids);
+			const idList = ids.map((id) => ({ id }));
+
+			const results = await this.user.findAll({
+				attributes: ['id', 'first_name', 'last_name', 'email'],
+				where: { [Op.or]: idList },
+				raw: true,
+			});
+
+			res.status(200).send({ users: results });
+		} catch (err) {
+			this.logger.error(err, 'RQ0W123', userId);
+			res.status(500).send(`Error getting users by IDs`);
 		}
 	}
 
@@ -771,49 +794,41 @@ class UserController {
 		}
 	}
 
+	// gives POC permissions to all users that enter this link (made for new users that need quick POC access)
 	async setupUserProfile(req, res) {
 		let userId = 'webapp_unknown';
 
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const user_id = getUserIdFromSAMLUserId(req);
-			const { email, permissions } = req.body;
-			const userRequest = await this.userRequest.findOne({ where: { email: email }, raw: true });
 
-			if (userRequest && !userRequest.is_activated) {
-				const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
+			// check if user exists
+			const user = await this.user.findOne({ where: { user_id: user_id }, raw: true });
 
-				if (user) {
-					user.organization = userRequest.organization;
-					user.email = email;
-					user.phone_number = userRequest.phone_number;
-
-					permissions.forEach((permission) => {
-						switch (permission) {
-							case 'PrimaryReviewer':
-								user.is_primary_reviewer = true;
-								break;
-							case 'ServiceReviewer':
-								user.is_service_reviewer = true;
-								break;
-							case 'POCReviewer':
-								user.is_poc_reviewer = true;
-								break;
-							default:
-								break;
-						}
-					});
-
-					userRequest.is_activated = true;
-
-					await this.userRequest.update(userRequest, { where: { id: userRequest.id } });
-					await this.user.update(user, { where: { id: user.id } });
-
-					return res.status(200).send({ setup: true });
+			// if user does not exist, create user with POC
+			if (!user) {
+				await this.user.create({
+					user_id: user_id,
+					cn: userId,
+					extra_fields: {
+						jbook: {
+							is_admin: false,
+							is_poc_reviewer: true,
+							is_primary_reviewer: false,
+							is_service_reviewer: false,
+						},
+					},
+				});
+				return res.status(200).send({ setup: true });
+			} else {
+				// if the user does exist, give them POC
+				let newExtraFields = { ...user.extra_fields };
+				if (!user.extra_fields?.jbook?.is_poc_reviewer) {
+					newExtraFields.jbook.is_poc_reviewer = true;
+					await this.user.update({ extra_fields: newExtraFields }, { where: { user_id: user_id } });
 				}
+				res.status(200).send({ setup: false });
 			}
-
-			res.status(200).send({ setup: false });
 		} catch (err) {
 			this.logger.error(err, 'AXJ1YXX', userId);
 			res.status(500).send(`Error setting up user: ${err.message}`);
@@ -1272,10 +1287,10 @@ class UserController {
 					attachment,
 					userId
 				)
-				.then((success) => {
+				.then(() => {
 					res.status(200).send({ status: 'good' });
 				})
-				.catch((failure) => {
+				.catch(() => {
 					res.status(500).send({ status: 'bad' });
 				});
 		} catch (err) {
@@ -1305,10 +1320,10 @@ class UserController {
 					null,
 					userId
 				)
-				.then((success) => {
+				.then(() => {
 					res.status(200).send({ status: 'good' });
 				})
-				.catch((failure) => {
+				.catch(() => {
 					res.status(500).send({ status: 'bad' });
 				});
 		} catch (err) {
@@ -1396,7 +1411,7 @@ class UserController {
 				id_values.push(value);
 			});
 
-			const [count, rows] = await this.gcUser.update({ api_requests: 3 }, { where: { id: id_values } });
+			const [count] = await this.gcUser.update({ api_requests: 3 }, { where: { id: id_values } });
 			this.logger.info(`Finished resetting; ${count} rows affected.`);
 			return count;
 		} catch (e) {

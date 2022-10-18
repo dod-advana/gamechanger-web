@@ -1,6 +1,5 @@
 const MODEL = require('../models').megamenu_links;
 const LOGGER = require('@dod-advana/advana-logger');
-const Sequelize = require('sequelize');
 const _ = require('underscore');
 
 class MegaMenuController {

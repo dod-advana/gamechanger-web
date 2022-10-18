@@ -7,7 +7,6 @@ const FAVORITE_ORGANIZATION = require('../models').favorite_organizations;
 const GC_HISTORY = require('../models').gc_history;
 const GC_USER = require('../models').gc_user;
 const { SearchController } = require('../../node_app/controllers/searchController');
-const { getTenDigitUserId } = require('../utils/userUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 const sparkMD5Lib = require('spark-md5');
 const SearchUtility = require('../utils/searchUtility');
@@ -374,28 +373,8 @@ class FavoritesController {
 
 			const handler = this.handler_factory.createHandler('search', cloneName);
 			const storeHistory = false;
-			const results = await handler.search(
-				searchText,
-				offset,
-				limit,
-				options,
-				cloneName,
-				permissions,
-				userId,
-				storeHistory
-			);
-
-			// we will ignore recoverable errors even though they may alter the search results
-			// and use the assumption that degradations in search services will only result in
-			// fewer search results so that below only *more* search results should trigger a
-			// search result update
-			/*
-			const error = handler.getError();
-			if (error.code) {
-				this.logger.error('favorites search error', 'YN3USY3');
-				return;
-			}
-			*/
+			const searchBounds = { searchText, offset, limit, search_after: [], search_before: [] };
+			const results = await handler.search(options, cloneName, permissions, userId, storeHistory, searchBounds);
 
 			// if new total count is greater than stored favorite count and the favorite
 			// has not already been marked updated we add a notification, else just update

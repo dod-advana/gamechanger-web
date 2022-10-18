@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
+import { styles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-// import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
-import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
+import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
 
 const gameChangerAPI = new GameChangerAPI();
+const gameChangerUserAPI = new GameChangerUserAPI();
 
 const portfolioStyles = {
 	portfolio: {
@@ -60,35 +59,18 @@ const Pill = styled.button`
  */
 const PortfolioBuilder = (props) => {
 	// State variables for the buttons
-	const [portfolios, setPortfolios] = useState([]);
+	const [publicPortfolios, setPublicPortfolios] = useState([]);
+	const [privatePortfolios, setPrivatePortfolios] = useState([]);
+
 	const [showModal, setShowModal] = useState(false);
-	const [deleteModal, setDeleteModal] = useState(false);
-	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
+	const [user, setUser] = useState(null);
 	let [init, setInit] = useState(false);
-	const classes = useStyles();
 
 	useEffect(() => {
-		if (!init) {
-			gameChangerAPI
-				.callDataFunction({
-					functionName: 'getPortfolios',
-					cloneName: 'jbook',
-					options: {},
-				})
-				.then((data) => {
-					console.log(data);
-					let pData = data.data !== undefined ? data.data : [];
-					setPortfolios(pData);
-				});
-			setInit(true);
-		}
-	}, [init, setInit, portfolios, setPortfolios]);
-
-	useEffect(() => {
-		const getUserData = async () => {
+		const initFunction = async () => {
 			const data = await gameChangerAPI.getUserData('jbook');
 			setUserList(data.data.users);
 			const newMap = {};
@@ -96,16 +78,111 @@ const PortfolioBuilder = (props) => {
 				newMap[user.id] = user;
 			});
 			setUserMap(newMap);
+
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+			setUser(currentUserData.data);
+			gameChangerAPI
+				.callDataFunction({
+					functionName: 'getPortfolios',
+					cloneName: 'jbook',
+					options: {
+						id: currentUserData.data.id,
+					},
+				})
+				.then((data) => {
+					console.log(data);
+
+					const alphaSort = (a, b) => {
+						const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+						const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+						if (nameA < nameB) {
+							return -1;
+						}
+						if (nameA > nameB) {
+							return 1;
+						}
+						// names must be equal
+						return 0;
+					};
+
+					let publicData = data.data ? data.data.publicPortfolios : [];
+					publicData.sort(alphaSort);
+					let privatePortfolios = data.data ? data.data.privatePortfolios : [];
+					privatePortfolios.sort(alphaSort);
+					setPublicPortfolios(publicData);
+					setPrivatePortfolios(privatePortfolios);
+				});
 		};
 
 		if (!init) {
-			getUserData();
+			initFunction();
 			setInit(true);
 		}
-	}, [init, setInit, userList, setUserList]);
+	}, [init, setInit, setUser, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
+
+	// helper function for listportfolio
+	const getName = (id) => {
+		if (userMap[id]) {
+			return `${userMap[id].first_name} ${userMap[id].last_name}`;
+		}
+		return '';
+	};
+
+	// helper function for listportfolio
+	const renderUsers = (users) => {
+		const portfolioUsers = [];
+		for (let user of users) {
+			if (getName(user) !== '') {
+				portfolioUsers.push(
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+					</Pill>
+				);
+			}
+		}
+
+		return portfolioUsers;
+	};
+
+	// helper function for listportfolio
+	const getTags = (tags) => {
+		let portfolioTags = '(none)';
+		if (tags.length > 0) {
+			portfolioTags = tags.map((tag, index) => {
+				return (
+					<Pill>
+						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
+					</Pill>
+				);
+			});
+		}
+
+		return portfolioTags;
+	};
 
 	const listPortfolios = (pList) => {
 		let portfolios = pList.map((portfolio) => {
+			const portfolioAdmins = [];
+			for (let user of portfolio.admins) {
+				if (getName(user) !== '') {
+					portfolioAdmins.push(
+						<Pill>
+							<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
+						</Pill>
+					);
+				}
+			}
+
+			let editIcon =
+				portfolio.admins.find((item) => item === user.id) !== undefined || portfolio.creator === user.id;
+
+			let userText = renderUsers(portfolio.user_ids);
+			if (!portfolio.isPrivate) {
+				userText = '(All JBOOK users)';
+			} else if (portfolio.user_ids.length === 0) {
+				userText = '(none)';
+			}
+
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
@@ -113,40 +190,41 @@ const PortfolioBuilder = (props) => {
 							{portfolio.name}
 						</Typography>
 						<div>
-							<IconButton
-								aria-label="close"
-								style={{
-									height: 30,
-									width: 30,
-									color: 'grey',
-									borderRadius: 0,
-									marginRight: '10px',
-								}}
-								onClick={() => {
-									setModalData(portfolio);
-									setShowModal(true);
-								}}
-							>
-								<EditIcon style={{ fontSize: 30 }} />
-							</IconButton>
-							<IconButton
-								aria-label="close"
-								style={{
-									height: 10,
-									width: 10,
-									color: 'red',
-									borderRadius: 0,
-								}}
-								onClick={() => {
-									setDeleteID(portfolio.id);
-									setDeleteModal(true);
-								}}
-							>
-								<CancelIcon style={{ fontSize: 30 }} />
-							</IconButton>
+							{editIcon && (
+								<IconButton
+									aria-label="close"
+									style={{
+										height: 30,
+										width: 30,
+										color: 'grey',
+										borderRadius: 0,
+										marginRight: '10px',
+									}}
+									onClick={() => {
+										setModalData(portfolio);
+										setShowModal(true);
+									}}
+								>
+									<EditIcon style={{ fontSize: 30 }} />
+								</IconButton>
+							)}
 						</div>
 					</div>
 					<div style={{ fontSize: '.8em' }}>{portfolio.description}</div>
+					<div style={{ fontSize: '.8em', fontweight: 'bold' }}>
+						Creator:{' ' + getName(portfolio.creator)}
+					</div>
+					<hr />
+					<div style={portfolioStyles.portfolioHeader}>
+						{' '}
+						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
+							Administrators
+						</Typography>
+					</div>
+					<div style={portfolioStyles.pillbox}>
+						{portfolio.admins.length === 0 && '(none)'}
+						{portfolioAdmins}
+					</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
 						{' '}
@@ -154,37 +232,14 @@ const PortfolioBuilder = (props) => {
 							People with Access
 						</Typography>
 					</div>
-					<div style={portfolioStyles.pillbox}>
-						{portfolio.user_ids.length === 0 &&
-							(portfolio.name === 'AI Inventory' ? '(All JBOOK users)' : '(none)')}
-						{portfolio.user_ids.map((user, index) => {
-							return (
-								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px' }}>
-										{(userMap[user] ? userMap[user].first_name : '') +
-											' ' +
-											(userMap[user] ? userMap[user].last_name : '')}
-									</div>
-								</Pill>
-							);
-						})}
-					</div>
+					<div style={portfolioStyles.pillbox}>{userText}</div>
 					<hr />
 					<div style={portfolioStyles.portfolioHeader}>
 						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
 							Associated Tags
 						</Typography>
 					</div>
-					<div style={portfolioStyles.pillbox}>
-						{portfolio.tags.length === 0 && '(none)'}
-						{portfolio.tags.map((tag, index) => {
-							return (
-								<Pill>
-									<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
-								</Pill>
-							);
-						})}
-					</div>
+					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
 				</div>
 			);
 		});
@@ -222,99 +277,45 @@ const PortfolioBuilder = (props) => {
 							</ul>
 						</div>
 					</div>
-					<div>
-						<GCButton
-							onClick={() => {
-								setShowModal(true);
-							}}
-							style={{ minWidth: 'unset' }}
-						>
-							Create a New Portfolio
-						</GCButton>
-					</div>
+					{user && (
+						<div>
+							<GCButton
+								onClick={() => {
+									setShowModal(true);
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Create a New Portfolio
+							</GCButton>
+						</div>
+					)}
+				</div>
+				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
 				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(portfolios)}
+					{listPortfolios(publicPortfolios)}
+				</div>
+				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
+				</div>
+				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+					{listPortfolios(privatePortfolios)}
 				</div>
 			</div>
-			<JbookPortfolioModal
-				showModal={showModal}
-				setShowModal={() => {
-					setShowModal(false);
-					setInit(false);
-				}}
-				modalData={modalData}
-				userList={userList}
-				userMap={userMap}
-			/>
-			<Dialog
-				open={deleteModal}
-				scroll={'paper'}
-				maxWidth="sm"
-				disableEscapeKeyDown
-				disableBackdropClick
-				classes={{
-					paperWidthSm: classes.dialogSm,
-				}}
-			>
-				<DialogTitle>
-					<div style={{ display: 'flex', width: '100%' }}>
-						<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
-							Are you sure you want to delete this portfolio?
-						</Typography>
-					</div>
-					<IconButton
-						aria-label="close"
-						style={{
-							position: 'absolute',
-							right: '0px',
-							top: '0px',
-							height: 60,
-							width: 60,
-							color: 'black',
-							backgroundColor: styles.backgroundGreyLight,
-							borderRadius: 0,
-						}}
-						onClick={() => {
-							setDeleteModal(false);
-						}}
-					>
-						<CloseIcon style={{ fontSize: 30 }} />
-					</IconButton>
-				</DialogTitle>
-				<DialogContent>
-					<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
-						This portolio will be immediately deleted. You cannot undo this action.
-					</Typography>
-				</DialogContent>
-				<DialogActions>
-					<GCButton
-						id={'editReviewerClose'}
-						onClick={() => {
-							setDeleteModal(false);
-						}}
-						style={{ margin: '10px' }}
-						buttonColor={'#8091A5'}
-					>
-						Cancel
-					</GCButton>
-					<GCButton
-						id={'editReviewerSubmit'}
-						onClick={async () => {
-							await gameChangerAPI.callDataFunction({
-								functionName: 'deletePortfolio',
-								cloneName: 'jbook',
-								options: { id: deleteID },
-							});
-							setInit(false);
-							setDeleteModal(false);
-						}}
-						style={{ margin: '10px' }}
-					>
-						Delete
-					</GCButton>
-				</DialogActions>
-			</Dialog>
+			{user && (
+				<JbookPortfolioModal
+					showModal={showModal}
+					setShowModal={() => {
+						setShowModal(false);
+						setInit(false);
+					}}
+					modalData={modalData}
+					userList={userList}
+					userMap={userMap}
+					user={user}
+				/>
+			)}
 		</>
 	);
 };

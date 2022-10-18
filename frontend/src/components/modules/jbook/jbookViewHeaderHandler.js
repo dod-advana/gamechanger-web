@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { FormControl, InputLabel, MenuItem, Select, CircularProgress } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _, { isArray } from 'lodash';
+import _, { isArray, isEqual } from 'lodash';
 import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
@@ -11,6 +11,10 @@ import GCTooltip from '../../common/GCToolTip';
 import JBookPortfolioSelector from './portfolioBuilder/jbookPortfolioSelector';
 import ExportIcon from '../../../images/icon/Export.svg';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
+import { filterSortFunction } from './jbookMainViewHelper';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+
+const gamechangerAPI = new GameChangerAPI();
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -43,7 +47,7 @@ const filterNameMap = {
 	maxBY1Funding: 'BY1 Fund Max',
 	minTotalCost: 'Total Fund Min',
 	maxTotalCost: 'Total Fund Max',
-	primaryReviewer: 'Primary Reviewer',
+	primaryReviewer: 'Initial Reviewer',
 	serviceReviewer: 'Service Reviewer',
 	pocReviewer: 'POC Reviewer',
 	reviewStatus: 'Review Status',
@@ -94,7 +98,7 @@ const processFilters = (settings, options) => {
 
 const JbookViewHeaderHandler = (props) => {
 	const classes = useStyles();
-	const { context = {}, extraStyle = {}, gameChangerAPI } = props;
+	const { context = {}, extraStyle = {}, gameChangerAPI, gameChangerUserAPI } = props;
 
 	const { state, dispatch } = context;
 	const {
@@ -112,7 +116,6 @@ const JbookViewHeaderHandler = (props) => {
 		currentOrder,
 		sortSelected,
 		searchText,
-		exportLoading,
 		runSearch,
 	} = state;
 
@@ -155,15 +158,30 @@ const JbookViewHeaderHandler = (props) => {
 	useEffect(() => {
 		try {
 			const fetchPortfolios = async () => {
-				gameChangerAPI
+				let user = await gameChangerUserAPI.getUserProfileData();
+				await gameChangerAPI
 					.callDataFunction({
 						functionName: 'getPortfolios',
 						cloneName: 'jbook',
-						options: {},
+						options: { id: user.data.id },
 					})
 					.then((data) => {
-						let pData = data.data !== undefined ? data.data : [];
-						setPortfolios(pData);
+						let publicData = data.data ? data.data.publicPortfolios : [];
+						let privateData = data.data ? data.data.privatePortfolios : [];
+						let portfolios = [...publicData, ...privateData];
+						portfolios.sort((a, b) => {
+							const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+							const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+							if (nameA < nameB) {
+								return -1;
+							}
+							if (nameA > nameB) {
+								return 1;
+							}
+							// names must be equal
+							return 0;
+						});
+						setPortfolios(portfolios);
 					});
 			};
 
@@ -172,10 +190,11 @@ const JbookViewHeaderHandler = (props) => {
 			console.log('Error fetching jbook portfolios');
 			console.log(e);
 		}
-	}, [gameChangerAPI]);
+	}, [gameChangerAPI, gameChangerUserAPI]);
 
 	const handleFilterChange = (option, type) => {
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+		let filterTypeStillPresent = false;
 
 		if (isArray(newSearchSettings[type])) {
 			const index = newSearchSettings[type].indexOf(option);
@@ -185,13 +204,19 @@ const JbookViewHeaderHandler = (props) => {
 			} else {
 				newSearchSettings[type].push(option);
 			}
+			if (newSearchSettings[type].length) filterTypeStillPresent = true;
 		} else {
 			newSearchSettings[type] = '';
 		}
 
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[`${type}Update`] = true;
+
+		let diffSearchSettings = [...state.modifiedSearchSettings];
+		if (!filterTypeStillPresent) diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
+
 		setState(dispatch, {
+			modifiedSearchSettings: diffSearchSettings,
 			jbookSearchSettings: newSearchSettings,
 			metricsCounted: false,
 			runSearch: true,
@@ -270,6 +295,36 @@ const JbookViewHeaderHandler = (props) => {
 		});
 	};
 
+	const updateServiceFilters = async (portfolio) => {
+		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+		const newDefaultOptions = _.cloneDeep(state.defaultOptions);
+		const oldServiceFilter = newDefaultOptions.serviceAgency;
+		const { data } = await gamechangerAPI.callSearchFunction({
+			functionName: 'getUpdatedAgencyFilter',
+			cloneName: state.cloneData.clone_name,
+			options: { selectedPortfolio: portfolio },
+		});
+		newSearchSettings.serviceAgency = [];
+		newDefaultOptions.serviceAgency = data.serviceAgency
+			.map((item) => {
+				if (item !== null) {
+					return item;
+				}
+				return 'Blank';
+			})
+			.sort(filterSortFunction);
+
+		const isUpdated = !isEqual(oldServiceFilter, newDefaultOptions.serviceAgency);
+
+		if (isUpdated) {
+			setState(dispatch, {
+				jbookSearchSettings: newSearchSettings,
+				defaultOptions: newDefaultOptions,
+				runSearch: true,
+			});
+		}
+	};
+
 	return (
 		<div
 			className={'results-count-view-buttons-container'}
@@ -281,6 +336,8 @@ const JbookViewHeaderHandler = (props) => {
 					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
+					updateServiceFilters={updateServiceFilters}
+					pageDisplayed={state.pageDisplayed}
 				/>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
 					<>
@@ -431,6 +488,7 @@ const JbookViewHeaderHandler = (props) => {
 				</GCButton>
 
 				<GCButton
+					data-cy="export-button"
 					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 					onClick={async () => {
 						try {
@@ -442,19 +500,14 @@ const JbookViewHeaderHandler = (props) => {
 						}
 					}}
 				>
-					{!exportLoading ? (
-						<img
-							src={ExportIcon}
-							style={{
-								margin: '0 0 3px 3px',
-								width: 15,
-							}}
-							alt="export"
-						/>
-					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '8px' }} />
-					)}
-					{/* <img src={ExportIcon} style={{ margin: '0 0 3px 5px', width: 20, opacity: !mainPageData || (mainPageData.docs && mainPageData.docs.length <= 0) ? .6 : 1 }} alt="export"/> */}
+					<img
+						src={ExportIcon}
+						style={{
+							margin: '0 0 3px 3px',
+							width: 15,
+						}}
+						alt="export"
+					/>
 				</GCButton>
 			</div>
 			<FilterList

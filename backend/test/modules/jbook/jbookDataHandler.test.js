@@ -114,7 +114,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -187,6 +187,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 
 			const actual = await target.getESProjectData(req, 'Test');
@@ -228,7 +229,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -301,6 +302,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -341,7 +343,7 @@ describe('JBookDataHandler', function () {
 				serviceAgency: 'Air Force (AF)',
 				uot_department_s: '57',
 				uot_agency_s: 'N/A',
-				budgetSubActivity: 'Other Production Charges',
+				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
 				org_code_s: 'AF',
 				key_review_s: 'pdoc#000075#2022#3010#07#Air Force (AF)',
@@ -414,6 +416,7 @@ describe('JBookDataHandler', function () {
 						serviceSecondaryReviewerEmail: null,
 					},
 				},
+				sort: undefined,
 			};
 			const actual = await target.getESProjectData(req, 'Test');
 			assert.deepStrictEqual(actual, expected);
@@ -439,16 +442,28 @@ describe('JBookDataHandler', function () {
 				deleted: false,
 			};
 
-			const expectedGetAll = [
-				{
-					id: 1,
-					name: 'AI Inventory',
-					description: 'AI Inventory portfolio description',
-					user_ids: [],
-					tags: [],
-					deleted: false,
-				},
-			];
+			const expectedGetAll = {
+				privatePortfolios: [
+					{
+						deleted: false,
+						description: 'AI Inventory portfolio description',
+						id: 1,
+						name: 'AI Inventory',
+						tags: [],
+						user_ids: [],
+					},
+				],
+				publicPortfolios: [
+					{
+						deleted: false,
+						description: 'AI Inventory portfolio description',
+						id: 1,
+						name: 'AI Inventory',
+						tags: [],
+						user_ids: [],
+					},
+				],
+			};
 
 			const expectedDelete = {
 				deleted: true,
@@ -461,6 +476,7 @@ describe('JBookDataHandler', function () {
 			const expectedEdit = {
 				name: 'AI',
 				description: undefined,
+				isPrivate: undefined,
 				user_ids: undefined,
 				tags: undefined,
 			};
@@ -500,31 +516,54 @@ describe('JBookDataHandler', function () {
 				},
 				portfolio: {
 					findAll: () => {
-						return Promise.resolve({
-							data: [
-								{
-									name: 'testPortfolio',
-									description: 'testPortfolio description',
-									tags: [],
-									user_ids: [],
-								},
-							],
-						});
+						return Promise.resolve([
+							{
+								name: 'testPortfolio',
+								description: 'testPortfolio description',
+								isPrivate: false,
+								tags: [],
+								user_ids: [],
+								creator: 1,
+								admins: [],
+								deleted: false,
+							},
+						]);
 					},
 				},
 			};
-			const req = {};
+			const req = {
+				body: {
+					id: 1,
+				},
+			};
 			const target = new JBookDataHandler(opts);
 			const expected = {
-				data: [
+				privatePortfolios: [
 					{
 						name: 'testPortfolio',
 						description: 'testPortfolio description',
+						isPrivate: false,
 						tags: [],
 						user_ids: [],
+						creator: 1,
+						admins: [],
+						deleted: false,
+					},
+				],
+				publicPortfolios: [
+					{
+						name: 'testPortfolio',
+						description: 'testPortfolio description',
+						isPrivate: false,
+						tags: [],
+						user_ids: [],
+						creator: 1,
+						admins: [],
+						deleted: false,
 					},
 				],
 			};
+
 			const actual = await target.getPortfolios(req, 'Test');
 			assert.deepStrictEqual(expected, actual);
 			done();
@@ -746,6 +785,21 @@ describe('JBookDataHandler', function () {
 						return Promise.resolve([
 							{
 								name,
+							},
+						]);
+					},
+				},
+				user: {
+					findAll: () => {
+						return Promise.resolve([
+							{
+								id: 88,
+								first_name: 'Test',
+								last_name: 'Testo',
+								organization: 'Booz Allen Hamilton',
+								job_title: 'Software Engineer',
+								email: 'test@test.com',
+								phone_number: '5555555555',
 							},
 						]);
 					},

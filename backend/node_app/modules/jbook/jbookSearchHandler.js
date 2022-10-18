@@ -5,7 +5,6 @@ const { DataLibrary } = require('../../lib/dataLibrary');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const SearchHandler = require('../base/searchHandler');
 const ACCOMP = require('../../models').accomp;
-const KEYWORD = require('../../models').keyword;
 const KEYWORD_ASSOC = require('../../models').keyword_assoc_archive;
 const REVIEW = require('../../models').review;
 const DB = require('../../models/index');
@@ -138,7 +137,7 @@ class JBookSearchHandler extends SearchHandler {
 			req.body.searchTerms = searchTerms;
 			req.body.parsedQuery = parsedQuery;
 
-			const { jbookSearchSettings } = req.body;
+			const { jbookSearchSettings, search_before = [] } = req.body;
 			// clean empty options:
 			Object.keys(jbookSearchSettings).forEach((key) => {
 				if (
@@ -174,7 +173,7 @@ class JBookSearchHandler extends SearchHandler {
 
 			let returnData = {};
 			try {
-				returnData = this.jbookSearchUtility.cleanESResults(esResults, userId);
+				returnData = this.jbookSearchUtility.cleanESResults(esResults, userId, search_before.length > 0);
 				returnData.expansionDict = expansionDict;
 			} catch (e) {}
 
@@ -194,6 +193,8 @@ class JBookSearchHandler extends SearchHandler {
 			switch (functionName) {
 				case 'getDataForFilters':
 					return await this.getDataForFilters(req, userId);
+				case 'getUpdatedAgencyFilter':
+					return await this.getUpdatedAgencyFilter(req, userId);
 				case 'getDataForReviewStatus':
 					return await this.getExcelDataForReviewStatus(req, userId, res);
 				default:
@@ -212,38 +213,10 @@ class JBookSearchHandler extends SearchHandler {
 		}
 	}
 
-	getGiantQuery(pQuery, rQuery, oQuery) {
-		let giantQuery = ``;
-
-		if (!jbookSearchSettings.budgetType) {
-			giantQuery = pQuery + ` UNION ALL ` + rQuery + ` UNION ALL ` + oQuery;
-		}
-
-		for (let btype of jbookSearchSettings.budgetType) {
-			let unionAll = giantQuery.length === 0 ? '' : ` UNION ALL `;
-			switch (btype) {
-				case 'Procurement':
-					giantQuery = pQuery;
-					break;
-				case 'RDT&E':
-					giantQuery += unionAll + rQuery;
-					break;
-				case 'O&M':
-					giantQuery += unionAll + oQuery;
-					break;
-				default:
-					break;
-			}
-		}
-
-		giantQuery += ';';
-
-		return giantQuery;
-	}
-
 	// retrieving the data used to populate the filter options on the frontend
-	async getDataForFilters(_req, userId) {
+	async getDataForFilters(req, userId) {
 		let returnData = {};
+		const { selectedPortfolio } = req.body;
 
 		const reviewQuery = `SELECT array_agg(DISTINCT primary_reviewer) as primaryReviewer,
 	       array_agg(DISTINCT service_reviewer) as serviceReviewer,
@@ -275,13 +248,17 @@ class JBookSearchHandler extends SearchHandler {
 
 		returnData.reviewstatus.push(null);
 
-		returnData = await this.getESDataForFilters(returnData, userId);
+		returnData = await this.getESDataForFilters(returnData, userId, selectedPortfolio);
 
 		return returnData;
 	}
 
+	processESResults(results) {
+		return results.body.aggregations.values.buckets.map((bucket) => bucket.key).filter((value) => value !== '');
+	}
+
 	// retrieve data for filter options from ES
-	async getESDataForFilters(returnData, userId) {
+	async getESDataForFilters(returnData, userId, selectedPortfolio) {
 		try {
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 
@@ -296,12 +273,6 @@ class JBookSearchHandler extends SearchHandler {
 						},
 					},
 				},
-			};
-
-			const processESResults = (results) => {
-				return results.body.aggregations.values.buckets
-					.map((bucket) => bucket.key)
-					.filter((value) => value !== '');
 			};
 
 			const processMainAccountResults = (results) => {
@@ -323,26 +294,11 @@ class JBookSearchHandler extends SearchHandler {
 				userId
 			);
 			if (budgetYearESResults && budgetYearESResults.body.aggregations) {
-				returnData.budgetYear = processESResults(budgetYearESResults);
+				returnData.budgetYear = this.processESResults(budgetYearESResults);
 			}
 
 			// get service agency data
-			query.aggs.values.terms.field = 'org_jbook_desc_s';
-
-			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				query,
-				userId
-			);
-
-			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
-				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
-
-				returnData.serviceAgency = _.uniq(
-					processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa)
-				);
-			}
+			returnData.serviceAgency = await this.getDataForAgencyFilter(query, selectedPortfolio, userId, clientObj);
 
 			// get main account field data
 			query = {
@@ -380,13 +336,74 @@ class JBookSearchHandler extends SearchHandler {
 				returnData.appropriationNumber = processMainAccountResults(mainAccountESResults);
 			}
 
-			console.log(returnData);
-
 			return returnData;
 		} catch (e) {
 			console.log('Error getESDataForFilters');
 			this.logger.error(e.message, 'K318I7C', userId);
 		}
+	}
+
+	async getDataForAgencyFilter(baseQuery, selectedPortfolio, userId, clientObj) {
+		try {
+			let query = { ...baseQuery };
+
+			query.aggs.values.terms.field = 'org_jbook_desc_s';
+
+			if (selectedPortfolio !== 'AI Inventory') {
+				query.query = {
+					bool: {
+						filter: {
+							bool: {
+								must_not: {
+									term: {
+										type_s: 'om',
+									},
+								},
+							},
+						},
+					},
+				};
+			}
+
+			const serviceAgencyESResults = await this.dataLibrary.queryElasticSearch(
+				clientObj.esClientName,
+				clientObj.esIndex,
+				query,
+				userId
+			);
+
+			if (serviceAgencyESResults && serviceAgencyESResults.body.aggregations) {
+				const saMapping = this.jbookSearchUtility.getMapping('esServiceAgency', false);
+
+				return _.uniq(this.processESResults(serviceAgencyESResults).map((sa) => saMapping[sa] || sa));
+			}
+			return [];
+		} catch (e) {
+			this.logger.error(e.message, 'K318I8D', userId);
+			return [];
+		}
+	}
+
+	async getUpdatedAgencyFilter(req, userId) {
+		const returnData = {};
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+		const { selectedPortfolio } = req.body;
+
+		let baseQuery = {
+			size: 0,
+			aggs: {
+				values: {
+					terms: {
+						field: '',
+						size: 1000,
+					},
+				},
+			},
+		};
+
+		returnData.serviceAgency = await this.getDataForAgencyFilter(baseQuery, selectedPortfolio, userId, clientObj);
+
+		return returnData;
 	}
 
 	getReviewStep(review_n) {

@@ -3,14 +3,8 @@ const sparkMD5Lib = require('spark-md5');
 const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary } = require('../lib/dataLibrary');
-const neo4jLib = require('neo4j-driver');
 const fs = require('fs');
-const { include } = require('underscore');
-const { performance } = require('perf_hooks');
-const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
 const SearchUtility = require('../utils/searchUtility');
-
-const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 class MLSearchUtility {
 	constructor(opts = {}) {

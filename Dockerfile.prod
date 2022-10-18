@@ -3,8 +3,6 @@ FROM $BASE_IMAGE AS base
 
 USER root
 
-RUN corepack prepare --all
-
 RUN yum install -y \
         git \
         make
@@ -48,7 +46,7 @@ RUN mkdir -p \
 USER "${APP_UID}":"${APP_GID}"
 
 RUN cd "$APP_SHARED_DIR" && \
-    yarn add -g nodemon sequelize-cli
+    npm install nodemon sequelize-cli
 
 FROM base AS builder
 
@@ -69,12 +67,12 @@ RUN cd "${APP_FRONTEND_DIR}" && \
         echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
         echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    yarn install --production
+    npm install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
 
 RUN cd "${APP_FRONTEND_DIR}" && \
-    yarn build
+    npm run build
 
 FROM base
 
@@ -95,12 +93,14 @@ RUN cd "${APP_BACKEND_DIR}" && \
         echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
         echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    yarn install --production
+    npm install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}/build"
 
 RUN cd "${APP_BACKEND_DIR}"
+
+RUN rm -rf /home/node/.cache
 
 # http & https
 EXPOSE 8990 8443

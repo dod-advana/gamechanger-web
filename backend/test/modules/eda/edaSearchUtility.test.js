@@ -492,7 +492,7 @@ describe('EDASearchUtility', function () {
 					startDate: null,
 					endDate: null,
 					issueAgency: null,
-					issueOfficeDoDAAC: 'N66001',
+					issueOfficeDoDAAC: ['N66001'],
 					allYearsSelected: true,
 					fiscalYears: [],
 					allDataSelected: true,
@@ -636,8 +636,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
-															fuzziness: 2,
-															query: '*N66001*',
+															default_operator: 'or',
+															query: 'N66001',
 														},
 													},
 												],
@@ -1041,8 +1041,8 @@ describe('EDASearchUtility', function () {
 					startDate: null,
 					endDate: null,
 					issueAgency: null,
-					issueOfficeDoDAAC: 'FA8075',
-					issueOfficeName: 'AFICA/KD',
+					issueOfficeDoDAAC: ['FA8075'],
+					issueOfficeName: ['AFICA/KD'],
 					allYearsSelected: true,
 					fiscalYears: [],
 					allDataSelected: true,
@@ -1185,8 +1185,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
-															fuzziness: 2,
-															query: '*FA8075*',
+															default_operator: 'or',
+															query: 'FA8075',
 														},
 													},
 												],
@@ -1203,8 +1203,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.contracting_office_name_eda_ext',
-															fuzziness: 2,
-															query: '*AFICA\\/KD*',
+															default_operator: 'or',
+															query: 'AFICA/KD',
 														},
 													},
 												],
@@ -1518,6 +1518,25 @@ describe('EDASearchUtility', function () {
 					track_total_hits: true,
 					query: {
 						bool: {
+							filter: [
+								{
+									nested: {
+										path: 'fpds_ng_n',
+										query: {
+											bool: {
+												should: [
+													{
+														query_string: {
+															query: 'H*',
+															default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
+														},
+													},
+												],
+											},
+										},
+									},
+								},
+							],
 							must: [
 								{
 									bool: {
@@ -1626,16 +1645,16 @@ describe('EDASearchUtility', function () {
 					majcoms: { 'air force': [], army: [], defense: [], navy: [] },
 					excludeTerms: null,
 					vendorName: 'test',
-					fundingOfficeCode: 'test',
+					fundingOfficeCode: ['test'],
 					idvPIID: 'test',
-					modNumber: 'test',
+					modNumber: ['test'],
 					pscDesc: 'test-',
 					piid: 'test',
 					reqDesc: 'test',
-					psc: 'test',
-					fundingAgencyName: 'test',
-					naicsCode: 'test',
-					duns: 'test',
+					psc: ['test'],
+					fundingAgencyName: ['test'],
+					naicsCode: ['test'],
+					duns: ['test'],
 				},
 				searchVersion: 1,
 				searchText: 'defense',
@@ -1788,8 +1807,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.funding_office_code_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],
@@ -1824,8 +1843,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.modification_number_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],
@@ -1879,15 +1898,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.psc_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
-														},
-													},
-													{
-														query_string: {
-															default_field: 'fpds_ng_n.psc_desc_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],
@@ -1904,8 +1916,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.funding_agency_name_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],
@@ -1922,8 +1934,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.naics_code_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],
@@ -1940,8 +1952,8 @@ describe('EDASearchUtility', function () {
 													{
 														query_string: {
 															default_field: 'fpds_ng_n.duns_eda_ext',
-															fuzziness: 2,
-															query: '*test*',
+															default_operator: 'or',
+															query: 'test',
 														},
 													},
 												],

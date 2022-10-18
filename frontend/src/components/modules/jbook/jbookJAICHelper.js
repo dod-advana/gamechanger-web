@@ -53,7 +53,9 @@ const ReviewersValue = React.memo((props) => {
 			size="small"
 			options={Object.keys(reviewers)}
 			style={{ width: 300 }}
-			renderInput={(params) => <TextField {...params} label="Reviewer" variant="outlined" />}
+			renderInput={(params) => (
+				<TextField {...params} label="Reviewer" data-cy="jbook-reviewer-label" variant="outlined" />
+			)}
 			value={primaryReviewer ?? null}
 			onChange={(_e, value) => {
 				setReviewDataMultiple({ primaryReviewer: value, primaryReviewerEmail: reviewers[value].email });
@@ -317,7 +319,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Reset Form'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -328,7 +330,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Save (Partial Review)'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -339,7 +341,7 @@ const ButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Submit'
 				) : (
-					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#FFFFFF" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 		</StyledFooterDiv>
@@ -369,7 +371,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Reset Form'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -380,7 +382,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Save (Partial Review)'
 				) : (
-					<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#515151" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 			<GCPrimaryButton
@@ -391,7 +393,7 @@ const SimpleButtonFooter = React.memo((props) => {
 				{!primaryReviewLoading ? (
 					'Submit'
 				) : (
-					<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+					<CircularProgress color="#FFFFFF" size={25} style={{ display: 'flex', justifyContent: 'center' }} />
 				)}
 			</GCPrimaryButton>
 		</StyledFooterDiv>

@@ -4,7 +4,6 @@ const { FavoritesController } = require('../../node_app/controllers/favoritesCon
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
 describe('FavoritesController', function () {
-
 	describe('#favoriteTopicPOST', () => {
 		it('should create a favorite topic', async (done) => {
 			const apiResMock = [{}, true];
@@ -13,22 +12,22 @@ describe('FavoritesController', function () {
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteTopic = {
 				findOrCreate() {
 					return Promise.resolve(apiResMock);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteTopic,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
@@ -36,8 +35,8 @@ describe('FavoritesController', function () {
 				...reqMock,
 				body: {
 					is_favorite: true,
-					topic: 'national security'
-				}
+					topic: 'national security',
+				},
 			};
 
 			let resMsg;
@@ -49,7 +48,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -72,22 +71,22 @@ describe('FavoritesController', function () {
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteOrganization = {
 				findOrCreate() {
 					return Promise.resolve(apiResMock);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteOrganization,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
@@ -95,8 +94,8 @@ describe('FavoritesController', function () {
 				...reqMock,
 				body: {
 					is_favorite: true,
-					organization: 'United States Navy'
-				}
+					organization: 'United States Navy',
+				},
 			};
 
 			let resMsg;
@@ -108,7 +107,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -131,22 +130,22 @@ describe('FavoritesController', function () {
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteDocument = {
 				findOrCreate() {
 					return Promise.resolve(apiResMock);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteDocument,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
@@ -154,8 +153,8 @@ describe('FavoritesController', function () {
 				...reqMock,
 				body: {
 					is_favorite: true,
-					topic: 'national security'
-				}
+					topic: 'national security',
+				},
 			};
 
 			let resMsg;
@@ -167,7 +166,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -190,33 +189,33 @@ describe('FavoritesController', function () {
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteGroup = {
 				findOrCreate() {
 					return Promise.resolve(apiResMock);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteGroup,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
 			const req = {
 				...reqMock,
 				body: {
-					group_type: 'document', 
-					group_name: 'Test', 
+					group_type: 'document',
+					group_name: 'Test',
 					group_description: 'Test',
-					create: true
-				}
+					create: true,
+				},
 			};
 
 			let resMsg;
@@ -228,7 +227,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -251,9 +250,9 @@ describe('FavoritesController', function () {
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteDocumentsGroup = {
@@ -262,23 +261,23 @@ describe('FavoritesController', function () {
 				},
 				bulkCreate() {
 					return Promise.resolve(apiResMock);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteDocumentsGroup,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
 			const req = {
 				...reqMock,
 				body: {
-					groupId: 1, 
-					documentIds: [1]
-				}
+					groupId: 1,
+					documentIds: [1],
+				},
 			};
 
 			let resMsg;
@@ -290,7 +289,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -307,36 +306,36 @@ describe('FavoritesController', function () {
 
 	describe('#deleteFavoriteFromGroupPOST', () => {
 		it('should delete a favorite from a group', async (done) => {
-			const expectedReturn = {'removed': 1};
+			const expectedReturn = { removed: 1 };
 			const statusMock = 200;
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favoriteDocumentsGroup = {
 				destroy() {
 					return Promise.resolve(1);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteDocumentsGroup,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
 			const req = {
 				...reqMock,
 				body: {
-					groupId: 1, 
-					documentId: 1
-				}
+					groupId: 1,
+					documentId: 1,
+				},
 			};
 
 			let resMsg;
@@ -348,7 +347,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -369,41 +368,41 @@ describe('FavoritesController', function () {
 				{
 					user_id: 'testsuite',
 					tiny_url: 'Test',
-					updated_results: false
-				}
+					updated_results: false,
+				},
 			];
 			const statusMock = 200;
 			const constants = {
 				env: {
 					GAME_CHANGER_OPTS: {
-						version: 'version'
-					}
-				}
+						version: 'version',
+					},
+				},
 			};
 
 			const favorites = [
 				{
 					user_id: 'testsuite',
 					tiny_url: 'Test',
-					updated_results: true
-				}
+					updated_results: true,
+				},
 			];
 			const favoriteSearch = {
 				update(data, where) {
-					favorites.forEach(favorite => {
+					favorites.forEach((favorite) => {
 						if (favorite.user_id === where.where.user_id && favorite.tiny_url === where.where.tiny_url) {
 							favorite.updated_results = data.updated_results;
 						}
 					});
 					return Promise.resolve(true);
-				}
+				},
 			};
 
 			const opts = {
 				...constructorOptionsMock,
 				constants,
 				favoriteSearch,
-				handler_factory: {}
+				handler_factory: {},
 			};
 			const target = new FavoritesController(opts);
 
@@ -411,7 +410,7 @@ describe('FavoritesController', function () {
 				...reqMock,
 				body: {
 					tinyurl: 'Test',
-				}
+				},
 			};
 
 			let resMsg;
@@ -423,7 +422,7 @@ describe('FavoritesController', function () {
 				},
 				send(msg) {
 					resMsg = msg;
-				}
+				},
 			};
 
 			try {
@@ -447,11 +446,11 @@ describe('FavoritesController', function () {
 				document_count: 100,
 				updated_results: false,
 				last_checked: new Date(0),
-				save: jest.fn(async function() {
-					favoriteSaves.push({...this});
+				save: jest.fn(async function () {
+					favoriteSaves.push({ ...this });
 				}),
 			};
-			const favorite = {...initFavorite};
+			const favorite = { ...initFavorite };
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
 			};
@@ -465,7 +464,7 @@ describe('FavoritesController', function () {
 				},
 			};
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = {
 				totalCount: 101,
@@ -479,8 +478,8 @@ describe('FavoritesController', function () {
 			const userSaves = [];
 			const initUser = {
 				notifications: { gamechanger: { favorites: 1, history: 1, total: 1 } },
-				save: jest.fn(async function() {
-					userSaves.push({...this});
+				save: jest.fn(async function () {
+					userSaves.push({ ...this });
 				}),
 			};
 			const user = initUser;
@@ -489,7 +488,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -510,19 +509,22 @@ describe('FavoritesController', function () {
 
 			const target = new FavoritesController(opts);
 			await target.checkLeastRecentFavoritedSearch();
-			
+
 			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
 			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
 			expect(favoriteSearch.findOne).toHaveBeenCalledWith({
-				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+				order: [
+					['last_checked', 'ASC'],
+					['id', 'ASC'],
+				],
 			});
 
 			expect(favorite.save).toHaveBeenCalledTimes(2);
 			expect(favorite.save).toHaveBeenCalledWith();
 			expect(favorite.save).toHaveBeenCalledWith({ transaction: transactionObj });
-			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[0], { ...initFavorite, last_checked: Sequelize.fn('NOW') });
 			assert.deepStrictEqual(favoriteSaves[1], {
-				...initFavorite, 
+				...initFavorite,
 				last_checked: Sequelize.fn('NOW'),
 				document_count: 101,
 				updated_results: true,
@@ -534,23 +536,24 @@ describe('FavoritesController', function () {
 					user_id: '54baea34480635caea8437904697bd9c',
 					tiny_url: 'gamechanger?tiny=77',
 				},
-				order: [['run_at', 'DESC']]
+				order: [['run_at', 'DESC']],
 			});
 
 			expect(handler_factory.createHandler).toHaveBeenCalledTimes(1);
 			expect(handler_factory.createHandler).toHaveBeenCalledWith('search', 'gamechanger');
 
 			expect(searchHandler.search).toHaveBeenCalledTimes(1);
-			expect(searchHandler.search).toHaveBeenCalledWith('pizza', 0, 10, {
-				cloneName: 'gamechanger',
-				searchText: 'pizza',
-				offset: 0,
-				limit: 10,
-				searchVersion: 1,
-			}, 'gamechanger', ['Webapp Super Admin', 'Tier 3 Support'], null, false);
+			expect(searchHandler.search).toHaveBeenCalledWith(
+				{ cloneName: 'gamechanger', limit: 10, offset: 0, searchText: 'pizza', searchVersion: 1 },
+				'gamechanger',
+				['Webapp Super Admin', 'Tier 3 Support'],
+				null,
+				false,
+				{ limit: 10, offset: 0, searchText: 'pizza', search_after: [], search_before: [] }
+			);
 
 			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
-			expect(gcUser.findOne).toHaveBeenCalledWith({ 
+			expect(gcUser.findOne).toHaveBeenCalledWith({
 				where: { user_id: '54baea34480635caea8437904697bd9c' },
 				lock: transactionObj.LOCK.UPDATE,
 				transaction: transactionObj,
@@ -559,7 +562,7 @@ describe('FavoritesController', function () {
 			expect(user.save).toHaveBeenCalledTimes(1);
 			expect(user.save).toHaveBeenCalledWith({ transaction: transactionObj });
 			assert.deepStrictEqual(userSaves[0], {
-				...initUser, 
+				...initUser,
 				notifications: { gamechanger: { favorites: 2, history: 1, total: 2 } },
 			});
 
@@ -575,11 +578,11 @@ describe('FavoritesController', function () {
 				document_count: 100,
 				updated_results: false,
 				last_checked: new Date(0),
-				save: jest.fn(async function() {
-					favoriteSaves.push({...this});
+				save: jest.fn(async function () {
+					favoriteSaves.push({ ...this });
 				}),
 			};
-			const favorite = {...initFavorite};
+			const favorite = { ...initFavorite };
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
 			};
@@ -593,7 +596,7 @@ describe('FavoritesController', function () {
 				},
 			};
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = {
 				totalCount: 101,
@@ -607,8 +610,8 @@ describe('FavoritesController', function () {
 			const userSaves = [];
 			const initUser = {
 				notifications: { gamechanger: { favorites: 1, history: 1, total: 1 } },
-				save: jest.fn(async function() {
-					userSaves.push({...this});
+				save: jest.fn(async function () {
+					userSaves.push({ ...this });
 				}),
 			};
 			const user = initUser;
@@ -617,7 +620,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -638,19 +641,22 @@ describe('FavoritesController', function () {
 
 			const target = new FavoritesController(opts);
 			await target.checkLeastRecentFavoritedSearch();
-			
+
 			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
 			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
 			expect(favoriteSearch.findOne).toHaveBeenCalledWith({
-				order: [['last_checked', 'ASC'], ['id', 'ASC']],
+				order: [
+					['last_checked', 'ASC'],
+					['id', 'ASC'],
+				],
 			});
 
 			expect(favorite.save).toHaveBeenCalledTimes(2);
 			expect(favorite.save).toHaveBeenCalledWith();
 			expect(favorite.save).toHaveBeenCalledWith({ transaction: transactionObj });
-			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[0], { ...initFavorite, last_checked: Sequelize.fn('NOW') });
 			assert.deepStrictEqual(favoriteSaves[1], {
-				...initFavorite, 
+				...initFavorite,
 				last_checked: Sequelize.fn('NOW'),
 				document_count: 101,
 				updated_results: true,
@@ -662,23 +668,24 @@ describe('FavoritesController', function () {
 					user_id: '54baea34480635caea8437904697bd9c',
 					tiny_url: 'covid19?tiny=77',
 				},
-				order: [['run_at', 'DESC']]
+				order: [['run_at', 'DESC']],
 			});
 
 			expect(handler_factory.createHandler).toHaveBeenCalledTimes(1);
 			expect(handler_factory.createHandler).toHaveBeenCalledWith('search', 'covid19');
 
 			expect(searchHandler.search).toHaveBeenCalledTimes(1);
-			expect(searchHandler.search).toHaveBeenCalledWith('pizza', 0, 10, {
-				cloneName: 'covid19',
-				searchText: 'pizza',
-				offset: 0,
-				limit: 10,
-				searchVersion: 1,
-			}, 'covid19', ['Webapp Super Admin', 'Tier 3 Support'], null, false);
+			expect(searchHandler.search).toHaveBeenCalledWith(
+				{ cloneName: 'covid19', limit: 10, offset: 0, searchText: 'pizza', searchVersion: 1 },
+				'covid19',
+				['Webapp Super Admin', 'Tier 3 Support'],
+				null,
+				false,
+				{ limit: 10, offset: 0, searchText: 'pizza', search_after: [], search_before: [] }
+			);
 
 			expect(gcUser.findOne).toHaveBeenCalledTimes(1);
-			expect(gcUser.findOne).toHaveBeenCalledWith({ 
+			expect(gcUser.findOne).toHaveBeenCalledWith({
 				where: { user_id: '54baea34480635caea8437904697bd9c' },
 				lock: transactionObj.LOCK.UPDATE,
 				transaction: transactionObj,
@@ -687,10 +694,10 @@ describe('FavoritesController', function () {
 			expect(user.save).toHaveBeenCalledTimes(1);
 			expect(user.save).toHaveBeenCalledWith({ transaction: transactionObj });
 			assert.deepStrictEqual(userSaves[0], {
-				...initUser, 
-				notifications: { 
+				...initUser,
+				notifications: {
 					covid19: { favorites: 1, history: 0, total: 1 },
-					gamechanger: { favorites: 1, history: 1, total: 1 }
+					gamechanger: { favorites: 1, history: 1, total: 1 },
 				},
 			});
 
@@ -706,11 +713,11 @@ describe('FavoritesController', function () {
 				document_count: 100,
 				updated_results: false,
 				last_checked: new Date(0),
-				save: jest.fn(async function() {
-					favoriteSaves.push({...this});
+				save: jest.fn(async function () {
+					favoriteSaves.push({ ...this });
 				}),
 			};
-			const favorite = {...initFavorite};
+			const favorite = { ...initFavorite };
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
 			};
@@ -724,7 +731,7 @@ describe('FavoritesController', function () {
 				},
 			};
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = {
 				totalCount: 100,
@@ -738,8 +745,8 @@ describe('FavoritesController', function () {
 			const userSaves = [];
 			const initUser = {
 				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
-				save: jest.fn(async function() {
-					userSaves.push({...this});
+				save: jest.fn(async function () {
+					userSaves.push({ ...this });
 				}),
 			};
 			const user = initUser;
@@ -748,7 +755,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -772,7 +779,7 @@ describe('FavoritesController', function () {
 
 			expect(favorite.save).toHaveBeenCalledTimes(1);
 			expect(favorite.save).toHaveBeenCalledWith();
-			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[0], { ...initFavorite, last_checked: Sequelize.fn('NOW') });
 
 			expect(user.save).not.toHaveBeenCalled();
 
@@ -788,11 +795,11 @@ describe('FavoritesController', function () {
 				document_count: 100,
 				updated_results: true,
 				last_checked: new Date(0),
-				save: jest.fn(async function() {
-					favoriteSaves.push({...this});
+				save: jest.fn(async function () {
+					favoriteSaves.push({ ...this });
 				}),
 			};
-			const favorite = {...initFavorite};
+			const favorite = { ...initFavorite };
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
 			};
@@ -806,7 +813,7 @@ describe('FavoritesController', function () {
 				},
 			};
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = {
 				totalCount: 101,
@@ -820,8 +827,8 @@ describe('FavoritesController', function () {
 			const userSaves = [];
 			const initUser = {
 				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
-				save: jest.fn(async function() {
-					userSaves.push({...this});
+				save: jest.fn(async function () {
+					userSaves.push({ ...this });
 				}),
 			};
 			const user = initUser;
@@ -830,7 +837,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -855,9 +862,9 @@ describe('FavoritesController', function () {
 			expect(favorite.save).toHaveBeenCalledTimes(2);
 			expect(favorite.save).toHaveBeenCalledWith();
 			expect(favorite.save).toHaveBeenCalledWith();
-			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[0], { ...initFavorite, last_checked: Sequelize.fn('NOW') });
 			assert.deepStrictEqual(favoriteSaves[1], {
-				...initFavorite, 
+				...initFavorite,
 				last_checked: Sequelize.fn('NOW'),
 				document_count: 101,
 				updated_results: true,
@@ -879,11 +886,11 @@ describe('FavoritesController', function () {
 				document_count: 100,
 				updated_results: false,
 				last_checked: new Date(0),
-				save: jest.fn(async function() {
-					favoriteSaves.push({...this});
+				save: jest.fn(async function () {
+					favoriteSaves.push({ ...this });
 				}),
 			};
-			const favorite = {...initFavorite};
+			const favorite = { ...initFavorite };
 			const favoriteSearch = {
 				findOne: jest.fn(async () => favorite),
 			};
@@ -897,7 +904,7 @@ describe('FavoritesController', function () {
 				},
 			};
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = {
 				totalCount: 99,
@@ -911,8 +918,8 @@ describe('FavoritesController', function () {
 			const userSaves = [];
 			const initUser = {
 				notifications: { gamechanger: { favorites: 0, history: 0, total: 0 } },
-				save: jest.fn(async function() {
-					userSaves.push({...this});
+				save: jest.fn(async function () {
+					userSaves.push({ ...this });
 				}),
 			};
 			const user = initUser;
@@ -921,7 +928,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -946,9 +953,9 @@ describe('FavoritesController', function () {
 			expect(favorite.save).toHaveBeenCalledTimes(2);
 			expect(favorite.save).toHaveBeenCalledWith();
 			expect(favorite.save).toHaveBeenCalledWith();
-			assert.deepStrictEqual(favoriteSaves[0], {...initFavorite, last_checked: Sequelize.fn('NOW')});
+			assert.deepStrictEqual(favoriteSaves[0], { ...initFavorite, last_checked: Sequelize.fn('NOW') });
 			assert.deepStrictEqual(favoriteSaves[1], {
-				...initFavorite, 
+				...initFavorite,
 				last_checked: Sequelize.fn('NOW'),
 				document_count: 99,
 				updated_results: false,
@@ -969,7 +976,7 @@ describe('FavoritesController', function () {
 			};
 			const searchHistory = null;
 			const gcHistory = {
-				findOne: jest.fn(async() => searchHistory),
+				findOne: jest.fn(async () => searchHistory),
 			};
 			const searchResult = null;
 			const searchHandler = {
@@ -984,7 +991,7 @@ describe('FavoritesController', function () {
 			};
 			const transactionObj = { LOCK: { UPDATE: 'UPDATE' } };
 			const sequelize = {
-				transaction: jest.fn(async function(fn) {
+				transaction: jest.fn(async function (fn) {
 					await fn(transactionObj);
 				}),
 			};
@@ -1005,7 +1012,7 @@ describe('FavoritesController', function () {
 
 			const target = new FavoritesController(opts);
 			await target.checkLeastRecentFavoritedSearch();
-			
+
 			expect(favoriteSearch.findOne).toHaveBeenCalledTimes(1);
 
 			expect(gcHistory.findOne).not.toHaveBeenCalled();

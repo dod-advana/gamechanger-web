@@ -15,6 +15,185 @@ class EDASearchUtility {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 	}
 
+	getElasticsearchFilterOptionsQuery() {
+		return {
+			size: 0,
+			aggs: {
+				majcom: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				issue_office_dodaac: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.contracting_office_code_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				issue_office_name: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.contracting_office_name_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				fiscal_year: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							date_histogram: {
+								field: 'fpds_ng_n.date_signed_eda_ext_dt',
+								calendar_interval: '1y',
+								format: 'YYYY',
+								min_doc_count: 0,
+							},
+						},
+					},
+				},
+				vendor_name: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.vendor_name_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				funding_office_dodaac: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.funding_office_code_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				funding_agency_name: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.funding_agency_name_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				psc: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.psc_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				naic: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.naics_code_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				duns: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.duns_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				piid_idv: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.idv_piid_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				piid: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.piid_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+				mod_number: {
+					nested: {
+						path: 'fpds_ng_n',
+					},
+					aggs: {
+						val: {
+							terms: {
+								field: 'fpds_ng_n.modification_number_eda_ext.keyword',
+								size: 10000,
+							},
+						},
+					},
+				},
+			},
+		};
+	}
+
 	getElasticsearchPagesQuery(
 		{
 			searchText = '',
@@ -50,7 +229,7 @@ class EDASearchUtility {
 			// add additional search fields to the query
 			let filterQueries = [];
 
-			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings, user));
 
 			storedFields = [...storedFields, ...extStoredFields];
 
@@ -281,42 +460,14 @@ class EDASearchUtility {
 	}
 
 	getElasticsearchStatsQuery(
-		{
-			searchText,
-			parsedQuery,
-			limit = 20,
-			charsPadding = 90,
-			operator = 'and',
-			storedFields = [
-				'filename',
-				'title',
-				'page_count',
-				'doc_type',
-				'doc_num',
-				'ref_list',
-				'id',
-				'summary_30',
-				'keyw_5',
-				'p_text',
-				'type',
-				'p_page',
-				'display_title_s',
-				'display_org_s',
-				'display_doc_type_s',
-			],
-			extStoredFields = [],
-			extSearchFields = [],
-			edaSearchSettings = {},
-		},
+		{ searchText, parsedQuery, limit = 20, operator = 'and', extSearchFields = [], edaSearchSettings = {} },
 		user
 	) {
 		try {
 			// add additional search fields to the query
 			let filterQueries = [];
 
-			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings));
-
-			storedFields = [...storedFields, ...extStoredFields];
+			filterQueries = filterQueries.concat(this.getEDASearchQuery(edaSearchSettings, user));
 
 			let query = {
 				_source: {
@@ -449,7 +600,7 @@ class EDASearchUtility {
 		}
 	}
 
-	getEDASearchQuery(settings) {
+	getEDASearchQuery(settings, user) {
 		const filterQueries = [];
 
 		try {
@@ -502,6 +653,7 @@ class EDASearchUtility {
 					army: 'W*',
 					navy: 'N* OR M*',
 					'air force': 'F*',
+					defense: 'H*',
 				};
 
 				let orgString = '';
@@ -580,16 +732,50 @@ class EDASearchUtility {
 
 			// ISSUE OFFICE DODAAC
 			if (settings.issueOfficeDoDAAC && settings.issueOfficeDoDAAC.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.contracting_office_code_eda_ext', settings.issueOfficeDoDAAC)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const issueOfficeDoDAAC of settings.issueOfficeDoDAAC) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
+							default_operator: 'or',
+							query: issueOfficeDoDAAC,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// ISSUE OFFICE NAME
 			if (settings.issueOfficeName && settings.issueOfficeName.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.contracting_office_name_eda_ext', settings.issueOfficeName)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const issueOfficeName of settings.issueOfficeName) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.contracting_office_name_eda_ext',
+							default_operator: 'or',
+							query: issueOfficeName,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// FISCAL YEARS
@@ -745,9 +931,26 @@ class EDASearchUtility {
 
 			// FUNDING OFFICE CODE
 			if (settings.fundingOfficeCode && settings.fundingOfficeCode.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.funding_office_code_eda_ext', settings.fundingOfficeCode)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const fundingOfficeCode of settings.fundingOfficeCode) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.funding_office_code_eda_ext',
+							default_operator: 'or',
+							query: fundingOfficeCode,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// IDV PIID
@@ -757,9 +960,26 @@ class EDASearchUtility {
 
 			// MOD NUMBER
 			if (settings.modNumber && settings.modNumber.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.modification_number_eda_ext', settings.modNumber)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const modNumber of settings.modNumber) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.modification_number_eda_ext',
+							default_operator: 'or',
+							query: modNumber,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// PIID
@@ -776,24 +996,98 @@ class EDASearchUtility {
 
 			// PSC
 			if (settings.psc && settings.psc.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.psc_eda_ext', settings.psc));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const psc of settings.psc) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.psc_eda_ext',
+							default_operator: 'or',
+							query: psc,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// FUNDING AGENCY NAME
 			if (settings.fundingAgencyName && settings.fundingAgencyName.length > 0) {
-				filterQueries.push(
-					this.getFPDSFilterQuery('fpds_ng_n.funding_agency_name_eda_ext', settings.fundingAgencyName)
-				);
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const fundingAgencyName of settings.fundingAgencyName) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.funding_agency_name_eda_ext',
+							default_operator: 'or',
+							query: fundingAgencyName,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// NAICS
 			if (settings.naicsCode && settings.naicsCode.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.naics_code_eda_ext', settings.naicsCode));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const naicsCode of settings.naicsCode) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.naics_code_eda_ext',
+							default_operator: 'or',
+							query: naicsCode,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// DUNS
 			if (settings.duns && settings.duns.length > 0) {
-				filterQueries.push(this.getFPDSFilterQuery('fpds_ng_n.duns_eda_ext', settings.duns));
+				const nestedQuery = {
+					nested: {
+						path: 'fpds_ng_n',
+						query: {
+							bool: {
+								should: [],
+							},
+						},
+					},
+				};
+				for (const duns of settings.duns) {
+					nestedQuery.nested.query.bool.should.push({
+						query_string: {
+							default_field: 'fpds_ng_n.duns_eda_ext',
+							default_operator: 'or',
+							query: duns,
+						},
+					});
+				}
+				filterQueries.push(nestedQuery);
 			}
 
 			// CONTRACT SOW
