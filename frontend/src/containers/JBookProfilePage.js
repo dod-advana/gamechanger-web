@@ -100,6 +100,16 @@ const JBookProfilePage = () => {
 	const [budgetYearProjectData, setBudgetYearProjectData] = useState({});
 	let [init, setInit] = useState(false);
 
+	useEffect(() => {
+		if (budgetYear === '2023' && selectedPortfolio === 'AI Inventory') {
+			const prevYearData = budgetYearProjectData['2022'];
+			const review = prevYearData?.review_n?.find((review) => review.portfolio_name_s === 'AI Inventory');
+			const classLabel = review?.latest_class_label_s;
+			if (classLabel) setReviewData('primaryClassLabel', classLabel);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [budgetYearProjectData, budgetYear, selectedPortfolio]);
+
 	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
