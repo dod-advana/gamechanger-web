@@ -1105,7 +1105,7 @@ class EDASearchUtility {
 				filterQueries.push({
 					query_string: {
 						query: `*${settings.clinText}*`,
-						default_field: 'clin_raw_text',
+						default_field: 'clins_raw_text_t',
 					},
 				});
 			}
