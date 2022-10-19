@@ -717,7 +717,7 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
+							<div style={{ width: '35%', boxSizing: 'border-box', fontWeight: 'bold' }} className="half">
 								Application: <br />
 								Version: <br />
 								Connection Status: <br />
