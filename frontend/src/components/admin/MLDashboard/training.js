@@ -218,11 +218,11 @@ const getModelsList = async (setModelTable, props) => {
 const getCorpusCount = async (setCorpusCount, props) => {
 	try {
 		// set downloadedModelsList
-		const count = await gameChangerAPI.getFilesInCorpusTrain();
+		const count = await gameChangerAPI.getFilesInCorpus();
 		setCorpusCount(count.data);
-		props.updateTrainLogs('Successfully queried files in corpus', 0);
+		props.updateLogs('Successfully queried files in corpus', 0);
 	} catch (e) {
-		props.updateTrainLogs('Error querying files in corpus: ' + e.toString(), 2);
+		props.updateLogs('Error querying files in corpus: ' + e.toString(), 2);
 		throw e;
 	}
 };

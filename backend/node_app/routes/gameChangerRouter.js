@@ -112,6 +112,7 @@ router.get('/admin/getLoadedModels', transformer.getLoadedModels);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getFilesInCorpusTrain', transformer.getFilesInCorpusTrain);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/getProcessStatusTrain', transformer.getProcessStatusTrain);
 router.get('/admin/getCache', transformer.getCache);
 router.get('/admin/initializeLTR', transformer.initializeLTR);
 router.get('/admin/createModelLTR', transformer.createModelLTR);
