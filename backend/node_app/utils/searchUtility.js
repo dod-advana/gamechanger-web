@@ -686,20 +686,20 @@ class SearchUtility {
 										size: paragraphLimit,
 										highlight: hasHighlights
 											? {
-												fields: {
-													'paragraphs.par_raw_text_t': {
-														fragment_size: 3 * charsPadding,
-														number_of_fragments: 1,
-														type: 'plain',
+													fields: {
+														'paragraphs.par_raw_text_t': {
+															fragment_size: 3 * charsPadding,
+															number_of_fragments: 1,
+															type: 'plain',
+														},
+														'paragraphs.par_raw_text_t.gc_english': {
+															fragment_size: 3 * charsPadding,
+															number_of_fragments: 1,
+															type: 'plain',
+														},
 													},
-													'paragraphs.par_raw_text_t.gc_english': {
-														fragment_size: 3 * charsPadding,
-														number_of_fragments: 1,
-														type: 'plain',
-													},
-												},
-												fragmenter: 'span',
-											}
+													fragmenter: 'span',
+											  }
 											: {},
 									},
 									query: {
@@ -777,20 +777,20 @@ class SearchUtility {
 				},
 				highlight: hasHighlights
 					? {
-						require_field_match: false,
-						fields: {
-							'display_title_s.search': {},
-							keyw_5: {},
-							'filename.search': {},
-							'display_source_s.search': {},
-							top_entities_t: {},
-							topics_s: {},
-						},
-						fragment_size: 10,
-						fragmenter: 'simple',
-						type: 'unified',
-						boundary_scanner: 'word',
-					}
+							require_field_match: false,
+							fields: {
+								'display_title_s.search': {},
+								keyw_5: {},
+								'filename.search': {},
+								'display_source_s.search': {},
+								top_entities_t: {},
+								topics_s: {},
+							},
+							fragment_size: 10,
+							fragmenter: 'simple',
+							type: 'unified',
+							boundary_scanner: 'word',
+					  }
 					: {},
 			};
 
@@ -1248,9 +1248,7 @@ class SearchUtility {
 		}
 	}
 
-	getESpresearchMultiQueryEDA({
-		searchText,
-	}) {
+	getESpresearchMultiQueryEDA({ searchText }) {
 		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
 		// search in ES if text is more than 2
 		if (searchText.length >= 2) {
@@ -1265,14 +1263,10 @@ class SearchUtility {
 						multi_match: {
 							query: `${plainQuery}`,
 							type: 'bool_prefix',
-							fields: [
-								'search_query',
-								'search_query._2gram',
-								'search_query._3gram'
-							]
-						}
-					}
-				}
+							fields: ['search_query', 'search_query._2gram', 'search_query._3gram'],
+						},
+					},
+				},
 			];
 			query = query.concat(searchHistoryQuery);
 			return query;
