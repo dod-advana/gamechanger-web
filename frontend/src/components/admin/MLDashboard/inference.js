@@ -609,7 +609,7 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
+							<div style={{ width: '35%', boxSizing: 'border-box', fontWeight: 'bold' }} className="half">
 								Application: <br />
 								Version: <br />
 								Connection Status: <br />
@@ -636,50 +636,6 @@ export default (props) => {
 							width: '100%',
 							display: 'inline-block',
 							paddingBottom: '5px',
-							marginTop: '10px',
-						}}
-					>
-						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>API Response:</div>
-					</div>
-					<fieldset className={'field'}>
-						<div className="info-container">
-							<ReactTable
-								data={props.apiErrors}
-								columns={apiColumns}
-								className="striped -highlight"
-								defaultSorted={[{ id: 'searchtime', desc: true }]}
-								defaultPageSize={5}
-							/>
-						</div>
-					</fieldset>
-				</BorderDiv>
-				<BorderDiv className="half">
-					<div
-						style={{
-							width: '100%',
-							display: 'inline-block',
-							paddingBottom: '5px',
-						}}
-					>
-						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>S3 Data:</div>
-					</div>
-					<fieldset className={'field'}>
-						<div className="info-container">
-							<ReactTable
-								data={s3List}
-								columns={s3Columns}
-								className="striped -highlight"
-								defaultPageSize={5}
-							/>
-						</div>
-					</fieldset>
-				</BorderDiv>
-				<BorderDiv className="half" style={{ float: 'right' }}>
-					<div
-						style={{
-							width: '100%',
-							display: 'inline-block',
-							paddingBottom: '5px',
 						}}
 					>
 						<div style={{ display: 'inline-block' }}>
@@ -689,7 +645,7 @@ export default (props) => {
 					</div>
 					<fieldset className={'field'}>
 						<div className="info-container">
-							<div style={{ width: '35%', boxSizing: 'border-box' }} className="half">
+							<div style={{ width: '35%', boxSizing: 'border-box', fontWeight: 'bold' }} className="half">
 								Corpus:
 								<br />
 								<div style={{ paddingLeft: '15px' }}>Files in corpus:</div>
@@ -733,6 +689,51 @@ export default (props) => {
 						</div>
 					</fieldset>
 				</BorderDiv>
+				<BorderDiv className="half">
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+							marginTop: '10px',
+						}}
+					>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>API Response:</div>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<ReactTable
+								data={props.apiErrors}
+								columns={apiColumns}
+								className="striped -highlight"
+								defaultSorted={[{ id: 'searchtime', desc: true }]}
+								defaultPageSize={5}
+							/>
+						</div>
+					</fieldset>
+				</BorderDiv>
+				<BorderDiv className="half" style={{ float: 'right' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'inline-block',
+							paddingBottom: '5px',
+						}}
+					>
+						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>S3 Data:</div>
+					</div>
+					<fieldset className={'field'}>
+						<div className="info-container">
+							<ReactTable
+								data={s3List}
+								columns={s3Columns}
+								className="striped -highlight"
+								defaultPageSize={5}
+							/>
+						</div>
+					</fieldset>
+				</BorderDiv>
+
 				<BorderDiv className="half">
 					<div
 						style={{
