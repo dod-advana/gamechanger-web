@@ -86,7 +86,7 @@ const getAllProcessData = (props) => {
 	if (props.processes.process_status) {
 		for (const key in props.processes.process_status) {
 			const status = key !== 'flags' ? props.processes.process_status[key]['container'] : '';
-			if (status !== 'training') {
+			if (status !== 'training' && key !== 'flags') {
 				processList.push({
 					...props.processes.process_status[key],
 					thread_id: key,
