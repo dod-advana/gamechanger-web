@@ -30,9 +30,9 @@ class TextSuggestionController {
 			const index = req.body.index
 				? req.body.index
 				: [
-					this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
-					this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
-				];
+						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.index,
+						this.constants.GAMECHANGER_ELASTIC_SEARCH_OPTS.assist_index,
+				  ];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
 			const esClientName = req.body.esClientName ? req.body.esClientName : 'gamechanger';
 			let corrected;
@@ -51,19 +51,20 @@ class TextSuggestionController {
 					req.body.searchText = corrected;
 				}
 				if (suggestionsFlag === true) {
-					const data_presearch = await this.getPresearchSuggestion({ body: { ...req.body }, index: index, userId: userId, esClientName: esClientName });
+					const data_presearch = await this.getPresearchSuggestion({
+						body: { ...req.body },
+						index: index,
+						userId: userId,
+						esClientName: esClientName,
+					});
 					if (esClientName === 'eda') {
-
 						try {
-							presearchHistory = this.getPreHistoryCorrectedEDA(
-								data_presearch.responses[0].hits.hits
-							);
+							presearchHistory = this.getPreHistoryCorrectedEDA(data_presearch.responses[0].hits.hits);
 						} catch (err) {
 							const { message } = err;
 							this.logger.error(message, 'JBVZKTZ', userId);
 						}
-					}
-					else {
+					} else {
 						try {
 							presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
 						} catch (err) {
@@ -118,8 +119,7 @@ class TextSuggestionController {
 			let esQueryArray;
 			if (esClientName === 'eda') {
 				esQueryArray = this.searchUtility.getESpresearchMultiQueryEDA(body);
-			}
-			else {
+			} else {
 				esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			}
 
@@ -159,7 +159,7 @@ class TextSuggestionController {
 		if (suggesterArray.length > 0) {
 			suggesterArray.forEach((term) => {
 				presearch.push(term['_source']['search_query']);
-			})
+			});
 		}
 		// incase same
 		let unique = [...new Set(presearch)];
