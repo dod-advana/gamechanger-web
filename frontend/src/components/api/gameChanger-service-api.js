@@ -83,6 +83,7 @@ const endpoints = {
 	getDataList: '/api/gamechanger/admin/getDataList',
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
+	getProcessStatusTrain: '/api/gamechanger/admin/getProcessStatusTrain',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
 	getFilesInCorpusTrain: '/api/gamechanger/admin/getFilesInCorpusTrain',
 	getCache: '/api/gamechanger/admin/getCache',
@@ -706,6 +707,11 @@ export default class GameChangerAPI {
 
 	getProcessStatus = async () => {
 		const url = endpoints.getProcessStatus;
+		return axiosGET(this.axios, url);
+	};
+
+	getProcessStatusTrain = async () => {
+		const url = endpoints.getProcessStatusTrain;
 		return axiosGET(this.axios, url);
 	};
 

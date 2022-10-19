@@ -22,6 +22,7 @@ export default () => {
 	const [apiErrors, setApiErrors] = useState([]);
 	const [apiTrainErrors, setApiTrainErrors] = useState([]);
 	const [processes, setProcesses] = useState({});
+	const [processesTrain, setProcessesTrain] = useState({});
 
 	/**
 	 * Creates log objects with the inital message,
@@ -72,6 +73,23 @@ export default () => {
 			throw e;
 		}
 	};
+
+	/**
+	 * Get the current and past processes and flags for the API
+	 * @method getProcesses
+	 */
+	const getProcessesTrain = async () => {
+		try {
+			// set processes
+			const processesData = await gameChangerAPI.getProcessStatusTrain();
+			setProcessesTrain(processesData.data);
+			checkProcesses(processesData.data);
+		} catch (e) {
+			updateLogs('Error querying processes: ' + e.toString(), 2);
+			throw e;
+		}
+	};
+
 	/**
 	 * Checks all of the flags. If any of them are true then check again in 5 seconds.
 	 * @method
@@ -94,6 +112,7 @@ export default () => {
 
 	useEffect(() => {
 		getProcesses();
+		getProcessesTrain();
 		return () => {
 			clearTimeout(processTimer);
 		};
@@ -169,8 +188,8 @@ export default () => {
 						<Training
 							apiTrainErrors={apiTrainErrors}
 							updateTrainLogs={updateTrainLogs}
-							processes={processes}
-							getProcesses={getProcesses}
+							processes={processesTrain}
+							getProcesses={getProcessesTrain}
 						/>
 					</TabPanel>
 					<TabPanel>
