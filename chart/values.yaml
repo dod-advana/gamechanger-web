@@ -125,6 +125,8 @@ ingress:
   web:
     enabled: true
     hostname: gamechanger
+    serversnippets: |
+      underscores_in_headers on;
     ## @param ingress.web.pathType Ingress path type
     ##
     pathType: ImplementationSpecific
