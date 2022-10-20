@@ -87,7 +87,12 @@ const EDASearchBarHandler = {
 					}
 					onSubmit={handleSubmit}
 					autoComplete="off"
-					onKeyDown={handleKeyDown}
+					onKeyDown={(e) => {
+						handleKeyDown(e);
+						if (e.key === 'Enter') {
+							handleSubmit(e);
+						}
+					}}
 				>
 					<SearchBarInput
 						type="text"
