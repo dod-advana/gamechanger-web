@@ -975,6 +975,7 @@ const cardHandler = {
 					<>
 						{item.dtic_pdf_location_s !== undefined && (
 							<CardButton
+								data-cy={'open-doc'}
 								target={'_blank'}
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
