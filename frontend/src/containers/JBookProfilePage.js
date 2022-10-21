@@ -103,11 +103,9 @@ const JBookProfilePage = () => {
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
 		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
-		let url = `/#/pdfviewer/gamechanger?filename=${encode(
-			filename
-		)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`;
-		let myWindow = window.open(url);
-		setTimeout(() => (myWindow.document.title = 'ADVANA | JBOOK SEARCH'), 500);
+		window.open(
+			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+		);
 	};
 
 	useEffect(() => {
