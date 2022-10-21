@@ -804,6 +804,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		latest_class_label: {
+			newName: 'latestClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	reviewESMapping: {
@@ -1079,6 +1084,11 @@ module.exports = {
 		// 	defaultValue: '',
 		// 	processValue: (value) => value
 		// },
+		latest_class_label_s: {
+			newName: 'latestClassLabel',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 		primary_class_label_s: {
 			newName: 'primaryClassLabel', //'coreAILabel'
 			defaultValue: '',
