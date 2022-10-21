@@ -1319,7 +1319,6 @@ const JBookProfilePage = () => {
 				<StyledRightContainer>
 					{projectData.dtic_pdf_location_s && (
 						<GCPrimaryButton
-							data-cy={'open-doc'}
 							style={{
 								color: 'white',
 								backgroundColor: '#1C2D64',
