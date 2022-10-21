@@ -56,10 +56,18 @@ export default function PDFViewer({ location }) {
 		setFilename(query.get('filename'));
 		setPrevSearchText(query.get('prevSearchText'));
 		setPageNumber(query.get('pageNumber'));
-		setIsClone(true);
+		if (query.get('cloneIndex') !== 'gamechanger') {
+			setIsClone(true);
+		}
 		setFileUrl(query.get('sourceURL'));
 		setCloneIndex(query.get('cloneIndex'));
 	}, [query, filename]);
+
+	useEffect(() => {
+		if (isClone) {
+			document.title = `ADVANA | ${cloneIndex.toUpperCase()} SEARCH`;
+		}
+	}, [isClone, cloneIndex]);
 
 	return (
 		<iframe
