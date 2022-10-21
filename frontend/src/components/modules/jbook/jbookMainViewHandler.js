@@ -132,6 +132,7 @@ const handlePageLoad = async (props) => {
 	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
 		// the main setstate that triggers the initial search (only on main page)
 		setState(dispatch, {
+			pageLoad: true,
 			searchText,
 			loading: true,
 			runSearch: true,

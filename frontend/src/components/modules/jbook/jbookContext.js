@@ -1,6 +1,7 @@
 import React, { useReducer } from 'react';
 
 const initState = {
+	pageLoad: false,
 	runSearch: false,
 	runningSearch: true,
 	useElasticSearch: true,
@@ -458,45 +459,6 @@ function reducer(state, action) {
 			return {
 				...state,
 				jbookSearchSettings: { ...state.defaultOptions },
-				modifiedSearchSettings: [],
-			};
-		case 'RESET_PORTFOLIO_FILTERS':
-			return {
-				...state,
-				jbookSearchSettings: {
-					...state.jbookSearchSettings,
-
-					primaryReviewerSpecificSelected: false,
-					primaryReviewerAllSelected: true,
-
-					serviceReviewerSpecificSelected: false,
-					serviceReviewerAllSelected: true,
-
-					hasKeywordsSpecificSelected: false,
-					hasKeywordsAllSelected: true,
-
-					classLabelSpecificSelected: false,
-					classLabelAllSelected: true,
-
-					sourceTagSpecificSelected: false,
-					sourceTagAllSelected: true,
-
-					reviewStatusSpecificSelected: false,
-					reviewStatusAllSelected: true,
-
-					primaryReviewStatusSpecificSelected: false,
-					primaryReviewStatusAllSelected: true,
-
-					budgetType: state.defaultOptions.budgetType,
-					reviewStatus: state.defaultOptions.reviewStatus,
-					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
-					primaryReviewer: state.defaultOptions.primaryReviewer,
-					serviceReviewer: state.defaultOptions.serviceReviewer,
-					pocReviewer: state.defaultOptions.pocReviewer,
-					sourceTag: state.defaultOptions.sourceTag,
-					hasKeyword: state.defaultOptions.hasKeyword,
-					classLabel: state.defaultOptions.classLabel,
-				},
 				modifiedSearchSettings: [],
 			};
 		default:
