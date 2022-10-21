@@ -16,6 +16,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     meta.helm.sh/release-name: {{ include "chart.fullname" . }}
     meta.helm.sh/release-namespace: {{ include "chart.fullname" . }}
+    nginx.ingress.kubernetes.io/server-snippet: {{- .Values.ingress.serversnippets | toYaml | indent 4 }}
 spec:
   rules:
     - host: {{ $fqdn | quote }}
