@@ -1019,7 +1019,13 @@ export default function GraphNodeCluster2D(props) {
 
 		if (!controlPoints) {
 			// Straight line
-			ctx.lineTo(end.x, end.y);
+			let xEnd = end.x;
+			let yEnd = end.y;
+			if (xEnd < start.x) {
+				ctx.lineTo(end.x + 10, end.y);
+			} else {
+				ctx.lineTo(end.x - 10, end.y);
+			}
 		} else {
 			// Use quadratic curves for regular lines and bezier for loops
 			ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
