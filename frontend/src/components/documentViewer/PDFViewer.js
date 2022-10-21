@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { encode, handlePdfOnLoad } from '../../utils/gamechangerUtils';
-import { ContactSupportOutlined } from '@material-ui/icons';
 
 const gameChangerAPI = new GameChangerAPI();
 
