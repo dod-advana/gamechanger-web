@@ -29,7 +29,7 @@ const HIDDEN_NODE_ALPHA = 0.08;
 const LINK_ALPHA = 0.5;
 const DEGREE_REL_TO_GET = 1;
 export const ZOOM_LIMIT = 8;
-const ARROW_LENGTH = 5;
+const ARROW_LENGTH = 3;
 const ARROW_REL_POS = 1;
 
 const edgePatterns = [[], ...shuffleArray(EDGE_PATTERNS)];
@@ -1053,7 +1053,18 @@ export default function GraphNodeCluster2D(props) {
 
 				drawLink(ctx, link, lineWidth, start, end, globalScale);
 
-				if (globalScale > 5) {
+				if (globalScale >= 8) {
+					// Draw Arrow
+					draw2DArrows(
+						link,
+						ctx,
+						globalScale,
+						arrowLength,
+						arrowRelativePosition,
+						color,
+						nodeRelativeSize + 5
+					);
+				} else if (globalScale > 5) {
 					// Draw Arrow
 					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
 				}

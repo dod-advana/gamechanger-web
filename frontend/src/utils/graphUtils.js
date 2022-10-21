@@ -83,6 +83,9 @@ export const draw2DArrows = (
 	const end = link.target;
 
 	const nodeSize = end.value * nodeRelSize;
+	console.log('here is the noderelsize', nodeRelSize);
+	console.log('here is the globalscale', globalScale);
+	console.log('here is the nodeSize', nodeSize);
 
 	if (
 		!start ||
