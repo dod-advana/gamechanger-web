@@ -267,7 +267,7 @@ const JbookViewHeaderHandler = (props) => {
 		});
 	};
 
-	const updateServiceFilters = async (portfolio) => {
+	const updatePortfolioSpecificFilters = async (portfolio) => {
 		const newSearchSettings = {
 			...state.jbookSearchSettings,
 
@@ -337,7 +337,7 @@ const JbookViewHeaderHandler = (props) => {
 					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
-					updateServiceFilters={updateServiceFilters}
+					updatePortfolioSpecificFilters={updatePortfolioSpecificFilters}
 					pageDisplayed={state.pageDisplayed}
 				/>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
