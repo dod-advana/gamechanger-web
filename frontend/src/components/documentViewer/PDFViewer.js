@@ -6,7 +6,6 @@ import { ContactSupportOutlined } from '@material-ui/icons';
 const gameChangerAPI = new GameChangerAPI();
 
 function useQuery(location) {
-	console.log('Do I hit this??', location.search);
 	return new URLSearchParams(location.search);
 }
 
@@ -19,31 +18,22 @@ export default function PDFViewer({ location }) {
 	const [fileUrl, setFileUrl] = React.useState(null);
 
 	let query = useQuery(location);
-	console.log('here is query', query);
-	console.log('here is the cloneIndex', cloneIndex);
-	console.log('here is the fileUrl', fileUrl);
-	console.log('here is the filename', filename);
-	console.log('here is isClone', isClone);
 
 	const measuredRef = useCallback(
 		(node) => {
 			if (node !== null && filename) {
 				gameChangerAPI.getCloneMeta({ cloneName: cloneIndex }).then((data) => {
-					console.log('Am i hitting this data', data);
-					console.log('is my filURL being updated???', fileUrl);
 					let isDLA = false;
 					if (fileUrl?.split('.').includes('dla')) isDLA = true;
 					if (filename) {
 						const encoded = encode(filename);
-						console.log('What is encoded', encoded);
 						gameChangerAPI
 							.dataStorageDownloadGET(encoded, prevSearchText, pageNumber, isClone, data.data, isDLA)
 							.then((url) => {
-								console.log('here is the url', url);
 								node.src = url;
 							})
 							.catch((err) => {
-								console.error('YOU HAVE FAILED', err);
+								console.error(err);
 							});
 					}
 				});
