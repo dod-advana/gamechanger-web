@@ -122,6 +122,8 @@ ingress:
   ##
   controller: default
   ingressClassName: ""
+  serversnippets: |
+      underscores_in_headers on;
   web:
     enabled: true
     hostname: gamechanger
