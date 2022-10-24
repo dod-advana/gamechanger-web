@@ -136,9 +136,9 @@ export default () => {
 				</div>
 				<div style={{ background: '#f2f2f2', borderRadius: 6, margin: '0 80px 20px 80px', padding: 10 }}>
 					<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
-						The table below lists all Initial (Primary), Service, and Secondary Reviewers. Use this page to
-						edit reviewer information or to add a new reviewer. Reviewers added to this page will
-						automatically be added to the respective columns and dropdown menus in the webapp.
+						The table below lists all Initial (Primary), RAI Lead (Service), and Secondary Reviewers. Use
+						this page to edit reviewer information or to add a new reviewer. Reviewers added to this page
+						will automatically be added to the respective columns and dropdown menus in the webapp.
 					</Typography>
 					<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
 						*Note: POC Reviewers are not included in the table below.
