@@ -100,9 +100,9 @@ const SecondaryReviewerKey = React.memo(() => {
 		<StyledTableKeyContainer>
 			<strong>Secondary Reviewer</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Service Level Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu.
-				Once selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer
-				checklist tab and the review will be the responsibility of the Secondary Reviewer.
+				RAI Lead Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu. Once
+				selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer checklist
+				tab and the review will be the responsibility of the Secondary Reviewer.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
