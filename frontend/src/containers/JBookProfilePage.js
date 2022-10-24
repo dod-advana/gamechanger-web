@@ -1049,11 +1049,19 @@ const JBookProfilePage = () => {
 
 	const scorecardData = () => {
 		let data = [];
+
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			let latestReviewer;
+			if (reviewData.pocClassLabel) {
+				latestReviewer = reviewData.servicePOCName;
+			} else if (reviewData.serviceClassLabel) {
+				latestReviewer = reviewData.servicePOCName;
+			} else {
+				latestReviewer = reviewData.primaryReviewer;
+			}
 			data.push({
 				name: 'Reviewer Tag',
-				description:
-					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				description: latestReviewer + ' classified this document as "' + reviewData.latestClassLabel + '"',
 				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
