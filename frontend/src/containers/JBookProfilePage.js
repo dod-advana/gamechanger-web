@@ -101,11 +101,12 @@ const JBookProfilePage = () => {
 	let [init, setInit] = useState(false);
 
 	useEffect(() => {
-		if (budgetYear === '2023' && selectedPortfolio === 'AI Inventory') {
-			const prevYearData = budgetYearProjectData['2022'];
-			const review = prevYearData?.review_n?.find((review) => review.portfolio_name_s === 'AI Inventory');
-			const classLabel = review?.latest_class_label_s;
-			if (classLabel) setReviewData('primaryClassLabel', classLabel);
+		if (selectedPortfolio === 'AI Inventory') {
+			const prevYearData = budgetYearProjectData[`${projectData.budgetYear - 1}`];
+			const previosuReview = prevYearData?.review_n?.find((review) => review.portfolio_name_s === 'AI Inventory');
+			const previousClassLabel = previosuReview?.latest_class_label_s;
+			if (previousClassLabel && !reviewData.primaryClassLabel)
+				setReviewData('primaryClassLabel', previousClassLabel);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [budgetYearProjectData, budgetYear, selectedPortfolio]);
