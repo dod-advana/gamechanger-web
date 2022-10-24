@@ -33,9 +33,9 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async exportSearch(state, dispatch) {
+	async exportSearch(state) {
 		try {
-			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+			const cleanSearchSettings = this.processSearchSettings(state);
 			const offset = 0;
 
 			const { searchText = '' } = state;
@@ -66,7 +66,7 @@ const JBookSearchHandler = {
 
 	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
-			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+			const cleanSearchSettings = this.processSearchSettings(state);
 			let offset = (resultsPage - 1) * RESULTS_PER_PAGE;
 			let search_after = [];
 			let search_before = [];
@@ -118,8 +118,8 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async getContractTotals(state, dispatch) {
-		const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+	async getContractTotals(state) {
+		const cleanSearchSettings = this.processSearchSettings(state);
 
 		const { data } = await gamechangerAPI.callDataFunction({
 			functionName: 'getContractTotals',
@@ -351,13 +351,19 @@ const JBookSearchHandler = {
 
 		if (searchText) params.append('q', searchText);
 		if (searchText && offset) params.append('offset', String(offset));
+		const cleanSearchSettings = this.processSearchSettings(state);
+		Object.keys(cleanSearchSettings).forEach((setting) => {
+			if (!setting.includes('Selected') && !setting.includes('Update') && setting !== 'sort') {
+				params.append(setting, cleanSearchSettings[setting]);
+			}
+		});
 
 		const hash = window.location.hash;
 
 		const paramIndex = hash.indexOf('?');
 
 		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${
-			searchText && searchText !== '' ? '?' : ''
+			params.toString() ? '?' : ''
 		}${params}`;
 
 		window.history.pushState(null, document.title, linkString);

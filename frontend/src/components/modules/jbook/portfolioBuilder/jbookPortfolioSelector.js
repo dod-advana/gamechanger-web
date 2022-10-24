@@ -12,7 +12,7 @@ const JBookPortfolioSelector = ({
 	projectData = null,
 	docID,
 	getCommentThread,
-	updateServiceFilters,
+	updatePortfolioSpecificFilters,
 	pageDisplayed,
 }) => {
 	const classes = useStyles();
@@ -32,14 +32,14 @@ const JBookPortfolioSelector = ({
 				if (pageDisplayed === 'profile') {
 					getCommentThread(docID, name);
 				} else {
-					updateServiceFilters(name);
+					updatePortfolioSpecificFilters(name);
 				}
 			} catch (err) {
 				console.log('Error setting portfolio');
 				console.log(err);
 			}
 		},
-		[dispatch, projectData, pageDisplayed, getCommentThread, docID, updateServiceFilters]
+		[dispatch, projectData, pageDisplayed, getCommentThread, docID, updatePortfolioSpecificFilters]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {
