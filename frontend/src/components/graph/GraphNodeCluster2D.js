@@ -1052,10 +1052,7 @@ export default function GraphNodeCluster2D(props) {
 
 				drawLink(ctx, link, lineWidth, start, end, globalScale);
 
-				if (nodeRelativeSize >= 8) {
-					// Draw Arrow
-					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
-				} else if (globalScale > 5) {
+				if (globalScale > 5) {
 					// Draw Arrow
 					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
 				}
@@ -1474,6 +1471,7 @@ export default function GraphNodeCluster2D(props) {
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
 				linkPointerAreaPaint={() => undefined}
+				linkDirectionalArrowColor={3}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}

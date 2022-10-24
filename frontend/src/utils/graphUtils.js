@@ -82,7 +82,7 @@ export const draw2DArrows = (
 	const start = link.source;
 	const end = link.target;
 
-	const nodeSize = end.value * nodeRelSize;
+	const nodeSize = end.value * nodeRelSize * 2;
 
 	if (
 		!start ||
@@ -103,6 +103,7 @@ export const draw2DArrows = (
 	const arrowColor = color;
 	const arrowHalfWidth = arrowLength / ARROW_WH_RATIO / 2;
 
+	console.log('can you tell me what the noderelsizes are?', nodeRelSize);
 	// Construct bezier for curved lines
 	const bzLine = link.__controlPoints && new Bezier(start.x, start.y, ...link.__controlPoints, end.x, end.y);
 
