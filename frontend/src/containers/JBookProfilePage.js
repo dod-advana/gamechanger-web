@@ -1115,7 +1115,7 @@ const JBookProfilePage = () => {
 					headerWidth="100%"
 					header={
 						<StyledAccordionHeader>
-							<strong>SERVICE REVIEWER</strong>
+							<strong>RAI LEAD REVIEWER</strong>
 							<FiberManualRecordIcon
 								style={{
 									color: reviewData.serviceReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',

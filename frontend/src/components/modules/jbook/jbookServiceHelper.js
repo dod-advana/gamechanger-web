@@ -465,11 +465,11 @@ const AIPOCKey = React.memo(() => {
 		<StyledTableKeyContainer>
 			<strong>AI Point of Contact (POC) for Effort</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Enter the AI Point of Contact for this Program/BLI in the POC section of the Service Reviewer Section. A
-				suitable type of POC would be the Program Element Monitor. Select the POC's name from the dropdown. If
+				Enter the AI Point of Contact for this Program/BLI in the POC section of the RAI Lead Reviewer Section.
+				A suitable type of POC would be the Program Element Monitor. Select the POC's name from the dropdown. If
 				the POC name is not available as an option, please direct the POC to{' '}
 				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added to the list and select `Save
-				(Partial Service Review)`. Once the POC has completed the steps at the link above, you can return to
+				(Partial RAI Lead Review)`. Once the POC has completed the steps at the link above, you can return to
 				this budget exhibit, select the POC name, and click `Submit`.
 			</Typography>
 		</StyledTableKeyContainer>
@@ -661,11 +661,11 @@ const ServiceDescriptionText = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Once your review is complete, click the submit finished review button to save your entries/information.
 				You can also Save a partial review to finish later by clicking the Save Partial Review button or you can
-				reset the Service Reviewer Section to blank values by clicking the reset Form Buttons.
+				reset the RAI Lead Reviewer Section to blank values by clicking the reset Form Buttons.
 			</Typography>
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>
-				Do not click "Submit (Finished Service Review)" until all fields in the Service Reviewer section have
+				Do not click "Submit (Finished RAI Lead Review)" until all fields in the RAI Lead Reviewer section have
 				been filled in.
 			</Typography>
 		</StyledTableValueContainer>
@@ -696,7 +696,7 @@ const ButtonFooter = React.memo((props) => {
 						style={ButtonStyles.main}
 						onClick={() => setState(dispatch, { ServiceModalOpen: true })}
 					>
-						Re-Enable (Partial Service Review)
+						Re-Enable (Partial RAI Lead Review)
 					</GCPrimaryButton>
 				</Tooltip>
 			)}
@@ -726,7 +726,7 @@ const ButtonFooter = React.memo((props) => {
 					disabled={finished || roleDisabled}
 				>
 					{!primaryReviewLoading ? (
-						'Save (Partial Service Review)'
+						'Save (Partial RAI Lead Review)'
 					) : (
 						<CircularProgress
 							color="#515151"
@@ -747,7 +747,7 @@ const ButtonFooter = React.memo((props) => {
 					disabled={finished || roleDisabled}
 				>
 					{!primaryReviewLoading ? (
-						'Submit (Finished Service Review)'
+						'Submit (Finished RAI Lead Review)'
 					) : (
 						<CircularProgress
 							color="#FFFFFF"

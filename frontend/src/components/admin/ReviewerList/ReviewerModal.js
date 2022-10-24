@@ -51,8 +51,8 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 
 		if (key === 'type') {
 			switch (value) {
-				case 'initial':
-					tmpData['title'] = 'Initial Reviewer';
+				case 'primary':
+					tmpData['title'] = 'Primary Reviewer';
 					break;
 				case 'service':
 					tmpData['title'] = 'Service Reviewer';
@@ -151,7 +151,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 						<Grid item xs={6}>
 							<Autocomplete
 								size="small"
-								options={['initial', 'service', 'secondary', 'inactive']}
+								options={['primary', 'service', 'secondary', 'inactive']}
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
 								defaultValue={editReviewerData?.type}
