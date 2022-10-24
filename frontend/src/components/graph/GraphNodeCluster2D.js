@@ -898,7 +898,6 @@ export default function GraphNodeCluster2D(props) {
 
 	const drawNode = (ctx, node, nodeColor, outlineColor, outlineThickness, nodeTextColor, globalScale) => {
 		ctx.beginPath();
-
 		ctx.fillStyle = nodeColor;
 		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
 		ctx.fill();
@@ -1019,13 +1018,7 @@ export default function GraphNodeCluster2D(props) {
 
 		if (!controlPoints) {
 			// Straight line
-			let xEnd = end.x;
-			let yEnd = end.y;
-			if (xEnd < start.x) {
-				ctx.lineTo(end.x + 10, end.y);
-			} else {
-				ctx.lineTo(end.x - 10, end.y);
-			}
+			ctx.lineTo(end.x, end.y);
 		} else {
 			// Use quadratic curves for regular lines and bezier for loops
 			ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
@@ -1059,17 +1052,9 @@ export default function GraphNodeCluster2D(props) {
 
 				drawLink(ctx, link, lineWidth, start, end, globalScale);
 
-				if (globalScale >= 8) {
+				if (nodeRelativeSize >= 8) {
 					// Draw Arrow
-					draw2DArrows(
-						link,
-						ctx,
-						globalScale,
-						arrowLength,
-						arrowRelativePosition,
-						color,
-						nodeRelativeSize + 5
-					);
+					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
 				} else if (globalScale > 5) {
 					// Draw Arrow
 					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
