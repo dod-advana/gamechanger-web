@@ -27,6 +27,24 @@ describe('Test search and filters', () => {
 		cy.get('.eda-card-front').should('have.length.greaterThan', 1);
 	});
 
+	it('search using advanced search filters', () => {
+		// type in "defense"
+		cy.get('#gcSearchInput').type('defense');
+
+		cy.get('#advancedSearchButton').click();
+
+		cy.get('#reqDescFilter').type('system');
+		cy.get('#clinTextFilter').type('dcma');
+
+		// click search button
+		cy.get('#gcSearchButton').click();
+
+		cy.get('.eda-card-front', { timeout: 10000 }).should('exist');
+
+		cy.get('.eda-card-front').should('have.length.lessThan', 1000);
+		cy.get('.eda-card-front').should('have.length.greaterThan', 0);
+	});
+
 	it('test out text input filters', () => {
 		// type in "defense"
 		cy.get('#gcSearchInput').type('defense');
@@ -106,7 +124,7 @@ describe('Test search and filters', () => {
 		cy.get('.eda-card-front').should('have.length.lessThan', 1000);
 	});
 
-	it.only('test out multiselect filters', () => {
+	it('test out multiselect filters', () => {
 		// type in "defense"
 		cy.get('#gcSearchInput').type('defense');
 
