@@ -1053,11 +1053,12 @@ const JBookProfilePage = () => {
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
 			let latestReviewer;
 			if (reviewData.pocClassLabel) {
-				latestReviewer = reviewData.servicePOCName;
+				latestReviewer = reviewData.servicePOCName || 'The POC Reviewer';
+				console.log('latestReviewer: ', latestReviewer);
 			} else if (reviewData.serviceClassLabel) {
-				latestReviewer = reviewData.servicePOCName;
+				latestReviewer = reviewData.serviceReviewer || 'The RAI Lead Reviewer';
 			} else {
-				latestReviewer = reviewData.primaryReviewer;
+				latestReviewer = reviewData.primaryReviewer || 'The Initial Reviewer';
 			}
 			data.push({
 				name: 'Reviewer Tag',
