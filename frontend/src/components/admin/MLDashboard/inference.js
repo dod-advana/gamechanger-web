@@ -616,6 +616,7 @@ export default (props) => {
 								Last Queried: <br />
 								Elasticsearch Host: <br />
 								Elasticsearch Status: <br />
+								Host: <br />
 							</div>
 							<div style={{ width: '65%' }} className="half">
 								{APIData.API_Name} {APIData.Container_Type}
@@ -625,6 +626,7 @@ export default (props) => {
 								{getLastQueried()} <br />
 								{APIData.Elasticsearch_Host} <br />
 								{APIData.Elasticsearch_Status} <br />
+								{APIData.host} <br />
 								<br />
 							</div>
 						</div>
