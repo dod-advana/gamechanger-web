@@ -1260,10 +1260,8 @@ class SearchUtility {
 				{
 					size: 8,
 					query: {
-						multi_match: {
-							query: `${plainQuery}`,
-							type: 'bool_prefix',
-							fields: ['search_query', 'search_query._2gram', 'search_query._3gram'],
+						match_phrase_prefix: {
+							search_query: `${plainQuery}`,
 						},
 					},
 				},
