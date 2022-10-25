@@ -724,6 +724,7 @@ export default (props) => {
 								Last Queried: <br />
 								Elasticsearch Host: <br />
 								Elasticsearch Status: <br />
+								Host: <br />
 								Files in corpus: <br />
 							</div>
 							<div style={{ width: '65%' }} className="half">
@@ -734,6 +735,7 @@ export default (props) => {
 								{getLastQueried()} <br />
 								{APITrainData.Elasticsearch_Host} <br />
 								{APITrainData.Elasticsearch_Status} <br />
+								{APITrainData.host} <br />
 								{corpusCount} <br />
 								<br />
 							</div>

@@ -57,13 +57,13 @@ class MLApiClient {
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
 		this.recommender = this.recommender.bind(this);
 		this.queryExpansion = this.queryExpansion.bind(this);
+		this.getAPIInformation = this.getAPIInformation.bind(this);
+		this.getAPIInformationTrain = this.getAPIInformationTrain.bind(this);
 
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
 		this.getModelsListTrain = this.getData.bind(this, 'getModelsListTrain');
 		this.getDataList = this.getData.bind(this, 'getDataList');
-		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
-		this.getAPIInformationTrain = this.getData.bind(this, 'getAPIInformationTrain');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
@@ -129,6 +129,17 @@ class MLApiClient {
 	async recommender(doc, userId = 'unknown') {
 		const data = { filenames: doc };
 		return this.postData('recommender', userId, data);
+	}
+
+	async getAPIInformation() {
+		let data = await this.getData('getAPIInformation', 'unkown');
+		data['host'] = mlBaseUrl;
+		return data;
+	}
+	async getAPIInformationTrain() {
+		let data = await this.getData('getAPIInformationTrain', 'unkown');
+		data['host'] = mlTrainBaseUrl;
+		return data;
 	}
 	/**
 	 * A generic get method to query the ML API.
