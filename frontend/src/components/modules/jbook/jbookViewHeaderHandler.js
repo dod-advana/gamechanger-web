@@ -36,7 +36,7 @@ const filterNameMap = {
 	minTotalCost: 'Total Fund Min',
 	maxTotalCost: 'Total Fund Max',
 	primaryReviewer: 'Initial Reviewer',
-	serviceReviewer: 'Service Reviewer',
+	serviceReviewer: 'RAI Lead Reviewer',
 	pocReviewer: 'POC Reviewer',
 	reviewStatus: 'Review Status',
 	hasKeywords: 'Keywords',

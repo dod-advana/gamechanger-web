@@ -385,7 +385,7 @@ const initState = {
 			'Project Title',
 			'Service / Agency',
 			'Initial Reviewer',
-			'Service Reviewer',
+			'RAI Lead Reviewer',
 			'POC Reviewer',
 			'Source',
 		],

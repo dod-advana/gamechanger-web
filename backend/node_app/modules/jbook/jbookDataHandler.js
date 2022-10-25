@@ -1306,7 +1306,7 @@ class JBookDataHandler extends DataHandler {
 			];
 			await this.emailUtility.sendEmail(
 				emailBody,
-				'JBOOK Search Service Reviewer: Application Access',
+				'JBOOK Search RAI Lead Reviewer: Application Access',
 				email,
 				this.constants.ADVANA_EMAIL_CC,
 				attachment,
