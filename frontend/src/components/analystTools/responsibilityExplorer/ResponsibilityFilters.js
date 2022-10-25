@@ -97,13 +97,15 @@ export default function ResponsibilityFilters({
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<AccordianWrapper>
 						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false}
+							expanded={
+								filters.find((filter) => filter.id === 'organizationPersonnelText') ? true : false
+							}
 							header={
 								<span>
 									ENTITY{' '}
-									{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+									{filters.filter((f) => f.id === 'organizationPersonnelText').length ? (
 										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'organizationPersonnel').length
+											filters.filter((f) => f.id === 'organizationPersonnelText').length
 										})`}</span>
 									) : (
 										''
@@ -196,7 +198,7 @@ export default function ResponsibilityFilters({
 							if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 							if (organization.length) {
 								organization.forEach((org) => {
-									newFilters.push({ id: 'organizationPersonnel', value: org });
+									newFilters.push({ id: 'organizationPersonnelText', value: org });
 								});
 							}
 							if (docTitle.length) {

@@ -16,7 +16,20 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false,
 			},
-			organizationPersonnel: {
+			organizationPersonnelNumbering: {
+				type: DataTypes.TEXT,
+				allowNull: true,
+			},
+			//organizationPersonnel
+			organizationPersonnelText: {
+				type: DataTypes.TEXT,
+				allowNull: false,
+			},
+			organizationPersonnelEntities: {
+				type: DataTypes.TEXT,
+				allowNull: false,
+			},
+			responsibilityNumbering: {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
@@ -24,22 +37,20 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false,
 			},
-			otherOrganizationPersonnel: {
+			// otherOrganizationPersonnel
+			responsibilityEntities: {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
-			documentsReferenced: {
-				type: DataTypes.ARRAY(DataTypes.TEXT),
-				allowNull: true,
-			},
-			status: {
-				type: DataTypes.TEXT,
-				defaultValue: 'active',
-			},
+			//TODO Needs to be added back in
+			// status: {
+			// 	type: DataTypes.TEXT,
+			// 	defaultValue: 'active',
+			// },
 		},
 		{
 			freezeTableName: true,
-			tableName: 'responsibilities',
+			tableName: 'responsibilites_new3',
 			timestamps: false,
 		}
 	);
