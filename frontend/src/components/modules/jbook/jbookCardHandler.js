@@ -542,7 +542,7 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 					setHitsExpanded(!hitsExpanded);
 				}}
 			>
-				<span className="buttonText">Details</span>
+				<span className="buttonText">Review</span>
 				<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
 			</button>
 		);
@@ -1002,7 +1002,7 @@ const cardHandler = {
 								clickFn(cloneName, searchText, item, selectedPortfolio);
 							}}
 						>
-							Details
+							Review
 						</CardButton>
 						{graphView && (
 							<CardButton
