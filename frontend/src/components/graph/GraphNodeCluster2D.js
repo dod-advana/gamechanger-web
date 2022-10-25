@@ -1007,10 +1007,14 @@ export default function GraphNodeCluster2D(props) {
 		}
 	};
 
+	let unitVector = { x: 0, y: 0 },
+		sp1 = { x: 0, y: 0 },
+		sp2 = { x: 0, y: 0 };
+
 	const buildUnitVector = (p1, p2, uVect) => {
 		uVect.x = p2.x - p1.x;
 		uVect.y = p2.y - p1.y;
-		var vectorNorm = Math.sqrt(uVect.x ** 2 + uVect.y ** 2);
+		const vectorNorm = Math.sqrt(uVect.x ** 2 + uVect.y ** 2);
 		uVect.x /= vectorNorm;
 		uVect.y /= vectorNorm;
 	};
@@ -1026,10 +1030,6 @@ export default function GraphNodeCluster2D(props) {
 		ctx.lineTo(sp2.x, sp2.y);
 		ctx.stroke();
 	};
-
-	var unitVector = { x: 0, y: 0 },
-		sp1 = { x: 0, y: 0 },
-		sp2 = { x: 0, y: 0 };
 
 	const drawLink = (ctx, link, lineWidth, start, end, globalScale) => {
 		ctx.beginPath();
