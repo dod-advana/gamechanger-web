@@ -215,7 +215,7 @@ export default function ResponsibilityUpdates() {
 		const groupedData = {};
 		data.forEach((responsibility) => {
 			const doc = responsibility.documentTitle;
-			let entity = responsibility.organizationPersonnel;
+			let entity = responsibility.organizationPersonnelText;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
 			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];
@@ -299,7 +299,7 @@ export default function ResponsibilityUpdates() {
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
-			organizationPersonnel: 'Organization/Personnel',
+			organizationPersonnelText: 'Organization/Personnel',
 			responsibilityText: 'Responsibility Text',
 		};
 		const metaData = [];
@@ -570,7 +570,7 @@ export default function ResponsibilityUpdates() {
 																				selectedDoc ===
 																					responsibility.documentTitle &&
 																				selectedEntity ===
-																					responsibility.organizationPersonnel &&
+																					responsibility.organizationPersonnelText &&
 																				respKey ===
 																					iframePreviewLink.responsibilityIdx;
 																		}

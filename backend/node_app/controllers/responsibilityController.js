@@ -302,7 +302,7 @@ class ResponsibilityController {
 						[Op.eq]: value,
 					};
 				} else {
-					if (id === 'otherOrganizationPersonnel') {
+					if (id === 'responsibilityEntities') {
 						if (value.includes(null)) {
 							tmpWhere[id] = {
 								[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
@@ -325,7 +325,8 @@ class ResponsibilityController {
 					}
 				}
 			});
-			tmpWhere['status'] = { [Op.not]: 'rejected' };
+			//TODO uncomment
+			// tmpWhere['status'] = { [Op.not]: 'rejected' };
 			const newOffsets = [];
 			let newLimit = 0;
 			if (docView) {
@@ -350,13 +351,14 @@ class ResponsibilityController {
 				order: order,
 				where: tmpWhere,
 				attributes: [
-					'id',
 					'filename',
 					'documentTitle',
-					'organizationPersonnel',
+					'organizationPersonnelNumbering',
+					'organizationPersonnelText',
+					'organizationPersonnelEntities',
+					'responsibilityNumbering',
 					'responsibilityText',
-					'otherOrganizationPersonnel',
-					'documentsReferenced',
+					'responsibilityEntities',
 				],
 			});
 			res.status(200).send({ offsets: newOffsets, totalCount: results.count, results: results.rows });
@@ -372,7 +374,8 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const where = {};
-			where['status'] = { [Op.not]: 'rejected' };
+			//TODO uncomment
+			// where['status'] = { [Op.not]: 'rejected' };
 
 			const results = await this.responsibilities.findAll({
 				group: ['documentTitle'],
@@ -440,7 +443,7 @@ class ResponsibilityController {
 		try {
 			const { update, responsibility, status } = req.body;
 			const { id: updateId, updatedText, updatedColumn } = update;
-			const { id: responsibilityId, responsibilityText, organizationPersonnel } = responsibility;
+			const { id: responsibilityId, responsibilityText, organizationPersonnelText } = responsibility;
 			let responsibilityStatus;
 			if (updatedColumn === 'Reject' && status === 'accepted') {
 				await this.responsibilities.update(
@@ -492,7 +495,7 @@ class ResponsibilityController {
 				);
 				let responsibilityUpdate;
 				if (updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
-				if (updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
+				if (updatedColumn === 'organizationPersonnelText') responsibilityUpdate = organizationPersonnelText;
 				await this.responsibility_reports.update(
 					{
 						updatedText: responsibilityUpdate,

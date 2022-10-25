@@ -34,7 +34,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
-	const [docResponsibilityData, setDocResponsibilityData] = useState([]);
+	const [docResponsibilityData, setDocResponsibilityData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
@@ -51,7 +51,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const tutorialSearch = () => {
 		setOrganization(['dod']);
-		const newFilters = [{ id: 'organizationPersonnel', value: 'dod' }];
+		const newFilters = [{ id: 'organizationPersonnelText', value: 'dod' }];
 		setCollapseKeys({
 			'DoDI 1304.02 Accession Processing Data Collection Forms': true,
 			'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
@@ -153,7 +153,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		const groupedData = {};
 		data.forEach((responsibility) => {
 			const doc = `${parseFilename(responsibility.filename)} ${responsibility.documentTitle}`;
-			let entity = responsibility.organizationPersonnel;
+			let entity = responsibility.organizationPersonnelText;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
 			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];

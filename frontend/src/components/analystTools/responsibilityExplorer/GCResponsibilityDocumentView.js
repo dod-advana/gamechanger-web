@@ -105,6 +105,10 @@ export default function GCResponsibilityDocumentView({
 	};
 
 	useEffect(() => {
+		console.log('responsibilityData: ', responsibilityData);
+	}, [responsibilityData]);
+
+	useEffect(() => {
 		if (!iframeLoading) {
 			setTimeout(() => {
 				const notFound = document
@@ -157,7 +161,7 @@ export default function GCResponsibilityDocumentView({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
-							selectedResponsibility.organizationPersonnel,
+							selectedResponsibility.organizationPersonnelText,
 							pageNumber,
 							true,
 							cloneData
@@ -293,7 +297,7 @@ export default function GCResponsibilityDocumentView({
 		if (isEditingResp) {
 			updatedColumn = 'responsibilityText';
 		} else if (isEditingEntity) {
-			updatedColumn = 'organizationPersonnel';
+			updatedColumn = 'organizationPersonnelText';
 		}
 		gameChangerAPI
 			.storeResponsibilityReportData({
@@ -314,7 +318,7 @@ export default function GCResponsibilityDocumentView({
 
 	const editEntity = () => {
 		getResponsibilityPageInfo(
-			selectedResponsibility.organizationPersonnel || selectedResponsibility.responsibilityText
+			selectedResponsibility.organizationPersonnelText || selectedResponsibility.responsibilityText
 		);
 		setIsEditingEntity(true);
 	};
@@ -528,7 +532,7 @@ export default function GCResponsibilityDocumentView({
 				open={editModalOpen}
 				setOpen={setEditModalOpen}
 				responsibility={selectedResponsibility.responsibilityText}
-				entity={selectedResponsibility.organizationPersonnel ?? 'NO ENTITY'}
+				entity={selectedResponsibility.organizationPersonnelText ?? 'NO ENTITY'}
 				editEntity={editEntity}
 				editResponsibility={editResponsibility}
 				rejectResponsibility={rejectResponsibility}
