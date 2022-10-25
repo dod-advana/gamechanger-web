@@ -212,7 +212,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
 	'Initial Reviewer': 'primaryReviewer',
-	'Service Reviewer': 'serviceReviewer',
+	'RAI Lead Reviewer': 'serviceReviewer',
 	'POC Reviewer': 'pocReviewer',
 	'Appropriation Title': 'budgetType',
 	'Budget Activity Number': 'budgetActivity',
@@ -921,7 +921,7 @@ const cardHandler = {
 					Value: reviewers.primary,
 				});
 				metadata.push({
-					Key: 'Service Reviewer',
+					Key: 'RAI Lead Reviewer',
 					Value: reviewers.service,
 				});
 				metadata.push({
