@@ -45,6 +45,46 @@ describe('Test search and filters', () => {
 		cy.get('.eda-card-front').should('have.length.greaterThan', 0);
 	});
 
+	it('basic search submitted with enter', () => {
+		// Type in some text to search
+		cy.get('#gcSearchInput').type('army').type('{enter}');
+
+		// check that filters, results found, buttons are all showing
+		cy.get('[data-cy="eda-filter-container"]', { timeout: 15000 }).should('exist');
+
+		// results found text
+		cy.get('[data-cy="eda-results-found"]', { timeout: 20000 }).should('exist');
+
+		// view selector
+		cy.get('.view-buttons-container', { timeout: 10000 }).should('exist');
+
+		// result card
+		cy.get('.eda-card-front', { timeout: 10000 }).should('exist');
+		cy.get('.eda-card-front').should('have.length.greaterThan', 1);
+
+		// open and close the advanced search menu then try a different search submitted with enter
+		// (there used to be a bug causing this to not work)
+		cy.get('#advancedSearchButton').click();
+		cy.get('#advanced-filters');
+		cy.get('#advancedSearchButton').click();
+
+		// Type in some text to search
+		cy.get('#gcSearchInput').type('{backspace}{backspace}{backspace}{backspace}').type('navy').type('{enter}');
+
+		// check that filters, results found, buttons are all showing
+		cy.get('[data-cy="eda-filter-container"]', { timeout: 15000 }).should('exist');
+
+		// results found text
+		cy.get('[data-cy="eda-results-found"]', { timeout: 20000 }).should('exist');
+
+		// view selector
+		cy.get('.view-buttons-container', { timeout: 10000 }).should('exist');
+
+		// result card
+		cy.get('.eda-card-front', { timeout: 10000 }).should('exist');
+		cy.get('.eda-card-front').should('have.length.greaterThan', 1);
+	});
+
 	it('test out text input filters', () => {
 		// type in "defense"
 		cy.get('#gcSearchInput').type('defense');

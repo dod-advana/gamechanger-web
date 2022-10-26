@@ -212,7 +212,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
 	'Initial Reviewer': 'primaryReviewer',
-	'Service Reviewer': 'serviceReviewer',
+	'RAI Lead Reviewer': 'serviceReviewer',
 	'POC Reviewer': 'pocReviewer',
 	'Appropriation Title': 'budgetType',
 	'Budget Activity Number': 'budgetActivity',
@@ -542,7 +542,7 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 					setHitsExpanded(!hitsExpanded);
 				}}
 			>
-				<span className="buttonText">Details</span>
+				<span className="buttonText">Review</span>
 				<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
 			</button>
 		);
@@ -921,7 +921,7 @@ const cardHandler = {
 					Value: reviewers.primary,
 				});
 				metadata.push({
-					Key: 'Service Reviewer',
+					Key: 'RAI Lead Reviewer',
 					Value: reviewers.service,
 				});
 				metadata.push({
@@ -981,6 +981,7 @@ const cardHandler = {
 					<>
 						{item.dtic_pdf_location_s !== undefined && (
 							<CardButton
+								data-cy={'open-doc'}
 								target={'_blank'}
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
@@ -1001,7 +1002,7 @@ const cardHandler = {
 								clickFn(cloneName, searchText, item, selectedPortfolio);
 							}}
 						>
-							Details
+							Review
 						</CardButton>
 						{graphView && (
 							<CardButton
