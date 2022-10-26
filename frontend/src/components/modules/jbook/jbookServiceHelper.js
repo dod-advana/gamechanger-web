@@ -8,7 +8,6 @@ import {
 } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -395,11 +394,9 @@ const MissionPartnersValue = React.memo((props) => {
 		vendorData,
 		finished,
 		serviceMissionPartners, // from reviewData
-		serviceMissionPartnersChecklist, //
 	} = props;
 
 	const [missionPartners, setMissionPartners] = useState([]);
-	const [missionPartnersChecklist, setMissionPartnersChecklist] = useState({});
 
 	useEffect(() => {
 		if (Array.isArray(serviceMissionPartners)) {
@@ -408,16 +405,6 @@ const MissionPartnersValue = React.memo((props) => {
 			setMissionPartners(serviceMissionPartners ? serviceMissionPartners.split('|') : []);
 		}
 	}, [serviceMissionPartners]);
-
-	useEffect(() => {
-		if (Object.prototype.toString.call(serviceMissionPartnersChecklist) === '[object Object]') {
-			setMissionPartnersChecklist(serviceMissionPartnersChecklist);
-		} else {
-			setMissionPartnersChecklist(
-				serviceMissionPartnersChecklist ? JSON.parse(serviceMissionPartnersChecklist) : {}
-			);
-		}
-	}, [serviceMissionPartnersChecklist]);
 
 	return (
 		<StyledTableValueContainer>
@@ -428,13 +415,6 @@ const MissionPartnersValue = React.memo((props) => {
 					dropdown box to provide more.
 				</Typography>
 			</StyledInlineContainer>
-			{renderMissionPartnersCheckboxes(
-				(value) => {
-					setReviewData('setMissionPartnersChecklist', value);
-				},
-				missionPartnersChecklist,
-				finished
-			)}
 			<Autocomplete
 				multiple
 				id={'serviceMissionPartners'}

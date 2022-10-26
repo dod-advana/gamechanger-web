@@ -82,8 +82,6 @@ const initState = {
 		minTotalCost: '',
 		maxTotalCost: '',
 
-		appropriationNumberSpecificSelected: false,
-		appropriationNumberAllSelected: true,
 		paccts: [],
 		raccts: [],
 		oaccts: [],
@@ -91,6 +89,9 @@ const initState = {
 		budgetSubActivity: '',
 
 		// v --- all and selected --- v
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+
 		budgetTypeSpecificSelected: false,
 		budgetTypeAllSelected: true,
 
@@ -458,7 +459,44 @@ function reducer(state, action) {
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				jbookSearchSettings: { ...state.defaultOptions },
+				jbookSearchSettings: {
+					...state.defaultOptions,
+					appropriationNumberSpecificSelected: false,
+					appropriationNumberAllSelected: true,
+
+					budgetTypeSpecificSelected: false,
+					budgetTypeAllSelected: true,
+
+					budgetYearSpecificSelected: false,
+					budgetYearAllSelected: true,
+
+					serviceAgencySpecificSelected: false,
+					serviceAgencyAllSelected: true,
+
+					primaryReviewerSpecificSelected: false,
+					primaryReviewerAllSelected: true,
+
+					serviceReviewerSpecificSelected: false,
+					serviceReviewerAllSelected: true,
+
+					hasKeywordsSpecificSelected: false,
+					hasKeywordsAllSelected: true,
+
+					classLabelSpecificSelected: false,
+					classLabelAllSelected: true,
+
+					sourceTagSpecificSelected: false,
+					sourceTagAllSelected: true,
+
+					reviewStatusSpecificSelected: false,
+					reviewStatusAllSelected: true,
+
+					primaryReviewStatusSpecificSelected: false,
+					primaryReviewStatusAllSelected: true,
+
+					budgetActivitySpecificSelected: false,
+					budgetActivityAllSelected: true,
+				},
 				modifiedSearchSettings: [],
 			};
 		default:

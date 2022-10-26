@@ -68,11 +68,11 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - yarn install --cache-folder ../.yarn-cache --no-progress
     - cd ../backend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --frozen-lockfile --no-progress
+    - yarn install --cache-folder ../.yarn-cache --no-progress
 
 sast:
   stage: "🧪 static-test"
