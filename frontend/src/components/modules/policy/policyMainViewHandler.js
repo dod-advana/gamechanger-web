@@ -730,7 +730,7 @@ const getViewNames = (props) => {
 };
 
 const getExtraViewPanels = (props) => {
-	const { context } = props;
+	const { context, docExplorerLeftPanelOpen, setDocExplorerLeftPanelOpen } = props;
 	const { state, dispatch } = context;
 	const { count } = state;
 	const viewPanels = [];
@@ -739,8 +739,14 @@ const getExtraViewPanels = (props) => {
 		panel: (
 			<StyledCenterContainer showSideFilters={false}>
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
+					<ViewHeader
+						{...props}
+						extraStyle={{ margin: `20px 0 0 ${docExplorerLeftPanelOpen ? '425' : '0'}px` }}
+						resultsText=" "
+					/>
 					<PolicyDocumentExplorer
+						leftPanelOpen={docExplorerLeftPanelOpen}
+						setLeftPanelOpen={setDocExplorerLeftPanelOpen}
 						handleSearch={() => setState(dispatch, { runSearch: true })}
 						totalCount={count}
 						resultsPerPage={RESULTS_PER_PAGE}
@@ -1152,6 +1158,7 @@ const PolicyMainViewHandler = (props) => {
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
+	const [docExplorerLeftPanelOpen, setDocExplorerLeftPanelOpen] = useState(true);
 
 	useEffect(() => {
 		const shouldRunPagination = (type) => {
@@ -1194,7 +1201,11 @@ const PolicyMainViewHandler = (props) => {
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
 
-		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
+		const extraViewPanels = getExtraViewPanels({
+			context: { state, dispatch },
+			docExplorerLeftPanelOpen,
+			setDocExplorerLeftPanelOpen,
+		});
 		extraViewPanels.forEach(({ panelName, panel }) => {
 			viewPanels[panelName] = panel;
 		});

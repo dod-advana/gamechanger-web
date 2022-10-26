@@ -43,6 +43,7 @@ const styles = {
 		display: 'flex',
 		width: '100%',
 		justifyContent: 'center',
+		marginBottom: -20,
 	},
 };
 
@@ -233,6 +234,8 @@ const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHi
 };
 
 export default function PolicyDocumentExplorer({
+	leftPanelOpen,
+	setLeftPanelOpen,
 	totalCount,
 	resultsPerPage,
 	onPaginationClick,
@@ -250,7 +253,6 @@ export default function PolicyDocumentExplorer({
 	});
 	const [loadPDF, setLoadPDF] = useState(false);
 	const [iframeLoading, setIframeLoading] = useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [viewToggle, setviewToggle] = useState(false);
