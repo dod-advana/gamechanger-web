@@ -172,7 +172,18 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					entityNumber: responsibility.organizationPersonnelNumbering,
 					responsibilities: [],
 				};
+			if (!responsibility.responsibilityText)
+				responsibility.responsibilityText = responsibility.organizationPersonnelText;
 			groupedData[doc][entity].responsibilities.push(responsibility);
+		});
+		Object.keys(groupedData).forEach((doc) => {
+			Object.keys(groupedData[doc]).forEach((entity) => {
+				groupedData[doc][entity].responsibilities.sort((a, b) => {
+					if (a.responsibilityNumbering > b.responsibilityNumbering) return 1;
+					if (b.responsibilityNumbering > a.responsibilityNumbering) return -1;
+					return 0;
+				});
+			});
 		});
 		setDocResponsibilityData(groupedData);
 	};
