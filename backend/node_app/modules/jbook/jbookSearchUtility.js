@@ -1233,7 +1233,7 @@ class JBookSearchUtility {
 			});
 		}
 
-		// Service Reviewer
+		// Service Reviewer (RAI Lead)
 		if (jbookSearchSettings.serviceReviewer) {
 			const reviewerTerms = jbookSearchSettings.serviceReviewer.map((reviewer) => {
 				return { term: { 'review_n.service_reviewer_s': reviewer } };
