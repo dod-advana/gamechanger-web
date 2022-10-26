@@ -149,6 +149,16 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			setLoading(false);
 		}
 	};
+
+	// DocResponsibilityData = {
+	// 	document: {
+	// 		entity: {
+	// 			entityText: 'organizationPersonnelText',
+	// 			entityNumber: 'organizationPersonnelNumbering',
+	// 			responsibilities: [{ responsibility: 'everything' }],
+	// 		},
+	// 	},
+	// };
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility) => {
@@ -156,8 +166,13 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			let entity = responsibility.organizationPersonnelText;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
-			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];
-			groupedData[doc][entity].push(responsibility);
+			if (!groupedData[doc][entity])
+				groupedData[doc][entity] = {
+					entityText: responsibility.organizationPersonnelText,
+					entityNumber: responsibility.organizationPersonnelNumbering,
+					responsibilities: [],
+				};
+			groupedData[doc][entity].responsibilities.push(responsibility);
 		});
 		setDocResponsibilityData(groupedData);
 	};

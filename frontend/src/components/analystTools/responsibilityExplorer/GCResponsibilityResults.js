@@ -72,7 +72,7 @@ export default function GCResponsibilityResults({
 															`#/gamechanger?q=${
 																responsibilityData[doc][
 																	Object.keys(responsibilityData[doc])[0]
-																][0].filename
+																].responsibilities[0].filename
 															}&view=Explorer`
 														);
 													}}
@@ -109,98 +109,105 @@ export default function GCResponsibilityResults({
 											</div>
 											<UnmountClosed isOpened={entOpen && docOpen}>
 												<div>
-													{responsibilityData[doc][entity].map((responsibility, respKey) => {
-														let isHighlighted =
-															selectedResponsibility.responsibilityText ===
-															responsibility.responsibilityText;
-														let blockquoteClass = 'searchdemo-blockquote-sm';
+													{responsibilityData[doc][entity].responsibilities.map(
+														(responsibility, respKey) => {
+															let isHighlighted =
+																selectedResponsibility.responsibilityText ===
+																responsibility.responsibilityText;
+															let blockquoteClass = 'searchdemo-blockquote-sm';
 
-														if (isHighlighted)
-															blockquoteClass += ' searchdemo-blockquote-sm-active';
-														return (
-															<div key={key + respKey} style={{ position: 'relative' }}>
+															if (isHighlighted)
+																blockquoteClass += ' searchdemo-blockquote-sm-active';
+															return (
 																<div
-																	className="searchdemo-quote-link"
-																	onClick={(e) => {
-																		handleQuoteLinkClick(e, responsibility);
-																	}}
+																	key={key + respKey}
+																	style={{ position: 'relative' }}
 																>
 																	<div
-																		className={blockquoteClass}
-																		style={{
-																			marginLeft: 40,
-																			marginRight: 0,
-																			borderLeft: 'none',
+																		className="searchdemo-quote-link"
+																		onClick={(e) => {
+																			handleQuoteLinkClick(e, responsibility);
 																		}}
 																	>
-																		<span>{responsibility.responsibilityText}</span>
-																	</div>
-																</div>
-																{isHighlighted && (
-																	<span
-																		style={{
-																			left: 20,
-																			borderTop: '14px solid transparent',
-																			borderBottom: '14px solid transparent',
-																		}}
-																		className="searchdemo-arrow-left-sm"
-																	></span>
-																)}
-																<UnmountClosed isOpened={isHighlighted}>
-																	<div
-																		className="searchdemo-blockquote-sm"
-																		style={{
-																			marginLeft: 40,
-																			marginRight: 0,
-																			border: '1px solid #DCDCDC',
-																			padding: '10px',
-																			whiteSpace: 'normal',
-																		}}
-																	>
-																		<span
-																			className="gc-document-explorer-result-header-text"
-																			style={{ fontWeight: 'normal' }}
-																		>
-																			{responsibility.responsibilityText}
-																		</span>
 																		<div
+																			className={blockquoteClass}
 																			style={{
-																				display: 'flex',
-																				justifyContent: 'right',
-																				marginTop: '10px',
+																				marginLeft: 40,
+																				marginRight: 0,
+																				borderLeft: 'none',
 																			}}
 																		>
-																			<GCTooltip
-																				title={
-																					'Report any existing issues with this data'
-																				}
-																				placement="Top"
-																				arrow
-																			>
-																				<div>
-																					<GCButton
-																						className="re-tutorial-step-3"
-																						onClick={handleReport}
-																						style={{
-																							height: 40,
-																							minWidth: 40,
-																							padding: '2px 8px 0px',
-																							fontSize: 14,
-																							margin: '16px 0px 0px 10px',
-																							width: 'auto',
-																						}}
-																						isSecondaryBtn={isEditing}
-																					>
-																						{reportBtnText}
-																					</GCButton>
-																				</div>
-																			</GCTooltip>
+																			<span>
+																				{responsibility.responsibilityText}
+																			</span>
 																		</div>
 																	</div>
-																</UnmountClosed>
-															</div>
-														);
-													})}
+																	{isHighlighted && (
+																		<span
+																			style={{
+																				left: 20,
+																				borderTop: '14px solid transparent',
+																				borderBottom: '14px solid transparent',
+																			}}
+																			className="searchdemo-arrow-left-sm"
+																		></span>
+																	)}
+																	<UnmountClosed isOpened={isHighlighted}>
+																		<div
+																			className="searchdemo-blockquote-sm"
+																			style={{
+																				marginLeft: 40,
+																				marginRight: 0,
+																				border: '1px solid #DCDCDC',
+																				padding: '10px',
+																				whiteSpace: 'normal',
+																			}}
+																		>
+																			<span
+																				className="gc-document-explorer-result-header-text"
+																				style={{ fontWeight: 'normal' }}
+																			>
+																				{responsibility.responsibilityText}
+																			</span>
+																			<div
+																				style={{
+																					display: 'flex',
+																					justifyContent: 'right',
+																					marginTop: '10px',
+																				}}
+																			>
+																				<GCTooltip
+																					title={
+																						'Report any existing issues with this data'
+																					}
+																					placement="Top"
+																					arrow
+																				>
+																					<div>
+																						<GCButton
+																							className="re-tutorial-step-3"
+																							onClick={handleReport}
+																							style={{
+																								height: 40,
+																								minWidth: 40,
+																								padding: '2px 8px 0px',
+																								fontSize: 14,
+																								margin: '16px 0px 0px 10px',
+																								width: 'auto',
+																							}}
+																							isSecondaryBtn={isEditing}
+																						>
+																							{reportBtnText}
+																						</GCButton>
+																					</div>
+																				</GCTooltip>
+																			</div>
+																		</div>
+																	</UnmountClosed>
+																</div>
+															);
+														}
+													)}
 												</div>
 											</UnmountClosed>
 										</div>

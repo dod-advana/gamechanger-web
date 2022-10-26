@@ -138,7 +138,7 @@ export default function GCResponsibilityDocumentView({
 			const doc = Object.keys(responsibilityData)[0];
 			const entity = Object.keys(responsibilityData[doc])[0];
 
-			setSelectedResponsibility(responsibilityData[doc][entity][0]);
+			setSelectedResponsibility(responsibilityData[doc][entity].responsibilities[0]);
 		} else if (!Object.keys(responsibilityData).length) {
 			setSelectedResponsibility({});
 		}
