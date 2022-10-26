@@ -149,7 +149,7 @@ class Reports {
 					docData.programElement ?? docData.budgetLineItem_s,
 					docData.projectNum,
 					docData.totalCost,
-					docData.currentYearAmount,
+					docData.by1Request ?? 'N/A',
 					docData.proj_fund_by2_d ?? docData.p4082_toa_by2_d ?? 'N/A',
 					docData.proj_fund_by3_d ?? docData.p4082_toa_by3_d ?? 'N/A',
 					docData.proj_fund_by4_d ?? docData.p4082_toa_by4_d ?? 'N/A',

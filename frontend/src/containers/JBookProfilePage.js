@@ -1060,11 +1060,20 @@ const JBookProfilePage = () => {
 
 	const scorecardData = () => {
 		let data = [];
+
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			let latestReviewer;
+			if (reviewData.pocClassLabel) {
+				latestReviewer = reviewData.servicePOCName || 'The POC Reviewer';
+				console.log('latestReviewer: ', latestReviewer);
+			} else if (reviewData.serviceClassLabel) {
+				latestReviewer = reviewData.serviceReviewer || 'The RAI Lead Reviewer';
+			} else {
+				latestReviewer = reviewData.primaryReviewer || 'The Initial Reviewer';
+			}
 			data.push({
 				name: 'Reviewer Tag',
-				description:
-					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				description: latestReviewer + ' classified this document as "' + reviewData.latestClassLabel + '"',
 				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
