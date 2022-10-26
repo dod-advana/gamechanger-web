@@ -47,7 +47,7 @@ class TextSuggestionController {
 					const { message } = err;
 					this.logger.error(message, 'JBVZKTP', userId);
 				}
-				if (corrected.length > 0) {
+				if (corrected.length > 0 && esClientName !== 'eda') {
 					req.body.searchText = corrected;
 				}
 				if (suggestionsFlag === true) {
