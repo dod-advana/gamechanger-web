@@ -266,7 +266,6 @@ const PolicyViewHeaderHandler = (props) => {
 		}
 	};
 
-	console.log(extraStyle);
 	return (
 		<div
 			className={'results-count-view-buttons-container'}
