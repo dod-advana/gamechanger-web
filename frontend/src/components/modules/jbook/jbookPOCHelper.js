@@ -442,7 +442,7 @@ const AltAIPOCKey = React.memo(() => {
 			</Typography>
 			<Typography variant="subtitle1" style={{ fontSize: 12, marginTop: 15 }}>
 				If you are not the appropriate POC for this Program/Project, please enter an alternate AI Point of
-				Contact for this Program/Project in the POC section of the Service Reviewer Section. A suitable type of
+				Contact for this Program/Project in the POC section of the RAI Lead Reviewer Section. A suitable type of
 				POC would be the Program Element Monitor. We ask that you enter the POC Title, Name, Email address,
 				Organization and Phone Number in this section.
 			</Typography>
@@ -1278,7 +1278,7 @@ const DataTypeValue = React.memo((props) => {
 					Clear Selection
 				</GCPrimaryButton>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Describe how this project fits this data type
+					Identify the data sources this project uses and how it fits this data type:
 				</Typography>
 				<TextField
 					placeholder="Reviewer Notes"
@@ -1568,7 +1568,7 @@ const FooterValue = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Once your review is complete, click the submit finished review button to save your entries/information.
 				You can also save a partial review to finish later by clicking the Save Partial Review button or reset
-				the Service Reviewer Section to blank values by clicking the reset Form Buttons.
+				the RAI Lead Reviewer Section to blank values by clicking the reset Form Buttons.
 			</Typography>
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>
