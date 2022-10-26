@@ -325,8 +325,7 @@ class ResponsibilityController {
 					}
 				}
 			});
-			//TODO uncomment
-			// tmpWhere['status'] = { [Op.not]: 'rejected' };
+			tmpWhere['status'] = { [Op.not]: 'rejected' };
 			const newOffsets = [];
 			let newLimit = 0;
 			if (docView) {
@@ -374,8 +373,7 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const where = {};
-			//TODO uncomment
-			// where['status'] = { [Op.not]: 'rejected' };
+			where['status'] = { [Op.not]: 'rejected' };
 
 			const results = await this.responsibilities.findAll({
 				group: ['documentTitle'],

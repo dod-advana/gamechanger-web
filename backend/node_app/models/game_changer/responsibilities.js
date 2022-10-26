@@ -42,11 +42,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
-			//TODO Needs to be added back in
-			// status: {
-			// 	type: DataTypes.TEXT,
-			// 	defaultValue: 'active',
-			// },
+			status: {
+				type: DataTypes.TEXT,
+				defaultValue: 'active',
+			},
 		},
 		{
 			freezeTableName: true,
