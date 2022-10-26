@@ -278,7 +278,7 @@ const getExtraViewPanels = (props) => {
 		panel: (
 			<StyledCenterContainer showSideFilters={false}>
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
+					<ViewHeader {...props} resultsText=" " />
 					<DefaultDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
 						data={docSearchResults}
