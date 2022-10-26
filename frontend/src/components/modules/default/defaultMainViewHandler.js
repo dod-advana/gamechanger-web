@@ -67,7 +67,7 @@ const getDocumentProperties = async (dispatch, gameChangerAPI) => {
 	return documentProperties;
 };
 
-const checkForTinyURL = async (location, gameChangerAPI) => {
+export const checkForTinyURL = async (location, gameChangerAPI) => {
 	const tiny = getQueryVariable('tiny');
 
 	if (!location || !tiny) {

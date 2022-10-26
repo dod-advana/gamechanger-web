@@ -1314,7 +1314,7 @@ const DataTypeValue = React.memo((props) => {
 					Clear Selection
 				</GCPrimaryButton>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Describe how this project fits this data type
+					Identify the data sources this project uses and how it fits this data type:
 				</Typography>
 				<TextField
 					placeholder="Reviewer Notes"
