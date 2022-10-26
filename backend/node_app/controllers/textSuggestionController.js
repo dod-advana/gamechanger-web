@@ -117,7 +117,6 @@ class TextSuggestionController {
 	async getPresearchSuggestion({ body, index, userId, esClientName }) {
 		try {
 			let esQueryArray;
-			this.logger.info(JSON.stringify(body));
 			if (esClientName === 'eda') {
 				esQueryArray = this.searchUtility.getESpresearchMultiQueryEDA(body);
 			} else {
