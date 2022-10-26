@@ -175,7 +175,7 @@ const columns = [
 		id: 'primaryReviewer',
 	},
 	{
-		Header: () => <p style={styles.tableColumn}>SERVICE REVIEWER</p>,
+		Header: () => <p style={styles.tableColumn}>RAI LEAD REVIEWER</p>,
 		accessor: (row) =>
 			row.serviceSecondaryReviewer && row.serviceSecondaryReviewer !== ''
 				? row.serviceSecondaryReviewer
