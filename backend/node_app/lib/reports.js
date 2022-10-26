@@ -126,7 +126,7 @@ class Reports {
 				'BY5 Funding',
 				'Has Keywords',
 				'Primary Reviewer',
-				'Service Reviewer',
+				'RAI Lead Reviewer',
 				'POC Reviewer',
 				'Review Status',
 				'Labels',
