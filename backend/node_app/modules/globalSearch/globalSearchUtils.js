@@ -13,10 +13,9 @@ let {
 	QLIK_EXCLUDE_CUST_PROP_NAME,
 	QLIK_EXCLUDE_CUST_PROP_VAL,
 	QLIK_BUSINESS_DOMAIN_PROP_NAME,
+	QLIK_APP_FILTER,
+	QLIK_STREAM_FILTER,
 } = constantsFile.QLIK_OPTS;
-
-const STREAM_PROD_FILTER = `customProperties.value eq 'Production' and customProperties.definition.name eq 'StreamType'`;
-const APP_PROD_FILTER = `stream.customProperties.value eq 'Production' and stream.customProperties.definition.name eq 'StreamType'`;
 
 const QLIK_ES_FIELDS = [
 	'name_t',
@@ -54,11 +53,11 @@ const getQlikApps = async (userId, logger, getCount = false, params = {}) => {
 			url = `${QLIK_URL}/qrs/app/count`;
 		}
 
-		const qlikAppReq = axios.get(url, getRequestConfigs({ filter: APP_PROD_FILTER, ...params }, userId));
+		const qlikAppReq = axios.get(url, getRequestConfigs({ filter: QLIK_APP_FILTER, ...params }, userId));
 
 		const qlikStreamReq = axios.get(
 			`${QLIK_URL}/qrs/stream/full`,
-			getRequestConfigs({ filter: STREAM_PROD_FILTER }, userId)
+			getRequestConfigs({ filter: QLIK_STREAM_FILTER }, userId)
 		);
 
 		const [qlikApps, qlikStreams] = await Promise.all([qlikAppReq, qlikStreamReq]);
