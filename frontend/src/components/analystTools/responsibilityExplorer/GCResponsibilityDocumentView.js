@@ -130,15 +130,14 @@ export default function GCResponsibilityDocumentView({
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach((docKey) => {
 				initialCollapseKeys[docKey] = false;
-				Object.keys(responsibilityData[docKey]).forEach((entityKey) => {
-					initialCollapseKeys[docKey + entityKey] = false;
+				responsibilityData[docKey].entities.forEach((entity) => {
+					initialCollapseKeys[docKey + entity.organizationPersonnelText] = false;
 				});
 			});
 			if (!showTutorial) setCollapseKeys(initialCollapseKeys);
 			const doc = Object.keys(responsibilityData)[0];
-			const entity = Object.keys(responsibilityData[doc])[0];
 
-			setSelectedResponsibility(responsibilityData[doc][entity].responsibilities[0]);
+			setSelectedResponsibility(responsibilityData[doc].entities[0].responsibilities[0]);
 		} else if (!Object.keys(responsibilityData).length) {
 			setSelectedResponsibility({});
 		}

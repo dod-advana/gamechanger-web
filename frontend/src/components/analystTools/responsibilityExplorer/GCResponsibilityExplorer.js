@@ -28,6 +28,30 @@ const parseFilename = (filename) => {
 	return `${letters} ${numbers}`;
 };
 
+const sortResponsibilities = (data) => {
+	Object.keys(data).forEach((doc) => {
+		Object.keys(data[doc].entityObj).forEach((entity) => {
+			data[doc].entityObj[entity].responsibilities.sort((a, b) => {
+				if (a.responsibilityNumbering > b.responsibilityNumbering) return 1;
+				if (b.responsibilityNumbering > a.responsibilityNumbering) return -1;
+				return 0;
+			});
+			data[doc].entities.push(data[doc].entityObj[entity]);
+		});
+		delete data[doc].entityObj;
+	});
+};
+
+const sortEntities = (data) => {
+	Object.keys(data).forEach((doc) => {
+		data[doc].entities.sort((a, b) => {
+			if (a.entityNumber > b.entityNumber) return 1;
+			if (b.entityNumber > a.entityNumber) return -1;
+			return 0;
+		});
+	});
+};
+
 export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const classes = useStyles();
 	const DOCS_PER_PAGE = 15;
@@ -139,58 +163,40 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			});
 			if (scroll) {
 				setResponsibilityData([...responsibilityData, ...results]);
+				setDocResponsibilityData({ ...docResponsibilityData, ...groupResponsibilities(results) });
 			} else {
 				setResponsibilityData(results);
+				setDocResponsibilityData(groupResponsibilities(results));
 			}
 		} catch (e) {
 			setResponsibilityData([]);
+			setDocResponsibilityData({});
 			console.error(e);
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// DocResponsibilityData = {
-	// 	document: {
-	// 		entity: {
-	// 			entityText: 'organizationPersonnelText',
-	// 			entityNumber: 'organizationPersonnelNumbering',
-	// 			responsibilities: [{ responsibility: 'everything' }],
-	// 		},
-	// 	},
-	// };
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility) => {
 			const doc = `${parseFilename(responsibility.filename)} ${responsibility.documentTitle}`;
 			let entity = responsibility.organizationPersonnelText;
-			if (!entity) entity = 'NO ENTITY';
-			if (!groupedData[doc]) groupedData[doc] = {};
-			if (!groupedData[doc][entity])
-				groupedData[doc][entity] = {
+			if (!groupedData[doc]) groupedData[doc] = { entities: [], entityObj: {} };
+			if (!groupedData[doc].entityObj[entity])
+				groupedData[doc].entityObj[entity] = {
 					entityText: responsibility.organizationPersonnelText,
 					entityNumber: responsibility.organizationPersonnelNumbering,
 					responsibilities: [],
 				};
 			if (!responsibility.responsibilityText)
 				responsibility.responsibilityText = responsibility.organizationPersonnelText;
-			groupedData[doc][entity].responsibilities.push(responsibility);
+			groupedData[doc].entityObj[entity].responsibilities.push(responsibility);
 		});
-		Object.keys(groupedData).forEach((doc) => {
-			Object.keys(groupedData[doc]).forEach((entity) => {
-				groupedData[doc][entity].responsibilities.sort((a, b) => {
-					if (a.responsibilityNumbering > b.responsibilityNumbering) return 1;
-					if (b.responsibilityNumbering > a.responsibilityNumbering) return -1;
-					return 0;
-				});
-			});
-		});
-		setDocResponsibilityData(groupedData);
+		sortResponsibilities(groupedData);
+		sortEntities(groupedData);
+		return groupedData;
 	};
-
-	useEffect(() => {
-		groupResponsibilities(responsibilityData);
-	}, [responsibilityData]);
 
 	const getData = async ({ page = 1, offset = 0, filtered = [] }) => {
 		try {
