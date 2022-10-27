@@ -69,11 +69,7 @@ export default function GCResponsibilityResults({
 												<InfoIcon
 													onClick={() => {
 														window.open(
-															`#/gamechanger?q=${
-																responsibilityData[doc][
-																	Object.keys(responsibilityData[doc])[0]
-																].responsibilities[0].filename
-															}&view=Explorer`
+															`#/gamechanger?q=${responsibilityData[doc].entities[0].responsibilities[0].filename}&view=Explorer`
 														);
 													}}
 												/>
@@ -83,15 +79,21 @@ export default function GCResponsibilityResults({
 								)}
 							</div>
 							<UnmountClosed isOpened={docOpen}>
-								{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
-									const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
+								{responsibilityData[doc].entities.map((entity, entKey) => {
+									const { entityText } = entity;
+									const entOpen = collapseKeys[doc + entityText]
+										? collapseKeys[doc + entityText]
+										: false;
 									return (
 										<div key={entKey}>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
 													e.preventDefault();
-													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
+													setCollapseKeys({
+														...collapseKeys,
+														[doc + entityText]: !entOpen,
+													});
 												}}
 												style={{ margin: '0 0 0 20px', backgroundColor: '#eceff1' }}
 											>
@@ -104,12 +106,12 @@ export default function GCResponsibilityResults({
 													className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
 												/>
 												<span className="gc-document-explorer-result-header-text">
-													{entity}
+													{entityText}
 												</span>
 											</div>
 											<UnmountClosed isOpened={entOpen && docOpen}>
 												<div>
-													{responsibilityData[doc][entity].responsibilities.map(
+													{responsibilityData[doc].entities[entKey].responsibilities.map(
 														(responsibility, respKey) => {
 															let isHighlighted =
 																selectedResponsibility.responsibilityText ===
