@@ -216,7 +216,7 @@ const GetQAResults = (props) => {
 								onClick={() => {
 									if (feedback === '') {
 										setFeedback('thumbsUp');
-										if (type === 'QA 123') {
+										if (type === 'QA') {
 											gameChangerAPI.sendQAFeedback(
 												'qa_thumbs_up',
 												question,
