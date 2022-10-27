@@ -116,8 +116,6 @@ export const draw2DArrows = (
 
 	const lineLen = bzLine ? bzLine.length() : Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
 
-	// console.log('what is globalscale??', globalScale);
-	// console.log('what is noderelsize?????', nodeRelSize);
 	const posAlongLine =
 		startR +
 		arrowLength -
