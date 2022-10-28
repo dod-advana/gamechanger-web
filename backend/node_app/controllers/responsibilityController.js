@@ -350,6 +350,7 @@ class ResponsibilityController {
 				order: order,
 				where: tmpWhere,
 				attributes: [
+					'id',
 					'filename',
 					'documentTitle',
 					'organizationPersonnelNumbering',
