@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
@@ -36,17 +37,23 @@
 //   }
 // }
 import '@testing-library/cypress/add-commands';
-import CypressHelper, { BASE_URL } from './CypressHelper';
+import CypressHelper from './CypressHelper';
 
 // jbook commands
 import './jbook-commands';
 // policy commands
 import './policy-commands';
+// eda commands
+import './eda-commands';
 
 /* ************* GENERAL ************** */
 
 Cypress.Commands.add('getDataCy', (cyTag, ...args) => {
-    cy.get(`[data-cy="${cyTag}"]`, ...args)
+	cy.get(`[data-cy="${cyTag}"]`, ...args);
+});
+
+Cypress.Commands.add('findDataCy', { prevSubject: true }, (subject, cyTag) => {
+	cy.wrap(subject).find(`[data-cy="${cyTag}"]`);
 });
 
 // this handles setting up your cookies and headers
@@ -56,15 +63,23 @@ Cypress.Commands.add('setup', () => {
 	cy.clearCookies();
 });
 
+/**
+ * Visits a page using the BASE_URL, mostly used for when you dont need to accept consent banner again
+ */
+Cypress.Commands.add('visitGcPage', (page) => {
+	if (page.charAt(0) === '/') page = page.substring(1, page.length);
+	cy.visit(`/#/${page}`);
+});
+
 // this visits a page and clicks the consent agreement
 Cypress.Commands.add('visit_accept_consent', (page) => {
 	// Visit the main page
-	cy.visit(`${BASE_URL}/#/${page}`);
+	cy.visit(`/#/${page}`);
 
 	// Click the okay button
 	cy.accept_consent();
 });
 
 Cypress.Commands.add('accept_consent', () => {
-    cy.get('[data-cy="consent-agreement-okay"]', { timeout: 10000 }).click();
+	cy.get('[data-cy="consent-agreement-okay"]').click();
 });

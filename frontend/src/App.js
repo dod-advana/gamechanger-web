@@ -115,6 +115,11 @@ const GamechangerLiteAdminPage = LoadableVisibility({
 	loading: () => emptyPage(),
 });
 
+const JbookUserProfileSetupPage = LoadableVisibility({
+	loader: () => import('./containers/JBookUserProfileSetupPage'),
+	loading: () => emptyPage(),
+});
+
 const instance = createInstance({
 	urlBase: Config.MATOMO_LINK || '',
 	siteId: Config.MATOMO_SITE_ID || 2,
@@ -148,6 +153,7 @@ const styles = {
 		marginLeft: '50px',
 		paddingTop: '2em',
 		background: '#ffffff',
+		position: 'relative',
 	},
 };
 
@@ -188,8 +194,7 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	useEffect(() => {
 		// On route load we want to log this to matomo, that is all this use effect does
 		const userId = Auth.getUserId() || ' ';
-		const regex = /\d{10}/g;
-		const id = regex.exec(userId);
+		const id = userId.split('@');
 		pushInstruction('setUserId', SparkMD5.hash(id ? id[0] : userId));
 		trackPageView({
 			// documentTitle and href get logged automatically
@@ -367,6 +372,12 @@ const App = () => {
 													exact
 													path="/gamechanger-details"
 													component={GameChangerDetailsPage}
+													location={location}
+												/>
+												<Route
+													exact
+													path="/jbook-register-poc"
+													component={JbookUserProfileSetupPage}
 													location={location}
 												/>
 												<PrivateTrackedRoute

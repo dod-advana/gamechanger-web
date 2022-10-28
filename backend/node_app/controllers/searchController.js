@@ -10,14 +10,11 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { Thesaurus } = require('../lib/thesaurus');
 const asyncRedisLib = require('async-redis');
 const sparkMD5Lib = require('spark-md5');
-const _ = require('lodash');
 const { DataLibrary } = require('../lib/dataLibrary');
 const { Reports } = require('../lib/reports');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
-const { getTenDigitUserId } = require('../utils/userUtility');
 
 const redisAsyncClientDB = 7;
-const abbreviationRedisAsyncClientDB = 9;
 const separatedRedisAsyncClientDB = 4;
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
@@ -108,6 +105,48 @@ class SearchController {
 		return searchResults;
 	}
 
+	documentSearchCleanResults({
+		results,
+		getIdList,
+		searchTerms,
+		userId,
+		expansionDict,
+		forGraphCache,
+		selectedDocuments,
+		esIndex,
+		esQuery,
+	}) {
+		if (
+			results &&
+			results.body &&
+			results.body.hits &&
+			results.body.hits.total &&
+			results.body.hits.total.value &&
+			results.body.hits.total.value > 0
+		) {
+			if (getIdList) {
+				return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
+			}
+
+			if (forGraphCache) {
+				return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
+			} else {
+				return this.searchUtility.cleanUpEsResults({
+					raw: results,
+					searchTerms,
+					user: userId,
+					selectedDocuments,
+					expansionDict,
+					index: esIndex,
+					query: esQuery,
+				});
+			}
+		} else {
+			this.logger.error('Error with Elasticsearch results', 'M91NVGW', userId);
+			return { totalCount: 0, docs: [] };
+		}
+	}
+
 	async documentSearch(req, body, userId) {
 		try {
 			const permissions = req.permissions ? req.permissions : [];
@@ -128,68 +167,43 @@ class SearchController {
 			let esIndex = index;
 			let esQuery = '';
 
-			if (cloneData.clone_data) {
-				switch (cloneData.clone_data.esCluster) {
-					case 'eda':
-						if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-							const { extSearchFields = [], extRetrieveFields = [] } =
-								this.constants.EDA_ELASTIC_SEARCH_OPTS;
+			if (
+				cloneData.clone_data &&
+				cloneData.clone_data.esCluster === 'eda' &&
+				(permissions.includes('View EDA') || permissions.includes('Webapp Super Admin'))
+			) {
+				const { extSearchFields = [], extRetrieveFields = [] } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 
-							body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
-							body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
-							esQuery = this.searchUtility.getElasticsearchPagesQuery(body, userId);
+				body.extSearchFields = extSearchFields.map((field) => field.toLowerCase());
+				body.extStoredFields = extRetrieveFields.map((field) => field.toLowerCase());
+				esQuery = this.searchUtility.getElasticsearchPagesQuery(body, userId);
 
-							esClientName = 'eda';
-						} else {
-							throw 'Unauthorized';
-						}
-						break;
-					default:
-						esClientName = 'gamechanger';
-				}
+				esClientName = 'eda';
+			} else if (cloneData.clone_data && cloneData.clone_data.esCluster === 'eda') {
+				throw new Error('Unauthorized');
 			}
 
-			if (esQuery === '') {
-				if (forGraphCache) {
-					esQuery = this.searchUtility.getElasticsearchQueryForGraphCache(body, userId);
-				} else if (searchType === 'Simple') {
-					esQuery = this.searchUtility.getSimpleSyntaxElasticsearchQuery(body, userId);
-					esIndex = this.constants.GAME_CHANGER_OPTS.simpleIndex;
-				} else {
-					esQuery = this.searchUtility.getElasticsearchQuery(body, userId);
-				}
+			if (esQuery === '' && forGraphCache) {
+				esQuery = this.searchUtility.getElasticsearchQueryForGraphCache(body, userId);
+			} else if (esQuery === '' && searchType === 'Simple') {
+				esQuery = this.searchUtility.getSimpleSyntaxElasticsearchQuery(body, userId);
+				esIndex = this.constants.GAME_CHANGER_OPTS.simpleIndex;
+			} else if (esQuery === '') {
+				esQuery = this.searchUtility.getElasticsearchQuery(body, userId);
 			}
 
 			const results = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-			if (
-				results &&
-				results.body &&
-				results.body.hits &&
-				results.body.hits.total &&
-				results.body.hits.total.value &&
-				results.body.hits.total.value > 0
-			) {
-				if (getIdList) {
-					return this.searchUtility.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
-				}
-
-				if (forGraphCache) {
-					return this.searchUtility.cleanUpIdEsResultsForGraphCache(results, userId);
-				} else {
-					return this.searchUtility.cleanUpEsResults(
-						results,
-						searchTerms,
-						userId,
-						selectedDocuments,
-						expansionDict,
-						esIndex,
-						esQuery
-					);
-				}
-			} else {
-				this.logger.error('Error with Elasticsearch results', 'M91NVGW', userId);
-				return { totalCount: 0, docs: [] };
-			}
+			return this.documentSearchCleanResults({
+				results,
+				getIdList,
+				searchTerms,
+				userId,
+				expansionDict,
+				forGraphCache,
+				selectedDocuments,
+				esIndex,
+				esQuery,
+			});
 		} catch (e) {
 			const { message } = e;
 			this.logger.error(message, 'KCYH5Z5', userId);
@@ -197,13 +211,10 @@ class SearchController {
 		}
 	}
 
-	async documentSearchOneID(req, body, userId) {
+	async documentSearchOneID(_req, body, userId) {
 		try {
-			const permissions = req.permissions ? req.permissions : [];
+			const { id = '', searchTerms = [], expansionDict = {}, limit = 20 } = body;
 
-			const { cloneData = {}, id = '', searchTerms = [], expansionDict = {}, limit = 20 } = body;
-
-			const { index } = this.constants.EDA_ELASTIC_SEARCH_OPTS;
 			const esQuery = this.searchUtility.getESQueryUsingOneID(id, userId, limit);
 
 			let esClientName = 'gamechanger';
@@ -218,15 +229,15 @@ class SearchController {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				return this.searchUtility.cleanUpEsResults(
-					esResults,
+				return this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
+					user: userId,
+					selectedDocuments: null,
 					expansionDict,
-					esIndex,
-					esQuery
-				);
+					index: esIndex,
+					query: esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'RLNTXAR', userId);
 				return { totalCount: 0, docs: [] };
@@ -269,15 +280,15 @@ class SearchController {
 				esResults.body.hits.total.value &&
 				esResults.body.hits.total.value > 0
 			) {
-				return this.searchUtility.cleanUpEsResults(
-					esResults,
+				return this.searchUtility.cleanUpEsResults({
+					raw: esResults,
 					searchTerms,
-					userId,
-					null,
+					user: esResults,
+					selectedDocuments: null,
 					expansionDict,
-					clientObj.esIndex,
-					esQuery
-				);
+					index: clientObj.esIndex,
+					query: esQuery,
+				});
 			} else {
 				this.logger.error('Error with Elasticsearch results', 'JBVXMP6', userId);
 				return { totalCount: 0, docs: [] };
@@ -289,25 +300,11 @@ class SearchController {
 		}
 	}
 
-	async storeSearchES(historyRec) {
-		const {
-			user_id,
-			searchText,
-			startTime,
-			endTime,
-			hadError,
-			numResults,
-			searchType,
-			cachedResult,
-			orgFilters,
-			tiny_url,
-			request_body,
-			search_version,
-			clone_name,
-		} = historyRec;
+	async storeSearchES(_historyRec) {
+		return undefined;
 	}
 
-	async storeRecordOfSearchInPg(historyRec, cloneData = {}, showTutorial) {
+	async storeRecordOfSearchInPg(historyRec, _cloneData, showTutorial) {
 		let userId = 'Unknown';
 		try {
 			const {
@@ -420,14 +417,12 @@ class SearchController {
 		if (isNaN(id)) {
 			return null;
 		}
-		const tinyUrl = await this.gcSearchURLs.findOne({
+		return this.gcSearchURLs.findOne({
 			where: {
 				id,
 			},
 			raw: true,
 		});
-
-		return tinyUrl;
 	}
 
 	async shortenSearchURL(req, res) {
@@ -477,8 +472,6 @@ class SearchController {
 				if (safeEsClient === 'eda') {
 					index = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 				}
-			} else {
-				safeEsClient = 'gamechanger';
 			}
 			console.log(`Querying ${esClient} with index ${index}`);
 			const esResults = await this.dataApi.queryElasticSearch(esClient, index, query, userId);
@@ -506,17 +499,14 @@ class SearchController {
 	getESClient(cloneData, permissions, index) {
 		let esClientName = 'gamechanger';
 		let esIndex = 'gamechanger';
-		switch (cloneData.clone_name) {
-			case 'eda':
-				if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
-					esClientName = 'eda';
-					esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
-					return { esClientName, esIndex };
-				} else {
-					throw 'Unauthorized';
-				}
-			default:
-				esClientName = 'gamechanger';
+		if (cloneData.clone_name === 'eda') {
+			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+				esClientName = 'eda';
+				esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+				return { esClientName, esIndex };
+			} else {
+				throw new Error('Unauthorized');
+			}
 		}
 
 		if (index) {

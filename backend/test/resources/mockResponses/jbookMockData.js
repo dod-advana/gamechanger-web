@@ -1473,6 +1473,7 @@ const commentData = [
 		portfolioName: 'AI Inventory',
 		updatedAt: '2022-07-15T21:44:52.984Z',
 		upvotes: [],
+		authorId: '99',
 	},
 	{
 		author: null,
@@ -1485,6 +1486,7 @@ const commentData = [
 		portfolioName: 'AI Inventory',
 		updatedAt: '2022-07-15T21:44:55.984Z',
 		upvotes: [],
+		authorId: '99',
 	},
 ];
 
@@ -1511,6 +1513,17 @@ const budgetDropdownData = {
 		{ current_msn_part: 'Other' },
 	],
 	secondaryReviewers: [{ name: 'Test Testeroni' }],
+	pocReviewers: {
+		'Test Testo (test@test.com)': {
+			email: 'test@test.com',
+			first_name: 'Test',
+			id: 88,
+			job_title: 'Software Engineer',
+			last_name: 'Testo',
+			organization: 'Booz Allen Hamilton',
+			phone_number: '5555555555',
+		},
+	},
 };
 
 module.exports = {

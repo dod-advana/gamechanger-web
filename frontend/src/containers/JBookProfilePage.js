@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
+import { trackEvent } from '../components/telemetry/Matomo';
+import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -10,7 +12,6 @@ import GCPrimaryButton from '../components/common/GCButton';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { gcOrange } from '../components/common/gc-colors';
 import CloseIcon from '@material-ui/icons/Close';
-import { getQueryVariable } from '../utils/gamechangerUtils';
 import './gamechanger.css';
 import './jbook.css';
 import './jbook-styles.css';
@@ -59,7 +60,6 @@ const JBookProfilePage = () => {
 		keywordsChecked,
 		selectedPortfolio,
 		cloneData,
-		domainTasks,
 		portfolios,
 		profilePageBudgetYear,
 		serviceValidation,
@@ -68,6 +68,7 @@ const JBookProfilePage = () => {
 		userData,
 	} = state;
 	const [permissions, setPermissions] = useState({
+		is_admin: false,
 		is_primary_reviewer: false,
 		is_service_reviewer: false,
 		is_poc_reviewer: false,
@@ -100,17 +101,29 @@ const JBookProfilePage = () => {
 	let [init, setInit] = useState(false);
 
 	useEffect(() => {
-		const getUserData = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
-			const newMap = {};
-			data.data.users.forEach((user) => {
-				newMap[user.id] = user;
-			});
+		if (selectedPortfolio === 'AI Inventory') {
+			const prevYearData = budgetYearProjectData[`${projectData.budgetYear - 1}`];
+			const previosuReview = prevYearData?.review_n?.find((review) => review.portfolio_name_s === 'AI Inventory');
+			const previousClassLabel = previosuReview?.latest_class_label_s;
+			if (previousClassLabel && !reviewData.primaryClassLabel)
+				setReviewData('primaryClassLabel', previousClassLabel);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [budgetYearProjectData, budgetYear, selectedPortfolio]);
 
+	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		window.open(
+			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+		);
+	};
+
+	useEffect(() => {
+		const getUserData = async () => {
 			const currentUserData = await gameChangerUserAPI.getUserProfileData();
 			setState(dispatch, { userData: currentUserData ? currentUserData.data : {} });
-
-			setUserMap(newMap);
 		};
 
 		if (!init) {
@@ -138,12 +151,7 @@ const JBookProfilePage = () => {
 	};
 
 	const setProjectReviewData = (newProjectData, tempMapping, portfolioName) => {
-		let newDomainTasks = _.cloneDeep(domainTasks);
 		let review = newProjectData.reviews[portfolioName] ?? {};
-
-		if (review.domainTask && review.domainTaskSecondary) {
-			newDomainTasks[review.domainTask] = review.domainTaskSecondary;
-		}
 
 		if (review.serviceMissionPartnersChecklist === null || review.serviceMissionPartnersChecklist === undefined) {
 			review.serviceMissionPartnersChecklist = JSON.stringify(tempMapping);
@@ -170,7 +178,7 @@ const JBookProfilePage = () => {
 			review.pocMPAgreeLabel = 'Yes';
 		}
 
-		setState(dispatch, { reviewData: review, domainTasks: newDomainTasks });
+		setState(dispatch, { reviewData: review });
 	};
 
 	const selectBudgetYearProjectData = (allBYProjectData, year, portfolioName) => {
@@ -232,6 +240,7 @@ const JBookProfilePage = () => {
 	// grab all profile page relaetd data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
+		const currentUserData = await gameChangerUserAPI.getUserProfileData();
 
 		try {
 			setProfileLoading(true);
@@ -242,8 +251,17 @@ const JBookProfilePage = () => {
 				cloneName: cloneData.clone_name,
 				options: {
 					id,
+					portfolioName,
+					userRowId: currentUserData.data.id,
 				},
 			});
+
+			if (allBYProjectData.data === 'Unauthorized Entry Detected') {
+				let newHref = window.location.href;
+				newHref = newHref.split('#')[0];
+				newHref += '#/unauthorized';
+				window.location.replace(newHref);
+			}
 
 			if (allBYProjectData?.data) {
 				allBYProjectData = allBYProjectData.data;
@@ -293,12 +311,12 @@ const JBookProfilePage = () => {
 
 		const userData = Auth.getTokenPayload();
 
-		if (userData.extra_fields && userData.extra_fields.jbook) {
+		if (userData?.extra_fields?.jbook) {
 			const tmpPermissions = {
 				is_admin: userData.extra_fields.jbook.is_admin,
 				is_primary_reviewer: userData.extra_fields.jbook.is_primary_reviewer,
 				is_service_reviewer: userData.extra_fields.jbook.is_service_reviewer,
-				is_pos_reviewer: userData.extra_fields.jbook.is_pos_reviewer,
+				is_poc_reviewer: userData.extra_fields.jbook.is_poc_reviewer,
 			};
 
 			setPermissions(tmpPermissions);
@@ -306,20 +324,39 @@ const JBookProfilePage = () => {
 
 		const getPortfolioData = async () => {
 			// grab the portfolio data
+			const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 			await gameChangerAPI
 				.callDataFunction({
 					functionName: 'getPortfolios',
 					cloneName: 'jbook',
-					options: {},
+					options: { id: currentUserData.data.id },
 				})
-				.then((data) => {
-					let portfolioData = data.data !== undefined ? data.data : [];
+				.then(async (data) => {
+					let publicData = [];
+					let privateData = [];
+					if (data.data) {
+						publicData = data.data.publicPortfolios;
+						privateData = data.data.privatePortfolios;
+					}
+					let portfolioData = [...publicData, ...privateData];
 					let map = {};
 					for (let item of portfolioData) {
 						map[item.name] = item;
 					}
 					setMap(map);
 					setState(dispatch, { portfolios: portfolioData });
+
+					const userIdSet = [];
+					Object.keys(map).forEach((portfolio) => {
+						map[portfolio].user_ids.forEach((id) => {
+							if (!userIdSet.includes(id)) userIdSet.push(id);
+						});
+					});
+					const { data: userData } = await gameChangerAPI.getUserDataByIDs(userIdSet);
+					const newUserMap = {};
+					userData.users.forEach((user) => (newUserMap[user.id] = user));
+					setUserMap(newUserMap);
 				});
 		};
 		getPortfolioData();
@@ -385,14 +422,14 @@ const JBookProfilePage = () => {
 				// if there is an or, highlight terms separately
 				if (searchText.indexOf('or') !== -1) {
 					terms.forEach((term) => {
-						const regex = new RegExp(`${term}([a-z]+)?`, 'gi');
+						const regex = new RegExp(`${term.replaceAll('"', '')}([a-z]+)?`, 'gi');
 						const tmpMatches = descriptions.value.match(regex);
 						matches = matches.concat(tmpMatches);
 					});
 				}
 				// else highlight as 1 phrase
 				else {
-					const regex = new RegExp(`${searchText}([a-z]+)?`, 'gi');
+					const regex = new RegExp(`${searchText.replaceAll('"', '')}([a-z]+)?`, 'gi');
 					const tmpMatches = descriptions.value.match(regex);
 					matches = matches.concat(tmpMatches);
 				}
@@ -401,7 +438,7 @@ const JBookProfilePage = () => {
 					for (const match of matches) {
 						descriptions.value = descriptions.value.replaceAll(
 							match,
-							`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+							`<span style="background-color: #1C2D64; color: white; padding: 0 4px;">${match}</span>`
 						);
 					}
 				}
@@ -616,8 +653,8 @@ const JBookProfilePage = () => {
 						</Typography>
 					</div>
 				</DialogTitle>
-				<CloseButton>
-					<CloseIcon fontSize="large" />
+				<CloseButton onClick={() => setState(dispatch, { [`${reviewType}ModalOpen`]: false })}>
+					<CloseIcon fontSize="25" />
 				</CloseButton>
 				<DialogContent>
 					<p>Would you like to re-enable the {reviewType} review form?</p>
@@ -642,23 +679,6 @@ const JBookProfilePage = () => {
 			</Dialog>
 		);
 	};
-
-	const setDomainTaskSecondary = useCallback(
-		(domainTask, newDomainTasks, value) => {
-			if (domainTasks[domainTask]) {
-				const index = newDomainTasks[domainTask].indexOf(value);
-
-				if (index !== -1) {
-					newDomainTasks[domainTask].splice(index, 1);
-				} else {
-					newDomainTasks[domainTask].push(value);
-				}
-			}
-
-			return newDomainTasks;
-		},
-		[domainTasks]
-	);
 
 	const updateValidation = useCallback(
 		(field, value, stateObject) => {
@@ -694,12 +714,18 @@ const JBookProfilePage = () => {
 		[dispatch, reviewData]
 	);
 
+	const setServicePOC = (value, reviewData) => {
+		const { first_name, last_name, organization, job_title, email, phone_number } = value;
+		reviewData.servicePOCTitle = job_title ?? '';
+		reviewData.servicePOCName = `${first_name} ${last_name}`;
+		reviewData.servicePOCEmail = email ?? '';
+		reviewData.servicePOCOrg = organization ?? '';
+		reviewData.servicePOCPhoneNumber = phone_number ?? '';
+	};
+
 	const setReviewData = useCallback(
 		(field, value) => {
 			let newReviewData = _.cloneDeep(reviewData);
-
-			const { domainTask } = reviewData;
-			let newDomainTasks = _.cloneDeep(domainTasks);
 
 			let stateObject = {};
 
@@ -712,7 +738,7 @@ const JBookProfilePage = () => {
 						serviceReviewer: '',
 						primaryPlannedTransitionPartner: null,
 						serviceAdditionalMissionPartners: null,
-						primaryReviewNotes: null,
+						primaryReviewNotes: '',
 					};
 					break;
 				case 'serviceForm':
@@ -722,15 +748,16 @@ const JBookProfilePage = () => {
 						serviceMissionPartnersChecklist: JSON.stringify(contractMapping),
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: null,
+						serviceClassLabel: null,
 						servicePTPAgreeLabel: 'Yes',
 						servicePlannedTransitionPartner: null,
 						otherMissionPartners: null,
-						servicePOCTitle: null,
-						servicePOCName: null,
-						servicePOCEmail: null,
-						servicePOCOrg: null,
-						servicePOCPhoneNumber: null,
-						serviceReviewerNotes: null,
+						servicePOCTitle: '',
+						servicePOCName: '',
+						servicePOCEmail: '',
+						servicePOCOrg: '',
+						servicePOCPhoneNumber: '',
+						serviceReviewerNotes: '',
 						serviceSecondaryReviewer: '',
 					};
 
@@ -746,9 +773,11 @@ const JBookProfilePage = () => {
 						altPOCOrg: '',
 						altPOCPhoneNumber: '',
 						pocJointCapabilityArea: null,
+						pocJointCapabilityArea2: null,
+						pocJointCapabilityArea3: null,
 						pocAIType: null,
-						pocAIRoleDescription: null,
-						pocAITypeDescription: null,
+						pocAIRoleDescription: '',
+						pocAITypeDescription: '',
 						pocDollarsAttributedCategory: null,
 						pocPercentageAttributedCategory: null,
 						pocDollarsAttributed: '',
@@ -768,29 +797,19 @@ const JBookProfilePage = () => {
 					};
 
 					stateObject.pocValidated = true;
-
-					newDomainTasks = {
-						'Natural Language Processing': [],
-						'Sensing and Perception': [],
-						'Planning, Scheduling, and Reasoning': [],
-						'Prediction and Assessment': [],
-						'Modeling and Simulation': [],
-						'Human-Machine Interaction': [],
-						'Responsible AI': [],
-						Other: [],
-					};
 					break;
 				case 'domainTaskSecondary':
-					newDomainTasks = setDomainTaskSecondary(domainTask, newDomainTasks, value);
-					newReviewData.domainTaskSecondary = newDomainTasks[domainTask];
+					const newDomainTasks = newReviewData.domainTaskSecondary ?? [];
+					if (newDomainTasks.includes(value)) {
+						newDomainTasks.splice(newDomainTasks.indexOf(value), 1);
+					} else {
+						newDomainTasks.push(value);
+					}
+					newReviewData.domainTaskSecondary = newDomainTasks;
 					break;
 				case 'domainTaskOther':
-					if (domainTasks['Other'].length > 0) {
-						newDomainTasks['Other'][0] = value;
-					} else {
-						newDomainTasks['Other'].push(value);
-					}
-					newReviewData.domainTaskSecondary = newDomainTasks['Other'];
+					const newOther = [value];
+					newReviewData.domainTaskSecondary = newOther;
 					break;
 				case 'setMissionPartners':
 					newReviewData.serviceMissionPartnersList = value.join('|');
@@ -805,8 +824,9 @@ const JBookProfilePage = () => {
 					newReviewData.pocMissionPartnersChecklist = JSON.stringify(value);
 					break;
 				case 'domainTask':
+					newReviewData.domainTaskSecondary = null;
 					if (newReviewData.domainTask === value) {
-						newReviewData.domainTask = '';
+						newReviewData.domainTask = null;
 						break;
 					}
 					newReviewData[field] = value;
@@ -824,42 +844,38 @@ const JBookProfilePage = () => {
 
 					break;
 				case 'pocJointCapabilityArea2':
-					const JCAindex2 = newReviewData['pocJointCapabilityArea2'].indexOf(value);
-					if (JCAindex2 !== -1) {
+					const JCAindex2 = newReviewData['pocJointCapabilityArea2']?.indexOf(value);
+					if (JCAindex2 != null && JCAindex2 !== -1) {
 						const tier3 = Object.keys(jca_data[newReviewData.pocJointCapabilityArea][value]);
-						newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(
-							(val) => tier3.indexOf(val) === -1
-						);
+						if (newReviewData.pocJointCapabilityArea3) {
+							newReviewData.pocJointCapabilityArea3 = newReviewData.pocJointCapabilityArea3.filter(
+								(val) => tier3.indexOf(val) === -1
+							);
+						}
 						newReviewData.pocJointCapabilityArea2.splice(JCAindex2, 1);
 						break;
 					}
+					if (!newReviewData[field]) newReviewData[field] = [];
 					newReviewData[field].push(value);
 
 					break;
 				case 'pocJointCapabilityArea3':
-					const JCAindex3 = newReviewData['pocJointCapabilityArea3'].indexOf(value);
-					if (JCAindex3 !== -1) {
+					const JCAindex3 = newReviewData['pocJointCapabilityArea3']?.indexOf(value);
+					if (JCAindex3 != null && JCAindex3 !== -1) {
 						newReviewData.pocJointCapabilityArea3.splice(JCAindex3, 1);
 						break;
 					}
+					if (!newReviewData[field]) newReviewData[field] = [];
 					newReviewData[field].push(value);
 					break;
 				case 'clearJCA':
-					newReviewData.pocJointCapabilityArea = '';
+					newReviewData.pocJointCapabilityArea = null;
+					newReviewData.pocJointCapabilityArea2 = null;
+					newReviewData.pocJointCapabilityArea3 = null;
 					break;
 				case 'clearDomainTask':
 					newReviewData.domainTask = '';
 					newReviewData.domainTaskSecondary = [];
-					newDomainTasks = {
-						'Natural Language Processing': [],
-						'Sensing and Perception': [],
-						'Planning, Scheduling, and Reasoning': [],
-						'Prediction and Assessment': [],
-						'Modeling and Simulation': [],
-						'Human-Machine Interaction': [],
-						'Responsible AI': [],
-						Other: [],
-					};
 					break;
 				case 'clearDataType':
 					newReviewData.pocAIType = '';
@@ -868,19 +884,21 @@ const JBookProfilePage = () => {
 					newReviewData.pocDollarsAttributed = value.pocDollarsAttributed;
 					newReviewData.pocPercentageAttributed = value.pocPercentageAttributed;
 					break;
+				case 'servicePOC':
+					setServicePOC(value, newReviewData);
+					break;
 				default:
 					newReviewData[field] = value !== null ? value : '';
 					break;
 			}
 
 			stateObject.reviewData = newReviewData;
-			stateObject.domainTasks = newDomainTasks;
 
 			stateObject = updateValidation(field, value, stateObject);
 
 			setState(dispatch, stateObject);
 		},
-		[dispatch, contractMapping, domainTasks, reviewData, setDomainTaskSecondary, updateValidation]
+		[dispatch, contractMapping, reviewData, updateValidation]
 	);
 
 	const validString = (text) => {
@@ -960,15 +978,6 @@ const JBookProfilePage = () => {
 	};
 
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
-		await gameChangerAPI.callDataFunction({
-			functionName: 'createComment',
-			cloneName: 'jbook',
-			options: {
-				docID,
-				portfolioName: selectedPortfolio,
-				message: 'just another super cool comment',
-			},
-		});
 		if (
 			!isSubmit ||
 			reviewType === 'primary' ||
@@ -977,12 +986,12 @@ const JBookProfilePage = () => {
 		) {
 			setState(dispatch, { [loading]: true });
 
-			reviewData.latest_class_label_s = reviewData.primaryClassLabel;
+			reviewData.latestClassLabel = reviewData.primaryClassLabel;
 			if (reviewData.serviceAgreeLabel === 'No') {
-				reviewData.latest_class_label_s = reviewData.serviceClassLabel;
+				reviewData.latestClassLabel = reviewData.serviceClassLabel;
 			}
 			if (reviewData.pocAgreeLabel === 'No') {
-				reviewData.latest_class_label_s = reviewData.pocClassLabel;
+				reviewData.latestClassLabel = reviewData.pocClassLabel;
 			}
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
@@ -1049,44 +1058,26 @@ const JBookProfilePage = () => {
 		setState(dispatch, { keywordsChecked: newKeywordsChecked });
 	};
 
-	const scorecardData = (classification) => {
+	const scorecardData = () => {
 		let data = [];
-		if (
-			selectedPortfolio === 'AI Inventory' &&
-			classification &&
-			classification.confidence &&
-			classification.top_class
-		) {
-			let num = classification.confidence;
-			num = num.toString(); //If it's not already a String
-			num = num.slice(0, num.indexOf('.') + 3); //With 3 exposing the hundredths place
-			Number(num); //If you need it back as a Number
 
-			data.push({
-				name: 'Predicted Tag',
-				description:
-					'The AI tool classified the BLI as "' +
-					classification.top_class +
-					'" with a confidence score of ' +
-					num,
-				value: num,
-			});
-		} else {
-			data.push({
-				name: 'No Prediction',
-				description: 'Classification data is not yet available for this exhibit',
-			});
-		}
 		if (reviewData.primaryReviewStatus === 'Finished Review') {
+			let latestReviewer;
+			if (reviewData.pocClassLabel) {
+				latestReviewer = reviewData.servicePOCName || 'The POC Reviewer';
+				console.log('latestReviewer: ', latestReviewer);
+			} else if (reviewData.serviceClassLabel) {
+				latestReviewer = reviewData.serviceReviewer || 'The RAI Lead Reviewer';
+			} else {
+				latestReviewer = reviewData.primaryReviewer || 'The Initial Reviewer';
+			}
 			data.push({
 				name: 'Reviewer Tag',
-				description:
-					reviewData.primaryReviewer + ' classified this document as "' + reviewData.primaryClassLabel + '"',
+				description: latestReviewer + ' classified this document as "' + reviewData.latestClassLabel + '"',
 				timestamp: new Date(reviewData.updatedAt).toLocaleDateString(),
 				justification: reviewData.primaryReviewNotes ? reviewData.primaryReviewNotes : '',
 			});
 		}
-
 		return data;
 	};
 
@@ -1099,7 +1090,7 @@ const JBookProfilePage = () => {
 					headerWidth="100%"
 					header={
 						<StyledAccordionHeader headerWidth="100%">
-							<strong>PRIMARY REVIEWER</strong>
+							<strong>INITIAL REVIEWER</strong>
 							<FiberManualRecordIcon
 								style={{
 									color: reviewData.primaryReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
@@ -1144,7 +1135,7 @@ const JBookProfilePage = () => {
 					headerWidth="100%"
 					header={
 						<StyledAccordionHeader>
-							<strong>SERVICE REVIEWER</strong>
+							<strong>RAI LEAD REVIEWER</strong>
 							<FiberManualRecordIcon
 								style={{
 									color: reviewData.serviceReviewStatus === 'Finished Review' ? 'green' : '#F9B32D',
@@ -1212,15 +1203,7 @@ const JBookProfilePage = () => {
 					<JBookPOCReviewForm
 						renderReenableModal={renderReenableModal}
 						finished={reviewData.pocReviewStatus === 'Finished Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										Permissions.hasPermission('JBOOK POC Reviewer') &&
-										(Auth.getTokenPayload().email === reviewData.servicePOCEmail ||
-											Auth.getTokenPayload().email === reviewData.altPOCEmail)
-								  )
-						}
+						roleDisabled={Permissions.hasPermission('JBOOK Admin') ? false : !permissions.is_poc_reviewer}
 						reviewStatus={reviewData.pocReviewStatus ?? 'Needs Review'}
 						dropdownData={dropdownData}
 						vendorData={projectData.vendors}
@@ -1233,7 +1216,25 @@ const JBookProfilePage = () => {
 		);
 	};
 
-	const SimpleReviewerSection = React.memo(() => {
+	const renderSimpleReviewerSection = () => {
+		let reviewers = [];
+		let tags = [];
+		if (pMap[selectedPortfolio]) {
+			reviewers = [];
+			for (let id of pMap[selectedPortfolio].user_ids) {
+				if (userMap[id]) {
+					reviewers.push({
+						id: userMap[id].id,
+						name: userMap[id].last_name + ', ' + userMap[id].first_name,
+						email: userMap[id].email,
+					});
+				}
+			}
+			tags = pMap[selectedPortfolio].tags.map((item) => ({
+				primary_class_label: item,
+			}));
+		}
+
 		return (
 			<StyledAccordionContainer id={'Simplified Reviewer Section'}>
 				<GCAccordion
@@ -1270,14 +1271,8 @@ const JBookProfilePage = () => {
 						setReviewDataMultiple={setReviewDataMultiple}
 						setReviewData={setReviewData}
 						dropdownData={{
-							reviewers: pMap[selectedPortfolio].user_ids.map((item) => ({
-								id: userMap[item].id,
-								name: userMap[item].last_name + ', ' + userMap[item].first_name,
-								email: userMap[item].email,
-							})),
-							primaryClassLabel: pMap[selectedPortfolio].tags.map((item) => ({
-								primary_class_label: item,
-							})),
+							reviewers: reviewers,
+							primaryClassLabel: tags,
 						}}
 						reviewerProp={projectData.reviewer}
 						serviceReviewerProp={projectData.serviceReview}
@@ -1285,7 +1280,7 @@ const JBookProfilePage = () => {
 				</GCAccordion>
 			</StyledAccordionContainer>
 		);
-	}, []);
+	};
 
 	const renderReviewSection = () => {
 		switch (selectedPortfolio) {
@@ -1300,7 +1295,7 @@ const JBookProfilePage = () => {
 					</>
 				);
 			default:
-				return <SimpleReviewerSection />;
+				return <>{renderSimpleReviewerSection()}</>;
 		}
 	};
 
@@ -1318,6 +1313,7 @@ const JBookProfilePage = () => {
 							projectData={projectData}
 							docID={docID}
 							getCommentThread={getCommentThread}
+							pageDisplayed={state.pageDisplayed}
 						/>
 					</div>
 					<div style={{ paddingLeft: 20 }}>
@@ -1333,7 +1329,7 @@ const JBookProfilePage = () => {
 					</div>
 					{selectedPortfolio !== 'General' && (
 						<ClassificationScoreCard
-							scores={scorecardData(projectData.ai_predictions?.[selectedPortfolio])}
+							scores={scorecardData()}
 							commentThread={commentThread}
 							gameChangerAPI={gameChangerAPI}
 							docID={docID}
@@ -1355,6 +1351,45 @@ const JBookProfilePage = () => {
 					/>
 				</StyledMainContainer>
 				<StyledRightContainer>
+					{projectData.dtic_pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(
+									projectData.dtic_pdf_location_s,
+									cloneData.clone_name,
+									projectData.dtic_pdf_page_s
+								);
+							}}
+						>
+							OPEN DOCUMENT
+						</GCPrimaryButton>
+					)}
+					{projectData.pdf_location_s && (
+						<GCPrimaryButton
+							style={{
+								color: 'white',
+								backgroundColor: '#1C2D64',
+								borderColor: '#1C2D64',
+								height: '35px',
+								marginBottom: '15px',
+								marginLeft: '0',
+							}}
+							onClick={() => {
+								clickFnPDF(projectData.pdf_location_s, cloneData.clone_name);
+							}}
+						>
+							OPEN FULL PDF
+						</GCPrimaryButton>
+					)}
+
 					<Metadata
 						budgetType={budgetType}
 						projectNum={projectNum}

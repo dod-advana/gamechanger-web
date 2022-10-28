@@ -9,7 +9,6 @@ const constantsFile = require('../config/constants');
 const { Op } = require('sequelize');
 const { DataLibrary } = require('../lib/dataLibrary');
 const SearchUtility = require('../utils/searchUtility');
-const moment = require('moment');
 
 class DataTrackerController {
 	constructor(opts = {}) {
@@ -142,147 +141,180 @@ class DataTrackerController {
 		}
 	}
 
+	compileDataFromStatusTable(data, crawlerData) {
+		data.map((item) => {
+			if (crawlerData[item.crawler_name]) {
+				if (crawlerData[item.crawler_name].datetime < item.datetime) {
+					crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
+				}
+			} else {
+				crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
+			}
+		});
+		return crawlerData;
+	}
+
+	setCrawlerDisplayName(crawler, crawlerName) {
+		const data_source_s = crawler?.dataValues.data_source_s;
+		const source_title = crawler?.dataValues.source_title;
+		const dataSourceOrData = data_source_s ? data_source_s : crawlerName;
+		return data_source_s && source_title && source_title !== 'none'
+			? `${data_source_s} - ${source_title}`
+			: dataSourceOrData;
+	}
+
+	handleSortByDisplayName(a, b, order) {
+		if (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase()) return order === 'ASC' ? 1 : -1;
+		return order === 'ASC' ? -1 : 1;
+	}
+
+	async getAllCrawlerMeta(res, req, userId) {
+		try {
+			const { limit = 10, offset = 0, order = [], where = {} } = req.body;
+			const crawlerData = await this.crawlerStatus.findAndCountAll({
+				raw: true,
+				attributes: ['crawler_name', 'status', 'datetime'],
+				where,
+				offset,
+				order,
+				limit,
+			});
+			res.status(200).send({ totalCount: crawlerData.count, docs: crawlerData.rows });
+		} catch (e) {
+			this.logger.error(e.message, 'UXV7V01', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving last crawler meta status' });
+		}
+	}
+
+	async getCrawlerMetaStatus(res, req, userId) {
+		try {
+			const { limit = 10, offset = 0, order = [], where = {}, cloneName = 'gamechanger' } = req.body;
+			const permissions = req.permissions ? req.permissions : [];
+			const filter = where?.[0]?.displayName.$iLike.replace(/%/gi, '').toLowerCase();
+			let crawlerStatusList;
+			let crawlerData = {};
+			const info = await this.crawlerInfo.findAll({
+				attributes: ['crawler', 'url_origin', 'data_source_s', 'source_title'],
+			});
+
+			crawlerStatusList = await this.crawlerStatus
+				.findAll({
+					attributes: ['crawler_name', 'status', 'datetime'],
+					where: {
+						crawler_name: {
+							[Op.ne]: 'dfars_subpart_regs',
+						},
+					},
+				})
+				.then((data) => {
+					return this.compileDataFromStatusTable(data, crawlerData);
+				});
+
+			const esQuery = {
+				size: 0,
+				aggs: {
+					pubs: {
+						terms: {
+							size: Object.keys(crawlerData).length + 10,
+							field: 'crawler_used_s',
+						},
+					},
+				},
+			};
+			const { esClientName, esIndex } = this.searchUtility.getESClient(cloneName, permissions);
+			const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			const docCounts = esResults?.body?.aggregations?.pubs?.buckets;
+
+			let resp = [];
+
+			const sort = order?.[0]?.[0];
+			const sortDirection = order?.[0]?.[1];
+
+			const crawlerList = Object.keys(crawlerStatusList);
+
+			crawlerList.forEach((data) => {
+				const dataInfo = info.find(
+					(crawler) => crawler.dataValues.crawler.toLowerCase() === data.toLowerCase()
+				);
+				const docCount =
+					docCounts.find((crawler) => crawler.key.toLowerCase() === data.toLowerCase())?.doc_count ||
+					'No Documents Found';
+				const displayName = this.setCrawlerDisplayName(dataInfo, data);
+
+				const crawlerObject = {
+					displayName,
+					crawler_name: data,
+					status: crawlerStatusList[data].status,
+					datetime: crawlerStatusList[data].datetime,
+					url_origin: dataInfo?.dataValues?.url_origin,
+					data_source_s: dataInfo?.dataValues.data_source_s,
+					source_title: dataInfo?.dataValues.source_title,
+					docCount,
+				};
+				if (filter) {
+					if (displayName.toLowerCase().includes(filter)) resp.push(crawlerObject);
+				} else {
+					resp.push(crawlerObject);
+				}
+			});
+			if (sort === 'displayName') {
+				resp.sort((a, b) => {
+					return this.handleSortByDisplayName(a, b, sortDirection);
+				});
+			}
+
+			res.status(200).send({
+				totalCount: resp.length,
+				docs: resp.slice(offset, offset + limit),
+			});
+		} catch (e) {
+			this.logger.error(e.message, 'UXV7V02', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving crawler meta status' });
+		}
+	}
+
+	async getLastCrawlerMetaStatus(res, req, userId) {
+		try {
+			const { limit = 10, offset = 0 } = req.body;
+			let crawlerStatusList;
+			let crawlerData = {};
+			crawlerStatusList = await this.crawlerStatus
+				.findAll({
+					attributes: ['crawler_name', 'status', 'datetime'],
+					where: {
+						status: 'Ingest Complete',
+					},
+				})
+				.then((data) => {
+					return this.compileDataFromStatusTable(data, crawlerData);
+				});
+			let resp = Object.keys(crawlerStatusList)
+				.slice(offset, offset + limit)
+				.map((data) => {
+					resp.push({
+						crawler_name: data,
+						status: crawlerStatusList[data].status,
+						datetime: crawlerStatusList[data].datetime,
+					});
+				});
+			res.status(200).send({ totalCount: Object.keys(crawlerData).length, docs: resp });
+		} catch (e) {
+			this.logger.error(e.message, 'UXV7V03', userId);
+			res.status(500).send({ error: e.message, message: 'Error retrieving last crawler meta status' });
+		}
+	}
+
 	async getCrawlerMetadata(req, res) {
 		let userId = 'webapp_unknown';
-		const { limit = 10, offset = 0, order = [], where = {}, option = 'all', cloneName = 'gamechanger' } = req.body;
-		const attributes = ['crawler_name', 'status', 'datetime'];
+		const { option = 'all' } = req.body;
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			if (option === 'all') {
-				const crawlerData = await this.crawlerStatus.findAndCountAll({
-					raw: true,
-					attributes,
-					where,
-					offset,
-					order,
-					limit,
-				});
-				res.status(200).send({ totalCount: crawlerData.count, docs: crawlerData.rows });
+				return await this.getAllCrawlerMeta(res, req, userId);
 			} else if (option === 'status') {
-				const permissions = req.permissions ? req.permissions : [];
-				const filter = where?.[0]?.displayName.$iLike.replace(/%/gi, '').toLowerCase();
-				let level_value;
-				let crawlerData = {};
-				const info = await this.crawlerInfo.findAll({
-					attributes: ['crawler', 'url_origin', 'data_source_s', 'source_title'],
-				});
-
-				level_value = await this.crawlerStatus
-					.findAll({
-						attributes,
-						where: {
-							crawler_name: {
-								[Op.ne]: 'dfars_subpart_regs',
-							},
-						},
-					})
-					.then((data) => {
-						data.map((item) => {
-							if (crawlerData[item.crawler_name]) {
-								if (crawlerData[item.crawler_name].datetime < item.datetime) {
-									crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
-								}
-							} else {
-								crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
-							}
-						});
-						return crawlerData;
-					});
-
-				const esQuery = {
-					size: 0,
-					aggs: {
-						pubs: {
-							terms: {
-								size: Object.keys(crawlerData).length + 10,
-								field: 'crawler_used_s',
-							},
-						},
-					},
-				};
-				const { esClientName, esIndex } = this.searchUtility.getESClient(cloneName, permissions);
-				const esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-				const docCounts = esResults?.body?.aggregations?.pubs?.buckets;
-
-				let resp = [];
-
-				const sort = order?.[0]?.[0];
-				const sortDirection = order?.[0]?.[1];
-
-				const crawlerList = Object.keys(level_value);
-
-				crawlerList.forEach((data) => {
-					const dataInfo = info.find(
-						(crawler) => crawler.dataValues.crawler.toLowerCase() === data.toLowerCase()
-					);
-					const docCount =
-						docCounts.find((crawler) => crawler.key.toLowerCase() === data.toLowerCase())?.doc_count ||
-						'No Documents Found';
-					const data_source_s = dataInfo?.dataValues.data_source_s;
-					const source_title = dataInfo?.dataValues.source_title;
-					const displayName = data_source_s && source_title ? `${data_source_s} - ${source_title}` : data;
-
-					const crawlerObject = {
-						displayName,
-						crawler_name: data,
-						status: level_value[data].status,
-						datetime: level_value[data].datetime,
-						url_origin: dataInfo?.dataValues?.url_origin,
-						data_source_s,
-						source_title,
-						docCount,
-					};
-					if (filter) {
-						if (displayName.toLowerCase().includes(filter)) resp.push(crawlerObject);
-					} else {
-						resp.push(crawlerObject);
-					}
-				});
-				if (sort === 'displayName') {
-					resp.sort((a, b) => {
-						if (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase())
-							return sortDirection === 'ASC' ? 1 : -1;
-						return sortDirection === 'ASC' ? -1 : 1;
-					});
-				}
-
-				res.status(200).send({
-					totalCount: resp.length,
-					docs: resp.slice(offset, offset + limit),
-				});
+				return await this.getCrawlerMetaStatus(res, req, userId);
 			} else if (option === 'last') {
-				let level_value;
-				let crawlerData = {};
-				level_value = await this.crawlerStatus
-					.findAll({
-						attributes,
-						where: {
-							status: 'Ingest Complete',
-						},
-					})
-					.then((data) => {
-						data.map((item) => {
-							if (crawlerData[item.crawler_name]) {
-								if (crawlerData[item.crawler_name].datetime < item.datetime) {
-									crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
-								}
-							} else {
-								crawlerData[item.crawler_name] = { datetime: item.datetime, status: item.status };
-							}
-						});
-						return crawlerData;
-					});
-				let resp = [];
-				Object.keys(level_value)
-					.slice(offset, offset + limit)
-					.map((data) => {
-						resp.push({
-							crawler_name: data,
-							status: level_value[data].status,
-							datetime: level_value[data].datetime,
-						});
-					});
-				res.status(200).send({ totalCount: Object.keys(crawlerData).length, docs: resp });
+				this.getLastCrawlerMetaStatus(res, req, userId);
 			}
 		} catch (e) {
 			this.logger.error(e.message, 'UXV7V8R', userId);

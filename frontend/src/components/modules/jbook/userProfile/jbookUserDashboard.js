@@ -165,7 +165,7 @@ const columns = [
 		id: 'portfolioName',
 	},
 	{
-		Header: () => <p style={styles.tableColumn}>PRIMARY REVIEWER</p>,
+		Header: () => <p style={styles.tableColumn}>INITIAL REVIEWER</p>,
 		accessor: 'primaryReviewer',
 		width: 130,
 		Cell: (row) => <TableData data={row.value} />,
@@ -175,7 +175,7 @@ const columns = [
 		id: 'primaryReviewer',
 	},
 	{
-		Header: () => <p style={styles.tableColumn}>SERVICE REVIEWER</p>,
+		Header: () => <p style={styles.tableColumn}>RAI LEAD REVIEWER</p>,
 		accessor: (row) =>
 			row.serviceSecondaryReviewer && row.serviceSecondaryReviewer !== ''
 				? row.serviceSecondaryReviewer

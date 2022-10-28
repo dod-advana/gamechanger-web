@@ -3,7 +3,7 @@ const tablename = 'users';
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
-		return queryInterface.describeTable(tablename).then((tableDefinition) => {
+		return queryInterface.describeTable(tablename).then(() => {
 			const queries = [];
 
 			queries.push(

@@ -20,12 +20,12 @@ const getAndSetDidYouMean = (index, searchText, dispatch) => {
 		.then(({ data }) => {
 			setState(dispatch, { idYouMean: data?.autocorrect?.[0] });
 		})
-		.catch((_) => {
+		.catch(() => {
 			//do nothing
 		});
 };
 
-const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
+const clearFavoriteSearchUpdate = async (search, dispatch) => {
 	try {
 		await gameChangerAPI.clearFavoriteSearchUpdate(search.tiny_url);
 		getUserData(dispatch);
@@ -34,7 +34,294 @@ const clearFavoriteSearchUpdate = async (search, index, dispatch) => {
 	}
 };
 
+// set url, trim search text, determine search favorite, set recent searches
+const setupSearchState = (state, dispatch, setSearchURL) => {
+	const { searchText = '', userData, tabName, cloneData } = state;
+	const favSearchUrls = userData?.favorite_searches?.map((search) => {
+		return search.url;
+	});
+
+	let url = window.location.hash.toString();
+	url = url.replace('#/', '');
+
+	const searchFavorite = favSearchUrls?.includes(url) || false;
+
+	const runGraphSearch = cloneData.show_graph && tabName === 'graphView';
+
+	setSearchURL(state);
+
+	const trimmed = searchText.trim();
+	if (_.isEmpty(trimmed)) return;
+
+	const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
+	const recentSearchesParsed = JSON.parse(recentSearches);
+
+	if (!recentSearchesParsed.includes(searchText)) {
+		recentSearchesParsed.unshift(searchText);
+		if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
+		localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
+	}
+
+	setState(dispatch, {
+		expansionDict: {},
+		isDataTracker: false,
+		isCachedResult: false,
+		pageDisplayed: PAGE_DISPLAYED.main,
+		didYouMean: '',
+		isFavoriteSearch: searchFavorite,
+		selectedDocuments: new Map(),
+		loading: true,
+		metricsLoading: true,
+		noResultsMessage: null,
+		autocompleteItems: [],
+		rawSearchResults: [],
+		docSearchResults: [],
+		searchResultsCount: 0,
+		count: 0,
+		resultsDownloadURL: '',
+		timeFound: 0.0,
+		iframePreviewLink: null,
+		graph: { nodes: [], edges: [] },
+		runningSearch: true,
+		showFullGraph: false,
+		docTypeData: {},
+		runningEntitySearch: true,
+		runningTopicSearch: true,
+		hideTabs: true,
+		statsLoading: true,
+		runGraphSearch,
+	});
+
+	return { searchFavorite, url };
+};
+
+const checkForExpansionTerms = (expansionDict) => {
+	if (expansionDict) {
+		Object.keys(expansionDict).forEach((key) => {
+			if (expansionDict[key].length > 0) return true;
+		});
+	}
+
+	return false;
+};
+
+const checkSearchFavorites = (searchFavorite, userData, url, dispatch) => {
+	let getUserDataFlag = true;
+
+	if (searchFavorite) {
+		userData.favorite_searches.forEach((search) => {
+			if (search.url === url) {
+				clearFavoriteSearchUpdate(search, dispatch);
+				getUserDataFlag = false;
+			}
+		});
+	}
+
+	return getUserDataFlag;
+};
+
+const setURLParams = ({
+	cloneData,
+	searchText,
+	offset,
+	orgFilterText,
+	issueOfficeDoDAACText,
+	issueOfficeNameText,
+	fiscalYearsText,
+	contractDataText,
+	minObligatedAmountText,
+	maxObligatedAmountText,
+	modTypeText,
+	startDateText,
+	endDateText,
+	issueAgencyText,
+}) => {
+	const params = new URLSearchParams();
+
+	if (searchText) params.append('q', searchText);
+	if (offset) params.append('offset', String(offset));
+	if (orgFilterText) params.append('orgFilter', orgFilterText);
+	if (issueOfficeDoDAACText) params.append('dodaac', issueOfficeDoDAACText);
+	if (issueOfficeNameText) params.append('officeName', issueOfficeNameText);
+	if (fiscalYearsText) params.append('fiscalYears', fiscalYearsText);
+	if (contractDataText) params.append('contractData', contractDataText);
+	if (minObligatedAmountText) params.append('minAmount', minObligatedAmountText);
+	if (maxObligatedAmountText) params.append('maxAmount', maxObligatedAmountText);
+	if (modTypeText) params.append('modType', modTypeText);
+	if (startDateText) params.append('startDate', startDateText);
+	if (endDateText) params.append('endDate', endDateText);
+	if (issueAgencyText) params.append('issueAgency', issueAgencyText);
+
+	const linkString = `/#/${cloneData.url.toLowerCase()}?${params}`;
+
+	window.history.pushState(null, document.title, linkString);
+};
+
+const getOrgMajcomFilters = (organizations, majcoms, allOrgsSelected) => {
+	let orgFilterText =
+		!allOrgsSelected && organizations && organizations.length > 0 ? organizations.join('_') : undefined;
+
+	const majcomFilter =
+		organizations && majcoms
+			? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1)
+			: undefined;
+
+	if (!allOrgsSelected && majcomFilter && Object.keys(majcomFilter).length > 0) {
+		orgFilterText = '';
+		for (const org of organizations) {
+			let separator = Object.keys(majcomFilter).indexOf(org) !== 0 ? '|' : '';
+			orgFilterText += `${separator}${org}${majcomFilter[org] ? ':' + majcomFilter[org].join('_') : ''}`;
+		}
+	}
+
+	return { orgFilterText };
+};
+
+// parse the organizations or sub organizations out of the url param
+const parseOrgs = (orgURL, newSearchSettings) => {
+	const hasSubOrgs = orgURL.indexOf(':') !== -1;
+	const orgs = orgURL.split('|');
+	newSearchSettings.allOrgsSelected = false;
+
+	// if no sub orgs, just take the main orgs
+	if (!hasSubOrgs) {
+		newSearchSettings.organizations = orgs[0].split('_');
+	} else {
+		const organizations = [];
+		const majcoms = {
+			'air force': [],
+			army: [],
+			defense: [],
+			navy: [],
+		};
+
+		for (const org of orgs) {
+			const orgWithSubOrgs = org.split(':');
+			organizations.push(orgWithSubOrgs[0]);
+			if (orgWithSubOrgs.length > 1) {
+				const subOrgs = orgWithSubOrgs[1].split('_');
+				for (const subOrg of subOrgs) {
+					majcoms[orgWithSubOrgs[0]].push(subOrg);
+				}
+			}
+		}
+
+		newSearchSettings.organizations = organizations;
+		newSearchSettings.majcoms = majcoms;
+	}
+};
+
+// parse the offset/result page number out of the url
+const parseResultsPage = (offsetURL, parsed) => {
+	const offset = parseInt(offsetURL);
+	if (!isNaN(offset)) parsed.offset = offset;
+	parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
+};
+
+// parse the contract data type out of the url
+const parseContractDataURL = (contractDataURL, newSearchSettings) => {
+	newSearchSettings.allDataSelected = false;
+	const dataSources = contractDataURL.split('_');
+	const contractData = {
+		pds: false,
+		syn: false,
+		none: false,
+	};
+	for (const source of dataSources) {
+		contractData[source] = true;
+	}
+
+	newSearchSettings.contractData = contractData;
+};
+
 const EdaSearchHandler = {
+	setSearchURL(state) {
+		const { searchText, resultsPage, cloneData } = state;
+		const {
+			allOrgsSelected,
+			organizations,
+			startDate,
+			endDate,
+			issueAgency,
+			issueOfficeDoDAAC,
+			issueOfficeName,
+			allYearsSelected,
+			fiscalYears,
+			allDataSelected,
+			contractData,
+			minObligatedAmount,
+			maxObligatedAmount,
+			contractsOrMods,
+			majcoms,
+		} = state.edaSearchSettings;
+
+		let { orgFilterText } = getOrgMajcomFilters(organizations, majcoms, allOrgsSelected);
+
+		const issueOfficeDoDAACText =
+			issueOfficeDoDAAC && issueOfficeDoDAAC.length > 0 ? issueOfficeDoDAAC.join('__') : undefined;
+		const issueOfficeNameText =
+			issueOfficeName && issueOfficeName.length > 0 ? issueOfficeName.join('__') : undefined;
+		const fiscalYearsText =
+			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
+		const contractDataText =
+			!allDataSelected && contractData
+				? Object.keys(_.pickBy(contractData, (value) => value)).join('_')
+				: undefined;
+		const minObligatedAmountText = minObligatedAmount ?? undefined;
+		const maxObligatedAmountText = maxObligatedAmount ?? undefined;
+		const modTypeText = contractsOrMods ?? undefined;
+		const startDateText = startDate ?? undefined;
+		const endDateText = endDate ?? undefined;
+		const issueAgencyText = issueAgency ?? undefined;
+		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+
+		setURLParams({
+			cloneData,
+			searchText,
+			offset,
+			orgFilterText,
+			issueOfficeDoDAACText,
+			issueOfficeNameText,
+			fiscalYearsText,
+			contractDataText,
+			minObligatedAmountText,
+			maxObligatedAmountText,
+			modTypeText,
+			startDateText,
+			endDateText,
+			issueAgencyText,
+		});
+	},
+
+	async getPresearchData(state, dispatch) {
+		const { cloneData } = state;
+		if (!state.filterDataFetched) {
+			const resp = await gameChangerAPI.callSearchFunction({
+				functionName: 'getPresearchData',
+				cloneName: cloneData.clone_name,
+				options: {},
+			});
+
+			const newFilterData = {
+				fiscalYear: resp.data.fiscal_year,
+				majcom: resp.data.majcom,
+				issueOfficeName: resp.data.issue_office_name.map((e) => e.toUpperCase()).sort(),
+				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()).sort(),
+				vendorName: resp.data.vendor_name,
+				fundingOfficeDoDAAC: resp.data.funding_office_dodaac.map((e) => e.toUpperCase()).sort(),
+				fundingAgencyName: resp.data.funding_agency_name.map((e) => e.toUpperCase()).sort(),
+				psc: resp.data.psc.map((e) => e.toUpperCase()).sort(),
+				naics: resp.data.naic.map((e) => e.toUpperCase()).sort(),
+				duns: resp.data.duns.map((e) => e.toUpperCase()).sort(),
+				idvPIID: resp.data.idv_piid,
+				PIID: resp.data.piid,
+				modNumber: resp.data.mod_number.map((e) => e.toUpperCase()).sort(),
+			};
+
+			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
+		}
+	},
+
 	async handleSearch(state, dispatch) {
 		setState(dispatch, { runSearch: false });
 
@@ -50,84 +337,23 @@ const EdaSearchHandler = {
 			edaSearchSettings,
 		} = state;
 
-		const favSearchUrls = userData?.favorite_searches?.map((search) => {
-			return search.url;
-		});
-
-		this.setSearchURL(state);
-
-		let url = window.location.hash.toString();
-		url = url.replace('#/', '');
-
-		const searchFavorite = favSearchUrls?.includes(url) || false;
-
-		setState(dispatch, {
-			isFavoriteSearch: searchFavorite,
-			runningSearch: true,
-			expansionDict: {},
-			isDataTracker: false,
-			isCachedResult: false,
-			pageDisplayed: PAGE_DISPLAYED.main,
-			didYouMean: '',
-		});
-
-		const trimmed = searchText.trim();
-		if (_.isEmpty(trimmed)) return;
-
-		const searchObject = getSearchObjectFromString(searchText);
-		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
-		const recentSearchesParsed = JSON.parse(recentSearches);
-
-		if (!recentSearchesParsed.includes(searchText)) {
-			recentSearchesParsed.unshift(searchText);
-			if (recentSearchesParsed.length === RECENT_SEARCH_LIMIT) recentSearchesParsed.pop();
-			localStorage.setItem(`recent${cloneData.clone_name}Searches`, JSON.stringify(recentSearchesParsed));
-		}
-
-		const t0 = new Date().getTime();
-
-		let searchResults = [];
-		let foundEntity = false;
-
-		setState(dispatch, {
-			selectedDocuments: new Map(),
-			loading: true,
-			metricsLoading: true,
-			noResultsMessage: null,
-			autocompleteItems: [],
-			rawSearchResults: [],
-			docSearchResults: [],
-			searchResultsCount: 0,
-			count: 0,
-			resultsDownloadURL: '',
-			timeFound: 0.0,
-			iframePreviewLink: null,
-			graph: { nodes: [], edges: [] },
-			runningSearch: true,
-			showFullGraph: false,
-			docTypeData: {},
-			runningEntitySearch: true,
-			runningTopicSearch: true,
-			hideTabs: true,
-			statsLoading: true,
-		});
-
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
-
-		const charsPadding = listView ? 750 : 90;
-
-		const tiny_url = await createTinyUrl(cloneData);
-
 		try {
-			if (cloneData.show_graph && tabName === 'graphView') {
-				setState(dispatch, { runGraphSearch: true });
-			}
+			// set url, trim search text, determine search favorite, set recent searches
+			const { searchFavorite, url } = setupSearchState(state, dispatch, this.setSearchURL);
 
 			const combinedSearch = 'false';
+			const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+			const charsPadding = listView ? 750 : 90;
+			const tiny_url = await createTinyUrl(cloneData);
+			const t0 = new Date().getTime();
+			const searchObject = getSearchObjectFromString(searchText);
+
+			let searchResults = [];
 
 			// regular search
-			gameChangerAPI
-				.modularSearch({
+			let resp = {};
+			try {
+				resp = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
 					searchText: searchObject.search,
 					offset,
@@ -138,161 +364,113 @@ const EdaSearchHandler = {
 						combinedSearch,
 						edaSearchSettings,
 					},
-				})
-				.then((resp) => {
-					const t1 = new Date().getTime();
+				});
 
-					let getUserDataFlag = true;
+				const t1 = new Date().getTime();
 
-					if (_.isObject(resp.data)) {
-						let { docs, totalCount, expansionDict, isCached, timeSinceCache } = resp.data;
+				let getUserDataFlag = true;
 
-						if (docs && Array.isArray(docs)) {
-							// intelligent search failed, show keyword results with warning alert
-							if (resp.data.transformFailed) {
-								setState(dispatch, { transformFailed: true });
-							}
+				if (_.isObject(resp.data)) {
+					let {
+						docs,
+						totalCount,
+						expansionDict,
+						isCached,
+						timeSinceCache,
+						issuingOrgs,
+						totalObligatedAmount,
+					} = resp.data;
 
-							searchResults = searchResults.concat(docs);
+					setState(dispatch, {
+						issuingOrgs: this.countOrgData(issuingOrgs),
+						statsLoading: false,
+						totalObligatedAmount,
+					});
 
-							// if this search is a favorite, turn off notifications of new results
-							if (searchFavorite) {
-								userData.favorite_searches.forEach((search, index) => {
-									if (search.url === url) {
-										clearFavoriteSearchUpdate(search, index, dispatch);
-										getUserDataFlag = false;
-									}
-								});
-							}
+					if (Array.isArray(docs)) {
+						// intelligent search failed, show keyword results with warning alert
+						let transformFailed = resp.data.transformFailed || false;
 
-							let hasExpansionTerms = false;
+						searchResults = searchResults.concat(docs);
 
-							if (expansionDict) {
-								Object.keys(expansionDict).forEach((key) => {
-									if (expansionDict[key].length > 0) hasExpansionTerms = true;
-								});
-							}
+						// if this search is a favorite, turn off notifications of new results
+						getUserDataFlag = checkSearchFavorites(searchFavorite, userData, url, dispatch);
 
-							if (!offset) {
-								trackSearch(
-									searchText,
-									`${getTrackingNameForFactory(cloneData.clone_name)}${
-										combinedSearch ? '_combined' : ''
-									}`,
-									totalCount + (foundEntity ? 1 : 0),
-									false
-								);
-							}
+						let hasExpansionTerms = checkForExpansionTerms(expansionDict);
 
-							setState(dispatch, {
-								timeFound: ((t1 - t0) / 1000).toFixed(2),
-								prevSearchText: searchText,
-								loading: false,
-								count: totalCount + (foundEntity ? 1 : 0),
-								rawSearchResults: searchResults,
-								docSearchResults: docs,
-								searchResultsCount: searchResults.length,
-								autocompleteItems: [],
-								expansionDict,
-								isCachedResult: isCached,
-								timeSinceCache,
-								hasExpansionTerms,
-								metricsLoading: false,
-								metricsCounted: true,
-								loadingTinyUrl: false,
-								hideTabs: false,
-								query: resp.data.query,
-								runningSearch: false,
-							});
-						} else {
-							if (!offset) {
-								trackSearch(
-									searchText,
-									`${getTrackingNameForFactory(cloneData.clone_name)}${
-										combinedSearch ? '_combined' : ''
-									}`,
-									0,
-									false
-								);
-							}
-
-							setState(dispatch, {
-								loading: false,
-								count: 0,
-								rawSearchResults: [],
-								docSearchResults: [],
-								searchResultsCount: 0,
-								runningSearch: false,
-								prevSearchText: searchText,
-								isCachedResult: false,
-								loadingTinyUrl: false,
-								hasExpansionTerms: false,
-							});
-						}
+						setState(dispatch, {
+							timeFound: ((t1 - t0) / 1000).toFixed(2),
+							prevSearchText: searchText,
+							loading: false,
+							count: totalCount,
+							rawSearchResults: searchResults,
+							docSearchResults: docs,
+							searchResultsCount: searchResults.length,
+							autocompleteItems: [],
+							expansionDict,
+							isCachedResult: isCached,
+							timeSinceCache,
+							hasExpansionTerms,
+							metricsLoading: false,
+							metricsCounted: true,
+							loadingTinyUrl: false,
+							hideTabs: false,
+							query: resp.data.query,
+							runningSearch: false,
+							transformFailed,
+						});
 					} else {
 						setState(dispatch, {
-							prevSearchText: null,
 							loading: false,
+							count: 0,
+							rawSearchResults: [],
+							docSearchResults: [],
 							searchResultsCount: 0,
-							noResultsMessage: NO_RESULTS_MESSAGE,
-							autocompleteItems: [],
 							runningSearch: false,
+							prevSearchText: searchText,
+							isCachedResult: false,
 							loadingTinyUrl: false,
 							hasExpansionTerms: false,
 						});
 					}
 
-					this.setSearchURL({
-						...state,
-						searchText,
-						resultsPage,
-						tabName,
-						cloneData,
-						searchSettings,
+					if (!offset) {
+						trackSearch(
+							searchText,
+							`${getTrackingNameForFactory(cloneData.clone_name)}${combinedSearch ? '_combined' : ''}`,
+							totalCount,
+							false
+						);
+					}
+				} else {
+					setState(dispatch, {
+						prevSearchText: null,
+						loading: false,
+						searchResultsCount: 0,
+						noResultsMessage: NO_RESULTS_MESSAGE,
+						autocompleteItems: [],
+						runningSearch: false,
+						loadingTinyUrl: false,
+						hasExpansionTerms: false,
 					});
+				}
 
-					if (getUserDataFlag) {
-						getUserData(dispatch);
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-					throw err;
+				this.setSearchURL({
+					...state,
+					searchText,
+					resultsPage,
+					tabName,
+					cloneData,
+					searchSettings,
 				});
 
-			// stats search
-			gameChangerAPI
-				.modularSearch({
-					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
-					offset,
-					limit: 10000,
-					options: {
-						charsPadding,
-						tiny_url,
-						combinedSearch,
-						edaSearchSettings,
-						forStats: true,
-					},
-				})
-				.then((resp) => {
-					if (_.isObject(resp.data)) {
-						const docs = resp.data.docs;
-
-						const { issuingOrgs, totalObligatedAmount } = this.countOrgData(docs);
-
-						setState(dispatch, {
-							issuingOrgs,
-							statsLoading: false,
-							totalObligatedAmount,
-						});
-					}
-				})
-				.catch((err) => {
-					console.log('error');
-					console.log(err);
-					throw err;
-				});
+				if (getUserDataFlag) {
+					getUserData(dispatch);
+				}
+			} catch (err) {
+				console.log(err);
+				throw err;
+			}
 		} catch (e) {
 			console.log(e);
 			setState(dispatch, {
@@ -311,7 +489,7 @@ const EdaSearchHandler = {
 		getAndSetDidYouMean(index, searchText, dispatch);
 	},
 
-	countOrgData(docs) {
+	countOrgData(data) {
 		try {
 			const issuingOrgs = {
 				'Air Force': {
@@ -348,27 +526,11 @@ const EdaSearchHandler = {
 				'DEFENSE LOGISTICS AGENCY': 'DLA',
 			};
 
-			let totalObligatedAmount = 0;
-
-			// doc.issuing_organization_eda_ext which is set in edaSearchUtility > getExtractedFields is no longer being used
-			// fpds_contracting_agency_name_eda_ext could work, but not every doc has fpds
-
-			for (const doc of docs) {
-				// if we have a name for the org, we will use that name
-				const orgField = doc.issuing_organization_eda_ext ?? doc.fpds_contracting_agency_name_eda_ext;
-				let org = orgNames[orgField] ?? orgField;
-
-				if (org !== 'undefined') {
-					if (!(org in issuingOrgs)) {
-						org = 'ODA';
-					}
-					issuingOrgs[org].count += 1;
-					if (doc.obligated_amounts_eda_ext && !isNaN(doc.obligated_amounts_eda_ext)) {
-						totalObligatedAmount += doc.obligated_amounts_eda_ext;
-						issuingOrgs[org].obligatedAmount += doc.obligated_amounts_eda_ext;
-					}
-				}
-			}
+			data?.forEach((org) => {
+				const orgName = orgNames[org.key.toUpperCase()] ? orgNames[org.key.toUpperCase()] : 'ODA';
+				issuingOrgs[orgName].count += org.count;
+				issuingOrgs[orgName].obligatedAmount += org.value;
+			});
 
 			for (const org of Object.keys(issuingOrgs)) {
 				if (issuingOrgs[org].count === 0) {
@@ -378,11 +540,11 @@ const EdaSearchHandler = {
 				}
 			}
 
-			return { totalObligatedAmount, issuingOrgs };
+			return issuingOrgs;
 		} catch (err) {
 			console.log('Error calculating EDA org data');
 			console.log(err);
-			return { totalObligatedAmount: 0, issuingOrgs: {} };
+			return {};
 		}
 	},
 
@@ -413,47 +575,19 @@ const EdaSearchHandler = {
 		}
 
 		if (!isNullish(offsetURL)) {
-			const offset = parseInt(offsetURL);
-			if (!isNaN(offset)) parsed.offset = offset;
-			parsed.resultsPage = Math.floor(offset / RESULTS_PER_PAGE) + 1;
+			parseResultsPage(offsetURL, parsed);
 		}
 
 		if (!isNullish(orgURL)) {
-			const hasSubOrgs = orgURL.indexOf(':') !== -1;
-			const orgs = orgURL.split('|');
-			newSearchSettings.allOrgsSelected = false;
-			if (!hasSubOrgs) {
-				newSearchSettings.organizations = orgs[0].split('_');
-			} else {
-				const organizations = [];
-				const majcoms = {
-					'air force': [],
-					army: [],
-					defense: [],
-					navy: [],
-				};
-
-				for (const org of orgs) {
-					const orgWithSubOrgs = org.split(':');
-					organizations.push(orgWithSubOrgs[0]);
-					if (orgWithSubOrgs.length > 1) {
-						const subOrgs = orgWithSubOrgs[1].split('_');
-						for (const subOrg of subOrgs) {
-							majcoms[orgWithSubOrgs[0]].push(subOrg);
-						}
-					}
-				}
-				newSearchSettings.organizations = organizations;
-				newSearchSettings.majcoms = majcoms;
-			}
+			parseOrgs(orgURL, newSearchSettings);
 		}
 
 		if (!isNullish(dodaacURL)) {
-			newSearchSettings.issueOfficeDoDAAC = dodaacURL;
+			newSearchSettings.issueOfficeDoDAAC = dodaacURL.split('__');
 		}
 
 		if (!isNullish(officeNameURL)) {
-			newSearchSettings.issueOfficeName = officeNameURL;
+			newSearchSettings.issueOfficeName = officeNameURL.split('__');
 		}
 
 		if (!isNullish(fiscalYearsURL)) {
@@ -462,18 +596,7 @@ const EdaSearchHandler = {
 		}
 
 		if (!isNullish(contractDataURL)) {
-			newSearchSettings.allDataSelected = false;
-			const dataSources = contractDataURL.split('_');
-			const contractData = {
-				pds: false,
-				syn: false,
-				none: false,
-			};
-			for (const source of dataSources) {
-				contractData[source] = true;
-			}
-
-			newSearchSettings.contractData = contractData;
+			parseContractDataURL(contractDataURL, newSearchSettings);
 		}
 
 		if (!isNullish(minAmountURL)) {
@@ -504,80 +627,6 @@ const EdaSearchHandler = {
 
 		return parsed;
 	},
-
-	setSearchURL(state) {
-		const { searchText, resultsPage } = state;
-		const {
-			allOrgsSelected,
-			organizations,
-			startDate,
-			endDate,
-			issueAgency,
-			issueOfficeDoDAAC,
-			issueOfficeName,
-			allYearsSelected,
-			fiscalYears,
-			allDataSelected,
-			contractData,
-			minObligatedAmount,
-			maxObligatedAmount,
-			contractsOrMods,
-			majcoms,
-		} = state.edaSearchSettings;
-
-		let orgFilterText = undefined;
-		const majcomFilter =
-			organizations && majcoms
-				? _.pickBy(majcoms, (value, key) => value && value.length > 0 && organizations.indexOf(key) !== -1)
-				: undefined;
-		if (!allOrgsSelected && majcomFilter && Object.keys(majcomFilter).length > 0) {
-			orgFilterText = '';
-			for (const org of organizations) {
-				let separator = Object.keys(majcomFilter).indexOf(org) !== 0 ? '|' : '';
-				orgFilterText += `${separator}${org}${majcomFilter[org] ? ':' + majcomFilter[org].join('_') : ''}`;
-			}
-		} else {
-			orgFilterText =
-				!allOrgsSelected && organizations && organizations.length > 0 ? organizations.join('_') : undefined;
-		}
-		const issueOfficeDoDAACText = issueOfficeDoDAAC ?? undefined;
-		const issueOfficeNameText = issueOfficeName ?? undefined;
-		const fiscalYearsText =
-			!allYearsSelected && fiscalYears && fiscalYears.length > 0 ? fiscalYears.join('_') : undefined;
-		const contractDataText =
-			!allDataSelected && contractData
-				? Object.keys(_.pickBy(contractData, (value, key) => value)).join('_')
-				: undefined;
-		const minObligatedAmountText = minObligatedAmount ?? undefined;
-		const maxObligatedAmountText = maxObligatedAmount ?? undefined;
-		const modTypeText = contractsOrMods ?? undefined;
-		const startDateText = startDate ?? undefined;
-		const endDateText = endDate ?? undefined;
-		const issueAgencyText = issueAgency ?? undefined;
-		const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
-
-		const params = new URLSearchParams();
-
-		if (searchText) params.append('q', searchText);
-		if (offset) params.append('offset', String(offset));
-		if (orgFilterText) params.append('orgFilter', orgFilterText);
-		if (issueOfficeDoDAACText) params.append('dodaac', issueOfficeDoDAACText);
-		if (issueOfficeNameText) params.append('officeName', issueOfficeNameText);
-		if (fiscalYearsText) params.append('fiscalYears', fiscalYearsText);
-		if (contractDataText) params.append('contractData', contractDataText);
-		if (minObligatedAmountText) params.append('minAmount', minObligatedAmountText);
-		if (maxObligatedAmountText) params.append('maxAmount', maxObligatedAmountText);
-		if (modTypeText) params.append('modType', modTypeText);
-		if (startDateText) params.append('startDate', startDateText);
-		if (endDateText) params.append('endDate', endDateText);
-		if (issueAgencyText) params.append('issueAgency', issueAgencyText);
-
-		const linkString = `/#/${state.cloneData.url.toLowerCase()}?${params}`;
-
-		window.history.pushState(null, document.title, linkString);
-	},
-
-	getPresearchData(state) {},
 };
 
 export default EdaSearchHandler;

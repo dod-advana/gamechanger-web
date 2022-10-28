@@ -121,9 +121,9 @@ const createFilteredPubs = (docs) => {
 	}));
 };
 
-const getImagesForFilteredPubs = (filteredPubs, state, gameChangerAPI, cancelToken, dispatch) => {
-	filteredPubs.forEach((pub) => {
-		gameChangerAPI
+const getImagesForFilteredPubs = async (filteredPubs, state, gameChangerAPI, cancelToken) => {
+	filteredPubs.forEach(async (pub) => {
+		await gameChangerAPI
 			.thumbnailStorageDownloadPOST([pub], 'thumbnails', state.cloneData, cancelToken)
 			.then((pngs) => {
 				const buffers = pngs.data;
@@ -134,12 +134,13 @@ const getImagesForFilteredPubs = (filteredPubs, state, gameChangerAPI, cancelTok
 						pub.imgSrc = DefaultPub;
 					}
 				});
-				setState(dispatch, { recDocs: filteredPubs });
 			})
 			.catch(() => {
 				//Do nothing
 			});
 	});
+
+	return filteredPubs;
 };
 
 const recRecentlyViewedOnClick = (cloneData, dispatch, pub) => {
@@ -159,6 +160,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 		includeRevoked,
 		run_at,
 	} = search;
+
 	return (
 		<RecentSearchContainer
 			onClick={() => {
@@ -189,7 +191,18 @@ const renderRecentSearches = (search, state, dispatch) => {
 			}}
 		>
 			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-				<Typography style={styles.containerText}>{searchText}</Typography>
+				<GCTooltip title={searchText} placement="top" arrow>
+					<Typography
+						style={{
+							...styles.containerText,
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+							overflow: 'hidden',
+						}}
+					>
+						{searchText}
+					</Typography>
+				</GCTooltip>
 			</div>
 			<Typography style={styles.subtext}>
 				<strong>Source Filter: </strong>
@@ -224,9 +237,8 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 			...item,
 			imgSrc: DefaultPub,
 		}));
-		setState(dispatch, { searchMajorPubs: filteredPubs });
-
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { searchMajorPubs: pubsWithImages });
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -245,10 +257,8 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, 
 	try {
 		filteredPubs = createFilteredPubs(cleanedDocs);
 
-		setState(dispatch, { lastOpened: filteredPubs });
-		setState(dispatch, { loadingLastOpened: false });
-
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { lastOpened: pubsWithImages, loadingLastOpened: false });
 	} catch (e) {
 		//Do nothing
 		console.log(e);
@@ -260,13 +270,11 @@ const handleRecDocs = async (rec_docs, state, dispatch, cancelToken, gameChanger
 	let filteredPubs = [];
 	try {
 		filteredPubs = createFilteredPubs(rec_docs);
-		setState(dispatch, { recDocs: filteredPubs });
-		setState(dispatch, { loadingrecDocs: false });
 
-		getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken, dispatch);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
+		setState(dispatch, { recDocs: pubsWithImages, loadingrecDocs: false });
 	} catch (e) {
 		//Do nothing
-		console.log(e);
 		setState(dispatch, { recDocs: filteredPubs });
 	}
 };
@@ -724,7 +732,7 @@ const getViewNames = (props) => {
 const getExtraViewPanels = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
-	const { cloneData, count, docSearchResults, resultsPage, loading, prevSearchText, searchText } = state;
+	const { count } = state;
 	const viewPanels = [];
 	viewPanels.push({
 		panelName: 'Explorer',
@@ -734,18 +742,18 @@ const getExtraViewPanels = (props) => {
 					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
 					<PolicyDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
-						data={docSearchResults}
-						searchText={searchText}
-						prevSearchText={prevSearchText}
-						totalCount={count > 9982 ? 9982 : count}
-						loading={loading}
-						resultsPage={resultsPage}
+						totalCount={count}
 						resultsPerPage={RESULTS_PER_PAGE}
-						onPaginationClick={(page) => {
-							setState(dispatch, { resultsPage: page, runSearch: true });
+						onPaginationClick={async (page) => {
+							setState(dispatch, {
+								docsLoading: true,
+								resultsPage: page,
+								docsPagination: true,
+							});
 						}}
 						isClone={true}
-						cloneData={cloneData}
+						state={state}
+						dispatch={dispatch}
 					/>
 				</div>
 			</StyledCenterContainer>
@@ -1146,13 +1154,18 @@ const PolicyMainViewHandler = (props) => {
 	const [searchHandler, setSearchHandler] = useState();
 
 	useEffect(() => {
-		if (state.docsPagination && searchHandler) {
-			searchHandler.handleDocPagination(state, dispatch, state.replaceResults);
+		const shouldRunPagination = (type) => {
+			return Boolean(type && searchHandler);
+		};
+
+		if (shouldRunPagination(state.docsPagination)) {
+			const replaceResults = state.currentViewName === 'Explorer' ? true : state.replaceResults;
+			searchHandler.handleDocPagination(state, dispatch, replaceResults);
 		}
-		if (state.entityPagination && searchHandler) {
+		if (shouldRunPagination(state.entityPagination)) {
 			searchHandler.handleEntityPagination(state, dispatch);
 		}
-		if (state.topicPagination && searchHandler) {
+		if (shouldRunPagination(state.topicPagination)) {
 			searchHandler.handleTopicPagination(state, dispatch);
 		}
 	}, [state, dispatch, searchHandler]);

@@ -4,16 +4,18 @@ import SearchBarDropdown from '../../searchBar/SearchBarDropdown';
 import GCButton from '../../common/GCButton';
 import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
+import { setState } from '../../../utils/sharedFunctions';
+import { PAGE_DISPLAYED } from '../../../utils/gamechangerUtils';
 
 const jbookSearchBarHandler = {
 	async debouncedFetchSearchSuggestions(
-		value,
-		cloneData,
-		setAutocorrect,
-		setPresearchTitle,
-		setPresearchTopic,
-		setPresearchOrg,
-		setPredictions
+		_value,
+		_cloneData,
+		_setAutocorrect,
+		_setPresearchTitle,
+		_setPresearchTopic,
+		_setPresearchOrg,
+		_setPredictions
 	) {
 		try {
 			// do nothing
@@ -24,6 +26,7 @@ const jbookSearchBarHandler = {
 	getSearchBar(props) {
 		const {
 			state,
+			dispatch,
 			classes,
 			searchFavoritePopperAnchorEl,
 			advancedSearchOpen,
@@ -46,6 +49,34 @@ const jbookSearchBarHandler = {
 			handleSaveSearch,
 		} = props;
 
+		const handleSearchFromOtherPages = () => {
+			// if user is searching from a page other than the main page,
+			// navigate to main page first to show results
+			if (state.pageDisplayed !== PAGE_DISPLAYED.main) {
+				window.history.pushState(null, document.title, `/#/jbook`);
+				setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+			}
+		};
+
+		const jbookDataRows = [];
+		if (dataRows.length > 0) {
+			dataRows.forEach((rowGroup) => {
+				const { handleRowPressed } = rowGroup;
+				jbookDataRows.push({
+					...rowGroup,
+					handleRowPressed: ({ text, rowType }) => {
+						handleSearchFromOtherPages();
+						handleRowPressed({ text, rowType });
+					},
+				});
+			});
+		}
+
+		const jbookHandleSubmit = (event) => {
+			handleSearchFromOtherPages();
+			handleSubmit(event);
+		};
+
 		return (
 			<div
 				style={{ display: 'flex', justifyContent: 'center', margin: '0 0 0 25px', position: 'relative' }}
@@ -58,7 +89,7 @@ const jbookSearchBarHandler = {
 							? `tutorial-step-${state.componentStepNumbers['Search Input']}`
 							: null
 					}
-					onSubmit={handleSubmit}
+					onSubmit={jbookHandleSubmit}
 					autoComplete="off"
 					onKeyDown={handleKeyDown}
 				>
@@ -74,17 +105,15 @@ const jbookSearchBarHandler = {
 						id="gcSearchInput"
 					/>
 					{dropdownOpen && !advancedSearchOpen && (
-						<SearchBarDropdown searchText={searchText} rowData={dataRows} cursor={cursor} />
+						<SearchBarDropdown searchText={searchText} rowData={jbookDataRows} cursor={cursor} />
 					)}
 				</SearchBarForm>
-				<SearchButton backgroundColor={'#9E9E9E'} id="gcSearchButton" onClick={handleSubmit}>
+				<SearchButton backgroundColor={'#9E9E9E'} id="gcSearchButton" onClick={jbookHandleSubmit}>
 					<i className="fa fa-search" />
 				</SearchButton>
 
 				<Popover
-					onClose={() => {
-						handleFavoriteSearchClicked(null);
-					}}
+					onClose={handleFavoriteSearchClicked}
 					open={searchFavoritePopperOpen}
 					anchorEl={searchFavoritePopperAnchorEl}
 					anchorOrigin={{

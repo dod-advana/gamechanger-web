@@ -8,7 +8,6 @@ const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
 const CACHE_IS_NOT_RELOADING = 'not-reloading';
-const MAX_RELOAD_TIME_MINS = 6 * 60;
 
 class ElasticSearchController {
 	constructor(opts = {}) {
@@ -95,17 +94,31 @@ class ElasticSearchController {
 
 			const clientObj = {
 				esClientName: 'gamechanger',
-				esIndex: 'global_search_qlik',
+				esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX,
 			};
 
-			// Create index for qlik apps in case it is not there
-			await this.esSearchLib.createIndex(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				this.constants.GLOBAL_SEARCH_OPTS.ES_MAPPING,
-				{},
-				'QlikAppCaching'
-			);
+			try {
+				await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
+			} catch (e) {
+				this.logger.info('Error deleting the index but lets try creating one.', 'QlikAppCaching', 'CronJob');
+			}
+
+			try {
+				// Create index for qlik apps in case it is not there
+				await this.esSearchLib.createIndex(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					this.constants.GLOBAL_SEARCH_OPTS.ES_MAPPING,
+					{},
+					'QlikAppCaching'
+				);
+			} catch (e) {
+				this.logger.info(
+					'Error creating the index but lets try storing the data.',
+					'QlikAppCaching',
+					'CronJob'
+				);
+			}
 
 			// Convert qlik apps into documents
 			const dataset = qlikApps.map((app) => {
@@ -115,21 +128,21 @@ class ElasticSearchController {
 					modified_dt: app['modifiedDate'],
 					//modifiedByUserName_s: app['modifiedByUserName'],
 					//ownerName_s: app['owner']['name'],
-					name_s: app['name'],
+					name_t: app['name'],
 					publishTime_dt: app['publishTime'],
 					published_b: app['published'],
-					tags_n: app['tags'],
+					tags_n: { items: app['tags'] },
 					description_t: app['description'],
-					streamId_s: app['stream']['id'],
-					streamName_s: app['stream']['name'],
-					streamCustomProperties_s: app['stream']['customProperties'],
-					fileSize_i: app['fileSize'],
+					streamId_t: app['stream']['id'],
+					streamName_t: app['stream']['name'],
+					streamCustomProperties_n: { items: app['stream']['customProperties'] },
+					fileSize_i: Number.parseInt(app['fileSize']),
 					lastReloadTime_dt: app['lastReloadTime'],
-					thumbnail_s: app['thumbnail'],
-					dynamicColor_s: app['dynamicColor'],
-					appCustomProperties_s: app['customProperties'],
-					businessDomains_s: app['businessDomains'],
-					owner_s: app['owner']['name'],
+					thumbnail_t: app['thumbnail'],
+					dynamicColor_t: app['dynamicColor'],
+					appCustomProperties_n: { items: app['customProperties'] },
+					businessDomains_n: { items: app['businessDomains'] },
+					owner_t: app['owner']['name'],
 				};
 			});
 
@@ -151,6 +164,7 @@ class ElasticSearchController {
 			this.logger.info('Finished Caching Full Qlik Apps');
 		} catch (e) {
 			this.logger.error(e, 'YQJ8T22', 'Qlik Cache Function');
+			throw e;
 		}
 	}
 }

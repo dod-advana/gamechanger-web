@@ -1,6 +1,5 @@
 const LOGGER = require('@dod-advana/advana-logger');
 const constantsFile = require('../config/constants');
-const CryptoJS = require('crypto-js');
 const axiosLib = require('axios');
 const https = require('https');
 const AWS = require('aws-sdk');
@@ -9,7 +8,6 @@ const asyncRedisLib = require('async-redis');
 const { ESSearchLib } = require('./ESSearchLib');
 const { Op } = require('sequelize');
 const edaDatabaseFile = require('../models/eda');
-const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const LINE_ITEM_DETAILS = edaDatabaseFile.line_item_details;
 const ALL_OUTGOING_COUNTS = edaDatabaseFile.all_outgoing_counts_pdf_pds_xwalk_only;
 
@@ -62,14 +60,27 @@ class DataLibrary {
 			s3Opt.region = this.constants.S3_REGION;
 		}
 
-		if (process.env.S3_IS_MINIO === 'true') {
-			s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
-			s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
-			s3Opt.endpoint = process.env.S3_ENDPOINT;
-			s3Opt.s3ForcePathStyle = true;
-			s3Opt.signatureVersion = 'v4';
+		if (process.env.REACT_APP_NODE_ENV === 'development') {
+			if (process.env.S3_IS_MINIO === 'true') {
+				s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
+				s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
+				s3Opt.endpoint = process.env.S3_ENDPOINT;
+				s3Opt.s3ForcePathStyle = true;
+				s3Opt.signatureVersion = 'v4';
+			}
+		} else {
+			// add in cert for non-NIPR environments
+			if (
+				process.env.REACT_APP_ENV_CLASSIFICATION !== undefined &&
+				process.env.REACT_APP_ENV_CLASSIFICATION !== 'NIPR'
+			) {
+				s3Opt['httpOptions'] = {
+					agent: new https.Agent({
+						ca: constants.TLS_CERT_CA,
+					}),
+				};
+			}
 		}
-
 		try {
 			this.awsS3Client = new AWS.S3(s3Opt);
 		} catch (err) {
@@ -281,63 +292,73 @@ class DataLibrary {
 	async getFilePDF(res, data, userId) {
 		let { dest, filekey, samplingType } = data;
 		const { req } = res;
-		try {
-			if (
-				(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
-				req.query.isClone &&
-				req.query.clone_name === 'eda'
-			) {
-				const edaUrl =
-					this.constants.GAMECHANGER_BACKEND_EDA_URL +
-					req.baseUrl +
-					req.path +
-					'?path=' +
-					req.query.path +
-					'&dest=' +
-					req.query.dest +
-					'&filekey=' +
-					req.query.filekey +
-					'&isClone=' +
-					req.query.isClone +
-					'&clone_name=edaReRoute';
+		if (
+			(req.permissions.includes('Webapp Super Admin') || req.permissions.includes('View EDA')) &&
+			req.query.isClone &&
+			req.query.clone_name === 'eda'
+		) {
+			const edaUrl =
+				this.constants.GAMECHANGER_BACKEND_EDA_URL +
+				req.baseUrl +
+				req.path +
+				'?path=' +
+				req.query.path +
+				'&dest=' +
+				req.query.dest +
+				'&filekey=' +
+				req.query.filekey +
+				'&isClone=' +
+				req.query.isClone +
+				'&clone_name=edaReRoute';
 
-				this.axios({
-					method: 'get',
-					url: edaUrl,
-					headers: req.headers,
-					responseType: 'stream',
+			this.axios({
+				method: 'get',
+				url: edaUrl,
+				headers: req.headers,
+				responseType: 'stream',
+			})
+				.then((response) => {
+					response.data.pipe(res);
 				})
-					.then((response) => {
-						response.data.pipe(res);
-					})
-					.catch((err) => {
-						this.logger.error(err, 'N4BAC3N', userId);
-						throw err;
-					});
-			} else {
-				const params = {
-					Bucket: dest,
-					Key: decodeURIComponent(filekey),
-				};
-
-				if (samplingType === 'head') {
-					params.Range = 'bytes=0-' + SAMPLING_BYTES;
-				} else if (samplingType === 'tail') {
-					params.Range = 'bytes=-' + SAMPLING_BYTES;
-				}
-
-				try {
-					res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
-					this.awsS3Client.getObject(params).createReadStream().pipe(res);
-				} catch (err) {
-					this.logger.error(err, 'IPOQHZS', userId);
+				.catch((err) => {
+					this.logger.error(err, 'N4BAC3N', userId);
 					throw err;
-				}
+				});
+		} else {
+			const params = {
+				Bucket: dest,
+				Key: decodeURIComponent(filekey),
+			};
+
+			if (samplingType === 'head') {
+				params.Range = 'bytes=0-' + SAMPLING_BYTES;
+			} else if (samplingType === 'tail') {
+				params.Range = 'bytes=-' + SAMPLING_BYTES;
 			}
-		} catch (err) {
-			const msg = err && err.message ? `${err.message}` : `${err}`;
-			this.logger.error(msg, 'PFXO7XD', userId);
-			throw msg;
+
+			try {
+				res.setHeader(`Content-Disposition`, `attachment; filename=${encodeURIComponent(filekey)}`);
+				this.awsS3Client
+					.getObject(params)
+					.createReadStream()
+					.on('error', function (_err) {
+						//Handles errors on the read stream
+						res.status(500);
+						res.end();
+					})
+					.pipe(res)
+					.on('error', function (_err) {
+						//Handles errors on the write stream
+						res.status(500);
+						res.end();
+					})
+					.on('finish', function () {
+						res.end();
+					});
+			} catch (err) {
+				this.logger.error(err, 'IPOQHZS', userId);
+				throw err;
+			}
 		}
 	}
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import _ from 'underscore';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { Collapse } from 'react-collapse';
@@ -8,16 +8,17 @@ import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import grey from '@material-ui/core/colors/grey';
 import {
-	getReferenceListMetadataPropertyTable,
 	getMetadataForPropertyTable,
 	handlePdfOnLoad,
 	getTrackingNameForFactory,
 	policyMetadata,
 } from '../../../utils/gamechangerUtils';
 
-import Pagination from 'react-js-pagination';
+import Pagination from '../../common/Pagination';
 import { trackEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
+import { setState } from '../../../utils/sharedFunctions';
+import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -83,6 +84,7 @@ function DocumentPanel({
 	handlePdfOnLoadStart,
 	data,
 	fileUrl,
+	loading,
 }) {
 	return (
 		<>
@@ -99,30 +101,35 @@ function DocumentPanel({
 				}}
 			>
 				<div style={{ height: '100%' }}>
-					{filename && filename.endsWith('pdf') && (
-						<iframe
-							title={'PDFViewer'}
-							className="aref"
-							id={'PdfViewer'}
-							ref={measuredRef}
-							onLoad={handlePdfOnLoadStart}
-							style={{
-								borderStyle: 'none',
-								display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
-							}}
-							width="100%"
-							height="100%%"
-						></iframe>
-					)}
-
-					{filename && filename.endsWith('html') && (
-						<iframe
-							title={'PDFViewer'}
-							className="aref"
-							id={'pdfViewer'}
-							src={fileUrl}
-							style={{ width: '100%', height: '100%' }}
-						></iframe>
+					{!loading && filename ? (
+						<>
+							{filename.endsWith('pdf') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'PdfViewer'}
+									ref={measuredRef}
+									onLoad={handlePdfOnLoadStart}
+									style={{
+										borderStyle: 'none',
+										display: data.length > 0 && !iframeLoading ? 'initial' : 'none',
+									}}
+									width="100%"
+									height="100%%"
+								></iframe>
+							)}
+							{filename.endsWith('html') && (
+								<iframe
+									title={'PDFViewer'}
+									className="aref"
+									id={'pdfViewer'}
+									src={fileUrl}
+									style={{ width: '100%', height: '100%' }}
+								></iframe>
+							)}{' '}
+						</>
+					) : (
+						<LoadingIndicator customColor={'#E9691D'} />
 					)}
 				</div>
 			</div>
@@ -172,35 +179,83 @@ function RightPanel({ iframeLoading, rightPanelOpen, handleRightPanelToggle }) {
 	);
 }
 
-export default function DocumentExplorer({
-	data = [],
+const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHighlightedSections }) => {
+	return (
+		<div style={{ overflow: 'auto', height: '100%', borderRight: '1px solid lightgrey' }}>
+			{docsLoading ? (
+				<div style={{ margin: '0 auto' }}>
+					<LoadingIndicator customColor={'#E9691D'} />
+				</div>
+			) : (
+				data.map((item, key) => {
+					const collapsed = collapseKeys?.[key.toString()] ?? true;
+					const displayTitle =
+						item.title === 'NA'
+							? `${item.doc_type} ${item.doc_num}`
+							: `${item.doc_type} ${item.doc_num} - ${item.title}`;
+
+					if (item.type === 'document') {
+						const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
+						return (
+							<div key={key}>
+								<div
+									className="searchdemo-modal-result-header"
+									onClick={(e) => {
+										e.preventDefault();
+										setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
+									}}
+								>
+									<i
+										style={{
+											marginRight: collapsed ? 14 : 10,
+											fontSize: 20,
+											cursor: 'pointer',
+										}}
+										className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
+									/>
+									<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
+									<span style={{ width: 30, marginLeft: 'auto', color: 'white' }} className="badge">
+										{item.pageHitCount}
+									</span>
+								</div>
+								<Collapse isOpened={!collapsed}>
+									<div>{renderHighlightedSections(pageHits, item, key)}</div>
+								</Collapse>
+							</div>
+						);
+					} else {
+						return null;
+					}
+				})
+			)}
+		</div>
+	);
+};
+
+export default function PolicyDocumentExplorer({
 	totalCount,
-	_searchText = '',
-	prevSearchText = '',
-	loading,
-	resultsPage,
 	resultsPerPage,
 	onPaginationClick,
 	isClone = false,
-	cloneData = {},
+	state,
+	dispatch,
 }) {
+	const { cloneData = {}, docSearchResults: data = [], resultsPage, docsLoading, prevSearchText, loading } = state;
+
 	// Set out state variables and access functions
-	const [collapseKeys, setCollapseKeys] = React.useState(null);
-	const [iframePreviewLink, setIframePreviewLink] = React.useState({
+	const [collapseKeys, setCollapseKeys] = useState(null);
+	const [iframePreviewLink, setIframePreviewLink] = useState({
 		dataIdx: 0,
 		pageHitIdx: 0,
 	});
-	const [prevIframPreviewLink, setPrevIframPreviewLink] = React.useState({
-		dataIdx: -1,
-		pageHitIdx: -1,
-	});
-	const [iframeLoading, setIframeLoading] = React.useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = React.useState(true);
-	const [rightPanelOpen, setRightPanelOpen] = React.useState(true);
-	const [pdfLoaded, setPdfLoaded] = React.useState(false);
-	const [viewToggle, setviewToggle] = React.useState(false);
-	const [fileUrl, setFileUrl] = React.useState(null);
-	const [filename, setFilename] = React.useState(null);
+	const [loadPDF, setLoadPDF] = useState(false);
+	const [iframeLoading, setIframeLoading] = useState(false);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+	const [rightPanelOpen, setRightPanelOpen] = useState(true);
+	const [pdfLoaded, setPdfLoaded] = useState(false);
+	const [viewToggle, setviewToggle] = useState(false);
+	const [fileUrl, setFileUrl] = useState(null);
+	const [filename, setFilename] = useState(null);
 
 	const measuredRef = useCallback(
 		(node) => {
@@ -212,7 +267,8 @@ export default function DocumentExplorer({
 
 					const pageObj = rec.pageHits ? rec.pageHits[pageHitIdx] : {};
 					const pageNumber = pageObj ? pageObj.pageNumber : 1;
-					if (filename && JSON.stringify(prevIframPreviewLink) !== JSON.stringify(iframePreviewLink)) {
+					if (filename && loadPDF) {
+						setLoadPDF(false);
 						setIframeLoading(true);
 						getIframePreviewLinkInferred(
 							filename,
@@ -224,14 +280,28 @@ export default function DocumentExplorer({
 						).then((url) => {
 							node.src = url;
 							setIframeLoading(false);
-							setPrevIframPreviewLink(iframePreviewLink);
 						});
 					}
 				}
 			}
 		},
-		[iframePreviewLink, prevSearchText, prevIframPreviewLink, isClone, cloneData, data, filename]
+		[iframePreviewLink, prevSearchText, isClone, cloneData, data, filename, loadPDF]
 	);
+
+	useEffect(() => {
+		setState(dispatch, { activeCategoryTab: 'Documents' });
+	}, [dispatch]);
+
+	useEffect(() => {
+		setIframePreviewLink({
+			pageHitIdx: 0,
+			dataIdx: 0,
+		});
+	}, [data]);
+
+	useEffect(() => {
+		setLoadPDF(true);
+	}, [iframePreviewLink]);
 
 	useEffect(() => {
 		const { dataIdx } = iframePreviewLink;
@@ -339,11 +409,7 @@ export default function DocumentExplorer({
 		policyData = [...policyMetadata(data[iframePreviewLink.dataIdx]), ...policyData];
 	}
 
-	const previewDataReflist =
-		(data.length > 0 &&
-			data[iframePreviewLink.dataIdx] &&
-			getReferenceListMetadataPropertyTable(data[iframePreviewLink.dataIdx].ref_list)) ||
-		[];
+	const document = (data.length > 0 && data[iframePreviewLink.dataIdx]) || undefined;
 	const iframePanelSize =
 		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
@@ -355,7 +421,6 @@ export default function DocumentExplorer({
 		minWidth: '75%',
 		maxWidth: '75%',
 	};
-	const colWidthRefTable = { minWidth: '25%', maxWidth: '25%' };
 
 	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
 
@@ -417,9 +482,8 @@ export default function DocumentExplorer({
 				style={{
 					display: leftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
-					borderRight: '1px solid lightgrey',
 					height: '100%',
-					overflow: 'auto',
+					marginTop: '-65px',
 				}}
 			>
 				<div
@@ -428,7 +492,11 @@ export default function DocumentExplorer({
 						color: grey800,
 						fontWeight: 'bold',
 						display: 'flex',
-						marginBottom: '10px',
+						alignItems: 'center',
+						width: '100%',
+						minWidth: '370px',
+						height: '45px',
+						marginBottom: '20px',
 					}}
 				>
 					<div style={styles.docExplorerPag} className="gcPagination docExplorerPag">
@@ -437,6 +505,8 @@ export default function DocumentExplorer({
 							itemsCountPerPage={resultsPerPage}
 							totalItemsCount={totalCount}
 							pageRangeDisplayed={3}
+							showJumpToFirstLastPages={false}
+							showFirstPageWithEllipsis={true}
 							onChange={(page) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),
@@ -444,6 +514,9 @@ export default function DocumentExplorer({
 									'Pagination',
 									page
 								);
+								setState(dispatch, {
+									visitEarlierPage: page < resultsPage,
+								});
 								onPaginationClick(page);
 							}}
 						/>
@@ -468,56 +541,16 @@ export default function DocumentExplorer({
 							</div>
 						</div>
 					) : (
-						'' // 'Make a search to get started.'
+						''
 					)}
 				</div>
-
-				{loading ? (
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={'#E9691D'} />
-					</div>
-				) : (
-					_.map(data, (item, key) => {
-						const collapsed = collapseKeys?.[key.toString()] ?? true;
-						const displayTitle =
-							item.title === 'NA'
-								? `${item.doc_type} ${item.doc_num}`
-								: `${item.doc_type} ${item.doc_num} - ${item.title}`;
-
-						if (item.type === 'document') {
-							const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
-							return (
-								<div key={key}>
-									<div
-										className="searchdemo-modal-result-header"
-										onClick={(e) => {
-											e.preventDefault();
-											setCollapseKeys({ ...collapseKeys, [key]: !collapsed });
-										}}
-									>
-										<i
-											style={{
-												marginRight: collapsed ? 14 : 10,
-												fontSize: 20,
-												cursor: 'pointer',
-											}}
-											className={`fa fa-caret-${!collapsed ? 'down' : 'right'}`}
-										/>
-										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
-										<span style={{ width: 30, marginLeft: 'auto' }} className="badge">
-											{item.pageHitCount}
-										</span>
-									</div>
-									<Collapse isOpened={!collapsed}>
-										<div>{renderHighlightedSections(pageHits, item, key)}</div>
-									</Collapse>
-								</div>
-							);
-						} else {
-							return null;
-						}
-					})
-				)}
+				<DocResults
+					docsLoading={docsLoading}
+					data={data}
+					collapseKeys={collapseKeys}
+					setCollapseKeys={setCollapseKeys}
+					renderHighlightedSections={renderHighlightedSections}
+				/>
 			</div>
 			<div
 				className={`col-xs-${iframePanelSize}`}
@@ -569,6 +602,7 @@ export default function DocumentExplorer({
 						handlePdfOnLoadStart={handlePdfOnLoadStart}
 						data={data}
 						fileUrl={fileUrl}
+						loading={loading}
 					/>
 
 					<RightPanel
@@ -601,16 +635,7 @@ export default function DocumentExplorer({
 				/>
 				<div style={{ marginTop: 0 }}>
 					{' '}
-					<SimpleTable
-						tableClass={'magellan-table'}
-						zoom={0.8}
-						headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
-						rows={previewDataReflist}
-						height={'auto'}
-						dontScroll={true}
-						colWidth={colWidthRefTable}
-						disableWrap={true}
-					/>
+					<PolicyDocumentReferenceTable state={state} document={document} zoom={0.8} />
 				</div>
 			</div>
 		</div>

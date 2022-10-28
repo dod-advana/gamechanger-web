@@ -104,7 +104,7 @@ const ClassificationScoreCard = (props) => {
 		<StyledLeftContainer>
 			<div style={{ backgroundColor: 'rgb(239, 241, 246)', marginLeft: -6, marginRight: -8 }}>
 				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
-					{`Classification Scorecard`}
+					{`${portfolioName} Label`}
 				</Typography>
 				{scores.map((score) => {
 					return (
@@ -177,7 +177,6 @@ const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { projectData, reviewData, keywordsChecked } = state;
-
 	return (
 		<SimpleTable
 			tableClass={'magellan-table'}
@@ -215,10 +214,14 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 				<LoadingIndicator customColor={'#1C2D64'} style={{ width: '50px', height: '50px' }} />
 			) : (
 				<>
-					<Typography variant="h2" style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}>
+					<Typography
+						variant="h2"
+						data-cy="jbook-profile-title"
+						style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
+					>
 						{renderTitle(projectData, programElement, projectNum)}
 					</Typography>
-					<div style={{ overflow: 'auto' }}>
+					<div style={{ overflow: 'auto' }} data-cy="jbook-project-descriptions">
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions.map((pd) => {
 								return (
@@ -413,7 +416,7 @@ const NavButtons = () => {
 		'The Basics',
 		'Accomplishment',
 		'Contracts',
-		'Primary Reviewer Section',
+		'Initial Reviewer Section',
 		'Service / DoD Component Reviewer Section',
 		'POC Reviewer Section',
 	];
@@ -478,6 +481,10 @@ const renderKeywordCheckboxes = (keywordsChecked, keywordCheckboxes, setKeywordC
 	return checkboxes;
 };
 
+const retrieveProjectField = (field) => {
+	return field || 'N/A';
+};
+
 const getMetadataTableData = (
 	projectData,
 	budgetType,
@@ -534,35 +541,43 @@ const getMetadataTableData = (
 		},
 		{
 			Key: 'Department',
-			Value: projectData.serviceAgency || 'N/A',
+			Value: retrieveProjectField(projectData.serviceAgency),
 		},
 		{
 			Key: 'Agency',
-			Value: projectData.org_jbook_desc_s || 'N/A',
+			Value: retrieveProjectField(projectData.org_jbook_desc_s),
 		},
 		{
 			Key: 'To Complete',
-			Value: `${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}` || 'N/A',
+			Value: retrieveProjectField(`${parseInt(projectData.budgetYear) + (budgetType === 'Procurement' ? 3 : 2)}`),
 		},
 		{
 			Key: 'Budget Cycle',
-			Value: projectData.budgetCycle || 'N/A',
+			Value: retrieveProjectField(projectData.budgetCycle),
 		},
 		{
 			Key: 'Appropriation',
-			Value: projectData.appropriationNumber || 'N/A',
+			Value: retrieveProjectField(projectData.appropriationNumber),
 		},
 		{
 			Key: 'Appropriation Title',
-			Value: projectData.appropriationTitle || 'N/A',
-		},
-		{
-			Key: 'Budget Activity',
-			Value: projectData.budgetActivityNumber || 'N/A',
+			Value: retrieveProjectField(projectData.appropriationTitle),
 		},
 		{
 			Key: 'Budget Activity Title',
-			Value: projectData.budgetActivityTitle || 'N/A',
+			Value: retrieveProjectField(projectData.budgetActivityTitle),
+		},
+		{
+			Key: 'Budget Activity Number',
+			Value: retrieveProjectField(projectData.budgetActivityNumber),
+		},
+		{
+			Key: 'Budget Sub Activity Title',
+			Value: retrieveProjectField(projectData.budgetSubActivityTitle),
+		},
+		{
+			Key: 'Budget Sub Activity Number',
+			Value: retrieveProjectField(projectData.budgetSubActivityNumber),
 		},
 		{
 			Key: 'Category',
@@ -572,7 +587,7 @@ const getMetadataTableData = (
 			Key: 'Keywords',
 			Value: (
 				<div>
-					{keywordCheckboxes && keywordCheckboxes.length > 0
+					{keywordCheckboxes?.length > 0
 						? renderKeywordCheckboxes(keywordsChecked, keywordCheckboxes, setKeywordCheck)
 						: 'None'}
 				</div>

@@ -21,14 +21,6 @@ import GamechangerAPI from '../../api/gameChanger-service-api';
 const gamechangerAPI = new GamechangerAPI();
 let cancelToken = axios.CancelToken.source();
 
-// const getAndSetDidYouMean = (index, searchText, dispatch) => {
-// 	jbookAPI.getTextSuggestion({ index, searchText }).then(({ data }) => {
-// 		setState(dispatch, {idYouMean: data?.autocorrect?.[0]});
-// 	}).catch(_ => {
-// 		//do nothing
-// 	})
-// };
-
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
 		const recentSearches = localStorage.getItem(`recentjbookSearches`) || '[]';
@@ -41,9 +33,9 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async exportSearch(state, dispatch) {
+	async exportSearch(state) {
 		try {
-			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+			const cleanSearchSettings = this.processSearchSettings(state);
 			const offset = 0;
 
 			const { searchText = '' } = state;
@@ -74,8 +66,22 @@ const JBookSearchHandler = {
 
 	async performQuery(state, searchText, resultsPage, dispatch, runningSearch) {
 		try {
-			const cleanSearchSettings = this.processSearchSettings(state, dispatch);
-			const offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+			const cleanSearchSettings = this.processSearchSettings(state);
+			let offset = (resultsPage - 1) * RESULTS_PER_PAGE;
+			let search_after = [];
+			let search_before = [];
+			if (offset >= 9982) {
+				if (state.rawSearchResults.length > 0) {
+					offset = 0;
+					if (state.visitEarlierPage) {
+						search_before = state.rawSearchResults[0]?.sort;
+					} else {
+						search_after = state.rawSearchResults[state.rawSearchResults.length - 1]?.sort;
+					}
+				} else {
+					console.log('bad yo, state.rawSearchResults is empty');
+				}
+			}
 
 			if (runningSearch) {
 				cancelToken.cancel('cancelled axios with consecutive call');
@@ -88,6 +94,8 @@ const JBookSearchHandler = {
 					cloneName: 'jbook',
 					searchText,
 					offset,
+					search_after,
+					search_before,
 					options: {
 						searchVersion: 1,
 						jbookSearchSettings: cleanSearchSettings,
@@ -110,8 +118,8 @@ const JBookSearchHandler = {
 		}
 	},
 
-	async getContractTotals(state, dispatch) {
-		const cleanSearchSettings = this.processSearchSettings(state, dispatch);
+	async getContractTotals(state) {
+		const cleanSearchSettings = this.processSearchSettings(state);
 
 		const { data } = await gamechangerAPI.callDataFunction({
 			functionName: 'getContractTotals',
@@ -250,7 +258,6 @@ const JBookSearchHandler = {
 	async handleEDASearch(state, dispatch) {
 		const { searchText = '', edaResultsPage, edaCloneData } = state;
 
-		// let searchResults = [];
 		setState(dispatch, {
 			edaCount: 0,
 			edaSearchResults: [],
@@ -274,8 +281,6 @@ const JBookSearchHandler = {
 					charsPadding,
 				},
 			});
-
-			// const t1 = new Date().getTime();
 
 			if (_.isObject(results.data)) {
 				let { docs, totalCount } = results.data;
@@ -313,11 +318,10 @@ const JBookSearchHandler = {
 		}
 	},
 
-	parseSearchURL(defaultState, url) {
+	parseSearchURL(_defaultState, url) {
 		if (!url) url = window.location.href;
 
 		const parsed = {};
-		// const newSearchSettings = {};
 
 		const searchText = getQueryVariable('q', url);
 		const offsetURL = getQueryVariable('offset', url);
@@ -347,19 +351,27 @@ const JBookSearchHandler = {
 
 		if (searchText) params.append('q', searchText);
 		if (searchText && offset) params.append('offset', String(offset));
+		const cleanSearchSettings = this.processSearchSettings(state);
+		Object.keys(cleanSearchSettings).forEach((setting) => {
+			if (!setting.includes('Selected') && !setting.includes('Update') && setting !== 'sort') {
+				params.append(setting, cleanSearchSettings[setting]);
+			}
+		});
 
 		const hash = window.location.hash;
 
 		const paramIndex = hash.indexOf('?');
 
 		linkString += `${paramIndex === -1 ? hash : hash.substring(0, paramIndex)}${
-			searchText && searchText !== '' ? '?' : ''
+			params.toString() ? '?' : ''
 		}${params}`;
 
 		window.history.pushState(null, document.title, linkString);
 	},
 
-	getPresearchData(state) {},
+	getPresearchData(_state) {
+		return undefined;
+	},
 
 	processSearchSettings(state) {
 		const searchSettings = _.cloneDeep(state.jbookSearchSettings);
@@ -385,10 +397,10 @@ const JBookSearchHandler = {
 			case 'Service / Agency':
 				searchSettings.sort = [{ id: 'serviceAgency', desc: sortDesc }];
 				break;
-			case 'Primary Reviewer':
+			case 'Initial Reviewer':
 				searchSettings.sort = [{ id: 'primaryReviewer', desc: sortDesc }];
 				break;
-			case 'Service Reviewer':
+			case 'RAI Lead Reviewer':
 				searchSettings.sort = [{ id: 'serviceReviewer', desc: sortDesc }];
 				break;
 			case 'POC Reviewer':
@@ -422,6 +434,8 @@ const JBookSearchHandler = {
 		for (const setting in searchSettings) {
 			if (!searchSettings[setting]) {
 				delete searchSettings[setting];
+			} else if (typeof searchSettings[setting] === 'string') {
+				searchSettings[setting] = searchSettings[setting].trim();
 			}
 		}
 

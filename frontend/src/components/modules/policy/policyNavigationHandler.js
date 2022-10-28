@@ -11,7 +11,6 @@ import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 import CrowdSourcingAppIcon from '../../../images/icon/crowdsourcing.png';
 import DataStatusTrackerIcon from '../../../images/icon/datatracker.png';
 import AnalystToolsIcon from '../../../images/icon/analyticswht.png';
-import CloneRequest from '../../../images/icon/CloneRequest.png';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
@@ -25,7 +24,7 @@ import PropTypes from 'prop-types';
 
 const isDecoupled = window?.__env__?.REACT_APP_GC_DECOUPLED === 'true' || process.env.REACT_APP_GC_DECOUPLED === 'true';
 
-const getToolTheme = (cloneData) => {
+const getToolTheme = (_cloneData) => {
 	return {
 		menuBackgroundColor: '#171A23',
 		logoBackgroundColor: '#000000',
@@ -48,6 +47,25 @@ const resetAdvancedSettings = (dispatch) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 };
 
+const clickNotification = (state, dispatch) => {
+	getNotifications(dispatch);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'ShowNotifications');
+};
+
+const clickTutorial = (state, dispatch) => {
+	setState(dispatch, {
+		showTutorial: true,
+		clickedTutorial: true,
+	});
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'ShowTutorial');
+};
+
+const clickAboutUs = (state, dispatch) => {
+	window.history.pushState(null, document.title, `/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`);
+	setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SidebarInteraction', 'showAboutUs');
+};
+
 const generateClosedContentArea = (state, dispatch) => {
 	const toolTheme = getToolTheme(state.cloneData);
 	return (
@@ -64,12 +82,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<HoverNavItem
 						centered
 						onClick={() => {
-							getNotifications(dispatch);
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowNotifications'
-							);
+							clickNotification(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -84,15 +97,7 @@ const generateClosedContentArea = (state, dispatch) => {
 						centered
 						onClick={() => {
 							resetAdvancedSettings(dispatch);
-							setState(dispatch, {
-								showTutorial: true,
-								clickedTutorial: true,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowTutorial'
-							);
+							clickTutorial(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -106,7 +111,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					</HoverNavItem>
 				</GCTooltip>
 			)}
-			<GCTooltip title="User Feedback" placement="right" arrow>
+			<GCTooltip data-cy="user-feedback" title="User Feedback" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -122,7 +127,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserFeedbackIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Crowd Sourcing" placement="right" arrow>
+			<GCTooltip data-cy="crowd-sourcing" title="Crowd Sourcing" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -138,7 +143,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={CrowdSourcingAppIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Data Status Tracker" placement="right" arrow>
+			<GCTooltip data-cy="data-status-tracker" title="Data Status Tracker" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -160,7 +165,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={DataStatusTrackerIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Analyst Tools" placement="right" arrow>
+			<GCTooltip data-cy="analyst-tools" title="Analyst Tools" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -184,44 +189,11 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={AnalystToolsIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Clone Request" placement="right" arrow>
-				<a
-					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
-					target="_blank"
-					rel="noopener noreferrer"
-					style={{ color: 'white', textDecoration: 'none', width: '100%' }}
-				>
-					<HoverNavItem
-						centered
-						onClick={() => {
-							// open modal or link
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'CloneRequest'
-							);
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={CloneRequest} />
-					</HoverNavItem>
-				</a>
-			</GCTooltip>
 			<GCTooltip title="About Us" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
-						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showAboutUs'
-						);
+						clickAboutUs(state, dispatch);
 					}}
 					active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
 					toolTheme={toolTheme}
@@ -229,7 +201,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={AboutUsIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="User Dashboard" placement="right" arrow>
+			<GCTooltip data-cy="user-dashboard" title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -272,12 +244,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="Show Notifications" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							getNotifications(dispatch);
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowNotifications'
-							);
+							clickNotification(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -294,16 +261,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
-							resetAdvancedSettings(dispatch);
-							setState(dispatch, {
-								showTutorial: true,
-								clickedTutorial: true,
-							});
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'ShowTutorial'
-							);
+							clickTutorial(state, dispatch);
 						}}
 						toolTheme={toolTheme}
 					>
@@ -392,42 +350,10 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<span style={{ marginLeft: '10px' }}>Analyst Tools</span>
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Clone Request" placement="right" arrow>
-				<a
-					href="https://support.advana.data.mil/plugins/servlet/desk/portal/15/create/235"
-					target="_blank"
-					rel="noopener noreferrer"
-					style={{ color: 'white', textDecoration: 'none' }}
-				>
-					<HoverNavItem
-						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(state.cloneData.clone_name),
-								'SidebarInteraction',
-								'CloneRequest'
-							);
-						}}
-						toolTheme={toolTheme}
-					>
-						<ConstrainedIcon src={CloneRequest} />
-						<span style={{ marginLeft: '10px' }}>Clone Request</span>
-					</HoverNavItem>
-				</a>
-			</GCTooltip>
 			<GCTooltip title="About Us" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.aboutUs}`
-						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.aboutUs });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'showAboutUs'
-						);
+						clickAboutUs(state, dispatch);
 					}}
 					active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
 					toolTheme={toolTheme}

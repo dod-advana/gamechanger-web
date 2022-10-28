@@ -12,20 +12,28 @@ const StyledContainer = styled.div`
 	flex-wrap: wrap;
 `;
 
-const FilterList = ({ filterNameMap, state, dispatch, searchSettings, handleFilterChange, processFilters, margin }) => {
+const FilterList = ({
+	filterNameMap,
+	searchSettings,
+	handleFilterChange,
+	processFilters,
+	margin,
+	runSearch,
+	defaultOptions,
+	loading = false,
+}) => {
 	const [filterList, setFilterList] = useState([]);
-	const { runSearch, defaultOptions } = state;
 
 	//Processes the search settings to find which filters are applied for displaying at the top
 	useEffect(() => {
-		if (runSearch) {
+		if (runSearch || loading) {
 			let cleanedSearchSettings = searchSettings;
 			if (processFilters) {
 				cleanedSearchSettings = processFilters(searchSettings, defaultOptions);
 			}
 			setFilterList(cleanedSearchSettings);
 		}
-	}, [searchSettings, runSearch, processFilters, defaultOptions]);
+	}, [searchSettings, runSearch, processFilters, defaultOptions, loading]);
 
 	return (
 		<StyledContainer margin={filterList && filterList.length > 0 ? margin : null}>
@@ -36,6 +44,7 @@ const FilterList = ({ filterNameMap, state, dispatch, searchSettings, handleFilt
 				return (
 					<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
 						<Button
+							data-cy={`${optionName}-top-filter`}
 							variant="outlined"
 							backgroundColor="white"
 							display="inline-flex"
@@ -51,7 +60,7 @@ const FilterList = ({ filterNameMap, state, dispatch, searchSettings, handleFilt
 							}}
 							endIcon={<CloseIcon />}
 							onClick={() => {
-								handleFilterChange(optionName, state, dispatch, type);
+								handleFilterChange(optionName, type);
 							}}
 						>
 							<span
@@ -75,10 +84,14 @@ const FilterList = ({ filterNameMap, state, dispatch, searchSettings, handleFilt
 };
 
 FilterList.propTypes = {
-	context: PropTypes.objectOf(PropTypes.string),
-	state: PropTypes.objectOf(PropTypes.string),
 	searchSettings: PropTypes.objectOf(PropTypes.string),
 	handleFilterChange: PropTypes.func,
+	filterNameMap: PropTypes.objectOf(PropTypes.string),
+	processFilters: PropTypes.func,
+	margin: PropTypes.string,
+	runSearch: PropTypes.bool,
+	defaultOptions: PropTypes.objectOf(PropTypes.string),
+	loading: PropTypes.bool,
 };
 
 export default FilterList;

@@ -168,7 +168,7 @@ const getCardViewPanel = (props) => {
 						>
 							<div className={'col-xs-12'} style={{ ...sideScroll, padding: 0 }}>
 								{runningSearch && (
-									<div style={{ margin: '0 auto' }} data-cy="jbook-search-load">
+									<div style={{ margin: '0 auto' }} data-cy="eda-search-load">
 										<LoadingIndicator />
 									</div>
 								)}
@@ -233,7 +233,6 @@ export const renderHideTabs = (props) => {
 	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 
 	const handleLinkListItemClick = (text) => {
-		console.log(text);
 		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', text);
 		setState(dispatch, {
 			searchText: text,
@@ -247,7 +246,10 @@ export const renderHideTabs = (props) => {
 		<div style={{ marginTop: '40px' }}>
 			{(!searchText || searchText === '') && (
 				<div style={{ margin: '10px auto', width: '67%' }}>
-					<div className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}>
+					<div
+						data-cy="eda-recent-searches"
+						className={`tutorial-step-${componentStepNumbers['Recent Searches']}`}
+					>
 						<MagellanTrendingLinkList
 							onLinkClick={handleLinkListItemClick}
 							links={JSON.parse(latestLinks)}

@@ -80,6 +80,8 @@ const endpoints = {
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getCache: '/api/gamechanger/admin/getCache',
+	clearCache: '/api/gamechanger/admin/clearCache',
 	getUserSettings: '/api/gamechanger/getUserSettings',
 	getInternalUsers: '/api/gamechanger/getInternalUsers',
 	addInternalUser: '/api/gamechanger/admin/addInternalUser',
@@ -135,6 +137,7 @@ const endpoints = {
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 	updateClonesVisitedPOST: '/api/gamechanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	getUserDataByIDs: '/api/gameChanger/user/getUserDataByIDs',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
 	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
@@ -149,6 +152,7 @@ const endpoints = {
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
 	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
+	cacheQlikApps: '/api/gamechanger/admin/cacheQlikApps',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -372,7 +376,7 @@ export default class GameChangerAPI {
 				}/${fileName}`
 			);
 
-			if (cloneData.clone_name === 'eda') {
+			if (cloneData.clone_name === 'eda' || cloneData.clone_name === 'jbook') {
 				filename = encodeURIComponent(fileName);
 			}
 
@@ -744,6 +748,16 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
+	getCache = async () => {
+		const url = endpoints.getCache;
+		return axiosGET(this.axios, url);
+	};
+
+	clearCache = async (opts) => {
+		const url = endpoints.clearCache;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	queryEs = async (opts) => {
 		const url = endpoints.queryEs;
 		return axiosPOST(this.axios, url, opts);
@@ -1095,6 +1109,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { cloneName });
 	};
 
+	getUserDataByIDs = async (ids) => {
+		const url = endpoints.getUserDataByIDs;
+		return axiosGET(this.axios, url, { params: { ids: JSON.stringify(ids) } });
+	};
+
 	storeUserData = async (userData) => {
 		const url = endpoints.gcUserDataPOST;
 		return axiosPOST(this.axios, url, { userData, fromApp: true });
@@ -1172,5 +1191,10 @@ export default class GameChangerAPI {
 	putUserFavoriteHomeApps = async (data) => {
 		const url = endpoints.getUserFavoriteHomeApps;
 		return axiosPUT(this.axios, url, data);
+	};
+
+	cacheQlikApps = async () => {
+		const url = endpoints.cacheQlikApps;
+		return axiosGET(this.axios, url);
 	};
 }

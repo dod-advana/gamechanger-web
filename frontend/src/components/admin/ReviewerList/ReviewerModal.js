@@ -60,6 +60,9 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 				case 'secondary':
 					tmpData['title'] = 'Secondary Reviewer';
 					break;
+				case 'inactive':
+					tmpData['title'] = 'Inactive Reviewer';
+					break;
 				default:
 					break;
 			}
@@ -108,7 +111,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 						style={{ background: '#f2f2f2', borderRadius: 6, marginTop: 10, marginBottom: 10, padding: 10 }}
 					>
 						<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
-							Complete the fields below to add a new Primary, Service, or Secondary Reviewer
+							Complete the fields below to add a new Initial, Service, or Secondary Reviewer
 						</Typography>
 					</Grid>
 					<Grid container>
@@ -148,7 +151,7 @@ export default ({ showCreateEditReviewerModal, setShowCreateEditReviewerModal, r
 						<Grid item xs={6}>
 							<Autocomplete
 								size="small"
-								options={['primary', 'service', 'secondary']}
+								options={['primary', 'service', 'secondary', 'inactive']}
 								style={{ width: 300, backgroundColor: 'white', marginBottom: 24 }}
 								renderInput={(params) => <TextField {...params} label="Type" margin="dense" />}
 								defaultValue={editReviewerData?.type}
