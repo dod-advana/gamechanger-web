@@ -2119,6 +2119,7 @@ const cardHandler = {
 					zoom={1}
 					headerExtraStyle={{ backgroundColor: '#313541', color: 'white' }}
 					rows={tableData}
+					columnMap={['Key', 'Value']}
 					height={'auto'}
 					dontScroll={true}
 					colWidth={colWidth}
