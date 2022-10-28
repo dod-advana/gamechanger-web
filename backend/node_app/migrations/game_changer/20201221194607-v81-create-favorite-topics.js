@@ -33,7 +33,7 @@ module.exports = {
 			updatedAt: Sequelize.DATE,
 		});
 	},
-	down: (queryInterface, Sequelize) => {
+	down: (queryInterface, _Sequelize) => {
 		return queryInterface.dropTable(tablename);
 	},
 };

@@ -9,8 +9,9 @@ const FEEDBACK_JBOOK = require('../../models').feedback_jbook;
 const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const COMMENTS = require('../../models').comments;
+const USER = require('../../models').user;
 const constantsFile = require('../../config/constants');
-const { Sequelize, Op } = require('sequelize');
+const { Op } = require('sequelize');
 const DB = require('../../models/index');
 const EmailUtility = require('../../utils/emailUtility');
 const DataHandler = require('../base/dataHandler');
@@ -44,6 +45,7 @@ class JBookDataHandler extends DataHandler {
 			portfolio = PORTFOLIO,
 			dataLibrary = new DataLibrary(opts),
 			comments = COMMENTS,
+			user = USER,
 		} = opts;
 
 		super({ ...opts });
@@ -65,6 +67,7 @@ class JBookDataHandler extends DataHandler {
 		this.dataLibrary = dataLibrary;
 		this.jbook_classification = jbook_classification;
 		this.comments = comments;
+		this.user = user;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -271,7 +274,7 @@ class JBookDataHandler extends DataHandler {
 		return review;
 	}
 
-	async parseESReviews(doc) {
+	async parseESReviews(doc, userId) {
 		for (let idx in doc.review_n) {
 			let tmp = this.jbookSearchUtility.parseFields(doc.review_n[idx], false, 'reviewES', true);
 
@@ -290,7 +293,21 @@ class JBookDataHandler extends DataHandler {
 
 	async getAllBYProjectData(req, userId) {
 		try {
-			const { id } = req.body;
+			const { id, portfolioName, userRowId } = req.body;
+			if (portfolioName !== 'General') {
+				const portfolios = await this.getPortfolios({ body: { id: userRowId } }, userId);
+				// looking for a match on portfolio
+				const portfolioList = [...portfolios.publicPortfolios, ...portfolios.privatePortfolios];
+				let foundPortfolio = false;
+				for (let portfolio of portfolioList) {
+					if (portfolio.name === portfolioName) {
+						foundPortfolio = true;
+					}
+				}
+				if (!foundPortfolio) {
+					return 'Unauthorized Entry Detected';
+				}
+			}
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 			const esQuery = this.jbookSearchUtility.getElasticSearchJBookDataFromId({ docIds: [id] }, userId);
@@ -318,7 +335,7 @@ class JBookDataHandler extends DataHandler {
 
 			for (let doc of docs) {
 				doc.reviews = {};
-				await this.parseESReviews(doc);
+				await this.parseESReviews(doc, userId);
 				yearToDoc[doc.budgetYear] = doc;
 			}
 
@@ -378,7 +395,7 @@ class JBookDataHandler extends DataHandler {
 
 			doc.reviews = {};
 
-			await this.parseESReviews(doc);
+			await this.parseESReviews(doc, userId);
 
 			delete doc.review_n;
 
@@ -490,6 +507,29 @@ class JBookDataHandler extends DataHandler {
 				},
 			});
 
+			const pocList = await this.user.findAll({
+				where: {
+					'extra_fields.jbook.is_poc_reviewer': true,
+				},
+				attributes: ['id', 'first_name', 'last_name', 'organization', 'job_title', 'email', 'phone_number'],
+			});
+			pocList.sort((a, b) => {
+				const aName = `${a.first_name} ${a.last_name}`.toUpperCase();
+				const bName = `${b.first_name} ${b.last_name}`.toUpperCase();
+				if (aName < bName) {
+					return -1;
+				}
+				if (aName > bName) {
+					return 1;
+				}
+				return 0;
+			});
+			const pocReviewers = {};
+			pocList.forEach((poc) => {
+				const emailDisp = poc.email ? `(${poc.email})` : '';
+				pocReviewers[`${poc.first_name} ${poc.last_name} ${emailDisp}`] = poc;
+			});
+
 			// hardcode from mitr if col doesn't exist/can't find it yet.. currently none
 			const data = {
 				reviewers,
@@ -514,6 +554,7 @@ class JBookDataHandler extends DataHandler {
 					{ current_msn_part: 'Other' },
 				],
 				secondaryReviewers,
+				pocReviewers,
 			};
 			data.secondaryReviewers.sort(function (a, b) {
 				let nameA = a.name.toUpperCase(); // ignore upper and lowercase
@@ -534,12 +575,12 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	checkReviewerPermissions(permissions) {
+	checkReviewerPermissions(permissions, reviewType) {
 		if (this.constants.JBOOK_USE_PERMISSIONS === 'true' && !permissions.includes('JBOOK Admin')) {
 			if (
 				(reviewType === 'primary' && !permissions.includes('JBOOK Primary Reviewer')) ||
 				(reviewType === 'service' && !permissions.includes('JBOOK Service Reviewer')) ||
-				(reviewType === 'poc' && !permissions.includes('JBOOK POC Reviewer'))
+				(reviewType === 'poc' && !permissions.includes(' '))
 			) {
 				throw new Error('Unauthorized');
 			}
@@ -584,7 +625,7 @@ class JBookDataHandler extends DataHandler {
 			let wasUpdated = false;
 
 			// check permissions
-			this.checkReviewerPermissions(permissions);
+			this.checkReviewerPermissions(permissions, reviewType);
 
 			// Review Status Update
 			this.updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName);
@@ -818,7 +859,7 @@ class JBookDataHandler extends DataHandler {
 					jbookSearchSettings[type + 'ReviewerForUserDash'] = [reviewer];
 					break;
 				case 'secondary':
-					if (jbookSearchSettings.hasOwnProperty(serviceReviewer)) {
+					if (jbookSearchSettings.hasOwnProperty('serviceReviewer')) {
 						jbookSearchSettings['serviceReviewerForUserDash'].push(reviewer);
 					} else {
 						jbookSearchSettings['serviceReviewerForUserDash'] = [reviewer];
@@ -990,12 +1031,31 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	// PORTFOLIO
-	async getPortfolios(userId) {
+	async getPortfolios(req, userId) {
 		try {
-			return await this.portfolio.findAll({
+			const { id } = req.body;
+			const publicPortfolios = await this.portfolio.findAll({
 				where: {
 					deleted: false,
+					isPrivate: false,
 				},
+			});
+
+			const privatePortfolios = await this.portfolio.findAll({
+				where: {
+					deleted: false,
+					isPrivate: true,
+					[Op.or]: [
+						{ user_ids: { [Op.contains]: [id] } },
+						{ admins: { [Op.contains]: [id] } },
+						{ creator: id },
+					],
+				},
+			});
+
+			return Promise.resolve({
+				publicPortfolios: publicPortfolios ?? [],
+				privatePortfolios: privatePortfolios ?? [],
 			});
 		} catch (e) {
 			const { message } = e;
@@ -1030,19 +1090,22 @@ class JBookDataHandler extends DataHandler {
 
 	async editPortfolio(req, userId) {
 		try {
-			const { id, name, description, user_ids, tags } = req.body;
+			const { id, name, description, isPrivate, user_ids, admins, tags, user } = req.body;
 
 			if (id) {
 				let update = await this.portfolio.update(
 					{
 						name,
 						description,
+						isPrivate,
+						admins,
 						user_ids,
 						tags,
 					},
 					{
 						where: {
 							id,
+							[Op.or]: [{ admins: { [Op.contains]: [user] } }, { creator: user }],
 						},
 					}
 				);
@@ -1053,6 +1116,7 @@ class JBookDataHandler extends DataHandler {
 					return {
 						name,
 						description,
+						isPrivate,
 						user_ids,
 						tags,
 					};
@@ -1242,7 +1306,7 @@ class JBookDataHandler extends DataHandler {
 			];
 			await this.emailUtility.sendEmail(
 				emailBody,
-				'JBOOK Search Service Reviewer: Application Access',
+				'JBOOK Search RAI Lead Reviewer: Application Access',
 				email,
 				this.constants.ADVANA_EMAIL_CC,
 				attachment,
@@ -1310,7 +1374,7 @@ class JBookDataHandler extends DataHandler {
 	// use comment id and which field (upvotes or downvotes) and properly update the vote lists
 	async voteComment(req, userId) {
 		try {
-			const { id, field } = req.body;
+			const { id, field, author } = req.body;
 
 			let where = { id };
 
@@ -1329,17 +1393,17 @@ class JBookDataHandler extends DataHandler {
 			let isAdded = false;
 
 			if (primaryVotes !== null && primaryVotes !== undefined) {
-				let index = primaryVotes.indexOf(userId);
+				let index = primaryVotes.indexOf(author);
 
 				if (index !== -1) {
 					primaryVotes.splice(index, 1);
 				} else {
-					primaryVotes.push(userId);
+					primaryVotes.push(author);
 
 					isAdded = true;
 				}
 			} else {
-				primaryVotes = [userId];
+				primaryVotes = [author];
 				isAdded = true;
 			}
 
@@ -1347,9 +1411,9 @@ class JBookDataHandler extends DataHandler {
 				isAdded &&
 				secondaryVotes !== null &&
 				secondaryVotes !== undefined &&
-				secondaryVotes.indexOf(userId) !== -1
+				secondaryVotes.indexOf(author) !== -1
 			) {
-				secondaryVotes.splice(secondaryVotes.indexOf(userId), 1);
+				secondaryVotes.splice(secondaryVotes.indexOf(author), 1);
 			}
 
 			let update = await this.comments.update(
@@ -1389,7 +1453,7 @@ class JBookDataHandler extends DataHandler {
 				case 'getContractTotals':
 					return await this.getContractTotals(req, userId);
 				case 'getPortfolios':
-					return await this.getPortfolios(userId);
+					return await this.getPortfolios(req, userId);
 				case 'getPortfolio':
 					return await this.getPortfolio(req, userId);
 				case 'editPortfolio':

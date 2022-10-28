@@ -72,6 +72,18 @@ if (constants.EXPRESS_TRUST_PROXY) {
 	app.set('trust proxy', constants.EXPRESS_TRUST_PROXY);
 }
 
+app.use(async function (req, _res, next) {
+	if (req.get('x-env-ssl-client-certificate')) {
+		req.headers['x-env-ssl_client_certificate'] = req.get('x-env-ssl-client-certificate');
+	}
+
+	if (req.get('SSL-CLIENT-S-DN-CN')) {
+		req.headers['ssl_client_s_dn_cn'] = req.get('SSL-CLIENT-S-DN-CN');
+	}
+
+	next();
+});
+
 app.get('*.js', function (req, res, next) {
 	if (req.url === '/config.js') {
 		next();
@@ -262,6 +274,7 @@ app.use(async function (req, res, next) {
 		'/api/gameChanger/mlApi/documentCompare',
 		'/api/gameChanger/mlApi/transformResults',
 		'/api/gameChanger/mlApi/recommender',
+		'/api/gameChanger/user/setupUserProfile',
 	];
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();

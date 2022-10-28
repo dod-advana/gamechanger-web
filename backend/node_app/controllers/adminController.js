@@ -4,6 +4,7 @@ const sparkMD5Lib = require('spark-md5');
 const APP_SETTINGS = require('../models').app_settings;
 const SearchUtility = require('../utils/searchUtility');
 const MLSearchUtility = require('../utils/MLsearchUtility');
+const { ElasticSearchController } = require('./elasticSearchController');
 
 const constantsFile = require('../config/constants');
 class AdminController {
@@ -15,6 +16,7 @@ class AdminController {
 			appSettings = APP_SETTINGS,
 			searchUtility = new SearchUtility(opts),
 			MLsearchUtility = new MLSearchUtility(opts),
+			esController = new ElasticSearchController(opts),
 
 			constants = constantsFile,
 		} = opts;
@@ -25,6 +27,7 @@ class AdminController {
 		this.appSettings = appSettings;
 		this.searchUtility = searchUtility;
 		this.MLsearchUtility = MLsearchUtility;
+		this.esController = esController;
 
 		this.constants = constants;
 
@@ -34,6 +37,19 @@ class AdminController {
 		this.getHomepageEditorData = this.getHomepageEditorData.bind(this);
 		this.setHomepageEditorData = this.setHomepageEditorData.bind(this);
 		this.getHomepageUserData = this.getHomepageUserData.bind(this);
+		this.cacheQlikApps = this.cacheQlikApps.bind(this);
+	}
+
+	async cacheQlikApps(req, res) {
+		let userId = 'webapp_unknown';
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			await this.esController.cacheStoreQlikApps();
+			res.status(200).send('ok');
+		} catch (err) {
+			this.logger.error(err, 'ANJMS52', userId);
+			res.status(500).send(err);
+		}
 	}
 
 	async getGCAdminData(req, res) {

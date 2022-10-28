@@ -7,9 +7,7 @@ const USER = require('../models').user;
 const FEEDBACK = require('../models').feedback;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { sendExcelFile } = require('../utils/sendFileUtility');
-const { queryFeedbackData } = './feedbackController';
 const sparkMD5Lib = require('spark-md5');
-const ExcelJS = require('exceljs');
 
 /**
  * This class queries matomo for app stats and passes
@@ -287,7 +285,7 @@ class AppStatsController {
 					matomo_log_action b 
 				where 
 					a.idaction_name = b.idaction  
-					and b.name like 'PDFViewer%'
+					and b.name like 'PDFViewer%gamechanger'
 					and hex(a.idvisitor) in (?)
 				order by 
 					documenttime desc
@@ -729,9 +727,8 @@ class AppStatsController {
 				];
 
 				const feedbackData = await this.feedback.findAndCountAll({
-					limit: 100,
 					offset: 0,
-					order: [],
+					order: [['createdAt', 'DESC']],
 					where: {},
 					attributes: [
 						'event_name',
@@ -754,7 +751,7 @@ class AppStatsController {
 					{ header: 'Viewer List', key: 'user_list' },
 					{ header: 'Searches', key: 'searches' },
 				];
-				const docData = await this.createDocumentUsageData(opt.startDate, opts.endDate, userId, connection);
+				const docData = await this.createDocumentUsageData(opts.startDate, opts.endDate, userId, connection);
 				sendExcelFile(res, 'Documents', columns, docData);
 			}
 		} catch (err) {
@@ -807,8 +804,8 @@ class AppStatsController {
 	 */
 	async getRecentlyOpenedDocs(req, res) {
 		let connection;
+		const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 		try {
-			const userId = this.sparkMD5.hash(getUserIdFromSAMLUserId(req));
 			connection = this.mysql.createConnection({
 				host: this.constants.MATOMO_DB_CONFIG.host,
 				user: this.constants.MATOMO_DB_CONFIG.user,

@@ -1,6 +1,7 @@
 const defaultAdminMainViewHandler = require(`../modules/default/defaultAdminMainViewHandler`);
 const policyAdminMainViewHandler = require(`../modules/policy/policyAdminMainViewHandler`);
 const jbookAdminMainViewHandler = require(`../modules/jbook/jbookAdminMainViewHandler`);
+const globalSearchAdminMainViewHandler = require(`../modules/globalSearch/globalSearchAdminMainViewHandler`);
 
 class AdminMainViewFactory {
 	constructor(module) {
@@ -11,6 +12,9 @@ class AdminMainViewFactory {
 					break;
 				case 'jbook/jbookMainViewHandler':
 					this.handler = jbookAdminMainViewHandler;
+					break;
+				case 'globalSearch/globalSearchMainViewHandler':
+					this.handler = globalSearchAdminMainViewHandler;
 					break;
 				default:
 					this.handler = defaultAdminMainViewHandler;

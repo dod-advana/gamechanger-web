@@ -77,6 +77,8 @@ router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
+router.get('/admin/cacheQlikApps', admin.cacheQlikApps);
+
 router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
@@ -107,6 +109,7 @@ router.get('/admin/getDataList', transformer.getDataList);
 router.get('/admin/getLoadedModels', transformer.getLoadedModels);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/getCache', transformer.getCache);
 router.get('/admin/initializeLTR', transformer.initializeLTR);
 router.get('/admin/createModelLTR', transformer.createModelLTR);
 router.post('/admin/downloadCorpus', transformer.downloadCorpus);
@@ -116,6 +119,7 @@ router.post('/admin/downloadS3File', transformer.downloadS3File);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/stopProcess', transformer.stopProcess);
 router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
+router.post('/admin/clearCache', transformer.clearCache);
 
 router.post('/getNotifications', notification.getNotifications);
 router.post('/admin/createNotification', notification.createNotification);
@@ -155,6 +159,7 @@ router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBl
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.post('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/user/getUserDataByIDs', user.getUserDataByIDs);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
 router.post('/admin/deleteUserData', user.deleteUserData);

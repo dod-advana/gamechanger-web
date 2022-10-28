@@ -228,10 +228,13 @@ export const typeFilters = {
 };
 
 export const getReferenceListMetadataPropertyTable = (ref_list = []) => {
-	if (ref_list.length === 1) {
-		ref_list = ref_list[0].split(', ');
+	let parsedList = ref_list.map((ref) => {
+		return ref.url ? `<a target="_blank" href="${ref.url}">${ref.name}</a>` : ref;
+	});
+	if (parsedList.length === 1) {
+		parsedList = parsedList[0].split(', ');
 	}
-	const trimmed = _.chain(ref_list)
+	const trimmed = _.chain(parsedList)
 		.map((x) => x.trim())
 		.chunk(4)
 		.value();
@@ -270,6 +273,7 @@ export const getMetadataForPropertyTable = (item) => {
 		{ name: 'doc_type', keyLabel: 'Document Type' },
 		{ name: 'doc_num', keyLabel: 'Document Number' },
 		{ name: 'pageHitCount', keyLabel: 'Page Matches' },
+		{ name: 'matchCount', keyLabel: 'Total Matches' },
 		{ name: 'top_entities_t', keyLabel: 'Entities' },
 
 		//{ name: 'ref_list', keyLabel: 'references', valueFunction: (val) => _.first(val) },
@@ -450,7 +454,7 @@ export const invertedCrawlerMappingFunc = (item) => {
 };
 
 export const crawlerMappingFunc = (item) => {
-	return crawlerMapping[item] ? crawlerMapping[item] : item;
+	return crawlerMapping[item] ? crawlerMapping[item].join(', ') : item;
 };
 
 export const orgColorMap = {
@@ -473,7 +477,6 @@ export const orgColorMap = {
 	NATO: '#003bd1', // blue
 	'Financial Mgmt. Reg': '#636363',
 	Legislation: '#ffbf00',
-	// FED:
 };
 
 const linkColorMap = {

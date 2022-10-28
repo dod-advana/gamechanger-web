@@ -26,7 +26,6 @@ import {
 	StyledAccordionDiv,
 	ButtonStyles,
 } from './profilePage/profilePageStyles';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import GCPrimaryButton from '../../common/GCButton';
 import GCAccordion from '../../common/GCAccordion';
 import JCAdata from './JCA.json';
@@ -100,7 +99,7 @@ const StyledChip = withStyles({
 	},
 })(Chip);
 
-const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButtonOptions, finished) => {
+const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButtonOptions, finished, roleDisabled) => {
 	const radioButtons = [];
 
 	const examples = [];
@@ -122,7 +121,7 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 				label={option.name}
 				labelPlacement="end"
 				style={{ ...styles.titleText, margin: '10px 0' }}
-				disabled={finished} //|| roleDisabled}
+				disabled={finished || roleDisabled}
 			/>
 		);
 
@@ -139,168 +138,200 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 	);
 };
 
-const renderDropdownRadioButtons = (
+const DropdownRadioButton = ({
 	reviewData,
 	reviewDataProp,
 	setReviewData,
 	radioButtonData,
-	text = '',
-	finished
-) => {
-	const radioDropdowns = [];
-
-	for (const radioButton in radioButtonData) {
-		radioDropdowns.push(
-			<GCAccordion
-				contentPadding={0}
-				expanded={reviewData && reviewData[reviewDataProp] === radioButton}
-				disabled={finished}
-				controlled={true}
-				header={
-					<FormControlLabel
-						name={radioButton}
-						value={radioButton}
-						control={
-							<Radio
-								style={styles.radio}
-								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
-								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
-								checked={reviewData && reviewData[reviewDataProp] === radioButton}
-								onClick={() => {
-									if (!finished) {
-										setReviewData(reviewDataProp, radioButton);
-									}
-								}}
-							/>
-						}
-						label={radioButton}
-						labelPlacement="end"
-						style={{ ...styles.titleText, margin: '10px 0' }}
-						disabled={finished} //|| roleDisabled}
-					/>
-				}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'600'}
-			>
-				<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
-					{radioButtonData[radioButton]}
-				</StyledAccordionDiv>
-			</GCAccordion>
-		);
-	}
-
+	finished,
+	domainTaskOther,
+	setDomainTaskOther,
+	roleDisabled,
+}) => {
+	const { radioButton, data } = radioButtonData;
 	return (
-		<>
-			{text !== '' ? <div style={{ width: '100%', margin: '15px 30px' }}>{text}</div> : null}
-			<div style={{ width: '100%', margin: '15px 0px' }}>{radioDropdowns}</div>
-		</>
+		<GCAccordion
+			contentPadding={0}
+			expanded={reviewData?.[reviewDataProp] && reviewData[reviewDataProp] === radioButton}
+			disabled={finished || roleDisabled}
+			controlled={true}
+			header={
+				<FormControlLabel
+					name={radioButton}
+					value={radioButton}
+					control={
+						<Radio
+							style={styles.radio}
+							icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
+							checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
+							checked={reviewData && reviewData[reviewDataProp] === radioButton}
+							onClick={() => {
+								if (!finished) {
+									setReviewData(reviewDataProp, radioButton);
+								}
+							}}
+						/>
+					}
+					label={radioButton}
+					labelPlacement="end"
+					style={{ ...styles.titleText, margin: '10px 0' }}
+					disabled={finished || roleDisabled}
+				/>
+			}
+			headerBackground={'rgb(238,241,242)'}
+			headerTextColor={'black'}
+			headerTextWeight={'600'}
+		>
+			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
+				<div style={{ display: 'flex', flexDirection: 'column' }}>
+					{radioButton !== 'Other' ? (
+						Object.keys(data).map((name) => {
+							return (
+								<DomainCheckbox
+									name={name}
+									secondary={data[name]}
+									reviewData={reviewData}
+									domainTask={radioButton}
+									setReviewData={setReviewData}
+									finished={finished || roleDisabled}
+								/>
+							);
+						})
+					) : (
+						<TextField
+							placeholder=""
+							variant="outlined"
+							value={domainTaskOther}
+							style={{ backgroundColor: 'white', width: '100%' }}
+							onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
+							onChange={(_event, value) => setDomainTaskOther(value)}
+							disabled={finished || radioButton !== reviewData?.domainTask || roleDisabled}
+						/>
+					)}
+				</div>
+			</StyledAccordionDiv>
+		</GCAccordion>
+	);
+};
+
+const JCACTier2CheckBox = ({ tier1, tier2, tier3List, setReviewData, tier1Checked, tier2Checked, finished }) => {
+	return (
+		<GCAccordion
+			contentPadding={0}
+			expanded={tier2Checked}
+			disabled={finished}
+			controlled={true}
+			key={tier2}
+			header={
+				<FormControlLabel
+					name={tier2}
+					value={tier2}
+					control={
+						<Checkbox
+							style={{
+								backgroundColor: '#ffffff',
+								borderRadius: '5px',
+								padding: '2px',
+								border: '2px solid #bdccde',
+								pointerEvents: 'none',
+								margin: '0px 10px 0px 5px',
+							}}
+							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+							checked={tier2Checked}
+							onClick={() => setReviewData('pocJointCapabilityArea2', tier2)}
+						/>
+					}
+					label={tier2}
+					labelPlacement="end"
+					style={{ ...styles.titleText, margin: '10px 0' }}
+					disabled={finished || !tier1Checked} //|| roleDisabled}
+				/>
+			}
+			headerBackground={'rgb(238,241,242)'}
+			headerTextColor={'black'}
+			headerTextWeight={'600'}
+		>
+			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
+				<div style={{ width: '100%', margin: '0 0 15px 0' }}>{JCAdata[tier1][tier2]['Description']}</div>
+				{tier3List}
+			</StyledAccordionDiv>
+		</GCAccordion>
+	);
+};
+
+const JCACTier3CheckBox = ({ tier1, tier2, tier3, setReviewData, reviewData, tier2Checked, finished }) => {
+	return (
+		<FormControlLabel
+			name={tier3}
+			value={tier3}
+			key={tier3}
+			style={{ width: '100%', margin: '10px 0' }}
+			control={
+				<Checkbox
+					style={{
+						backgroundColor: '#ffffff',
+						borderRadius: '5px',
+						padding: '2px',
+						border: '2px solid #bdccde',
+						pointerEvents: 'none',
+						margin: '0px 10px 0px 5px',
+					}}
+					onClick={() => setReviewData('pocJointCapabilityArea3', tier3)}
+					icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+					checked={tier2Checked && reviewData?.['pocJointCapabilityArea3']?.includes(tier3)}
+					checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+					name={tier3}
+				/>
+			}
+			label={
+				<span style={{ fontSize: 13, lineHeight: '5px' }}>
+					<b>{tier3}</b>- {JCAdata[tier1][tier2][tier3]}
+				</span>
+			}
+			labelPlacement="end"
+			disabled={finished || !tier2Checked} //|| roleDisabled}
+		/>
 	);
 };
 
 const JCAChecklist = (props) => {
-	const { reviewData, setReviewData, finished } = props;
+	const { reviewData, setReviewData, finished, roleDisabled } = props;
 	const radioDropdowns = [];
 	let tier2List = [];
 	let tier3List = [];
+	const disabled = finished || roleDisabled;
 
 	for (const tier1 in JCAdata) {
+		const tier1Checked = reviewData?.['pocJointCapabilityArea'] === tier1;
 		for (const tier2 in JCAdata[tier1]) {
+			const tier2Checked = tier1Checked && reviewData?.['pocJointCapabilityArea2']?.includes(tier2);
 			for (const tier3 in JCAdata[tier1][tier2]) {
 				if (tier3 !== 'Description') {
 					tier3List.push(
-						<FormControlLabel
-							name={tier3}
-							value={tier3}
-							key={tier3}
-							style={{ width: '100%', margin: '10px 0' }}
-							control={
-								<Checkbox
-									style={{
-										backgroundColor: '#ffffff',
-										borderRadius: '5px',
-										padding: '2px',
-										border: '2px solid #bdccde',
-										pointerEvents: 'none',
-										margin: '0px 10px 0px 5px',
-									}}
-									onClick={() => setReviewData('pocJointCapabilityArea3', tier3)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={
-										reviewData &&
-										reviewData['pocJointCapabilityArea3'] &&
-										reviewData['pocJointCapabilityArea3'].indexOf(tier3) !== -1
-									}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name={tier3}
-								/>
-							}
-							label={
-								<span style={{ fontSize: 13, lineHeight: '5px' }}>
-									<b>{tier3}</b>- {JCAdata[tier1][tier2][tier3]}
-								</span>
-							}
-							labelPlacement="end"
-							disabled={finished} //|| roleDisabled}
+						<JCACTier3CheckBox
+							tier1={tier1}
+							tier2={tier2}
+							tier3={tier3}
+							setReviewData={setReviewData}
+							reviewData={reviewData}
+							tier2Checked={tier2Checked}
+							finished={finished}
 						/>
 					);
 				}
 			}
 			if (tier2 !== 'Description') {
 				tier2List.push(
-					<GCAccordion
-						contentPadding={0}
-						expanded={
-							reviewData &&
-							reviewData['pocJointCapabilityArea2'] &&
-							reviewData['pocJointCapabilityArea2'].indexOf(tier2) !== -1
-						}
-						disabled={finished}
-						controlled={true}
-						key={tier2}
-						header={
-							<FormControlLabel
-								name={tier2}
-								value={tier2}
-								control={
-									<Checkbox
-										style={{
-											backgroundColor: '#ffffff',
-											borderRadius: '5px',
-											padding: '2px',
-											border: '2px solid #bdccde',
-											pointerEvents: 'none',
-											margin: '0px 10px 0px 5px',
-										}}
-										icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-										checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-										checked={
-											reviewData &&
-											reviewData['pocJointCapabilityArea2'] &&
-											reviewData['pocJointCapabilityArea2'].indexOf(tier2) !== -1
-										}
-										onClick={() => {
-											setReviewData('pocJointCapabilityArea2', tier2);
-										}}
-									/>
-								}
-								label={tier2}
-								labelPlacement="end"
-								style={{ ...styles.titleText, margin: '10px 0' }}
-								disabled={finished} //|| roleDisabled}
-							/>
-						}
-						headerBackground={'rgb(238,241,242)'}
-						headerTextColor={'black'}
-						headerTextWeight={'600'}
-					>
-						<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
-							<div style={{ width: '100%', margin: '0 0 15px 0' }}>
-								{JCAdata[tier1][tier2]['Description']}
-							</div>
-							{tier3List}
-						</StyledAccordionDiv>
-					</GCAccordion>
+					<JCACTier2CheckBox
+						tier1={tier1}
+						tier2={tier2}
+						tier3List={tier3List}
+						setReviewData={setReviewData}
+						tier1Checked={tier1Checked}
+						tier2Checked={tier2Checked}
+						finished={finished}
+					/>
 				);
 			}
 			tier3List = [];
@@ -309,8 +340,8 @@ const JCAChecklist = (props) => {
 		radioDropdowns.push(
 			<GCAccordion
 				contentPadding={0}
-				expanded={reviewData && reviewData['pocJointCapabilityArea'] === tier1}
-				disabled={finished}
+				expanded={tier1Checked}
+				disabled={disabled}
 				controlled={true}
 				key={tier1}
 				header={
@@ -322,7 +353,7 @@ const JCAChecklist = (props) => {
 								style={styles.radio}
 								icon={<RadioButtonUncheckedIcon style={styles.radioIcon} />}
 								checkedIcon={<FiberManualRecordIcon style={styles.radioChecked} />}
-								checked={reviewData && reviewData['pocJointCapabilityArea'] === tier1}
+								checked={tier1Checked}
 								onClick={() => {
 									if (!finished) {
 										setReviewData('pocJointCapabilityArea', tier1);
@@ -333,7 +364,7 @@ const JCAChecklist = (props) => {
 						label={tier1}
 						labelPlacement="end"
 						style={{ ...styles.titleText, margin: '10px 0' }}
-						disabled={finished} //|| roleDisabled}
+						disabled={disabled}
 					/>
 				}
 				headerBackground={'rgb(238,241,242)'}
@@ -356,74 +387,48 @@ const JCAChecklist = (props) => {
 	);
 };
 
-const renderDomainCheckboxes = (
-	secondaries,
-	reviewData,
-	domainTasks,
-	domainTaskOther,
-	setReviewData,
-	setDomainTaskOther,
-	finished
-) => {
-	let domainTask;
-	if (reviewData && reviewData.domainTask) {
-		domainTask = reviewData.domainTask;
-	}
+const DomainCheckbox = ({ secondary, domainTask, reviewData, setReviewData, finished, name }) => {
+	const [checked, setChecked] = useState(false);
 
-	const checkboxes = [];
-	if (secondaries) {
-		for (const name in secondaries) {
-			checkboxes.push(
-				<FormControlLabel
-					name={name}
-					value={name}
-					style={{ margin: '10px 0' }}
-					control={
-						<Checkbox
-							style={{
-								backgroundColor: '#ffffff',
-								borderRadius: '5px',
-								padding: '2px',
-								border: '2px solid #bdccde',
-								pointerEvents: 'none',
-								margin: '0px 10px 0px 5px',
-							}}
-							onClick={() => setReviewData('domainTaskSecondary', name)}
-							icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-							checked={
-								reviewData &&
-								reviewData.domainTask &&
-								domainTasks[domainTask] &&
-								domainTasks[domainTask].length &&
-								domainTasks[domainTask].indexOf(name) !== -1
-							}
-							checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-							name={name}
-						/>
-					}
-					label={
-						<span style={{ fontSize: 13, lineHeight: '5px' }}>
-							<b>{name}</b> {secondaries[name]}
-						</span>
-					}
-					labelPlacement="end"
-					disabled={finished} //|| roleDisabled}
-				/>
-			);
+	const selectedDomainTask = reviewData?.domainTask;
+
+	useEffect(() => {
+		if (domainTask === selectedDomainTask && reviewData.domainTaskSecondary?.includes(name)) {
+			setChecked(true);
+		} else {
+			setChecked(false);
 		}
-
-		return <div style={{ display: 'flex', flexDirection: 'column' }}>{checkboxes}</div>;
-	}
+	}, [domainTask, name, reviewData.domainTaskSecondary, selectedDomainTask]);
 
 	return (
-		<TextField
-			placeholder=""
-			variant="outlined"
-			value={domainTaskOther}
-			style={{ backgroundColor: 'white', width: '100%' }}
-			onBlur={(event) => setReviewData('domainTaskOther', event.target.value)}
-			onChange={(event, value) => setDomainTaskOther(value)}
-			disabled={finished} //|| roleDisabled}
+		<FormControlLabel
+			name={name}
+			value={name}
+			style={{ margin: '10px 0' }}
+			control={
+				<Checkbox
+					style={{
+						backgroundColor: '#ffffff',
+						borderRadius: '5px',
+						padding: '2px',
+						border: '2px solid #bdccde',
+						pointerEvents: 'none',
+						margin: '0px 10px 0px 5px',
+					}}
+					onClick={() => setReviewData('domainTaskSecondary', name)}
+					icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+					checked={checked}
+					checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+					name={name}
+				/>
+			}
+			label={
+				<span style={{ fontSize: 13, lineHeight: '5px' }}>
+					<b>{name}</b> {secondary}
+				</span>
+			}
+			labelPlacement="end"
+			disabled={finished || domainTask !== selectedDomainTask} //|| roleDisabled}
 		/>
 	);
 };
@@ -437,7 +442,7 @@ const AltAIPOCKey = React.memo(() => {
 			</Typography>
 			<Typography variant="subtitle1" style={{ fontSize: 12, marginTop: 15 }}>
 				If you are not the appropriate POC for this Program/Project, please enter an alternate AI Point of
-				Contact for this Program/Project in the POC section of the Service Reviewer Section. A suitable type of
+				Contact for this Program/Project in the POC section of the RAI Lead Reviewer Section. A suitable type of
 				POC would be the Program Element Monitor. We ask that you enter the POC Title, Name, Email address,
 				Organization and Phone Number in this section.
 			</Typography>
@@ -446,7 +451,7 @@ const AltAIPOCKey = React.memo(() => {
 });
 
 const AltAIPOCValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 
 	const context = useContext(JBookContext);
 	const { state } = context;
@@ -494,7 +499,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCTitle(value)}
 					onBlur={(event) => setReviewData('altPOCTitle', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCTitle ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -517,7 +522,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCName(value)}
 					onBlur={(event) => setReviewData('altPOCName', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCName ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -540,7 +545,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCEmail(value)}
 					onBlur={(event) => setReviewData('altPOCEmail', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCEmail ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -563,7 +568,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCOrg(value)}
 					onBlur={(event) => setReviewData('altPOCOrg', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCOrg ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -586,7 +591,7 @@ const AltAIPOCValue = React.memo((props) => {
 					onChange={(event, value) => setAltPOCPhoneNumber(value)}
 					onBlur={(event) => setReviewData('altPOCPhoneNumber', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					// InputProps={!pocValidated && !pocValidation.altPOCPhoneNumber ? {
 					// 	classes: {
 					// 		root: classes.cssOutlinedInput,
@@ -655,15 +660,15 @@ const LabelingValidationKey = React.memo(() => {
 });
 
 const LabelingValidationValue = React.memo((props) => {
-	const { setReviewData, dropdownData } = props;
-
+	const { setReviewData, dropdownData, roleDisabled } = props;
 	const classes = useStyles();
-
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
-
+	const disabled = finished || roleDisabled;
+	const isPocSecIncomplete = (...args) =>
+		!pocValidated && args.reduce((a, b) => pocValidation[a] && pocValidation[b]);
 	return (
 		<StyledTableValueContainer>
 			<StyledInlineContainer>
@@ -675,19 +680,15 @@ const LabelingValidationValue = React.memo((props) => {
 					options={['Yes', 'No']}
 					style={{ width: 300 }}
 					//renderInput={(params) => <TextField {...params} label="Select" variant="outlined" classes={{ focused: classes.focused }} />}
-					value={
-						reviewData && reviewData.pocAgreeLabel && reviewData.pocAgreeLabel !== null
-							? reviewData.pocAgreeLabel
-							: 'Yes'
-					}
+					value={reviewData?.pocAgreeLabel === undefined ? 'Yes' : reviewData.pocAgreeLabel}
 					onChange={(event, value) => setReviewData('pocAgreeLabel', value)}
-					disabled={finished} //|| roleDisabled}
+					disabled={disabled}
 					disableClearable
 					renderInput={(params) => (
 						<TextField
 							{...params}
 							InputLabelProps={{
-								className: !pocValidated && !pocValidation.pocAgreeLabel ? classes.labelError : '',
+								className: isPocSecIncomplete('pocAgreeLabel') ? classes.labelError : '',
 							}}
 							InputProps={{ ...params.InputProps }}
 							FormHelperTextProps={{ className: classes.helperText }}
@@ -696,7 +697,7 @@ const LabelingValidationValue = React.memo((props) => {
 						/>
 					)}
 					classes={{
-						inputRoot: !pocValidated && !pocValidation.pocAgreeLabel ? classes.autocompleteError : '',
+						inputRoot: isPocSecIncomplete('pocAgreeLabel') ? classes.autocompleteError : '',
 					}}
 				/>
 			</StyledInlineContainer>
@@ -707,33 +708,27 @@ const LabelingValidationValue = React.memo((props) => {
 				<Autocomplete
 					size="small"
 					style={{ width: 300 }}
-					options={
-						dropdownData && reviewData && dropdownData.primaryClassLabel
-							? dropdownData.primaryClassLabel
-							: []
-					}
+					options={dropdownData?.primaryClassLabel === undefined ? [] : dropdownData.primaryClassLabel}
 					getOptionLabel={(option) => option.primary_class_label ?? ''}
 					getOptionSelected={(option, value) => option.primary_class_label === value.primary_class_label}
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					onChange={(event, value) => setReviewData('pocClassLabel', value.primary_class_label)}
 					value={
-						reviewData &&
-						(reviewData.serviceClassLabel || reviewData.primaryClassLabel || reviewData.pocClassLabel)
+						reviewData?.pocClassLabel || reviewData?.serviceClassLabel || reviewData?.primaryClassLabel
 							? {
 									primary_class_label:
-										reviewData.pocClassLabel ??
-										reviewData.serviceClassLabel ??
+										reviewData.pocClassLabel ||
+										reviewData.serviceClassLabel ||
 										reviewData.primaryClassLabel,
 							  }
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocAgreeLabel === 'Yes')} //|| roleDisabled}
+					disabled={disabled || (!finished && reviewData.pocAgreeLabel === 'Yes')}
 					disableClearable
 					classes={{
-						inputRoot:
-							!pocValidated && !pocValidation.pocClassLabel && pocValidation.pocAgreeLabel === 'No'
-								? classes.autocompleteError
-								: '',
+						inputRoot: isPocSecIncomplete('pocClassLabel', 'pocAgreeLabel')
+							? classes.autocompleteError
+							: '',
 					}}
 				/>
 			</StyledInlineContainer>
@@ -791,12 +786,13 @@ const TransitionPartnerKey = React.memo(() => {
 });
 
 const TransitionPartnerValue = React.memo((props) => {
-	const { setReviewData, dropdownData } = props;
+	const { setReviewData, dropdownData, roleDisabled } = props;
 	const classes = useStyles();
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
+	const disabled = finished || roleDisabled;
 
 	return (
 		<StyledTableValueContainer>
@@ -815,7 +811,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							? reviewData.pocPTPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished} //|| roleDisabled}
+					disabled={disabled}
 					disableClearable
 					classes={{
 						inputRoot: !pocValidated && !pocValidation.pocPTPAgreeLabel ? classes.autocompleteError : '',
@@ -842,7 +838,7 @@ const TransitionPartnerValue = React.memo((props) => {
 							  reviewData.primaryPlannedTransitionPartner
 							: null
 					}
-					disabled={finished || (!finished && reviewData.pocPTPAgreeLabel === 'Yes')} //|| roleDisabled}
+					disabled={disabled || (!finished && reviewData.pocPTPAgreeLabel === 'Yes')}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -873,41 +869,14 @@ const MissionPartnersKey = React.memo(() => {
 });
 
 const MissionPartnersValue = React.memo((props) => {
-	const { setReviewData, vendorData } = props;
+	const { setReviewData, vendorData, roleDisabled } = props;
 	const classes = useStyles();
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
-
+	const disabled = finished || roleDisabled;
 	const [pocMissionPartners, setPOCMissionPartners] = useState([]);
-	const [pocMissionPartnersChecklist, setPOCMissionPartnersChecklist] = useState({});
-
-	useEffect(() => {
-		if (reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null && reviewData.pocMPAgreeLabel === 'Yes') {
-			if (Object.prototype.toString.call(reviewData.serviceMissionPartnersChecklist) === '[object Object]') {
-				setPOCMissionPartnersChecklist(reviewData.serviceMissionPartnersChecklist);
-			} else {
-				setPOCMissionPartnersChecklist(
-					reviewData.serviceMissionPartnersChecklist
-						? JSON.parse(reviewData.serviceMissionPartnersChecklist)
-						: {}
-				);
-			}
-		} else {
-			if (Object.prototype.toString.call(reviewData.pocMissionPartnersChecklist) === '[object Object]') {
-				setPOCMissionPartnersChecklist(reviewData.pocMissionPartnersChecklist);
-			} else {
-				setPOCMissionPartnersChecklist(
-					reviewData.pocMissionPartnersChecklist ? JSON.parse(reviewData.pocMissionPartnersChecklist) : {}
-				);
-			}
-		}
-	}, [
-		reviewData.serviceMissionPartnersChecklist,
-		reviewData.pocMissionPartnersChecklist,
-		reviewData.pocMPAgreeLabel,
-	]);
 
 	useEffect(() => {
 		if (reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null && reviewData.pocMPAgreeLabel === 'Yes') {
@@ -942,11 +911,11 @@ const MissionPartnersValue = React.memo((props) => {
 					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
 					onChange={(event, value) => setReviewData('pocMPAgreeLabel', value)}
 					value={
-						reviewData && reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null
+						reviewData?.pocMPAgreeLabel && reviewData?.pocMPAgreeLabel !== null
 							? reviewData.pocMPAgreeLabel
 							: 'Yes'
 					}
-					disabled={finished} //|| roleDisabled}
+					disabled={disabled}
 					disableClearable
 					classes={{
 						inputRoot:
@@ -963,14 +932,6 @@ const MissionPartnersValue = React.memo((props) => {
 					dropdown box to provide more.
 				</Typography>
 			</StyledInlineContainer>
-			{renderMissionPartnersCheckboxes(
-				(value) => {
-					setReviewData('setPOCMissionPartnersChecklist', value);
-				},
-				pocMissionPartnersChecklist,
-				finished,
-				reviewData.pocMPAgreeLabel === 'Yes'
-			)}
 			<Autocomplete
 				multiple
 				id={'pocMissionPartners'}
@@ -990,7 +951,7 @@ const MissionPartnersValue = React.memo((props) => {
 					setReviewData('setPOCMissionPartners', value);
 				}}
 				value={pocMissionPartners}
-				disabled={finished || (!finished && reviewData.pocMPAgreeLabel === 'Yes')}
+				disabled={disabled || (!finished && reviewData.pocMPAgreeLabel === 'Yes')}
 			/>
 		</StyledTableValueContainer>
 	);
@@ -1009,7 +970,7 @@ const JCAKey = React.memo(() => {
 });
 
 const JCAValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1032,7 +993,12 @@ const JCAValue = React.memo((props) => {
 					''
 				)}
 			</Typography>
-			<JCAChecklist reviewData={reviewData} setReviewData={setReviewData} finished={finished} />
+			<JCAChecklist
+				reviewData={reviewData}
+				setReviewData={setReviewData}
+				finished={finished}
+				roleDisabled={roleDisabled}
+			/>
 			<GCPrimaryButton
 				style={{
 					...ButtonStyles.main,
@@ -1041,6 +1007,7 @@ const JCAValue = React.memo((props) => {
 				onClick={() => {
 					setReviewData('clearJCA', '', state, dispatch);
 				}}
+				disabled={finished || roleDisabled}
 			>
 				Clear Selection
 			</GCPrimaryButton>
@@ -1056,7 +1023,7 @@ const JCAValue = React.memo((props) => {
 				onChange={(event, value) => setAIRoleDescription(value)}
 				rows={6}
 				multiline
-				disabled={finished} //|| roleDisabled}
+				disabled={finished || roleDisabled}
 				InputProps={
 					!pocValidated && !pocValidation.pocAIRoleDescription
 						? {
@@ -1085,8 +1052,100 @@ const AIDomainKey = React.memo(() => {
 	);
 });
 
+const radioButtonData = [
+	{
+		radioButton: 'Natural Language Processing',
+		data: {
+			'Information Extraction':
+				'– techniques to produce useful structured information (e.g. names, events, relationships) from unstructured source documents',
+			'Machine Translation': '– tools to convert text from one language to another',
+			'Information Retrieval':
+				'– methods to process and store documents to enable efficient identification of relevant documents in response to a user query',
+			'Automated Speech Recognition': '– methods to process spoken audio signals and generate text transcripts',
+			'Optical Character Recognition': '– Identification of text in images or scans',
+			'Natural Language Generation': '– Tools that produce realistic-looking text artificially',
+		},
+	},
+	{
+		radioButton: 'Sensing and Perception',
+		data: {
+			Detection: '– determining whether an item of interest is present in the input',
+			Classification: '– determining which of several categories an input best belongs to',
+			Tracking:
+				'– identifying and following an item of interest over a sequence of detections, often generating a trajectory over time',
+			Mapping:
+				'– constructing a map of the environment from collected sensor data (e.g. as a system moves about the environment)',
+		},
+	},
+	{
+		radioButton: 'Planning, Scheduling, and Reasoning',
+		data: {
+			'Action Planning': '– determining a sequence of actions to reach a desired goal',
+			'Planning in Uncertainty':
+				'– developing plans without perfect information (e.g. due to missing information, randomness, or the actions of others)',
+			'Multi-AgentPlanning':
+				'– coordinating the actions of a set of agents to achieve individual and/or shared goals',
+			'Knowledge Representation':
+				'– ways to structure information about the world in a format that a computer can reason about',
+			'Pattern Analysis': '– identifying rules or patterns that account for regularities observed in the data',
+			'Constraint Satisfaction':
+				'-  finding solutions subject to various restrictions or constraints (e.g. Sudoku)',
+			Scheduling: '– optimal allocation resources to a set of tasks',
+		},
+	},
+	{
+		radioButton: 'Prediction and Assessment',
+		data: {
+			'Predictive Analytics': '– estimation of future or hypothetical outcomes from historical data',
+			'Risk Assessment': '– identification and prediction of potential hazards and estimating their likelihoods',
+			'Recommender Systems':
+				'- systems that suggest potentially relevant items based on context, user activity, or queries (example: Amazon, Netflix)',
+			'Data Mining': '– techniques for finding patterns, rules, or insights from large volumes of data',
+		},
+	},
+	{
+		radioButton: 'Modeling and Simulation',
+		data: {
+			'Wargaming & "What-If" analysis':
+				'– analysis and/or simulation of alternative hypothetical scenarios to support planning, decision making, and risk assessment',
+			'Synthetic data generation':
+				'– methods for creating data artificially, often to augment real data or as a substitute for sensitive data, specifically for deep neural network classification systems',
+			'Model Analysis & Testing':
+				'– assessment of a computational or machine learning models to estimate features such as performance and reliability',
+			'Virtual Training':
+				'– the use of model or simulation environments in place of real-world testing for training and validation of machine learning systems',
+		},
+	},
+	{
+		radioButton: 'Human-Machine Interaction',
+		data: {
+			'User-centered design/interfaces':
+				'– iterative, use case / user-focused approaches to AI software development; also includes the use of AI to aid in User-Centered Design',
+			'Data visualization': '-  tools and techniques for effective visual presentation of data to humans',
+			'Shared control schemes': '– systems that integrate automation and human control',
+			'Human-Machine task allocation':
+				'– partitioning tasks between human operators and computer tools to make best use of the relative strengths of each',
+		},
+	},
+	{
+		radioButton: 'Responsible AI',
+		data: {
+			Explainability:
+				'– efforts related to explanations for AI decisions, including tools to generate human-understandable explanations for AI outputs and ways to train models that are explainable by design',
+			Adversarial:
+				'– efforts focused on the behavior of AI systems in the presence of adversaries attempting to mislead, control, poison, or otherwise disrupt system functionality, and countermeasures to such attempts',
+			Bias: '– work identifying and mitigating systematic errors or unintended consequences due to flawed assumptions implicit in the datasets, system design, or operational concept of AI systems',
+			Manipulation:
+				'– work concerning the potential of AI tools to mislead or manipulate human decisions or actions, as well as detections, mitigations, or countermeasures',
+			'Ethical AI':
+				'– methods and principles for assessing the ethical implications of AI deployments, and guidance for developing and deploying AI technologies in accordance with stated ethical principles',
+		},
+	},
+	{ radioButton: 'Other' },
+];
+
 const AIDomainValue = React.memo((props) => {
-	const { setReviewData, domainTasks } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1095,8 +1154,12 @@ const AIDomainValue = React.memo((props) => {
 	const [domainTaskOther, setDomainTaskOther] = useState('');
 
 	useEffect(() => {
-		setDomainTaskOther(domainTasks['Other'][0]);
-	}, [domainTasks]);
+		if (reviewData?.domainTask === 'Other') {
+			setDomainTaskOther(reviewData.domainTaskSecondary?.[0] ?? '');
+		} else {
+			setDomainTaskOther('');
+		}
+	}, [reviewData]);
 
 	return (
 		<StyledTableValueContainer>
@@ -1106,131 +1169,22 @@ const AIDomainValue = React.memo((props) => {
 			</Typography>
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				<div style={{ display: 'flex', flexDirection: 'row' }}>
-					{renderDropdownRadioButtons(reviewData, 'domainTask', setReviewData, {
-						'Natural Language Processing': renderDomainCheckboxes(
-							{
-								'Information Extraction':
-									'– techniques to produce useful structured information (e.g. names, events, relationships) from unstructured source documents',
-								'Machine Translation': '– tools to convert text from one language to another',
-								'Information Retrieval':
-									'– methods to process and store documents to enable efficient identification of relevant documents in response to a user query',
-								'Automated Speech Recognition':
-									'– methods to process spoken audio signals and generate text transcripts',
-								'Optical Character Recognition': '– Identification of text in images or scans',
-								'Natural Language Generation':
-									'– Tools that produce realistic-looking text artificially',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Sensing and Perception': renderDomainCheckboxes(
-							{
-								Detection: '– determining whether an item of interest is present in the input',
-								Classification: '– determining which of several categories an input best belongs to',
-								Tracking:
-									'– identifying and following an item of interest over a sequence of detections, often generating a trajectory over time',
-								Mapping:
-									'– constructing a map of the environment from collected sensor data (e.g. as a system moves about the environment)',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Planning, Scheduling, and Reasoning': renderDomainCheckboxes(
-							{
-								'Action Planning': '– determining a sequence of actions to reach a desired goal',
-								'Planning in Uncertainty':
-									'– developing plans without perfect information (e.g. due to missing information, randomness, or the actions of others)',
-								'Multi-AgentPlanning':
-									'– coordinating the actions of a set of agents to achieve individual and/or shared goals',
-								'Knowledge Representation':
-									'– ways to structure information about the world in a format that a computer can reason about',
-								'Pattern Analysis':
-									'– identifying rules or patterns that account for regularities observed in the data',
-								'Constraint Satisfaction':
-									'-  finding solutions subject to various restrictions or constraints (e.g. Sudoku)',
-								Scheduling: '– optimal allocation resources to a set of tasks',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Prediction and Assessment': renderDomainCheckboxes({
-							'Predictive Analytics':
-								'– estimation of future or hypothetical outcomes from historical data',
-							'Risk Assessment':
-								'– identification and prediction of potential hazards and estimating their likelihoods',
-							'Recommender Systems':
-								'- systems that suggest potentially relevant items based on context, user activity, or queries (example: Amazon, Netflix)',
-							'Data Mining':
-								'– techniques for finding patterns, rules, or insights from large volumes of data',
-						}),
-						'Modeling and Simulation': renderDomainCheckboxes(
-							{
-								'Wargaming & "What-If" analysis':
-									'– analysis and/or simulation of alternative hypothetical scenarios to support planning, decision making, and risk assessment',
-								'Synthetic data generation':
-									'– methods for creating data artificially, often to augment real data or as a substitute for sensitive data, specifically for deep neural network classification systems',
-								'Model Analysis & Testing':
-									'– assessment of a computational or machine learning models to estimate features such as performance and reliability',
-								'Virtual Training':
-									'– the use of model or simulation environments in place of real-world testing for training and validation of machine learning systems',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Human-Machine Interaction': renderDomainCheckboxes(
-							{
-								'User-centered design/interfaces':
-									'– iterative, use case / user-focused approaches to AI software development; also includes the use of AI to aid in User-Centered Design',
-								'Data visualization':
-									'-  tools and techniques for effective visual presentation of data to humans',
-								'Shared control schemes': '– systems that integrate automation and human control',
-								'Human-Machine task allocation':
-									'– partitioning tasks between human operators and computer tools to make best use of the relative strengths of each',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						'Responsible AI': renderDomainCheckboxes(
-							{
-								Explainability:
-									'– efforts related to explanations for AI decisions, including tools to generate human-understandable explanations for AI outputs and ways to train models that are explainable by design',
-								Adversarial:
-									'– efforts focused on the behavior of AI systems in the presence of adversaries attempting to mislead, control, poison, or otherwise disrupt system functionality, and countermeasures to such attempts',
-								Bias: '– work identifying and mitigating systematic errors or unintended consequences due to flawed assumptions implicit in the datasets, system design, or operational concept of AI systems',
-								Manipulation:
-									'– work concerning the potential of AI tools to mislead or manipulate human decisions or actions, as well as detections, mitigations, or countermeasures',
-								'Ethical AI':
-									'– methods and principles for assessing the ethical implications of AI deployments, and guidance for developing and deploying AI technologies in accordance with stated ethical principles',
-							},
-							reviewData,
-							domainTasks,
-							domainTaskOther,
-							setReviewData,
-							setDomainTaskOther,
-							finished
-						),
-						Other: renderDomainCheckboxes(null),
-					})}
+					<div style={{ width: '100%', margin: '15px 0px' }}>
+						{radioButtonData.map((data) => {
+							return (
+								<DropdownRadioButton
+									reviewData={reviewData}
+									reviewDataProp={'domainTask'}
+									setReviewData={setReviewData}
+									radioButtonData={data}
+									finished={finished}
+									domainTaskOther={domainTaskOther}
+									setDomainTaskOther={setDomainTaskOther}
+									roleDisabled={roleDisabled}
+								/>
+							);
+						})}
+					</div>
 				</div>
 				<GCPrimaryButton
 					style={{
@@ -1241,6 +1195,7 @@ const AIDomainValue = React.memo((props) => {
 					onClick={() => {
 						setReviewData('clearDomainTask', '', state, dispatch);
 					}}
+					disabled={finished || roleDisabled}
 				>
 					Clear Selection
 				</GCPrimaryButton>
@@ -1261,7 +1216,7 @@ const DataTypeKey = React.memo(() => {
 });
 
 const DataTypeValue = React.memo((props) => {
-	const { setReviewData } = props;
+	const { setReviewData, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state, dispatch } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
@@ -1306,7 +1261,8 @@ const DataTypeValue = React.memo((props) => {
 						{ name: 'Graph / Network', example: 'Social network data' },
 						{ name: 'Computer / Network', example: 'Binary, executable, communication data' },
 					],
-					finished
+					finished,
+					roleDisabled
 				)}
 				<GCPrimaryButton
 					style={{
@@ -1317,11 +1273,12 @@ const DataTypeValue = React.memo((props) => {
 					onClick={() => {
 						setReviewData('clearDataType', '', state, dispatch);
 					}}
+					disabled={finished || roleDisabled}
 				>
 					Clear Selection
 				</GCPrimaryButton>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Describe how this project fits this data type
+					Identify the data sources this project uses and how it fits this data type:
 				</Typography>
 				<TextField
 					placeholder="Reviewer Notes"
@@ -1332,7 +1289,7 @@ const DataTypeValue = React.memo((props) => {
 					onChange={(event, value) => setAITypeDescription(value)}
 					rows={6}
 					multiline
-					disabled={finished} //|| roleDisabled}
+					disabled={finished || roleDisabled}
 					InputProps={
 						!pocValidated && !pocValidation.pocAITypeDescription
 							? {
@@ -1354,9 +1311,9 @@ const DataTypeValue = React.memo((props) => {
 						options={['Computer', 'Robotic']}
 						style={{ minWidth: 180 }}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-						value={reviewData ? reviewData.roboticsSystemAgree : null}
+						value={reviewData.roboticsSystemAgree ?? null}
 						onChange={(event, value) => setReviewData('roboticsSystemAgree', value)}
-						disabled={finished} //|| roleDisabled}
+						disabled={finished || roleDisabled}
 						disableClearable
 						classes={{
 							inputRoot:
@@ -1377,9 +1334,9 @@ const DataTypeValue = React.memo((props) => {
 						options={['Yes', 'No']}
 						style={{ minWidth: 180 }}
 						renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
-						value={reviewData ? reviewData.intelligentSystemsAgree : null}
+						value={reviewData?.intelligentSystemsAgree ?? null}
 						onChange={(event, value) => setReviewData('intelligentSystemsAgree', value)}
-						disabled={finished} //|| roleDisabled}
+						disabled={finished || roleDisabled}
 						disableClearable
 						classes={{
 							inputRoot:
@@ -1411,13 +1368,13 @@ const SliderKey = React.memo(() => {
 });
 
 const SliderValue = React.memo((props) => {
-	const { setReviewData, totalBudget } = props;
+	const { setReviewData, totalBudget, roleDisabled } = props;
 	const context = useContext(JBookContext);
 	const { state } = context;
 	const { pocValidated, pocValidation, reviewData } = state;
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const { pocDollarsAttributed, pocPercentageAttributed } = reviewData;
-
+	const disabled = finished || roleDisabled;
 	const classes = useStyles();
 
 	const [attributionUnits, setAttributionUnits] = useState('%');
@@ -1510,7 +1467,7 @@ const SliderValue = React.memo((props) => {
 					// ValueLabelComponent={}
 					style={{ fontSize: 14, margin: '0 20px 0 0', width: '70%' }}
 					marks={marks}
-					disabled={finished || attributionUnits === ''} //|| roleDisabled}
+					disabled={disabled || attributionUnits === ''}
 				/>
 
 				<div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '5px', marginLeft: '10px' }}>
@@ -1550,7 +1507,7 @@ const SliderValue = React.memo((props) => {
 									setReviewData('pocSlider', newData);
 								}
 							}}
-							disabled={finished || attributionUnits === ''} //|| roleDisabled}
+							disabled={disabled || attributionUnits === ''}
 							classes={{
 								inputRoot:
 									!pocValidated &&
@@ -1597,7 +1554,7 @@ const SliderValue = React.memo((props) => {
 						setAttributionUnits(value);
 					}}
 					disableClearable
-					disabled={finished} //|| roleDisabled}
+					disabled={disabled}
 					defaultValue={'$'}
 				/>
 			</StyledInlineContainer>
@@ -1611,7 +1568,7 @@ const FooterValue = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Once your review is complete, click the submit finished review button to save your entries/information.
 				You can also save a partial review to finish later by clicking the Save Partial Review button or reset
-				the Service Reviewer Section to blank values by clicking the reset Form Buttons.
+				the RAI Lead Reviewer Section to blank values by clicking the reset Form Buttons.
 			</Typography>
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>
@@ -1624,8 +1581,6 @@ const FooterValue = React.memo(() => {
 
 export {
 	renderRadioButtons,
-	renderDropdownRadioButtons,
-	renderDomainCheckboxes,
 	JCAChecklist,
 	AltAIPOCKey,
 	AltAIPOCValue,

@@ -9,7 +9,9 @@ matomo
 mysql
 /.github/CODEOWNERS
 frontend/cypress.env.json
+frontend/cypress/downloads
 cypress-tests/cypress/videos
 cypress-tests/cypress/screenshots
 cypress-tests/cypress/results
 junit.xml
+.DS_Store

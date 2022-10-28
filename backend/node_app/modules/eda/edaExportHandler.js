@@ -11,6 +11,7 @@ class EdaExportHandler extends ExportHandler {
 			csvStringify = csvStringifyLib,
 			edaSearchUtility = new EDASearchUtility(opts),
 			constants = CONSTANTS,
+			reports,
 		} = opts;
 
 		super(opts);
@@ -18,23 +19,12 @@ class EdaExportHandler extends ExportHandler {
 		this.csvStringify = csvStringify;
 		this.edaSearchUtility = edaSearchUtility;
 		this.constants = constants;
+		this.reports = reports;
 	}
 
 	async exportHelper(req, res, userId) {
 		try {
-			const {
-				searchText,
-				index,
-				format,
-				historyId,
-				expansionDict = {},
-				orgFilter,
-				typeFilter,
-				operator,
-				selectedDocuments,
-				offset,
-				...rest
-			} = req.body;
+			const { index, format, expansionDict = {}, orgFilter, ...rest } = req.body;
 
 			const clientObj = {};
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
@@ -67,14 +57,7 @@ class EdaExportHandler extends ExportHandler {
 					esQuery
 				);
 
-				if (
-					results &&
-					results.body &&
-					results.body.hits &&
-					results.body.hits.total &&
-					results.body.hits.total.value &&
-					results.body.hits.total.value > 0
-				) {
+				if (results?.body?.hits?.total?.value > 0) {
 					searchResults = this.edaSearchUtility.cleanUpEsResults(
 						results,
 						searchTerms,
@@ -107,6 +90,7 @@ class EdaExportHandler extends ExportHandler {
 					rest.index = index;
 					rest.orgFilter = orgFilter;
 					this.reports.createPdfBuffer(searchResults, userId, rest, sendDataCallback);
+					res.status(200);
 				} else if (format === 'csv') {
 					const csvStream = this.createCsvStream(searchResults, userId);
 					res.status(200);
@@ -155,16 +139,18 @@ class EdaExportHandler extends ExportHandler {
 				// '',
 				// 'CLINS',
 				// 'Prod or Svc',
-				'PCS Code',
-				'PSC Description',
+				'PCS Code (FPDS-NG)',
+				'PSC Description (FPDS-NG)',
 				// 'Base',
 				// 'Type',
 				'Obligated Amount',
 				'Clin Number',
 				'Unit',
 				'Unit Price',
+				'Amount',
 				'Purchase Request Number',
 				'Supply Services',
+				'PCS Code',
 				'NAICS',
 				// 'Obligated Amount CIN',
 				// 'Row ID',
@@ -196,8 +182,10 @@ class EdaExportHandler extends ExportHandler {
 							clinData.clin_num_eda_ext,
 							clinData.unit_eda_ext,
 							clinData.unit_price_eda_ext,
+							clinData.amount_eda_ext,
 							clinData.purchase_request_number_eda_ext,
-							clinData.supplies_services_eda_ext,
+							[clinData.supplies_services_eda_ext],
+							clinData.psc_code_eda_ext,
 							clinData.naics_code_clin_eda_ext,
 						];
 						stringifier.write(line_item);

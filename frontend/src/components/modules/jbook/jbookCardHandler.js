@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackEvent } from '../../telemetry/Matomo';
-import { CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { CARD_FONT_SIZE, getTrackingNameForFactory, encode } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
@@ -208,19 +208,17 @@ const metadataNameToSearchFilterName = {
 	Project: 'projectTitle',
 	Keywords: 'hasKeywords',
 	'Total Cost': ['minTotalCost', 'maxTotalCost'],
-	'Main Account': 'appropriationNumber',
+	'Main Account': ['oaccts', 'paccts', 'raccts'],
 	'Budget Activity': 'budgetActivity',
 	'Budget Sub Activity': 'budgetSubActivity',
-	'Primary Reviewer': 'primaryReviewer',
-	'Service Reviewer': 'serviceReviewer',
+	'Initial Reviewer': 'primaryReviewer',
+	'RAI Lead Reviewer': 'serviceReviewer',
 	'POC Reviewer': 'pocReviewer',
-};
-
-// helper functions
-const getBudgetSubActivity = (projectData) => {
-	return projectData.budgetType === 'odoc'
-		? projectData.budgetActivityTitle ?? 'N/A'
-		: projectData.budgetSubActivity ?? 'N/A';
+	'Appropriation Title': 'budgetType',
+	'Budget Activity Number': 'budgetActivity',
+	'Budget Sub Activity Number': 'budgetSubActivity',
+	'Budget Year 1 Requested': ['maxBY1Funding', 'minBY1Funding'],
+	Tags: 'classLabel',
 };
 
 const getToComplete = (projectData, budgetType) => {
@@ -239,6 +237,15 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 		types[budgetType]
 	)}&searchText=${searchText}&id=${id}&appropriationNumber=${appropriationNumber}&portfolioName=${portfolioName}&budgetYear=${budgetYear}`;
 	window.open(url);
+};
+
+const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
+	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	window.open(
+		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
+	);
 };
 
 const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
@@ -261,16 +268,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: budgetType === 'ODOC' ? projectData.budgetActivityTitle : projectData.projectTitle,
 		},
 		{
-			Key: 'Program Element',
-			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
-			Hidden: budgetType === 'PDOC',
-		},
-		{
-			Key: 'Project Number',
-			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
-			Hidden: budgetType === 'PDOC',
-		},
-		{
 			Key: 'Budget Year (FY)',
 			Value: projectData.budgetYear,
 		},
@@ -287,16 +284,38 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Value: projectData.appropriationNumber,
 		},
 		{
-			Key: 'Budget Activity',
+			Key: 'Budget Activity Number',
 			Value: projectData.budgetActivityNumber,
 		},
 		{
-			Key: 'Budget Sub Activity',
-			Value: getBudgetSubActivity(projectData),
+			Key: 'Budget Activity Title',
+			Value: projectData.budgetActivityTitle,
+		},
+		{
+			Key: 'Budget Sub Activity Number',
+			Value: projectData.budgetSubActivityNumber,
+		},
+		{
+			Key: 'Budget Sub Activity Title',
+			Value: projectData.budgetSubActivityTitle,
+		},
+		{
+			Key: 'Program Element',
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Project Number',
+			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
+			Hidden: budgetType === 'PDOC',
 		},
 		{
 			Key: 'Budget Year 1 Requested',
 			Value: getTableFormattedCost(projectData.by1Request),
+		},
+		{
+			Key: 'Total Cost',
+			Value: getFormattedTotalCost(projectData),
 		},
 		{
 			Key: 'Current Year Amount',
@@ -309,10 +328,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		{
 			Key: 'All Prior Years Amount',
 			Value: getTableFormattedCost(projectData.allPriorYearsAmount),
-		},
-		{
-			Key: 'Total Cost',
-			Value: getFormattedTotalCost(projectData),
 		},
 		{
 			Key: 'BY2',
@@ -452,11 +467,12 @@ const getItemPageHits = (item) => {
 	returns true if that metadata field represents a search setting that has been modified
 	false otherwise */
 const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
-	if (metadataName === 'Total Cost') {
-		return (
-			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][0]) ||
-			modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName][1])
-		);
+	if (Array.isArray(metadataNameToSearchFilterName[metadataName])) {
+		let included = false;
+		metadataNameToSearchFilterName[metadataName].forEach((option) => {
+			if (modifiedSearchSettings.includes(option)) included = true;
+		});
+		return included;
 	}
 	return modifiedSearchSettings.includes(metadataNameToSearchFilterName[metadataName]);
 };
@@ -526,7 +542,7 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 					setHitsExpanded(!hitsExpanded);
 				}}
 			>
-				<span className="buttonText">Details</span>
+				<span className="buttonText">Review</span>
 				<i className={hitsExpanded ? 'fa fa-chevron-up' : 'fa fa-chevron-down'} aria-hidden="true" />
 			</button>
 		);
@@ -870,6 +886,8 @@ const cardHandler = {
 				'appropriationNumber',
 				'appropriationTitle',
 				'budgetActivityNumber',
+				'budgetSubActivityTitle',
+				'budgetSubActivityNumber',
 			];
 
 			for (let key of keys) {
@@ -899,11 +917,11 @@ const cardHandler = {
 				const reviewers = getReviewerNames(projectData);
 
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 				metadata.push({
-					Key: 'Service Reviewer',
+					Key: 'RAI Lead Reviewer',
 					Value: reviewers.service,
 				});
 				metadata.push({
@@ -913,7 +931,7 @@ const cardHandler = {
 			} else if (selectedPortfolio !== 'General') {
 				const reviewers = getReviewerNames(projectData);
 				metadata.push({
-					Key: 'Primary Reviewer',
+					Key: 'Initial Reviewer',
 					Value: reviewers.primary,
 				});
 			}
@@ -961,6 +979,20 @@ const cardHandler = {
 			return (
 				<>
 					<>
+						{item.dtic_pdf_location_s !== undefined && (
+							<CardButton
+								data-cy={'open-doc'}
+								target={'_blank'}
+								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
+								href={'#'}
+								onClick={(e) => {
+									e.preventDefault();
+									clickFnPDF(item.dtic_pdf_location_s, cloneName, item.dtic_pdf_page_s);
+								}}
+							>
+								Open Document
+							</CardButton>
+						)}
 						<CardButton
 							target={'_blank'}
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
@@ -970,7 +1002,7 @@ const cardHandler = {
 								clickFn(cloneName, searchText, item, selectedPortfolio);
 							}}
 						>
-							Open
+							Review
 						</CardButton>
 						{graphView && (
 							<CardButton

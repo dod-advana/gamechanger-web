@@ -4,8 +4,6 @@ const { DataLibrary } = require('../../lib/dataLibrary');
 const dataLibrary = new DataLibrary();
 const constants = require('../../config/constants');
 const SearchHandler = require('../base/searchHandler');
-const FAVORITE_SEARCH = require('../../models').favorite_searches;
-const sparkMD5 = require('spark-md5');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 
 const redisAsyncClientDB = 7;

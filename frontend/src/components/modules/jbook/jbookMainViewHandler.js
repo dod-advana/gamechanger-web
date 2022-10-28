@@ -7,7 +7,6 @@ import { Card } from '../../cards/GCCard';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
 import { Typography } from '@material-ui/core';
-import Pagination from 'react-js-pagination';
 import '../../../containers/jbook.css';
 import {
 	getQueryVariable,
@@ -38,6 +37,8 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import JBookProfilePage from '../../../containers/JBookProfilePage';
+import Pagination from '../../common/Pagination';
+import { checkForTinyURL } from '../default/defaultMainViewHandler';
 
 const _ = require('lodash');
 
@@ -67,41 +68,90 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 	});
 };
 
+const parseFilterhUrlParams = (searchSettings, url) => {
+	if (!url) url = window.location.href;
+	url = url.slice(url.indexOf('?') + 1);
+	const searchParams = new URLSearchParams(url);
+	const newSearchSettings = { ...searchSettings };
+
+	// Iterating the search parameters
+	for (const param of searchParams) {
+		const [filter, value] = param;
+		if (filter === 'q' || filter === 'offset') {
+			continue;
+		} else if (Array.isArray(newSearchSettings[[filter]])) {
+			const newSetting = value.split(',');
+			newSearchSettings[filter] = newSetting;
+			newSearchSettings[`${filter}AllSelected`] = false;
+			newSearchSettings[`${filter}SpecificSelected`] = true;
+		} else {
+			newSearchSettings[filter] = value;
+		}
+	}
+
+	return newSearchSettings;
+};
+
 const handlePageLoad = async (props) => {
-	const { dispatch, state, gameChangerAPI } = props;
+	const { dispatch, state, gameChangerAPI, gameChangerUserAPI, history } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
+
+	// redirect the page if using tinyurl
+	const tinyURL = await checkForTinyURL(window.location, gameChangerAPI);
+	if (tinyURL) {
+		history.replace(`#/${tinyURL}`);
+	}
 
 	const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
 	const url = window.location.href;
 	const searchText = getQueryVariable('q', url) ?? '';
+	const selectedPortfolio = getQueryVariable('selectedPortfolio', url) ?? 'General';
+	const newSearchSettings = parseFilterhUrlParams(jbookSearchSettings, url);
 	let mainTabSelected = 0;
 
 	// grab the portfolio data
 	let portfolios = [];
+
+	const currentUserData = await gameChangerUserAPI.getUserProfileData();
+
 	await gameChangerAPI
 		.callDataFunction({
 			functionName: 'getPortfolios',
 			cloneName: 'jbook',
-			options: {},
+			options: { id: currentUserData.data.id },
 		})
 		.then((data) => {
-			portfolios = data.data !== undefined ? data.data : [];
+			let publicData = data.data ? data.data.publicPortfolios : [];
+			let privateData = data.data ? data.data.privatePortfolios : [];
+			portfolios = [...publicData, ...privateData];
 		});
 
-	// the main setstate that triggers the initial search
-	setState(dispatch, {
-		searchText,
-		loading: true,
-		runSearch: true,
-		mainTabSelected,
-		urlSearch: true,
-		jbookSearchSettings,
-		defaultOptions: { ...state.defaultOptions, ...defaultOptions },
-		dropdownData,
-		portfolios,
-	});
+	const portPerm = portfolios.some((port) => port.name === selectedPortfolio);
+	if (selectedPortfolio !== 'General' && !portPerm) {
+		let newHref = window.location.href;
+		newHref = newHref.split('#')[0];
+		newHref += '#/unauthorized';
+		window.location.replace(newHref);
+	}
+
+	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
+		// the main setstate that triggers the initial search (only on main page)
+		setState(dispatch, {
+			pageLoad: true,
+			searchText,
+			loading: true,
+			runSearch: true,
+			mainTabSelected,
+			urlSearch: true,
+			jbookSearchSettings: newSearchSettings,
+			selectedPortfolio,
+			defaultOptions: { ...state.defaultOptions, ...defaultOptions },
+			dropdownData,
+			portfolios,
+		});
+	}
 };
 
 const renderHideTabs = () => {
@@ -220,6 +270,8 @@ const getPagination = (state, dispatch, edaCloneData, edaLoading, edaSearchResul
 								activePage={edaResultsPage}
 								itemsCountPerPage={18}
 								totalItemsCount={edaCount}
+								showJumpToFirstLastPages={true}
+								showFirstPageWithEllipsis={false}
 								pageRangeDisplayed={8}
 								onChange={(page) => {
 									trackEvent(
@@ -305,7 +357,7 @@ const getCardViewPanel = (props) => {
 											style={{ position: 'absolute', right: 15, top: 5 }}
 											onClick={() => {
 												window.open(
-													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e/sheet/c8a85d97-1198-4185-8d55-f6306b2a13c8/state/analysis'
+													'https://qlik.advana.data.mil/sense/app/629bd685-187f-48bc-b66e-59787d8f6a9e'
 												);
 											}}
 										>
@@ -397,7 +449,9 @@ const getCardViewPanel = (props) => {
 																		activePage={resultsPage}
 																		itemsCountPerPage={18}
 																		totalItemsCount={count}
-																		pageRangeDisplayed={8}
+																		pageRangeDisplayed={3}
+																		showJumpToFirstLastPages={false}
+																		showFirstPageWithEllipsis={true}
 																		onChange={(page) => {
 																			trackEvent(
 																				getTrackingNameForFactory(
@@ -412,6 +466,7 @@ const getCardViewPanel = (props) => {
 																				runSearch: true,
 																				loading: true,
 																				paginationSearch: true,
+																				visitEarlierPage: page < resultsPage,
 																			});
 																			scrollToContentTop();
 																		}}
@@ -496,14 +551,17 @@ const JBookMainViewHandler = (props) => {
 				searchHandler: tmpSearchHandler,
 				cancelToken,
 				gameChangerAPI,
+				gameChangerUserAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
-		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, searchHandler }) };
+		const viewPanels = {
+			Card: getCardViewPanel({ context: { state, dispatch }, gameChangerAPI, gameChangerUserAPI, searchHandler }),
+		};
 
 		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
 		extraViewPanels.forEach(({ panelName, panel }) => {
@@ -524,7 +582,12 @@ const JBookMainViewHandler = (props) => {
 		case PAGE_DISPLAYED.aboutUs:
 			return getNonMainPageOuterContainer(getAboutUs(props), state, dispatch);
 		case PAGE_DISPLAYED.profile:
-			return <JBookProfilePage {...props} />;
+			return (
+				<>
+					<FeedbackModal state={state} dispatch={dispatch} />
+					<JBookProfilePage {...props} />
+				</>
+			);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({

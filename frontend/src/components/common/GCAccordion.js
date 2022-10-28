@@ -86,6 +86,7 @@ const GCAccordion = (props) => {
 		onChange,
 		onClick = _.noop,
 		marginBottom,
+		id,
 	} = props;
 
 	const StyledAccordion = useMemo(
@@ -117,10 +118,10 @@ const GCAccordion = (props) => {
 		setIsExpanded(expanded);
 	}, [expanded]);
 
-	const handleExpandAccordion = (expanded) => {
-		setIsExpanded(expanded);
+	const handleExpandAccordion = (newExpand) => {
+		setIsExpanded(newExpand);
 		if (onChange) {
-			onChange(expanded);
+			onChange(newExpand);
 		}
 	};
 
@@ -130,11 +131,12 @@ const GCAccordion = (props) => {
 		<StyledAccordion
 			style={{ border: borderString, borderRadius: '7px' }}
 			expanded={isExpanded}
-			onChange={(event, newExpanded) => handleExpandAccordion(newExpanded)}
+			onChange={(_event, newExpanded) => handleExpandAccordion(newExpanded)}
 			onClick={onClick}
+			id={id}
 		>
 			<StyledAccordionSummary
-				style={{ backgroundColor: headerBackground, height: 'fit-content' }}
+				style={{ backgroundColor: headerBackground, height: 'fit-content', borderBottom: borderString }}
 				aria-controls="accordion-content"
 				id="accordion-header"
 				expandIcon={

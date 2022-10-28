@@ -3,7 +3,6 @@ const LOGGER = require('@dod-advana/advana-logger');
 const SearchUtility = require('../../utils/searchUtility');
 const GC_HISTORY = require('../../models').gc_history;
 const { DataLibrary } = require('../../lib/dataLibrary');
-const neo4jLib = require('neo4j-driver');
 const d3Force = require('d3-force-3d');
 
 class GraphHandler {
@@ -56,15 +55,15 @@ class GraphHandler {
 		return await this.callFunctionHelper({ body: proxyBody, permissions }, userId);
 	}
 
-	async searchHelper(req, userId) {
+	async searchHelper(req, _userId) {
 		return req.body;
 	}
 
-	async queryHelper(req, userId, code) {
+	async queryHelper(req, _userId, _code) {
 		return req.body;
 	}
 
-	async callFunctionHelper(req, userId) {
+	async callFunctionHelper(req, _userId) {
 		return req.body;
 	}
 

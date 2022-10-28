@@ -78,9 +78,12 @@ const styles = {
 	},
 };
 
-export const downloadFile = async (data, format, cloneData) => {
+export const downloadFile = async (data, format, classificationMarking, cloneData) => {
 	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', 'onDownloadFile', format);
-	const filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	let filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	if (classificationMarking === 'CUI') {
+		filename += '-CUI';
+	}
 	if (format === 'pdf') {
 		const blob = b64toBlob(data, 'application/pdf');
 		autoDownloadFile({ data: blob, extension: 'pdf', filename });
@@ -189,7 +192,7 @@ const ExportResultsDialog = ({
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(data, selectedFormat, cloneData);
+			downloadFile(data, selectedFormat, classificationMarking, cloneData);
 			getUserData();
 			if (
 				selectedFormat === 'pdf' &&
@@ -210,7 +213,7 @@ const ExportResultsDialog = ({
 		<UOTDialog
 			open={open}
 			title={
-				<div>
+				<div data-cy="export-dialog">
 					<Typography variant="h3" display="inline">
 						Export Results
 					</Typography>
@@ -235,8 +238,10 @@ const ExportResultsDialog = ({
 					justifyContent: 'center',
 					margin: '4% 0 0 0',
 				}}
+				data-cy="export-classification"
 			>
 				<Autocomplete
+					data-cy="export-autocomplete"
 					freeSolo
 					options={classificationMarkingOptions}
 					renderInput={(params) => (
@@ -259,7 +264,6 @@ const ExportResultsDialog = ({
 					onInputChange={(_, value) => {
 						setClassificationMarking(value);
 					}}
-					disabled={selectedFormat !== 'pdf'}
 				/>
 			</div>
 
@@ -272,24 +276,22 @@ const ExportResultsDialog = ({
 					margin: '3% 0 0 0',
 				}}
 			>
-				<div style={styles.leftButtonGroup}>
-					<FormControl variant="outlined" style={{ width: '100%' }}>
+				<div style={styles.leftButtonGroup} data-cy="export-select">
+					<FormControl variant="outlined" style={{ width: '100%' }} i data-cy="export-select-form">
 						<InputLabel className={classes.labelFont}>File Format</InputLabel>
 						<Select
 							label="File Format"
 							style={{ fontSize: '16px' }}
 							value={selectedFormat}
 							onChange={handleChange}
+							id={'#select'}
 						>
 							{!isEda && (
-								<MenuItem style={styles.menuItem} value="pdf" key="pdf">
+								<MenuItem style={styles.menuItem} value="pdf" key="pdf" data-cy={`export-option-pdf`}>
 									PDF
 								</MenuItem>
 							)}
-							<MenuItem style={styles.menuItem} value="json" key="json">
-								JSON
-							</MenuItem>
-							<MenuItem style={styles.menuItem} value="csv" key="csv">
+							<MenuItem style={styles.menuItem} value="csv" key="csv" data-cy={`export-option-csv`}>
 								CSV
 							</MenuItem>
 						</Select>
@@ -309,7 +311,7 @@ const ExportResultsDialog = ({
 					<GCButton onClick={handleClose} isSecondaryBtn={true}>
 						Close
 					</GCButton>
-					<GCButton onClick={generateFile} disabled={loading}>
+					<GCButton onClick={generateFile} disabled={loading} data-cy={'generate'}>
 						Generate
 					</GCButton>
 				</div>

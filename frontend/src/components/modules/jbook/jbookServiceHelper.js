@@ -8,7 +8,6 @@ import {
 } from './profilePage/profilePageStyles';
 import { TextField, Typography, CircularProgress, Tooltip } from '@material-ui/core';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -100,9 +99,9 @@ const SecondaryReviewerKey = React.memo(() => {
 		<StyledTableKeyContainer>
 			<strong>Secondary Reviewer</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Service Level Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu.
-				Once selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer
-				checklist tab and the review will be the responsibility of the Secondary Reviewer.
+				RAI Lead Reviewers can select a secondary reviewer for this Program/Project from the dropdown menu. Once
+				selected and saved, the Secondary Reviewer Name will populate as the Reviewer on the Reviewer checklist
+				tab and the review will be the responsibility of the Secondary Reviewer.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -395,11 +394,9 @@ const MissionPartnersValue = React.memo((props) => {
 		vendorData,
 		finished,
 		serviceMissionPartners, // from reviewData
-		serviceMissionPartnersChecklist, //
 	} = props;
 
 	const [missionPartners, setMissionPartners] = useState([]);
-	const [missionPartnersChecklist, setMissionPartnersChecklist] = useState({});
 
 	useEffect(() => {
 		if (Array.isArray(serviceMissionPartners)) {
@@ -408,16 +405,6 @@ const MissionPartnersValue = React.memo((props) => {
 			setMissionPartners(serviceMissionPartners ? serviceMissionPartners.split('|') : []);
 		}
 	}, [serviceMissionPartners]);
-
-	useEffect(() => {
-		if (Object.prototype.toString.call(serviceMissionPartnersChecklist) === '[object Object]') {
-			setMissionPartnersChecklist(serviceMissionPartnersChecklist);
-		} else {
-			setMissionPartnersChecklist(
-				serviceMissionPartnersChecklist ? JSON.parse(serviceMissionPartnersChecklist) : {}
-			);
-		}
-	}, [serviceMissionPartnersChecklist]);
 
 	return (
 		<StyledTableValueContainer>
@@ -428,13 +415,6 @@ const MissionPartnersValue = React.memo((props) => {
 					dropdown box to provide more.
 				</Typography>
 			</StyledInlineContainer>
-			{renderMissionPartnersCheckboxes(
-				(value) => {
-					setReviewData('setMissionPartnersChecklist', value);
-				},
-				missionPartnersChecklist,
-				finished
-			)}
 			<Autocomplete
 				multiple
 				id={'serviceMissionPartners'}
@@ -465,9 +445,12 @@ const AIPOCKey = React.memo(() => {
 		<StyledTableKeyContainer>
 			<strong>AI Point of Contact (POC) for Effort</strong>
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
-				Enter the AI Point of Contact for this Program/Project in the POC section of the Service Reviewer
-				Section. A suitable type of POC would be the Program Element Monitor. We ask that you enter the POC
-				Title, Name, Email address, Organization and Phone number in this section.
+				Enter the AI Point of Contact for this Program/BLI in the POC section of the RAI Lead Reviewer Section.
+				A suitable type of POC would be the Program Element Monitor. Select the POC's name from the dropdown. If
+				the POC name is not available as an option, please direct the POC to{' '}
+				<span>{`${window.location.origin}/#/jbook-register-poc`}</span> to be added to the list and select `Save
+				(Partial RAI Lead Review)`. Once the POC has completed the steps at the link above, you can return to
+				this budget exhibit, select the POC name, and click `Submit`.
 			</Typography>
 		</StyledTableKeyContainer>
 	);
@@ -477,6 +460,7 @@ const AIPOCValue = React.memo((props) => {
 	const {
 		setReviewData,
 		finished,
+		dropdownData,
 		serviceValidated,
 		serviceValidation,
 		servicePOCTitle, // from reviewData
@@ -486,36 +470,25 @@ const AIPOCValue = React.memo((props) => {
 		servicePOCPhoneNumber, //
 	} = props;
 
-	const [pocTitle, setPOCTitle] = useState(servicePOCTitle);
-	const [pocName, setPOCName] = useState(servicePOCName);
-	const [pocEmail, setPOCEmail] = useState(servicePOCEmail);
-	const [pocOrg, setPOCOrg] = useState(servicePOCOrg);
-	const [pocPhoneNumber, setPOCPhoneNumber] = useState(servicePOCPhoneNumber);
-
 	const classes = useStyles();
-
-	useEffect(() => {
-		setPOCTitle(servicePOCTitle);
-	}, [servicePOCTitle]);
-
-	useEffect(() => {
-		setPOCName(servicePOCName);
-	}, [servicePOCName]);
-
-	useEffect(() => {
-		setPOCEmail(servicePOCEmail);
-	}, [servicePOCEmail]);
-
-	useEffect(() => {
-		setPOCOrg(servicePOCOrg);
-	}, [servicePOCOrg]);
-
-	useEffect(() => {
-		setPOCPhoneNumber(servicePOCPhoneNumber);
-	}, [servicePOCPhoneNumber]);
 
 	return (
 		<StyledTableValueContainer>
+			<StyledInlineContainer justifyContent={'left'}>
+				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
+					POC Name
+				</Typography>
+				<Autocomplete
+					style={{ backgroundColor: 'white', width: '40%' }}
+					size="small"
+					options={Object.keys(dropdownData.pocReviewers).map((poc) => poc)}
+					renderInput={(params) => <TextField {...params} label="Select" variant="outlined" />}
+					onChange={(_event, value) => setReviewData('servicePOC', dropdownData.pocReviewers[value])}
+					value={servicePOCName ?? null}
+					disabled={finished}
+					disableClearable
+				/>
+			</StyledInlineContainer>
 			<StyledInlineContainer justifyContent={'left'}>
 				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
 					POC Title
@@ -523,41 +496,12 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Title"
 					variant="outlined"
-					value={pocTitle}
-					defaultValue={pocTitle}
+					value={servicePOCTitle ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCTitle(value)}
-					onBlur={(event) => setReviewData('servicePOCTitle', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocTitle
-							? {
-									classes: {
-										root: classes.cssOutlinedInput,
-										focused: classes.cssFocused,
-										notchedOutline: classes.notchedOutline,
-									},
-							  }
-							: {}
-					}
-				/>
-			</StyledInlineContainer>
-			<StyledInlineContainer justifyContent={'left'}>
-				<Typography variant="subtitle1" style={{ fontSize: 16, marginRight: 20, width: 90 }}>
-					POC Name
-				</Typography>
-				<TextField
-					placeholder="Name"
-					variant="outlined"
-					value={pocName}
-					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCName(value)}
-					onBlur={(event) => setReviewData('servicePOCName', event.target.value)}
-					size="small"
-					disabled={finished} //|| roleDisabled}
-					InputProps={
-						!serviceValidated && !serviceValidation.pocName
 							? {
 									classes: {
 										root: classes.cssOutlinedInput,
@@ -576,12 +520,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Email"
 					variant="outlined"
-					value={pocEmail}
+					value={servicePOCEmail ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCEmail(value)}
-					onBlur={(event) => setReviewData('servicePOCEmail', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocEmail
 							? {
@@ -602,12 +544,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Org"
 					variant="outlined"
-					value={pocOrg}
+					value={servicePOCOrg ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCOrg(value)}
-					onBlur={(event) => setReviewData('servicePOCOrg', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocOrg
 							? {
@@ -628,12 +568,10 @@ const AIPOCValue = React.memo((props) => {
 				<TextField
 					placeholder="Phone Number"
 					variant="outlined"
-					value={pocPhoneNumber}
+					value={servicePOCPhoneNumber ?? null}
 					style={{ backgroundColor: 'white', width: '40%' }}
-					onChange={(event, value) => setPOCPhoneNumber(value)}
-					onBlur={(event) => setReviewData('servicePOCPhoneNumber', event.target.value)}
 					size="small"
-					disabled={finished} //|| roleDisabled}
+					disabled={true}
 					InputProps={
 						!serviceValidated && !serviceValidation.pocPhoneNumber
 							? {
@@ -703,11 +641,11 @@ const ServiceDescriptionText = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Once your review is complete, click the submit finished review button to save your entries/information.
 				You can also Save a partial review to finish later by clicking the Save Partial Review button or you can
-				reset the Service Reviewer Section to blank values by clicking the reset Form Buttons.
+				reset the RAI Lead Reviewer Section to blank values by clicking the reset Form Buttons.
 			</Typography>
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>
-				Do not click "Submit (Finished Service Review)" until all fields in the Service Reviewer section have
+				Do not click "Submit (Finished RAI Lead Review)" until all fields in the RAI Lead Reviewer section have
 				been filled in.
 			</Typography>
 		</StyledTableValueContainer>
@@ -738,7 +676,7 @@ const ButtonFooter = React.memo((props) => {
 						style={ButtonStyles.main}
 						onClick={() => setState(dispatch, { ServiceModalOpen: true })}
 					>
-						Re-Enable (Partial Service Review)
+						Re-Enable (Partial RAI Lead Review)
 					</GCPrimaryButton>
 				</Tooltip>
 			)}
@@ -753,7 +691,11 @@ const ButtonFooter = React.memo((props) => {
 					{!primaryReviewLoading ? (
 						'Reset Form'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>
@@ -764,9 +706,13 @@ const ButtonFooter = React.memo((props) => {
 					disabled={finished || roleDisabled}
 				>
 					{!primaryReviewLoading ? (
-						'Save (Partial Service Review)'
+						'Save (Partial RAI Lead Review)'
 					) : (
-						<CircularProgress color="#515151" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#515151"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>
@@ -781,9 +727,13 @@ const ButtonFooter = React.memo((props) => {
 					disabled={finished || roleDisabled}
 				>
 					{!primaryReviewLoading ? (
-						'Submit (Finished Service Review)'
+						'Submit (Finished RAI Lead Review)'
 					) : (
-						<CircularProgress color="#FFFFFF" size={25} style={{ margin: '3px' }} />
+						<CircularProgress
+							color="#FFFFFF"
+							size={25}
+							style={{ display: 'flex', justifyContent: 'center' }}
+						/>
 					)}
 				</GCPrimaryButton>
 			</Tooltip>
