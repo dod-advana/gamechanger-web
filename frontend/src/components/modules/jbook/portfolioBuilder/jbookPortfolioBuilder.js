@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
+import JbookPublicRequestModal from './jbookPublicRequestModal';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -63,6 +64,8 @@ const PortfolioBuilder = (props) => {
 	const [privatePortfolios, setPrivatePortfolios] = useState([]);
 
 	const [showModal, setShowModal] = useState(false);
+	const [showPublicModal, setShowPublicModal] = useState(false);
+
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
@@ -249,72 +252,97 @@ const PortfolioBuilder = (props) => {
 
 	return (
 		<>
-			<div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>JBOOK Portfolio Builder</p>
-				</div>
-				<div
-					style={{
-						display: 'flex',
-						margin: '10px 80px',
-						justifyContent: 'space-evenly',
-					}}
-				>
-					<div style={{ flex: 2 }}>
-						<div>
-							Rapidly discover and label all Program Elements/Budget Line Items related to a spend
-							category by creating a Portfolio.
+			<div
+				style={{
+					width: '100%',
+					padding: '15px 22px 15px 30px',
+					minHeight: 'calc(100vh - 245px)',
+				}}
+			>
+				<div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}></div>
+					<div
+						style={{
+							display: 'flex',
+							margin: '10px 80px',
+							justifyContent: 'space-evenly',
+						}}
+					>
+						<div style={{ flex: 2 }}>
+							<div>
+								Rapidly discover and label all Program Elements/Budget Line Items related to a spend
+								category by creating a Portfolio.
+							</div>
+							<div style={{ marginTop: 15 }}>
+								Using the Portfolio Builder, users can:
+								<ul>
+									<li>Create a new portfolio</li>
+									<li>Define a portfolio description</li>
+									<li>Upload a portfolio ontology</li>
+									<li>Create tags/labels for use within the portfolio</li>
+									<li>Set user permissions</li>
+									<li>View all portfolios</li>
+								</ul>
+							</div>
 						</div>
-						<div style={{ marginTop: 15 }}>
-							Using the Portfolio Builder, users can:
-							<ul>
-								<li>Create a new portfolio</li>
-								<li>Define a portfolio description</li>
-								<li>Upload a portfolio ontology</li>
-								<li>Create tags/labels for use within the portfolio</li>
-								<li>Set user permissions</li>
-								<li>View all portfolios</li>
-							</ul>
-						</div>
+						{user && (
+							<div style={{ display: 'flex', flexDirection: 'column' }}>
+								<GCButton
+									onClick={() => {
+										setShowModal(true);
+									}}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
+									Create a New Portfolio
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										setShowPublicModal(true);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Public Portfolio Request
+								</GCButton>
+							</div>
+						)}
 					</div>
-					{user && (
-						<div>
-							<GCButton
-								onClick={() => {
-									setShowModal(true);
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Create a New Portfolio
-							</GCButton>
-						</div>
-					)}
-				</div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
-				</div>
-				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(publicPortfolios)}
-				</div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
-				</div>
-				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(privatePortfolios)}
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+						<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
+					</div>
+					<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+						{listPortfolios(publicPortfolios)}
+					</div>
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+						<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
+					</div>
+					<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+						{listPortfolios(privatePortfolios)}
+					</div>
 				</div>
 			</div>
 			{user && (
-				<JbookPortfolioModal
-					showModal={showModal}
-					setShowModal={() => {
-						setShowModal(false);
-						setInit(false);
-					}}
-					modalData={modalData}
-					userList={userList}
-					userMap={userMap}
-					user={user}
-				/>
+				<>
+					<JbookPortfolioModal
+						showModal={showModal}
+						setShowModal={() => {
+							setShowModal(false);
+							setInit(false);
+						}}
+						modalData={modalData}
+						userList={userList}
+						userMap={userMap}
+						user={user}
+					/>
+					<JbookPublicRequestModal
+						showModal={showPublicModal}
+						setShowModal={() => {
+							setShowPublicModal(false);
+						}}
+						userMap={userMap}
+						user={user}
+						privatePortfolios={privatePortfolios.map((item) => item.name)}
+					/>
+				</>
 			)}
 		</>
 	);
