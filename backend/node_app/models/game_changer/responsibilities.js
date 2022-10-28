@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
-			//organizationPersonnel
 			organizationPersonnelText: {
 				type: DataTypes.TEXT,
 				allowNull: false,
@@ -37,7 +36,6 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false,
 			},
-			// otherOrganizationPersonnel
 			responsibilityEntities: {
 				type: DataTypes.TEXT,
 				allowNull: true,
@@ -49,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		{
 			freezeTableName: true,
-			tableName: 'responsibilites_new3',
+			tableName: 'responsibilities_test',
 			timestamps: false,
 		}
 	);

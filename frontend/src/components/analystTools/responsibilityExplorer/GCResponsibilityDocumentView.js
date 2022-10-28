@@ -531,7 +531,7 @@ export default function GCResponsibilityDocumentView({
 				open={editModalOpen}
 				setOpen={setEditModalOpen}
 				responsibility={selectedResponsibility.responsibilityText}
-				entity={selectedResponsibility.organizationPersonnelText ?? 'NO ENTITY'}
+				entity={selectedResponsibility.organizationPersonnelText}
 				editEntity={editEntity}
 				editResponsibility={editResponsibility}
 				rejectResponsibility={rejectResponsibility}
