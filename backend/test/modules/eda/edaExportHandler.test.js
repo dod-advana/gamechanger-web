@@ -150,7 +150,7 @@ describe('EDAExportHandler', function () {
 			const target = new EDAExportHandler(opts);
 			const expectedStatus = 200;
 			const expectedResults =
-				'Filename,Contract Number,Page Count,Issuing Organization,PCS Code (FPDS-NG),PSC Description (FPDS-NG),Obligated Amount,Clin Number,Unit,Unit Price,Amount,Purchase Request Number,Supply Services,PCS Code,NAICSEDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,2017-09-21.pdf-undefined,48,Army,,,6472000see previous filename*,,,,,,,test,test,test,test,test,test,test,test';
+				'Filename,Contract Number,Page Count,Issuing Organization,PCS Code (FPDS-NG),PSC Description (FPDS-NG),Obligated Amount,Clin Number,Unit,Unit Price,Amount,Purchase Request Number,PCS Code,NAICSEDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,2017-09-21.pdf-undefined,48,Army,,,6472000see previous filename*,,,,,,,test,test,test,test,test,test,test';
 			try {
 				await target.exportHelper(mockReq, mockRes, 'test');
 
