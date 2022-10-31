@@ -88,6 +88,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={documentList}
+								disableClearable
 								getOptionLabel={(option) => option.documentTitle}
 								defaultValue={docTitle}
 								onChange={(_event, newValue) => {
@@ -132,6 +133,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={[]}
+								disableClearable
 								freeSolo
 								autoSelect
 								getOptionLabel={(option) => option}
