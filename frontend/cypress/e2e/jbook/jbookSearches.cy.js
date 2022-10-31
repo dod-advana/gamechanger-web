@@ -61,7 +61,7 @@ describe('Tests search from multiple pages.', () => {
 
 		// look for name of document in profile page title
 		cy.getDataCy('jbook-profile-title', { timeout: 15000 }).should('contain', 'A01000: A-10  Air Force (AF) ');
-		
+
 		// Search for a PE
 		cy.jbook_search('0206623M');
 
@@ -104,7 +104,7 @@ describe('does changing to test/hypersonic cause random scrolling', () => {
 		});
 	});
 });
-describe.only('does accessing unauthorized portfolio redirect to unauthorized page', () => {
+describe('does accessing unauthorized portfolio redirect to unauthorized page', () => {
 	before(() => {
 		cy.setup();
 	});
@@ -123,7 +123,7 @@ describe.only('does accessing unauthorized portfolio redirect to unauthorized pa
 	it('can successfully be restricted from AI Inventory', () => {
 		// load particular document's profile page
 		cy.visit_accept_consent(
-			'jbook/profile?type=Procurement&id=pdoc#2019#PB#05#A01000#57#N/A#3010&appropriationNumber=3010&portfolioName=AI%20Inventory&budgetYear=2019'
+			'jbook/profile?type=RDT%26E&searchText=&id=rdoc#2023#PB#08#1208248SF#57#N/A#3620#68A035&appropriationNumber=3620&portfolioName=tesTest&budgetYear=2023'
 		);
 		// Wait some time
 		cy.wait(8000);
@@ -132,7 +132,6 @@ describe.only('does accessing unauthorized portfolio redirect to unauthorized pa
 		cy.url().should('eq', 'http://localhost:8080/#/unauthorized');
 	});
 });
-
 
 describe('Tests navigation items', () => {
 	before(() => {
@@ -148,7 +147,7 @@ describe('Tests navigation items', () => {
 		cy.jbook_open_specific_filter('serviceAgency');
 		cy.jbook_select_specific_filter_options(['Army']);
 
-		// Expand the nav bar 
+		// Expand the nav bar
 		cy.getDataCy('side-nav-open-button').click();
 
 		// Click on the title
@@ -158,12 +157,32 @@ describe('Tests navigation items', () => {
 		cy.getDataCy('jbook-search-load', { timeout: 10000 }).should('exist');
 		cy.getDataCy('jbook-search-load', { timeout: 10000 }).should('not.exist');
 		cy.getDataCy('jbook-card-header').should('exist');
-		cy.getDataCy('jbook-search-results')
-			.find('[data-cy="jbook-card-header"]')
-			.should('have.length.greaterThan', 1);
+		cy.getDataCy('jbook-search-results').find('[data-cy="jbook-card-header"]').should('have.length.greaterThan', 1);
 
 		// Ensure the filter and query are no longer present
 		cy.get('#gcSearchInput').should('have.value', '');
 		cy.getDataCy('Army-top-filter').should('not.exist');
+	});
+});
+describe('make sure browser tab name is changed', () => {
+	before(() => {
+		cy.setup();
+		cy.initial_jbook_visit();
+	});
+
+	it('should open a document and have the title be correct as Advana jbook search ', () => {
+		// Make a search
+		cy.jbook_search('navy');
+
+		// Click open document
+		cy.getDataCy('open-doc').first().click();
+		cy.title().should('eq', 'ADVANA | JBOOK SEARCH');
+	});
+	it('should open a document and ', () => {
+		//go to this pdf doc
+		cy.visit_accept_consent(
+			'jbook/profile?type=Procurement&id=pdoc#2019#PB#05#A01000#57#N/A#3010&appropriationNumber=3010&portfolioName=General&budgetYear=2019'
+		);
+		cy.title().should('eq', 'ADVANA | JBOOK SEARCH');
 	});
 });
