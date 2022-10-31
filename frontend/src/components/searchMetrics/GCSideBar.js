@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
+// import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
-import { getTrackingNameForFactory, orgColorMap, exactMatch } from '../../utils/gamechangerUtils';
+import { getTrackingNameForFactory, /*orgColorMap,*/ exactMatch } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
-import ReactTable from 'react-table';
+// import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import { setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import DefaultSeal from '../mainView/img/GC Default Seal.png';
-import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
+// import dodSeal from '../../images/United_States_Department_of_Defense_Seal.svg.png';
 
 import { FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
+/*
 const gcColors = {
 	buttonColor1: '#131E43',
 	buttonColor2: '#E9691D',
 };
+*/
 
 const styles = {
 	innerContainer: {
@@ -276,15 +278,15 @@ export const StyledAddTermButton = styled.button`
 const gameChangerAPI = new GameChangerAPI();
 
 export default function SideBar(props) {
-	const { cloneData = {}, context } = props;
+	const { /* cloneData = {}, */ context } = props;
 
 	const { state, dispatch } = context;
 	const classes = useStyles();
 
-	const [topEntities, setTopEntities] = useState([]);
-	const [topTopics, setTopTopics] = useState([]);
-	const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
-	const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
+	// const [topEntities, setTopEntities] = useState([]);
+	// const [topTopics, setTopTopics] = useState([]);
+	// const [runningTopicSearch, setRunningTopicSearch] = useState(state.runningTopicSearch);
+	// const [runningEntitySearch, setRunningEntitySearch] = useState(state.runningEntitySearch);
 	const [expansionTerms, setExpansionTerms] = React.useState([]);
 
 	let expansionTermSelected = true;
@@ -295,7 +297,7 @@ export default function SideBar(props) {
 
 	// eslint-disable-next-line no-unused-vars
 	const [orgSources, setOrgSources] = useState([]); // Will use when s3 performance fixed
-	const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
+	// const [orgOverrideImageURLs, setOrgOverrideImageURLs] = useState({});
 
 	useEffect(() => {
 		// nested arrays of expanded terms from each searchTerm
@@ -336,6 +338,7 @@ export default function SideBar(props) {
 		setExpansionTerms(topTermsArr);
 	}, [state, comparableExpansion]);
 
+	/*
 	useEffect(() => {
 		setTopEntities(state.entitiesForSearch);
 		state.entitiesForSearch.forEach((entity) => {
@@ -350,6 +353,7 @@ export default function SideBar(props) {
 		setRunningTopicSearch(state.runningTopicSearch);
 		setRunningEntitySearch(state.runningEntitySearch);
 	}, [state]);
+	*/
 
 	useEffect(() => {
 		if (state.searchSettings.expansionTermAdded) {
@@ -379,11 +383,11 @@ export default function SideBar(props) {
 		}
 	}, [state, expansionTerms, dispatch]);
 
-	useEffect(() => {
-		gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({ data }) => {
-			setOrgOverrideImageURLs(data);
-		});
-	}, [topEntities]);
+	// useEffect(() => {
+	// 	gameChangerAPI.getOrgImageOverrideURLs(topEntities.map((entity) => entity.name)).then(({ data }) => {
+	// 		setOrgOverrideImageURLs(data);
+	// 	});
+	// }, [topEntities]);
 
 	useEffect(() => {
 		try {
@@ -423,6 +427,7 @@ export default function SideBar(props) {
 		}
 	}, [state.cloneData]);
 
+	/*
 	const handleImgSrcError = (event, fallbackSources) => {
 		if (fallbackSources.admin) {
 			// fallback to entity
@@ -432,7 +437,6 @@ export default function SideBar(props) {
 			event.target.src = dodSeal;
 		}
 	};
-
 	const renderTopEntities = () => {
 		return (
 			<StyledTopEntities>
@@ -484,6 +488,7 @@ export default function SideBar(props) {
 			</StyledTopEntities>
 		);
 	};
+	*/
 	const renderExpansionTerms = (expansionTerms, handleAddSearchTerm, classes) => {
 		return (
 			<div style={{ margin: '10px 0 10px 0' }}>
@@ -523,6 +528,7 @@ export default function SideBar(props) {
 		);
 	};
 
+	/*
 	const renderTopTopics = () => {
 		return (
 			<StyledTopTopics>
@@ -549,7 +555,6 @@ export default function SideBar(props) {
 			</StyledTopTopics>
 		);
 	};
-	/*
 	// Commenting out till orgs and topics work fully
 	const renderLegend = () => {
 		const TableRow = styled.div`
