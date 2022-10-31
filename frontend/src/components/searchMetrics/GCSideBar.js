@@ -549,6 +549,8 @@ export default function SideBar(props) {
 			</StyledTopTopics>
 		);
 	};
+	/*
+	// Commenting out till orgs and topics work fully
 	const renderLegend = () => {
 		const TableRow = styled.div`
 			text-align: center;
@@ -587,7 +589,7 @@ export default function SideBar(props) {
 			/>
 		);
 	};
-
+*/
 	const handleAddSearchTerm = (phrase, source, idx) => {
 		const temp = _.cloneDeep(expansionTerms);
 		temp[idx].checked = !temp[idx].checked;
@@ -616,6 +618,8 @@ export default function SideBar(props) {
 									</GCTooltip>
 								</div>
 							)}
+							{/*
+							//	COMMENTING OUT ORGS AND TOPICS FOR NOW TILL WHEN THEY WORK PROPERLY
 							{topEntities.length > 0 && (
 								<>
 									<div style={{ width: '100%', marginBottom: 10 }}>
@@ -653,6 +657,7 @@ export default function SideBar(props) {
 									)}
 								</>
 							)}
+							 */}
 						</div>
 					</div>
 				</div>
