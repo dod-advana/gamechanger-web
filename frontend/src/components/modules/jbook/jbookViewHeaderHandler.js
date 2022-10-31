@@ -115,7 +115,7 @@ const JbookViewHeaderHandler = (props) => {
 		if (searchText && searchText !== '' && !sortSelected && currentSort !== 'Relevance') {
 			setState(dispatch, { currentSort: 'Relevance' });
 		} else if (!searchText || (searchText === '' && !sortSelected)) {
-			setState(dispatch, { currentSort: 'Budget Year' });
+			setState(dispatch, { currentSort: currentSort });
 		}
 	}, [dispatch, currentSort, searchText, sortSelected]);
 
