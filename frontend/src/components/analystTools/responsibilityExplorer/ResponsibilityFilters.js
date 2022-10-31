@@ -44,6 +44,17 @@ export default function ResponsibilityFilters({
 }) {
 	const [clearFilters, setClearFilters] = useState(false);
 
+	const handleRespFilterChange = (e) => {
+		if (e.target.value) {
+			setResponsibilityText({
+				id: 'responsibilityText',
+				value: e.target.value,
+			});
+		} else {
+			setResponsibilityText({});
+		}
+	};
+
 	const classes = useStyles();
 
 	return (
@@ -167,12 +178,7 @@ export default function ResponsibilityFilters({
 									variant="outlined"
 									placeholder="Responsibility Text"
 									value={responsibilityText?.value || ''}
-									onChange={(e) =>
-										setResponsibilityText({
-											id: 'responsibilityText',
-											value: e.target.value,
-										})
-									}
+									onChange={handleRespFilterChange}
 								/>
 							</div>
 						</GCAccordion>

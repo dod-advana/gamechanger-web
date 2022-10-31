@@ -168,10 +168,10 @@ describe('ResponsibilityController', function () {
 				...reqMock,
 				query: {
 					where: [
-						{ id: 'id', value: 'test' },
-						{ id: 'responsibilityEntities', value: 'test' },
-						{ id: 'responsibilityEntities', value: [null] },
-						{ id: 'test', value: 'test' },
+						"{ id: 'id', value: 'test' }",
+						"{ id: 'responsibilityEntities', value: 'test' }",
+						"{ id: 'responsibilityEntities', value: [null] }",
+						"{ id: 'test', value: 'test' }",
 					],
 				},
 			};
@@ -274,10 +274,7 @@ describe('ResponsibilityController', function () {
 				...reqMock,
 				query: {
 					docView: true,
-					where: [
-						{ id: 'id', value: 'test' },
-						{ id: 'responsibilityEntities', value: [null] },
-					],
+					where: ["{ id: 'id', value: 'test' }", "{ id: 'responsibilityEntities', value: [null] }"],
 					page: 1,
 				},
 			};
