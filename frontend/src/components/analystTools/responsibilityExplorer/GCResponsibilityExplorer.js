@@ -73,18 +73,6 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 
-	const tutorialSearch = () => {
-		setOrganization(['dod']);
-		const newFilters = [{ id: 'organizationPersonnelText', value: 'dod' }];
-		setCollapseKeys({
-			'DoDI 1304.02 Accession Processing Data Collection Forms': true,
-			'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
-		});
-		setFilters(newFilters);
-		setInfiniteCount(1);
-		setReloadResponsibilities(true);
-	};
-
 	useEffect(() => {
 		if (stepIndex === 5) {
 			setReView('Document');
@@ -96,12 +84,13 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			window.scrollTo(0, 0);
 			const resultsDiv = document.getElementById('re-results-col');
 			resultsDiv.scrollTop = 0;
+			const firstDoc = Object.keys(docResponsibilityData)[0];
 			setCollapseKeys({
-				'DoDI 1304.02 Accession Processing Data Collection Forms': true,
-				'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+				[firstDoc]: true,
+				[`${firstDoc}${docResponsibilityData[firstDoc]?.entities?.[0]?.entityText}`]: true,
 			});
 		}
-	}, [stepIndex]);
+	}, [docResponsibilityData, stepIndex]);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -125,6 +114,11 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		setOrganization([]);
 		setResponsibilityText({});
 		setReloadResponsibilities(true);
+	};
+
+	const startTutorial = () => {
+		resetPage();
+		setShowTutorial(true);
 	};
 
 	const scrollRef = useBottomScrollListener(
@@ -257,13 +251,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						in specific documents, by organization/role/entity, and/or by responsibility area.
 					</div>
 					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon
-							style={{ cursor: 'pointer' }}
-							onClick={() => {
-								setReView('Document');
-								setShowTutorial(true);
-							}}
-						/>
+						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
 					</GCToolTip>
 					<span
 						style={{
@@ -377,8 +365,6 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				setStepIndex={setStepIndex}
 				showSkipButton={false}
 			/>
-
-			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
 		</div>
 	);
 }
