@@ -166,7 +166,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {
+				query: {
 					where: [
 						{ id: 'id', value: 'test' },
 						{ id: 'responsibilityEntities', value: 'test' },
@@ -272,7 +272,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {
+				query: {
 					docView: true,
 					where: [
 						{ id: 'id', value: 'test' },
@@ -486,7 +486,7 @@ describe('ResponsibilityController', function () {
 			const req = {
 				...reqMock,
 				permissions: 'Gamechanger Admin',
-				body: {
+				query: {
 					cloneData: { clone_name: 'gamechanger' },
 					filename: 'test',
 					text: 'test',
@@ -821,7 +821,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {
+				query: {
 					cloneData: { clone_name: 'gamechanger' },
 					filename: 'test.pdf',
 					text: 'test text',
@@ -1002,7 +1002,7 @@ describe('ResponsibilityController', function () {
 
 			const req = {
 				...reqMock,
-				body: {
+				query: {
 					offset: 0,
 					page: 0,
 				},
