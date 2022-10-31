@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
 import { getCurrentView } from '../../../utils/gamechangerUtils';
-import _, { isArray, isEqual } from 'lodash';
+import _, { isArray } from 'lodash';
 import FilterList from '../../common/FilterList';
 
 import GCButton from '../../common/GCButton';
@@ -22,18 +22,6 @@ const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
-const PORTFOLIO_FILTERS = [
-	'reviewStatus',
-	'primaryReviewStatus',
-	'primaryReviewer',
-	'serviceReviewer',
-	'pocReviewer',
-	'sourceTag',
-	'hasKeyword',
-	'primaryClassLabel',
-	'budgetType',
-];
-
 const filterNameMap = {
 	budgetYear: 'Budget Year',
 	budgetType: 'PL Title',
@@ -48,7 +36,7 @@ const filterNameMap = {
 	minTotalCost: 'Total Fund Min',
 	maxTotalCost: 'Total Fund Max',
 	primaryReviewer: 'Initial Reviewer',
-	serviceReviewer: 'Service Reviewer',
+	serviceReviewer: 'RAI Lead Reviewer',
 	pocReviewer: 'POC Reviewer',
 	reviewStatus: 'Review Status',
 	hasKeywords: 'Keywords',
@@ -127,25 +115,9 @@ const JbookViewHeaderHandler = (props) => {
 		if (searchText && searchText !== '' && !sortSelected && currentSort !== 'Relevance') {
 			setState(dispatch, { currentSort: 'Relevance' });
 		} else if (!searchText || (searchText === '' && !sortSelected)) {
-			setState(dispatch, { currentSort: 'Budget Year' });
+			setState(dispatch, { currentSort: currentSort });
 		}
 	}, [dispatch, currentSort, searchText, sortSelected]);
-
-	//If portfolio filters are present when selecting a different portfolio, resets those filters and runs updates search
-	useEffect(() => {
-		let search = false;
-		PORTFOLIO_FILTERS.forEach((filter) => {
-			if (!_.isEqual(jbookSearchSettings[filter], defaultOptions[filter])) {
-				search = true;
-			}
-		});
-
-		if (search) {
-			dispatch({ type: 'RESET_PORTFOLIO_FILTERS' });
-			setState(dispatch, { runSearch: true });
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [state.selectedPortfolio, dispatch]);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -295,10 +267,43 @@ const JbookViewHeaderHandler = (props) => {
 		});
 	};
 
-	const updateServiceFilters = async (portfolio) => {
-		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+	const updatePortfolioSpecificFilters = async (portfolio) => {
+		const newSearchSettings = {
+			...state.jbookSearchSettings,
+
+			primaryReviewerSpecificSelected: false,
+			primaryReviewerAllSelected: true,
+
+			serviceReviewerSpecificSelected: false,
+			serviceReviewerAllSelected: true,
+
+			hasKeywordsSpecificSelected: false,
+			hasKeywordsAllSelected: true,
+
+			classLabelSpecificSelected: false,
+			classLabelAllSelected: true,
+
+			sourceTagSpecificSelected: false,
+			sourceTagAllSelected: true,
+
+			reviewStatusSpecificSelected: false,
+			reviewStatusAllSelected: true,
+
+			primaryReviewStatusSpecificSelected: false,
+			primaryReviewStatusAllSelected: true,
+
+			budgetType: state.defaultOptions.budgetType,
+			reviewStatus: state.defaultOptions.reviewStatus,
+			primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
+			primaryReviewer: state.defaultOptions.primaryReviewer,
+			serviceReviewer: state.defaultOptions.serviceReviewer,
+			pocReviewer: state.defaultOptions.pocReviewer,
+			sourceTag: state.defaultOptions.sourceTag,
+			hasKeywords: state.defaultOptions.hasKeywords,
+			classLabel: state.defaultOptions.classLabel,
+		};
 		const newDefaultOptions = _.cloneDeep(state.defaultOptions);
-		const oldServiceFilter = newDefaultOptions.serviceAgency;
+
 		const { data } = await gamechangerAPI.callSearchFunction({
 			functionName: 'getUpdatedAgencyFilter',
 			cloneName: state.cloneData.clone_name,
@@ -314,15 +319,11 @@ const JbookViewHeaderHandler = (props) => {
 			})
 			.sort(filterSortFunction);
 
-		const isUpdated = !isEqual(oldServiceFilter, newDefaultOptions.serviceAgency);
-
-		if (isUpdated) {
-			setState(dispatch, {
-				jbookSearchSettings: newSearchSettings,
-				defaultOptions: newDefaultOptions,
-				runSearch: true,
-			});
-		}
+		setState(dispatch, {
+			jbookSearchSettings: newSearchSettings,
+			defaultOptions: newDefaultOptions,
+			runSearch: true,
+		});
 	};
 
 	return (
@@ -336,7 +337,7 @@ const JbookViewHeaderHandler = (props) => {
 					selectedPortfolio={state.selectedPortfolio}
 					dispatch={dispatch}
 					projectData={projectData}
-					updateServiceFilters={updateServiceFilters}
+					updatePortfolioSpecificFilters={updatePortfolioSpecificFilters}
 					pageDisplayed={state.pageDisplayed}
 				/>
 				{categorySorting !== undefined && categorySorting[activeCategoryTab] !== undefined && (
