@@ -2,6 +2,83 @@ const assert = require('assert');
 const { ResponsibilityController } = require('../../node_app/controllers/responsibilityController');
 const { constructorOptionsMock, reqMock } = require('../resources/testUtility');
 
+const responsibilitiesReturn = {
+	count: 84,
+	rows: [
+		{
+			id: 0,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText: 'All-Source Intelligence Analysis',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityNumbering: '1',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '1',
+			responsibilityEntities: '',
+		},
+		{
+			id: 1,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText:
+				'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityEntities: '',
+			responsibilityNumbering: '2',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '2',
+		},
+		{
+			id: 2,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText:
+				'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+			responsibilityNumbering: '3',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '3',
+		},
+		{
+			id: 3,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText:
+				'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityEntities: '',
+			responsibilityNumbering: '4',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '4',
+		},
+		{
+			id: 4,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText:
+				'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+			responsibilityNumbering: '5',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '5',
+		},
+		{
+			id: 5,
+			filename: 'DoDD 1000.20.pdf',
+			documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
+			responsibilityText:
+				'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.',
+			organizationPersonnelText: 'The Director, DIA,',
+			responsibilityEntities: '',
+			responsibilityNumbering: '6',
+			organizationPersonnelEntities: 'The Director, DIA,',
+			organizationPersonnelNumbering: '6',
+		},
+	],
+};
+
 const esRawResults = {
 	body: {
 		took: 4,
@@ -72,7 +149,7 @@ describe('ResponsibilityController', function () {
 			responsibilities: {
 				findAndCountAll(data) {
 					if (data.group) {
-						const parsedResults = responsiblities.map((resp) => {
+						const parsedResults = responsibilities.map((resp) => {
 							return { dataValues: { ...resp, documentCount: 10 } };
 						});
 						const docOffsets = { rows: parsedResults };
@@ -84,103 +161,7 @@ describe('ResponsibilityController', function () {
 		};
 
 		it('should get the responsibilities', async () => {
-			responsibilities = {
-				count: 84,
-				rows: [
-					{
-						id: 0,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText: 'All-Source Intelligence Analysis',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 1,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 2,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-					},
-					{
-						id: 3,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 4,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-					},
-					{
-						id: 5,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 6,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-						references: 'DoDD 5105.72',
-					},
-					{
-						id: 7,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-						references: 'DoDD 5000.1',
-					},
-					{
-						id: 8,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 9,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-						references: 'Executive Order 13388, DoDD 2000.12',
-					},
-				],
-			};
+			responsibilities = responsibilitiesReturn;
 			const target = new ResponsibilityController(opts);
 
 			const req = {
@@ -195,16 +176,11 @@ describe('ResponsibilityController', function () {
 				},
 			};
 
-			let resCode;
-			let resMsg;
-
 			const res = {
-				status(code) {
-					resCode = code;
+				status() {
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -215,103 +191,75 @@ describe('ResponsibilityController', function () {
 				count: 84,
 				rows: [
 					{
-						responsibilityEntities: '',
+						id: 0,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 0,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText: 'All-Source Intelligence Analysis',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityNumbering: '1',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '1',
+						responsibilityEntities: '',
 					},
 					{
-						responsibilityEntities: '',
+						id: 1,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 1,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: '',
+						responsibilityNumbering: '2',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '2',
 					},
 					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						id: 2,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 2,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						responsibilityNumbering: '3',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '3',
 					},
 					{
-						responsibilityEntities: '',
+						id: 3,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 3,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: '',
+						responsibilityNumbering: '4',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '4',
 					},
 					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						id: 4,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 4,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						responsibilityNumbering: '5',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '5',
 					},
 					{
-						responsibilityEntities: '',
+						id: 5,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 5,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.',
-					},
-					{
+						organizationPersonnelText: 'The Director, DIA,',
 						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 6,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'DoDD 5105.72',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and',
-					},
-					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 7,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'DoDD 5000.1',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).',
-					},
-					{
-						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 8,
-						organizationPersonnelText: 'The Director, DIA,',
-
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.',
-					},
-					{
-						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 9,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'Executive Order 13388, DoDD 2000.12',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).',
+						responsibilityNumbering: '6',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '6',
 					},
 				],
 			};
@@ -319,103 +267,7 @@ describe('ResponsibilityController', function () {
 		});
 
 		it('should get the responsibilities with offsets and limits set for document view', async () => {
-			responsibilities = {
-				count: 84,
-				rows: [
-					{
-						id: 0,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText: 'All-Source Intelligence Analysis',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 1,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 2,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-					},
-					{
-						id: 3,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 4,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-					},
-					{
-						id: 5,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 6,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-						references: 'DoDD 5105.72',
-					},
-					{
-						id: 7,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-						references: 'DoDD 5000.1',
-					},
-					{
-						id: 8,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-					},
-					{
-						id: 9,
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).',
-						organizationPersonnelText: 'The Director, DIA,',
-						responsibilityEntities: '',
-						references: 'Executive Order 13388, DoDD 2000.12',
-					},
-				],
-			};
+			let responsibilities = responsibilitiesReturn;
 			const target = new ResponsibilityController(opts);
 
 			const req = {
@@ -430,16 +282,11 @@ describe('ResponsibilityController', function () {
 				},
 			};
 
-			let resCode;
-			let resMsg;
-
 			const res = {
-				status(code) {
-					resCode = code;
+				status() {
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -450,103 +297,75 @@ describe('ResponsibilityController', function () {
 				count: 84,
 				rows: [
 					{
-						responsibilityEntities: '',
+						id: 0,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 0,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText: 'All-Source Intelligence Analysis',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityNumbering: '1',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '1',
+						responsibilityEntities: '',
 					},
 					{
-						responsibilityEntities: '',
+						id: 1,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 1,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Promulgate and manage a program to establish community management of Defense Intelligence analytic resources, including the intelligence production centers of the Military Departments, toward a unified production framework that is consistent with National Intelligence policies and priorities.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: '',
+						responsibilityNumbering: '2',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '2',
 					},
 					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						id: 2,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 2,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Manage, organize, train, and develop the expertise of the DIA analytic and Defense Intelligence workforce; provide and evaluate timely all-source intelligence products to meet customer needs that conform to standards on analytic integrity and sourcing.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						responsibilityNumbering: '3',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '3',
 					},
 					{
-						responsibilityEntities: '',
+						id: 3,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 3,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Collect and evaluate Open-Source Intelligence (OSINT) and make it fully available for use in Defense Intelligence products.  Serve as the DoD Lead Component for OSINT and develop policies and procedures to fully leverage OSINT within Defense Intelligence.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: '',
+						responsibilityNumbering: '4',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '4',
 					},
 					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						id: 4,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 4,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Maximize resources by assigning defined all-source intelligence analytical responsibilities within DIA and to each COCOM and Military Service Intelligence Center based on capabilities, workforce characteristics, and mission requirements, and manage capabilities to maintain a surge capability.',
+						organizationPersonnelText: 'The Director, DIA,',
+						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
+						responsibilityNumbering: '5',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '5',
 					},
 					{
-						responsibilityEntities: '',
+						id: 5,
 						filename: 'DoDD 1000.20.pdf',
 						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 5,
-						organizationPersonnelText: 'The Director, DIA,',
-
 						responsibilityText:
 							'All-Source Intelligence Analysis. Provide Defense Intelligence support for the policies and planning activities of the Heads of the DoD Components and, as appropriate, for similar activities of non-DoD national authorities to identify foreign emerging challenges to national security and homeland defense.',
-					},
-					{
+						organizationPersonnelText: 'The Director, DIA,',
 						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 6,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'DoDD 5105.72',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Prepare intelligence assessments and estimates concerning transfers of technology, goods, services, munitions, and associated transfer mechanisms and participate in interagency, national, and international fora on such transfer matters pursuant to DoD Directives 5105.72 and',
-					},
-					{
-						responsibilityEntities: 'National Geospatial-Intelligence Agency, Defense Intelligence Agency',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 7,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'DoDD 5000.1',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Support the DoD weapons system acquisition process by producing threat assessments within DIA or validating assessments produced by other Defense Intelligence   Components for all major DoD acquisition programs pursuant to DoD Directive 5000.1 (Reference (n)).',
-					},
-					{
-						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 8,
-						organizationPersonnelText: 'The Director, DIA,',
-
-						responsibilityText:
-							'All-Source Intelligence Analysis. Provide Defense Intelligence support to disrupt Weapons of Mass Destruction (WMD) proliferation networks.',
-					},
-					{
-						responsibilityEntities: '',
-						filename: 'DoDD 1000.20.pdf',
-						documentTitle: 'Active Duty Service Determinations for Civilian or Contractual Groups',
-						id: 9,
-						organizationPersonnelText: 'The Director, DIA,',
-						references: 'Executive Order 13388, DoDD 2000.12',
-						responsibilityText:
-							'All-Source Intelligence Analysis. Operate the Joint Intelligence Task Force for Combating Terrorism to provide prompt analysis and dissemination of intelligence on terrorist threats; set DoD terrorist threat levels; and provide all-source intelligence analysis in support of counterterrorism plans and operations pursuant to E.O. 13388 (Reference (o)) and DoD Directive 2000.12 (Reference (p)).',
+						responsibilityNumbering: '6',
+						organizationPersonnelEntities: 'The Director, DIA,',
+						organizationPersonnelNumbering: '6',
 					},
 				],
 			};
@@ -555,23 +374,15 @@ describe('ResponsibilityController', function () {
 	});
 
 	describe('#storeResponsibilityReports', () => {
-		let responsibility_reports = [
-			{
-				id: 2,
-				responsibility_id: 2,
-				reporter_hashed_username: '27d1ca9e10b731476b7641eae2710ac0',
-				issue_description: 'test',
-			},
-		];
 		const opts = {
 			...constructorOptionsMock,
 			responsibility_reports: {
-				create(data) {
+				create() {
 					return Promise.resolve({ responsibility_report: 'dummy report' });
 				},
 			},
 			responsibilities: {
-				update(data) {
+				update() {
 					return Promise.resolve([1]);
 				},
 			},
@@ -621,15 +432,13 @@ describe('ResponsibilityController', function () {
 			};
 
 			let resCode;
-			let resMsg;
 
 			const res = {
 				status(code) {
 					resCode = code;
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -642,7 +451,7 @@ describe('ResponsibilityController', function () {
 
 	describe('#queryOneDocES', () => {
 		const dataApi = {
-			queryElasticSearch: async (esClientName, esIndex, esQuery, userId) => {
+			queryElasticSearch: async () => {
 				return Promise.resolve(esRawResults);
 			},
 		};
@@ -662,12 +471,10 @@ describe('ResponsibilityController', function () {
 		it('should get back a list of paragraphs for a document and the paragraph number for the string', async () => {
 			const target = new ResponsibilityController(opts);
 
-			let resCode;
 			let resMsg;
 
 			const res = {
-				status(code) {
-					resCode = code;
+				status() {
 					return this;
 				},
 				send(msg) {
@@ -716,9 +523,11 @@ describe('ResponsibilityController', function () {
 				filename: 'test',
 				documentTitle: 'test',
 				organizationPersonnelText: 'test',
+				organizationPersonnelNumber: '1',
+				organizationPersonnelEntities: 'test',
 				responsibilityText: 'test',
+				responsibilityNumbering: '1',
 				responsibilityEntities: 'test',
-
 				status: 'active',
 			},
 		];
@@ -743,15 +552,13 @@ describe('ResponsibilityController', function () {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
-			let resMsg;
 
 			const res = {
 				status(code) {
 					resCode = code;
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -782,9 +589,11 @@ describe('ResponsibilityController', function () {
 				filename: 'test',
 				documentTitle: 'test',
 				organizationPersonnelText: 'test',
+				organizationPersonnelNumber: '1',
+				organizationPersonnelEntities: 'test',
 				responsibilityText: 'test',
+				responsibilityNumbering: '1',
 				responsibilityEntities: 'test',
-
 				status: 'active',
 				responsibility_reports: [reportList[0]],
 			},
@@ -881,15 +690,13 @@ describe('ResponsibilityController', function () {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
-			let resMsg;
 
 			const res = {
 				status(code) {
 					resCode = code;
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -920,15 +727,13 @@ describe('ResponsibilityController', function () {
 			const target = new ResponsibilityController(opts);
 
 			let resCode;
-			let resMsg;
 
 			const res = {
 				status(code) {
 					resCode = code;
 					return this;
 				},
-				send(msg) {
-					resMsg = msg;
+				send() {
 					return this;
 				},
 			};
@@ -958,7 +763,7 @@ describe('ResponsibilityController', function () {
 
 	describe('#getFileLink', () => {
 		const dataApi = {
-			queryElasticSearch: async (esClientName, esIndex, esQuery, userId) => {
+			queryElasticSearch: async () => {
 				return Promise.resolve({
 					body: {
 						hits: {
@@ -1034,7 +839,7 @@ describe('ResponsibilityController', function () {
 	describe('#getResponsibilityDocTitles', () => {
 		const documentList = ['Doc1', 'Doc2', 'Doc3'];
 		const responsibilities = {
-			findAll: async (data) => {
+			findAll: async () => {
 				return Promise.resolve(documentList);
 			},
 		};
