@@ -296,7 +296,8 @@ class ResponsibilityController {
 			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
-			where.forEach(({ id, value }) => {
+			where.forEach((filter) => {
+				const { id, value } = JSON.parse(filter);
 				if (id === 'id') {
 					tmpWhere[id] = {
 						[Op.eq]: value,
