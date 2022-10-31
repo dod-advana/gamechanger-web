@@ -142,7 +142,7 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
-			const { cloneData = {}, filename = '', text = '' } = req.body;
+			const { cloneData = {}, filename = '', text = '' } = req.query;
 			let esQuery = this.paraNumQuery(filename, text);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
@@ -193,7 +193,7 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
-			const { cloneData = {}, filename = '', text = '' } = req.body;
+			const { cloneData = {}, filename = '', text = '' } = req.query;
 
 			const cleanedText = this.cleanEsQueryText(text);
 
@@ -293,7 +293,7 @@ class ResponsibilityController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = {};
 			where.forEach(({ id, value }) => {
@@ -617,7 +617,7 @@ class ResponsibilityController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
+			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.query;
 			order.push(['filename', 'ASC']);
 			const where = {};
 			where['status'] = { [Op.like]: '%review%' };
