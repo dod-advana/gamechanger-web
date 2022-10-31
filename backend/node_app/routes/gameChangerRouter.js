@@ -77,6 +77,8 @@ router.post('/admin/deleteAdminData', admin.deleteGCAdminData);
 router.post('/getHomepageEditorData', admin.getHomepageEditorData);
 router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
+router.get('/admin/cacheQlikApps', admin.cacheQlikApps);
+
 router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
