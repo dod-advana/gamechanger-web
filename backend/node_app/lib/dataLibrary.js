@@ -60,14 +60,27 @@ class DataLibrary {
 			s3Opt.region = this.constants.S3_REGION;
 		}
 
-		if (process.env.S3_IS_MINIO === 'true') {
-			s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
-			s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
-			s3Opt.endpoint = process.env.S3_ENDPOINT;
-			s3Opt.s3ForcePathStyle = true;
-			s3Opt.signatureVersion = 'v4';
+		if (process.env.REACT_APP_NODE_ENV === 'development') {
+			if (process.env.S3_IS_MINIO === 'true') {
+				s3Opt.accessKeyId = process.env.S3_ACCESS_KEY;
+				s3Opt.secretAccessKey = process.env.S3_SECRET_KEY;
+				s3Opt.endpoint = process.env.S3_ENDPOINT;
+				s3Opt.s3ForcePathStyle = true;
+				s3Opt.signatureVersion = 'v4';
+			}
+		} else {
+			// add in cert for non-NIPR environments
+			if (
+				process.env.REACT_APP_ENV_CLASSIFICATION !== undefined &&
+				process.env.REACT_APP_ENV_CLASSIFICATION !== 'NIPR'
+			) {
+				s3Opt['httpOptions'] = {
+					agent: new https.Agent({
+						ca: constants.TLS_CERT_CA,
+					}),
+				};
+			}
 		}
-
 		try {
 			this.awsS3Client = new AWS.S3(s3Opt);
 		} catch (err) {

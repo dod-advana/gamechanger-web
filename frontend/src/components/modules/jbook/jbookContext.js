@@ -1,6 +1,7 @@
 import React, { useReducer } from 'react';
 
 const initState = {
+	pageLoad: false,
 	runSearch: false,
 	runningSearch: true,
 	useElasticSearch: true,
@@ -76,13 +77,11 @@ const initState = {
 		minBY1Funding: '',
 		maxBY1Funding: '',
 
-		budgetActivity: '',
+		budgetActivity: [],
 
 		minTotalCost: '',
 		maxTotalCost: '',
 
-		appropriationNumberSpecificSelected: false,
-		appropriationNumberAllSelected: true,
 		paccts: [],
 		raccts: [],
 		oaccts: [],
@@ -90,6 +89,9 @@ const initState = {
 		budgetSubActivity: '',
 
 		// v --- all and selected --- v
+		appropriationNumberSpecificSelected: false,
+		appropriationNumberAllSelected: true,
+
 		budgetTypeSpecificSelected: false,
 		budgetTypeAllSelected: true,
 
@@ -384,7 +386,7 @@ const initState = {
 			'Project Title',
 			'Service / Agency',
 			'Initial Reviewer',
-			'Service Reviewer',
+			'RAI Lead Reviewer',
 			'POC Reviewer',
 			'Source',
 		],
@@ -457,14 +459,19 @@ function reducer(state, action) {
 		case 'RESET_SEARCH_SETTINGS':
 			return {
 				...state,
-				jbookSearchSettings: { ...state.defaultOptions },
-				modifiedSearchSettings: [],
-			};
-		case 'RESET_PORTFOLIO_FILTERS':
-			return {
-				...state,
 				jbookSearchSettings: {
-					...state.jbookSearchSettings,
+					...state.defaultOptions,
+					appropriationNumberSpecificSelected: false,
+					appropriationNumberAllSelected: true,
+
+					budgetTypeSpecificSelected: false,
+					budgetTypeAllSelected: true,
+
+					budgetYearSpecificSelected: false,
+					budgetYearAllSelected: true,
+
+					serviceAgencySpecificSelected: false,
+					serviceAgencyAllSelected: true,
 
 					primaryReviewerSpecificSelected: false,
 					primaryReviewerAllSelected: true,
@@ -487,15 +494,8 @@ function reducer(state, action) {
 					primaryReviewStatusSpecificSelected: false,
 					primaryReviewStatusAllSelected: true,
 
-					budgetType: state.defaultOptions.budgetType,
-					reviewStatus: state.defaultOptions.reviewStatus,
-					primaryReviewStatus: state.defaultOptions.primaryReviewStatus,
-					primaryReviewer: state.defaultOptions.primaryReviewer,
-					serviceReviewer: state.defaultOptions.serviceReviewer,
-					pocReviewer: state.defaultOptions.pocReviewer,
-					sourceTag: state.defaultOptions.sourceTag,
-					hasKeyword: state.defaultOptions.hasKeyword,
-					classLabel: state.defaultOptions.classLabel,
+					budgetActivitySpecificSelected: false,
+					budgetActivityAllSelected: true,
 				},
 				modifiedSearchSettings: [],
 			};
