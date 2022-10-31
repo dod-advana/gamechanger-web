@@ -421,7 +421,6 @@ function PolicyGraphView(props) {
 
 	const [nodeGroupMenuLabel, setNodeGroupMenuLabel] = React.useState('');
 	const [nodeGroupMenuOpen, setNodeGroupMenuOpen] = React.useState(false);
-	useEffect(() => console.log('did mount'), []);
 	useEffect(() => {
 		if (!graphData || graphData.nodes?.length <= 0) return;
 		setContextOpen(false);
