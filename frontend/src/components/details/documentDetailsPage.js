@@ -296,12 +296,10 @@ const DocumentDetailsPage = (props) => {
 				docsVisible = similarDocs.docs.slice((docPage - 1) * RESULTS_PER_PAGE, docPage * RESULTS_PER_PAGE + 1);
 				break;
 			case 'docsReferenced':
-				console.log('here is docs refernced pre slice', docsReferenced);
 				docsVisible = docsReferenced.docs.slice(
 					(docPage - 1) * RESULTS_PER_PAGE,
 					docPage * RESULTS_PER_PAGE + 1
 				);
-				console.log('Here is docsreferenced', docsVisible);
 				const localNotInCorpusDocs = document?.ref_list.filter((doc) => {
 					return notInCorpusHelper(doc);
 				});
