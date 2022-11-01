@@ -288,6 +288,36 @@ class ResponsibilityController {
 		}
 	}
 
+	parseResponsibilityFilters(filters, docView) {
+		const where = {};
+		where['status'] = { [Op.not]: 'rejected' };
+		filters.forEach((filter) => {
+			const { id, value } = JSON.parse(filter);
+			if (id === 'responsibilityEntities') {
+				if (value.includes(null)) {
+					where[id] = {
+						[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
+					};
+				} else {
+					where[id] = {
+						[Op.like]: { [Op.any]: value },
+					};
+				}
+			} else if (docView && id === 'documentTitle') {
+				if (!where[Op.or]) where[Op.or] = [];
+				where[Op.or].push({
+					[id]: value,
+				});
+			} else {
+				if (!where[id]) where[id] = { [Op.or]: [] };
+				where[id][Op.or].push({
+					[Op.iLike]: `%${value}%`,
+				});
+			}
+		});
+		return where;
+	}
+
 	async getResponsibilityData(req, res) {
 		let userId = 'unknown_webapp';
 		try {
@@ -295,38 +325,7 @@ class ResponsibilityController {
 
 			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
 			order.push(['documentTitle', 'ASC']);
-			const tmpWhere = {};
-			where.forEach((filter) => {
-				const { id, value } = JSON.parse(filter);
-				if (id === 'id') {
-					tmpWhere[id] = {
-						[Op.eq]: value,
-					};
-				} else {
-					if (id === 'responsibilityEntities') {
-						if (value.includes(null)) {
-							tmpWhere[id] = {
-								[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
-							};
-						} else {
-							tmpWhere[id] = {
-								[Op.like]: { [Op.any]: value },
-							};
-						}
-					} else if (docView && id === 'documentTitle') {
-						if (!tmpWhere[Op.or]) tmpWhere[Op.or] = [];
-						tmpWhere[Op.or].push({
-							[id]: value,
-						});
-					} else {
-						if (!tmpWhere[id]) tmpWhere[id] = { [Op.or]: [] };
-						tmpWhere[id][Op.or].push({
-							[Op.iLike]: `%${value}%`,
-						});
-					}
-				}
-			});
-			tmpWhere['status'] = { [Op.not]: 'rejected' };
+			const tmpWhere = this.parseResponsibilityFilters(where, docView);
 			const newOffsets = [];
 			let newLimit = 0;
 			if (docView) {
