@@ -32,7 +32,7 @@ const renderFilterOptions = (state, dispatch, classes, type, customOptions = und
 const handleFilterInputChange = (field, value, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 
-	newSearchSettings[field] = value.toUpperCase();
+	newSearchSettings[field] = value;
 
 	// track that a change was made to a filter
 	let diffSearchSettings = [...state.modifiedSearchSettings];

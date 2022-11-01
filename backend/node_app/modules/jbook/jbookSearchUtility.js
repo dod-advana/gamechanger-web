@@ -1156,13 +1156,13 @@ class JBookSearchUtility {
 								should: [
 									{
 										query_string: {
-											query: `*${jbookSearchSettings.programElement}*`,
+											query: `*${jbookSearchSettings.programElement.toUpperCase()}* OR *${jbookSearchSettings.programElement.toLowerCase()}*`,
 											default_field: 'budgetLineItem_t',
 										},
 									},
 									{
 										query_string: {
-											query: `*${jbookSearchSettings.programElement}*`,
+											query: `*${jbookSearchSettings.programElement.toUpperCase()}* OR *${jbookSearchSettings.programElement.toLowerCase()}*`,
 											default_field: 'programElement_s',
 										},
 									},
@@ -1175,7 +1175,7 @@ class JBookSearchUtility {
 					case 'projectNum':
 						filterQueries.push({
 							query_string: {
-								query: `*${jbookSearchSettings.projectNum}*`,
+								query: `*${jbookSearchSettings.projectNum.toUpperCase()}* OR *${jbookSearchSettings.projectNum.toLowerCase()}*`,
 								default_field: 'projectNum_s',
 							},
 						});
