@@ -1448,6 +1448,16 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getPublicPortfolioRequests(req, userId) {
+		try {
+			return await this.publicPortfolioRequests.findAll();
+		} catch (e) {
+			const message = e.message;
+			this.logger.error(message, 'B5KIOUI');
+			return { data: [] };
+		}
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -1489,6 +1499,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.voteComment(req, userId);
 				case 'submitPublicPortfolioRequest':
 					return await this.submitPublicPortfolioRequest(req, userId);
+				case 'getPublicPortfolioRequests':
+					return await this.getPublicPortfolioRequests(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,
