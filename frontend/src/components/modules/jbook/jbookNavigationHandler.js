@@ -131,11 +131,6 @@ const generateClosedContentArea = (state, dispatch) => {
 				<HoverNavItem
 					centered
 					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
-						);
 						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.portfolio });
 					}}
 					active={state.pageDisplayed === PAGE_DISPLAYED.portfolio}
@@ -234,11 +229,6 @@ const generateOpenedContentArea = (state, dispatch) => {
 			<GCTooltip title="Portfolio Builder" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
-						window.history.pushState(
-							null,
-							document.title,
-							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
-						);
 						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.portfolio });
 					}}
 					active={state.pageDisplayed === PAGE_DISPLAYED.portfolio}
