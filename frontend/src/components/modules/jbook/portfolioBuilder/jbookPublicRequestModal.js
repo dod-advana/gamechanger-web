@@ -1,19 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Grid,
-	TextField,
-	Typography,
-	FormControl,
-	FormControlLabel,
-} from '@material-ui/core';
+import React, { useState } from 'react';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, TextField, Typography } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCButton from '../../../common/GCButton';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
-import styled from 'styled-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';

@@ -5,11 +5,9 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
-	Switch,
 	TextField,
 	Typography,
 	FormControl,
-	FormControlLabel,
 } from '@material-ui/core';
 import AddIcon from '@mui/icons-material/Add';
 import GCButton from '../../../common/GCButton';
