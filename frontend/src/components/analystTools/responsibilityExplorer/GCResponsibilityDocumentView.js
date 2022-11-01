@@ -58,6 +58,21 @@ const getIframePreviewLinkInferred = (
 	});
 };
 
+const PanelArrowIcon = ({ leftFacing }) => {
+	return (
+		<i
+			className={`fa ${leftFacing ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+			style={{
+				color: 'white',
+				verticalAlign: 'sub',
+				height: 20,
+				width: 20,
+				margin: '20px 0 20px 2px',
+			}}
+		/>
+	);
+};
+
 export default function GCResponsibilityDocumentView({
 	state,
 	responsibilityData = {},
@@ -385,27 +400,9 @@ export default function GCResponsibilityDocumentView({
 						style={{ ...leftBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleLeftPanelToggle()}
 					>
-						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={leftPanelOpen} />
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
-						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={leftPanelOpen} />
 					</div>
 					<div
 						style={{
@@ -453,27 +450,9 @@ export default function GCResponsibilityDocumentView({
 						style={{ ...rightBarExtraStyles, right: 0, bottom: '0px', zIndex: 100 }}
 						onClick={() => handleRightPanelToggle()}
 					>
-						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={!rightPanelOpen} />
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Search Results</span>
-						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={!rightPanelOpen} />
 					</div>
 				</div>
 			</div>
