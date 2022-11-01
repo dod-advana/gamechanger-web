@@ -31,6 +31,8 @@ const renderFilterOptions = (state, dispatch, classes, type, customOptions = und
 
 const handleFilterInputChange = (field, value, state, dispatch) => {
 	const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
+	console.log('here is the field..', field);
+	console.log('here is the fields value..', value);
 
 	newSearchSettings[field] = value;
 
