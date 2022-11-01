@@ -67,8 +67,8 @@ class EDASearchUtility {
 							date_histogram: {
 								field: 'fpds_ng_n.date_signed_eda_ext_dt',
 								calendar_interval: '1y',
-								format: 'YYYY',
-								min_doc_count: 0,
+								format: 'uuuu',
+								min_doc_count: 1,
 							},
 						},
 					},
