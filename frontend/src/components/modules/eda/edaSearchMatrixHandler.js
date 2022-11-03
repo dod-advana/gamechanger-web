@@ -527,9 +527,6 @@ const renderFiscalYearFilter = (state, dispatch) => {
 	const { fiscalYear } = state.edaFilterData;
 	const yearCheckboxes = [];
 
-	const start = 2000;
-	const end = now.getFullYear();
-
 	for (let i = fiscalYear.length - 1; i >= 0; i--) {
 		const year = fiscalYear[i];
 		yearCheckboxes.push(
