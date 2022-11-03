@@ -1247,6 +1247,32 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+
+	getESpresearchMultiQueryEDA({ searchText }) {
+		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
+		// search in ES if text is more than 2
+		if (searchText.length >= 2) {
+			let query = [];
+			let searchHistoryQuery = [
+				{
+					index: this.constants.GAME_CHANGER_OPTS.historyIndex,
+				},
+				{
+					size: 8,
+					query: {
+						match_phrase_prefix: {
+							search_query: `${plainQuery}`,
+						},
+					},
+				},
+			];
+			query = query.concat(searchHistoryQuery);
+			return query;
+		} else {
+			throw new Error('searchText required to construct query or not long enough');
+		}
+	}
+
 	async autocorrect(text, index, userId) {
 		try {
 			const esQuery = this.getESSuggesterQuery({ searchText: text, index: index });
