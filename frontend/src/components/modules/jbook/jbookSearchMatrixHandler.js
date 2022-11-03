@@ -368,7 +368,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="primaryReviewer-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.primaryReviewerSpecificSelected}
-					header={<b>PRIMARY REVIEWER</b>}
+					header={<b>INITIAL REVIEWER</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -379,7 +379,7 @@ const getSearchMatrixItemsAIInventory = (props) => {
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="serviceReviewer-filter">
 				<GCAccordion
 					expanded={jbookSearchSettings.serviceReviewerSpecificSelected}
-					header={<b>SERVICE REVIEWER</b>}
+					header={<b>RAI LEAD REVIEWER</b>}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}

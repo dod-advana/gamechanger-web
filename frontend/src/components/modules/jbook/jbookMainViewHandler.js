@@ -38,6 +38,7 @@ import JBookUserDashboard from './userProfile/jbookUserDashboard';
 import ExportResultsDialog from '../../export/ExportResultsDialog';
 import JBookProfilePage from '../../../containers/JBookProfilePage';
 import Pagination from '../../common/Pagination';
+import { checkForTinyURL } from '../default/defaultMainViewHandler';
 
 const _ = require('lodash');
 
@@ -67,15 +68,47 @@ const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 	});
 };
 
+const parseFilterhUrlParams = (searchSettings, url) => {
+	if (!url) url = window.location.href;
+	url = url.slice(url.indexOf('?') + 1);
+	const searchParams = new URLSearchParams(url);
+	const newSearchSettings = { ...searchSettings };
+
+	// Iterating the search parameters
+	for (const param of searchParams) {
+		const [filter, value] = param;
+		if (filter === 'q' || filter === 'offset') {
+			continue;
+		} else if (Array.isArray(newSearchSettings[[filter]])) {
+			const newSetting = value.split(',');
+			newSearchSettings[filter] = newSetting;
+			newSearchSettings[`${filter}AllSelected`] = false;
+			newSearchSettings[`${filter}SpecificSelected`] = true;
+		} else {
+			newSearchSettings[filter] = value;
+		}
+	}
+
+	return newSearchSettings;
+};
+
 const handlePageLoad = async (props) => {
-	const { dispatch, state, gameChangerAPI, gameChangerUserAPI } = props;
+	const { dispatch, state, gameChangerAPI, gameChangerUserAPI, history } = props;
 
 	gameChangerAPI.updateClonesVisited(state.cloneData.clone_name);
+
+	// redirect the page if using tinyurl
+	const tinyURL = await checkForTinyURL(window.location, gameChangerAPI);
+	if (tinyURL) {
+		history.replace(`#/${tinyURL}`);
+	}
 
 	const { jbookSearchSettings, defaultOptions, dropdownData } = await populateDropDowns(state, dispatch);
 
 	const url = window.location.href;
 	const searchText = getQueryVariable('q', url) ?? '';
+	const selectedPortfolio = getQueryVariable('selectedPortfolio', url) ?? 'General';
+	const newSearchSettings = parseFilterhUrlParams(jbookSearchSettings, url);
 	let mainTabSelected = 0;
 
 	// grab the portfolio data
@@ -95,15 +128,25 @@ const handlePageLoad = async (props) => {
 			portfolios = [...publicData, ...privateData];
 		});
 
+	const portPerm = portfolios.some((port) => port.name === selectedPortfolio);
+	if (selectedPortfolio !== 'General' && !portPerm) {
+		let newHref = window.location.href;
+		newHref = newHref.split('#')[0];
+		newHref += '#/unauthorized';
+		window.location.replace(newHref);
+	}
+
 	if (state.pageDisplayed === PAGE_DISPLAYED.main) {
 		// the main setstate that triggers the initial search (only on main page)
 		setState(dispatch, {
+			pageLoad: true,
 			searchText,
 			loading: true,
 			runSearch: true,
 			mainTabSelected,
 			urlSearch: true,
-			jbookSearchSettings,
+			jbookSearchSettings: newSearchSettings,
+			selectedPortfolio,
 			defaultOptions: { ...state.defaultOptions, ...defaultOptions },
 			dropdownData,
 			portfolios,

@@ -10,14 +10,11 @@ const { MLApiClient } = require('../lib/mlApiClient');
 const { Thesaurus } = require('../lib/thesaurus');
 const asyncRedisLib = require('async-redis');
 const sparkMD5Lib = require('spark-md5');
-const _ = require('lodash');
 const { DataLibrary } = require('../lib/dataLibrary');
 const { Reports } = require('../lib/reports');
 const { DataTrackerController } = require('../controllers/dataTrackerController');
-const { getTenDigitUserId } = require('../utils/userUtility');
 
 const redisAsyncClientDB = 7;
-const abbreviationRedisAsyncClientDB = 9;
 const separatedRedisAsyncClientDB = 4;
 
 const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';

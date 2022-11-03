@@ -5,12 +5,6 @@ const constantsFile = require('../config/constants');
 const { MLApiClient } = require('../lib/mlApiClient');
 const { DataLibrary } = require('../lib/dataLibrary');
 const neo4jLib = require('neo4j-driver');
-const fs = require('fs');
-const { include } = require('underscore');
-const { performance } = require('perf_hooks');
-const { esTopLevelFields, esInnerHitFields } = require('../modules/jbook/jbookDataMapping');
-
-const TRANSFORM_ERRORED = 'TRANSFORM_ERRORED';
 
 class SearchUtility {
 	constructor(opts = {}) {
@@ -259,7 +253,7 @@ class SearchUtility {
 			return this.getQueryAndSearchTerms(terms);
 		} catch (e) {
 			console.log('Error getting es search terms');
-			this.logger.error(e.message, 'D2O1YIB', user);
+			this.logger.error(e.message, 'D2O1YIB');
 			return [];
 		}
 	}
@@ -1253,6 +1247,32 @@ class SearchUtility {
 			throw new Error('searchText required to construct query or not long enough');
 		}
 	}
+
+	getESpresearchMultiQueryEDA({ searchText }) {
+		const plainQuery = this.isVerbatim(searchText, true) ? searchText.replace(/["']/g, '') : searchText;
+		// search in ES if text is more than 2
+		if (searchText.length >= 2) {
+			let query = [];
+			let searchHistoryQuery = [
+				{
+					index: this.constants.GAME_CHANGER_OPTS.historyIndex,
+				},
+				{
+					size: 8,
+					query: {
+						match_phrase_prefix: {
+							search_query: `${plainQuery}`,
+						},
+					},
+				},
+			];
+			query = query.concat(searchHistoryQuery);
+			return query;
+		} else {
+			throw new Error('searchText required to construct query or not long enough');
+		}
+	}
+
 	async autocorrect(text, index, userId) {
 		try {
 			const esQuery = this.getESSuggesterQuery({ searchText: text, index: index });
@@ -1671,8 +1691,8 @@ class SearchUtility {
 					},
 				},
 			};
-		} catch {
-			this.logger.error(e, '17I8XO8', user);
+		} catch (e) {
+			this.logger.error(e, '17I8XO8');
 		}
 	}
 
@@ -2295,6 +2315,7 @@ class SearchUtility {
 		edgeIds,
 		relationships,
 		relProperties,
+		docIds,
 	}) {
 		result.records.forEach((record) => {
 			const recObj = record.toObject();
@@ -2386,6 +2407,7 @@ class SearchUtility {
 				edgeIds,
 				relationships,
 				relProperties,
+				docIds,
 			});
 
 			if (docIds.length > 0) {

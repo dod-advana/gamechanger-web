@@ -13,10 +13,8 @@ const SearchHandler = require('../base/searchHandler');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 const APP_SETTINGS = require('../../models').app_settings;
 const redisAsyncClientDB = 7;
-const abbreviationRedisAsyncClientDB = 9;
 const testing = false;
 const { performance } = require('perf_hooks');
-const { default: Helpers } = require('@elastic/elasticsearch/lib/Helpers');
 
 class PolicySearchHandler extends SearchHandler {
 	constructor(opts = {}) {
@@ -510,7 +508,7 @@ class PolicySearchHandler extends SearchHandler {
 					qaParams
 				);
 				if (testing === true) {
-					this.MLsearchUtility.addSearchReport(qaSearchText, qaParams, { results: context }, userId);
+					this.MLsearchUtility.addSearchReport(searchText, qaParams, { results: context }, userId);
 				}
 				if (context.length > 0) {
 					// if context results, query QA model
@@ -656,7 +654,7 @@ class PolicySearchHandler extends SearchHandler {
 		}
 	}
 
-	entitySearchHelper(docDataCleaned, returnEntity) {
+	entitySearchHelper(docDataCleaned, returnEntity, userId) {
 		try {
 			// if parsing and adding stuff fails, log docDataCleaned
 			if (docDataCleaned && docDataCleaned.nodes && docDataCleaned.nodes.length > 0) {
@@ -702,7 +700,7 @@ class PolicySearchHandler extends SearchHandler {
 						userId
 					);
 					const docDataCleaned = this.searchUtility.cleanNeo4jData(docData.result, false, userId);
-					this.entitySearchHelper(docDataCleaned, returnEntity);
+					this.entitySearchHelper(docDataCleaned, returnEntity, userId);
 					return returnEntity;
 				});
 
@@ -750,8 +748,6 @@ class PolicySearchHandler extends SearchHandler {
 					} catch (err) {
 						// log errors if neo4j stuff fails
 						this.logger.error(err.message, 'OICE7JS');
-						this.logger.error(JSON.stringify(topicDataCleaned), 'OICE7JS');
-						this.logger.error(JSON.stringify(docDataCleaned), 'OICE7JS');
 					}
 					return returnObject;
 				});

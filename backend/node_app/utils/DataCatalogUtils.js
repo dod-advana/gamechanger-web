@@ -1,6 +1,5 @@
 const _ = require('underscore');
 const https = require('https');
-const fs = require('fs');
 const constants = require('../config/constants');
 const asyncRedisLib = require('async-redis');
 

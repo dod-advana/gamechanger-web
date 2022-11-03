@@ -36,7 +36,7 @@ const PAGES = {
 
 const userListTableAdditions = [
 	{
-		Header: 'Primary Reviewer',
+		Header: 'Initial Reviewer',
 		accessor: 'extra_fields.jbook.is_primary_reviewer',
 		width: 160,
 		Cell: (row) => (
@@ -52,7 +52,7 @@ const userListTableAdditions = [
 		),
 	},
 	{
-		Header: 'Service Reviewer',
+		Header: 'RAI Lead Reviewer',
 		accessor: 'extra_fields.jbook.is_service_reviewer',
 		width: 160,
 		Cell: (row) => (

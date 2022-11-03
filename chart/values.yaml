@@ -96,6 +96,7 @@ podSecurityContext:
 appContainerSecurityContext:
   runAsUser: 1001
   runAsGroup: 1001
+  allowPrivilegeEscalation: false
 
 # serviceAccount - <Map>
 #   Config of service account to be used by the app and job pods
@@ -121,6 +122,8 @@ ingress:
   ##
   controller: default
   ingressClassName: ""
+  serversnippets: |
+      underscores_in_headers on;
   web:
     enabled: true
     hostname: gamechanger

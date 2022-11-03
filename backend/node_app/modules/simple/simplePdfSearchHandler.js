@@ -15,7 +15,6 @@ const { Thesaurus } = require('../../lib/thesaurus');
 const thesaurus = new Thesaurus();
 const GC_HISTORY = require('../../models').gc_history;
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
-const { clone } = require('underscore');
 
 const redisAsyncClientDB = 7;
 const abbreviationRedisAsyncClientDB = 9;
@@ -56,10 +55,9 @@ function documentSearchHelperGetIndex(isClone, cloneData, req) {
 	return index;
 }
 
-async function documentSearchHelperGetExpandedAbbreviations(redis, termsArray) {
+async function documentSearchHelperGetExpandedAbbreviations(redis, termsArray, abbreviationExpansions) {
 	// get expanded abbreviations
 	await redis.select(abbreviationRedisAsyncClientDB);
-	let abbreviationExpansions = [];
 	let i = 0;
 	for (i; i < termsArray.length; i++) {
 		let term = termsArray[i];
@@ -76,17 +74,10 @@ async function documentSearchHelperGetExpandedAbbreviations(redis, termsArray) {
 	}
 }
 
-async function documentSearchHelperCheckCache({
-	forCacheReload,
-	useGCCache,
-	offset,
-	redisDB,
-	redisKey,
-	historyRec,
-	isClone,
-	cloneData,
-	showTutorial,
-}) {
+async function documentSearchHelperCheckCache(
+	{ forCacheReload, useGCCache, offset, redisDB, redisKey, historyRec, isClone, cloneData, showTutorial },
+	userId
+) {
 	if (!forCacheReload && useGCCache && offset === 0) {
 		try {
 			// check cache for search (first page only)
@@ -108,7 +99,7 @@ async function documentSearchHelperCheckCache({
 	}
 }
 
-function documentSearchHelperCleanAbbreviations(abbreviationExpansions) {
+function documentSearchHelperCleanAbbreviations(abbreviationExpansions, termsArray) {
 	// removing abbreviations of expanded terms (so if someone has "dod" AND "department of defense" in the search, it won't show either in expanded terms)
 	let cleanedAbbreviations = [];
 	abbreviationExpansions.forEach((abb) => {
@@ -173,7 +164,7 @@ async function documentSearchHelperDoDocSearch({
 	}
 }
 
-async function documentSearchHelperTransformResults(searchType, searchResults, searchText, userId) {
+async function documentSearchHelperTransformResults(searchType, searchResults, searchText, userId, forCacheReload) {
 	// use transformer on results
 	if (searchType === 'Intelligent') {
 		try {
@@ -311,17 +302,20 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			await storeEsRecord(clientObj.esClientName, offset, clone_name, historyRec.user_id, searchText);
 		}
 
-		let cachedResults = await documentSearchHelperCheckCache({
-			forCacheReload,
-			useGCCache,
-			offset,
-			redisDB,
-			redisKey,
-			historyRec,
-			isClone,
-			cloneData,
-			showTutorial,
-		});
+		let cachedResults = await documentSearchHelperCheckCache(
+			{
+				forCacheReload,
+				useGCCache,
+				offset,
+				redisDB,
+				redisKey,
+				historyRec,
+				isClone,
+				cloneData,
+				showTutorial,
+			},
+			userId
+		);
 		if (cachedResults) {
 			return cachedResults;
 		}
@@ -351,8 +345,9 @@ async function documentSearchHelper(req, userId, storeHistory) {
 			text = termsArray[0];
 		}
 
-		await documentSearchHelperGetExpandedAbbreviations(redisAsyncClient, termsArray);
-		let cleanedAbbreviations = documentSearchHelperCleanAbbreviations(abbreviationExpansions);
+		let abbreviationExpansions = [];
+		await documentSearchHelperGetExpandedAbbreviations(redisAsyncClient, termsArray, abbreviationExpansions);
+		let cleanedAbbreviations = documentSearchHelperCleanAbbreviations(abbreviationExpansions, termsArray);
 
 		expansionDict = searchUtility.combineExpansionTerms(
 			expansionDict,
@@ -378,7 +373,7 @@ async function documentSearchHelper(req, userId, storeHistory) {
 		// insert crawler dates into search results
 		searchResults = await dataTracker.crawlerDateHelper(searchResults, userId);
 
-		await documentSearchHelperTransformResults(searchType, searchResults, searchText, userId);
+		await documentSearchHelperTransformResults(searchType, searchResults, searchText, userId, forCacheReload);
 		await documentSearchHelperWriteToCache(
 			useGCCache,
 			searchResults,

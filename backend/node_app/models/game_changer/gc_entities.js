@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: false,
 		}
 	);
-	gc_entities.associate = function (models) {
+	gc_entities.associate = function (_models) {
 		// associations can be defined here
 	};
 	return gc_entities;

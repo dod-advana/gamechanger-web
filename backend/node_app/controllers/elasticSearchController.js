@@ -8,7 +8,6 @@ const { getQlikApps } = require('../modules/globalSearch/globalSearchUtils');
 const CACHE_QLIK_RELOAD_KEY = 'qlikCacheReloadingStatus';
 const CACHE_IS_RELOADING = 'is-reloading';
 const CACHE_IS_NOT_RELOADING = 'not-reloading';
-const MAX_RELOAD_TIME_MINS = 6 * 60;
 
 class ElasticSearchController {
 	constructor(opts = {}) {
@@ -98,16 +97,28 @@ class ElasticSearchController {
 				esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX,
 			};
 
-			await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
+			try {
+				await this.esSearchLib.deleteIndex(clientObj.esClientName, clientObj.esIndex, 'QlikAppCaching');
+			} catch (e) {
+				this.logger.info('Error deleting the index but lets try creating one.', 'QlikAppCaching', 'CronJob');
+			}
 
-			// Create index for qlik apps in case it is not there
-			await this.esSearchLib.createIndex(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				this.constants.GLOBAL_SEARCH_OPTS.ES_MAPPING,
-				{},
-				'QlikAppCaching'
-			);
+			try {
+				// Create index for qlik apps in case it is not there
+				await this.esSearchLib.createIndex(
+					clientObj.esClientName,
+					clientObj.esIndex,
+					this.constants.GLOBAL_SEARCH_OPTS.ES_MAPPING,
+					{},
+					'QlikAppCaching'
+				);
+			} catch (e) {
+				this.logger.info(
+					'Error creating the index but lets try storing the data.',
+					'QlikAppCaching',
+					'CronJob'
+				);
+			}
 
 			// Convert qlik apps into documents
 			const dataset = qlikApps.map((app) => {
@@ -153,6 +164,7 @@ class ElasticSearchController {
 			this.logger.info('Finished Caching Full Qlik Apps');
 		} catch (e) {
 			this.logger.error(e, 'YQJ8T22', 'Qlik Cache Function');
+			throw e;
 		}
 	}
 }

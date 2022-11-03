@@ -152,6 +152,7 @@ const endpoints = {
 	sendReviewStatusUpdates: '/api/gameChanger/admin/sendReviewStatusUpdates',
 	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
 	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
+	cacheQlikApps: '/api/gamechanger/admin/cacheQlikApps',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -1190,5 +1191,10 @@ export default class GameChangerAPI {
 	putUserFavoriteHomeApps = async (data) => {
 		const url = endpoints.getUserFavoriteHomeApps;
 		return axiosPUT(this.axios, url, data);
+	};
+
+	cacheQlikApps = async () => {
+		const url = endpoints.cacheQlikApps;
+		return axiosGET(this.axios, url);
 	};
 }
