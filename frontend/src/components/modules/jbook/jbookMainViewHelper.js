@@ -113,12 +113,6 @@ const getName = (reviewer) => {
 };
 
 const itemOrBlank = (item) => {
-	if (item === 'Partial Review (Primary)') {
-		return 'Partial Review (Initial)';
-	}
-	if (item === 'Partial Review (Service)') {
-		return 'Partial Review (RAI Lead)';
-	}
 	if (item !== null) {
 		return item;
 	}
