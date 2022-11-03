@@ -1074,7 +1074,7 @@ class AppStatsController {
 			);
 		});
 	}
-	
+
 	/**
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
@@ -1494,13 +1494,15 @@ class AppStatsController {
 
 			let cards, userCards, searchBar, userBar, newUser;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise]).then((data) => {
-				cards = data[0];
-				userCards = data[1];
-				searchBar = data[2];
-				userBar = data[3];
-				newUser = data[4];
-			});
+			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise]).then(
+				(data) => {
+					cards = data[0];
+					userCards = data[1];
+					searchBar = data[2];
+					userBar = data[3];
+					newUser = data[4];
+				}
+			);
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 			cards[0]['new_users'] = newUser[0]['new_users'];
