@@ -1156,14 +1156,14 @@ class JBookSearchUtility {
 								should: [
 									{
 										query_string: {
-											query: `*${jbookSearchSettings.programElement.toUpperCase()}* OR *${jbookSearchSettings.programElement.toLowerCase()}*`,
-											default_field: 'budgetLineItem_t',
+query: `*${jbookSearchSettings.programElement}*`,
+default_field: 'budgetLineItem_t',
 										},
 									},
 									{
 										query_string: {
-											query: `*${jbookSearchSettings.programElement.toUpperCase()}* OR *${jbookSearchSettings.programElement.toLowerCase()}*`,
-											default_field: 'programElement_s',
+query: `*${jbookSearchSettings.programElement}*`,
+default_field: 'programElement_t',
 										},
 									},
 								],
