@@ -898,7 +898,6 @@ export default function GraphNodeCluster2D(props) {
 
 	const drawNode = (ctx, node, nodeColor, outlineColor, outlineThickness, nodeTextColor, globalScale) => {
 		ctx.beginPath();
-
 		ctx.fillStyle = nodeColor;
 		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
 		ctx.fill();
@@ -923,7 +922,6 @@ export default function GraphNodeCluster2D(props) {
 		: (node, ctx, globalScale) => {
 				let outlineThickness = 3;
 				let connectedLevel = -1;
-
 				if (highlightNodes.size > 0 && highlightNodes.has(node)) {
 					if (degreeConnected[0].includes(node)) {
 						connectedLevel = 0;
@@ -1009,22 +1007,46 @@ export default function GraphNodeCluster2D(props) {
 		}
 	};
 
+	let unitVector = { x: 0, y: 0 },
+		sp1 = { x: 0, y: 0 },
+		sp2 = { x: 0, y: 0 };
+
+	const buildUnitVector = (p1, p2, uVect) => {
+		uVect.x = p2.x - p1.x;
+		uVect.y = p2.y - p1.y;
+		const vectorNorm = Math.sqrt(uVect.x ** 2 + uVect.y ** 2);
+		uVect.x /= vectorNorm;
+		uVect.y /= vectorNorm;
+	};
+
+	const drawShorterLine = (ctx, p1, p2, a, b) => {
+		buildUnitVector(p1, p2, unitVector);
+		sp1.x = p1.x + unitVector.x * a;
+		sp1.y = p1.y + unitVector.y * a;
+		sp2.x = p2.x - unitVector.x * b;
+		sp2.y = p2.y - unitVector.y * b;
+		ctx.beginPath();
+		ctx.moveTo(sp1.x, sp1.y);
+		ctx.lineTo(sp2.x, sp2.y);
+		ctx.stroke();
+	};
+
 	const drawLink = (ctx, link, lineWidth, start, end, globalScale) => {
 		ctx.beginPath();
 		ctx.setLineDash(edgeLabelPatterns[link.label]?.pattern || []);
 		ctx.lineWidth = lineWidth / globalScale;
-		ctx.moveTo(start.x, start.y);
+		drawShorterLine(ctx, start, end, 0, 10.5);
+		// ctx.moveTo(start.x, start.y);
+		// const controlPoints = link.__controlPoints;
 
-		const controlPoints = link.__controlPoints;
-
-		if (!controlPoints) {
-			// Straight line
-			ctx.lineTo(end.x, end.y);
-		} else {
-			// Use quadratic curves for regular lines and bezier for loops
-			ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
-		}
-		ctx.stroke();
+		// if (!controlPoints) {
+		// 	// Straight line
+		// 	ctx.lineTo(end.x, end.y);
+		// } else {
+		// 	// Use quadratic curves for regular lines and bezier for loops
+		// 	ctx[controlPoints.length === 2 ? 'quadraticCurveTo' : 'bezierCurveTo'](...controlPoints, end.x, end.y);
+		// }
+		// ctx.stroke();
 	};
 
 	const handleCreateGraphLink = createGraphLink
@@ -1055,7 +1077,15 @@ export default function GraphNodeCluster2D(props) {
 
 				if (globalScale > 5) {
 					// Draw Arrow
-					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
+					draw2DArrows(
+						link,
+						ctx,
+						globalScale,
+						arrowLength,
+						arrowRelativePosition,
+						color,
+						nodeRelativeSizeProp
+					);
 				}
 
 				if (displayLinkLabel) {
@@ -1472,6 +1502,7 @@ export default function GraphNodeCluster2D(props) {
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
 				linkPointerAreaPaint={() => undefined}
+				linkDirectionalArrowColor={3}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}

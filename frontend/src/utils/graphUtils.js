@@ -82,7 +82,7 @@ export const draw2DArrows = (
 	const start = link.source;
 	const end = link.target;
 
-	const nodeSize = end.value * nodeRelSize;
+	const nodeSize = end.value * nodeRelSize * 2;
 
 	if (
 		!start ||

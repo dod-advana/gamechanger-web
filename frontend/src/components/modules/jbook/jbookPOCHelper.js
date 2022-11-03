@@ -26,7 +26,6 @@ import {
 	StyledAccordionDiv,
 	ButtonStyles,
 } from './profilePage/profilePageStyles';
-import { renderMissionPartnersCheckboxes } from './missionPartnerChecklist';
 import GCPrimaryButton from '../../common/GCButton';
 import GCAccordion from '../../common/GCAccordion';
 import JCAdata from './JCA.json';
@@ -443,7 +442,7 @@ const AltAIPOCKey = React.memo(() => {
 			</Typography>
 			<Typography variant="subtitle1" style={{ fontSize: 12, marginTop: 15 }}>
 				If you are not the appropriate POC for this Program/Project, please enter an alternate AI Point of
-				Contact for this Program/Project in the POC section of the Service Reviewer Section. A suitable type of
+				Contact for this Program/Project in the POC section of the RAI Lead Reviewer Section. A suitable type of
 				POC would be the Program Element Monitor. We ask that you enter the POC Title, Name, Email address,
 				Organization and Phone Number in this section.
 			</Typography>
@@ -878,33 +877,6 @@ const MissionPartnersValue = React.memo((props) => {
 	const finished = reviewData.pocReviewStatus === 'Finished Review';
 	const disabled = finished || roleDisabled;
 	const [pocMissionPartners, setPOCMissionPartners] = useState([]);
-	const [pocMissionPartnersChecklist, setPOCMissionPartnersChecklist] = useState({});
-
-	useEffect(() => {
-		if (reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null && reviewData.pocMPAgreeLabel === 'Yes') {
-			if (Object.prototype.toString.call(reviewData.serviceMissionPartnersChecklist) === '[object Object]') {
-				setPOCMissionPartnersChecklist(reviewData.serviceMissionPartnersChecklist);
-			} else {
-				setPOCMissionPartnersChecklist(
-					reviewData.serviceMissionPartnersChecklist
-						? JSON.parse(reviewData.serviceMissionPartnersChecklist)
-						: {}
-				);
-			}
-		} else {
-			if (Object.prototype.toString.call(reviewData.pocMissionPartnersChecklist) === '[object Object]') {
-				setPOCMissionPartnersChecklist(reviewData.pocMissionPartnersChecklist);
-			} else {
-				setPOCMissionPartnersChecklist(
-					reviewData.pocMissionPartnersChecklist ? JSON.parse(reviewData.pocMissionPartnersChecklist) : {}
-				);
-			}
-		}
-	}, [
-		reviewData.serviceMissionPartnersChecklist,
-		reviewData.pocMissionPartnersChecklist,
-		reviewData.pocMPAgreeLabel,
-	]);
 
 	useEffect(() => {
 		if (reviewData.pocMPAgreeLabel && reviewData.pocMPAgreeLabel !== null && reviewData.pocMPAgreeLabel === 'Yes') {
@@ -960,14 +932,6 @@ const MissionPartnersValue = React.memo((props) => {
 					dropdown box to provide more.
 				</Typography>
 			</StyledInlineContainer>
-			{renderMissionPartnersCheckboxes(
-				(value) => {
-					setReviewData('setPOCMissionPartnersChecklist', value);
-				},
-				pocMissionPartnersChecklist,
-				finished,
-				reviewData.pocMPAgreeLabel === 'Yes'
-			)}
 			<Autocomplete
 				multiple
 				id={'pocMissionPartners'}
@@ -1314,7 +1278,7 @@ const DataTypeValue = React.memo((props) => {
 					Clear Selection
 				</GCPrimaryButton>
 				<Typography variant="subtitle1" style={{ fontSize: 16 }}>
-					Describe how this project fits this data type
+					Identify the data sources this project uses and how it fits this data type:
 				</Typography>
 				<TextField
 					placeholder="Reviewer Notes"
@@ -1604,7 +1568,7 @@ const FooterValue = React.memo(() => {
 			<Typography variant="subtitle1" style={{ fontSize: 12 }}>
 				Once your review is complete, click the submit finished review button to save your entries/information.
 				You can also save a partial review to finish later by clicking the Save Partial Review button or reset
-				the Service Reviewer Section to blank values by clicking the reset Form Buttons.
+				the RAI Lead Reviewer Section to blank values by clicking the reset Form Buttons.
 			</Typography>
 			<hr />
 			<Typography variant="subtitle1" style={{ fontSize: 12, color: errorColor }}>
