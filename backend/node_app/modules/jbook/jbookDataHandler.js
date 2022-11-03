@@ -1448,12 +1448,12 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async getPublicPortfolioRequests(req, userId) {
+	async getPublicPortfolioRequests(userId) {
 		try {
 			return await this.publicPortfolioRequests.findAll();
 		} catch (e) {
 			const message = e.message;
-			this.logger.error(message, 'B5KIOUI');
+			this.logger.error(message, 'B5KIOUI', userId);
 			return { data: [] };
 		}
 	}
