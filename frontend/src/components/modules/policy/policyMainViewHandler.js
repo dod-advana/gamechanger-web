@@ -160,6 +160,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 		includeRevoked,
 		run_at,
 	} = search;
+
 	return (
 		<RecentSearchContainer
 			onClick={() => {
@@ -190,7 +191,18 @@ const renderRecentSearches = (search, state, dispatch) => {
 			}}
 		>
 			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-				<Typography style={styles.containerText}>{searchText}</Typography>
+				<GCTooltip title={searchText} placement="top" arrow>
+					<Typography
+						style={{
+							...styles.containerText,
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+							overflow: 'hidden',
+						}}
+					>
+						{searchText}
+					</Typography>
+				</GCTooltip>
 			</div>
 			<Typography style={styles.subtext}>
 				<strong>Source Filter: </strong>
@@ -1015,7 +1027,9 @@ const renderResultView = (props) => {
 
 								{renderResults({
 									resultsType: 'Organizations',
-									searchResults: entitySearchResults,
+									searchResults: entitySearchResults.filter(
+										(result) => result.type === 'organization'
+									),
 									activeCategoryTab,
 									selectedCategories,
 									state,

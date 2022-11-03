@@ -50,7 +50,7 @@ module.exports = {
 		});
 	},
 
-	down: async (queryInterface, Sequelize) => {
+	down: async (queryInterface, _Sequelize) => {
 		return queryInterface.dropTable('favorite_documents');
 	},
 };

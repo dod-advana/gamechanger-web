@@ -898,7 +898,6 @@ export default function GraphNodeCluster2D(props) {
 
 	const drawNode = (ctx, node, nodeColor, outlineColor, outlineThickness, nodeTextColor, globalScale) => {
 		ctx.beginPath();
-
 		ctx.fillStyle = nodeColor;
 		ctx.arc(node.x, node.y, node.value * nodeRelativeSize, 0, 2 * Math.PI, false);
 		ctx.fill();
@@ -923,7 +922,6 @@ export default function GraphNodeCluster2D(props) {
 		: (node, ctx, globalScale) => {
 				let outlineThickness = 3;
 				let connectedLevel = -1;
-
 				if (highlightNodes.size > 0 && highlightNodes.has(node)) {
 					if (degreeConnected[0].includes(node)) {
 						connectedLevel = 0;
@@ -1055,7 +1053,15 @@ export default function GraphNodeCluster2D(props) {
 
 				if (globalScale > 5) {
 					// Draw Arrow
-					draw2DArrows(link, ctx, globalScale, arrowLength, arrowRelativePosition, color, nodeRelativeSize);
+					draw2DArrows(
+						link,
+						ctx,
+						globalScale,
+						arrowLength,
+						arrowRelativePosition,
+						color,
+						nodeRelativeSizeProp
+					);
 				}
 
 				if (displayLinkLabel) {
@@ -1472,6 +1478,7 @@ export default function GraphNodeCluster2D(props) {
 				onNodeHover={handleNodeHover}
 				linkCanvasObject={handleCreateGraphLink}
 				linkPointerAreaPaint={() => undefined}
+				linkDirectionalArrowColor={3}
 				cooldownTicks={shouldRunSimulation ? 60 : 0}
 				onEngineStop={handleSimulationStop}
 				// onEngineTick={handleSimulationTick}

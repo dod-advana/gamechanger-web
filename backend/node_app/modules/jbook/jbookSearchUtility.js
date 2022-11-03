@@ -290,9 +290,8 @@ class JBookSearchUtility {
 	cleanESUserReviews(esResults, userId) {
 		const results = [];
 
+		let searchResults = { totalCount: 0, docs: [] };
 		try {
-			let searchResults = { totalCount: 0, docs: [] };
-
 			const { body = {} } = esResults;
 			const { hits: esHits = {} } = body;
 			const {
@@ -1234,7 +1233,7 @@ class JBookSearchUtility {
 			});
 		}
 
-		// Service Reviewer
+		// Service Reviewer (RAI Lead)
 		if (jbookSearchSettings.serviceReviewer) {
 			const reviewerTerms = jbookSearchSettings.serviceReviewer.map((reviewer) => {
 				return { term: { 'review_n.service_reviewer_s': reviewer } };

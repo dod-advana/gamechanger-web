@@ -740,7 +740,7 @@ describe('EDASearchHandler', function () {
 					},
 				};
 				assert.deepStrictEqual(actual, expected);
-				expect(target.storeRecordOfSearchInPg).toHaveBeenCalled();
+				expect(target.storeRecordOfSearchInPg).not.toHaveBeenCalled();
 			} catch (err) {
 				assert.fail(err);
 			}

@@ -15,21 +15,7 @@ class SimpleExportHandler extends ExportHandler {
 
 	async exportHelper(req, res, userId) {
 		try {
-			const {
-				searchText,
-				index,
-				format,
-				historyId,
-				cloneData = {},
-				limit = 20,
-				searchFields = {},
-				expansionDict = {},
-				orgFilter,
-				typeFilter,
-				operator,
-				offset,
-				...rest
-			} = req.body;
+			const { index, format, historyId, expansionDict = {}, orgFilter, ...rest } = req.body;
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger' };
 			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms(req.body, userId);
