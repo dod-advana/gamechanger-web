@@ -322,8 +322,9 @@ export default class SimpleTable extends React.Component {
 		} = this.props;
 		if (rows.length === 0) return <i></i>;
 		const cols = colKeys || _.keys(rows[0]);
-		const head = this.getHeader(cols, columnMap);
-		const body = this.getBody(rows, cols, columnMap, onRowClick);
+		let filtered_cols = cols.filter((col) => col !== 'Hidden');
+		const head = this.getHeader(filtered_cols, columnMap);
+		const body = this.getBody(rows, filtered_cols, columnMap, onRowClick);
 
 		const s = {
 			tbl: {
