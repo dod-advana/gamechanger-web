@@ -21,11 +21,6 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 
 	const handleFilterChange = (event, type = filter) => {
 		const newSearchSettings = structuredClone(state[searchSettingsName]);
-		console.log('here are the new search settings', newSearchSettings);
-		newSearchSettings.reviewStatus.forEach((reviewer, index) => {
-			console.log('here is the reviewer and the index', reviewer, index);
-		});
-
 		if (state[searchSettingsName][allSelected]) {
 			newSearchSettings[allSelected] = false;
 			newSearchSettings[specificSelected] = true;
@@ -56,17 +51,6 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 		} else if (index !== -1 && diffSearchSettings.includes(type)) {
 			diffSearchSettings = diffSearchSettings.filter((e) => e !== type);
 		}
-
-		console.log('here is the review status before changing', newSearchSettings.reviewStatus);
-		newSearchSettings.reviewStatus.forEach((rs, index) => {
-			if (rs === 'Partial Review (Initial)') {
-				newSearchSettings.reviewStatus[index] = 'Partial Review (Primary)';
-			}
-			if (rs === 'Partial Review (RAI Lead)') {
-				newSearchSettings.reviewStatus[index] = 'Partial Review (Service)';
-			}
-		});
-		console.log('here is the review status after changing', newSearchSettings.reviewStatus);
 
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
