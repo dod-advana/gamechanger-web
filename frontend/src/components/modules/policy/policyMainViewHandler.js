@@ -741,7 +741,7 @@ const getExtraViewPanels = (props) => {
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
 					<ViewHeader
 						{...props}
-						extraStyle={{ margin: `20px 0 0 ${state.docsExplorerLeftPanelOpen ? '425' : '0'}px` }}
+						extraStyle={{ margin: `20px 0 0 ${state.docsExplorerLeftPanelOpen ? '470' : '0'}px` }}
 						resultsText=" "
 					/>
 					<PolicyDocumentExplorer
