@@ -1156,14 +1156,14 @@ class JBookSearchUtility {
 								should: [
 									{
 										query_string: {
-query: `*${jbookSearchSettings.programElement}*`,
-default_field: 'budgetLineItem_t',
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'budgetLineItem_t',
 										},
 									},
 									{
 										query_string: {
-query: `*${jbookSearchSettings.programElement}*`,
-default_field: 'programElement_t',
+											query: `*${jbookSearchSettings.programElement}*`,
+											default_field: 'programElement_t',
 										},
 									},
 								],
@@ -1175,7 +1175,7 @@ default_field: 'programElement_t',
 					case 'projectNum':
 						filterQueries.push({
 							query_string: {
-								query: `*${jbookSearchSettings.projectNum.toUpperCase()}* OR *${jbookSearchSettings.projectNum.toLowerCase()}*`,
+								query: `*${jbookSearchSettings.projectNum}*`,
 								default_field: 'projectNum_s',
 							},
 						});
