@@ -31,7 +31,6 @@ export default ({ showModal, setShowModal, userMap, user, privatePortfolios }) =
 	const handleDataChange = (val, key) => {
 		const newData = { ...data };
 		newData[key] = val;
-		console.log(val);
 		setData(newData);
 	};
 
