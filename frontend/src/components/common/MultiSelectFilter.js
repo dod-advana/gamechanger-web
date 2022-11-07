@@ -172,13 +172,7 @@ const MultiSelectFilter = ({
 										key={checkboxText}
 									/>
 								}
-								label={
-									checkboxText === 'Partial Review (Primary)'
-										? 'Partial Review (Initial)'
-										: checkboxText === 'Partial Review (Service)'
-										? 'Primary Review (RAI Lead)'
-										: checkboxText
-								}
+								label={checkboxText}
 								labelPlacement="end"
 								ref={checkboxRef}
 								data-cy={`filter-option-${option}`}
