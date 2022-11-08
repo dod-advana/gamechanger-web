@@ -22,8 +22,6 @@ const EDAListViewCard = (props) => {
 		backBody,
 	} = props;
 
-	console.log(item);
-
 	return (
 		<StyledListViewFrontCardContent expandedDataBackground={'#eceef1'}>
 			{item.pageHits && item.pageHits.length > 0 && (
