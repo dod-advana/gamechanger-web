@@ -129,7 +129,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 
 			.text {
@@ -205,6 +205,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Year (FY)': 'budgetYear',
 	'Program Element': 'programElement',
 	'Project Number': 'projectNum',
+	'Budget Line Item': 'budgetLineItem',
 	Project: 'projectTitle',
 	Keywords: 'hasKeywords',
 	'Total Cost': ['minTotalCost', 'maxTotalCost'],
@@ -262,8 +263,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		num = Math.round(num * 100);
 		predictionString = `"${projectData.ai_predictions[selectedPortfolio].top_class}" - ${num}%`;
 	}
-	console.log('HERE IS THE PROJECT DATA', projectData);
-	console.log('GIVE ME THE BUDGETYPE TOO', budgetType);
 	return [
 		{
 			Key: 'Project',
@@ -300,11 +299,6 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		{
 			Key: 'Budget Sub Activity Title',
 			Value: projectData.budgetSubActivityTitle,
-		},
-		{
-			Key: 'Program Element',
-			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
-			Hidden: budgetType === 'PDOC',
 		},
 		{
 			Key: 'Program Element',
@@ -495,6 +489,15 @@ const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
 */
 const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	return (a, b) => {
+		if (modifiedSearchSettings.includes('programElement') && !modifiedSearchSettings.includes('budgetLineItem')) {
+			modifiedSearchSettings.push('budgetLineItem');
+		}
+		if (
+			!modifiedSearchSettings.includes('programElement') &&
+			modifiedSearchSettings.indexOf('budgetLineItem') !== -1
+		) {
+			modifiedSearchSettings.splice(modifiedSearchSettings.indexOf('budgetLineItem'), 1);
+		}
 		const metadataNames = Object.keys(metadataNameToSearchFilterName);
 		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
 
