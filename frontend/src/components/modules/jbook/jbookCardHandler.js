@@ -311,13 +311,13 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Hidden: budgetType === 'PDOC',
 		},
 		{
-			Key: 'Budget Year 1 Requested',
-			Value: getTableFormattedCost(projectData.by1Request),
-		},
-		{
 			Key: 'Budget Line Item',
 			Value: projectData.budgetLineItem,
 			Hidden: budgetType !== 'PDOC',
+		},
+		{
+			Key: 'Budget Year 1 Requested',
+			Value: getTableFormattedCost(projectData.by1Request),
 		},
 		{
 			Key: 'Total Cost',
