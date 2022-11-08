@@ -317,7 +317,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		{
 			Key: 'Budget Line Item',
 			Value: projectData.budgetLineItem,
-			Hidden: budgetType === 'RDOC',
+			Hidden: budgetType !== 'PDOC',
 		},
 		{
 			Key: 'Total Cost',
