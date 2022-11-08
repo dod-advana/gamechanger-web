@@ -262,6 +262,8 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		num = Math.round(num * 100);
 		predictionString = `"${projectData.ai_predictions[selectedPortfolio].top_class}" - ${num}%`;
 	}
+	console.log('HERE IS THE PROJECT DATA', projectData);
+	console.log('GIVE ME THE BUDGETYPE TOO', budgetType);
 	return [
 		{
 			Key: 'Project',
@@ -305,6 +307,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Hidden: budgetType === 'PDOC',
 		},
 		{
+			Key: 'Program Element',
+			Value: budgetType === 'ODOC' ? projectData.appropriationNumber : projectData.programElement,
+			Hidden: budgetType === 'PDOC',
+		},
+		{
 			Key: 'Project Number',
 			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
@@ -312,6 +319,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 		{
 			Key: 'Budget Year 1 Requested',
 			Value: getTableFormattedCost(projectData.by1Request),
+		},
+		{
+			Key: 'Budget Line Item',
+			Value: projectData.budgetLineItem,
+			Hidden: budgetType === 'RDOC',
 		},
 		{
 			Key: 'Total Cost',
