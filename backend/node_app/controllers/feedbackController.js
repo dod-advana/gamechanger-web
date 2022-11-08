@@ -35,12 +35,15 @@ class FeedbackController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		const { eventName, intelligentSearchTitle, searchText, sentenceResults } = req.body;
 		try {
+			const value_1 = 'search_text: ' + searchText;
+			const value_2 = 'title_returned: ' + intelligentSearchTitle;
+			const value_3 = 'sentence_results ' + JSON.stringify(sentenceResults);
 			await this.feedback.create({
 				event_name: eventName,
 				user_id: getUserIdFromSAMLUserId(req),
-				value_1: 'search_text: ' + searchText,
-				value_2: 'title_returned: ' + intelligentSearchTitle,
-				value_5: 'sentence_results ' + JSON.stringify(sentenceResults),
+				value_1: value_1.substring(0, 255),
+				value_2: value_2.substring(0, 255),
+				value_5: value_3.substring(0, 255),
 			});
 			res.status(200).send(eventName + ' feedback sent.');
 		} catch (err) {
