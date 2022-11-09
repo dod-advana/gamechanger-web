@@ -236,6 +236,7 @@ class Reports {
 
 			doc.end();
 		} catch (e) {
+			callback('', true);
 			this.logger.error(e);
 			this.logger.error(e.message, 'KRx98r2', userId);
 		}
@@ -811,11 +812,11 @@ class Reports {
 			tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
 			const areas2 =
 				docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
-					? docData.pocJointCapabilityArea2.split(', ')
+					? docData.pocJointCapabilityArea2
 					: [];
 			const areas3 =
 				docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
-					? docData.pocJointCapabilityArea3.split(', ')
+					? docData.pocJointCapabilityArea3
 					: [];
 			const areasCombined = {};
 			areas2.forEach((area2) => {
