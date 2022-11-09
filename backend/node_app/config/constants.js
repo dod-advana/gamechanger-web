@@ -161,7 +161,7 @@ module.exports = Object.freeze({
 		password: process.env.MYSQL_PASSWORD_MATOMO,
 		database: 'matomo',
 	},
-	MATOMO_CLONE_LIST:[
+	MATOMO_CLONE_LIST: [
 		'GAMECHANGER_gamechanger',
 		'GAMECHANGER_eda',
 		'GAMECHANGER_jbook',
@@ -174,7 +174,6 @@ module.exports = Object.freeze({
 		'GAMECHANGER_AMHS',
 		'GAMECHANGER_space-force',
 		'GlobalSearch',
-
 	],
 	HERMES_ELASTIC_SEARCH_OPTS: {
 		index: process.env.HERMES_ELASTICSEARCH_INDEX,

@@ -464,7 +464,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async queryClones(connection,clones) {
+	async queryClones(connection, clones) {
 		return new Promise((resolve) => {
 			connection.query(
 				`
@@ -477,7 +477,7 @@ class AppStatsController {
 			where a.idaction = b.idaction_event_category
 			and a.name in (?)
 			`,
-			[clones],
+				[clones],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP6');
@@ -658,7 +658,7 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const clones = await this.queryClones(connection,this.constants.MATOMO_CLONE_LIST);
+			const clones = await this.queryClones(connection, this.constants.MATOMO_CLONE_LIST);
 			const defaultClone = await this.getDefualtClone(connection);
 			res.status(200).send({ clones: clones, default: defaultClone[0] });
 		} catch (err) {
