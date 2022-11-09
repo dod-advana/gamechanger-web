@@ -617,6 +617,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 							pageSize={PAGE_SIZE}
 							showPageSizeOptions={false}
+							showPageJump={false}
 							filterable={true}
 							loading={loading}
 							manual={true}
@@ -846,6 +847,7 @@ const GCDataStatusTracker = (props) => {
 							style={{ whiteSpace: 'unset', margin: '0 0 20px 0', height: 'auto' }}
 							pageSize={PAGE_SIZE}
 							showPageSizeOptions={false}
+							showPageJump={false}
 							filterable={false}
 							loading={loading}
 							manual={true}
