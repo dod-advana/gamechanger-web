@@ -40,12 +40,6 @@ const FilterList = ({
 			{filterList.map((filter) => {
 				let { type, optionName } = filter;
 				const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';
-				if (optionName === 'Partial Review (Primary)') {
-					optionName = 'Partial Review (Initial)';
-				}
-				if (optionName === 'Partial Review (Service)') {
-					optionName = 'Partial Review (RAI Lead)';
-				}
 				return (
 					<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
 						<Button
@@ -65,14 +59,7 @@ const FilterList = ({
 							}}
 							endIcon={<CloseIcon />}
 							onClick={() => {
-								handleFilterChange(
-									optionName === 'Partial Review (Initial)'
-										? 'Partial Review (Primary)'
-										: optionName === 'Partial Review (RAI Lead)'
-										? 'Partial Review (Service)'
-										: optionName,
-									type
-								);
+								handleFilterChange(optionName, type);
 							}}
 						>
 							<span
