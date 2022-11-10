@@ -49,7 +49,7 @@ const SearchBar = (props) => {
 				<TitleBar
 					titleBarModule={state.cloneData.title_bar_module}
 					onTitleClick={() => {
-						window.location.href = `#/${state.cloneData.url}`;
+						window.location.href = `#/${state.cloneData.url}/userDashboard`;
 						dispatch({ type: 'RESET_STATE' });
 					}}
 					componentStepNumbers={state.componentStepNumbers}

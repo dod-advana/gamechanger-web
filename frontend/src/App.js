@@ -365,8 +365,15 @@ const App = () => {
 													exact
 													path="/"
 													render={() => (
-														<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+														// <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+														<Redirect to={'/gamechanger/userDashboard'} />
 													)}
+												/>
+												<Route
+													exact
+													path="/gamechanger"
+													render={() => <Redirect to="/gamechanger/userDashboard" />}
+													location={location}
 												/>
 												<Route
 													exact
