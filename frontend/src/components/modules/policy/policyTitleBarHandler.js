@@ -12,7 +12,8 @@ const getTitleBar = (props) => {
 		<img
 			src={GamechangerLogo}
 			style={{ ...styles.title, width: 300 }}
-			onClick={onTitleClick}
+			onClick={() => (window.location.href = '/')}
+			// onClick={onTitleClick}
 			alt="gamechanger"
 			id={'titleButton'}
 			className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Gamechanger Title']}` : null}
