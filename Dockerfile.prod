@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="registry.access.redhat.com/ubi8/nodejs-14:1-50"
+ARG BASE_IMAGE="registry1.dso.mil/ironbank/opensource/nodejs/nodejs18:18.9.0"
 FROM $BASE_IMAGE AS base
 
 USER root

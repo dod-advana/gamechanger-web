@@ -52,7 +52,7 @@ cache: &global_cache
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: node:14
+  image: node:18
   stage: "📡 prepare"
   cache:
     <<: *global_cache
@@ -101,7 +101,7 @@ semgrep-sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 unit-backend-test-job: # Job for the unit tests
-  image: node:14
+  image: node:18
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -120,7 +120,7 @@ unit-backend-test-job: # Job for the unit tests
         path: backend/coverage/cobertura-coverage.xml
 
 lint-test-job: # lint-job
-  image: node:14
+  image: node:18
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -280,7 +280,7 @@ trigger:
     project: "platform/promotion"
 
 integration-testing-cypress-job: # Start the integration testing
-  image: cypress/browsers:node14.19.0-chrome100-ff99-edge
+  image: cypress/browsers:node18.6.0-chrome105-ff104
   stage: "🧪 integration-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
