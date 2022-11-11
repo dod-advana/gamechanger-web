@@ -310,7 +310,7 @@ const renderFiscalYear = (state, dispatch) => {
 	const yearCheckboxes = [];
 
 	const start = 2000;
-	const end = now.getFullYear();
+	const end = now.getFullYear() + 1;
 
 	for (let i = end; i >= start; i--) {
 		yearCheckboxes.push(
