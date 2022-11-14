@@ -82,7 +82,7 @@ export const draw2DArrows = (
 	const start = link.source;
 	const end = link.target;
 
-	const nodeSize = end.value * nodeRelSize * 2;
+	const nodeSize = end.value * nodeRelSize;
 
 	if (
 		!start ||
@@ -116,7 +116,13 @@ export const draw2DArrows = (
 
 	const lineLen = bzLine ? bzLine.length() : Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
 
-	const posAlongLine = startR + arrowLength + (lineLen - startR - endR - arrowLength) * arrowRelPos - nodeSize / 2;
+	const posAlongLine =
+		startR +
+		arrowLength -
+		link.target.nodeSize +
+		5 +
+		(lineLen - startR - endR - arrowLength) * arrowRelPos -
+		nodeSize / 2;
 
 	const arrowHead = getCoordsAlongLine(posAlongLine / lineLen);
 	const arrowTail = getCoordsAlongLine((posAlongLine - arrowLength) / lineLen);

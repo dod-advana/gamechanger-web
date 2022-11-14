@@ -328,6 +328,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 								</span>
 							)}
 							{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
+							{state.pageDisplayed === PAGE_DISPLAYED.portfolio && <span>Portfolio Builder</span>}
 						</p>
 					</div>
 
