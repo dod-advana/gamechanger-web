@@ -524,35 +524,33 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 };
 
 const renderFiscalYearFilter = (state, dispatch) => {
-	const now = new Date();
+	const { fiscalYear } = state.edaFilterData;
 	const yearCheckboxes = [];
 
-	const start = 2000;
-	const end = now.getFullYear() + 1;
-
-	for (let i = end; i >= start; i--) {
+	for (let i = fiscalYear.length - 1; i >= 0; i--) {
+		const year = fiscalYear[i];
 		yearCheckboxes.push(
 			<FormControlLabel
-				name={i.toString()}
-				value={i.toString()}
+				name={year.toString()}
+				value={year.toString()}
 				style={styles.titleText}
 				control={
 					<Checkbox
 						style={styles.filterBox}
-						onClick={() => setEDASearchSetting('fiscalYear', i.toString(), state, dispatch)}
+						onClick={() => setEDASearchSetting('fiscalYear', year.toString(), state, dispatch)}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 						checked={
 							state.edaSearchSettings &&
 							state.edaSearchSettings.fiscalYears &&
-							state.edaSearchSettings.fiscalYears.indexOf(i.toString()) !== -1
+							state.edaSearchSettings.fiscalYears.indexOf(year.toString()) !== -1
 						}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 						name={i.toString()}
 					/>
 				}
-				label={i.toString()}
+				label={year.toString()}
 				labelPlacement="end"
-				id={'year' + i.toString() + 'Checkbox'}
+				id={'year' + year.toString() + 'Checkbox'}
 			/>
 		);
 	}
