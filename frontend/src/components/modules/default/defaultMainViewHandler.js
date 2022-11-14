@@ -509,6 +509,8 @@ const DefaultMainViewHandler = (props) => {
 		return viewPanels;
 	};
 
+	console.log('What is the pagedisplayed', state.pageDisplayed);
+
 	switch (state.pageDisplayed) {
 		case PAGE_DISPLAYED.userDashboard:
 			return getNonMainPageOuterContainer(

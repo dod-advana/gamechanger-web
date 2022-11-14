@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 
 const getTitleBar = (props) => {
-	const { onTitleClick, componentStepNumbers } = props;
+	const { /*onTitleClick,*/ componentStepNumbers } = props;
 	return (
 		<img
 			src={GamechangerLogo}
