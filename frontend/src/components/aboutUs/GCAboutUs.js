@@ -66,7 +66,7 @@ const GCAboutUs = (props) => {
 	const categoryRefs = useRef([]);
 
 	const categoryOrder = useMemo(() => {
-		return ['General', 'Clones', 'Search', 'Graph View', 'Data', 'Analyst Tools', 'Collaboration'];
+		return ['General', 'Search', 'Graph View', 'Data', 'Analyst Tools', 'Collaboration'];
 	}, []);
 
 	const arrLength = categoryOrder.length;
