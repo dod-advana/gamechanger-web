@@ -62,8 +62,6 @@ const SearchBanner = (props) => {
 		closeButtonTop: '160px',
 	};
 
-	console.log('here are the newProps!!', newProps);
-
 	const getTitleBarComponent = () => {
 		switch (titleBarModule) {
 			case 'policy/policyTitleBarHandler':
