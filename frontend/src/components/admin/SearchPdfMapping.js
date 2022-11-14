@@ -317,7 +317,7 @@ export default () => {
 	const [feedbackData, setFeedbackData] = useState([]);
 	const [documentData, setDocumentData] = useState([]);
 	const [userAggData, setUserAggData] = useState([]);
-	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0, unique_searches: 0 });
+	const [cardData, setCardData] = useState({ unique_users: 0, total_searches: 0, unique_searches: 0, new_users: 0 });
 	const [graphData, setGraphData] = useState({ userBar: [], searchBar: [] });
 	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
@@ -744,7 +744,17 @@ export default () => {
 											</CardContent>
 										</Card>
 									</Grid>
-									<Grid item xs={3}></Grid>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													New Users
+												</p>
+												{cardData.new_users}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={1}></Grid>
 									<Grid item lg={2} xs={3}>
 										<GCPrimaryButton
 											onClick={() => {
