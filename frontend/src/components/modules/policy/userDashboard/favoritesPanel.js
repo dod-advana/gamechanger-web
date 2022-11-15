@@ -685,7 +685,7 @@ const FavoritesPanel = ({
 
 	return (
 		<div>
-			{Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
+			{/* {Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
 				<GCAccordion expanded={false} header={'FAVORITE TOPICS'} itemCount={topicFavoritesTotalCount}>
 					{renderTopicFavorites()}
 				</GCAccordion>
@@ -698,7 +698,7 @@ const FavoritesPanel = ({
 				>
 					{renderOrganizationFavorites()}
 				</GCAccordion>
-			)}
+			)} */}
 			{cloneData.clone_name === 'gamechanger' && (
 				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
 					{renderDocumentFavorites()}
