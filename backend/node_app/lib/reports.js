@@ -151,9 +151,9 @@ class Reports {
 					docData.totalCost,
 					docData.by1Request ?? 'N/A',
 					docData.proj_fund_by2_d ?? docData.p4082_toa_by2_d ?? 'N/A',
-					docData.proj_fund_by3_d ?? docData.p4082_toa_by3_d ?? 'N/A',
-					docData.proj_fund_by4_d ?? docData.p4082_toa_by4_d ?? 'N/A',
-					docData.proj_fund_by5_d ?? docData.p4082_toa_by5_d ?? 'N/A',
+					docData.proj_fund_by3_d ?? docData.p4083_toa_by3_d ?? 'N/A',
+					docData.proj_fund_by4_d ?? docData.p4084_toa_by4_d ?? 'N/A',
+					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? 'N/A',
 					docData.hasKeywords ? 'Yes' : 'No',
 					docData.primary_reviewer_s,
 					docData.service_reviewer_s,
@@ -442,7 +442,39 @@ class Reports {
 
 	async constructProfilePagePDF(fullData, userId, showPOC = true) {
 		const img = path.resolve(__dirname, './ProfilePagePDFImages/cdao_logo.png');
-		let currentYear = new Date().getFullYear();
+		const date = new Date();
+		let currentYear = date.getFullYear();
+		const month = [
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December',
+		];
+		const nth = (day) => {
+			if (day > 3 && day < 21) {
+				return day + 'th';
+			}
+			switch (day % 10) {
+				case 1:
+					return day + 'st';
+				case 2:
+					return day + 'nd';
+				case 3:
+					return day + 'rd';
+				default:
+					return day + 'th';
+			}
+		};
+		let currentMonth = month[date.getMonth()];
+		let currentDay = nth(date.getDate());
 
 		// Define base document
 		let doc = {
@@ -457,7 +489,7 @@ class Reports {
 							marginBottom: 5,
 						},
 						{
-							text: `JBook Search Results Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
+							text: `JBook Search Results | ${currentMonth} ${currentDay}, ${currentYear}`,
 							alignment: 'center',
 							marginTop: 4,
 							marginBottom: 5,

@@ -1163,7 +1163,7 @@ class JBookSearchUtility {
 									{
 										query_string: {
 											query: `*${jbookSearchSettings.programElement}*`,
-											default_field: 'programElement_s',
+											default_field: 'programElement_t',
 										},
 									},
 								],
