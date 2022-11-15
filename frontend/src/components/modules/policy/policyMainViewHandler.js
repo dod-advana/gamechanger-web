@@ -1031,7 +1031,9 @@ const renderResultView = (props) => {
 
 								{renderResults({
 									resultsType: 'Organizations',
-									searchResults: entitySearchResults,
+									searchResults: entitySearchResults.filter(
+										(result) => result.type === 'organization'
+									),
 									activeCategoryTab,
 									selectedCategories,
 									state,
