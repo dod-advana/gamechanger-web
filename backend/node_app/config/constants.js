@@ -187,6 +187,12 @@ module.exports = Object.freeze({
 		QLIK_EXCLUDE_CUST_PROP_NAME: process.env.QLIK_EXCLUDE_CUST_PROP_NAME || 'appTags',
 		QLIK_EXCLUDE_CUST_PROP_VAL: process.env.QLIK_EXCLUDE_CUST_PROP_VAL || 'ExcludeSearch',
 		QLIK_BUSINESS_DOMAIN_PROP_NAME: process.env.QLIK_BUSINESS_DOMAIN_PROP_NAME || 'BusinessDomain',
+		QLIK_STREAM_FILTER:
+			process.env.QLIK_STREAM_FILTER ||
+			`customProperties.value eq 'Production' or customProperties.value eq 'Public' and customProperties.definition.name eq 'StreamType'`,
+		QLIK_APP_FILTER:
+			process.env.QLIK_APP_FILTER ||
+			`stream.customProperties.value eq 'Production' or stream.customProperties.value eq 'Public' and stream.customProperties.definition.name eq 'StreamType'`,
 	},
 	DATA_CATALOG_OPTS: {
 		port: process.env.DATA_CATALOG_PORT,
