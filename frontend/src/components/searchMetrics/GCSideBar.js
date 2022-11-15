@@ -438,9 +438,11 @@ export default function SideBar(props) {
 		}
 	};
 	const renderTopEntities = () => {
+		const organizations = topEntities.filter((entity) => entity.type === 'organization');
+
 		return (
 			<StyledTopEntities>
-				{topEntities.map((entity) => {
+				{organizations.map((entity) => {
 					let fallbackSources = {
 						s3: undefined, // use values from orgSources
 						admin: orgOverrideImageURLs[entity.name],
