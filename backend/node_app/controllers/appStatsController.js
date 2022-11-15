@@ -1266,7 +1266,7 @@ class AppStatsController {
 
 		for (let open of opened) {
 			if (visitIDMap[open.idvisitor]) {
-				try{
+				try {
 					if (
 						!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
 						documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
@@ -1276,8 +1276,7 @@ class AppStatsController {
 						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
 						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
 					}
-				}
-				catch (error) {
+				} catch (error) {
 					console.log(open.idvisitor);
 				}
 			}
