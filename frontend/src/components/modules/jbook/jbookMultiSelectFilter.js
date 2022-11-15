@@ -16,7 +16,15 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 	const originalFilters = Object.values(options).map((option) => [option, 0]);
 
 	const isChecked = (option) => {
-		return state[searchSettingsName][specificSelected] && state[searchSettingsName][filter].includes(option);
+		let newOption = option;
+		if (option === 'Partial Review (Initial)') {
+			newOption = 'Partial Review (Primary)';
+		}
+		if (option === 'Partial Review (RAI Lead)') {
+			newOption = 'Partial Review (Service)';
+		}
+
+		return state[searchSettingsName][specificSelected] && state[searchSettingsName][filter].includes(newOption);
 	};
 
 	const handleFilterChange = (event, type = filter) => {
@@ -28,6 +36,12 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 			setShowClear(true);
 		}
 		let name = event.target.name;
+		if (name === 'Partial Review (Initial)') {
+			name = 'Partial Review (Primary)';
+		}
+		if (name === 'Partial Review (RAI Lead)') {
+			name = 'Partial Review (Service)';
+		}
 		const index = newSearchSettings[type].indexOf(name);
 		if (index !== -1) {
 			newSearchSettings[type].splice(index, 1);
