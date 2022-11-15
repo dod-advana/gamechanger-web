@@ -1266,14 +1266,19 @@ class AppStatsController {
 
 		for (let open of opened) {
 			if (visitIDMap[open.idvisitor]) {
-				if (
-					!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
-					documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
-				) {
-					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
-				} else {
-					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
-					documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+				try{
+					if (
+						!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+						documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
+					) {
+						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+					} else {
+						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+					}
+				}
+				catch (error) {
+					console.log(open.idvisitor);
 				}
 			}
 		}
