@@ -1,0 +1,145 @@
+.info {
+    margin: 10px 80px;
+    height: 100%;
+    overflow-y: auto;
+}
+.info .stopped {
+    background: rgba(255, 0, 0, .15) !important;
+}
+.info .progress {
+    margin-top: 10px;
+    text-align: center;
+    box-shadow: none !important;
+}
+.info .info-container {
+    text-align: left;
+}
+.info .info-container .rt-expander:after {
+    border-top: 7px solid #f5f5f5;
+}
+.info .field {
+    box-sizing: border-box;
+    background: #171a23;
+    color: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
+    min-height: 50px;
+    box-shadow: 0 0 px #23415d;
+}
+.info .field legend {
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: left;
+    font-size: 18px;
+}
+.info .field .button {
+    width: 30%;
+    margin: 1.5%;
+    padding: 6px;
+    box-sizing: border-box;
+    color: #f5f5f5 !important;
+    cursor: pointer;
+    float: left;
+    box-shadow: none;
+    border-radius: 4px;
+}
+.info .field .button:hover {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+.info .field .button:active {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+.info .field .-odd {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+.info .field .rt-th {
+    padding: 7px 5px;
+}
+.info .field input {
+    color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.info .field option {
+    color: #f5f5f5;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+.info .field select {
+    color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.info .field .-btn {
+    color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.info .half {
+    width: calc(50% - 5px);
+    float: left;
+    padding: 10px;
+}
+.info .ok {
+    background: green;
+}
+.info .loading {
+    background: #e7b416;
+}
+.info .warning {
+    background: #e7b416;
+}
+.info .error {
+    background: #cc3232;
+}
+.bar {
+    position: relative;
+    background-color: #333;
+    box-shadow: 0 0 5px #333;
+    color: #f5f5f5 !important;
+    border-radius: 5px;
+    border-width: 1px;
+    overflow: hidden;
+    cursor: pointer;
+    width: 100%;
+    min-height: 22px;
+    transition: all 0.5s linear;
+}
+.bar .high {
+    background: linear-gradient(rgba(255, 0, 0, .6), rgba(255, 0, 0, .2), rgba(255, 0, 0, .6));
+}
+.bar .warning {
+    background: linear-gradient(rgba(255, 255, 0, .6), rgba(255, 255, 0, .2), rgba(255, 255, 0, .6));
+}
+.bar .ok {
+    background: linear-gradient(rgba(0, 255, 0, .6), rgba(0, 255, 0, .2), rgba(0, 255, 0, .6));
+}
+.progress-container {
+    float: left;
+    position: absolute;
+    border-radius: 5px;
+    border-width: 1px;
+    height: 100%;
+    transition: all 0.5s linear;
+    box-shadow: none !important;
+    background: darkcyan;
+}
+.even {
+    background: rgba(255, 255, 255, 0.05);
+}
+.code-container {
+    width: 100%;
+    background-color: #fff;
+    -webkit-transition: max-height 1s;
+    -moz-transition: max-height 1s;
+    -ms-transition: max-height 1s;
+    -o-transition: max-height 1s;
+    transition: max-height 1s;
+    overflow: hidden;
+}
+.code-container .code-block {
+    width: fit-content;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.Highlight--scrolledTo .Highlight__part {
+    background: #ff8741;
+    z-index: 1;
+}

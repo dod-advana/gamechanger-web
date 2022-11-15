@@ -12,7 +12,7 @@ import { styles } from '../util/GCAdminStyles';
 import Processes from './processes';
 
 import 'react-table/react-table.css';
-import './index.scss';
+import './index.css';
 
 const gameChangerAPI = new GameChangerAPI();
 

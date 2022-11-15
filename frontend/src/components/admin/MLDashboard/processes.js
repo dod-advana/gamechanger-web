@@ -8,7 +8,7 @@ import { Stop } from '@material-ui/icons';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 import 'react-table/react-table.css';
-import './index.scss';
+import './index.css';
 
 const gameChangerAPI = new GameChangerAPI();
 

@@ -47,7 +47,6 @@
 		"jws": "3.1.4",
 		"lodash": "4.17.21",
 		"moment": "2.29.3",
-		"node-sass": "6.0.1",
 		"npm-force-resolutions": "0.0.10",
 		"paginator": "1.0.0",
 		"piwik-react-router": "0.12.1",
