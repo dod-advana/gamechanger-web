@@ -1,5 +1,5 @@
 import React from 'react';
-import '../index.scss';
+import '../index.css';
 /**
  * Takes in className, progress and two thresholds. One for Warning and one for High/Error.
  * Only  the progress is required. The thresholds determine the css class to use

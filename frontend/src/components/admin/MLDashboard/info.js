@@ -7,7 +7,7 @@ import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCPrimaryButton from '../../common/GCButton';
-import './index.scss';
+import './index.css';
 const status = ['ok', 'warning', 'error', 'loading'];
 
 const gameChangerAPI = new GameChangerAPI();

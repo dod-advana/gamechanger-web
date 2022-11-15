@@ -10,7 +10,7 @@ import GCButton from '../../common/GCButton';
 
 import { styles } from '../util/GCAdminStyles';
 import 'react-table/react-table.css';
-import './index.scss';
+import './index.css';
 import Processes from './processes';
 
 const gameChangerAPI = new GameChangerAPI();
