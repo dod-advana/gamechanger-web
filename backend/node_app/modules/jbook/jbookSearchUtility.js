@@ -570,7 +570,15 @@ class JBookSearchUtility {
 	}
 
 	getESJBookProfilePageQuery(
-		{ type_s, appropriationNumber_s, budgetActivityNumber_s, budgetLineItem_s, programElement_s, projectNum_s },
+		{
+			type_s,
+			appropriationNumber_s,
+			budgetActivityNumber_s,
+			budgetLineItem_s,
+			programElement_s,
+			projectNum_s,
+			searchText,
+		},
 		userId
 	) {
 		try {
@@ -595,9 +603,96 @@ class JBookSearchUtility {
 								},
 							},
 						],
+						should: [],
 					},
 				},
+				highlight: {
+					fields: {},
+				},
 			};
+
+			const [parsedQuery, searchTerms] = this.searchUtility.getEsSearchTerms({ searchText, questionFlag: false });
+
+			const isVerbatimSearch = this.searchUtility.isVerbatim(searchText);
+			const plainQuery = isVerbatimSearch ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+			const operator = 'and';
+
+			console.log(parsedQuery);
+
+			if (searchText !== '') {
+				query.query.bool.should.push({
+					query_string: {
+						query: `${parsedQuery}`,
+						fields: Mappings.esTopLevelFields,
+						type: 'best_fields',
+						default_operator: `${operator}`,
+					},
+				});
+			}
+
+			Mappings.esTopLevelFields.forEach((field) => {
+				query.highlight.fields[field] = {};
+			});
+
+			Mappings.esInnerHitFields.forEach((innerField) => {
+				const nested = {
+					nested: {
+						path: innerField.path,
+						inner_hits: {
+							_source: false,
+							highlight: {
+								fields: {},
+							},
+						},
+						query: {
+							bool: {
+								should: [
+									{
+										query_string: {
+											query: `${parsedQuery}`,
+											fields: innerField.fields,
+											type: 'best_fields',
+											default_operator: `${operator}`,
+										},
+									},
+								],
+							},
+						},
+					},
+				};
+
+				innerField.fields.forEach((field) => {
+					nested.nested.inner_hits.highlight.fields[field] = {};
+				});
+				query.query.bool.should.push(nested);
+			});
+
+			const wildcardList = {
+				type_s: 1,
+				key_s: 1,
+				projectTitle_t: 1,
+				projectNum_s: 6,
+				programElementTitle_t: 1,
+				serviceAgency_s: 2,
+				appropriationTitle_t: 1,
+				budgetActivityTitle_t: 6,
+				budgetActivityTitle_s: 6,
+				programElement_t: 15,
+				accountTitle_s: 1,
+				budgetLineItemTitle_s: 1,
+				budgetLineItem_t: 15,
+			};
+
+			Object.keys(wildcardList).forEach((wildCardKey) => {
+				query.query.bool.should.push({
+					wildcard: {
+						[wildCardKey]: {
+							value: `*${plainQuery}*`,
+							boost: wildcardList[wildCardKey],
+						},
+					},
+				});
+			});
 
 			if (budgetLineItem_s) {
 				query.query.bool.must.push({

@@ -349,6 +349,16 @@ const aggregateProjectDescriptions = (projectData) => {
 		}
 	});
 
+	if (projectData?.pageHits?.length > 0) {
+		let otherDescText = '<br/>';
+
+		for (let hit of projectData.pageHits) {
+			otherDescText += `<strong>${hit.title}</strong> <br/> ${hit.snippet}... <br/><br/>`;
+		}
+
+		tmpProjectDescriptions.push({ title: 'Other Descriptions', value: otherDescText });
+	}
+
 	return tmpProjectDescriptions;
 };
 
