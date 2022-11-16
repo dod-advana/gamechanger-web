@@ -67,7 +67,7 @@ RUN cd "${APP_FRONTEND_DIR}" && \
         echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
         echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    npm install --production
+    yarn install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
 
@@ -93,7 +93,7 @@ RUN cd "${APP_BACKEND_DIR}" && \
         echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
         echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    npm install --production
+    yarn install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}/build"
