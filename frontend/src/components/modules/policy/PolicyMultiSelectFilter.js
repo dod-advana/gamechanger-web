@@ -75,6 +75,28 @@ const PolicyMultiSelectFilter = ({
 		});
 	};
 
+	const handleSelectAll = () => {
+		const newSearchSettings = structuredClone(state[searchSettingsName]);
+
+		// Set all filters with nonzero options to true
+		const newFilter = originalFilters.reduce((accumulator, originalFilter) => {
+			return { ...accumulator, [originalFilter[0]]: !!originalFilter[1] };
+		}, {});
+
+		newSearchSettings[filter] = newFilter;
+		newSearchSettings[allSelected] = true;
+		newSearchSettings[specificSelected] = false;
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings[update] = true;
+		setShowClear(false);
+		setState(dispatch, {
+			[searchSettingsName]: newSearchSettings,
+			metricsCounted: false,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
+		});
+	};
+
 	return (
 		<MultiSelectFilter
 			state={state}
