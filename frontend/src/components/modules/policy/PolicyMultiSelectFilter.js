@@ -80,7 +80,10 @@ const PolicyMultiSelectFilter = ({
 
 		// Set all filters with nonzero options to true
 		const newFilter = originalFilters.reduce((accumulator, originalFilter) => {
-			return { ...accumulator, [originalFilter[0]]: !!originalFilter[1] };
+			if (searchSettingsName === 'searchSettings') {
+				return { ...accumulator, [originalFilter[0]]: !!originalFilter[1] };
+			}
+			return { ...accumulator, [originalFilter[0]]: true };
 		}, {});
 
 		newSearchSettings[filter] = newFilter;
