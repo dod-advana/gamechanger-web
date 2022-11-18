@@ -111,6 +111,8 @@ const PolicyMultiSelectFilter = ({
 			handleClear={handleClear}
 			showClear={showClear}
 			isChecked={isChecked}
+			showSelectAll={true}
+			handleSelectAll={handleSelectAll}
 		/>
 	);
 };
