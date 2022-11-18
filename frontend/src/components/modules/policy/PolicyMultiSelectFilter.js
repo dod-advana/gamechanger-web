@@ -88,7 +88,7 @@ const PolicyMultiSelectFilter = ({
 		newSearchSettings[specificSelected] = false;
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
-		setShowClear(false);
+		setShowClear(true);
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
