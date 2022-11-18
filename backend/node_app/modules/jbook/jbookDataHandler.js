@@ -320,10 +320,7 @@ class JBookDataHandler extends DataHandler {
 
 			const profilePageQueryData = this.jbookSearchUtility.getProfilePageQueryData(esResults, userId);
 
-			const pfpQuery = this.jbookSearchUtility.getESJBookProfilePageQuery(
-				{ ...profilePageQueryData, searchText },
-				userId
-			);
+			const pfpQuery = this.jbookSearchUtility.getESJBookProfilePageQuery(profilePageQueryData, userId);
 
 			const pfpESResults = await this.dataLibrary.queryElasticSearch(
 				clientObj.esClientName,
