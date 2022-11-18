@@ -324,7 +324,7 @@ const aggregateProjectDescriptions = (projectData) => {
 		'P40-11_BA_Title': { title: 'P40-11 BA Title' },
 		'P3a-20_Milestone_Desc': { title: 'P3a-20_Milestone_Desc' },
 		p3a_dev_milestones_n: { title: 'P3a Milestones' },
-		p3a_contract_data_n: { title: 'P3a Contract Data' },
+		p3a_contract_data_n: { title: 'P3a Contract Titles' },
 
 		// odoc
 		budgetLineItemTitle: { title: 'Budget Line Item Title' },
