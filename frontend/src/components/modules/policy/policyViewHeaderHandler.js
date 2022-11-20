@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
-import { getCurrentView, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { getCurrentView } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
 
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
-import { FormControl, InputLabel, MenuItem, Select, Button } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import { trackEvent } from '../../telemetry/Matomo';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useStyles } from '../default/defaultViewHeaderHandler.js';
 
 // Internet Explorer 6-11
@@ -18,59 +16,11 @@ const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
-const handleTypeFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let typeName = event.currentTarget.value;
-	newSearchSettings.typeFilter = {
-		...newSearchSettings.typeFilter,
-		[typeName]: false,
-	};
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.typeUpdate = true;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'typeFilterToggle',
-		event.target.innerHTML,
-		event.currentTarget.ariaPressed ? 1 : 0
-	);
-};
-
-const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let orgName = event.currentTarget.value;
-	newSearchSettings.orgFilter = {
-		...newSearchSettings.orgFilter,
-		[orgName]: false,
-	};
-
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.orgUpdate = true;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'OrgFilterToggle',
-		event.target.innerHTML,
-		event.currentTarget.ariaPressed ? 1 : 0
-	);
-};
-
 const PolicyViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {} } = props;
 
 	const { state, dispatch } = context;
-	const { typeFilter, orgFilter } = state.searchSettings;
 	const {
 		activeCategoryTab,
 		cloneData,
