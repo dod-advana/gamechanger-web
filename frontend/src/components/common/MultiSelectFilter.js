@@ -28,7 +28,7 @@ const styles = {
 
 const TopButtonGroup = ({ state, dispatch, showClear, handleSelectAll, handleClear }) => {
 	return (
-		<div style={styles.buttonContainer}>
+		<div style={{ ...styles.buttonContainer, paddingBottom: '10px' }}>
 			{
 				<Button variant="text" onClick={() => handleSelectAll(state, dispatch)} sx={styles.textButton}>
 					Select All
