@@ -363,21 +363,25 @@ const App = () => {
 												<Route
 													exact
 													path="/"
-													render={() => (
-														// <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
-														<Redirect to={'/gamechanger/userDashboard'} />
-													)}
-													location={location}
+													render={() => {
+														return (
+															<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+														);
+													}}
+													location={{ ...location, pathname: '/' }}
 												/>
-												<Route
+												{/* <Route
 													exact
 													path="/gamechanger"
-													render={() => (
-														// <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
-														<Redirect to={'/gamechanger/userDashboard'} />
-													)}
-													location={location}
-												/>
+													render={() => {
+														console.log('hey now this is the location', location);
+														return (
+															// <Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+															<Redirect to={'/gamechanger/userDashboard'} />
+														);
+													}}
+													location={{ ...location, pathname: '/' }}
+												/> */}
 												<Route
 													exact
 													path="/gamechanger-details"

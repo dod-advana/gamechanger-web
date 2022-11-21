@@ -1,60 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { withStyles } from '@material-ui/core/styles';
-import { trackEvent } from '../../../telemetry/Matomo';
-import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
 import { Typography } from '@material-ui/core';
-import { backgroundGreyDark, backgroundWhite, gcOrange } from '../../../common/gc-colors';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import GCButton from '../../../common/GCButton';
 import Popper from '@material-ui/core/Popper';
-import Badge from '@material-ui/core/Badge';
-import { getTrackingNameForFactory } from '../../../../utils/gamechangerUtils';
-import 'react-table/react-table.css';
 import GCAccordion from '../../../common/GCAccordion';
-import { clearDashboardNotification } from '../../../../utils/sharedFunctions';
 import GroupsPanel from './GroupsPanel';
 import HistoryPanel from './historyPanel';
 import FavoritesPanel from './favoritesPanel';
-
-const StyledBadge = withStyles(() => ({
-	badge: {
-		backgroundColor: '#AD0000',
-		right: '-11px !important',
-		top: 0,
-		color: 'white',
-		fontSize: 12,
-		minWidth: 15,
-		width: 16,
-		height: 16,
-	},
-}))(Badge);
-
-const TabContainer = styled.div`
-	align-items: center;
-	min-height: 613px;
-
-	.tab-button-container {
-		width: 100%;
-		display: flex;
-		align-items: center;
-	}
-
-	.tabs-list {
-		border-bottom: 2px solid ${gcOrange};
-		padding: 0;
-		display: flex;
-		align-items: center;
-		flex: 9;
-		margin: 10px !important;
-	}
-
-	.panel-container {
-		align-items: center;
-		margin: 10px;
-	}
-`;
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -246,8 +199,6 @@ const GCUserDashboard = React.memo((props) => {
 		dispatch,
 	} = props;
 
-	const [tIndex, setTabIndex] = useState(0);
-
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
 	const [apiKeyPopperOpen, setAPIKeyPopperOpen] = useState(false);
 
@@ -267,12 +218,6 @@ const GCUserDashboard = React.memo((props) => {
 		}
 	}, [userData, cloneData.clone_name, cloneData.url]);
 
-	const handleTabClicked = (tabIndex, _lastIndex, event) => {
-		const tabName = event.target.title;
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTab', 'onClick', tabName);
-		setTabIndex(tabIndex);
-	};
-
 	const handleDeleteFavoriteSearch = async (idx) => {
 		favoriteSearchesSlice[idx].favorite = false;
 		handleDeleteSearch(favoriteSearchesSlice[idx]);
@@ -281,30 +226,16 @@ const GCUserDashboard = React.memo((props) => {
 
 	const renderGroups = () => {
 		return (
-			<div>
-				<GCAccordion expanded={true} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
+			<div style={{ marginBottom: 10 }}>
+				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
 					<GroupsPanel state={state} dispatch={dispatch} documentGroups={documentGroups} />
 				</GCAccordion>
 			</div>
 		);
 	};
 
-	const tabList = [];
-	const favoritesTabMeta = {
-		title: 'userFavorites',
-		onClick: () => clearDashboardNotification(cloneData.clone_name, 'favorites', state, dispatch),
-		children: (
-			<StyledBadge
-				badgeContent={
-					userData?.notifications ? userData.notifications[cloneData.clone_name]?.favorites : undefined
-				}
-			>
-				<Typography variant="h6" display="inline" title="cardView">
-					FAVORITES
-				</Typography>
-			</StyledBadge>
-		),
-		panel: (
+	const renderFavorites = () => {
+		return (
 			<FavoritesPanel
 				userData={userData}
 				cloneData={cloneData}
@@ -321,16 +252,11 @@ const GCUserDashboard = React.memo((props) => {
 				setFavoriteSearchesSlice={setFavoriteSearchesSlice}
 				documentGroups={documentGroups}
 			/>
-		),
+		);
 	};
-	const historyTabMeta = {
-		title: 'userHistory',
-		children: (
-			<Typography variant="h6" display="inline" title="cardView">
-				HISTORY
-			</Typography>
-		),
-		panel: (
+
+	const renderHistory = () => {
+		return (
 			<HistoryPanel
 				userData={userData}
 				handleDeleteFavoriteSearch={handleDeleteFavoriteSearch}
@@ -340,167 +266,89 @@ const GCUserDashboard = React.memo((props) => {
 				cloneData={cloneData}
 				classes={classes}
 			/>
-		),
+		);
 	};
-	const groupTabMeta = {
-		title: 'userGroups',
-		children: (
-			<Typography variant="h6" display="inline" title="cardView">
-				GROUPS
-			</Typography>
-		),
-		panel: renderGroups(),
-	};
-	if (cloneData.user_favorites) tabList.push(favoritesTabMeta, groupTabMeta);
-	tabList.push(historyTabMeta);
 
 	return (
-		<TabContainer id="gc-user-dash">
-			<Tabs onSelect={(tabIndex, lastIndex, event) => handleTabClicked(tabIndex, lastIndex, event)}>
-				<div className={'tab-button-container'}>
-					<TabList className={'tabs-list'}>
-						{tabList.map((tab, index) => {
-							const tl = index === 0 ? '5px' : '0';
-							const tr = index === tabList.length - 1 ? '5px' : '0';
-							return (
-								<Tab
-									style={{
-										...styles.tabStyle,
-										...(tIndex === index ? styles.tabSelectedStyle : {}),
-										borderRadius: `${tl} ${tr} 0 0`,
-									}}
-									title={tab.title}
-									onClick={tab.onClick}
-								>
-									{tab.children}
-								</Tab>
-							);
-						})}
-					</TabList>
-
-					<div style={styles.spacer} />
-					{userData.api_key && (
-						<Typography
-							variant="body"
-							display="inline"
-							title="API Key"
-							style={{
-								marginTop: '30px',
-								marginLeft: '10px',
-								marginRight: '15px',
-								cursor: 'pointer',
-								color: 'rgb(6, 159, 217)',
-							}}
-							onClick={(event) => {
-								setAPIKeyPopperAnchorEl(event.currentTarget);
-								setAPIKeyPopperOpen(true);
-							}}
-						>
-							View API Key
-						</Typography>
-					)}
-					<Popper
-						open={apiKeyPopperOpen}
-						anchorEl={apiKeyPopperAnchorEl}
-						anchorOrigin={{
-							vertical: 'bottom',
-							horizontal: 'right',
+		<>
+			{userData.api_key && (
+				<Typography
+					variant="body"
+					display="inline"
+					title="API Key"
+					style={{
+						marginTop: '30px',
+						marginLeft: '10px',
+						marginRight: '15px',
+						cursor: 'pointer',
+						color: 'rgb(6, 159, 217)',
+					}}
+					onClick={(event) => {
+						setAPIKeyPopperAnchorEl(event.currentTarget);
+						setAPIKeyPopperOpen(true);
+					}}
+				>
+					View API Key
+				</Typography>
+			)}
+			<Popper
+				open={apiKeyPopperOpen}
+				anchorEl={apiKeyPopperAnchorEl}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'right',
+				}}
+				transformOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+			>
+				<div
+					style={{
+						padding: '10px',
+						background: 'white',
+						border: '1px solid',
+					}}
+				>
+					<Typography
+						style={{
+							fontSize: '14px',
+							fontWeight: '900',
+							marginBottom: '5px',
 						}}
-						transformOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
+						className={classes.typography}
 					>
-						<div
-							style={{
-								padding: '10px',
-								background: 'white',
-								border: '1px solid',
+						{userData.api_key}
+					</Typography>
+					<div style={{ display: 'flex', justifyContent: 'center' }}>
+						<GCButton
+							onClick={() => {
+								navigator.clipboard.writeText(userData.api_key);
+								setAPIKeyPopperOpen(false);
 							}}
 						>
-							<Typography
-								style={{
-									fontSize: '14px',
-									fontWeight: '900',
-									marginBottom: '5px',
-								}}
-								className={classes.typography}
-							>
-								{userData.api_key}
-							</Typography>
-							<div style={{ display: 'flex', justifyContent: 'center' }}>
-								<GCButton
-									onClick={() => {
-										navigator.clipboard.writeText(userData.api_key);
-										setAPIKeyPopperOpen(false);
-									}}
-								>
-									Copy Key
-								</GCButton>
-								<GCButton
-									onClick={() => {
-										setAPIKeyPopperAnchorEl(null);
-										setAPIKeyPopperOpen(false);
-									}}
-								>
-									Close
-								</GCButton>
-							</div>
-						</div>
-					</Popper>
+							Copy Key
+						</GCButton>
+						<GCButton
+							onClick={() => {
+								setAPIKeyPopperAnchorEl(null);
+								setAPIKeyPopperOpen(false);
+							}}
+						>
+							Close
+						</GCButton>
+					</div>
 				</div>
+			</Popper>
 
-				<div className={'panel-container'}>
-					{tabList.map((tab) => (
-						<TabPanel> {tab.panel} </TabPanel>
-					))}
-				</div>
-			</Tabs>
-		</TabContainer>
+			<div className={'panel-container'}>
+				{renderFavorites()}
+				{renderGroups()}
+				{renderHistory()}
+			</div>
+		</>
 	);
 });
-
-const styles = {
-	menuItem: {
-		fontSize: 16,
-	},
-	tabStyle: {
-		width: '140px',
-		border: '1px solid',
-		borderColor: backgroundGreyDark,
-		borderBottom: 'none !important',
-		borderRadius: `6px 6px 0px 0px`,
-		position: ' relative',
-		listStyle: 'none',
-		padding: '2px 12px',
-		cursor: 'pointer',
-		textAlign: 'center',
-		backgroundColor: backgroundWhite,
-		marginRight: '2px',
-		marginLeft: '2px',
-		height: 45,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	tabSelectedStyle: {
-		border: '1px solid transparent',
-		backgroundColor: gcOrange,
-		borderColor: 'none',
-		color: 'white',
-	},
-	panelContainer: {
-		alignItems: 'center',
-		marginTop: 10,
-		margin: '20px 72px 0 80px',
-		minHeight: 'calc(100vh - 600px)',
-		paddingBottom: 20,
-	},
-
-	modalError: {
-		color: '#f44336',
-	},
-};
 
 GCUserDashboard.propTypes = {
 	userData: PropTypes.shape({
