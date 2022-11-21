@@ -35,8 +35,8 @@ const getToolTheme = (_cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href="/">
-				<img src={GamechangerTextIcon} href="/" alt="tool logo" />
+			<PageLink href="#/">
+				<img src={GamechangerTextIcon} alt="tool logo" />
 			</PageLink>
 		),
 		toolIconHref: '#/gamechanger',

@@ -684,7 +684,7 @@ const FavoritesPanel = ({
 	};
 
 	return (
-		<div>
+		<div style={{ marginBottom: 10 }}>
 			{/* {Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
 				<GCAccordion expanded={false} header={'FAVORITE TOPICS'} itemCount={topicFavoritesTotalCount}>
 					{renderTopicFavorites()}
@@ -705,7 +705,7 @@ const FavoritesPanel = ({
 				</GCAccordion>
 			)}
 
-			<GCAccordion expanded={true} header={'FAVORITE SEARCHES'} itemCount={searchFavoritesTotalCount}>
+			<GCAccordion expanded={false} header={'FAVORITE SEARCHES'} itemCount={searchFavoritesTotalCount}>
 				{renderSearchFavorites()}
 			</GCAccordion>
 		</div>
