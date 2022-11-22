@@ -10,7 +10,7 @@ import {
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
 import { primary } from '../../common/gc-colors';
-import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
+import { trackFlipCardEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import {
 	getDefaultComponent,
