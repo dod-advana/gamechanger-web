@@ -17,12 +17,13 @@ import {
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
 import { Divider } from '@material-ui/core';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 export const colWidth = {
 	maxWidth: '900px',
@@ -525,10 +526,14 @@ const getDisplayTitle = (item) => {
 	return item.title;
 };
 
-export const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+export const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl, idx) => {
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen',
+		null,
+		makeCustomDimensions(filename, pageNumber, idx)
+	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
 			searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''
@@ -606,6 +611,7 @@ const cardHandler = {
 				setMetadataExpanded,
 				intelligentSearch,
 				intelligentFeedbackComponent,
+				idx,
 			} = props;
 
 			let hoveredSnippet = '';
@@ -625,7 +631,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
+									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages',
+									null,
+									makeCustomDimensions(item.filename, null, idx)
 								);
 								setHitsExpanded(!hitsExpanded);
 							}}
@@ -658,7 +666,8 @@ const cardHandler = {
 															item.filename,
 															state.cloneData.clone_name,
 															state.searchText,
-															page.pageNumber
+															page.pageNumber,
+															idx
 														);
 													}}
 												>
@@ -692,7 +701,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+									null,
+									makeCustomDimensions(item.filename, null, idx)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -765,7 +776,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+									null,
+									makeCustomDimensions(item.filename, null, idx)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -881,6 +894,7 @@ const cardHandler = {
 				closeGraphCard,
 				showEsDoc,
 				searchText,
+				idx,
 			} = props;
 
 			return (
@@ -905,7 +919,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'Close Graph Card'
+										'Close Graph Card',
+										null,
+										makeCustomDimensions(filename, null, idx)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -930,11 +946,10 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton }}
 						onClick={() => {
-							trackEvent(
+							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
+								toggledMore,
+								makeCustomDimensions(filename, null, idx)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -1111,7 +1126,7 @@ const cardHandler = {
 		},
 
 		getFooter: (props) => {
-			const { name, cloneName, graphView, toggledMore, setToggledMore, closeGraphCard } = props;
+			const { name, cloneName, graphView, toggledMore, setToggledMore, closeGraphCard, idx } = props;
 
 			return (
 				<>
@@ -1124,8 +1139,7 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
 									'GraphCardInteraction',
-									'Open',
-									`${name}DetailsPage`
+									`Open${name}DetailsPage`
 								);
 								e.preventDefault();
 								window.open(
@@ -1143,7 +1157,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'Close Graph Card'
+										'Close Graph Card',
+										null,
+										makeCustomDimensions(name, null, idx)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -1156,11 +1172,10 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton }}
 						onClick={() => {
-							trackEvent(
+							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
+								toggledMore,
+								makeCustomDimensions(name)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -1324,6 +1339,7 @@ export const getDefaultComponent = (props, cardHandler) => {
 											setState(dispatch, { selectedDoc: item, showEsDocDialog: true });
 										},
 										state,
+										idx,
 									})}
 								</div>
 							</div>

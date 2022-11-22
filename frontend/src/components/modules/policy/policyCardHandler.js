@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
 	convertDCTScoreToText,
@@ -29,6 +29,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -569,7 +570,8 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											getTrackingNameForFactory(cloneName),
 											'CancelFavorite',
 											'', // empty because topic getFilename always returns empty string
-											`search : ${searchText}`
+											null,
+											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -628,7 +630,8 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											getTrackingNameForFactory(cloneName),
 											'Favorite',
 											'', // empty because topic getFilename always returns empty string
-											`search : ${searchText}`
+											null,
+											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -650,8 +653,8 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-const handleTopicClick = (topic, cloneName) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
+const handleTopicClick = (topic, cloneName, idx) => {
+	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic, null, makeCustomDimensions(null, null, idx));
 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
 };
 
@@ -691,7 +694,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												handleTopicClick(topic, cloneData.clone_name);
+												handleTopicClick(topic, cloneData.clone_name, index);
 											}}
 										>
 											{topic}
@@ -706,7 +709,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											handleTopicClick(topic, cloneData.clone_name);
+											handleTopicClick(topic, cloneData.clone_name, index);
 										}}
 									>
 										{topic}
@@ -1305,7 +1308,9 @@ const renderListView = (
 						trackEvent(
 							getTrackingNameForFactory(cloneName),
 							'ListViewInteraction',
-							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+							null,
+							makeCustomDimensions(item.filename)
 						);
 						setMetadataExpanded(!metadataExpanded);
 					}}
@@ -1538,6 +1543,7 @@ const cardHandler = {
 				item,
 				searchText,
 				state,
+				idx,
 			} = props;
 			return (
 				<>
@@ -1563,7 +1569,9 @@ const cardHandler = {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
 												'CardInteraction',
-												'Close Graph Card'
+												'Close Graph Card',
+												null,
+												makeCustomDimensions(filename)
 											);
 											e.preventDefault();
 											closeGraphCard();
@@ -1579,7 +1587,9 @@ const cardHandler = {
 										trackEvent(
 											getTrackingNameForFactory(cloneName),
 											'CardInteraction',
-											'showDocumentDetails'
+											'showDocumentDetails',
+											null,
+											makeCustomDimensions(filename, null, idx)
 										);
 										window.open(
 											`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`
@@ -1606,11 +1616,11 @@ const cardHandler = {
 								data-cy="card-footer-more"
 								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
-									trackEvent(
+									trackFlipCardEvent(
 										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'flipCard',
-										toggledMore ? 'Overview' : 'More'
+										toggledMore,
+										null,
+										makeCustomDimensions(filename)
 									);
 									setToggledMore(!toggledMore);
 								}}
@@ -1866,8 +1876,7 @@ const cardHandler = {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
 												'GraphCardInteraction',
-												'Open',
-												`${item.name}DetailsPage`
+												`Open${item.name}DetailsPage`
 											);
 											e.preventDefault();
 											window.open(
@@ -1921,8 +1930,7 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
 									'GraphCardInteraction',
-									'Open',
-									`${item.name}DetailsPage`
+									`Open${item.name}DetailsPage`
 								);
 								e.preventDefault();
 								window.open(
@@ -1940,7 +1948,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'Close Graph Card'
+										'Close Graph Card',
+										null,
+										makeCustomDimensions(item.name)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -1953,11 +1963,10 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 						onClick={() => {
-							trackEvent(
+							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
+								toggledMore,
+								makeCustomDimensions(item.name)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -2143,8 +2152,7 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
 									'TopicCardOnClick',
-									'Open',
-									`${item.name.toLowerCase()}DetailsPage`
+									`Open${item.name.toLowerCase()}DetailsPage`
 								);
 								e.preventDefault();
 								window.open(
@@ -2170,11 +2178,10 @@ const cardHandler = {
 						<div
 							style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 							onClick={() => {
-								trackEvent(
+								trackFlipCardEvent(
 									getTrackingNameForFactory(cloneName),
-									'CardInteraction',
-									'flipCard',
-									toggledMore ? 'Overview' : 'More'
+									toggledMore,
+									makeCustomDimensions(item.name)
 								);
 								setToggledMore(!toggledMore);
 							}}

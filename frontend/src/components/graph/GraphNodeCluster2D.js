@@ -20,6 +20,7 @@ import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 import GCTooltip from '../common/GCToolTip';
 import { trackEvent } from '../telemetry/Matomo';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 import UOTToggleSwitch from '../common/GCToggleSwitch';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
@@ -459,7 +460,13 @@ export default function GraphNodeCluster2D(props) {
 	const handleNodeClick = onNodeClick
 		? onNodeClick
 		: async (node, _event) => {
-				trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNode', 'onClick', node.name);
+				trackEvent(
+					getTrackingNameForFactory(cloneData.clone_name),
+					'GraphNode',
+					'onClick',
+					null,
+					makeCustomDimensions(node.name)
+				);
 				if (selectedNodeID !== node.id) {
 					setSelectedNodeID(node.id);
 				} else {

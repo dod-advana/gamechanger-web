@@ -19,6 +19,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -343,9 +344,14 @@ class ResponsibilityAssist extends Component {
 	handleOpen = () => {
 		const { filename, pageNumber, searchText } = this.state;
 		const cloneName = this.props.context.state.cloneData.clone_name;
-		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(cloneName), 'ResponsibilityTracker', 'pageNumber', pageNumber);
+		trackEvent(
+			getTrackingNameForFactory(cloneName),
+			'ResponsibilityTracker',
+			'PDFOpen',
+			null,
+			makeCustomDimensions(filename, pageNumber)
+
+		);
 		let searchTextArray;
 		let tempSearchText;
 		if (searchText) {
