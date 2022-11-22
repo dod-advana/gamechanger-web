@@ -37,7 +37,7 @@ export const styles = {
 	},
 	footerButtonBack: {
 		margin: '0 10px 0 0 ',
-		padding: '8px 12px',
+		padding: '8px',
 	},
 	button: {
 		height: 50,
