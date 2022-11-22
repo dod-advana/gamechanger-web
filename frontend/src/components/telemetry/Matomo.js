@@ -6,13 +6,13 @@ import MatomoReactRouter from 'piwik-react-router';
 import SparkMD5 from 'spark-md5';
 
 const MATOMO_LINK = Config.MATOMO_LINK;
-
+const MATOMO_SITE_ID = Config.MATOMO_SITE_ID;
 let matomo = null;
 
 try {
 	matomo = MatomoReactRouter({
 		url: MATOMO_LINK,
-		siteId: 2,
+		siteId: MATOMO_SITE_ID,
 	});
 } catch (e) {
 	console.log('Cannot find Matomo');
