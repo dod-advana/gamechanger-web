@@ -79,8 +79,9 @@ const PolicyMultiSelectFilter = ({
 		const newSearchSettings = structuredClone(state[searchSettingsName]);
 
 		// Set all filters with nonzero options to true
+		// in reg search, filters come in with [string: filter name, string | 0: number of docs]
 		const newFilter = originalFilters.reduce((accumulator, originalFilter) => {
-			if (searchSettingsName === 'searchSettings') {
+			if (showNumResultsPerOption) {
 				return { ...accumulator, [originalFilter[0]]: !!originalFilter[1] };
 			}
 			return { ...accumulator, [originalFilter[0]]: true };
