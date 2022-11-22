@@ -476,7 +476,6 @@ describe('JBookDataHandler', function () {
 			const expectedEdit = {
 				name: 'AI',
 				description: undefined,
-				isPrivate: undefined,
 				user_ids: undefined,
 				tags: undefined,
 			};
