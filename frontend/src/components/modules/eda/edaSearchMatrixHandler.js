@@ -527,8 +527,7 @@ const renderFiscalYearFilter = (state, dispatch) => {
 	const { fiscalYear } = state.edaFilterData;
 	const yearCheckboxes = [];
 
-	for (let i = 0; i < fiscalYear.length; i++) {
-		const year = fiscalYear[i].toString();
+	for (let year of fiscalYear) {
 		yearCheckboxes.push(
 			<FormControlLabel
 				name={year}
