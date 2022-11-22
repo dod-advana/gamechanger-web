@@ -12,7 +12,7 @@ export const RESULTS_PER_PAGE = 18;
 
 export const RECENT_SEARCH_LIMIT = 6;
 
-export const CARD_FONT_SIZE = 12;
+export const CARD_FONT_SIZE = 14;
 
 export const NO_RESULTS_MESSAGE = 'No results found! Please try refining your search.';
 
