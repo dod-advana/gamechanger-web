@@ -293,7 +293,7 @@ class JBookDataHandler extends DataHandler {
 
 	async getAllBYProjectData(req, userId) {
 		try {
-			const { id, portfolioName, searchText, userRowId } = req.body;
+			const { id, portfolioName, userRowId } = req.body;
 			if (portfolioName !== 'General') {
 				const portfolios = await this.getPortfolios({ body: { id: userRowId } }, userId);
 				// looking for a match on portfolio
