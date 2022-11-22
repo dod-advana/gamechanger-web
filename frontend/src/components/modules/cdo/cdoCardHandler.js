@@ -4,7 +4,7 @@ import { KeyboardArrowRight } from '@material-ui/icons';
 import { capitalizeFirst, getTrackingNameForFactory, getTypeDisplay } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { primary } from '../../common/gc-colors';
-import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
+import { trackFlipCardEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import {
 	getDefaultComponent,
