@@ -162,7 +162,7 @@ const GCResponsibilityChartView = ({
 		if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 		if (organization.length) {
 			organization.forEach((org) => {
-				newFilters.push({ id: 'organizationPersonnel', value: org });
+				newFilters.push({ id: 'organizationPersonnelText', value: org });
 			});
 		}
 		if (docTitle.length) {
@@ -268,7 +268,7 @@ const GCResponsibilityChartView = ({
 			},
 			{
 				Header: 'Entity',
-				accessor: 'organizationPersonnel',
+				accessor: 'organizationPersonnelText',
 				style: { whiteSpace: 'unset' },
 				Filter: (
 					<FilterInput
@@ -292,14 +292,6 @@ const GCResponsibilityChartView = ({
 					/>
 				),
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
-			},
-			{
-				Header: 'Documents Referenced',
-				accessor: 'documentsReferenced',
-				style: { whiteSpace: 'unset' },
-				width: 200,
-				filterable: false,
-				Cell: (row) => <TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>,
 			},
 			{
 				Header: 'Select',

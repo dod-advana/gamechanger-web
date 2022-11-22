@@ -40,6 +40,7 @@ export const PAGE_DISPLAYED = {
 	faq: 'faq',
 	searchFavorites: 'searchFavorites',
 	profile: 'profile',
+	portfolio: 'portfolio',
 };
 
 export const SEARCH_TYPES = {

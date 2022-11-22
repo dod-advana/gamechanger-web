@@ -50,7 +50,15 @@ const createFilterArray = (settings, options) => {
 		if (Object.keys(options).includes(type) && type !== 'sort') {
 			if (isArray(settings[type])) {
 				settings[type].forEach((option) => {
-					processedFilters.push({ type, optionName: option });
+					processedFilters.push({
+						type,
+						optionName:
+							option === 'Partial Review (Primary)'
+								? 'Partial Review (Initial)'
+								: option === 'Partial Review (Service)'
+								? 'Partial Review (RAI Lead)'
+								: option,
+					});
 				});
 			} else {
 				processedFilters.push({ type, optionName: settings[type] });
@@ -165,6 +173,12 @@ const JbookViewHeaderHandler = (props) => {
 	}, [gameChangerAPI, gameChangerUserAPI]);
 
 	const handleFilterChange = (option, type) => {
+		if (option === 'Partial Review (Initial)') {
+			option = 'Partial Review (Primary)';
+		}
+		if (option === 'Partial Review (RAI Lead)') {
+			option = 'Partial Review (Service)';
+		}
 		const newSearchSettings = _.cloneDeep(state.jbookSearchSettings);
 		let filterTypeStillPresent = false;
 

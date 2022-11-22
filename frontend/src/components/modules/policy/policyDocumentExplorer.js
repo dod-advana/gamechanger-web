@@ -44,6 +44,7 @@ const styles = {
 		display: 'flex',
 		width: '100%',
 		justifyContent: 'center',
+		marginBottom: -20,
 	},
 };
 
@@ -78,7 +79,6 @@ const assignCollapseKeys = (data, collapseKeys, setCollapseKeys) => {
 function DocumentPanel({
 	iframeLoading,
 	previewPathname,
-	leftPanelOpen,
 	rightPanelOpen,
 	filename,
 	measuredRef,
@@ -86,6 +86,7 @@ function DocumentPanel({
 	data,
 	fileUrl,
 	loading,
+	state,
 }) {
 	return (
 		<>
@@ -96,7 +97,7 @@ function DocumentPanel({
 			)}
 			<div
 				style={{
-					paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!leftPanelOpen ? 10 : 0),
+					paddingLeft: SIDEBAR_TOGGLE_WIDTH + (!state.docsExplorerLeftPanelOpen ? 10 : 0),
 					paddingRight: SIDEBAR_TOGGLE_WIDTH + (!rightPanelOpen ? 10 : 0),
 					height: '100%',
 				}}
@@ -251,7 +252,6 @@ export default function PolicyDocumentExplorer({
 	});
 	const [loadPDF, setLoadPDF] = useState(false);
 	const [iframeLoading, setIframeLoading] = useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [viewToggle, setviewToggle] = useState(false);
@@ -338,9 +338,9 @@ export default function PolicyDocumentExplorer({
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
 			true,
-			leftPanelOpen
+			state.docsExplorerLeftPanelOpen
 		);
-		setLeftPanelOpen(!leftPanelOpen);
+		setState(dispatch, { docsExplorerLeftPanelOpen: !state.docsExplorerLeftPanelOpen });
 	}
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
@@ -406,7 +406,9 @@ export default function PolicyDocumentExplorer({
 
 	const document = (data.length > 0 && data[iframePreviewLink.dataIdx]) || undefined;
 	const iframePanelSize =
-		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+		12 -
+		(state.docsExplorerLeftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) -
+		(rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 
 	assignCollapseKeys(data, collapseKeys, setCollapseKeys);
 
@@ -417,7 +419,7 @@ export default function PolicyDocumentExplorer({
 		maxWidth: '75%',
 	};
 
-	if (!leftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
+	if (!state.docsExplorerLeftPanelOpen) leftBarExtraStyles = { marginLeft: 10, borderBottomLeftRadius: 10 };
 
 	const getViewToggleText = (toggleState) => {
 		return toggleState ? '+' : '-';
@@ -475,7 +477,7 @@ export default function PolicyDocumentExplorer({
 			<div
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
-					display: leftPanelOpen ? 'block' : 'none',
+					display: state.docsExplorerLeftPanelOpen ? 'block' : 'none',
 					paddingRight: 0,
 					height: '100%',
 					marginTop: '-65px',
@@ -565,7 +567,9 @@ export default function PolicyDocumentExplorer({
 						onClick={() => handleLeftPanelToggle()}
 					>
 						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+							className={`fa ${
+								state.docsExplorerLeftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
+							} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -574,9 +578,11 @@ export default function PolicyDocumentExplorer({
 								margin: '20px 0 20px 2px',
 							}}
 						/>
-						<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
+						<span>{state.docsExplorerLeftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
 						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+							className={`fa ${
+								state.docsExplorerLeftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'
+							} fa-angle-double-up`}
 							style={{
 								color: 'white',
 								verticalAlign: 'sub',
@@ -590,7 +596,6 @@ export default function PolicyDocumentExplorer({
 					<DocumentPanel
 						iframeLoading={iframeLoading}
 						previewPathname={previewPathname}
-						leftPanelOpen={leftPanelOpen}
 						rightPanelOpen={rightPanelOpen}
 						filename={filename}
 						measuredRef={measuredRef}
@@ -598,6 +603,7 @@ export default function PolicyDocumentExplorer({
 						data={data}
 						fileUrl={fileUrl}
 						loading={loading}
+						state={state}
 					/>
 
 					<RightPanel

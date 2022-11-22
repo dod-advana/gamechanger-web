@@ -130,7 +130,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 
 			.text {
@@ -206,6 +206,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Year (FY)': 'budgetYear',
 	'Program Element': 'programElement',
 	'Project Number': 'projectNum',
+	'Budget Line Item': 'budgetLineItem',
 	Project: 'projectTitle',
 	Keywords: 'hasKeywords',
 	'Total Cost': ['minTotalCost', 'maxTotalCost'],
@@ -313,6 +314,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Key: 'Project Number',
 			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Budget Line Item',
+			Value: projectData.budgetLineItem,
+			Hidden: budgetType !== 'PDOC',
 		},
 		{
 			Key: 'Budget Year 1 Requested',
@@ -488,6 +494,15 @@ const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
 */
 const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	return (a, b) => {
+		if (modifiedSearchSettings.includes('programElement') && !modifiedSearchSettings.includes('budgetLineItem')) {
+			modifiedSearchSettings.push('budgetLineItem');
+		}
+		if (
+			!modifiedSearchSettings.includes('programElement') &&
+			modifiedSearchSettings.indexOf('budgetLineItem') !== -1
+		) {
+			modifiedSearchSettings.splice(modifiedSearchSettings.indexOf('budgetLineItem'), 1);
+		}
 		const metadataNames = Object.keys(metadataNameToSearchFilterName);
 		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
 

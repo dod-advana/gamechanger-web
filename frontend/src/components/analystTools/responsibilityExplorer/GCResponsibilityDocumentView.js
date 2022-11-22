@@ -58,6 +58,21 @@ const getIframePreviewLinkInferred = (
 	});
 };
 
+const PanelArrowIcon = ({ leftFacing }) => {
+	return (
+		<i
+			className={`fa ${leftFacing ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+			style={{
+				color: 'white',
+				verticalAlign: 'sub',
+				height: 20,
+				width: 20,
+				margin: '20px 0 20px 2px',
+			}}
+		/>
+	);
+};
+
 export default function GCResponsibilityDocumentView({
 	state,
 	responsibilityData = {},
@@ -105,6 +120,10 @@ export default function GCResponsibilityDocumentView({
 	};
 
 	useEffect(() => {
+		console.log('responsibilityData: ', responsibilityData);
+	}, [responsibilityData]);
+
+	useEffect(() => {
 		if (!iframeLoading) {
 			setTimeout(() => {
 				const notFound = document
@@ -126,15 +145,14 @@ export default function GCResponsibilityDocumentView({
 			let initialCollapseKeys = {};
 			Object.keys(responsibilityData).forEach((docKey) => {
 				initialCollapseKeys[docKey] = false;
-				Object.keys(responsibilityData[docKey]).forEach((entityKey) => {
-					initialCollapseKeys[docKey + entityKey] = false;
+				responsibilityData[docKey].entities.forEach((entity) => {
+					initialCollapseKeys[docKey + entity.organizationPersonnelText] = false;
 				});
 			});
 			if (!showTutorial) setCollapseKeys(initialCollapseKeys);
 			const doc = Object.keys(responsibilityData)[0];
-			const entity = Object.keys(responsibilityData[doc])[0];
 
-			setSelectedResponsibility(responsibilityData[doc][entity][0]);
+			setSelectedResponsibility(responsibilityData[doc].entities[0].responsibilities[0]);
 		} else if (!Object.keys(responsibilityData).length) {
 			setSelectedResponsibility({});
 		}
@@ -157,7 +175,7 @@ export default function GCResponsibilityDocumentView({
 						getIframePreviewLinkInferred(
 							selectedResponsibility.filename,
 							selectedResponsibility.responsibilityText,
-							selectedResponsibility.organizationPersonnel,
+							selectedResponsibility.organizationPersonnelText,
 							pageNumber,
 							true,
 							cloneData
@@ -292,7 +310,7 @@ export default function GCResponsibilityDocumentView({
 		if (isEditingResp) {
 			updatedColumn = 'responsibilityText';
 		} else if (isEditingEntity) {
-			updatedColumn = 'organizationPersonnel';
+			updatedColumn = 'organizationPersonnelText';
 		}
 		gameChangerAPI
 			.storeResponsibilityReportData({
@@ -313,7 +331,7 @@ export default function GCResponsibilityDocumentView({
 
 	const editEntity = () => {
 		getResponsibilityPageInfo(
-			selectedResponsibility.organizationPersonnel || selectedResponsibility.responsibilityText
+			selectedResponsibility.organizationPersonnelText || selectedResponsibility.responsibilityText
 		);
 		setIsEditingEntity(true);
 	};
@@ -381,27 +399,9 @@ export default function GCResponsibilityDocumentView({
 						style={{ ...leftBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleLeftPanelToggle()}
 					>
-						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={leftPanelOpen} />
 						<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
-						<i
-							className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={leftPanelOpen} />
 					</div>
 					<div
 						style={{
@@ -449,27 +449,9 @@ export default function GCResponsibilityDocumentView({
 						style={{ ...rightBarExtraStyles, right: 0, bottom: '0px', zIndex: 100 }}
 						onClick={() => handleRightPanelToggle()}
 					>
-						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={!rightPanelOpen} />
 						<span>{rightPanelOpen ? 'Hide' : 'Show'} Search Results</span>
-						<i
-							className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-							style={{
-								color: 'white',
-								verticalAlign: 'sub',
-								height: 20,
-								width: 20,
-								margin: '20px 0 20px 2px',
-							}}
-						/>
+						<PanelArrowIcon leftFacing={!rightPanelOpen} />
 					</div>
 				</div>
 			</div>
@@ -527,7 +509,7 @@ export default function GCResponsibilityDocumentView({
 				open={editModalOpen}
 				setOpen={setEditModalOpen}
 				responsibility={selectedResponsibility.responsibilityText}
-				entity={selectedResponsibility.organizationPersonnel ?? 'NO ENTITY'}
+				entity={selectedResponsibility.organizationPersonnelText}
 				editEntity={editEntity}
 				editResponsibility={editResponsibility}
 				rejectResponsibility={rejectResponsibility}
