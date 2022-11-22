@@ -200,6 +200,11 @@ const PolicyDocumentsComparisonTool = ({
 				canceledDocs: includeRevoked,
 			};
 
+			console.log('filters.orgFilters');
+			console.log(filters.orgFilters);
+			console.log('filters.typeFilters');
+			console.log(filters.typeFilters);
+
 			gameChangerAPI
 				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
 				.then((resp) => {
