@@ -101,14 +101,19 @@ class JBookExportHandler extends ExportHandler {
 					);
 				}
 
+				const sendDataCallback = (buffer, error = false) => {
+					if (error) {
+						res.status(500).send('an error has occurred');
+					} else {
+						const pdfBase64String = buffer.toString('base64');
+						res.contentType('application/pdf');
+						res.status(200);
+						res.send(pdfBase64String);
+					}
+				};
+
 				switch (format) {
 					case 'pdf':
-						const sendDataCallback = (buffer) => {
-							const pdfBase64String = buffer.toString('base64');
-							res.contentType('application/pdf');
-							res.status(200);
-							res.send(pdfBase64String);
-						};
 						rest.index = index;
 						rest.orgFilter = orgFilter;
 						this.reports.createProfilePagePDFBuffer(docs, userId, sendDataCallback);
