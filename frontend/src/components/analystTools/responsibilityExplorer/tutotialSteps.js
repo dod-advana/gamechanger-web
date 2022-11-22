@@ -24,8 +24,6 @@ const reTutorialSteps = [
 		content:
 			'Filters allow users to narrow down search results by either document title, entity, or responsibility text.',
 		disableScrolling: true,
-		clickButton: true,
-		buttonID: 'update-search',
 	},
 	{
 		...tutorialObject,
