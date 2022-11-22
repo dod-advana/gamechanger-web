@@ -323,8 +323,6 @@ const aggregateProjectDescriptions = (projectData) => {
 		'P5-16_Item_Title': { title: 'P5-16 Item Title' },
 		'P40-11_BA_Title': { title: 'P40-11 BA Title' },
 		'P3a-20_Milestone_Desc': { title: 'P3a-20_Milestone_Desc' },
-		p3a_dev_milestones_n: { title: 'P3a Milestones' },
-		p3a_contract_data_n: { title: 'P3a Contract Titles' },
 
 		// odoc
 		budgetLineItemTitle: { title: 'Budget Line Item Title' },
@@ -334,8 +332,6 @@ const aggregateProjectDescriptions = (projectData) => {
 		// 'projectAquisitionStrategy': {title: 'Project Aquisition Strategy'},
 		// 'projectPerformanceMetrics': {title: 'Project Performance Metrics'},
 		// 'otherProgramFundSummaryRemarks': {title: 'Other Program Funded Summary Remarks'},
-		projectPerformanceMetrics: { title: 'Performance Metrics' },
-		projectAquisitionStrategy: { title: 'Project Acquisition Strategy' },
 	};
 
 	if (projectData.review && projectData.review.budgetType === 'rdoc') {
@@ -349,17 +345,7 @@ const aggregateProjectDescriptions = (projectData) => {
 
 	Object.keys(titleMapping).forEach((key) => {
 		if (projectData[key]) {
-			let obj = { ...titleMapping[key], value: projectData[key] };
-			if (key === 'p3a_dev_milestones_n' || key === 'p3a_contract_data_n') {
-				let str = ``;
-				for (let obj of projectData[key]) {
-					for (let innerKey of Object.keys(obj)) {
-						str += `${obj[innerKey]}<br/><br/>`;
-					}
-				}
-				obj.value = str;
-			}
-			tmpProjectDescriptions.push(obj);
+			tmpProjectDescriptions.push({ ...titleMapping[key], value: projectData[key] });
 		}
 	});
 

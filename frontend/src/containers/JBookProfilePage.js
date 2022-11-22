@@ -238,7 +238,7 @@ const JBookProfilePage = () => {
 	};
 
 	// grab all profile page relaetd data
-	const getAllBYProjectData = async (id, year, searchText, portfolioName) => {
+	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
 		const currentUserData = await gameChangerUserAPI.getUserProfileData();
 
@@ -252,7 +252,6 @@ const JBookProfilePage = () => {
 				options: {
 					id,
 					portfolioName,
-					searchText,
 					userRowId: currentUserData.data.id,
 				},
 			});
@@ -297,7 +296,7 @@ const JBookProfilePage = () => {
 			setSearchText(text);
 			setDocID(id);
 
-			getAllBYProjectData(id, year, text, tmpPortfolioName).then(() => {
+			getAllBYProjectData(id, year, tmpPortfolioName).then(() => {
 				setState(dispatch, { selectedPortfolio: tmpPortfolioName });
 			});
 
@@ -1017,7 +1016,7 @@ const JBookProfilePage = () => {
 				},
 			});
 
-			await getAllBYProjectData(docID, budgetYear, searchText, selectedPortfolio);
+			await getAllBYProjectData(docID, budgetYear, selectedPortfolio);
 			setState(dispatch, { [loading]: false });
 		}
 	};
@@ -1038,7 +1037,7 @@ const JBookProfilePage = () => {
 				docID,
 			},
 		});
-		await getAllBYProjectData(docID, budgetYear, searchText, selectedPortfolio);
+		await getAllBYProjectData(docID, budgetYear, selectedPortfolio);
 		setState(dispatch, { [loading]: false });
 	};
 
