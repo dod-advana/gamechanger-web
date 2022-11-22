@@ -1176,7 +1176,7 @@ class JBookSearchUtility {
 						filterQueries.push({
 							query_string: {
 								query: `*${jbookSearchSettings.projectNum}*`,
-								default_field: 'projectNum_s',
+								default_field: 'projectNum_t',
 							},
 						});
 						break;
