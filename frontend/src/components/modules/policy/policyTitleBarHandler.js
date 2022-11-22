@@ -7,16 +7,12 @@ import PropTypes from 'prop-types';
 import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
 
 const getTitleBar = (props) => {
-	const { /*onTitleClick,*/ componentStepNumbers } = props;
+	const { onTitleClick, componentStepNumbers } = props;
 	return (
 		<img
 			src={GamechangerLogo}
 			style={{ ...styles.title, width: 300 }}
-			onClick={() => {
-				window.location.href = '#/gamechanger/userDashboard';
-				setTimeout(() => window.location.reload(), 10);
-			}}
-			// onClick={onTitleClick}
+			onClick={onTitleClick}
 			alt="gamechanger"
 			id={'titleButton'}
 			className={componentStepNumbers ? `tutorial-step-${componentStepNumbers['Gamechanger Title']}` : null}
