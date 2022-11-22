@@ -4,8 +4,8 @@ import { Typography } from '@material-ui/core';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import GCButton from '../../../common/GCButton';
 import Popper from '@material-ui/core/Popper';
-import GCAccordion from '../../../common/GCAccordion';
-import GroupsPanel from './GroupsPanel';
+// import GCAccordion from '../../../common/GCAccordion';
+// import GroupsPanel from './GroupsPanel';
 import HistoryPanel from './historyPanel';
 import FavoritesPanel from './favoritesPanel';
 
@@ -195,8 +195,8 @@ const GCUserDashboard = React.memo((props) => {
 		handleFavoriteTopic,
 		handleFavoriteOrganization,
 		cloneData,
-		state,
-		dispatch,
+		// state,
+		// dispatch,
 	} = props;
 
 	const [apiKeyPopperAnchorEl, setAPIKeyPopperAnchorEl] = useState(null);
@@ -224,15 +224,15 @@ const GCUserDashboard = React.memo((props) => {
 		updateUserData();
 	};
 
-	const renderGroups = () => {
-		return (
-			<div style={{ marginBottom: 10 }}>
-				<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
-					<GroupsPanel state={state} dispatch={dispatch} documentGroups={documentGroups} />
-				</GCAccordion>
-			</div>
-		);
-	};
+	// const renderGroups = () => {
+	// 	return (
+	// 		<div style={{ marginBottom: 10 }}>
+	// 			<GCAccordion expanded={false} header={'DOCUMENT GROUPS'} itemCount={documentGroups.length}>
+	// 				<GroupsPanel state={state} dispatch={dispatch} documentGroups={documentGroups} />
+	// 			</GCAccordion>
+	// 		</div>
+	// 	);
+	// };
 
 	const renderFavorites = () => {
 		return (
@@ -343,7 +343,7 @@ const GCUserDashboard = React.memo((props) => {
 
 			<div className={'panel-container'}>
 				{renderFavorites()}
-				{renderGroups()}
+				{/* {renderGroups()} */}
 				{renderHistory()}
 			</div>
 		</>

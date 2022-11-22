@@ -35,11 +35,17 @@ const getToolTheme = (_cloneData) => {
 		fontColor: '#FFFFFF',
 		hoverColor: '#E9691D',
 		toolLogo: (
-			<PageLink href="#/">
-				<img src={GamechangerTextIcon} alt="tool logo" />
+			<PageLink href={`#/gamechanger/userDashboard`}>
+				<img
+					onClick={() => {
+						setTimeout(() => window.location.reload(), 10);
+					}}
+					src={GamechangerTextIcon}
+					alt="tool logo"
+				/>
 			</PageLink>
 		),
-		toolIconHref: '#/gamechanger',
+		toolIconHref: '#/gamechanger/userDashboard',
 	};
 };
 
@@ -201,7 +207,7 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={AboutUsIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip data-cy="user-dashboard" title="User Dashboard" placement="right" arrow>
+			{/* <GCTooltip data-cy="user-dashboard" title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -222,7 +228,7 @@ const generateClosedContentArea = (state, dispatch) => {
 				>
 					<ConstrainedIcon src={UserIcon} />
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			{Permissions.isGameChangerAdmin() && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`} centered style={{ width: '100%' }}>
@@ -362,7 +368,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<span style={{ marginLeft: '10px' }}>About Us</span>
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="User Dashboard" placement="right" arrow>
+			{/* <GCTooltip title="User Dashboard" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
 						window.history.pushState(
@@ -383,7 +389,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserIcon} />
 					<span style={{ marginLeft: '10px' }}>User Dashboard</span>
 				</HoverNavItem>
-			</GCTooltip>
+			</GCTooltip> */}
 			{Permissions.isGameChangerAdmin() && (
 				<GCTooltip title="Admin Page" placement="right" arrow>
 					<PageLink href={`#/${state.cloneData.url}/admin`}>
