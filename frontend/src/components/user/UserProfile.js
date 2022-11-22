@@ -49,9 +49,8 @@ const StyledUserProfileDataDiv = styled.div`
 `;
 
 const StyledCustomAppDataDiv = styled.div`
-	background: ${'#FFFFFF'};
+	background: inherit;
 	border-radius: 6px;
-	box-shadow: 0px 3px 6px ${'#00000029'};
 	width: 100%;
 `;
 

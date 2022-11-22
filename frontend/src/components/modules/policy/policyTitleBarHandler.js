@@ -12,7 +12,10 @@ const getTitleBar = (props) => {
 		<img
 			src={GamechangerLogo}
 			style={{ ...styles.title, width: 300 }}
-			onClick={() => (window.location.href = '/')}
+			onClick={() => {
+				window.location.href = '#/gamechanger/userDashboard';
+				setTimeout(() => window.location.reload(), 10);
+			}}
 			// onClick={onTitleClick}
 			alt="gamechanger"
 			id={'titleButton'}
