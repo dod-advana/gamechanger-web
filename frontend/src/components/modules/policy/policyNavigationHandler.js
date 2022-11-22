@@ -16,7 +16,7 @@ import AdminIcon from '../../../images/icon/NewAdminIcon.png';
 import GamechangerTextIcon from '../../../images/icon/GamechangerText.png';
 import ResourcesIcon from '../../../images/icon/slideout-menu/resources icon.png';
 import AboutUsIcon from '../../../images/icon/AboutUsIcon.png';
-import UserIcon from '../../../images/icon/UserIcon.png';
+// import UserIcon from '../../../images/icon/UserIcon.png';
 import { getNotifications } from '../../notifications/Notifications';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
