@@ -128,17 +128,17 @@ const UserProfile = React.memo((props) => {
 		});
 	}, [getUserData]);
 
-	useEffect(() => {
-		if (
-			userData !== {} &&
-			(userData.first_name === null ||
-				userData.last_name === null ||
-				userData.email === null ||
-				userData.organization === null)
-		) {
-			setShowEditUserModal(true);
-		}
-	}, [userData, setShowEditUserModal]);
+	// useEffect(() => {
+	// 	if (
+	// 		userData !== {} &&
+	// 		(userData.first_name === null ||
+	// 			userData.last_name === null ||
+	// 			userData.email === null ||
+	// 			userData.organization === null)
+	// 	) {
+	// 		setShowEditUserModal(true);
+	// 	}
+	// }, [userData, setShowEditUserModal]);
 
 	const refreshUserData = async () => {
 		const { data } = await getUserData();
