@@ -49,7 +49,7 @@ export const handleSearchTypeUpdate = ({ value = SEARCH_TYPES.keyword }, dispatc
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
 	});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', 'value', value);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', value);
 };
 
 export const createCopyTinyUrl = (toolUrl, dispatch) => {

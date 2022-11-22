@@ -79,7 +79,7 @@ const styles = {
 };
 
 export const downloadFile = async (data, format, classificationMarking, cloneData) => {
-	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', 'onDownloadFile', format);
+	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', `onDownloadFile${format}`);
 	let filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
 	if (classificationMarking === 'CUI') {
 		filename += '-CUI';
@@ -145,8 +145,7 @@ const ExportResultsDialog = ({
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'ExportResultsDialog',
-				'onGenerate',
-				selectedFormat
+				`onGenerate${selectedFormat}`
 			);
 			Array.from(selectedDocuments.keys()).forEach((item) => {
 				gameChangerAPI.sendIntelligentSearchFeedback(
@@ -154,12 +153,7 @@ const ExportResultsDialog = ({
 					item,
 					searchObject.search
 				);
-				trackEvent(
-					getTrackingNameForFactory(cloneData.clone_name),
-					'ExportDocument',
-					`${item}`,
-					`search : ${searchObject.search}`
-				);
+				trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportDocument', `${item}`);
 			});
 			let url = window.location.hash.toString();
 			url = url.replace('#/', '');

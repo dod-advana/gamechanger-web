@@ -4,7 +4,7 @@ import { KeyboardArrowRight } from '@material-ui/icons';
 import { capitalizeFirst, getTrackingNameForFactory, getTypeDisplay } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { primary } from '../../common/gc-colors';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import {
 	getDefaultComponent,
@@ -269,12 +269,7 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
+							trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 							setToggledMore(!toggledMore);
 						}}
 					>

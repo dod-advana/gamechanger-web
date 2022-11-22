@@ -18,6 +18,7 @@ import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 import IngestStats from './IngestStats';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const GoalIcon = styled.div`
 	height: 20px;
@@ -477,7 +478,13 @@ const GCDataStatusTracker = (props) => {
 
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', 'PDFOpen');
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'DataStatusTracker',
+				'PDFOpen',
+				null,
+				makeCustomDimensions(filename)
+			);
 			window.open(
 				`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${
 					state.cloneData.clone_name
