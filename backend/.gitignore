@@ -15,4 +15,5 @@ security_scan/route_check/output.txt
 security_scan/route_check/routes.csv
 .pnpm-debug.log
 .pnpm-store/*
+eslintReport.json
 junit.xml
