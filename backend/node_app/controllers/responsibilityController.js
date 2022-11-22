@@ -142,7 +142,7 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
-			const { cloneData = {}, filename = '', text = '' } = req.body;
+			const { cloneData = {}, filename = '', text = '' } = req.query;
 			let esQuery = this.paraNumQuery(filename, text);
 			let esClientName = 'gamechanger';
 			let esIndex = 'gamechanger';
@@ -193,7 +193,7 @@ class ResponsibilityController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 			const permissions = req.permissions ? req.permissions : [];
 
-			const { cloneData = {}, filename = '', text = '' } = req.body;
+			const { cloneData = {}, filename = '', text = '' } = req.query;
 
 			const cleanedText = this.cleanEsQueryText(text);
 
@@ -288,44 +288,44 @@ class ResponsibilityController {
 		}
 	}
 
+	parseResponsibilityFilters(filters, docView) {
+		const where = {};
+		where['status'] = { [Op.not]: 'rejected' };
+		filters.forEach((filter) => {
+			const { id, value } = JSON.parse(filter);
+			if (id === 'responsibilityEntities') {
+				if (value.includes(null)) {
+					where[id] = {
+						[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
+					};
+				} else {
+					where[id] = {
+						[Op.like]: { [Op.any]: value },
+					};
+				}
+			} else if (docView && id === 'documentTitle') {
+				if (!where[Op.or]) where[Op.or] = [];
+				where[Op.or].push({
+					[id]: value,
+				});
+			} else {
+				if (!where[id]) where[id] = { [Op.or]: [] };
+				where[id][Op.or].push({
+					[Op.iLike]: `%${value}%`,
+				});
+			}
+		});
+		return where;
+	}
+
 	async getResponsibilityData(req, res) {
 		let userId = 'unknown_webapp';
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.body;
+			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
 			order.push(['documentTitle', 'ASC']);
-			const tmpWhere = {};
-			where.forEach(({ id, value }) => {
-				if (id === 'id') {
-					tmpWhere[id] = {
-						[Op.eq]: value,
-					};
-				} else {
-					if (id === 'otherOrganizationPersonnel') {
-						if (value.includes(null)) {
-							tmpWhere[id] = {
-								[Op.or]: [{ [Op.like]: { [Op.any]: value } }, { [Op.eq]: null }],
-							};
-						} else {
-							tmpWhere[id] = {
-								[Op.like]: { [Op.any]: value },
-							};
-						}
-					} else if (docView && id === 'documentTitle') {
-						if (!tmpWhere[Op.or]) tmpWhere[Op.or] = [];
-						tmpWhere[Op.or].push({
-							[id]: value,
-						});
-					} else {
-						if (!tmpWhere[id]) tmpWhere[id] = { [Op.or]: [] };
-						tmpWhere[id][Op.or].push({
-							[Op.iLike]: `%${value}%`,
-						});
-					}
-				}
-			});
-			tmpWhere['status'] = { [Op.not]: 'rejected' };
+			const tmpWhere = this.parseResponsibilityFilters(where, docView);
 			const newOffsets = [];
 			let newLimit = 0;
 			if (docView) {
@@ -353,10 +353,12 @@ class ResponsibilityController {
 					'id',
 					'filename',
 					'documentTitle',
-					'organizationPersonnel',
+					'organizationPersonnelNumbering',
+					'organizationPersonnelText',
+					'organizationPersonnelEntities',
+					'responsibilityNumbering',
 					'responsibilityText',
-					'otherOrganizationPersonnel',
-					'documentsReferenced',
+					'responsibilityEntities',
 				],
 			});
 			res.status(200).send({ offsets: newOffsets, totalCount: results.count, results: results.rows });
@@ -440,7 +442,7 @@ class ResponsibilityController {
 		try {
 			const { update, responsibility, status } = req.body;
 			const { id: updateId, updatedText, updatedColumn } = update;
-			const { id: responsibilityId, responsibilityText, organizationPersonnel } = responsibility;
+			const { id: responsibilityId, responsibilityText, organizationPersonnelText } = responsibility;
 			let responsibilityStatus;
 			if (updatedColumn === 'Reject' && status === 'accepted') {
 				await this.responsibilities.update(
@@ -492,7 +494,7 @@ class ResponsibilityController {
 				);
 				let responsibilityUpdate;
 				if (updatedColumn === 'responsibilityText') responsibilityUpdate = responsibilityText;
-				if (updatedColumn === 'organizationPersonnel') responsibilityUpdate = organizationPersonnel;
+				if (updatedColumn === 'organizationPersonnelText') responsibilityUpdate = organizationPersonnelText;
 				await this.responsibility_reports.update(
 					{
 						updatedText: responsibilityUpdate,
@@ -615,7 +617,7 @@ class ResponsibilityController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.body;
+			const { offset = 0, order = [], DOCS_PER_PAGE = 10, page } = req.query;
 			order.push(['filename', 'ASC']);
 			const where = {};
 			where['status'] = { [Op.like]: '%review%' };

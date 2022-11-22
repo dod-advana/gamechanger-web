@@ -16,7 +16,19 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false,
 			},
-			organizationPersonnel: {
+			organizationPersonnelNumbering: {
+				type: DataTypes.TEXT,
+				allowNull: true,
+			},
+			organizationPersonnelText: {
+				type: DataTypes.TEXT,
+				allowNull: false,
+			},
+			organizationPersonnelEntities: {
+				type: DataTypes.TEXT,
+				allowNull: false,
+			},
+			responsibilityNumbering: {
 				type: DataTypes.TEXT,
 				allowNull: true,
 			},
@@ -24,12 +36,8 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.TEXT,
 				allowNull: false,
 			},
-			otherOrganizationPersonnel: {
+			responsibilityEntities: {
 				type: DataTypes.TEXT,
-				allowNull: true,
-			},
-			documentsReferenced: {
-				type: DataTypes.ARRAY(DataTypes.TEXT),
 				allowNull: true,
 			},
 			status: {

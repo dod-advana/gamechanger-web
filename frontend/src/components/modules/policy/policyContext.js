@@ -141,6 +141,7 @@ const initState = {
 	resultsPage: 1,
 	docsPagination: false,
 	docsLoading: false,
+	docsExplorerLeftPanelOpen: true,
 
 	entityCount: 0,
 	entityPage: 1,
