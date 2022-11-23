@@ -323,7 +323,7 @@ class ResponsibilityAssist extends Component {
 			}
 		});
 		const updatedProps = {
-			organizationPersonnel: annotatedEntity,
+			organizationPersonnelText: annotatedEntity,
 			responsibilityText: annotatedResponsibilityText,
 		};
 		gameChangerAPI.updateResponsibility({ id: id, updatedProps }).then(() => {

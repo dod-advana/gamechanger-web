@@ -486,22 +486,22 @@ export default class GameChangerAPI {
 
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
-	getResponsibilityDocTitles = async (options) => {
+	getResponsibilityDocTitles = async () => {
 		const url = endpoints.getResponsibilityDocTitles;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url);
 	};
 
 	getResponsibilityDocLink = async (options) => {
 		const url = endpoints.getResponsibilityDocLink;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
 	getResponsibilityDoc = async (options) => {
 		const url = endpoints.getResponsibilityDoc;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
 	setRejectionStatus = async (options) => {
@@ -526,7 +526,7 @@ export default class GameChangerAPI {
 
 	getResponsibilityUpdates = async (data) => {
 		const url = endpoints.getResponsibilityUpdates;
-		return axiosPOST(this.axios, url, data);
+		return axiosGET(this.axios, url, { params: data });
 	};
 
 	getAdminData = async () => {

@@ -293,7 +293,7 @@ class AppStatsController {
 				[userId],
 				(error, results) => {
 					if (error) {
-						this.logger.error('No userids found', 'B07IQHT');
+						this.logger.error(error, 'B07IQHT');
 						resolve([]);
 					} else {
 						resolve(results);
@@ -1079,6 +1079,39 @@ class AppStatsController {
 	 * This method gets aggregations for the cards
 	 * @returns an array of data from Matomo.
 	 */
+	async getCardNewUsers(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				select
+					count(distinct b.user_id) as new_users
+				from
+					matomo_log_visit b
+				where 
+					b.idvisitor in (
+						select distinct idvisitor
+						from matomo_log_link_visit_action
+						where idaction_event_category=?
+					)
+					AND b.visit_first_action_time >= ?
+					AND b.visit_first_action_time  <= ?
+					AND b.visitor_returning = 0
+				`,
+				[cloneName, startDate, endDate],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM919');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
+	/**
+	 * This method gets aggregations for the cards
+	 * @returns an array of data from Matomo.
+	 */
 	async getCardSearchAggregationQuery(startDate, endDate, cloneName, connection) {
 		return new Promise((resolve) => {
 			connection.query(
@@ -1233,14 +1266,18 @@ class AppStatsController {
 
 		for (let open of opened) {
 			if (visitIDMap[open.idvisitor]) {
-				if (
-					!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
-					documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
-				) {
-					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
-				} else {
-					documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
-					documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+				try {
+					if (
+						!documentMap[visitIDMap[open.idvisitor]]['opened'].includes(open.document) &&
+						documentMap[visitIDMap[open.idvisitor]]['opened'].length < 5
+					) {
+						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+					} else {
+						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
+						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
+					}
+				} catch (error) {
+					console.log(open.idvisitor);
 				}
 			}
 		}
@@ -1455,19 +1492,24 @@ class AppStatsController {
 
 			const cardPromise = this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
 			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
+			const newUserPromise = this.getCardNewUsers(startDate, endDate, cloneID, connection);
 			const searchBarPromise = this.getSearchGraphData(cloneName, connection);
 			const userBarPromise = this.getUserGraphData(cloneID, connection);
 
-			let cards, userCards, searchBar, userBar;
+			let cards, userCards, searchBar, userBar, newUser;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise]).then((data) => {
-				cards = data[0];
-				userCards = data[1];
-				searchBar = data[2];
-				userBar = data[3];
-			});
+			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise]).then(
+				(data) => {
+					cards = data[0];
+					userCards = data[1];
+					searchBar = data[2];
+					userBar = data[3];
+					newUser = data[4];
+				}
+			);
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
+			cards[0]['new_users'] = newUser[0]['new_users'];
 
 			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
 		} catch (err) {
