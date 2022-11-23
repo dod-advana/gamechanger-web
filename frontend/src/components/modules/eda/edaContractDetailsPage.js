@@ -110,8 +110,9 @@ const EDAContractDetailsPage = (props) => {
 			setModLoading(false);
 			setTimeFound(((t1 - t0) / 1000).toFixed(2));
 			const contractModData = contractMods?.data;
+			console.log('contractModData: ', contractModData);
 
-			if (contractModData) {
+			if (contractModData && contractModData.docs?.length > 0) {
 				// for the contract modifications section
 				contractModData.docs.sort((first, second) => {
 					if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {
