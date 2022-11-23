@@ -267,7 +267,7 @@ MultiSelectFilter.propTypes = {
 	classes: PropTypes.object,
 	searchSettingsName: PropTypes.string,
 	filter: PropTypes.string,
-	originalFilters: PropTypes.object,
+	originalFilters: PropTypes.array,
 	trackingName: PropTypes.string,
 	showNumResultsPerOption: PropTypes.bool,
 	preventSearchOnChange: PropTypes.bool,
