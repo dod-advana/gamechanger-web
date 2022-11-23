@@ -13,7 +13,7 @@ import defaultAdminMainViewHandler from '../default/defaultAdminMainViewHandler'
 import GCTooltip from '../../common/GCToolTip';
 import ReviewerList from '../../admin/ReviewerList';
 import UserFeedback from '../../admin/UserFeedback';
-import PortfolioBuilder from './portfolioBuilder/jbookPortfolioBuilder';
+import PortfolioTable from './portfolioBuilder/jbookPortfolioTable';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import RateReviewIcon from '@mui/icons-material/RateReview';
@@ -215,8 +215,8 @@ const JBookAdminMainViewHandler = {
 				);
 			case PAGES.reviewerList:
 				return <ReviewerList cloneName={cloneName} />;
-			case PAGES.portfolio:
-				return <PortfolioBuilder cloneName={cloneName} />;
+			case PAGES.portfolioRequests:
+				return <PortfolioTable cloneName={cloneName} />;
 			case PAGES.userFeedback:
 				return (
 					<UserFeedback
@@ -285,8 +285,12 @@ const JBookAdminMainViewHandler = {
 
 				{(Permissions.permissionValidator(`${cloneName} Admin`, true) ||
 					Permissions.permissionValidator(`Gamechanger Super Admin`, true)) && (
-					<Tooltip title="Portfolio Builder" placement="right" arrow>
-						<HoverNavItem centered onClick={() => setPageToView(PAGES.portfolio)} toolTheme={toolTheme}>
+					<Tooltip title="Portfolio Requests" placement="right" arrow>
+						<HoverNavItem
+							centered
+							onClick={() => setPageToView(PAGES.portfolioRequests)}
+							toolTheme={toolTheme}
+						>
 							<FolderIcon style={{ fontSize: 30 }} />
 						</HoverNavItem>
 					</Tooltip>
@@ -360,10 +364,10 @@ const JBookAdminMainViewHandler = {
 				)}
 
 				{Permissions.permissionValidator(`${cloneName} Admin`, true) && (
-					<Tooltip title="Portfolio Builder" placement="right" arrow>
-						<HoverNavItem onClick={() => setPageToView(PAGES.portfolio)} toolTheme={toolTheme}>
+					<Tooltip title="Portfolio Requests" placement="right" arrow>
+						<HoverNavItem onClick={() => setPageToView(PAGES.portfolioRequests)} toolTheme={toolTheme}>
 							<FolderIcon style={{ fontSize: 30 }} />
-							<span style={{ marginLeft: '5px' }}>Portfolio Builder</span>
+							<span style={{ marginLeft: '5px' }}>Portfolio Requests</span>
 						</HoverNavItem>
 					</Tooltip>
 				)}

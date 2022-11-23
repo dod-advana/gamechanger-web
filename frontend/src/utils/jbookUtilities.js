@@ -191,11 +191,17 @@ export const processSearchSettings = (state, _dispatch) => {
 };
 
 export const formatNum = (num) => {
-	const parsed = num >= 5 ? parseInt(num) : parseFloat(num).toFixed(2);
+	let isInt = !isNaN(num) && Number.isInteger(parseFloat(num));
+	let parsed;
+	if (isInt) {
+		parsed = parseInt(num);
+	} else {
+		parsed = parseFloat(num).toFixed(2);
+	}
+
 	if (parsed > 999) {
 		return `$${(parsed / 1000).toFixed(2)} B`;
 	}
-
 	if (parsed > 999999) {
 		return `$${(parsed / 1000000).toFixed(2)} T`;
 	}
