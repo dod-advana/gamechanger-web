@@ -349,7 +349,6 @@ const App = () => {
 				<MuiThemeProvider theme={ThemeDefault}>
 					<ClassificationBanner />
 					<ConsentAgreement id={'consent-agreement'} />
-
 					<Route
 						exact
 						path="/"
@@ -367,6 +366,11 @@ const App = () => {
 													render={() => (
 														<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
 													)}
+												/>
+												<Route
+													exact
+													path="/gamechanger"
+													render={() => <Redirect to={'/gamechanger/userDashboard'} />}
 												/>
 												<Route
 													exact

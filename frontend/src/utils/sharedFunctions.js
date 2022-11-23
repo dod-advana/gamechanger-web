@@ -271,44 +271,46 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					/>
 				)}
 				<React.Fragment>
-					{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
-						<Button
-							style={{
-								marginLeft: '10px',
-								marginTop: '8px',
-								fontFamily: 'Montserrat',
-								color: '#313541',
-								position: 'absolute',
-							}}
-							startIcon={<ArrowBackIcon />}
-							onClick={() => {
-								window.history.pushState(
-									null,
-									document.title,
-									`/#/${state.cloneData.url.toLowerCase()}`
-								);
-								setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
-								let viewName;
-								switch (state.pageDisplayed) {
-									case PAGE_DISPLAYED.dataTracker:
-										viewName = 'DataTracker';
-										break;
-									case PAGE_DISPLAYED.userDashboard:
-										viewName = 'UserDashboard';
-										break;
-									case PAGE_DISPLAYED.analystTools:
-										viewName = 'AnalystTools';
-										break;
-									default:
-										viewName = 'Main';
-										break;
-								}
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
-							}}
-						>
-							<></>
-						</Button>
-					)}
+					{state.pageDisplayed !== 'aboutUs' &&
+						state.pageDisplayed !== 'faq' &&
+						state.pageDisplayed !== 'userDashboard' && (
+							<Button
+								style={{
+									marginLeft: '10px',
+									marginTop: '8px',
+									fontFamily: 'Montserrat',
+									color: '#313541',
+									position: 'absolute',
+								}}
+								startIcon={<ArrowBackIcon />}
+								onClick={() => {
+									window.history.pushState(
+										null,
+										document.title,
+										`/#/${state.cloneData.url.toLowerCase()}`
+									);
+									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+									let viewName;
+									switch (state.pageDisplayed) {
+										case PAGE_DISPLAYED.dataTracker:
+											viewName = 'DataTracker';
+											break;
+										case PAGE_DISPLAYED.userDashboard:
+											viewName = 'UserDashboard';
+											break;
+										case PAGE_DISPLAYED.analystTools:
+											viewName = 'AnalystTools';
+											break;
+										default:
+											viewName = 'Main';
+											break;
+									}
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
+								}}
+							>
+								<></>
+							</Button>
+						)}
 					<div>
 						<p
 							style={{
