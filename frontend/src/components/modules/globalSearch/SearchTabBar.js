@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import { commaThousands } from '../../../utils/gamechangerUtils';
 
 import { SearchContext } from './SearchContext';
-// import JumpButton from './JumpButton';
+import JumpButton from './JumpButton';
 
 const ACTIVE_TAB_COLOR = 'rgb(68,111,145)';
 
@@ -28,7 +28,7 @@ const calculatSumTotal = (meta) => {
 };
 
 const SearchTabBar = (props) => {
-	const { searchTypes, activeTab, setActiveTab, resultMetaData = {} /*returnHome*/ } = useContext(SearchContext);
+	const { searchTypes, activeTab, setActiveTab, resultMetaData = {}, returnHome } = useContext(SearchContext);
 
 	const { containerStyles = {} } = props;
 
@@ -37,7 +37,9 @@ const SearchTabBar = (props) => {
 	return (
 		<div style={{ ...styles.container, ...containerStyles }}>
 			<div style={styles.left}>
-				{/* <JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} /> */}
+				{!window.location.href.includes('gamechanger') && (
+					<JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} />
+				)}
 			</div>
 
 			<div style={styles.tabsContainer} data-cy="tabs-container">
