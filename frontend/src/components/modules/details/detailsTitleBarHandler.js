@@ -12,7 +12,12 @@ const getTitleBar = (props) => {
 			<img
 				src={GamechangerLogo}
 				style={{ ...styles.title, width: 300 }}
-				onClick={() => (window.location.href = window.location.href.split('#')[0] + '#')}
+				onClick={() =>
+					(window.location.href =
+						window.location.href.split('#')[0] + window.location.href.includes('cloneName=gamechanger')
+							? '#/gamechanger/userDashboard'
+							: '#')
+				}
 				alt="gamechanger"
 				id={'titleButton'}
 			/>
@@ -40,7 +45,6 @@ const DetailsTitleBar = (props) => {
 		closeButtonRight,
 		closeButtonTop,
 	} = props;
-
 	return (
 		<div
 			style={{ ...styles.container, ...style }}
