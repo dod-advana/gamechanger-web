@@ -303,7 +303,7 @@ const EdaSearchHandler = {
 			});
 
 			const newFilterData = {
-				fiscalYear: resp.data.fpds_date_signed_dt,
+				fiscalYear: resp.data.fpds_date_signed_dt.sort().reverse(),
 				issueOfficeName: resp.data.fpds_contracting_office_name.map((e) => e.toUpperCase()).sort(),
 				issueOfficeDoDAAC: resp.data.fpds_contracting_office_code.map((e) => e.toUpperCase()).sort(),
 				vendorName: resp.data.fpds_vendor_name,
