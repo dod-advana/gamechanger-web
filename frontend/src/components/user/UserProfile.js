@@ -49,9 +49,8 @@ const StyledUserProfileDataDiv = styled.div`
 `;
 
 const StyledCustomAppDataDiv = styled.div`
-	background: ${'#FFFFFF'};
+	background: inherit;
 	border-radius: 6px;
-	box-shadow: 0px 3px 6px ${'#00000029'};
 	width: 100%;
 `;
 
@@ -129,17 +128,17 @@ const UserProfile = React.memo((props) => {
 		});
 	}, [getUserData]);
 
-	useEffect(() => {
-		if (
-			userData !== {} &&
-			(userData.first_name === null ||
-				userData.last_name === null ||
-				userData.email === null ||
-				userData.organization === null)
-		) {
-			setShowEditUserModal(true);
-		}
-	}, [userData, setShowEditUserModal]);
+	// useEffect(() => {
+	// 	if (
+	// 		userData !== {} &&
+	// 		(userData.first_name === null ||
+	// 			userData.last_name === null ||
+	// 			userData.email === null ||
+	// 			userData.organization === null)
+	// 	) {
+	// 		setShowEditUserModal(true);
+	// 	}
+	// }, [userData, setShowEditUserModal]);
 
 	const refreshUserData = async () => {
 		const { data } = await getUserData();
