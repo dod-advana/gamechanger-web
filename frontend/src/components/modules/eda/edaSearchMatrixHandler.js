@@ -200,16 +200,14 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 
 const getIssuingOrgData = (issuingOrgs) => {
 	const COLORS = ['#010691', '#007506', '#ad0202', '#6c0299', '#006069', '#969902'];
-
+	console.log('issueingOrgs: ', issuingOrgs);
 	// for the stats pie chart
 	return Object.keys(issuingOrgs).map((org, index) => {
 		let orgData = issuingOrgs[org];
 		return {
 			type: org,
 			count: orgData.count,
-			obligatedAmount: !isNaN(orgData.obligatedAmount)
-				? '$' + numberWithCommas((orgData.obligatedAmount / 1000000).toFixed(2)) + ' M'
-				: '',
+			obligatedAmount: !isNaN(orgData.obligatedAmount) ? orgData.obligatedAmount : 0,
 			color: COLORS[index],
 		};
 	});
@@ -217,21 +215,35 @@ const getIssuingOrgData = (issuingOrgs) => {
 
 const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let data = getIssuingOrgData(issuingOrgs);
-	let amount = 0;
-
-	if (!isNaN(totalObligatedAmount)) {
-		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
-	}
 
 	const renderChartLabel = (entry) => {
 		return entry.type;
+	};
+
+	const renderObligatedAmountMBT = (obligatedAmount) => {
+		if (isNaN(obligatedAmount)) {
+			return '$0';
+		}
+
+		const amountMillions = obligatedAmount / 1000000;
+		if (amountMillions < 1000) {
+			return '$' + numberWithCommas(amountMillions.toFixed(2)) + 'M';
+		}
+		const amountBillions = amountMillions / 1000;
+		if (amountBillions < 1000) {
+			return '$' + numberWithCommas(amountBillions.toFixed(2)) + 'B';
+		}
+		const amountTrillions = amountBillions / 1000;
+		return '$' + numberWithCommas(amountTrillions.toFixed(2)) + 'T';
 	};
 
 	const CustomTooltip = ({ payload }) => {
 		let tooltipText = '';
 		if (payload.length > 0) {
 			let agency = payload[0];
-			tooltipText += agency.name + ': ' + agency.payload.obligatedAmount;
+			tooltipText = `${agency.name}: ${renderObligatedAmountMBT(
+				agency.payload.obligatedAmount
+			)}/${numberWithCommas(agency.payload.count)} contracts`;
 		}
 		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
 	};
@@ -245,7 +257,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					data={data}
 					cx="50%"
 					cy="50%"
-					dataKey="count"
+					dataKey="obligatedAmount"
 					nameKey="type"
 					label={renderChartLabel}
 					isAnimationActive={false}
@@ -255,7 +267,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					))}
 				</Pie>
 				<text x={'50%'} y={'50%'} dy={8} textAnchor="middle">
-					{numberWithCommas(Math.floor(amount))}$M
+					{renderObligatedAmountMBT(totalObligatedAmount)}
 				</text>
 				<Tooltip content={<CustomTooltip />} />
 			</PieChart>
