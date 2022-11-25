@@ -82,8 +82,8 @@ const EDAContractDetailsPage = (props) => {
 					functionName: 'querySimilarDocs',
 					cloneName: cloneData.clone_name,
 					options: {
-						issueOfficeDoDAAC: contractAward.data.contract_issue_dodaac_eda_ext,
-						issueOfficeName: contractAward.data.contract_issue_name_eda_ext,
+						issueOfficeDoDAAC: [contractAward.data.contract_issue_dodaac_eda_ext],
+						issueOfficeName: [contractAward.data.contract_issue_name_eda_ext],
 					},
 				});
 				setSimilarDocsData(similarDocs.data);
