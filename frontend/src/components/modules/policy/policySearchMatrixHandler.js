@@ -189,27 +189,6 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 		<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 			{searchbar ? (
 				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
-							name="Archived Congress"
-							value="Archived Congress"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.archivedCongressSelected || false}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="Archived Congress"
-									style={styles.filterBox}
-								/>
-							}
-							label="Archived Congress"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
 					<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
 						{Object.keys(typeFilter).map((type, index) => {
 							let typeString = Pluralize(type);
@@ -259,28 +238,6 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 				</>
 			) : (
 				<>
-					<FormGroup row style={{ marginBottom: '10px' }}>
-						<FormControlLabel
-							name="Archived Congress"
-							value="Archived Congress"
-							classes={{ label: classes.titleText }}
-							control={
-								<Checkbox
-									classes={{ root: classes.filterBox }}
-									onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
-									icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-									checked={state.searchSettings.archivedCongressSelected || false}
-									checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-									name="Archived Congress"
-									style={styles.filterBox}
-								/>
-							}
-							label="Archived Congress"
-							labelPlacement="end"
-							style={styles.titleText}
-						/>
-					</FormGroup>
-
 					<PolicyMultiSelectFilter
 						state={state}
 						dispatch={dispatch}
@@ -430,6 +387,27 @@ const renderStatus = (state, dispatch, classes) => {
 	return (
 		<div>
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
+				<FormGroup row style={{ marginBottom: '10px' }}>
+					<FormControlLabel
+						name="Include Archived Congressional Documents"
+						value="Include Archived Congressional Documents"
+						classes={{ label: classes.titleText }}
+						control={
+							<Checkbox
+								classes={{ root: classes.filterBox }}
+								onClick={(event) => handleSelectArchivedCongress(event, state, dispatch)}
+								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
+								checked={state.searchSettings.archivedCongressSelected || false}
+								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
+								name="Include Archived Congressional Documents"
+								style={styles.filterBox}
+							/>
+						}
+						label="Include Archived Congressional Documents"
+						labelPlacement="end"
+						style={styles.titleText}
+					/>
+				</FormGroup>
 				<FormGroup row style={{ marginBottom: '0px' }}>
 					<FormControlLabel
 						name="Revoked Docs"
