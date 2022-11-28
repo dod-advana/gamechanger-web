@@ -38,7 +38,13 @@ const PolicyMultiSelectFilter = ({
 			...newSearchSettings[filter],
 			[name]: event.target.checked,
 		};
-		if (Object.values(newSearchSettings[filter]).filter((value) => value).length === 0) {
+		const allAvailableSelected = originalFilters.reduce(
+			(availableSelected, originalFilter) =>
+				availableSelected && (!originalFilter[1] || newSearchSettings[filter][originalFilter[0]]),
+			true
+		);
+
+		if (allAvailableSelected) {
 			newSearchSettings[allSelected] = true;
 			newSearchSettings[specificSelected] = false;
 			setShowClear(false);

@@ -254,15 +254,12 @@ const PolicyAnalyticsToolsHandler = {
 
 		const { analystToolsSearchSettings } = state;
 
-		const sourceCount =
-			analystToolsSearchSettings.specificOrgsSelected &&
-			Object.keys(analystToolsSearchSettings.orgFilter).filter((org) => analystToolsSearchSettings.orgFilter[org])
-				.length;
-		const typeCount =
-			analystToolsSearchSettings.specificTypesSelected &&
-			Object.keys(analystToolsSearchSettings.typeFilter).filter(
-				(type) => analystToolsSearchSettings.typeFilter[type]
-			).length;
+		const sourceCount = Object.keys(analystToolsSearchSettings.orgFilter).filter(
+			(org) => analystToolsSearchSettings.orgFilter[org]
+		).length;
+		const typeCount = Object.keys(analystToolsSearchSettings.typeFilter).filter(
+			(type) => analystToolsSearchSettings.typeFilter[type]
+		).length;
 		const dateActive =
 			analystToolsSearchSettings?.publicationDateFilter[0] &&
 			analystToolsSearchSettings?.publicationDateFilter[1];
