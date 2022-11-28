@@ -23,8 +23,6 @@ const reTutorialSteps = [
 		title: 'Filter the Results',
 		content:
 			'Filters allow users to narrow down search results by either document title, entity, or responsibility text.',
-		clickButton: true,
-		buttonID: 'update-search',
 	},
 	{
 		...tutorialObject,
@@ -74,20 +72,19 @@ const dctTutorialSteps = [
 		target: '.dct-tutorial-step-1',
 		title: 'Paragraph Input',
 		content:
-			'Provide the body of text (up to 5 paragraphs) in the main text field, where it will be utilized to find similar documents.',
+			'Provide up to 5 paragraphs of text in the open text field—this can be draft policy, existing policy, or other documentation.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-2',
-		title: 'Filter the Results',
-		content:
-			'Select filters to view only documents that meet specific criteria. Filters can also be updated after input is submitted.',
+		title: 'Filter Results',
+		content: 'Apply filters to streamline results before or after submitting text.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-3',
 		title: 'Submit',
-		content: 'Click submit to find documents with similarity to the paragraph inputs.',
+		content: 'Click “submit” to find documents in the GAMECHANGER repository with similarity to your text inputs.',
 		clickButton: true,
 		buttonID: 'compare-button',
 	},
@@ -96,14 +93,14 @@ const dctTutorialSteps = [
 		target: '.dct-tutorial-step-4',
 		title: 'Paragraph Input',
 		content:
-			'Continue to view the the text used for the query in the paragraph input pane.​ If more than one paragraph is entered in the query, each paragraph will be assessed separately. Click on a different input to view its results',
+			'View text inputs here. By default, individual paragraph inputs are assessed separately. Click on different paragraph inputs to view their respective results.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-5',
 		title: 'Combine Paragraph Input',
 		content:
-			'Paragraph inputs can be combined to re-compare as a whole paragraph. First, select paragraphs by clicking the check mark next to the inputs to combine. Then, press the combine button to merge the selected paragraphs and reinitiate the comparison search with the combined text.',
+			'Paragraph inputs can be combined to be assessed as a whole. Combine paragraphs by selecting the check mark next to each paragraph. Click “combine” to merge the selected paragraphs and reinitiate the comparison search with combined text.',
 		clickButton: true,
 		buttonID: 'first-dct-result',
 	},
@@ -111,7 +108,7 @@ const dctTutorialSteps = [
 		...tutorialObject,
 		target: '.dct-tutorial-step-6',
 		title: 'Results',
-		content: 'View results from the similar document query below the paragraph input section.',
+		content: 'View document results below the paragraph input pane.',
 		placement: 'left-start',
 	},
 	{
@@ -119,25 +116,27 @@ const dctTutorialSteps = [
 		target: '.dct-tutorial-step-7',
 		title: 'Select a Document',
 		content:
-			'Select a document from the results to display the section of the document that is  similar to your query text. In addition, view the page number it was found on and its similarity score. The results of the document can also be exported here, or the document can be saved to favorites.',
+			'Select a document from the results panel to display the individual sections or paragraphs with text similarity. This view also displays the page number and similarity score of the similar text. Results of each document can be exported or the document can be saved to favorites from here.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-8',
 		title: 'Document',
-		content: 'View the PDF of the selected document result in the middle display.',
+		content:
+			'View a PDF of the selected document result in the middle display. The tool automatically jumps to the relevant page for more convenient comparison review.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-9',
 		title: 'Sort',
-		content: 'Sort results by selecting an option from the drop-down menu.',
+		content:
+			'Sort results by similarity score, alphabetically, or date published by selecting an option from the drop-down menu.',
 	},
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-10',
 		title: 'Export',
-		content: 'Export the results of the search by selecting the orange export icon.',
+		content: 'Export the full results of the search by selecting the orange export icon.',
 	},
 ];
 
