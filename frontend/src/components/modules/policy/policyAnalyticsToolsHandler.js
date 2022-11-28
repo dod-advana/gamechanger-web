@@ -271,7 +271,7 @@ const PolicyAnalyticsToolsHandler = {
 		return (
 			<>
 				<div>
-					<div style={{ marginBottom: 20 }}>Apply filters to your search</div>
+					<div style={{ marginBottom: 20 }}>Apply filters to streamline search results:</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<AccordianWrapper>
