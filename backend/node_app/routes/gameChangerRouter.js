@@ -196,6 +196,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.post('/getAppStats', appStatsController.getAppStats);
 	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+	router.get('/admin/getSourceInteractions', appStatsController.getSourceInteractions);
 	router.get('/admin/exportUserData', appStatsController.exportUserData);
 	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
