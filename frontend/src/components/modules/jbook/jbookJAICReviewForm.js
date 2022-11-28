@@ -78,7 +78,7 @@ const JBookJAICReviewForm = React.memo((props) => {
 				),
 			},
 			{
-				Key: 'Service/DoD Component Reviewer',
+				Key: 'RAI Lead Reviewer',
 				Value: (
 					<ServiceComponentReviewerValue
 						serviceReviewer={reviewData.serviceReviewer}

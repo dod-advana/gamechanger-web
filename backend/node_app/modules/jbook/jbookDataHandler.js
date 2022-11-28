@@ -10,6 +10,7 @@ const PORTFOLIO = require('../../models').portfolio;
 const JBOOK_CLASSIFICATION = require('../../models').jbook_classification;
 const COMMENTS = require('../../models').comments;
 const USER = require('../../models').user;
+const PUBLICPORTFOLIOREQUESTS = require('../../models').public_portfolio_requests;
 const constantsFile = require('../../config/constants');
 const { Op } = require('sequelize');
 const DB = require('../../models/index');
@@ -46,6 +47,7 @@ class JBookDataHandler extends DataHandler {
 			dataLibrary = new DataLibrary(opts),
 			comments = COMMENTS,
 			user = USER,
+			publicPortfolioRequests = PUBLICPORTFOLIOREQUESTS,
 		} = opts;
 
 		super({ ...opts });
@@ -68,6 +70,7 @@ class JBookDataHandler extends DataHandler {
 		this.jbook_classification = jbook_classification;
 		this.comments = comments;
 		this.user = user;
+		this.publicPortfolioRequests = publicPortfolioRequests;
 
 		let transportOptions = constants.ADVANA_EMAIL_TRANSPORT_OPTIONS;
 
@@ -1090,14 +1093,13 @@ class JBookDataHandler extends DataHandler {
 
 	async editPortfolio(req, userId) {
 		try {
-			const { id, name, description, isPrivate, user_ids, admins, tags, user } = req.body;
+			const { id, name, description, user_ids, admins, tags, user } = req.body;
 
 			if (id) {
 				let update = await this.portfolio.update(
 					{
 						name,
 						description,
-						isPrivate,
 						admins,
 						user_ids,
 						tags,
@@ -1116,7 +1118,6 @@ class JBookDataHandler extends DataHandler {
 					return {
 						name,
 						description,
-						isPrivate,
 						user_ids,
 						tags,
 					};
@@ -1157,7 +1158,9 @@ class JBookDataHandler extends DataHandler {
 
 	async createPortfolio(req, userId) {
 		try {
-			await this.portfolio.create(req.body);
+			const cleanedData = req.body;
+			cleanedData.isPrivate = true;
+			await this.portfolio.create(cleanedData);
 			return true;
 		} catch (e) {
 			const { message } = e;
@@ -1433,6 +1436,28 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async submitPublicPortfolioRequest(req, userId) {
+		try {
+			const { creator, portfolioName, justification } = req.body;
+			await this.publicPortfolioRequests.create({ creator, portfolio_name: portfolioName, justification });
+			return true;
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'YI9BAI0', userId);
+			return { updated: false };
+		}
+	}
+
+	async getPublicPortfolioRequests(userId) {
+		try {
+			return await this.publicPortfolioRequests.findAll();
+		} catch (e) {
+			const message = e.message;
+			this.logger.error(message, 'B5KIOUI', userId);
+			return { data: [] };
+		}
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -1472,6 +1497,10 @@ class JBookDataHandler extends DataHandler {
 					return await this.deleteComment(req, userId);
 				case 'voteComment':
 					return await this.voteComment(req, userId);
+				case 'submitPublicPortfolioRequest':
+					return await this.submitPublicPortfolioRequest(req, userId);
+				case 'getPublicPortfolioRequests':
+					return await this.getPublicPortfolioRequests(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,

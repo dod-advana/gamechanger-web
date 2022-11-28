@@ -53,6 +53,7 @@ class EdaSearchHandler extends SearchHandler {
 		} = req.body;
 
 		try {
+			storeHistory = false;
 			historyRec.search = searchText;
 			historyRec.searchText = searchText;
 			historyRec.tiny_url = tiny_url;

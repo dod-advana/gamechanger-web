@@ -61,6 +61,13 @@ const JBookSideBar = LoadableVisibility({
 	},
 });
 
+const JBookPortfolioBuilder = LoadableVisibility({
+	loader: () => import('./portfolioBuilder/jbookPortfolioBuilder'),
+	loading: () => {
+		return <LoadingIndicator customColor={GC_COLORS.secondary} />;
+	},
+});
+
 const getSearchResults = (searchResultData, state, dispatch, module = null) => {
 	return _.map(searchResultData, (item, idx) => {
 		item.type = 'document';
@@ -510,6 +517,16 @@ const getAboutUs = (props) => {
 	);
 };
 
+const getPortfolioBuilder = (props) => {
+	const { state, dispatch } = props;
+	return (
+		<>
+			<FeedbackModal state={state} dispatch={dispatch} />
+			<JBookPortfolioBuilder />
+		</>
+	);
+};
+
 const displayUserRelatedItems = (props) => {
 	const { state, dispatch } = props;
 	return (
@@ -588,6 +605,8 @@ const JBookMainViewHandler = (props) => {
 					<JBookProfilePage {...props} />
 				</>
 			);
+		case PAGE_DISPLAYED.portfolio:
+			return getNonMainPageOuterContainer(getPortfolioBuilder(props), state, dispatch, searchHandler);
 		case PAGE_DISPLAYED.main:
 		default:
 			return getMainView({
