@@ -11,7 +11,6 @@ import { CloudDownload } from '@material-ui/icons';
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import GCPrimaryButton from '../../common/GCButton';
 import GCButton from '../../common/GCButton';
 
 import Processes from './processes';
@@ -367,6 +366,97 @@ const triggerCreateModelLTR = async (props, setLTRModelCreatedStatus) => {
 };
 
 /**
+ * @method getLastQueried
+ * @returns
+ */
+const getLastQueried = (props) => {
+	let mostRecent = '';
+	for (const message of props.apiTrainErrors) {
+		if (mostRecent === '' || Date.parse(message.timeStamp) > Date.parse(mostRecent)) {
+			mostRecent = message.timeStamp;
+		}
+	}
+	return mostRecent;
+};
+
+/**
+ * Get all the model tar files in s3 with their upload time.
+ * @method getS3List
+ */
+const getS3List = async (setS3List, props) => {
+	try {
+		// set transformerList
+		const slist = await gameChangerAPI.getS3List();
+		const setList = [];
+		// slist is an array of arrays of length 2.
+		// First is the name of the tar file,
+		// the second is the time it was uploaded to s3
+		for (const s3 of slist.data) {
+			setList.push({
+				file: s3[0],
+				upload: s3[1],
+			});
+		}
+		setS3List(setList);
+		props.updateTrainLogs('Successfully queried s3 models', 0);
+	} catch (e) {
+		props.updateTrainLogs('Error querying s3 models: ' + e.toString(), 2);
+		throw e;
+	}
+};
+
+/**
+ * Get all the tar data files in s3 with their upload time.
+ * @method getS3DataList
+ */
+const getS3DataList = async (setS3DataList, props) => {
+	try {
+		// set transformerList
+		const slist = await gameChangerAPI.getS3DataList();
+		const setList = [];
+		// slist is an array of arrays of length 2.
+		// First is the name of the tar file,
+		// the second is the time it was uploaded to s3
+		for (const s3 of slist.data) {
+			setList.push({
+				file: s3[0],
+				upload: s3[1],
+			});
+		}
+		setS3DataList(setList);
+		props.updateTrainLogs('Successfully queried s3 data', 0);
+	} catch (e) {
+		props.updateTrainLogs('Error querying s3 data: ' + e.toString(), 2);
+		throw e;
+	}
+};
+
+/**
+ * @method getConnectionStatus
+ * @return integer 0-3
+ */
+const getConnectionStatus = (props) => {
+	let success = false;
+	let error = false;
+	for (const message of props.apiTrainErrors) {
+		if (message.status === 'OK') {
+			success = true;
+		}
+		if (message.status === 'ERROR') {
+			error = true;
+		}
+	}
+	if (success && error) {
+		return 1;
+	} else if (!success && error) {
+		return 2;
+	} else if (!success && !error) {
+		return 3;
+	}
+	return 0;
+};
+
+/**
  * This class queries the ml api information
  * @class Training
  */
@@ -424,8 +514,8 @@ export default (props) => {
 	};
 
 	useEffect(() => {
-		getS3List();
-		getS3DataList();
+		getS3List(setS3List, props);
+		getS3DataList(setS3DataList, props);
 		props.getProcesses();
 		// eslint-disable-next-line
 	}, []);
@@ -471,99 +561,6 @@ export default (props) => {
 		props.getProcesses();
 	};
 
-	/**
-	 * Get all the model tar files in s3 with their upload time.
-	 * @method getS3List
-	 */
-	const getS3List = async () => {
-		try {
-			// set transformerList
-			const slist = await gameChangerAPI.getS3List();
-			const setList = [];
-			// slist is an array of arrays of length 2.
-			// First is the name of the tar file,
-			// the second is the time it was uploaded to s3
-			for (const s3 of slist.data) {
-				setList.push({
-					file: s3[0],
-					upload: s3[1],
-				});
-			}
-			setS3List(setList);
-			props.updateTrainLogs('Successfully queried s3 models', 0);
-		} catch (e) {
-			props.updateTrainLogs('Error querying s3 models: ' + e.toString(), 2);
-			throw e;
-		}
-	};
-
-	/**
-	 * Get all the tar data files in s3 with their upload time.
-	 * @method getS3DataList
-	 */
-	const getS3DataList = async () => {
-		try {
-			// set transformerList
-			const slist = await gameChangerAPI.getS3DataList();
-			const setList = [];
-			// slist is an array of arrays of length 2.
-			// First is the name of the tar file,
-			// the second is the time it was uploaded to s3
-			for (const s3 of slist.data) {
-				setList.push({
-					file: s3[0],
-					upload: s3[1],
-				});
-			}
-			setS3DataList(setList);
-			props.updateTrainLogs('Successfully queried s3 data', 0);
-		} catch (e) {
-			props.updateTrainLogs('Error querying s3 data: ' + e.toString(), 2);
-			throw e;
-		}
-	};
-
-	/**
-	 * @method getLastQueried
-	 * @returns
-	 */
-	const getLastQueried = () => {
-		let mostRecent = '';
-		for (const message of props.apiTrainErrors) {
-			if (mostRecent === '') {
-				mostRecent = message.timeStamp;
-			} else if (Date.parse(message.timeStamp) > Date.parse(mostRecent)) {
-				mostRecent = message.timeStamp;
-			}
-		}
-		return mostRecent;
-	};
-
-	/**
-	 * @method getConnectionStatus
-	 * @return integer 0-3
-	 */
-	const getConnectionStatus = () => {
-		let success = false;
-		let error = false;
-		for (const message of props.apiTrainErrors) {
-			if (message.status === 'OK') {
-				success = true;
-			}
-			if (message.status === 'ERROR') {
-				error = true;
-			}
-		}
-		//setLastQueried(new Date(Date.now()).toLocaleString());
-		if (success && error) {
-			return 1;
-		} else if (!success && error) {
-			return 2;
-		} else if (!success && !error) {
-			return 3;
-		}
-		return 0;
-	};
 	const s3Columns = [
 		{
 			Header: 'Tar File',
@@ -683,14 +680,14 @@ export default (props) => {
 			>
 				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>General Information</p>
 
-				<GCPrimaryButton
+				<GCButton
 					onClick={() => {
 						onload();
 					}}
 					style={{ minWidth: 'unset' }}
 				>
 					Refresh
-				</GCPrimaryButton>
+				</GCButton>
 			</div>
 			<div>
 				<div>
@@ -708,11 +705,11 @@ export default (props) => {
 					>
 						<div style={{ display: 'inline-block', fontWeight: 'bold' }}>Current State:</div>
 						<Tooltip
-							title={'Connection ' + status[getConnectionStatus()].toUpperCase()}
+							title={'Connection ' + status[getConnectionStatus(props)].toUpperCase()}
 							placement="right"
 							arrow
 						>
-							<StatusCircle className={status[getConnectionStatus()]} />
+							<StatusCircle className={status[getConnectionStatus(props)]} />
 						</Tooltip>
 					</div>
 					<fieldset className={'field'}>
@@ -731,8 +728,8 @@ export default (props) => {
 								{APITrainData.API_Name} {APITrainData.Container_Type}
 								<br />
 								{APITrainData.Version} <br />
-								{status[getConnectionStatus()].toUpperCase()} <br />
-								{getLastQueried()} <br />
+								{status[getConnectionStatus(props)].toUpperCase()} <br />
+								{getLastQueried(props)} <br />
 								{APITrainData.Elasticsearch_Host} <br />
 								{APITrainData.Elasticsearch_Status} <br />
 								{APITrainData.host} <br />
@@ -830,7 +827,7 @@ export default (props) => {
 											<pre className="code-block">
 												<code>{row.original.config}</code>
 											</pre>
-											<GCPrimaryButton
+											<GCButton
 												onClick={() => {
 													setDeleteModal({
 														show: true,
@@ -841,7 +838,7 @@ export default (props) => {
 												style={{ float: 'left', minWidth: 'unset' }}
 											>
 												Delete
-											</GCPrimaryButton>
+											</GCButton>
 										</div>
 									);
 								}}
@@ -912,7 +909,7 @@ export default (props) => {
 						}}
 					>
 						<b>Download dependencies from s3 Args</b>
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerDownloadModel(props, setDownloading);
 							}}
@@ -920,7 +917,7 @@ export default (props) => {
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Download
-						</GCPrimaryButton>
+						</GCButton>
 					</div>
 					<div
 						style={{
@@ -952,14 +949,14 @@ export default (props) => {
 								dateFormat="yyyy-MM-dd HH:mm"
 							/>
 						</DatePickerWrapper>
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								sendUserAggData(startDate, endDate);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Send Data
-						</GCPrimaryButton>
+						</GCButton>
 					</div>
 					<div
 						style={{
@@ -974,14 +971,14 @@ export default (props) => {
 					>
 						<b>Download Corpus</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerDownloadCorpus(props, corpus);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Download
-						</GCPrimaryButton>
+						</GCButton>
 						<div>
 							Corpus:
 							<Input
@@ -1018,14 +1015,14 @@ export default (props) => {
 					>
 						<b>Sentence Embedding Model</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerTrainModel(props, version, modelName, gpu, upload);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
-						</GCPrimaryButton>
+						</GCButton>
 
 						<div>
 							<div style={{ width: '120px', display: 'inline-block' }}>Encoder Model:</div>
@@ -1078,14 +1075,14 @@ export default (props) => {
 					>
 						<b>Query Expansion Model</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerTrainQexp(props, qexpversion, qexpupload);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
-						</GCPrimaryButton>
+						</GCButton>
 
 						<div>
 							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px' }}>Version:</div>
@@ -1120,14 +1117,14 @@ export default (props) => {
 					>
 						<b>Topic Model</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerTrainTopics(props, topicsSampling, topicsUpload, topicsVersion);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
-						</GCPrimaryButton>
+						</GCButton>
 
 						<div>
 							<div style={{ width: '120px', display: 'inline-block', marginLeft: '10px' }}>Version:</div>
@@ -1177,14 +1174,14 @@ export default (props) => {
 					>
 						<b>Finetune Models</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerFinetuneModel(props, epochs, warmupSteps, baseModel, remakeTD, testingOnly);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Train
-						</GCPrimaryButton>
+						</GCButton>
 
 						<div>
 							<div style={{ width: '60px', display: 'inline-block' }}>Base Model:</div>
@@ -1250,14 +1247,14 @@ export default (props) => {
 					>
 						<b>Evaluate Models</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerEvaluateModel(props, evalModelName);
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Evaluate
-						</GCPrimaryButton>
+						</GCButton>
 						<div>
 							<div style={{ width: '120px', display: 'inline-block' }}>Model:</div>
 							<Input
@@ -1282,14 +1279,14 @@ export default (props) => {
 						<b>Learn to Rank Model</b>
 						<br />
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerInitializeLTR(props, setLTRInitializedStatus);
 							}}
 							style={{ margin: '0 10px 10px 0', minWidth: 'unset' }}
 						>
 							Initialize
-						</GCPrimaryButton>
+						</GCButton>
 						{ltrInitializedStatus && (
 							<div
 								style={{
@@ -1303,14 +1300,14 @@ export default (props) => {
 							</div>
 						)}
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerCreateModelLTR(props, setLTRModelCreatedStatus);
 							}}
 							style={{ margin: '0 10px 0 0', minWidth: 'unset' }}
 						>
 							Create Model
-						</GCPrimaryButton>
+						</GCButton>
 						{ltrModelCreatedStatus && (
 							<div
 								style={{

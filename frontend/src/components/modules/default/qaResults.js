@@ -102,7 +102,7 @@ const GetQAResults = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 	const { question, answers, qaContext, params } = state.qaResults;
-	// const sentenceResults = state.sentenceResults;
+
 	const { intelligentSearchResult } = state;
 	const isFavorite =
 		_.findIndex(state.userData.favorite_documents, (item) => item.id === intelligentSearchResult.id) !== -1;
@@ -143,7 +143,7 @@ const GetQAResults = (props) => {
 		setFavorite(favorite);
 		setPopperAnchorEl(null);
 		setPopperIsOpen(false);
-		// setFavoriteName('');
+
 		setFavoriteSummary('');
 		handleSaveFavoriteDocument(documentData, state, dispatch);
 	};

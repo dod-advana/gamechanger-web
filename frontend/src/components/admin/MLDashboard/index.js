@@ -12,6 +12,27 @@ const status = ['ok', 'warning', 'error'];
 const logs = [];
 const trainLogs = [];
 let processTimer;
+
+/**
+ * Checks all of the flags. If any of them are true then check again in 5 seconds.
+ * @method
+ */
+const checkProcesses = (processesData, getProcesses) => {
+	if (processesData && processesData.process_status && processesData.process_status.flags) {
+		let checkProcess = false;
+		const flags = processesData.process_status.flags;
+		for (const key in flags) {
+			if (flags[key]) {
+				checkProcess = true;
+			}
+		}
+		if (checkProcess) {
+			clearTimeout(processTimer);
+			processTimer = setTimeout(getProcesses, 10000);
+		}
+	}
+};
+
 /**
  * This class queries the ml api information and provides controls
  * for the different endpoints
@@ -67,7 +88,7 @@ export default () => {
 			// set processes
 			const processesData = await gameChangerAPI.getProcessStatus();
 			setProcesses(processesData.data);
-			checkProcesses(processesData.data);
+			checkProcesses(processesData.data, getProcesses);
 		} catch (e) {
 			updateLogs('Error querying processes: ' + e.toString(), 2);
 			throw e;
@@ -83,30 +104,10 @@ export default () => {
 			// set processes
 			const processesData = await gameChangerAPI.getProcessStatusTrain();
 			setProcessesTrain(processesData.data);
-			checkProcesses(processesData.data);
+			checkProcesses(processesData.data, getProcessesTrain);
 		} catch (e) {
 			updateLogs('Error querying processes: ' + e.toString(), 2);
 			throw e;
-		}
-	};
-
-	/**
-	 * Checks all of the flags. If any of them are true then check again in 5 seconds.
-	 * @method
-	 */
-	const checkProcesses = (processesData) => {
-		if (processesData && processesData.process_status && processesData.process_status.flags) {
-			let checkProcess = false;
-			const flags = processesData.process_status.flags;
-			for (const key in flags) {
-				if (flags[key]) {
-					checkProcess = true;
-				}
-			}
-			if (checkProcess) {
-				clearTimeout(processTimer);
-				processTimer = setTimeout(getProcesses, 10000);
-			}
 		}
 	};
 
