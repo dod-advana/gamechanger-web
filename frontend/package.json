@@ -101,7 +101,7 @@
 		"mochawesome-merge": "^4.2.1",
 		"mochawesome-report-generator": "^6.2.0",
 		"prettier": "^2.6.1",
-		"sonarqube-scanner": "^2.5.0",
+		"sonarqube-scanner": "2.8.1",
 		"source-map-explorer": "^2.5.2",
 		"typescript": "^4.4.3"
 	},
