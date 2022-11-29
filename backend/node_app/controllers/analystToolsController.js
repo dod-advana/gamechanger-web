@@ -80,7 +80,8 @@ class AnalystToolsController {
 					this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, paragraph.id, userId)
 				);
 				const paragraphResults = await Promise.all(paragraphSearches);
-				console.log(`Post ML API call: ${paragraphResults}`);
+				console.log(`Post ML API call:`);
+				console.log(paragraphResults);
 
 				paragraphResults.forEach((para) => {
 					Object.keys(para).forEach((id) => {
@@ -103,7 +104,8 @@ class AnalystToolsController {
 					esQuery,
 					userId
 				);
-				console.log(`Post ES query: ${esResults}`);
+				console.log(`Post ES query:`);
+				console.log(esResults);
 
 				// Aggregate Data
 				console.log(`Pre cleanUpEsResults`);
@@ -118,7 +120,8 @@ class AnalystToolsController {
 					isCompareReturn: true,
 					paragraphResults: resultsObject,
 				});
-				console.log(`Post cleanUpEsResults: ${returnData}`);
+				console.log(`Post cleanUpEsResults:`);
+				console.log(returnData);
 
 				if (cloneName !== 'eda') {
 					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
