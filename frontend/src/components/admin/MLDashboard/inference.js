@@ -10,7 +10,6 @@ import GCButton from '../../common/GCButton';
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import GCPrimaryButton from '../../common/GCButton';
 import Processes from './processes';
 
 import './index.scss';
@@ -83,16 +82,14 @@ const checkFlag = (flag, props) => {
  */
 const getAllProcessData = (props) => {
 	const processList = [];
-	if (props.processes.process_status) {
-		for (const key in props.processes.process_status) {
-			const status = key !== 'flags' ? props.processes.process_status[key]['container'] : '';
-			if (status !== 'training' && key !== 'flags') {
-				processList.push({
-					...props.processes.process_status[key],
-					thread_id: key,
-					date: 'Currently Running',
-				});
-			}
+	for (const key in props.processes.process_status) {
+		const status = key !== 'flags' ? props.processes.process_status[key]['container'] : '';
+		if (status !== 'training' && key !== 'flags') {
+			processList.push({
+				...props.processes.process_status[key],
+				thread_id: key,
+				date: 'Currently Running',
+			});
 		}
 	}
 	if (props.processes.completed_process) {
@@ -452,9 +449,7 @@ export default (props) => {
 	const getLastQueried = () => {
 		let mostRecent = '';
 		for (const message of props.apiErrors) {
-			if (mostRecent === '') {
-				mostRecent = message.timeStamp;
-			} else if (Date.parse(message.timeStamp) > Date.parse(mostRecent)) {
+			if (mostRecent === '' || Date.parse(message.timeStamp) > Date.parse(mostRecent)) {
 				mostRecent = message.timeStamp;
 			}
 		}
@@ -475,7 +470,6 @@ export default (props) => {
 				error = true;
 			}
 		}
-		//setLastQueried(new Date(Date.now()).toLocaleString());
 		if (success && error) {
 			return 1;
 		} else if (!success && error) {
@@ -575,14 +569,14 @@ export default (props) => {
 			>
 				<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>General Information</p>
 
-				<GCPrimaryButton
+				<GCButton
 					onClick={() => {
 						onload();
 					}}
 					style={{ minWidth: 'unset' }}
 				>
 					Refresh
-				</GCPrimaryButton>
+				</GCButton>
 			</div>
 			<div>
 				<div>
@@ -761,7 +755,7 @@ export default (props) => {
 											<pre className="code-block">
 												<code>{row.original.config}</code>
 											</pre>
-											<GCPrimaryButton
+											<GCButton
 												onClick={() => {
 													setDeleteModal({
 														show: true,
@@ -772,7 +766,7 @@ export default (props) => {
 												style={{ float: 'left', minWidth: 'unset' }}
 											>
 												Delete
-											</GCPrimaryButton>
+											</GCButton>
 										</div>
 									);
 								}}
@@ -805,7 +799,7 @@ export default (props) => {
 					>
 						<b>Reload Models</b>
 						<br />
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								triggerReloadModels(
 									props,
@@ -820,7 +814,7 @@ export default (props) => {
 							style={{ float: 'right', minWidth: 'unset' }}
 						>
 							Reload
-						</GCPrimaryButton>
+						</GCButton>
 						<div>
 							<div>
 								<div style={{ width: '120px', display: 'inline-block' }}>SENTENCE EMBEDDINGS:</div>
@@ -988,22 +982,22 @@ export default (props) => {
 								}}
 							/>
 						</div>
-						<GCPrimaryButton
+						<GCButton
 							onClick={() => {
 								clearSelectCache(props, selectedCache, setSelectedCache, setCacheOptions);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
 							Clear Selected Cache
-						</GCPrimaryButton>
-						<GCPrimaryButton
+						</GCButton>
+						<GCButton
 							onClick={() => {
 								clearAllCache(props, setSelectedCache, setCacheOptions);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
 							Clear All Cache
-						</GCPrimaryButton>
+						</GCButton>
 					</div>
 				</BorderDiv>
 			</div>
