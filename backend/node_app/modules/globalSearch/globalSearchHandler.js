@@ -24,7 +24,7 @@ class GlobalSearchHandler extends SearchHandler {
 			database = databaseFile,
 			dcUtils = dataCatalogUtils,
 			dataLibrary = new DataLibrary(opts),
-            redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
+            // redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
@@ -33,7 +33,7 @@ class GlobalSearchHandler extends SearchHandler {
 		this.database = database;
 		this.dcUtils = dcUtils;
 		this.dataLibrary = dataLibrary;
-        this.redisDB = redisDB;
+        // this.redisDB = redisDB;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
