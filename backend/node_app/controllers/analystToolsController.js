@@ -75,13 +75,10 @@ class AnalystToolsController {
 				}
 			} else {
 				// ML API Call Goes Here
-				console.log(`Pre ML api call`);
 				const paragraphSearches = paragraphs.map((paragraph) =>
 					this.mlApi.getSentenceTransformerResultsForCompare(paragraph.text, paragraph.id, userId)
 				);
 				const paragraphResults = await Promise.all(paragraphSearches);
-				console.log(`Post ML API call:`);
-				console.log(paragraphResults);
 
 				paragraphResults.forEach((para) => {
 					Object.keys(para).forEach((id) => {
@@ -97,18 +94,14 @@ class AnalystToolsController {
 				const ids = Object.keys(resultsObject);
 				// Query ES
 				esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
-				console.log(`Pre ES query`);
 				esResults = await this.dataLibrary.queryElasticSearch(
 					clientObj.esClientName,
 					clientObj.esIndex,
 					esQuery,
 					userId
 				);
-				console.log(`Post ES query:`);
-				console.log(esResults);
 
 				// Aggregate Data
-				console.log(`Pre cleanUpEsResults`);
 				returnData = this.searchUtility.cleanUpEsResults({
 					raw: esResults,
 					searchTerms: [],
@@ -120,8 +113,6 @@ class AnalystToolsController {
 					isCompareReturn: true,
 					paragraphResults: resultsObject,
 				});
-				console.log(`Post cleanUpEsResults:`);
-				console.log(returnData);
 
 				if (cloneName !== 'eda') {
 					const cleanedDocs = returnData.docs.filter((doc) => doc?.paragraphs?.length > 0);
