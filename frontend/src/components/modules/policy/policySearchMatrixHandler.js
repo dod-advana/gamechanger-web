@@ -391,7 +391,7 @@ const renderStatus = (state, dispatch, classes) => {
 					<FormControlLabel
 						name="Include Archived Congressional Documents"
 						value="Include Archived Congressional Documents"
-						classes={{ label: classes.titleText }}
+						classes={{ label: classes.checkboxText }}
 						control={
 							<Checkbox
 								classes={{ root: classes.filterBox }}
@@ -400,19 +400,17 @@ const renderStatus = (state, dispatch, classes) => {
 								checked={state.searchSettings.archivedCongressSelected || false}
 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name="Include Archived Congressional Documents"
-								style={styles.filterBox}
 							/>
 						}
 						label="Include Archived Congressional Documents"
 						labelPlacement="end"
-						style={styles.titleText}
 					/>
 				</FormGroup>
 				<FormGroup row style={{ marginBottom: '0px' }}>
 					<FormControlLabel
 						name="Revoked Docs"
 						value="Revoked Docs"
-						classes={{ label: classes.titleText }}
+						classes={{ label: classes.checkboxText }}
 						control={
 							<Checkbox
 								classes={{ root: classes.filterBox }}

@@ -226,8 +226,8 @@ const renderStatus = (state, dispatch, classes) => {
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '0px' }}>
 					<FormControlLabel
-						name="Revoked Docs"
-						value="Revoked Docs"
+						name="Include Canceled Documents"
+						value="Include Canceled Documents"
 						classes={{ label: classes.titleText }}
 						control={
 							<Checkbox
@@ -236,7 +236,7 @@ const renderStatus = (state, dispatch, classes) => {
 								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.analystToolsSearchSettings.includeRevoked}
 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name="Revoked Docs"
+								name="Include Canceled Documents"
 							/>
 						}
 						label="Include Canceled Documents"
