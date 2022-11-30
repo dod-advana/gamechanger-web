@@ -37,9 +37,7 @@ const SearchTabBar = (props) => {
 	return (
 		<div style={{ ...styles.container, ...containerStyles }}>
 			<div style={styles.left}>
-				{document.title !== 'ADVANA | GAMECHANGER' && (
-					<JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} />
-				)}
+				<JumpButton style={{ marginTop: 0 }} reverse={true} label="Back to Home" action={returnHome} />
 			</div>
 
 			<div style={styles.tabsContainer} data-cy="tabs-container">
