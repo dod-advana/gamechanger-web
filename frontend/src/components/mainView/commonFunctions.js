@@ -116,12 +116,7 @@ export const getUserProfilePage = (displayUserRelatedItems, gameChangerUserAPI, 
 			getAppRelatedUserData={() => {}}
 			updateAppRelatedUserData={() => {}}
 			displayCustomAppContent={displayUserRelatedItems}
-			style={{
-				width: '100%',
-				padding: '15px 22px 15px 30px',
-				marginBottom: '-6px',
-				minHeight: 'calc(100vh - 245px)',
-			}}
+			style={{ width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)' }}
 			primaryColor={primaryColor || '#1C2D65'}
 			secondaryColor={secondaryColor || '#8091A5'}
 		/>
