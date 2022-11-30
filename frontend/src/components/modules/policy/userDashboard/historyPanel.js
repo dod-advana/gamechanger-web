@@ -781,7 +781,7 @@ const HistoryPanel = ({
 				{renderExportHistory()}
 			</GCAccordion>
 
-			<GCAccordion expanded={false} header={'SEARCH HISTORY'} itemCount={searchHistory.length}>
+			<GCAccordion expanded={true} header={'SEARCH HISTORY'} itemCount={searchHistory.length}>
 				{renderSearchHistory()}
 			</GCAccordion>
 		</div>
