@@ -88,7 +88,7 @@ const initState = {
 	loading: false,
 	isResetting: false,
 	documentProperties: [],
-	pageDisplayed: 'userDashboard',
+	pageDisplayed: 'main',
 	analystToolsPageDisplayed: '',
 	listView: false,
 
@@ -306,7 +306,7 @@ function reducer(state, action) {
 			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
 			return newState;
 		case 'RESET_STATE':
-			window.location.href = `#/${state.cloneData.url}/userDashboard`;
+			window.location.href = `#/${state.cloneData.url}`;
 			return {
 				...initState,
 				searchSettings: state.searchSettings,

@@ -568,7 +568,7 @@ const renderHideTabs = (props) => {
 							}}
 						>
 							{item.name}
-							{/* <i
+							<i
 								className={item.favorite ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
 									color: item.favorite ? '#E9691D' : 'rgb(224,224,224)',
@@ -580,7 +580,7 @@ const renderHideTabs = (props) => {
 									event.stopPropagation();
 									handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
 								}}
-							/> */}
+							/>
 						</div>
 					))}
 				</GameChangerThumbnailRow>
