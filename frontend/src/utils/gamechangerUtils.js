@@ -440,7 +440,7 @@ const crawlerMapping = {
 	dfar_subpart_regs: ['Defense Federal Acquisition Regulation'],
 	far_subpart_regs: ['Federal Acquisition Regulation'],
 	Chief_National_Guard_Bureau_Instructions: ['National Guard Bureau Instructions'],
-	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board'],
+	code_of_federal_regulations: ['Code of Federal Regulations'],
 };
 export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
