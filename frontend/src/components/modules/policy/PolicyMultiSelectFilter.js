@@ -26,11 +26,7 @@ const PolicyMultiSelectFilter = ({
 
 	const handleFilterChange = (event) => {
 		const newSearchSettings = structuredClone(state[searchSettingsName]);
-		if (state[searchSettingsName][allSelected]) {
-			newSearchSettings[allSelected] = false;
-			newSearchSettings[specificSelected] = true;
-			setShowClear(true);
-		}
+
 		let name = showNumResultsPerOption
 			? event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1)
 			: event.target.name;
@@ -38,17 +34,27 @@ const PolicyMultiSelectFilter = ({
 			...newSearchSettings[filter],
 			[name]: event.target.checked,
 		};
+
+		const noFiltersSelected = Object.values(newSearchSettings[filter]).filter((value) => value).length === 0;
 		const allAvailableSelected = originalFilters.reduce(
 			(availableSelected, originalFilter) =>
 				availableSelected && (!originalFilter[1] || newSearchSettings[filter][originalFilter[0]]),
 			true
 		);
-
-		if (allAvailableSelected) {
+		if (noFiltersSelected) {
 			newSearchSettings[allSelected] = true;
 			newSearchSettings[specificSelected] = false;
 			setShowClear(false);
+		} else if (allAvailableSelected) {
+			newSearchSettings[allSelected] = true;
+			newSearchSettings[specificSelected] = false;
+			setShowClear(true);
+		} else {
+			newSearchSettings[allSelected] = false;
+			newSearchSettings[specificSelected] = true;
+			setShowClear(true);
 		}
+
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
 		setState(dispatch, {
