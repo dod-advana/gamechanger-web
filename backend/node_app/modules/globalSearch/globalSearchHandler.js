@@ -93,7 +93,8 @@ class GlobalSearchHandler extends SearchHandler {
 						limit,
 						favoriteApps,
 						isForFavorites,
-						userId
+						userId,
+						cloneSpecificObject
 					);
 					break;
 				case 'dataSources':
@@ -208,7 +209,7 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
+	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId, cloneSpecificObject) {
 		try {
 			const t0 = new Date().getTime();
 			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX };
@@ -237,7 +238,8 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
-			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, {});
+			// get user apps from Qlik
+			const userApps = this.getUserApps(userId, cloneSpecificObject);
 
 			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
@@ -247,6 +249,31 @@ class GlobalSearchHandler extends SearchHandler {
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
+		}
+	}
+
+	/* Helper method for getDashboardResults */
+	async getUserApps(userId, cloneSpecificObject) {
+		// generate redis key
+		const redisKey = this.searchUtility.createCacheKeyFromOptions({
+			type: 'globalSearchUserApps',
+			userId,
+			cloneSpecificObject,
+		});
+
+		// get cached results
+		await this.redisDB.select(this.redisClientDB);
+		const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
+
+		// if cache exists, return cached results
+		// else get user apps from API and create cache and store
+		if (cachedResults) {
+			return cachedResults;
+		} else {
+			const userApps = await getQlikApps(getUserIdFromSAMLUserId(userId, false), this.logger, false, {});
+			await this.redisDB.set(redisKey, JSON.stringify(userApps), 'EX', 43200); // in seconds
+
+			return userApps;
 		}
 	}
 
