@@ -107,6 +107,7 @@ module.exports = Object.freeze({
 		favoriteSearchPollInterval: process.env.GAMECHANGER_FAVORITE_SEARCH_POLL_INTERVAL,
 	},
 	GAMECHANGER_ML_API_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_HOST}:5000`,
+	GAMECHANGER_ML_API_TRAIN_BASE_URL: `http://${process.env.GAMECHANGER_ML_API_TRAIN_HOST}`,
 	ADVANA_EMAIL_CONTACT_NAME: process.env.EMAIL_FROM_NAME || 'Advana Do Not Reply',
 	ADVANA_NOREPLY_EMAIL_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@boozallencsn.com',
 	ADVANA_EMAIL_TRANSPORT_OPTIONS: {
@@ -141,6 +142,7 @@ module.exports = Object.freeze({
 		password: process.env.EDA_ELASTICSEARCH_PASSWORD || 'password',
 		ca: process.env.EDA_ELASTICSEARCH_CA ? process.env.EDA_ELASTICSEARCH_CA.replace(/\\n/g, '\n') : '',
 		index: process.env.EDA_ELASTICSEARCH_INDEX || 'eda',
+		filterPicklistIndex: process.env.EDA_ELASTICSEARCH_FILTER_PICKLIST_INDEX || 'gc_eda_picklist',
 		extSearchFields: ['*_eda_ext'], //['acomod_eda_ext','product_or_service_line_item_eda_ext'],
 		extRetrieveFields: ['*_eda_ext'],
 		// index: 'eda'
