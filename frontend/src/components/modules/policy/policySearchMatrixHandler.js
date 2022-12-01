@@ -424,6 +424,12 @@ const handleRevokedChange = (event, state, dispatch) => {
 		runSearch: true,
 		runGraphSearch: true,
 	});
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'StatusFilterToggle',
+		'IncludeCanceledDocuments',
+		event.target.checked ? 1 : 0
+	);
 };
 
 const renderStatus = (state, dispatch, classes) => {
