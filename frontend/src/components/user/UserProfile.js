@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, FormControl, Grid, Input, InputAdornment, InputLabel, Typography } from '@material-ui/core';
+import { /*Avatar,*/ FormControl, Grid, Input, InputAdornment, InputLabel, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { styled as muiStyled } from '@mui/material/styles';
-import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
+// import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import PersonIcon from '@mui/icons-material/Person';
 import WorkIcon from '@mui/icons-material/Work';
@@ -22,27 +22,27 @@ const StyledUserProfileDataDiv = styled.div`
 	box-shadow: 0px 3px 6px ${'#00000029'};
 	width: 100%;
 	height: 100%;
-	
+
 	& .user-picture {
 		padding-top: 20px;
-	
+
 		& .user-name {
 			font-family: Montserrat;
 			font-weight: bold;
 			font-size: 24px;
-			color: ${'#000000DE'}
-			margin-top: 20px;
+			color: ${'#000000DE'};
+			margin-bottom: 20px;
 		}
 	}
-	
+
 	& .user-data {
 		margin-left: 30px;
 	}
-	
+
 	& .user-edit-button {
 		margin-bottom: 20px;
 	}
-	
+
 	.input-field {
 		margin-bottom: 12px;
 	}
@@ -277,7 +277,7 @@ const UserProfile = React.memo((props) => {
 							alignItems="center"
 							className={'user-picture'}
 						>
-							<Avatar src={ProfileDefaultImg} alt="profile-pic" className={classes.bigAvatar} />
+							{/* <Avatar src={ProfileDefaultImg} alt="profile-pic" className={classes.bigAvatar} /> */}
 							<Typography className={'user-name'}>
 								{userData.preferred_name || `${userData.first_name || ''} ${userData.last_name || ''}`}
 							</Typography>
