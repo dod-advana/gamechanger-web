@@ -144,6 +144,12 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 };
 
 const handleSelectArchivedCongress = (event, state, dispatch) => {
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'TypeFilterToggle',
+		'ArchivedCongress',
+		event.target.checked ? 1 : 0
+	);
 	const newSearchSettings = structuredClone(state.searchSettings);
 	newSearchSettings.archivedCongressSelected = event.target.checked;
 	newSearchSettings.isFilterUpdate = true;
