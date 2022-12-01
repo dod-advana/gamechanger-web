@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import Config from '../../config/config';
 import MatomoReactRouter from 'piwik-react-router';
 import SparkMD5 from 'spark-md5';
-import { CustomDimension } from './utils/customDimensions';
 
 const MATOMO_LINK = Config.MATOMO_LINK;
 const MATOMO_SITE_ID = Config.MATOMO_SITE_ID;

@@ -350,7 +350,6 @@ class ResponsibilityAssist extends Component {
 			'PDFOpen',
 			null,
 			makeCustomDimensions(filename, pageNumber)
-
 		);
 		let searchTextArray;
 		let tempSearchText;
