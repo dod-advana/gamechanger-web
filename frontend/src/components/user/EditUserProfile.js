@@ -10,15 +10,15 @@ import {
 	Button,
 	DialogActions,
 	Grid,
-	Avatar,
+	// Avatar,
 	Box,
 	TextField,
 	Stack,
-	Badge,
+	// Badge,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 // import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
+// import ProfileDefaultImg from '../../images/logos/account_circle_black_24dp.png';
 import { convertHexToRgbA } from '../../utils/gamechangerUtils';
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
@@ -112,7 +112,7 @@ const StyledTextField = muiStyled(TextField)({
 // 	})
 // ));
 
-const REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'organization', 'country'];
+// const REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'organization', 'country'];
 
 const EditUserProfile = React.memo((props) => {
 	const {
@@ -155,12 +155,12 @@ const EditUserProfile = React.memo((props) => {
 		let hasErrors = false;
 
 		// Check required fields are filled in
-		REQUIRED_FIELDS.forEach((reqField) => {
-			if (!editUserData[reqField] || editUserData[reqField] === null || editUserData[reqField] === '') {
-				tmpData[reqField] = true;
-				hasErrors = true;
-			}
-		});
+		// REQUIRED_FIELDS.forEach((reqField) => {
+		// 	if (!editUserData[reqField] || editUserData[reqField] === null || editUserData[reqField] === '') {
+		// 		tmpData[reqField] = true;
+		// 		hasErrors = true;
+		// 	}
+		// });
 
 		setUserDataErrors(tmpData);
 		console.log(tmpData);
@@ -213,7 +213,7 @@ const EditUserProfile = React.memo((props) => {
 					Use the form below to edit your profile information
 				</Typography>
 				<StyledGrid container>
-					<Grid container justify="center" item xs={2} sx={{ p: 2, justifyContent: 'center' }}>
+					{/* <Grid container justify="center" item xs={2} sx={{ p: 2, justifyContent: 'center' }}>
 						<Badge
 							overlap="circular"
 							anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -230,7 +230,7 @@ const EditUserProfile = React.memo((props) => {
 								sx={{ width: 145, height: 145, marginTop: 5 }}
 							/>
 						</Badge>
-					</Grid>
+					</Grid> */}
 					<Grid item xs={10} sx={{ p: 2 }}>
 						<Typography
 							style={{ fontFamily: 'Montserrat', fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}
@@ -242,7 +242,7 @@ const EditUserProfile = React.memo((props) => {
 							<Stack spacing={2}>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('preferred_name')}
+										// required={REQUIRED_FIELDS.includes('preferred_name')}
 										error={userDataErrors['preferred_name']}
 										label="Preferred Name"
 										variant="outlined"
@@ -253,7 +253,7 @@ const EditUserProfile = React.memo((props) => {
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('first_name')}
+										// required={REQUIRED_FIELDS.includes('first_name')}
 										error={userDataErrors['first_name']}
 										label="First Name"
 										variant="outlined"
@@ -262,7 +262,7 @@ const EditUserProfile = React.memo((props) => {
 										data-cy="firstName"
 									/>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('last_name')}
+										// required={REQUIRED_FIELDS.includes('last_name')}
 										error={userDataErrors['last_name']}
 										label="Last Name"
 										variant="outlined"
@@ -273,7 +273,7 @@ const EditUserProfile = React.memo((props) => {
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('email')}
+										// required={REQUIRED_FIELDS.includes('email')}
 										error={userDataErrors['email']}
 										label="Email"
 										variant="outlined"
@@ -283,7 +283,7 @@ const EditUserProfile = React.memo((props) => {
 										data-cy="email"
 									/>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('phone_number')}
+										// required={REQUIRED_FIELDS.includes('phone_number')}
 										error={userDataErrors['phone_number']}
 										label="Phone"
 										variant="outlined"
@@ -294,7 +294,7 @@ const EditUserProfile = React.memo((props) => {
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('organization')}
+										// required={REQUIRED_FIELDS.includes('organization')}
 										error={userDataErrors['organization']}
 										label="Agency/Organization"
 										variant="outlined"
@@ -303,7 +303,7 @@ const EditUserProfile = React.memo((props) => {
 										sx={{ width: 440 }}
 									/>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('sub_office')}
+										// required={REQUIRED_FIELDS.includes('sub_office')}
 										error={userDataErrors['sub_office']}
 										label="Sub-Office"
 										variant="outlined"
@@ -324,7 +324,7 @@ const EditUserProfile = React.memo((props) => {
 								</Typography>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('country')}
+										// required={REQUIRED_FIELDS.includes('country')}
 										error={userDataErrors['country']}
 										label="Country"
 										variant="outlined"
@@ -333,7 +333,7 @@ const EditUserProfile = React.memo((props) => {
 										sx={{ width: 340 }}
 									/>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('state')}
+										// required={REQUIRED_FIELDS.includes('state')}
 										error={userDataErrors['state']}
 										label="State"
 										variant="outlined"
@@ -342,7 +342,7 @@ const EditUserProfile = React.memo((props) => {
 										sx={{ width: 340 }}
 									/>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('city')}
+										// required={REQUIRED_FIELDS.includes('city')}
 										error={userDataErrors['city']}
 										label="City"
 										variant="outlined"
@@ -353,7 +353,7 @@ const EditUserProfile = React.memo((props) => {
 								</Stack>
 								<Stack direction={'row'} spacing={2}>
 									<StyledTextField
-										required={REQUIRED_FIELDS.includes('job_title')}
+										// required={REQUIRED_FIELDS.includes('job_title')}
 										error={userDataErrors['job_title']}
 										label="Job Title"
 										variant="outlined"
