@@ -85,6 +85,8 @@ const PolicyViewHeaderHandler = (props) => {
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
 
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
+
 	useEffect(() => {
 		if (IS_EDGE) {
 			setDropdownValue('List');
@@ -115,6 +117,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeSort = (event) => {
+		trackEvent(trackingCategory, 'ChangeSortSelection', event.target.value);
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.isFilterUpdate = true;
 		const {
@@ -146,6 +149,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeView = (event) => {
+		trackEvent(trackingCategory, 'ChangeResultsView', event.target.value);
 		const {
 			target: { value },
 		} = event;
