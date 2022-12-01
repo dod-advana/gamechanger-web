@@ -2,6 +2,7 @@ import _ from 'underscore';
 import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
+import { makeCustomDimensions } from '../components/telemetry/utils/customDimensions';
 import Config from '../config/config.js';
 import { useEffect } from 'react';
 import styled from 'styled-components';
@@ -726,7 +727,13 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 				text = doc.selection.createRange().text;
 			}
 			if (text !== '') {
-				trackEvent(getTrackingNameForFactory(cloneName), 'Highlight', filename);
+				trackEvent(
+					getTrackingNameForFactory(cloneName),
+					'Highlight',
+					filename,
+					null,
+					makeCustomDimensions(filename)
+				);
 				gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
 			}
 		});
@@ -735,7 +742,13 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 
 const handleOnScroll = (distance, filename, category) => {
 	if (filename) {
-		trackEvent(category, distance > 0 ? 'onScrollUp' : 'onScrollDown', filename, distance);
+		trackEvent(
+			category,
+			distance > 0 ? 'onScrollUp' : 'onScrollDown',
+			filename,
+			distance,
+			makeCustomDimensions(filename)
+		);
 	}
 };
 
