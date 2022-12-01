@@ -12,7 +12,6 @@ const databaseFile = require('../../models/game_changer');
 const { getUserIdFromSAMLUserId } = require('../../utils/userUtility');
 const { getQlikApps, getElasticSearchQueryForQlikApps, cleanQlikESResults } = require('./globalSearchUtils');
 const { DataLibrary } = require('../../lib/dataLibrary');
-const asyncRedisLib = require('async-redis');
 
 const redisAsyncClientDB = 7;
 
@@ -24,7 +23,6 @@ class GlobalSearchHandler extends SearchHandler {
 			database = databaseFile,
 			dcUtils = dataCatalogUtils,
 			dataLibrary = new DataLibrary(opts),
-            // redisDB = asyncRedisLib.createClient(process.env.REDIS_URL || 'redis://localhost'),
 		} = opts;
 		super({ redisClientDB: redisAsyncClientDB, ...opts });
 
@@ -33,7 +31,6 @@ class GlobalSearchHandler extends SearchHandler {
 		this.database = database;
 		this.dcUtils = dcUtils;
 		this.dataLibrary = dataLibrary;
-        // this.redisDB = redisDB;
 	}
 
 	async searchHelper(req, userId, storeHistory) {
@@ -97,7 +94,7 @@ class GlobalSearchHandler extends SearchHandler {
 						favoriteApps,
 						isForFavorites,
 						userId,
-                        cloneSpecificObject
+						cloneSpecificObject
 					);
 					break;
 				case 'dataSources':
@@ -241,8 +238,8 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
-            // get user apps from Qlik
-            const userApps = this.getUserApps(userId, cloneSpecificObject);
+			// get user apps from Qlik
+			const userApps = this.getUserApps(userId, cloneSpecificObject);
 
 			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
@@ -255,26 +252,30 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-    /* Helper method for getDashboardResults */
-    async getUserApps(userId, cloneSpecificObject) {
-        // generate redis key
-        const redisKey = this.searchUtility.createCacheKeyFromOptions({ type: "globalSearchUserApps", userId, cloneSpecificObject });
+	/* Helper method for getDashboardResults */
+	async getUserApps(userId, cloneSpecificObject) {
+		// generate redis key
+		const redisKey = this.searchUtility.createCacheKeyFromOptions({
+			type: 'globalSearchUserApps',
+			userId,
+			cloneSpecificObject,
+		});
 
-        // get cached results
-        await this.redisDB.select(this.redisClientDB);
-        const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
+		// get cached results
+		await this.redisDB.select(this.redisClientDB);
+		const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
 
-        // if cache exists, return cached results
-        // else get user apps from API and create cache and store
-        if(cachedResults) {
-            return cachedResults;
-        } else {
-            const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, {});
-            await this.redisDB.set(redisKey, JSON.stringify(userApps), 'EX', 43200); // in seconds
+		// if cache exists, return cached results
+		// else get user apps from API and create cache and store
+		if (cachedResults) {
+			return cachedResults;
+		} else {
+			const userApps = await getQlikApps(getUserIdFromSAMLUserId(userId, false), this.logger, false, {});
+			await this.redisDB.set(redisKey, JSON.stringify(userApps), 'EX', 43200); // in seconds
 
-            return userApps;
-        }
-    }
+			return userApps;
+		}
+	}
 
 	async getDataCatalogResults(searchText, offset, limit, favoriteApps, isForFavorites, userId, searchType = 'all') {
 		const t0 = new Date().getTime();
