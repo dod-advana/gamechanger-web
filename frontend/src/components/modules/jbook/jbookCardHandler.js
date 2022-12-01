@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import { CARD_FONT_SIZE, getTrackingNameForFactory, encode } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
@@ -23,6 +23,7 @@ import {
 	StyledListViewFrontCardContent,
 	RevokedTag,
 } from '../default/defaultCardHandler';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
@@ -241,9 +242,13 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 };
 
 const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen',
+		null,
+		makeCustomDimensions(filename, pageNumber)
+	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 	);
@@ -1049,12 +1054,7 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
+							trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 							setToggledMore(!toggledMore);
 						}}
 					>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { DidYouMean } from '../searchBar/SearchBarStyledComponents';
 import MagellanTrendingLinkList from '../common/MagellanTrendingLinkList';
@@ -8,7 +9,13 @@ import { styles } from './commonStyles';
 import UserProfile from '../user/UserProfile';
 
 export const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'SuggestionSelected',
+		'DidYouMean',
+		null,
+		makeCustomDimensions(didYouMean)
+	);
 	setState(dispatch, { searchText: didYouMean, runSearch: true });
 };
 
@@ -40,7 +47,7 @@ export const renderHideTabs = (props) => {
 	}
 
 	const handleLinkListItemClick = (searchText) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', searchText);
 		setState(dispatch, {
 			searchText,
 			autoCompleteItems: [],

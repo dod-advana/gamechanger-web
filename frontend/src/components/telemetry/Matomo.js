@@ -1,7 +1,6 @@
 import Auth from '@dod-advana/advana-platform-ui/dist/utilities/Auth';
 import React, { useEffect } from 'react';
 import Config from '../../config/config';
-
 import MatomoReactRouter from 'piwik-react-router';
 import SparkMD5 from 'spark-md5';
 
@@ -102,11 +101,14 @@ export function trackPageView(documentTitle, customDimensions) {
 
 /***
  * Tracks the event and sends the provided data to Matomo.
- * @param category TODO
- * @param action TODO
- * @param name TODO
- * @param value TODO
- * @param customDimensions: false or an array of customDimensions.
+ *
+ * @param {string} category - Event category. Use a GAMECHANGER clone name.
+ * @param {string} action - Event action.
+ * @param {string} name - Event name.
+ * @param {Number} value - Event value. Non-number value will be ignored by Matomo.
+ * @param {CustomDimension[]} - Custom dimensions for the event. See
+ * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ *
  */
 export function trackEvent(category, action, name, value, customDimensions) {
 	try {
@@ -126,6 +128,37 @@ export function trackEvent(category, action, name, value, customDimensions) {
 	} catch (error) {
 		// Nothing
 	}
+}
+
+/**
+ * Track an event in Matomo when a card is flipped.
+ *
+ * @param {string} category - Event category. Use a GAMECHANGER clone name.
+ * @param {boolean} toggledOverview - True if the card was flipped from the
+ * 		'Overview' side, false if it was flipped from the 'More' side.
+ * @param {CustomDimension[]} - Custom dimensions for the event. See
+ * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ */
+export function trackFlipCardEvent(category, toggledOverview, customDimensions) {
+	trackEvent(category, 'CardInteraction', `flipCard${toggledOverview ? 'Overview' : 'More'}`, null, customDimensions);
+}
+
+/***
+ * Track an event in Matomo when a (left or right) panel is opened or closed.
+ *
+ * @param {string} category - Event category. Use a GAMECHANGER clone name.
+ * @param {string} action - Event action.
+ * @param {boolean} isLeft - True if the left panel was toggled, false if the
+ *		right panel was toggled.
+ * @param {boolean} wasOpen - True if the panel was open when the event occurred,
+ *		false if the panel was closed when the event occurred.
+ * @param {CustomDimension[]} - Custom dimensions for the event. See
+ * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ */
+export function trackLeftRightPanelToggle(category, action, isLeft, wasOpen, customDimensions) {
+	const panelDirection = isLeft ? 'Left' : 'Right';
+	const panelState = wasOpen ? 'Close' : 'Open';
+	trackEvent(category, action, `${panelDirection}PanelToggle${panelState}`, null, customDimensions);
 }
 
 /***
