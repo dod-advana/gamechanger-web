@@ -44,6 +44,17 @@ export default function ResponsibilityFilters({
 }) {
 	const [clearFilters, setClearFilters] = useState(false);
 
+	const handleRespFilterChange = (e) => {
+		if (e.target.value) {
+			setResponsibilityText({
+				id: 'responsibilityText',
+				value: e.target.value,
+			});
+		} else {
+			setResponsibilityText({});
+		}
+	};
+
 	const classes = useStyles();
 
 	return (
@@ -77,6 +88,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={documentList}
+								disableClearable
 								getOptionLabel={(option) => option.documentTitle}
 								defaultValue={docTitle}
 								onChange={(_event, newValue) => {
@@ -97,13 +109,15 @@ export default function ResponsibilityFilters({
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<AccordianWrapper>
 						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false}
+							expanded={
+								filters.find((filter) => filter.id === 'organizationPersonnelText') ? true : false
+							}
 							header={
 								<span>
 									ENTITY{' '}
-									{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+									{filters.filter((f) => f.id === 'organizationPersonnelText').length ? (
 										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'organizationPersonnel').length
+											filters.filter((f) => f.id === 'organizationPersonnelText').length
 										})`}</span>
 									) : (
 										''
@@ -119,6 +133,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={[]}
+								disableClearable
 								freeSolo
 								autoSelect
 								getOptionLabel={(option) => option}
@@ -165,12 +180,7 @@ export default function ResponsibilityFilters({
 									variant="outlined"
 									placeholder="Responsibility Text"
 									value={responsibilityText?.value || ''}
-									onChange={(e) =>
-										setResponsibilityText({
-											id: 'responsibilityText',
-											value: e.target.value,
-										})
-									}
+									onChange={handleRespFilterChange}
 								/>
 							</div>
 						</GCAccordion>
@@ -196,7 +206,7 @@ export default function ResponsibilityFilters({
 							if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 							if (organization.length) {
 								organization.forEach((org) => {
-									newFilters.push({ id: 'organizationPersonnel', value: org });
+									newFilters.push({ id: 'organizationPersonnelText', value: org });
 								});
 							}
 							if (docTitle.length) {

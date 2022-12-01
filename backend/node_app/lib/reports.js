@@ -151,9 +151,9 @@ class Reports {
 					docData.totalCost,
 					docData.by1Request ?? 'N/A',
 					docData.proj_fund_by2_d ?? docData.p4082_toa_by2_d ?? 'N/A',
-					docData.proj_fund_by3_d ?? docData.p4082_toa_by3_d ?? 'N/A',
-					docData.proj_fund_by4_d ?? docData.p4082_toa_by4_d ?? 'N/A',
-					docData.proj_fund_by5_d ?? docData.p4082_toa_by5_d ?? 'N/A',
+					docData.proj_fund_by3_d ?? docData.p4083_toa_by3_d ?? 'N/A',
+					docData.proj_fund_by4_d ?? docData.p4084_toa_by4_d ?? 'N/A',
+					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? 'N/A',
 					docData.hasKeywords ? 'Yes' : 'No',
 					docData.primary_reviewer_s,
 					docData.service_reviewer_s,
@@ -236,6 +236,7 @@ class Reports {
 
 			doc.end();
 		} catch (e) {
+			callback('', true);
 			this.logger.error(e);
 			this.logger.error(e.message, 'KRx98r2', userId);
 		}
@@ -442,7 +443,39 @@ class Reports {
 
 	async constructProfilePagePDF(fullData, userId, showPOC = true) {
 		const img = path.resolve(__dirname, './ProfilePagePDFImages/cdao_logo.png');
-		let currentYear = new Date().getFullYear();
+		const date = new Date();
+		let currentYear = date.getFullYear();
+		const month = [
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December',
+		];
+		const nth = (day) => {
+			if (day > 3 && day < 21) {
+				return day + 'th';
+			}
+			switch (day % 10) {
+				case 1:
+					return day + 'st';
+				case 2:
+					return day + 'nd';
+				case 3:
+					return day + 'rd';
+				default:
+					return day + 'th';
+			}
+		};
+		let currentMonth = month[date.getMonth()];
+		let currentDay = nth(date.getDate());
 
 		// Define base document
 		let doc = {
@@ -457,7 +490,7 @@ class Reports {
 							marginBottom: 5,
 						},
 						{
-							text: `JBook Search Results Baseline Assessment - Fiscal Year (FY) ${currentYear}`,
+							text: `JBook Search Results | ${currentMonth} ${currentDay}, ${currentYear}`,
 							alignment: 'center',
 							marginTop: 4,
 							marginBottom: 5,
@@ -811,11 +844,11 @@ class Reports {
 			tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
 			const areas2 =
 				docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
-					? docData.pocJointCapabilityArea2.split(', ')
+					? docData.pocJointCapabilityArea2
 					: [];
 			const areas3 =
 				docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
-					? docData.pocJointCapabilityArea3.split(', ')
+					? docData.pocJointCapabilityArea3
 					: [];
 			const areasCombined = {};
 			areas2.forEach((area2) => {
@@ -972,6 +1005,18 @@ class Reports {
 						subheader,
 						[
 							{
+								text: 'Budget Year',
+								style: 'subheader',
+							},
+							`${docData.budgetYear}`,
+							{
+								text: '',
+								style: 'subheader',
+							},
+							``,
+						],
+						[
+							{
 								text: showPOC ? 'Project POC:' : '',
 								style: 'subheader',
 							},
@@ -1045,7 +1090,8 @@ class Reports {
 	constructJCAData(docData) {
 		const JCAData = this.budgetSearchUtility.getJCAData();
 		const tmpJCAData = this.formatJCAData(JCAData, docData);
-		let currentYear = new Date().getFullYear();
+		console.log(docData);
+		let currentYear = parseInt(docData.budgetYear);
 
 		return {
 			pageBreak: 'after',
@@ -1054,7 +1100,12 @@ class Reports {
 				widths: ['*', '*', '*'],
 				body: [
 					[
-						{ text: 'FY21-FY25 Total Program Element Cost', style: 'subheader' },
+						{
+							text: `FY${(currentYear - 1).toString().substring(2)}-FY${(currentYear + 3)
+								.toString()
+								.substring(2)} Total Program Element Cost`,
+							style: 'subheader',
+						},
 						{
 							text: 'Data Type',
 							style: 'subheader',
@@ -1084,13 +1135,13 @@ class Reports {
 									marginBottom: 5,
 								},
 								{
-									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+									text: `FY${(currentYear + 2).toString().substring(2)}: ${
 										docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
 									}`,
 									marginBottom: 5,
 								},
 								{
-									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+									text: `FY${(currentYear + 3).toString().substring(2)}: ${
 										docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
 									}`,
 									marginBottom: 5,
