@@ -677,6 +677,7 @@ class EDASearchUtility {
 				}
 				const orgAndMajcoms = setOrgQuery && setMajcomQuery;
 
+				let firstOrgQuery = true;
 				for (const org of orgs) {
 					// for filtering by MAJCOM / sub orgs
 					if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
@@ -705,7 +706,8 @@ class EDASearchUtility {
 							orgText = orgMap[org];
 						}
 
-						orgString += `${i !== 0 ? ' OR ' : ''}${orgText}`;
+						orgString += `${!firstOrgQuery ? ' OR ' : ''}${orgText}`;
+						firstOrgQuery = false;
 					}
 				}
 
