@@ -216,6 +216,7 @@ export default function GCResponsibilityDocumentView({
 			true,
 			leftPanelOpen
 		);
+		setLeftPanelOpen(!leftPanelOpen);
 	}
 
 	function handlePdfOnLoadStart() {
