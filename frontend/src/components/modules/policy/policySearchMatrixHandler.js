@@ -301,6 +301,12 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 };
 
 const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) => {
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		`Publication${isStartDate ? 'Start' : 'End'}DateFilterChange`,
+		date ? date.toString() : date
+	);
+
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.publicationDateAllTime = false;
 	const { publicationDateFilter, accessDateFilter } = newSearchSettings;
