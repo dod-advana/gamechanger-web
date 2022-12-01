@@ -111,6 +111,8 @@ const ModularSearchBarHandler = (props) => {
 
 	const [searchBarHandler, setSearchBarHandler] = useState();
 
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
+
 	useEffect(() => {
 		const queryText = context.state.searchText ? context.state.searchText : null;
 		if (queryText) {
@@ -290,6 +292,7 @@ const ModularSearchBarHandler = (props) => {
 		});
 		document.activeElement.blur();
 		setDropdownOpen(false);
+		trackEvent(trackingCategory, 'SearchButton', 'onClickOrEnter');
 	};
 
 	useEffect(() => {
@@ -408,13 +411,7 @@ const ModularSearchBarHandler = (props) => {
 			setDropdownOpen(false);
 
 			if (rowType) {
-				trackEvent(
-					getTrackingNameForFactory(state.cloneData),
-					'SearchSuggestionSelected',
-					rowType,
-					null,
-					makeCustomDimensions(text)
-				);
+				trackEvent(trackingCategory, 'SearchSuggestionSelected', rowType, null, makeCustomDimensions(text));
 			}
 		};
 
@@ -437,6 +434,7 @@ const ModularSearchBarHandler = (props) => {
 		presearchTopic,
 		presearchOrg,
 		setDataRows,
+		trackingCategory,
 	]);
 
 	const noResults = Boolean(state.rawSearchResults?.length === 0);
