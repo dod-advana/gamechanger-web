@@ -64,7 +64,7 @@ const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 		getTrackingNameForFactory(state.cloneData.clone_name),
 		'OrgFilterToggle',
 		event.target.name,
-		event.target.value ? 1 : 0
+		event.target.checked ? 1 : 0
 	);
 };
 
@@ -178,7 +178,7 @@ const handleTypeFilterChangeSearchbar = (event, type, state, dispatch) => {
 		getTrackingNameForFactory(state.cloneData.clone_name),
 		'TypeFilterToggle',
 		event.target.name,
-		event.target.value ? 1 : 0
+		event.target.checked ? 1 : 0
 	);
 };
 

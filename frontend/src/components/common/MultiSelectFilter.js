@@ -100,7 +100,7 @@ const MultiSelectFilter = ({
 			getTrackingNameForFactory(state.cloneData.clone_name),
 			trackingName,
 			event.target.name,
-			event.target.value ? 1 : 0
+			event.target.checked ? 1 : 0
 		);
 	};
 
