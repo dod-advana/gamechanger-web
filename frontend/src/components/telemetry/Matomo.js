@@ -161,6 +161,19 @@ export function trackLeftRightPanelToggle(category, action, isLeft, wasOpen, cus
 	trackEvent(category, action, `${panelDirection}PanelToggle${panelState}`, null, customDimensions);
 }
 
+/**
+ * Track an event in Matomo when a page title is clicked.
+ *
+ * @param {string} category - Event category. Use a GAMECHANGER clone name.
+ * @param {string} pageName
+ * @param {number} numValue - Optional integer value.
+ * @param {CustomDimension[]} - Optional Custom dimensions for the event. See
+ * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ */
+export function trackPageTitleClick(category, pageName, numValue = null, customDimensions = []) {
+	trackEvent(category, `${pageName}PageTitle`, 'onClick', numValue, customDimensions);
+}
+
 /***
  * Logs the error to Matomo.
  * @param e: Error object.
