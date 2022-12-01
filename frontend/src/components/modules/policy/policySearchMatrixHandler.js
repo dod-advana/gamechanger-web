@@ -472,13 +472,15 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 };
 
-const resetAdvancedSettings = (dispatch) => {
+const resetAdvancedSettings = (dispatch, state) => {
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'AdvancedSearchSettings', 'onClickClearFilters');
 	dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
 };
 
-const clearFilters = (dispatch) => {
+const clearFilters = (dispatch, state) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 	setState(dispatch, { runSearch: true, runGraphSearch: true });
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ClearFilters', 'onClick');
 };
 
 const getSearchMatrixItems = (props) => {
@@ -542,7 +544,7 @@ const getSearchMatrixItems = (props) => {
 					borderRadius: 5,
 				}}
 				onClick={() => {
-					clearFilters(dispatch);
+					clearFilters(dispatch, state);
 				}}
 			>
 				<span
@@ -600,7 +602,7 @@ export const getAdvancedOptions = (props) => {
 							padding: '0px',
 						}}
 						isSecondaryBtn={true}
-						onClick={() => resetAdvancedSettings(dispatch)}
+						onClick={() => resetAdvancedSettings(dispatch, state)}
 					>
 						Clear Filters
 					</GCButton>
