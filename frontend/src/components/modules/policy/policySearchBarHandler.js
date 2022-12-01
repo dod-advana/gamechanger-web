@@ -13,6 +13,8 @@ import Popover from '@material-ui/core/Popover';
 import TextField from '@material-ui/core/TextField';
 import { setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import { trackEvent } from '../../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 const gameChangerAPI = new GameChangerAPI();
 
 const PolicySearchBarHandler = {
@@ -149,6 +151,11 @@ const PolicySearchBarHandler = {
 							id="advancedSearchButton"
 							onClick={() => {
 								setAdvancedSearchOpen(!advancedSearchOpen);
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'AdvancedSearchSettings',
+									advancedSearchOpen ? 'onClose' : 'onOpen'
+								);
 							}}
 						>
 							Advanced
