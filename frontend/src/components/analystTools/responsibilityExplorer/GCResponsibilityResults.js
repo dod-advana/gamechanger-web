@@ -4,6 +4,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { trackEvent } from '../../telemetry/Matomo';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+
+const trackingAction = 'ResponsibilityExplorer-DocumentResults';
 
 export default function GCResponsibilityResults({
 	responsibilityData,
@@ -18,7 +23,20 @@ export default function GCResponsibilityResults({
 	setDocumentLink,
 	setEditModalOpen,
 	loading,
+	cloneData,
 }) {
+	const trackingCategory = getTrackingNameForFactory(cloneData?.clone_name);
+
+	const handleDocToggle = (docName, wasDocOpen, idx) => {
+		trackEvent(
+			trackingCategory,
+			`${trackingAction}-Toggle${wasDocOpen ? 'Close' : 'Open'}`,
+			docName,
+			null,
+			makeCustomDimensions(null, null, idx)
+		);
+	};
+
 	const handleQuoteLinkClick = (e, resp) => {
 		e.preventDefault();
 		setSelectedResponsibility(resp);
@@ -48,6 +66,7 @@ export default function GCResponsibilityResults({
 							<div
 								className="searchdemo-modal-result-header"
 								onClick={(e) => {
+									handleDocToggle(doc, docOpen, key);
 									e.preventDefault();
 									setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
 								}}
@@ -68,6 +87,13 @@ export default function GCResponsibilityResults({
 											<div>
 												<InfoIcon
 													onClick={() => {
+														trackEvent(
+															trackingCategory,
+															`${trackingAction}-InfoIconClick`,
+															doc,
+															null,
+															makeCustomDimensions(null, null, key)
+														);
 														window.open(
 															`#/gamechanger?q=${responsibilityData[doc].entities[0].responsibilities[0].filename}&view=Explorer`
 														);
@@ -89,6 +115,15 @@ export default function GCResponsibilityResults({
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
+													trackEvent(
+														trackingCategory,
+														`${trackingAction}-ToggleResponsibility${
+															entOpen ? 'Close' : 'Open'
+														}`,
+														entityText,
+														null,
+														makeCustomDimensions(doc, null, key)
+													);
 													e.preventDefault();
 													setCollapseKeys({
 														...collapseKeys,
