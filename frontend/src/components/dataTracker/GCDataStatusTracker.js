@@ -155,6 +155,8 @@ const gameChangerAPI = new GameChangerAPI();
 
 const PAGE_SIZE = 15;
 
+const trackingAction = 'DataStatusTracker';
+
 const nextFriday = new Date();
 nextFriday.setDate(nextFriday.getDate() + ((5 + (7 - nextFriday.getDay())) % 7));
 nextFriday.setUTCHours(11, 0, 0);
@@ -283,6 +285,9 @@ const GCDataStatusTracker = (props) => {
 	const [crawlerInfoMap, setCrawlerInfoMap] = useState(null);
 
 	const classes = useStyles();
+
+	// Category for Matomo event tracking
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	useEffect(() => {
 		gameChangerAPI.getDocIngestionStats().then((res) => {
@@ -442,11 +447,22 @@ const GCDataStatusTracker = (props) => {
 	};
 
 	const handleTabClicked = async (tabIndex) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'DataStatusTracker', tabIndex);
+		trackEvent(trackingCategory, `${trackingAction}-TabChange`, tabIndex);
 		setTabIndex(tabIndex);
 		if (tabIndex === 'neo4j') {
 			await handleGetNeo4jData();
 		}
+	};
+
+	const handlePageChange = (pageNum) => {
+		trackEvent(trackingCategory, `${trackingAction}-${tabIndex}Tab`, 'Pagination', pageNum + 1);
+	};
+
+	const handleFilteredChange = (data) => {
+		data = data.map((item) => `column:${item.id}, value:${item.value}`);
+		data = data.join(' -- ');
+		!data && (data = 'filtersEmpty');
+		trackEvent(trackingCategory, `${trackingAction}-${tabIndex}Tab-FilterChange`, data);
 	};
 
 	const crawl_download = (status) => {
@@ -479,8 +495,8 @@ const GCDataStatusTracker = (props) => {
 	const renderDataTable = () => {
 		const fileClicked = (filename) => {
 			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'DataStatusTracker',
+				trackingCategory,
+				`${trackingAction}-${tabIndex}Tab`,
 				'PDFOpen',
 				null,
 				makeCustomDimensions(filename)
@@ -537,6 +553,11 @@ const GCDataStatusTracker = (props) => {
 							<Link
 								href={'#'}
 								onClick={(event) => {
+									trackEvent(
+										trackingCategory,
+										`${trackingAction}-${tabIndex}Tab-SourceOpen`,
+										cellProps.original.json_metadata.source_page_url
+									);
 									preventDefault(event);
 									window.open(cellProps.original.json_metadata.source_page_url);
 								}}
@@ -550,7 +571,15 @@ const GCDataStatusTracker = (props) => {
 				Filter: ({ filter, onChange }) => (
 					<Select
 						id="select"
-						onChange={(event) => onChange(event.target.value)}
+						onChange={(event) => {
+							const selected = event.target.value;
+							onChange(selected);
+							trackEvent(
+								trackingCategory,
+								`${trackingAction}-${tabIndex}Tab-SourceFilterSelected`,
+								selected ? selected : 'showAll'
+							);
+						}}
 						style={{ width: '100%' }}
 						className="font-size-14"
 						value={filter ? filter.value : ''}
@@ -626,10 +655,12 @@ const GCDataStatusTracker = (props) => {
 							showPageSizeOptions={false}
 							showPageJump={false}
 							filterable={true}
+							onFilteredChange={handleFilteredChange}
 							loading={loading}
 							manual={true}
 							pages={numPages}
 							onFetchData={handleFetchData}
+							onPageChange={handlePageChange}
 							defaultSorted={[
 								{
 									id: 'pub_type',
@@ -696,7 +727,18 @@ const GCDataStatusTracker = (props) => {
 				Cell: (row) => {
 					return row.original.url_origin ? (
 						<TableRow>
-							<a href={row.original.url_origin} target="_blank" rel="noreferrer">
+							<a
+								href={row.original.url_origin}
+								target="_blank"
+								rel="noreferrer"
+								onClick={() =>
+									trackEvent(
+										trackingCategory,
+										`${trackingAction}-${tabIndex}Tab-SourceOpen`,
+										row.value
+									)
+								}
+							>
 								{row.value}
 							</a>
 						</TableRow>
@@ -859,7 +901,9 @@ const GCDataStatusTracker = (props) => {
 							loading={loading}
 							manual={true}
 							pages={numPages}
+							onFilteredChange={handleFilteredChange}
 							onFetchData={handleFetchCrawlerData}
+							onPageChange={handlePageChange}
 							defaultSorted={[
 								{
 									id: 'displayName',
