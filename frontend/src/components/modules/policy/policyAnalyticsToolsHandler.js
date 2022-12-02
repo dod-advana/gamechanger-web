@@ -69,7 +69,7 @@ const renderSources = (state, dispatch, classes, results) => {
 				allSelected={'allOrgsSelected'}
 				specificSelected={'specificOrgsSelected'}
 				update={'orgUpdate'}
-				trackingName={'OrgFilterToggle'}
+				trackingName={'DocumentComparisonTool-OrgFilterToggle'}
 				showNumResultsPerOption={results.length > 0}
 				preventSearchOnChange
 			/>
@@ -98,7 +98,7 @@ const renderTypes = (state, dispatch, classes, results) => {
 				allSelected={'allTypesSelected'}
 				specificSelected={'specificTypesSelected'}
 				update={'typeUpdate'}
-				trackingName={'TypeFilterToggle'}
+				trackingName={'DocumentComparisonTool-TypeFilterToggle'}
 				showNumResultsPerOption={results.length > 0}
 				preventSearchOnChange
 			/>
