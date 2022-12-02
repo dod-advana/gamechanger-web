@@ -46,6 +46,8 @@ const sortByScore = (order) => {
 	};
 };
 
+const trackingAction = 'DocumentComparisonTool';
+
 const PolicyDocumentsComparisonTool = ({
 	context,
 	gameChangerAPI,
@@ -80,6 +82,8 @@ const PolicyDocumentsComparisonTool = ({
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -364,6 +368,7 @@ const PolicyDocumentsComparisonTool = ({
 	};
 
 	const handleCompare = () => {
+		trackEvent(trackingCategory, `${trackingAction}-Submit`, paragraphs.map((par) => par.text).join('\n'));
 		if (!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
@@ -878,7 +883,10 @@ const PolicyDocumentsComparisonTool = ({
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
-						onClick={() => resetAdvancedSettings(dispatch)}
+						onClick={() => {
+							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
+							resetAdvancedSettings(dispatch);
+						}}
 						style={{ margin: 0, width: '100%' }}
 					>
 						Clear Filters
