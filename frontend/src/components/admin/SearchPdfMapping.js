@@ -417,6 +417,30 @@ const subComponent = (row) => {
 };
 
 /**
+ * Takes in a set time to go back in the query
+ * @param {string} back
+ * @method timeBack
+ */
+const timeBack = async (back, setStartDateFunction, setEndDateFunction) => {
+	switch (back) {
+		case 'day':
+			setStartDateFunction(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		case 'week':
+			setStartDateFunction(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		case 'month':
+			setStartDateFunction(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		default:
+			break;
+	}
+};
+
+/**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
  * to download as a csv
@@ -636,30 +660,6 @@ export default () => {
 				}));
 			});
 	}, [startDate, endDate, cloneName]);
-
-	/**
-	 * Takes in a set time to go back in the query
-	 * @param {string} back
-	 * @method timeBack
-	 */
-	const timeBack = async (back, setStartDateFunction, setEndDateFunction) => {
-		switch (back) {
-			case 'day':
-				setStartDateFunction(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDateFunction(moment()._d);
-				break;
-			case 'week':
-				setStartDateFunction(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDateFunction(moment()._d);
-				break;
-			case 'month':
-				setStartDateFunction(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
-				setEndDateFunction(moment()._d);
-				break;
-			default:
-				break;
-		}
-	};
 
 	useEffect(() => {
 		if (cloneName !== '') {
