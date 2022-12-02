@@ -636,24 +636,25 @@ export default () => {
 				}));
 			});
 	}, [startDate, endDate, cloneName]);
+
 	/**
 	 * Takes in a set time to go back in the query
 	 * @param {string} back
 	 * @method timeBack
 	 */
-	const timeBack = async (back) => {
+	const timeBack = async (back, setStartDateFunction, setEndDateFunction) => {
 		switch (back) {
 			case 'day':
-				setStartDate(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
+				setStartDateFunction(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDateFunction(moment()._d);
 				break;
 			case 'week':
-				setStartDate(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
+				setStartDateFunction(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
+				setEndDateFunction(moment()._d);
 				break;
 			case 'month':
-				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
+				setStartDateFunction(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
+				setEndDateFunction(moment()._d);
 				break;
 			default:
 				break;
@@ -736,7 +737,7 @@ export default () => {
 					<Grid item lg={4} xs={4}>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('day');
+								timeBack('day', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -744,7 +745,7 @@ export default () => {
 						</GCPrimaryButton>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('week');
+								timeBack('week', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -752,7 +753,7 @@ export default () => {
 						</GCPrimaryButton>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('month');
+								timeBack('month', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
