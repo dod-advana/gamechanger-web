@@ -17,6 +17,8 @@ const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 2;
 const RIGHT_PANEL_COL_WIDTH = 4;
 
+const trackingAction = 'ResponsibilityExplorer';
+
 const cleanHighlightText = (text) => {
 	if (text) {
 		text = text.replace(/&/g, '%26');
@@ -112,6 +114,8 @@ export default function GCResponsibilityDocumentView({
 	const [alertMessage, setAlertMessage] = useState('');
 	const [editModalOpen, setEditModalOpen] = useState(false);
 
+	const trackingCategory = getTrackingNameForFactory(cloneData.clone_name);
+
 	const createAlert = (title, type, message) => {
 		setAlertTitle(title);
 		setAlertType(type);
@@ -200,22 +204,12 @@ export default function GCResponsibilityDocumentView({
 	);
 
 	function handleRightPanelToggle() {
-		trackLeftRightPanelToggle(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'ResponsibilityExplorerInteraction',
-			false,
-			rightPanelOpen
-		);
+		trackLeftRightPanelToggle(trackingCategory, trackingAction, false, rightPanelOpen);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackLeftRightPanelToggle(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'ResponsibilityExplorerInteraction',
-			true,
-			leftPanelOpen
-		);
+		trackLeftRightPanelToggle(trackingCategory, trackingAction, true, leftPanelOpen);
 		setLeftPanelOpen(!leftPanelOpen);
 	}
 
@@ -380,6 +374,7 @@ export default function GCResponsibilityDocumentView({
 						setResultsPage={setResultsPage}
 						setReloadResponsibilities={setReloadResponsibilities}
 						setCollapseKeys={setCollapseKeys}
+						cloneData={state.cloneData}
 					/>
 				</div>
 			</div>
@@ -485,6 +480,7 @@ export default function GCResponsibilityDocumentView({
 					setDocumentLink={setDocumentLink}
 					setEditModalOpen={setEditModalOpen}
 					loading={loading}
+					cloneData={state.cloneData}
 				/>
 			</div>
 			{alertActive ? (
