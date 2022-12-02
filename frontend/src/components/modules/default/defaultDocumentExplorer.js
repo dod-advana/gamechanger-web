@@ -16,7 +16,7 @@ import {
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
-import { trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
+import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
 import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
@@ -164,6 +164,8 @@ export default function DocumentExplorer({
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
 	function handleViewToggle() {
+		trackDocumentExplorerToggleAll(cloneData.clone_name, viewTogle);
+
 		if (collapseKeys) {
 			let collapse = Object.assign({}, collapseKeys);
 			for (let key in collapse) {
