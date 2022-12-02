@@ -174,6 +174,10 @@ export function trackPageTitleClick(category, pageName, numValue = null, customD
 	trackEvent(category, `${pageName}PageTitle`, 'onClick', numValue, customDimensions);
 }
 
+export function trackDocumentExplorerToggleAll(category, onExpand) {
+	trackEvent(category, 'DocumentExplorerResultsViewToggle', onExpand ? 'onExpandAll' : 'onCollapseAll');
+}
+
 /***
  * Logs the error to Matomo.
  * @param e: Error object.

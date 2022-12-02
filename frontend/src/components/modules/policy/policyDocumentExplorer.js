@@ -15,7 +15,7 @@ import {
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from '../../common/Pagination';
-import { trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
+import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
@@ -345,6 +345,8 @@ export default function PolicyDocumentExplorer({
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
 	function handleViewToggle() {
+		trackDocumentExplorerToggleAll(cloneData.clone_name, viewToggle);
+
 		if (collapseKeys) {
 			let collapse = Object.assign({}, collapseKeys);
 			for (let key in collapse) {
