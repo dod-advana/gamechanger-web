@@ -462,7 +462,7 @@ const updateSearchFavorites = (gameChangerAPI, dispatch, state, searchHandler) =
 };
 
 const GlobalSearchMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime, gameChangerAPI } = props;
+	const { state, dispatch, abortController, setCurrentTime, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
@@ -519,13 +519,13 @@ const GlobalSearchMainViewHandler = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler: tmpSearchHandler,
-				cancelToken,
+				abortController,
 				gameChangerAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+	}, [abortController, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	useEffect(() => {
 		let tmpApplications, tmpDashboards, tmpDataSources, tmpDatabases, tmpModels;

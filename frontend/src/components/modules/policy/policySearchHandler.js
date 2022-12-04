@@ -19,7 +19,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
 const gameChangerAPI = new GameChangerAPI();
-let cancelToken = axios.CancelToken.source();
+let abortController = new AbortController();
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	gameChangerAPI
@@ -402,8 +402,9 @@ const PolicySearchHandler = {
 		} = searchSettings;
 
 		if (runningSearch) {
-			cancelToken.cancel('cancelled axios with consecutive call');
-			cancelToken = axios.CancelToken.source();
+			abortController.abort();
+			console.log('cancelled axios with consecutive call');
+			abortController = new AbortController();
 		}
 
 		let favSearchUrls = [];
@@ -513,7 +514,7 @@ const PolicySearchHandler = {
 						},
 						cloneName: cloneData.clone_name,
 					},
-					cancelToken
+					abortController
 				)
 				.then((res) => {
 					setState(dispatch, {
@@ -533,7 +534,7 @@ const PolicySearchHandler = {
 					});
 				});
 
-			let combinedSearch = await gameChangerAPI.getCombinedSearchMode(cancelToken);
+			let combinedSearch = await gameChangerAPI.getCombinedSearchMode(abortController);
 			combinedSearch = combinedSearch.data.value === 'true';
 
 			let ltr = await gameChangerAPI.getLTRMode();
@@ -565,7 +566,7 @@ const PolicySearchHandler = {
 					},
 					limit: 18,
 				},
-				cancelToken
+				abortController
 			);
 
 			let getUserDataFlag = true;

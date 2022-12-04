@@ -11,7 +11,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 const gameChangerAPI = new GameChangerAPI();
 const gameChangerUserAPI = new GamechangerUserManagementAPI();
 
-let cancelToken = axios.CancelToken.source();
+let abortController = new AbortController();
 
 const DefaultMainViewHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultMainViewHandler'),
@@ -81,15 +81,17 @@ const MainView = (props) => {
 
 	useEffect(() => {
 		return function cleanUp() {
-			cancelToken.cancel('canceled axios with cleanup');
-			cancelToken = axios.CancelToken.source();
+			abortController.abort();
+			console.log('canceled axios with cleanup');
+			abortController = new AbortController();
 		};
 	}, []);
 
 	useEffect(() => {
-		if (state.runningSearch && cancelToken) {
-			cancelToken.cancel('canceled axios request from search run');
-			cancelToken = axios.CancelToken.source();
+		if (state.runningSearch && abortController) {
+			abortController.abort();
+			console.log('canceled axios request from search run');
+			abortController = new AbortController();
 		}
 	}, [state.runningSearch]);
 
@@ -183,7 +185,7 @@ const MainView = (props) => {
 			{getMainViewComponent({
 				state,
 				dispatch,
-				cancelToken,
+				abortController,
 				setCurrentTime,
 				gameChangerAPI,
 				gameChangerUserAPI,
