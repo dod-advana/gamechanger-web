@@ -255,7 +255,7 @@ export const renderHideTabs = (props) => {
 };
 
 const EdaMainViewHandler = (props) => {
-	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
+	const { state, dispatch, abortController, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 
@@ -264,11 +264,11 @@ const EdaMainViewHandler = (props) => {
 			const searchFactory = new SearchHandlerFactory(state.cloneData.search_module);
 			const searchHandler = searchFactory.createHandler();
 
-			handlePageLoad({ state, dispatch, history: state.history, searchHandler, cancelToken, gameChangerAPI });
+			handlePageLoad({ state, dispatch, history: state.history, searchHandler, abortController, gameChangerAPI });
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [cancelToken, dispatch, gameChangerAPI, pageLoaded, state]);
+	}, [abortController, dispatch, gameChangerAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };

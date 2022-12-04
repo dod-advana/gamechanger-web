@@ -19,7 +19,7 @@ import {
 import GamechangerAPI from '../../api/gameChanger-service-api';
 
 const gamechangerAPI = new GamechangerAPI();
-let cancelToken = axios.CancelToken.source();
+let abortController = new AbortController();
 
 const JBookSearchHandler = {
 	updateRecentSearches(searchText) {
@@ -84,8 +84,9 @@ const JBookSearchHandler = {
 			}
 
 			if (runningSearch) {
-				cancelToken.cancel('cancelled axios with consecutive call');
-				cancelToken = axios.CancelToken.source();
+				abortController.abort();
+				console.log('cancelled axios with consecutive call');
+				abortController = new AbortController();
 			}
 
 			// regular search
@@ -103,7 +104,7 @@ const JBookSearchHandler = {
 						sortSelected: state.sortSelected,
 					},
 				},
-				cancelToken
+				abortController
 			);
 
 			if (_.isObject(resp.data)) {
