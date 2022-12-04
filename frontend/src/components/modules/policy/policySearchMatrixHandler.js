@@ -11,6 +11,7 @@ import { FormControl, FormGroup, FormControlLabel, Checkbox } from '@material-ui
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { setState } from '../../../utils/sharedFunctions';
+import { gcOrange } from '../../common/gc-colors';
 import themeDatePicker from '../../common/theme-datepicker';
 import { trackEvent } from '../../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
@@ -442,11 +443,18 @@ const clearFilters = (dispatch) => {
 const getSearchMatrixItems = (props) => {
 	const { state, dispatch, classes } = props;
 
+	const sourceCount = Object.values(state.searchSettings.orgFilter).filter(Boolean).length;
+	const typeCount = Object.values(state.searchSettings.typeFilter).filter(Boolean).length;
+
 	return (
 		<>
 			<div data-cy={'source-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={'SOURCE'}
+					header={
+						<>
+							SOURCE <span style={styles.filterCount}>{sourceCount ? `(${sourceCount})` : ''}</span>
+						</>
+					}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -457,7 +465,11 @@ const getSearchMatrixItems = (props) => {
 
 			<div data-cy={'type-accordion'} style={{ width: '100%', marginBottom: 10 }}>
 				<GCAccordion
-					header={'TYPE'}
+					header={
+						<>
+							TYPE <span style={styles.filterCount}>{typeCount ? `(${typeCount})` : ''}</span>
+						</>
+					}
 					headerBackground={'rgb(238,241,242)'}
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
@@ -578,6 +590,9 @@ const PolicySearchMatrixHandler = (props) => {
 };
 
 const styles = {
+	filterCount: {
+		color: gcOrange,
+	},
 	innerContainer: {
 		display: 'flex',
 		height: '100%',
