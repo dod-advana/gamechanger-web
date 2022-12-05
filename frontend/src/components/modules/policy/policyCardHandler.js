@@ -869,6 +869,11 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 							onClick={() => {
 								setShowDocIngestModal(true);
 								requestDocIngest(item);
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'RequestThisDataButton',
+									item.display_title_s
+								);
 							}}
 						>
 							Request This Data
@@ -1206,13 +1211,22 @@ const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, s
 	);
 };
 
-const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
+const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody, cloneName) => {
 	return !item.notInCorpus ? (
 		<GCAccordion
 			header={'DOCUMENT METADATA'}
 			headerBackground={'rgb(238,241,242)'}
 			headerTextColor={'black'}
 			headerTextWeight={'normal'}
+			onChange={(isExpanding) => {
+				trackEvent(
+					getTrackingNameForFactory(cloneName),
+					'DocumentMetadata',
+					isExpanding ? 'onExpand' : 'onCollapse',
+					null,
+					makeCustomDimensions(item.filename)
+				);
+			}}
 		>
 			<div className={'metadata'}>
 				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
@@ -1249,7 +1263,7 @@ const renderListView = (
 					contextHtml
 				)}
 				{renderListViewParagraphHitsWithoutIntelligentSearch(item, hoveredHit, setHoveredHit, contextHtml)}
-				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody)}
+				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody, cloneName)}
 			</StyledListViewFrontCardContent>
 		);
 	} else if (intelligentSearch) {
