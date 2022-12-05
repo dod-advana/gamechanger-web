@@ -99,6 +99,11 @@ const styles = {
 	tableLeftDiv: {
 		textAlign: 'left',
 	},
+	textInCell: {
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+	},
 	tableRightDiv: {
 		textAlign: 'right',
 	},
@@ -172,22 +177,7 @@ const renderTable = (data, columns) => {
 	);
 };
 
-const HistoryPanel = ({
-	userData,
-	handleDeleteFavoriteSearch,
-	reload,
-	setReload,
-	saveFavoriteSearch,
-	cloneData,
-	classes,
-}) => {
-	const [exportHistory, setExportHistory] = useState([]);
-	const [exportHistoryLoading, setExportHistoryLoading] = useState(true);
-
-	const [searchHistory, setSearchHistory] = useState([]);
-	const [searchHistoryLoading, setSearchHistoryLoading] = useState(true);
-
-	const [exportHistoryDownloading, setExportHistoryDownloading] = useState(new Set());
+const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes }) => {
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
 	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
@@ -196,34 +186,12 @@ const HistoryPanel = ({
 		exportType: '',
 		isExport: false,
 	});
-	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] = useState(null);
-	const [searchHistoryPopperOpen, setSearchHistoryPopperOpen] = useState(false);
-	const [unfavoritePopperOpen, setUnfavoritePopperOpen] = useState(false);
-	const [searchHistoryFavoriteData, setSearchHistoryFavoriteData] = useState({
-		favoriteName: '',
-		favoriteSummary: '',
-		favorite: false,
-		tinyUrl: '',
-		searchText: '',
-		count: 0,
-	});
-	const [searchHistoryIdx, setSearchHistoryIdx] = useState(-1);
+	const [exportHistory, setExportHistory] = useState([]);
+	const [exportHistoryLoading, setExportHistoryLoading] = useState(true);
+	const [exportHistoryDownloading, setExportHistoryDownloading] = useState(new Set());
 
 	useEffect(() => {
 		if (userData === null) return;
-
-		if (userData.search_history) {
-			userData.search_history = userData.search_history.filter(
-				(search) => search.clone_name === cloneData.clone_name
-			);
-			userData.search_history.forEach((search) => {
-				const data = decodeTinyUrl(search.url);
-				Object.assign(search, data);
-			});
-
-			setSearchHistory(userData.search_history);
-			setSearchHistoryLoading(false);
-		}
 
 		if (userData.export_history) {
 			userData.export_history = userData.export_history.filter(
@@ -253,98 +221,6 @@ const HistoryPanel = ({
 		}
 	}, [userData, cloneData.clone_name, cloneData.url]);
 
-	const searchHistoryColumns = [
-		{
-			Header: () => <p>Search Text</p>,
-			filterable: false,
-			accessor: 'search',
-			Cell: (row) => (
-				<Link
-					href={'#'}
-					onClick={(event) => {
-						preventDefault(event);
-						window.open(`${window.location.origin}/#/${row.original.tiny_url}`, '_blank');
-					}}
-					style={{ color: '#386F94' }}
-				>
-					<div style={styles.tableLeftDiv}>
-						<p>{row.value}</p>
-					</div>
-				</Link>
-			),
-		},
-		{
-			Header: () => <p>Results Found</p>,
-			filterable: false,
-			accessor: 'num_results',
-			width: 200,
-			Cell: (row) => (
-				<div style={styles.tableLeftDiv}>
-					<p>{row.value}</p>
-				</div>
-			),
-		},
-		{
-			Header: () => <p>Search Date</p>,
-			filterable: false,
-			accessor: 'completion_time',
-			width: 250,
-			Cell: (row) => renderDate(row),
-		},
-		{
-			Header: () => <p>Settings Used</p>,
-			filterable: false,
-			width: 160,
-			Cell: (row) => (
-				<GCTooltip title={'Click to see setting for this search'} placement="top">
-					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
-						<i
-							className="fa fa-cogs"
-							style={{ fontSize: '20px' }}
-							onClick={(event) => {
-								handleHideShowSearchHistorySettings(
-									event.target,
-									row.original.searchType,
-									row.original.orgFilterText
-								);
-							}}
-						/>
-					</StyledI>
-				</GCTooltip>
-			),
-		},
-		{
-			Header: () => <p>Favorite</p>,
-			filterable: false,
-			accessor: 'favorite',
-			width: 160,
-			Cell: (row) => (
-				<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top">
-					<FavoriteStyledI
-						style={{
-							...styles.tableCenterDiv,
-							cursor: 'pointer',
-							alignItems: 'center',
-							padding: '0 15px',
-						}}
-						onClick={(event) =>
-							handleFavoriteSearchHistoryStarClicked(
-								event.target,
-								!row.value,
-								row.original.tiny_url,
-								row.original.search,
-								row.original.num_results,
-								row.index
-							)
-						}
-					>
-						<i className={row.value ? 'fa fa-star' : 'fa fa-star-o'} />
-					</FavoriteStyledI>
-				</GCTooltip>
-			),
-		},
-	];
-
 	const exportHistoryColumns = [
 		{
 			Header: () => <p>Search Text</p>,
@@ -359,9 +235,11 @@ const HistoryPanel = ({
 					}}
 					style={{ color: '#386F94' }}
 				>
-					<div style={styles.tableLeftDiv}>
-						<p>{row.value}</p>
-					</div>
+					<GCTooltip title={row.value} placement="left">
+						<div style={styles.tableLeftDiv}>
+							<p style={styles.textInCell}>{row.value}</p>
+						</div>
+					</GCTooltip>
 				</Link>
 			),
 		},
@@ -425,6 +303,283 @@ const HistoryPanel = ({
 					>
 						<i className={'fa fa-download'} />
 					</StyledI>
+				</GCTooltip>
+			),
+		},
+	];
+	const handleHideShowSearchHistorySettings = (
+		target,
+		searchType,
+		orgFilterText,
+		exportType = '',
+		isExport = false
+	) => {
+		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
+
+		if (!searchHistorySettingsPopperOpen) {
+			tmpSearchHistorySettings.searchType = searchType;
+			tmpSearchHistorySettings.orgFilterText = orgFilterText;
+			tmpSearchHistorySettings.exportType = exportType;
+			tmpSearchHistorySettings.isExport = isExport;
+			setSearchHistorySettingsData(tmpSearchHistorySettings);
+			setSearchHistorySettingsPopperAnchorEl(target);
+			setSearchHistorySettingsPopperOpen(true);
+		} else {
+			setSearchHistorySettingsData({
+				searchType: '',
+				orgFilterText: '',
+				exportType: '',
+				isExport: false,
+			});
+			setSearchHistorySettingsPopperAnchorEl(null);
+			setSearchHistorySettingsPopperOpen(false);
+		}
+		setReload(!reload);
+	};
+
+	const regenerate = async (download_request_body, historyId) => {
+		try {
+			exportHistoryDownloading.add(historyId);
+			setExportHistoryDownloading(new Set(exportHistoryDownloading));
+			const exportInput = {
+				cloneName: download_request_body.cloneData.clone_name,
+				format: download_request_body.format,
+				searchText: download_request_body.searchText,
+				options: {
+					limit: download_request_body.limit,
+					index: download_request_body.index,
+					classificationMarking: download_request_body.classificationMarking,
+					cloneData: download_request_body.cloneData,
+					orgFilter: download_request_body.orgFilter,
+					orgFilterString: download_request_body.orgFilterString,
+					typeFilter: download_request_body.typeFilter,
+					typeFilterString: download_request_body.typeFilterString,
+					selectedDocuments: download_request_body.selectedDocuments,
+					tiny_url: download_request_body.tiny_url,
+					edaSearchSettings: download_request_body.edaSearchSettings,
+					sort: download_request_body.sort,
+					order: download_request_body.order,
+				},
+			};
+			const { data } = await gameChangerAPI.modularExport(exportInput);
+			downloadFile(data, download_request_body.format, cloneData);
+		} catch (e) {
+			console.log('regen err', e);
+		} finally {
+			exportHistoryDownloading.delete(historyId);
+			setExportHistoryDownloading(new Set(exportHistoryDownloading));
+		}
+	};
+
+	const renderExportHistory = () => {
+		let renderData;
+		if (exportHistoryLoading) {
+			renderData = (
+				<div style={{ margin: '0 auto' }}>
+					<LoadingIndicator customColor={gcOrange} />
+				</div>
+			);
+		} else {
+			renderData =
+				exportHistory.length > 0 ? (
+					renderTable(exportHistory, exportHistoryColumns)
+				) : (
+					<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
+				);
+		}
+
+		return (
+			<div style={{ width: '100%', height: '100%' }}>
+				<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
+				<Popover
+					onClose={() => handleHideShowSearchHistorySettings(null)}
+					open={searchHistorySettingsPopperOpen}
+					anchorEl={searchHistorySettingsPopperAnchorEl}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'right',
+					}}
+					transformOrigin={{
+						vertical: 'top',
+						horizontal: 'right',
+					}}
+					classes={{ paper: classes.popTransparent }}
+				>
+					<div style={styles.searchHistorySettings}>
+						<div style={styles.searchHistorySettings.overlayButtons}>
+							<GCButton
+								buttonColor={'transparent'}
+								fontStyle={{ color: '#ffffff' }}
+								style={{ minWidth: 'unset' }}
+								onClick={() => handleHideShowSearchHistorySettings(null)}
+							>
+								<CloseIcon fontSize={'large'} />
+							</GCButton>
+						</div>
+						<div style={styles.searchHistorySettings.overlayText}>
+							<div style={styles.searchHistorySettings.overlaySearchDetails}>
+								<span style={{ fontWeight: 'bold' }}>Source Filter:</span>{' '}
+								{searchHistorySettingsData.orgFilterText}
+							</div>
+							{searchHistorySettingsData.isExport && (
+								<div style={styles.searchHistorySettings.overlaySearchDetails}>
+									<span style={{ fontWeight: 'bold' }}>Export Type:</span>{' '}
+									{searchHistorySettingsData.exportType}
+								</div>
+							)}
+						</div>
+					</div>
+				</Popover>
+			</div>
+		);
+	};
+	return (
+		<div>
+			<GCAccordion expanded={false} header={'EXPORT HISTORY'} itemCount={exportHistory.length}>
+				{renderExportHistory()}
+			</GCAccordion>
+		</div>
+	);
+};
+
+const SearchHistoryPanel = ({
+	userData,
+	handleDeleteFavoriteSearch,
+	reload,
+	setReload,
+	saveFavoriteSearch,
+	cloneData,
+	classes,
+}) => {
+	const [searchHistory, setSearchHistory] = useState([]);
+	const [searchHistoryLoading, setSearchHistoryLoading] = useState(true);
+	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
+	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
+	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
+		searchType: '',
+		orgFilterText: '',
+		exportType: '',
+		isExport: false,
+	});
+	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] = useState(null);
+	const [searchHistoryPopperOpen, setSearchHistoryPopperOpen] = useState(false);
+	const [unfavoritePopperOpen, setUnfavoritePopperOpen] = useState(false);
+	const [searchHistoryFavoriteData, setSearchHistoryFavoriteData] = useState({
+		favoriteName: '',
+		favoriteSummary: '',
+		favorite: false,
+		tinyUrl: '',
+		searchText: '',
+		count: 0,
+	});
+	const [searchHistoryIdx, setSearchHistoryIdx] = useState(-1);
+
+	useEffect(() => {
+		if (userData === null) return;
+
+		if (userData.search_history) {
+			userData.search_history = userData.search_history.filter(
+				(search) => search.clone_name === cloneData.clone_name
+			);
+			userData.search_history.forEach((search) => {
+				const data = decodeTinyUrl(search.url);
+				Object.assign(search, data);
+			});
+
+			setSearchHistory(userData.search_history);
+			setSearchHistoryLoading(false);
+		}
+	}, [userData, cloneData.clone_name, cloneData.url]);
+
+	const searchHistoryColumns = [
+		{
+			Header: () => <p>Search Text</p>,
+			filterable: false,
+			accessor: 'search',
+			Cell: (row) => (
+				<Link
+					href={'#'}
+					onClick={(event) => {
+						preventDefault(event);
+						window.open(`${window.location.origin}/#/${row.original.tiny_url}`, '_blank');
+					}}
+					style={{ color: '#386F94' }}
+				>
+					<GCTooltip title={row.value} placement="left">
+						<div style={styles.tableLeftDiv}>
+							<p style={styles.textInCell}>{row.value}</p>
+						</div>
+					</GCTooltip>
+				</Link>
+			),
+		},
+		{
+			Header: () => <p>Results Found</p>,
+			filterable: false,
+			accessor: 'num_results',
+			width: 200,
+			Cell: (row) => (
+				<div style={styles.tableLeftDiv}>
+					<p>{row.value}</p>
+				</div>
+			),
+		},
+		{
+			Header: () => <p>Search Date</p>,
+			filterable: false,
+			accessor: 'completion_time',
+			width: 250,
+			Cell: (row) => renderDate(row),
+		},
+		{
+			Header: () => <p>Settings Used</p>,
+			filterable: false,
+			width: 160,
+			Cell: (row) => (
+				<GCTooltip title={'Click to see setting for this search'} placement="top">
+					<StyledI style={{ ...styles.tableCenterDiv, cursor: 'pointer' }}>
+						<i
+							onClick={(event) => {
+								handleHideShowSearchHistorySettings(
+									event.target,
+									row.original.searchType,
+									row.original.orgFilterText
+								);
+							}}
+							className="fa fa-cogs"
+							style={{ fontSize: '20px' }}
+						/>
+					</StyledI>
+				</GCTooltip>
+			),
+		},
+		{
+			Header: () => <p>Favorite</p>,
+			filterable: false,
+			accessor: 'favorite',
+			width: 160,
+			Cell: (row) => (
+				<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top">
+					<FavoriteStyledI
+						style={{
+							...styles.tableCenterDiv,
+							cursor: 'pointer',
+							alignItems: 'center',
+							padding: '0 15px',
+						}}
+						onClick={(event) =>
+							handleFavoriteSearchHistoryStarClicked(
+								event.target,
+								!row.value,
+								row.original.tiny_url,
+								row.original.search,
+								row.original.num_results,
+								row.index
+							)
+						}
+					>
+						<i className={row.value ? 'fa fa-star' : 'fa fa-star-o'} />
+					</FavoriteStyledI>
 				</GCTooltip>
 			),
 		},
@@ -494,64 +649,6 @@ const HistoryPanel = ({
 		setReload(!reload);
 	};
 
-	const regenerate = async (download_request_body, historyId) => {
-		try {
-			exportHistoryDownloading.add(historyId);
-			setExportHistoryDownloading(new Set(exportHistoryDownloading));
-			const exportInput = {
-				cloneName: download_request_body.cloneData.clone_name,
-				format: download_request_body.format,
-				searchText: download_request_body.searchText,
-				options: {
-					limit: download_request_body.limit,
-					index: download_request_body.index,
-					classificationMarking: download_request_body.classificationMarking,
-					cloneData: download_request_body.cloneData,
-					orgFilter: download_request_body.orgFilter,
-					orgFilterString: download_request_body.orgFilterString,
-					typeFilter: download_request_body.typeFilter,
-					typeFilterString: download_request_body.typeFilterString,
-					selectedDocuments: download_request_body.selectedDocuments,
-					tiny_url: download_request_body.tiny_url,
-					edaSearchSettings: download_request_body.edaSearchSettings,
-					sort: download_request_body.sort,
-					order: download_request_body.order,
-				},
-			};
-			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(data, download_request_body.format, cloneData);
-		} catch (e) {
-			console.log('regen err', e);
-		} finally {
-			exportHistoryDownloading.delete(historyId);
-			setExportHistoryDownloading(new Set(exportHistoryDownloading));
-		}
-	};
-
-	const renderExportHistory = () => {
-		let renderData;
-		if (exportHistoryLoading) {
-			renderData = (
-				<div style={{ margin: '0 auto' }}>
-					<LoadingIndicator customColor={gcOrange} />
-				</div>
-			);
-		} else {
-			renderData =
-				exportHistory.length > 0 ? (
-					renderTable(exportHistory, exportHistoryColumns)
-				) : (
-					<StyledPlaceHolder>Make a search to see the History</StyledPlaceHolder>
-				);
-		}
-
-		return (
-			<div style={{ width: '100%', height: '100%' }}>
-				<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
-			</div>
-		);
-	};
-
 	const renderSearchHistory = () => {
 		let renderData;
 		if (searchHistoryLoading) {
@@ -569,9 +666,10 @@ const HistoryPanel = ({
 				);
 		}
 		return (
-			<div style={{ width: '100%', height: '100%' }}>
-				<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
-
+			<>
+				<div style={{ width: '100%', height: '100%' }}>
+					<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
+				</div>
 				<Popover
 					onClose={() => {
 						handleFavoriteSearchHistoryStarClicked(null);
@@ -756,7 +854,7 @@ const HistoryPanel = ({
 						</div>
 					</div>
 				</Popover>
-			</div>
+			</>
 		);
 	};
 
@@ -776,11 +874,7 @@ const HistoryPanel = ({
 	};
 
 	return (
-		<div>
-			<GCAccordion expanded={false} header={'EXPORT HISTORY'} itemCount={exportHistory.length}>
-				{renderExportHistory()}
-			</GCAccordion>
-
+		<div style={{ marginBottom: '10px' }}>
 			<GCAccordion expanded={false} header={'SEARCH HISTORY'} itemCount={searchHistory.length}>
 				{renderSearchHistory()}
 			</GCAccordion>
@@ -788,11 +882,14 @@ const HistoryPanel = ({
 	);
 };
 
-HistoryPanel.propTypes = {
-	exportHistoryLoading: PropTypes.bool.isRequired,
-	exportHistory: PropTypes.array,
+SearchHistoryPanel.propTypes = {
 	searchHistoryLoading: PropTypes.bool.isRequired,
 	searchHistory: PropTypes.array,
 };
 
-export default HistoryPanel;
+ExportHistoryPanel.propTypes = {
+	exportHistoryLoading: PropTypes.bool.isRequired,
+	exportHistory: PropTypes.array,
+};
+
+export { SearchHistoryPanel, ExportHistoryPanel };

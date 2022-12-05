@@ -6,7 +6,7 @@ import GCButton from '../../../common/GCButton';
 import Popper from '@material-ui/core/Popper';
 // import GCAccordion from '../../../common/GCAccordion';
 // import GroupsPanel from './GroupsPanel';
-import HistoryPanel from './historyPanel';
+import { SearchHistoryPanel, ExportHistoryPanel } from './historyPanel';
 import FavoritesPanel from './favoritesPanel';
 
 const useStyles = makeStyles((theme) => ({
@@ -257,13 +257,24 @@ const GCUserDashboard = React.memo((props) => {
 
 	const renderHistory = () => {
 		return (
-			<HistoryPanel
+			<SearchHistoryPanel
 				userData={userData}
 				handleDeleteFavoriteSearch={handleDeleteFavoriteSearch}
 				reload={reload}
 				setReload={setReload}
 				saveFavoriteSearch={saveFavoriteSearch}
+				classes={classes}
 				cloneData={cloneData}
+			/>
+		);
+	};
+	const renderExportHistory = () => {
+		return (
+			<ExportHistoryPanel
+				userData={userData}
+				cloneData={cloneData}
+				reload={reload}
+				setReload={setReload}
 				classes={classes}
 			/>
 		);
@@ -342,9 +353,10 @@ const GCUserDashboard = React.memo((props) => {
 			</Popper>
 
 			<div className={'panel-container'}>
+				{renderHistory()}
 				{renderFavorites()}
 				{/* {renderGroups()} */}
-				{renderHistory()}
+				{renderExportHistory()}
 			</div>
 		</>
 	);

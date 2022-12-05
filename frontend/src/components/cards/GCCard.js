@@ -652,7 +652,15 @@ const FavoriteComponent = (props) => {
 				)}
 			</Popover>
 			{cardType !== 'organization' && cardType !== 'topic' && (
-				<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
+				<GCTooltip
+					title={
+						favorite
+							? `Unfavorite this ${cardType} to stop tracking in the User Dashboard`
+							: `Favorite this ${cardType} to track in the User Dashboard`
+					}
+					placement="top"
+					arrow
+				>
 					<i
 						onClick={(event) => {
 							switch (cardType) {
@@ -741,7 +749,11 @@ function GCCard(props) {
 
 	const checkboxComponent = (key, value, tmpId) => {
 		return (
-			<GCTooltip title={'Select a document for export'} placement="top" arrow>
+			<GCTooltip
+				title={selected ? 'Deselect document for export' : 'Select document for export'}
+				placement="top"
+				arrow
+			>
 				<Checkbox
 					style={styles.checkbox}
 					onChange={() => handleCheckbox(key, value, tmpId)}
