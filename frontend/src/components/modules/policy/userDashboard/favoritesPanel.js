@@ -335,6 +335,8 @@ const FavoritesPanel = ({
 			document.active = !document.active;
 		};
 
+		console.log('THIS IS THE DOCUMENT', document);
+
 		const createdDate = moment(Date.parse(document.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const documentDetails = (
@@ -385,7 +387,7 @@ const FavoritesPanel = ({
 							placement="top"
 						>
 							<div className={'stats-stat'}>
-								<span className={'stats-text'}>{document.favorited}</span>
+								<span className={'stats-text'}>{document.favorited - 1}</span>
 								<Icon className="fa fa-heart-o" />
 							</div>
 						</GCTooltip>
