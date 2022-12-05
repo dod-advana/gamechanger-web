@@ -1423,7 +1423,7 @@ function PolicyGraphView(props) {
 			getTrackingNameForFactory(cloneData.clone_name),
 			'GraphLegendClicked',
 			legendKey,
-			!orgTypesSelected.includes(legendKey)
+			orgTypesSelected.includes(legendKey) ? 0 : 1
 		);
 
 		const newOrgTypesSelected = orgTypesSelected.includes(legendKey)
