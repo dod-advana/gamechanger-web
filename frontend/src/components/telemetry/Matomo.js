@@ -108,9 +108,11 @@ export function trackPageView(documentTitle, customDimensions) {
  * @param {Number} value - Event value. Non-number value will be ignored by Matomo.
  * @param {CustomDimension[]} - Custom dimensions for the event. See
  * 		makeCustomDimensions() in ./utils/customDimensions.js.
- *
+ * @param {bool} isCustomDimensionsForOneActionOnly - Optional. True to track
+ * 		customDimensions only for this event, false to track customDimensions
+ * 		for all events following this event. Default is true.
  */
-export function trackEvent(category, action, name, value, customDimensions) {
+export function trackEvent(category, action, name, value, customDimensions, isCustomDimensionsForOneActionOnly = true) {
 	try {
 		const useMatomo =
 			JSON.parse(localStorage.getItem('userMatomo')) && JSON.parse(localStorage.getItem('appMatomo'));
@@ -121,10 +123,17 @@ export function trackEvent(category, action, name, value, customDimensions) {
 		const userId = Auth.getUserId() || ' ';
 		const id = userId.split('@');
 		matomo.setUserId(SparkMD5.hash(id ? id[0] : userId));
-		// Set custom dimensions
-		setupDimensions(customDimensions, useMatomo);
-		// Track Event
-		matomo.push(['trackEvent', category, action, name, value]);
+
+		// Set custom dimensions & track event
+		// See the "Custom Dimensions" section here: https://developer.matomo.org/guides/tracking-javascript-guide
+		if (customDimensions) {
+			if (isCustomDimensionsForOneActionOnly) {
+				matomo.push(['trackEvent', category, action, name, value, customDimensions]);
+			} else {
+				setupDimensions(customDimensions, useMatomo);
+				matomo.push(['trackEvent', category, action, name, value]);
+			}
+		}
 	} catch (error) {
 		// Nothing
 	}
