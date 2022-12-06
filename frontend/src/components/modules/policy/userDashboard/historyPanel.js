@@ -179,8 +179,8 @@ const renderTable = (data, columns) => {
 
 const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes }) => {
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
-	const [searchHistorySettingsPopperOpen, setSearchHistorySettingsPopperOpen] = useState(false);
-	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
+	const [exportHistorySettingsPopperOpen, setExportHistorySettingsPopperOpen] = useState(false);
+	const [exportHistorySettingsData, setExportHistorySettingsData] = useState({
 		searchType: '',
 		orgFilterText: '',
 		exportType: '',
@@ -272,7 +272,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 							className="fa fa-cogs"
 							style={{ fontSize: '20px' }}
 							onClick={(event) => {
-								handleHideShowSearchHistorySettings(
+								handleHideShowExportHistorySettings(
 									event.target,
 									row.original.download_request_body.searchType,
 									row.original.orgFilterText,
@@ -307,35 +307,35 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 			),
 		},
 	];
-	const handleHideShowSearchHistorySettings = (
+	const handleHideShowExportHistorySettings = (
 		target,
 		searchType,
 		orgFilterText,
 		exportType = '',
 		isExport = false
 	) => {
-		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
+		const tmpSearchHistorySettings = _.cloneDeep(exportHistorySettingsData);
 		if (target?.className === 'fa fa-cogs') {
 			target = target.parentNode.parentNode;
 		}
 
-		if (!searchHistorySettingsPopperOpen) {
+		if (!exportHistorySettingsPopperOpen) {
 			tmpSearchHistorySettings.searchType = searchType;
 			tmpSearchHistorySettings.orgFilterText = orgFilterText;
 			tmpSearchHistorySettings.exportType = exportType;
 			tmpSearchHistorySettings.isExport = isExport;
-			setSearchHistorySettingsData(tmpSearchHistorySettings);
+			setExportHistorySettingsData(tmpSearchHistorySettings);
 			setSearchHistorySettingsPopperAnchorEl(target);
-			setSearchHistorySettingsPopperOpen(true);
+			setExportHistorySettingsPopperOpen(true);
 		} else {
-			setSearchHistorySettingsData({
+			setExportHistorySettingsData({
 				searchType: '',
 				orgFilterText: '',
 				exportType: '',
 				isExport: false,
 			});
 			setSearchHistorySettingsPopperAnchorEl(null);
-			setSearchHistorySettingsPopperOpen(false);
+			setExportHistorySettingsPopperOpen(false);
 		}
 		setReload(!reload);
 	};
@@ -395,8 +395,8 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 			<div style={{ width: '100%', height: '100%' }}>
 				<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
 				<Popover
-					onClose={() => handleHideShowSearchHistorySettings(null)}
-					open={searchHistorySettingsPopperOpen}
+					onClose={() => handleHideShowExportHistorySettings(null)}
+					open={exportHistorySettingsPopperOpen}
 					anchorEl={searchHistorySettingsPopperAnchorEl}
 					anchorOrigin={{
 						vertical: 'top',
@@ -414,7 +414,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 								buttonColor={'transparent'}
 								fontStyle={{ color: '#ffffff' }}
 								style={{ minWidth: 'unset' }}
-								onClick={() => handleHideShowSearchHistorySettings(null)}
+								onClick={() => handleHideShowExportHistorySettings(null)}
 							>
 								<CloseIcon fontSize={'large'} />
 							</GCButton>
@@ -422,7 +422,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
 								<span style={{ fontWeight: 'bold' }}>Export Type:</span>{' '}
-								{searchHistorySettingsData.exportType}
+								{exportHistorySettingsData.exportType}
 							</div>
 						</div>
 					</div>
