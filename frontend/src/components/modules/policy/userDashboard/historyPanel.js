@@ -315,6 +315,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 		isExport = false
 	) => {
 		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
+		console.log('HERE IS TMP SEARCH SETTINGS', tmpSearchHistorySettings);
 		if (target?.className === 'fa fa-cogs') {
 			target = target.parentNode.parentNode;
 		}
@@ -421,15 +422,9 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 						</div>
 						<div style={styles.searchHistorySettings.overlayText}>
 							<div style={styles.searchHistorySettings.overlaySearchDetails}>
-								<span style={{ fontWeight: 'bold' }}>Source Filter:</span>{' '}
-								{searchHistorySettingsData.orgFilterText}
+								<span style={{ fontWeight: 'bold' }}>Export Type:</span>{' '}
+								{searchHistorySettingsData.exportType}
 							</div>
-							{searchHistorySettingsData.isExport && (
-								<div style={styles.searchHistorySettings.overlaySearchDetails}>
-									<span style={{ fontWeight: 'bold' }}>Export Type:</span>{' '}
-									{searchHistorySettingsData.exportType}
-								</div>
-							)}
 						</div>
 					</div>
 				</Popover>
@@ -504,14 +499,7 @@ const SearchHistoryPanel = ({
 					href={'#'}
 					onClick={(event) => {
 						preventDefault(event);
-						// console.log('this is the URL', `${window.location.origin}/#/${row.original.tiny_url}`);
-						setTimeout(() => {
-							window.open(
-								`${window.location.origin}/#/${row.original.tiny_url}`,
-								'_blank',
-								'location=yes, status=yes'
-							);
-						}, 1000);
+						window.open(`${window.location.origin}/#/${row.original.tiny_url}`, '_blank');
 					}}
 					style={{ color: '#386F94' }}
 				>
