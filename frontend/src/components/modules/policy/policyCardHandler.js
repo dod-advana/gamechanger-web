@@ -471,6 +471,10 @@ const StyledQuickCompareContent = styled.div`
 	}
 `;
 
+const trackingActionForCard = 'CardInteraction';
+const trackingActionForGraphCard = 'GraphCardInteraction';
+const trackingActionForListView = 'ListViewInteraction';
+
 const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, cloneName }) => {
 	const classes = useStyles();
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
@@ -656,6 +660,25 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 const handleTopicClick = (topic, cloneName, idx) => {
 	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic, null, makeCustomDimensions(null, null, idx));
 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+};
+
+const handlePageHitHover = (
+	setHoveredHitFunc,
+	pageIdx,
+	trackingCategory,
+	trackingAction,
+	pageNumber,
+	fileName,
+	resultIdx
+) => {
+	setHoveredHitFunc && setHoveredHitFunc(pageIdx);
+	trackEvent(
+		trackingCategory,
+		`${trackingAction}-PageHit`,
+		'onMouseEnter',
+		pageNumber,
+		makeCustomDimensions(fileName, pageNumber, resultIdx)
+	);
 };
 
 export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText, maxWidth) => {
@@ -1085,8 +1108,10 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 	setHoveredHit,
 	cloneName,
 	searchText,
-	contextHtml
+	contextHtml,
+	idx
 ) => {
+	const trackingCategory = getTrackingNameForFactory(cloneName);
 	return (
 		item.pageHits?.length > 0 && (
 			<GCAccordion
@@ -1094,6 +1119,15 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				onChange={(isExpanding) =>
+					trackEvent(
+						trackingCategory,
+						`${trackingActionForListView}-PageHits`,
+						isExpanding ? 'onExpand' : 'onCollapse',
+						null,
+						makeCustomDimensions(item.filename, null, idx)
+					)
+				}
 			>
 				<div className={'expanded-hits'}>
 					<div className={'page-hits'}>
@@ -1109,7 +1143,17 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											handlePageHitHover(
+												setHoveredHit,
+												key,
+												trackingCategory,
+												trackingActionForListView,
+												page.pageNumber,
+												item.filename,
+												idx
+											);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1170,7 +1214,9 @@ const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, s
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											setHoveredHit(key);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 										}}
@@ -1221,7 +1267,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody, cloneNam
 			onChange={(isExpanding) => {
 				trackEvent(
 					getTrackingNameForFactory(cloneName),
-					'DocumentMetadata',
+					`${trackingActionForListView}-DocumentMetadata`,
 					isExpanding ? 'onExpand' : 'onCollapse',
 					null,
 					makeCustomDimensions(item.filename)
@@ -1245,7 +1291,8 @@ const renderListView = (
 	metadataExpandedState,
 	cloneName,
 	searchText,
-	intelligentFeedbackComponent
+	intelligentFeedbackComponent,
+	idx
 ) => {
 	const { hoveredHit, setHoveredHit } = hoveredHitState;
 	const { metadataExpanded, setMetadataExpanded } = metadataExpandedState;
@@ -1260,7 +1307,8 @@ const renderListView = (
 					setHoveredHit,
 					cloneName,
 					searchText,
-					contextHtml
+					contextHtml,
+					idx
 				)}
 				{renderListViewParagraphHitsWithoutIntelligentSearch(item, hoveredHit, setHoveredHit, contextHtml)}
 				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody, cloneName)}
@@ -1283,7 +1331,9 @@ const renderListView = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											setHoveredHit(key);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1321,7 +1371,7 @@ const renderListView = (
 					onClick={() => {
 						trackEvent(
 							getTrackingNameForFactory(cloneName),
-							'ListViewInteraction',
+							trackingActionForListView,
 							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 							null,
 							makeCustomDimensions(item.filename)
@@ -1345,7 +1395,7 @@ const renderListView = (
 	}
 };
 
-const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
+const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, documentIdx, trackingCategory) => {
 	if (page.title || key < 5) {
 		return (
 			<div
@@ -1357,7 +1407,17 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						color: 'white',
 					}),
 				}}
-				onMouseEnter={() => setHoveredHit(key)}
+				onMouseEnter={() => {
+					handlePageHitHover(
+						setHoveredHit,
+						key,
+						trackingCategory,
+						trackingActionForCard,
+						page.pageNumber,
+						item.filename,
+						documentIdx
+					);
+				}}
 				onClick={(e) => {
 					e.preventDefault();
 					clickFn(
@@ -1365,7 +1425,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						state.cloneData.clone_name,
 						state.searchText,
 						page.pageNumber,
-						item.download_url_s
+						item.download_url_s,
+						documentIdx
 					);
 				}}
 			>
@@ -1407,10 +1468,12 @@ const cardHandler = {
 				setMetadataExpanded,
 				intelligentSearch,
 				intelligentFeedbackComponent,
+				idx,
 			} = props;
 
 			const contextHtml = getHoveredSnippet(item, hoveredHit);
 			const publicationDate = getPublicationDate(item.publication_date_dt);
+			const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 			if (state.listView) {
 				return renderListView(
@@ -1419,7 +1482,8 @@ const cardHandler = {
 					{ metadataExpanded, setMetadataExpanded },
 					state.cloneData.clone_name,
 					state.searchText,
-					intelligentFeedbackComponent
+					intelligentFeedbackComponent,
+					idx
 				);
 			} else {
 				return (
@@ -1448,7 +1512,16 @@ const cardHandler = {
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
-										return renderPageHit(page, key, hoveredHit, setHoveredHit, item, state);
+										return renderPageHit(
+											page,
+											key,
+											hoveredHit,
+											setHoveredHit,
+											item,
+											state,
+											idx,
+											trackingCategory
+										);
 									})
 									.value()}
 							</div>
@@ -1582,7 +1655,7 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'CardInteraction',
+												trackingActionForCard,
 												'Close Graph Card',
 												null,
 												makeCustomDimensions(filename)
@@ -1600,7 +1673,7 @@ const cardHandler = {
 									onClick={(e) => {
 										trackEvent(
 											getTrackingNameForFactory(cloneName),
-											'CardInteraction',
+											trackingActionForCard,
 											'showDocumentDetails',
 											null,
 											makeCustomDimensions(filename, null, idx)
@@ -1712,7 +1785,11 @@ const cardHandler = {
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 							href={'#'}
 							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
+								trackEvent(
+									getTrackingNameForFactory(cloneName),
+									trackingActionForCard,
+									'Close Graph Card'
+								);
 								e.preventDefault();
 								closeGraphCard();
 							}}
@@ -1889,7 +1966,7 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'GraphCardInteraction',
+												trackingActionForGraphCard,
 												`Open${item.name}DetailsPage`
 											);
 											e.preventDefault();
@@ -1943,7 +2020,7 @@ const cardHandler = {
 							onClick={(e) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
-									'GraphCardInteraction',
+									trackingActionForGraphCard,
 									`Open${item.name}DetailsPage`
 								);
 								e.preventDefault();
@@ -1961,7 +2038,7 @@ const cardHandler = {
 								onClick={(e) => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
+										trackingActionForGraphCard,
 										'Close Graph Card',
 										null,
 										makeCustomDimensions(item.name)
@@ -2181,7 +2258,11 @@ const cardHandler = {
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
 								onClick={(e) => {
-									trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Close');
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										`${trackingActionForGraphCard}-TopicCardOnClick`,
+										'Close'
+									);
 									e.preventDefault();
 									closeGraphCard();
 								}}

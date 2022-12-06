@@ -1314,6 +1314,7 @@ export const getDefaultComponent = (props, cardHandler) => {
 								intelligentSearch,
 								intelligentFeedbackComponent,
 								collection,
+								idx,
 							})}
 						</div>
 						{/* END CARD CONTENT */}
