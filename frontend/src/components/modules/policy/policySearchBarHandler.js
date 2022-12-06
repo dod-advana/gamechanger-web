@@ -104,7 +104,15 @@ const PolicySearchBarHandler = {
 						placeholder="Search..."
 						id="gcSearchInput"
 					/>
-					<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top" arrow>
+					<GCTooltip
+						title={
+							state.isFavoriteSearch
+								? 'Unfavorite this search to stop tracking in the User Dashboard'
+								: 'Favorite this search to track in the User Dashboard'
+						}
+						placement="top"
+						arrow
+					>
 						<button
 							type="button"
 							style={{
