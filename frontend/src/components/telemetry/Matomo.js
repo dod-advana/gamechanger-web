@@ -126,13 +126,11 @@ export function trackEvent(category, action, name, value, customDimensions, isCu
 
 		// Set custom dimensions & track event
 		// See the "Custom Dimensions" section here: https://developer.matomo.org/guides/tracking-javascript-guide
-		if (customDimensions) {
-			if (isCustomDimensionsForOneActionOnly) {
-				matomo.push(['trackEvent', category, action, name, value, customDimensions]);
-			} else {
-				setupDimensions(customDimensions, useMatomo);
-				matomo.push(['trackEvent', category, action, name, value]);
-			}
+		if (isCustomDimensionsForOneActionOnly) {
+			matomo.push(['trackEvent', category, action, name, value, customDimensions]);
+		} else {
+			setupDimensions(customDimensions, useMatomo);
+			matomo.push(['trackEvent', category, action, name, value]);
 		}
 	} catch (error) {
 		// Nothing
