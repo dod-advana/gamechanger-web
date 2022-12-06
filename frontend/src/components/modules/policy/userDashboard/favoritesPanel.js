@@ -335,8 +335,6 @@ const FavoritesPanel = ({
 			document.active = !document.active;
 		};
 
-		console.log('THIS IS THE DOCUMENT', document);
-
 		const createdDate = moment(Date.parse(document.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
 		const documentDetails = (

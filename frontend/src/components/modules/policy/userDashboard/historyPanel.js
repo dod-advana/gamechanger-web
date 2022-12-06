@@ -235,7 +235,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 					}}
 					style={{ color: '#386F94' }}
 				>
-					<GCTooltip title={row.value} placement="left">
+					<GCTooltip title={row.value} placement="top">
 						<div style={styles.tableLeftDiv}>
 							<p style={styles.textInCell}>{row.value}</p>
 						</div>
@@ -315,6 +315,9 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 		isExport = false
 	) => {
 		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
+		if (target?.className === 'fa fa-cogs') {
+			target = target.parentNode.parentNode;
+		}
 
 		if (!searchHistorySettingsPopperOpen) {
 			tmpSearchHistorySettings.searchType = searchType;
@@ -396,7 +399,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 					open={searchHistorySettingsPopperOpen}
 					anchorEl={searchHistorySettingsPopperAnchorEl}
 					anchorOrigin={{
-						vertical: 'bottom',
+						vertical: 'top',
 						horizontal: 'right',
 					}}
 					transformOrigin={{
@@ -501,11 +504,18 @@ const SearchHistoryPanel = ({
 					href={'#'}
 					onClick={(event) => {
 						preventDefault(event);
-						window.open(`${window.location.origin}/#/${row.original.tiny_url}`, '_blank');
+						// console.log('this is the URL', `${window.location.origin}/#/${row.original.tiny_url}`);
+						setTimeout(() => {
+							window.open(
+								`${window.location.origin}/#/${row.original.tiny_url}`,
+								'_blank',
+								'location=yes, status=yes'
+							);
+						}, 1000);
 					}}
 					style={{ color: '#386F94' }}
 				>
-					<GCTooltip title={row.value} placement="left">
+					<GCTooltip title={row.value} placement="top">
 						<div style={styles.tableLeftDiv}>
 							<p style={styles.textInCell}>{row.value}</p>
 						</div>
@@ -559,7 +569,14 @@ const SearchHistoryPanel = ({
 			accessor: 'favorite',
 			width: 160,
 			Cell: (row) => (
-				<GCTooltip title={'Favorite a search to track in the User Dashboard'} placement="top">
+				<GCTooltip
+					title={
+						!row.value
+							? 'Favorite this search to track in the User Dashboard'
+							: 'Unfavorite this search to stop tracking in the User Dashboard'
+					}
+					placement="top"
+				>
 					<FavoriteStyledI
 						style={{
 							...styles.tableCenterDiv,
@@ -567,16 +584,18 @@ const SearchHistoryPanel = ({
 							alignItems: 'center',
 							padding: '0 15px',
 						}}
-						onClick={(event) =>
-							handleFavoriteSearchHistoryStarClicked(
-								event.target,
-								!row.value,
-								row.original.tiny_url,
-								row.original.search,
-								row.original.num_results,
-								row.index
-							)
-						}
+						onClick={(event) => {
+							!row.value
+								? handleFavoriteSearchHistoryStarClicked(
+										event.target,
+										!row.value,
+										row.original.tiny_url,
+										row.original.search,
+										row.original.num_results,
+										row.index
+								  )
+								: unfavoriteSearchHistoryStarClicked(event.target, row.index);
+						}}
 					>
 						<i className={row.value ? 'fa fa-star' : 'fa fa-star-o'} />
 					</FavoriteStyledI>
@@ -593,6 +612,9 @@ const SearchHistoryPanel = ({
 		isExport = false
 	) => {
 		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
+		if (target?.className === 'fa fa-cogs') {
+			target = target.parentNode.parentNode;
+		}
 
 		if (!searchHistorySettingsPopperOpen) {
 			tmpSearchHistorySettings.searchType = searchType;
@@ -615,13 +637,24 @@ const SearchHistoryPanel = ({
 		setReload(!reload);
 	};
 
-	const handleFavoriteSearchHistoryStarClicked = (target, favorite, tinyUrl, searchText, count, index) => {
-		if (!favorite && !unfavoritePopperOpen) {
+	const unfavoriteSearchHistoryStarClicked = (target, index) => {
+		if (target?.className.startsWith('fa fa-star')) {
+			target = target.parentNode.parentNode;
+		}
+		if (!unfavoritePopperOpen) {
 			setSearchHistoryPopperAnchorEl(target);
 			setUnfavoritePopperOpen(true);
 			setSearchHistoryIdx(index);
-			console.log(index);
-			return;
+		} else {
+			setSearchHistoryPopperAnchorEl(null);
+			setUnfavoritePopperOpen(false);
+			setSearchHistoryIdx(index);
+		}
+	};
+
+	const handleFavoriteSearchHistoryStarClicked = (target, favorite, tinyUrl, searchText, count, index) => {
+		if (target?.className.startsWith('fa fa-star')) {
+			target = target.parentNode.parentNode;
 		}
 		if (!searchHistoryPopperOpen) {
 			setSearchHistoryPopperAnchorEl(target);
@@ -666,10 +699,8 @@ const SearchHistoryPanel = ({
 				);
 		}
 		return (
-			<>
-				<div style={{ width: '100%', height: '100%' }}>
-					<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
-				</div>
+			<div style={{ width: '100%', height: '100%' }}>
+				<div style={{ width: '100%', height: '100%' }}>{renderData}</div>
 				<Popover
 					onClose={() => {
 						handleFavoriteSearchHistoryStarClicked(null);
@@ -677,7 +708,7 @@ const SearchHistoryPanel = ({
 					open={searchHistoryPopperOpen}
 					anchorEl={searchHistoryPopperAnchorEl}
 					anchorOrigin={{
-						vertical: 'bottom',
+						vertical: 'top',
 						horizontal: 'right',
 					}}
 					transformOrigin={{
@@ -748,7 +779,7 @@ const SearchHistoryPanel = ({
 
 				<Popover
 					onClose={() => {
-						handleFavoriteSearchHistoryStarClicked(null);
+						unfavoriteSearchHistoryStarClicked(null);
 					}}
 					open={unfavoritePopperOpen}
 					anchorEl={searchHistoryPopperAnchorEl}
@@ -820,7 +851,7 @@ const SearchHistoryPanel = ({
 					open={searchHistorySettingsPopperOpen}
 					anchorEl={searchHistorySettingsPopperAnchorEl}
 					anchorOrigin={{
-						vertical: 'bottom',
+						vertical: 'top',
 						horizontal: 'right',
 					}}
 					transformOrigin={{
@@ -854,7 +885,7 @@ const SearchHistoryPanel = ({
 						</div>
 					</div>
 				</Popover>
-			</>
+			</div>
 		);
 	};
 
