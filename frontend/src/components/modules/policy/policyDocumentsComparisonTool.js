@@ -748,10 +748,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				<div style={{ display: 'flex' }}>
 					{/* different */}
 					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Document Comparison Tool enables you to input text and locate policies in the GAMECHANGER
-						policy repository with semantically similar language. Using the Document Comparison Tool below,
-						you can conduct deeper policy analysis and understand how one piece of policy compares to the
-						GAMECHANGER policy repository.
+						The Document Comparison Tool enables users to compare submitted text (in the field below) with
+						existing text in the GAMECHANGER repository. After submitting a sentence, paragraph, or string
+						of paragraphs into the open text field, the tool will search for and yield the top existing
+						policy documents available within GAMECHANGER that share the most semantically similar text.
 					</div>
 					<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
 						<HelpOutlineIcon
@@ -895,7 +895,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					)}
 				</div>
 			</div>
-			{returnedDocs.length <= 0 && !loading && (
+			{((returnedDocs.length <= 0 && !loading) || stepIndex === 2) && (
 				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
