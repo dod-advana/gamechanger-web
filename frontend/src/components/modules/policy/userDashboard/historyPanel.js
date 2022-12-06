@@ -315,7 +315,6 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 		isExport = false
 	) => {
 		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
-		console.log('HERE IS TMP SEARCH SETTINGS', tmpSearchHistorySettings);
 		if (target?.className === 'fa fa-cogs') {
 			target = target.parentNode.parentNode;
 		}
