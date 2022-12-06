@@ -81,7 +81,7 @@ class CustomDimensionForMultipleEvents {
  * @param {any} value - Value to assign the custom dimension for a single event.
  */
 function customDimensionForSingleEvent(id, value) {
-	id = 'dimension' + id;
-	const dimension = { id: value };
+	let dimension = {};
+	dimension['dimension' + id] = value;
 	return dimension;
 }
