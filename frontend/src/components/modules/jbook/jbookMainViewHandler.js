@@ -538,7 +538,7 @@ const displayUserRelatedItems = (props) => {
 };
 
 const JBookMainViewHandler = (props) => {
-	const { state, dispatch, abortController, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
@@ -566,14 +566,14 @@ const JBookMainViewHandler = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler: tmpSearchHandler,
-				abortController,
+				cancelToken,
 				gameChangerAPI,
 				gameChangerUserAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [abortController, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = {
