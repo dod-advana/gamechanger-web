@@ -1619,8 +1619,7 @@ const cardHandler = {
 									trackFlipCardEvent(
 										getTrackingNameForFactory(cloneName),
 										toggledMore,
-										null,
-										makeCustomDimensions(filename)
+										makeCustomDimensions(filename, null, idx)
 									);
 									setToggledMore(!toggledMore);
 								}}
