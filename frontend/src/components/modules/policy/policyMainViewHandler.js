@@ -532,10 +532,19 @@ const renderHideTabs = (props) => {
 									marginTop: 8,
 								}}
 							>
-								<Typography style={styles.containerText}>
-									<i className="fa fa-search" style={{ marginRight: 12 }} />
-									{`   ${idx + 1}. ${search.length < 18 ? search : search.substring(0, 20) + '...'}`}
-								</Typography>
+								<GCTooltip title={search.length < 18 ? '' : search} placement="top" arrow>
+									<Typography
+										style={{
+											...styles.containerText,
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+										}}
+									>
+										<i className="fa fa-search" style={{ marginRight: 12 }} />
+										{`   ${idx + 1}. ${search}`}
+									</Typography>
+								</GCTooltip>
 							</div>
 						</TrendingSearchContainer>
 					))}
