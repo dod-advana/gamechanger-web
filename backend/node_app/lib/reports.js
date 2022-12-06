@@ -236,6 +236,7 @@ class Reports {
 
 			doc.end();
 		} catch (e) {
+			callback('', true);
 			this.logger.error(e);
 			this.logger.error(e.message, 'KRx98r2', userId);
 		}
@@ -843,11 +844,11 @@ class Reports {
 			tmpJCAData.push({ text: `${docData.pocJointCapabilityArea}:`, bold: true, marginBottom: 5 });
 			const areas2 =
 				docData.pocJointCapabilityArea2 && docData.pocJointCapabilityArea2 !== null
-					? docData.pocJointCapabilityArea2.split(', ')
+					? docData.pocJointCapabilityArea2
 					: [];
 			const areas3 =
 				docData.pocJointCapabilityArea3 && docData.pocJointCapabilityArea3 != null
-					? docData.pocJointCapabilityArea3.split(', ')
+					? docData.pocJointCapabilityArea3
 					: [];
 			const areasCombined = {};
 			areas2.forEach((area2) => {
@@ -1004,6 +1005,18 @@ class Reports {
 						subheader,
 						[
 							{
+								text: 'Budget Year',
+								style: 'subheader',
+							},
+							`${docData.budgetYear}`,
+							{
+								text: '',
+								style: 'subheader',
+							},
+							``,
+						],
+						[
+							{
 								text: showPOC ? 'Project POC:' : '',
 								style: 'subheader',
 							},
@@ -1077,7 +1090,8 @@ class Reports {
 	constructJCAData(docData) {
 		const JCAData = this.budgetSearchUtility.getJCAData();
 		const tmpJCAData = this.formatJCAData(JCAData, docData);
-		let currentYear = new Date().getFullYear();
+		console.log(docData);
+		let currentYear = parseInt(docData.budgetYear);
 
 		return {
 			pageBreak: 'after',
@@ -1086,7 +1100,12 @@ class Reports {
 				widths: ['*', '*', '*'],
 				body: [
 					[
-						{ text: 'FY21-FY25 Total Program Element Cost', style: 'subheader' },
+						{
+							text: `FY${(currentYear - 1).toString().substring(2)}-FY${(currentYear + 3)
+								.toString()
+								.substring(2)} Total Program Element Cost`,
+							style: 'subheader',
+						},
 						{
 							text: 'Data Type',
 							style: 'subheader',
@@ -1116,13 +1135,13 @@ class Reports {
 									marginBottom: 5,
 								},
 								{
-									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+									text: `FY${(currentYear + 2).toString().substring(2)}: ${
 										docData.proj_fund_by3_d !== undefined ? docData.proj_fund_by3_d + ' M' : ''
 									}`,
 									marginBottom: 5,
 								},
 								{
-									text: `FY${(currentYear + 1).toString().substring(2)}: ${
+									text: `FY${(currentYear + 3).toString().substring(2)}: ${
 										docData.proj_fund_by4_d !== undefined ? docData.proj_fund_by4_d + ' M' : ''
 									}`,
 									marginBottom: 5,
