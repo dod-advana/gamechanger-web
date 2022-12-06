@@ -413,7 +413,7 @@ export default () => {
 	const getDocumentData = useCallback(() => {
 		const params = { startDate, endDate };
 		gameChangerAPI.getDocumentUsage(params).then((data) => {
-			setDocumentData(data.data);
+			setDocumentData(data.data.data);
 		});
 	}, [startDate, endDate]);
 
@@ -528,7 +528,7 @@ export default () => {
 					getUserAggData();
 					getUserGraphData();
 					break;
-				case 'userTracking':
+				case 'userTracker':
 					getDocumentData();
 					break;
 				case 'feedback':
