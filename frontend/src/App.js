@@ -376,6 +376,18 @@ const App = () => {
 												/>
 												<Route
 													exact
+													path="/gamechanger"
+													render={() => {
+														if (
+															window.location.href.endsWith('gamechanger/') ||
+															window.location.href.endsWith('gamechanger')
+														) {
+															return <Redirect to={'/gamechanger/userDashboard'} />;
+														}
+													}}
+												/>
+												<Route
+													exact
 													path="/gamechanger-details"
 													component={GameChangerDetailsPage}
 													location={location}
