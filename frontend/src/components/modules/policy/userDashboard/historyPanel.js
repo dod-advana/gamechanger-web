@@ -235,7 +235,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 					}}
 					style={{ color: '#386F94' }}
 				>
-					<GCTooltip title={row.value} placement="top">
+					<GCTooltip title={row.value} placement="top-start">
 						<div style={styles.tableLeftDiv}>
 							<p style={styles.textInCell}>{row.value}</p>
 						</div>
@@ -502,7 +502,7 @@ const SearchHistoryPanel = ({
 					}}
 					style={{ color: '#386F94' }}
 				>
-					<GCTooltip title={row.value} placement="top">
+					<GCTooltip title={row.value} placement="top-start">
 						<div style={styles.tableLeftDiv}>
 							<p style={styles.textInCell}>{row.value}</p>
 						</div>
