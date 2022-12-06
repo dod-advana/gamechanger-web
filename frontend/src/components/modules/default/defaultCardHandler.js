@@ -459,7 +459,15 @@ const getCardHeaderHandler = ({ item, state, graphView, intelligentSearch }) => 
 						className={'title-text'}
 						onClick={
 							docListView
-								? () => clickFn(item.filename, state.cloneData.clone_name, state.searchText, 0)
+								? () =>
+										clickFn(
+											item.filename,
+											state.cloneData.clone_name,
+											state.searchText,
+											null,
+											null,
+											0
+										)
 								: () => {}
 						}
 					>
@@ -526,7 +534,7 @@ const getDisplayTitle = (item) => {
 	return item.title;
 };
 
-export const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl, idx) => {
+export const clickFn = (filename, cloneName, searchText, sourceUrl, idx, pageNumber = 0) => {
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
@@ -666,8 +674,9 @@ const cardHandler = {
 															item.filename,
 															state.cloneData.clone_name,
 															state.searchText,
-															page.pageNumber,
-															idx
+															null,
+															idx,
+															page.pageNumber
 														);
 													}}
 												>
@@ -745,6 +754,8 @@ const cardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
+														null,
+														null,
 														page.pageNumber
 													);
 												}}
@@ -829,6 +840,8 @@ const cardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
+														null,
+														null,
 														page.pageNumber
 													);
 												}}
@@ -906,7 +919,7 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(filename, cloneName, searchText, 0);
+								clickFn(filename, cloneName, searchText, null, null, 0);
 							}}
 						>
 							Open
