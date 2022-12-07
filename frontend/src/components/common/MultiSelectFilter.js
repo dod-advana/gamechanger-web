@@ -26,7 +26,34 @@ const styles = {
 	},
 };
 
-const ButtonGroup = ({ state, dispatch, showSeeMore, showClear, showingAllOptions, handleSeeMore, handleClear }) => {
+const TopButtonGroup = ({ state, dispatch, showClear, handleSelectAll, handleClear }) => {
+	return (
+		<div style={{ ...styles.buttonContainer, paddingBottom: '10px' }}>
+			{
+				<Button variant="text" onClick={() => handleSelectAll(state, dispatch)} sx={styles.textButton}>
+					Select All
+				</Button>
+			}
+			{showClear ? (
+				<Button variant="text" onClick={() => handleClear(state, dispatch)} sx={styles.textButton}>
+					Clear
+				</Button>
+			) : (
+				<span></span>
+			)}
+		</div>
+	);
+};
+
+const BottomButtonGroup = ({
+	state,
+	dispatch,
+	showSeeMore,
+	showClear,
+	showingAllOptions,
+	handleSeeMore,
+	handleClear,
+}) => {
 	const getSeeMoreText = () => {
 		return showingAllOptions ? (
 			<>
@@ -71,7 +98,9 @@ const MultiSelectFilter = ({
 	trackingName,
 	showNumResultsPerOption = false,
 	handleFilterChange,
+	handleSelectAll,
 	handleClear,
+	showSelectAll,
 	showClear,
 	isChecked,
 	children,
@@ -143,6 +172,15 @@ const MultiSelectFilter = ({
 
 	return (
 		<FormGroup row style={{ marginLeft: '10px', width: '100%' }}>
+			{showSelectAll && (
+				<TopButtonGroup
+					state={state}
+					dispatch={dispatch}
+					showClear={showClear}
+					handleSelectAll={handleSelectAll}
+					handleClear={handleClear}
+				/>
+			)}
 			<div ref={containerRef} style={styles.checkboxContainer}>
 				{children ||
 					visibleOptions.map((option) => {
@@ -180,12 +218,12 @@ const MultiSelectFilter = ({
 						);
 					})}
 			</div>
-			{(showSeeMore || showClear) && (
-				<ButtonGroup
+			{(showSeeMore || (showClear && !showSelectAll)) && (
+				<BottomButtonGroup
 					state={state}
 					dispatch={dispatch}
 					showSeeMore={showSeeMore}
-					showClear={showClear}
+					showClear={showClear && !showSelectAll}
 					showingAllOptions={showingAllOptions}
 					handleSeeMore={handleSeeMore}
 					handleClear={handleClear}
@@ -195,7 +233,16 @@ const MultiSelectFilter = ({
 	);
 };
 
-ButtonGroup.propTypes = {
+TopButtonGroup.propTypes = {
+	state: PropTypes.shape({
+		searchSettings: PropTypes.object,
+	}),
+	dispatch: PropTypes.func,
+	handleSelectAll: PropTypes.func,
+	handleClear: PropTypes.func,
+};
+
+BottomButtonGroup.propTypes = {
 	state: PropTypes.shape({
 		searchSettings: PropTypes.object,
 	}),
@@ -207,6 +254,11 @@ ButtonGroup.propTypes = {
 	handleClear: PropTypes.func,
 };
 
+MultiSelectFilter.defaultProps = {
+	showSelectAll: false,
+	handleSelectAll: () => {},
+};
+
 MultiSelectFilter.propTypes = {
 	state: PropTypes.shape({
 		searchSettings: PropTypes.object,
@@ -215,7 +267,7 @@ MultiSelectFilter.propTypes = {
 	classes: PropTypes.object,
 	searchSettingsName: PropTypes.string,
 	filter: PropTypes.string,
-	originalFilters: PropTypes.object,
+	originalFilters: PropTypes.array,
 	trackingName: PropTypes.string,
 	showNumResultsPerOption: PropTypes.bool,
 	preventSearchOnChange: PropTypes.bool,
@@ -223,6 +275,9 @@ MultiSelectFilter.propTypes = {
 	handleClear: PropTypes.func,
 	showClear: PropTypes.bool,
 	isChecked: PropTypes.func,
+
+	showSelectAll: PropTypes.bool,
+	handleSelectAll: PropTypes.func,
 };
 
 export default MultiSelectFilter;
