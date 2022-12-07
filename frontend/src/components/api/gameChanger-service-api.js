@@ -72,14 +72,20 @@ const endpoints = {
 	getS3List: '/api/gamechanger/admin/getS3List',
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
+	downloadS3FileTrain: '/api/gamechanger/admin/downloadS3FileTrain',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	deleteLocalModelTrain: '/api/gamechanger/admin/deleteLocalModelTrain',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
+	getAPIInformationTrain: '/api/gamechanger/admin/getAPIInformationTrain',
 	getModelsList: '/api/gamechanger/admin/getModelsList',
+	getModelsListTrain: '/api/gamechanger/admin/getModelsListTrain',
 	getDataList: '/api/gamechanger/admin/getDataList',
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
+	getProcessStatusTrain: '/api/gamechanger/admin/getProcessStatusTrain',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getFilesInCorpusTrain: '/api/gamechanger/admin/getFilesInCorpusTrain',
 	getCache: '/api/gamechanger/admin/getCache',
 	clearCache: '/api/gamechanger/admin/clearCache',
 	getUserSettings: '/api/gamechanger/getUserSettings',
@@ -694,8 +700,18 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
+	getAPIInformationTrain = async () => {
+		const url = endpoints.getAPIInformationTrain;
+		return axiosGET(this.axios, url);
+	};
+
 	getProcessStatus = async () => {
 		const url = endpoints.getProcessStatus;
+		return axiosGET(this.axios, url);
+	};
+
+	getProcessStatusTrain = async () => {
+		const url = endpoints.getProcessStatusTrain;
 		return axiosGET(this.axios, url);
 	};
 
@@ -714,6 +730,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	downloadS3FileTrain = async (opts) => {
+		const url = endpoints.downloadS3FileTrain;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	stopProcess = async (opts) => {
 		const url = endpoints.stopProcess;
 		return axiosPOST(this.axios, url, opts);
@@ -723,11 +744,21 @@ export default class GameChangerAPI {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
+
+	deleteLocalModelTrain = async (opts) => {
+		const url = endpoints.deleteLocalModelTrain;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	};
 
+	getModelsListTrain = async () => {
+		const url = endpoints.getModelsListTrain;
+		return axiosGET(this.axios, url);
+	};
 	getDataList = async () => {
 		const url = endpoints.getDataList;
 		return axiosGET(this.axios, url);
@@ -740,6 +771,10 @@ export default class GameChangerAPI {
 
 	getFilesInCorpus = async () => {
 		const url = endpoints.getFilesInCorpus;
+		return axiosGET(this.axios, url);
+	};
+	getFilesInCorpusTrain = async () => {
+		const url = endpoints.getFilesInCorpusTrain;
 		return axiosGET(this.axios, url);
 	};
 	// End ML endpoints
