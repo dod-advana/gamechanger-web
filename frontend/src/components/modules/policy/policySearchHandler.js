@@ -18,7 +18,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
 const gameChangerAPI = new GameChangerAPI();
-let mostRecentSearch = 0;
+let mostRecentSearchTS = 0;
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	gameChangerAPI
@@ -436,7 +436,7 @@ const PolicySearchHandler = {
 		handleRecentSearchesLocalStorage(recentSearchesParsed, searchText, cloneData);
 
 		const t0 = new Date().getTime();
-		mostRecentSearch = t0;
+		mostRecentSearchTS = t0;
 
 		let searchResults = [];
 
@@ -488,6 +488,10 @@ const PolicySearchHandler = {
 				setState(dispatch, { runGraphSearch: true });
 			}
 
+			if (t0 < mostRecentSearchTS) {
+				throw 'cancelling due to more recent search';
+			}
+
 			gameChangerAPI
 				.getDataForSearch({
 					options: {
@@ -530,8 +534,8 @@ const PolicySearchHandler = {
 			let ltr = await gameChangerAPI.getLTRMode();
 			ltr = ltr.data.value === 'true';
 
-			if (t0 < mostRecentSearch) {
-				throw 'cancelling modular search due to more recent search';
+			if (t0 < mostRecentSearchTS) {
+				throw 'cancelling due to more recent search';
 			}
 
 			const resp = await gameChangerAPI.modularSearch({
@@ -560,8 +564,8 @@ const PolicySearchHandler = {
 				limit: 18,
 			});
 
-			if (t0 < mostRecentSearch) {
-				throw 'cancelling result render due to more recent search';
+			if (t0 < mostRecentSearchTS) {
+				throw 'cancelling render due to more recent search';
 			}
 
 			let getUserDataFlag = true;
