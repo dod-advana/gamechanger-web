@@ -264,6 +264,23 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
+
+					<div style={{ marginTop: '20px' }}>
+						<GCButton
+							onClick={async () => {
+								gameChangerAPI.callDataFunction({
+									functionName: 'bulkUpload',
+									cloneName: 'jbook',
+									options: {
+										portfolio,
+									},
+								});
+							}}
+							style={{ minWidth: 'unset' }}
+						>
+							Bulk Upload
+						</GCButton>
+					</div>
 				</div>
 			);
 		});
