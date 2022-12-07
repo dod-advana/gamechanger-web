@@ -121,10 +121,10 @@ const createFilteredPubs = (docs) => {
 	}));
 };
 
-const getImagesForFilteredPubs = async (filteredPubs, state, gameChangerAPI, abortController) => {
+const getImagesForFilteredPubs = async (filteredPubs, state, gameChangerAPI, cancelToken) => {
 	filteredPubs.forEach(async (pub) => {
 		await gameChangerAPI
-			.thumbnailStorageDownloadPOST([pub], 'thumbnails', state.cloneData, abortController)
+			.thumbnailStorageDownloadPOST([pub], 'thumbnails', state.cloneData, cancelToken)
 			.then((pngs) => {
 				const buffers = pngs.data;
 				buffers.forEach((buf) => {
@@ -228,7 +228,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 	);
 };
 
-const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, abortController, gameChangerAPI) => {
+const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI) => {
 	let filteredPubs = _.filter(pop_pubs, (item) => {
 		return !_.includes(pop_pubs_inactive, item.id);
 	});
@@ -237,7 +237,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, abort
 			...item,
 			imgSrc: DefaultPub,
 		}));
-		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, abortController);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
 		setState(dispatch, { searchMajorPubs: pubsWithImages });
 	} catch (e) {
 		//Do nothing
@@ -246,7 +246,7 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, abort
 	}
 };
 
-const handleLastOpened = async (last_opened_docs, state, dispatch, abortController, gameChangerAPI) => {
+const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let cleanedDocs = [];
 	let filteredPubs = [];
 
@@ -257,7 +257,7 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, abortControll
 	try {
 		filteredPubs = createFilteredPubs(cleanedDocs);
 
-		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, abortController);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
 		setState(dispatch, { lastOpened: pubsWithImages, loadingLastOpened: false });
 	} catch (e) {
 		//Do nothing
@@ -266,12 +266,12 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, abortControll
 	}
 };
 
-const handleRecDocs = async (rec_docs, state, dispatch, abortController, gameChangerAPI) => {
+const handleRecDocs = async (rec_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let filteredPubs = [];
 	try {
 		filteredPubs = createFilteredPubs(rec_docs);
 
-		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, abortController);
+		const pubsWithImages = await getImagesForFilteredPubs(filteredPubs, state, gameChangerAPI, cancelToken);
 		setState(dispatch, { recDocs: pubsWithImages, loadingrecDocs: false });
 	} catch (e) {
 		//Do nothing
@@ -279,7 +279,7 @@ const handleRecDocs = async (rec_docs, state, dispatch, abortController, gameCha
 	}
 };
 
-const handleSources = async (state, dispatch, abortController, gameChangerAPI) => {
+const handleSources = async (state, dispatch, cancelToken, gameChangerAPI) => {
 	let crawlerSources = await gameChangerAPI.gcCrawlerSealData();
 	crawlerSources = crawlerSources.data.map((item) => ({
 		...item,
@@ -294,7 +294,7 @@ const handleSources = async (state, dispatch, abortController, gameChangerAPI) =
 		});
 		for (let i = 0; i < thumbnailList.length; i++) {
 			gameChangerAPI
-				.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, state.cloneData, abortController)
+				.thumbnailStorageDownloadPOST([thumbnailList[i]], folder, state.cloneData, cancelToken)
 				.then((pngs) => {
 					const buffers = pngs.data;
 					buffers.forEach((buf) => {
@@ -337,7 +337,7 @@ const formatString = (text) => {
 };
 
 const handlePageLoad = async (props) => {
-	const { state, dispatch, gameChangerAPI, abortController } = props;
+	const { state, dispatch, gameChangerAPI, cancelToken } = props;
 	await defaultHandlePageLoad(props);
 	setState(dispatch, { loadingrecDocs: true });
 	setState(dispatch, { loadingLastOpened: true });
@@ -381,10 +381,10 @@ const handlePageLoad = async (props) => {
 		setState(dispatch, { adminTopics: topics });
 	}
 
-	handleSources(state, dispatch, abortController, gameChangerAPI);
-	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, abortController, gameChangerAPI);
-	handleRecDocs(rec_docs, state, dispatch, abortController, gameChangerAPI);
-	handleLastOpened(pdf_opened, state, dispatch, abortController, gameChangerAPI);
+	handleSources(state, dispatch, cancelToken, gameChangerAPI);
+	handlePopPubs(pop_pubs, pop_pubs_inactive, state, dispatch, cancelToken, gameChangerAPI);
+	handleRecDocs(rec_docs, state, dispatch, cancelToken, gameChangerAPI);
+	handleLastOpened(pdf_opened, state, dispatch, cancelToken, gameChangerAPI);
 };
 
 const recRecentlyViewedMap = (cloneData, dispatch, pub) => {
@@ -1154,7 +1154,7 @@ const getGCUserDashboard = (props) => {
 };
 
 const PolicyMainViewHandler = (props) => {
-	const { state, dispatch, abortController, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
+	const { state, dispatch, cancelToken, setCurrentTime, gameChangerUserAPI, gameChangerAPI } = props;
 
 	const [pageLoaded, setPageLoaded] = useState(false);
 	const [searchHandler, setSearchHandler] = useState();
@@ -1188,14 +1188,14 @@ const PolicyMainViewHandler = (props) => {
 				dispatch,
 				history: state.history,
 				searchHandler: tmpSearchHandler,
-				abortController,
+				cancelToken,
 				gameChangerAPI,
 				gameChangerUserAPI,
 			});
 			setState(dispatch, { viewNames: getViewNames({ cloneData: state.cloneData }) });
 			setPageLoaded(true);
 		}
-	}, [abortController, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
+	}, [cancelToken, dispatch, gameChangerAPI, gameChangerUserAPI, pageLoaded, state]);
 
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
