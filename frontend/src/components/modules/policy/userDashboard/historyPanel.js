@@ -181,10 +181,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 	const [searchHistorySettingsPopperAnchorEl, setSearchHistorySettingsPopperAnchorEl] = useState(null);
 	const [exportHistorySettingsPopperOpen, setExportHistorySettingsPopperOpen] = useState(false);
 	const [exportHistorySettingsData, setExportHistorySettingsData] = useState({
-		searchType: '',
-		orgFilterText: '',
 		exportType: '',
-		isExport: false,
 	});
 	const [exportHistory, setExportHistory] = useState([]);
 	const [exportHistoryLoading, setExportHistoryLoading] = useState(true);
@@ -274,10 +271,7 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 							onClick={(event) => {
 								handleHideShowExportHistorySettings(
 									event.target,
-									row.original.download_request_body.searchType,
-									row.original.orgFilterText,
-									row.original.download_request_body.format,
-									true
+									row.original.download_request_body.format
 								);
 							}}
 						/>
@@ -307,32 +301,20 @@ const ExportHistoryPanel = ({ userData, cloneData, reload, setReload, classes })
 			),
 		},
 	];
-	const handleHideShowExportHistorySettings = (
-		target,
-		searchType,
-		orgFilterText,
-		exportType = '',
-		isExport = false
-	) => {
+	const handleHideShowExportHistorySettings = (target, exportType = '') => {
 		const tmpSearchHistorySettings = _.cloneDeep(exportHistorySettingsData);
 		if (target?.className === 'fa fa-cogs') {
 			target = target.parentNode.parentNode;
 		}
 
 		if (!exportHistorySettingsPopperOpen) {
-			tmpSearchHistorySettings.searchType = searchType;
-			tmpSearchHistorySettings.orgFilterText = orgFilterText;
 			tmpSearchHistorySettings.exportType = exportType;
-			tmpSearchHistorySettings.isExport = isExport;
 			setExportHistorySettingsData(tmpSearchHistorySettings);
 			setSearchHistorySettingsPopperAnchorEl(target);
 			setExportHistorySettingsPopperOpen(true);
 		} else {
 			setExportHistorySettingsData({
-				searchType: '',
-				orgFilterText: '',
 				exportType: '',
-				isExport: false,
 			});
 			setSearchHistorySettingsPopperAnchorEl(null);
 			setExportHistorySettingsPopperOpen(false);
@@ -455,8 +437,8 @@ const SearchHistoryPanel = ({
 	const [searchHistorySettingsData, setSearchHistorySettingsData] = useState({
 		searchType: '',
 		orgFilterText: '',
-		exportType: '',
-		isExport: false,
+		pubDate: '',
+		typeFilterText: '',
 	});
 	const [searchHistoryPopperAnchorEl, setSearchHistoryPopperAnchorEl] = useState(null);
 	const [searchHistoryPopperOpen, setSearchHistoryPopperOpen] = useState(false);
@@ -540,7 +522,9 @@ const SearchHistoryPanel = ({
 								handleHideShowSearchHistorySettings(
 									event.target,
 									row.original.searchType,
-									row.original.orgFilterText
+									row.original.orgFilterText,
+									row.original.pubDate,
+									row.original.typeFilterText
 								);
 							}}
 							className="fa fa-cogs"
@@ -591,13 +575,7 @@ const SearchHistoryPanel = ({
 		},
 	];
 
-	const handleHideShowSearchHistorySettings = (
-		target,
-		searchType,
-		orgFilterText,
-		exportType = '',
-		isExport = false
-	) => {
+	const handleHideShowSearchHistorySettings = (target, searchType, orgFilterText, pubDate, typeFilterText) => {
 		const tmpSearchHistorySettings = _.cloneDeep(searchHistorySettingsData);
 		if (target?.className === 'fa fa-cogs') {
 			target = target.parentNode.parentNode;
@@ -606,8 +584,8 @@ const SearchHistoryPanel = ({
 		if (!searchHistorySettingsPopperOpen) {
 			tmpSearchHistorySettings.searchType = searchType;
 			tmpSearchHistorySettings.orgFilterText = orgFilterText;
-			tmpSearchHistorySettings.exportType = exportType;
-			tmpSearchHistorySettings.isExport = isExport;
+			tmpSearchHistorySettings.pubDate = pubDate;
+			tmpSearchHistorySettings.typeFilterText = typeFilterText;
 			setSearchHistorySettingsData(tmpSearchHistorySettings);
 			setSearchHistorySettingsPopperAnchorEl(target);
 			setSearchHistorySettingsPopperOpen(true);
@@ -615,8 +593,8 @@ const SearchHistoryPanel = ({
 			setSearchHistorySettingsData({
 				searchType: '',
 				orgFilterText: '',
-				exportType: '',
-				isExport: false,
+				pubDate: '',
+				typeFilterText: '',
 			});
 			setSearchHistorySettingsPopperAnchorEl(null);
 			setSearchHistorySettingsPopperOpen(false);
@@ -863,12 +841,14 @@ const SearchHistoryPanel = ({
 								<span style={{ fontWeight: 'bold' }}>Source Filter:</span>{' '}
 								{searchHistorySettingsData.orgFilterText}
 							</div>
-							{searchHistorySettingsData.isExport && (
-								<div style={styles.searchHistorySettings.overlaySearchDetails}>
-									<span style={{ fontWeight: 'bold' }}>Export Type:</span>{' '}
-									{searchHistorySettingsData.exportType}
-								</div>
-							)}
+							<div style={styles.searchHistorySettings.overlaySearchDetails}>
+								<span style={{ fontWeight: 'bold' }}>Type Filter:</span>{' '}
+								{searchHistorySettingsData.typeFilterText}
+							</div>
+							<div style={styles.searchHistorySettings.overlaySearchDetails}>
+								<span style={{ fontWeight: 'bold' }}>Publication Dates:</span>{' '}
+								{searchHistorySettingsData.pubDate}
+							</div>
 						</div>
 					</div>
 				</Popover>
