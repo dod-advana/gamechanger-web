@@ -19,12 +19,23 @@ const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
+const ExcelJS = require('exceljs');
+const path = require('path');
+
+const { performance } = require('perf_hooks');
+
 const _ = require('underscore');
 
 const types = {
 	'RDT&E': 'rdoc',
 	Procurement: 'pdoc',
 	'O&M': 'odoc',
+};
+
+const types_reverse = {
+	rdoc: 'RDT&E',
+	pdoc: 'Procurement',
+	odoc: 'O&M',
 };
 
 class JBookDataHandler extends DataHandler {
@@ -642,7 +653,7 @@ class JBookDataHandler extends DataHandler {
 
 			delete reviewData.id;
 
-			// in review table, budget_line_item is also projectNum
+			// in review table, budget_line_item is also PE
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
 					break;
@@ -1458,6 +1469,200 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async bulkUpload(req, userId) {
+		const { portfolio } = req.body;
+
+		const workbook = new ExcelJS.Workbook();
+		const filepath = path.join(__dirname, './real-excel.xlsx');
+		let excelFile = await workbook.xlsx.readFile(filepath);
+		let sheet1 = excelFile.getWorksheet('Primary Review Worksheet');
+		const cols = [
+			'primary_reviewer',
+			'primary_class_label',
+			'fy22_class_label',
+			'service_reviewer',
+			'fy22_service_reviewer',
+			'primary_ptp',
+			'service_mp_add',
+			'primary_review_notes',
+			'fy22_poc_reviewer',
+			'budget_year',
+			'budget_type',
+			'agency_service',
+			'agency_office',
+			'appn_num',
+			'appn_title',
+			'project',
+			'budget_activity',
+			'budget_activity_title',
+			'program_element',
+			'budget_line_item',
+			'total_funding',
+			'by1_funding',
+			'by2_funding',
+			'by3_funding',
+			'by4_funding',
+			'by5_funding',
+			'has-keywords',
+		];
+
+		const reviewArray = [];
+		sheet1.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+			const currRow = sheet1.getRow(rowNumber);
+			const reviewData = {};
+			const indexSkip = new Set([3, 5, 9, 15, 16, 18, 21, 22, 23, 24, 25, 26, 27]);
+			for (let i = 1; i <= 27; i++) {
+				if (indexSkip.has(i)) {
+					continue;
+				}
+				reviewData[cols[i - 1]] = currRow.getCell(i).value !== null ? `${currRow.getCell(i).value}` : null;
+			}
+
+			if (reviewData.budget_type === 'pdoc') {
+				reviewData.budget_line_item = reviewData.program_element;
+				reviewData.program_element = null;
+			}
+
+			if (reviewData.agency_service === 'Department of Defense (DOD)') {
+				reviewData.agency = reviewData.agency_office;
+			} else {
+				reviewData.agency = reviewData.agency_service;
+			}
+
+			if (reviewData.budget_activity.length === 1) {
+				reviewData.budget_activity = `0${reviewData.budget_activity}`;
+			}
+
+			let refString = '';
+			if (reviewData.budgetType === 'pdoc') {
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budgetType === 'rdoc') {
+				refString = `rdoc#${reviewData.budget_line_item}#${reviewData.program_element}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else {
+				// refString = `odoc#${reviewData.budget_line_item}#${reviewData.program_element}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			}
+			reviewData.jbook_ref_id = refString;
+			delete reviewData.agency_office;
+			delete reviewData.agency_service;
+
+			reviewData.portfolio_name = portfolio.name;
+			reviewData.latest_class_label = reviewData.primary_class_label;
+			reviewData.primary_review_status = 'Finished Review';
+			reviewData.review_status = 'Partial Review (Service)';
+
+			if (rowNumber > 1) {
+				reviewArray.push(reviewData);
+			}
+		});
+
+		var startTime = performance.now();
+		let created = [];
+		let dupes = [];
+		let failed = [];
+		for (let reviewData of reviewArray) {
+			console.log(reviewData);
+			const result = await this.rev.findAll({
+				where: {
+					budget_line_item: reviewData.budget_line_item,
+					program_element: reviewData.program_element,
+					appn_num: reviewData.appn_num,
+					budget_activity: reviewData.budget_activity,
+					budget_year: reviewData.budget_year,
+					portfolio_name: reviewData.portfolio_name,
+				},
+			});
+			console.log(result);
+			let newOrUpdatedReview;
+			if (result.length === 0) {
+				if (reviewData.budget_type !== 'odoc') {
+					newOrUpdatedReview = await this.rev.create(reviewData);
+					created.push(createReview);
+					newOrUpdatedReview = newOrUpdatedReview.dataValues;
+				}
+			} else if (result.length > 1) {
+				dupes.push(...result);
+			} else {
+				let item = result[0].dataValues;
+				console.log(item);
+				reviewData.jbook_ref_id = item.jbook_ref_id;
+				newOrUpdatedReview = await this.rev.update(
+					{
+						primary_reviewer: reviewData.primary_reviewer,
+						primary_class_label: reviewData.primary_class_label,
+						service_reviewer: reviewData.service_reviewer,
+						primary_ptp: reviewData.primary_ptp,
+						service_mp_add: reviewData.service_mp_add,
+						primary_review_notes: reviewData.primary_review_notes,
+						latest_class_label: reviewData.latest_class_label,
+						primary_review_status: reviewData.primary_review_status,
+						review_status: reviewData.review_status,
+					},
+					{
+						where: {
+							id: item.id,
+						},
+					}
+				);
+				newOrUpdatedReview = { ...reviewData };
+				newOrUpdatedReview.id = tmpId;
+
+				console.log(newOrUpdatedReview);
+				if (newOrUpdatedReview[0] !== 1) {
+					failed.push(reviewData);
+				} else {
+					// Now update ES
+					let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
+					tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+					const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+
+					let esReviews = [];
+					if (doc.review_n && Array.isArray(doc.review_n)) {
+						esReviews = doc.review_n;
+					} else if (doc.review_n) {
+						esReviews = [doc.review_n];
+					} else {
+						esReviews = [];
+					}
+
+					// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+					const newReviews = [];
+					esReviews.forEach((review) => {
+						if (review.portfolio_name_s !== portfolio.name) {
+							newReviews.push(review);
+						}
+					});
+					newReviews.push(tmpPGToES);
+
+					const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+					const updated = await this.dataLibrary.updateDocument(
+						clientObj.esClientName,
+						clientObj.esIndex,
+						{ review_n: newReviews },
+						id,
+						userId
+					);
+					if (!updated) {
+						console.log('ES NOT UPDATED for REVIEW');
+					}
+
+					return { created: wasUpdated && updated };
+				}
+			}
+		}
+
+		var endTime = performance.now();
+		console.log(reviewArray);
+		console.log(`not found: ${created.length}`);
+		console.log(`dupes: ${dupes.length}`);
+		console.log(`Call took ${(endTime - startTime) / 60000} minutes`);
+		return {
+			created,
+			dupes,
+			failedRows: failed,
+		};
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -1501,6 +1706,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.submitPublicPortfolioRequest(req, userId);
 				case 'getPublicPortfolioRequests':
 					return await this.getPublicPortfolioRequests(req, userId);
+				case 'bulkUpload':
+					return await this.bulkUpload(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,
