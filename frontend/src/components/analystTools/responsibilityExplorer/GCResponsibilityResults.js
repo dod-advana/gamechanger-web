@@ -37,6 +37,16 @@ export default function GCResponsibilityResults({
 		);
 	};
 
+	const handleResponsibilityToggle = (wasOpen, entityText, doc, idx) => {
+		trackEvent(
+			trackingCategory,
+			`${trackingAction}-ToggleResponsibility${wasOpen ? 'Close' : 'Open'}`,
+			entityText,
+			null,
+			makeCustomDimensions(doc, null, idx)
+		);
+	};
+
 	const handleQuoteLinkClick = (e, resp) => {
 		e.preventDefault();
 		setSelectedResponsibility(resp);
@@ -115,15 +125,7 @@ export default function GCResponsibilityResults({
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
-													trackEvent(
-														trackingCategory,
-														`${trackingAction}-ToggleResponsibility${
-															entOpen ? 'Close' : 'Open'
-														}`,
-														entityText,
-														null,
-														makeCustomDimensions(doc, null, key)
-													);
+													handleResponsibilityToggle(entOpen, entityText, doc, key);
 													e.preventDefault();
 													setCollapseKeys({
 														...collapseKeys,
