@@ -1669,9 +1669,8 @@ class AppStatsController {
 	 * @returns
 	 */
 	async queryDocumentInteractionEvents(startDate, endDate, cloneID, limit, connection) {
-		return new Promise((resolve) => {
-			connection.query(
-				`
+		const params = [cloneID, startDate, endDate];
+		let query = `
 				SELECT 
 					CONVERT_TZ(llva.server_time,'UTC','EST') as event_time,
 					hex(llva.idvisitor) as idvisitor,
@@ -1694,16 +1693,19 @@ class AppStatsController {
 					)
 				ORDER BY
 					llva.server_time desc
-				` + (limit ? `limit ${limit};` : ';'),
-				[cloneID, startDate, endDate],
-				(error, results) => {
-					if (error) {
-						this.logger.error(error, 'BAP9ZIP5');
-						throw error;
-					}
-					resolve(results);
+		`;
+		if (limit) {
+			params.push(limit);
+			query += ` LIMIT ?`;
+		}
+		return new Promise((resolve) => {
+			connection.query(query, params, (error, results) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP5');
+					throw error;
 				}
-			);
+				resolve(results);
+			});
 		});
 	}
 
