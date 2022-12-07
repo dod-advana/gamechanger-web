@@ -218,12 +218,6 @@ const GCUserDashboard = React.memo((props) => {
 		}
 	}, [userData, cloneData.clone_name, cloneData.url]);
 
-	const handleTabClicked = (tabIndex, _lastIndex, event) => {
-		const tabName = event.target.title;
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'UserDashboardTab', `onClick${tabName}`);
-		setTabIndex(tabIndex);
-	};
-
 	const handleDeleteFavoriteSearch = async (idx) => {
 		favoriteSearchesSlice[idx].favorite = false;
 		handleDeleteSearch(favoriteSearchesSlice[idx]);
