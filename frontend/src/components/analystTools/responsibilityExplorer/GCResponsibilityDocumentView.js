@@ -120,10 +120,6 @@ export default function GCResponsibilityDocumentView({
 	};
 
 	useEffect(() => {
-		console.log('responsibilityData: ', responsibilityData);
-	}, [responsibilityData]);
-
-	useEffect(() => {
 		if (!iframeLoading) {
 			setTimeout(() => {
 				const notFound = document
