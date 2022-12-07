@@ -26,7 +26,7 @@ class SimpleSearchHandler extends SearchHandler {
 
 		this.dataTracker = dataTracker;
 		this.logger = logger;
-		this.this.searchUtility = searchUtility;
+		this.searchUtility = searchUtility;
 		this.dataLibrary = dataLibrary;
 		this.mlApi = mlApi;
 	}
