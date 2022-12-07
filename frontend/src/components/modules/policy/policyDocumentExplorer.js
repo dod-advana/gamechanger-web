@@ -15,7 +15,8 @@ import {
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from '../../common/Pagination';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
@@ -323,21 +324,21 @@ export default function PolicyDocumentExplorer({
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
+			false,
+			rightPanelOpen
 		);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'LeftPanelToggle',
-			state.docsExplorerLeftPanelOpen ? 'Close' : 'Open'
+			true,
+			state.docsExplorerLeftPanelOpen
 		);
 		setState(dispatch, { docsExplorerLeftPanelOpen: !state.docsExplorerLeftPanelOpen });
 	}
@@ -360,18 +361,12 @@ export default function PolicyDocumentExplorer({
 			const fileName = rec.id;
 			const pageObj = rec.pageHits[pageKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'PDFOpen');
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'DocumentExplorerInteraction',
-				'filename',
-				fileName
-			);
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'pageNumber',
-				pageNumber
+				'PDFOpen',
+				null,
+				makeCustomDimensions(fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

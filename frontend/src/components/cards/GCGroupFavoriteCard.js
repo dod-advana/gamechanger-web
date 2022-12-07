@@ -14,6 +14,7 @@ import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils'
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { CardButton } from '../common/CardButton';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
@@ -286,9 +287,13 @@ const GroupFavoriteCard = (props) => {
 	};
 
 	const clickFn = (filename, cloneName, searchText, pageNumber = 0, sourceUrl) => {
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		trackEvent(
+			getTrackingNameForFactory(cloneName),
+			'CardInteraction',
+			'PDFOpen',
+			null,
+			makeCustomDimensions(filename, pageNumber)
+		);
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
 				searchText ? `&prevSearchText=${searchText.replace(/"/gi, '')}` : ''
@@ -430,7 +435,9 @@ const GroupFavoriteCard = (props) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneData.clone_name),
 									'CardInteraction',
-									'showDocumentDetails'
+									'showDocumentDetails',
+									null,
+									makeCustomDimensions(documentObject.filename)
 								);
 								window.open(
 									`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${documentObject.id}`
