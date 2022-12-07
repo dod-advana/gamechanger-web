@@ -5,6 +5,7 @@ import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
 import sanitizeHtml from 'sanitize-html';
 import GCTooltip from '../../common/GCToolTip';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const EDAListViewCard = (props) => {
 	const {
@@ -32,7 +33,9 @@ const EDAListViewCard = (props) => {
 						trackEvent(
 							getTrackingNameForFactory(cloneData.clone_name),
 							'ListViewInteraction',
-							!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
+							!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages',
+							null,
+							makeCustomDimensions(item.file_location_eda_ext)
 						);
 						setHitsExpanded(!hitsExpanded);
 					}}
@@ -97,7 +100,9 @@ const EDAListViewCard = (props) => {
 							trackEvent(
 								getTrackingNameForFactory(cloneData.clone_name),
 								'ListViewInteraction',
-								!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+								!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+								null,
+								makeCustomDimensions(item.file_location_eda_ext)
 							);
 							setMetadataExpanded(!metadataExpanded);
 						}}

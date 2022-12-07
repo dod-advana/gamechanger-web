@@ -26,6 +26,7 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Checkbox } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../common/gc-colors';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const DefaultCardHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultCardHandler'),
@@ -574,7 +575,8 @@ const FavoriteComponent = (props) => {
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'CancelFavorite',
 											filename,
-											`search : ${state.searchText}`
+											null,
+											makeCustomDimensions(filename, null, idx)
 										);
 									}}
 									style={{
@@ -633,7 +635,8 @@ const FavoriteComponent = (props) => {
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'Favorite',
 											filename,
-											`search : ${state.searchText}`
+											null,
+											makeCustomDimensions(filename, null, idx)
 										);
 									}}
 									style={{
@@ -776,15 +779,26 @@ function GCCard(props) {
 	const handleCheckbox = (key, value, tmpId) => {
 		const { selectedDocuments, selectedDocumentsForGraph = [] } = state;
 		let newDocArray = [...selectedDocumentsForGraph];
-
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
 			newDocArray = newDocArray.filter((tmpItem) => tmpItem !== tmpId);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxUnchecked',
+				key,
+				0,
+				makeCustomDimensions(key, null, idx)
+			);
 		} else {
 			selectedDocuments.set(key, value);
 			newDocArray.push(tmpId);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxChecked',
+				key,
+				1,
+				makeCustomDimensions(key, null, idx)
+			);
 		}
 
 		setState(dispatch, {
@@ -826,7 +840,9 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsUp',
-									filename`search : ${searchText}`
+									filename`search : ${searchText}`,
+									null,
+									makeCustomDimensions(filename)
 								);
 							}
 						}}
@@ -845,7 +861,9 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsDown',
-									filename`search : ${searchText}`
+									filename`search : ${searchText}`,
+									null,
+									makeCustomDimensions(filename)
 								);
 							}
 						}}

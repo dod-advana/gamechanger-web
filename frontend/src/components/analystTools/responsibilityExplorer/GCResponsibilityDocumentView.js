@@ -4,7 +4,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import { handlePdfOnLoad, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import PDFHighlighter from './PDFHighlighter';
 import UOTAlert from '../../common/GCAlert';
 import GCResponsiblityEditModal from './GCResponsiblityEditModal';
@@ -200,21 +200,21 @@ export default function GCResponsibilityDocumentView({
 	);
 
 	function handleRightPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'ResponsibilityExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
+			false,
+			rightPanelOpen
 		);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'ResponsibilityExplorerInteraction',
-			'LeftPanelToggle',
-			leftPanelOpen ? 'Close' : 'Open'
+			true,
+			leftPanelOpen
 		);
 		setLeftPanelOpen(!leftPanelOpen);
 	}
