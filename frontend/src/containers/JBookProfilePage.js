@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackEvent } from '../components/telemetry/Matomo';
+import { makeCustomDimensions } from '../components/telemetry/utils/customDimensions';
 import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
@@ -112,9 +113,13 @@ const JBookProfilePage = () => {
 	}, [budgetYearProjectData, budgetYear, selectedPortfolio]);
 
 	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		trackEvent(
+			getTrackingNameForFactory(cloneName),
+			'CardInteraction',
+			'PDFOpen',
+			null,
+			makeCustomDimensions(filename, pageNumber)
+		);
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 		);

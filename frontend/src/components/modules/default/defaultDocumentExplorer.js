@@ -16,8 +16,9 @@ import {
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from 'react-js-pagination';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -142,21 +143,21 @@ export default function DocumentExplorer({
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
+			false,
+			rightPanelOpen
 		);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'LeftPanelToggle',
-			leftPanelOpen ? 'Close' : 'Open'
+			true,
+			leftPanelOpen
 		);
 		setLeftPanelOpen(!leftPanelOpen);
 	}
@@ -179,18 +180,12 @@ export default function DocumentExplorer({
 			const fileName = rec.id;
 			const pageObj = rec.pageHits[pageKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'PDFOpen');
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'DocumentExplorerInteraction',
-				'filename',
-				fileName
-			);
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'pageNumber',
-				pageNumber
+				'PDFOpen',
+				null,
+				makeCustomDimensions(fileName, pageNumber, key)
 			);
 			setPdfLoaded(false);
 		}

@@ -18,6 +18,7 @@ import { backgroundGreyDark, backgroundGreyLight, backgroundWhite, gcOrange } fr
 import GCPrimaryButton from '../../common/GCButton';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -383,18 +384,12 @@ const GCResponsibilityChartView = ({
 	};
 
 	const fileClicked = (filename, searchText, pageNumber) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'PDFOpen');
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
 			'ResponsibilityTracker',
-			'filename',
-			filename
-		);
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
-			'pageNumber',
-			pageNumber
+			'PDFOpen',
+			null,
+			makeCustomDimensions(filename, pageNumber)
 		);
 		let tempSearchText;
 		if (searchText) {
