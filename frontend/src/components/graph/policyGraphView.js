@@ -22,6 +22,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { Card } from '../cards/GCCard';
 import { backgroundWhite } from '../common/gc-colors';
 import { Warning } from '@material-ui/icons';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const _ = require('lodash');
 
@@ -576,7 +577,13 @@ function PolicyGraphView(props) {
 	};
 
 	const handleNodeClick = async (node, event) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'GraphNodeClicked', node.name);
+		trackEvent(
+			getTrackingNameForFactory(cloneData.clone_name),
+			'GraphNodeClicked',
+			node.name,
+			null,
+			makeCustomDimensions(node.name)
+		);
 		setShouldCenter(false);
 
 		// Sleep until node is in place

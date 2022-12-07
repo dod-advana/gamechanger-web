@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 import { getTrackingNameForFactory, /*orgColorMap,*/ exactMatch } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
@@ -364,7 +365,8 @@ export default function SideBar(props) {
 						getTrackingNameForFactory(state.cloneData.clone_name),
 						'QueryExpansion',
 						'SearchTermAdded',
-						`${phrase}_${source}`
+						null,
+						makeCustomDimensions(`${phrase}_${source}`)
 					);
 					//newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 					newSearchText = phrase;
