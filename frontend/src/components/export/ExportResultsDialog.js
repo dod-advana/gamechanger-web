@@ -79,7 +79,7 @@ const styles = {
 };
 
 export const downloadFile = async (data, format, classificationMarking, cloneData) => {
-	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ExportResults', `onDownloadFile${format}`);
+	trackEvent(getTrackingNameForFactory(cloneData?.clone_name), 'ExportResults', `onDownloadFile${format}`);
 	let filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
 	if (classificationMarking === 'CUI') {
 		filename += '-CUI';
