@@ -102,7 +102,7 @@ const GetQAResults = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 	const { question, answers, qaContext, params } = state.qaResults;
-	const sentenceResults = state.sentenceResults;
+
 	const { intelligentSearchResult } = state;
 	const isFavorite =
 		_.findIndex(state.userData.favorite_documents, (item) => item.id === intelligentSearchResult.id) !== -1;
@@ -143,7 +143,7 @@ const GetQAResults = (props) => {
 		setFavorite(favorite);
 		setPopperAnchorEl(null);
 		setPopperIsOpen(false);
-		// setFavoriteName('');
+
 		setFavoriteSummary('');
 		handleSaveFavoriteDocument(documentData, state, dispatch);
 	};
@@ -547,7 +547,9 @@ const GetQAResults = (props) => {
 				{feedbackComponent(
 					{
 						title: intelligentSearchResult.display_title_s,
-						sentenceResults: sentenceResults,
+						sentenceResults: _.truncate(intelligentSearchResult.pageHits[0].snippet, {
+							length: 255,
+						}),
 					},
 					'intelligentSearch'
 				)}
