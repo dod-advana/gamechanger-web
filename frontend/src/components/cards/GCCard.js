@@ -26,7 +26,7 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Checkbox } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../common/gc-colors';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 
 const DefaultCardHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultCardHandler'),
@@ -576,7 +576,7 @@ const FavoriteComponent = (props) => {
 											'CancelFavorite',
 											filename,
 											null,
-											makeCustomDimensions(filename, null, idx)
+											CustomDimensions.create(true, filename, null, idx)
 										);
 									}}
 									style={{
@@ -636,7 +636,7 @@ const FavoriteComponent = (props) => {
 											'Favorite',
 											filename,
 											null,
-											makeCustomDimensions(filename, null, idx)
+											CustomDimensions.create(true, filename, null, idx)
 										);
 									}}
 									style={{
@@ -773,7 +773,7 @@ function GCCard(props) {
 				'CardCheckboxUnchecked',
 				key,
 				0,
-				makeCustomDimensions(key, null, idx)
+				CustomDimensions.create(true, key, null, idx)
 			);
 		} else {
 			selectedDocuments.set(key, value);
@@ -783,7 +783,7 @@ function GCCard(props) {
 				'CardCheckboxChecked',
 				key,
 				1,
-				makeCustomDimensions(key, null, idx)
+				CustomDimensions.create(true, key, null, idx)
 			);
 		}
 
@@ -828,7 +828,7 @@ function GCCard(props) {
 									'thumbsUp',
 									filename`search : ${searchText}`,
 									null,
-									makeCustomDimensions(filename)
+									CustomDimensions.create(true, filename)
 								);
 							}
 						}}
@@ -849,7 +849,7 @@ function GCCard(props) {
 									'thumbsDown',
 									filename`search : ${searchText}`,
 									null,
-									makeCustomDimensions(filename)
+									CustomDimensions.create(true, filename)
 								);
 							}
 						}}

@@ -15,7 +15,7 @@ import sanitizeHtml from 'sanitize-html';
 import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 import PropTypes from 'prop-types';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const MAX_KEYS = 8;
 
@@ -718,7 +718,7 @@ const cardHandler = {
 							'CardInteraction',
 							restricted ? 'Application Card Request Access' : 'Application Card Launch',
 							null,
-							makeCustomDimensions(url)
+							CustomDimensions.create(true, url)
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -869,7 +869,7 @@ const cardHandler = {
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
 							null,
-							makeCustomDimensions(getUrl(item, restricted, 'dashboards'))
+							CustomDimensions.create(true, getUrl(item, restricted, 'dashboards'))
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
