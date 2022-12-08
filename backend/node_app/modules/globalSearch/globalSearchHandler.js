@@ -93,8 +93,7 @@ class GlobalSearchHandler extends SearchHandler {
 						limit,
 						favoriteApps,
 						isForFavorites,
-						userId,
-						cloneSpecificObject
+						userId
 					);
 					break;
 				case 'dataSources':
@@ -209,7 +208,7 @@ class GlobalSearchHandler extends SearchHandler {
 		}
 	}
 
-	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId, cloneSpecificObject) {
+	async getDashboardResults(searchText, offset, limit, favoriteApps, isForFavorites, userId) {
 		try {
 			const t0 = new Date().getTime();
 			const clientObj = { esClientName: 'gamechanger', esIndex: this.constants.GLOBAL_SEARCH_OPTS.ES_INDEX };
@@ -239,7 +238,7 @@ class GlobalSearchHandler extends SearchHandler {
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
 			// get user apps from Qlik
-			const userApps = await this.getUserApps(userId, cloneSpecificObject);
+			const userApps = await this.getUserApps(userId);
 
 			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
@@ -253,13 +252,9 @@ class GlobalSearchHandler extends SearchHandler {
 	}
 
 	/* Helper method for getDashboardResults */
-	async getUserApps(userId, cloneSpecificObject) {
+	async getUserApps(userId) {
 		// generate redis key
-		const redisKey = this.searchUtility.createCacheKeyFromOptions({
-			type: 'globalSearchUserApps',
-			userId,
-			cloneSpecificObject,
-		});
+		const redisKey = `globalSearchUserApps_${userId}`;
 
 		// get cached results
 		await this.redisDB.select(this.redisClientDB);
