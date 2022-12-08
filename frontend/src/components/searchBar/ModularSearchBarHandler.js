@@ -7,7 +7,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { handleSaveFavoriteSearch, setState } from '../../utils/sharedFunctions';
 import SearchBarFactory from '../factories/searchBarFactory';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -411,13 +411,7 @@ const ModularSearchBarHandler = (props) => {
 			setDropdownOpen(false);
 
 			if (rowType) {
-				trackEvent(
-					trackingCategory,
-					'SearchSuggestionSelected',
-					rowType,
-					null,
-					CustomDimensions.create(true, text)
-				);
+				trackEvent(trackingCategory, 'SearchSuggestionSelected', rowType, null, makeCustomDimensions(text));
 			}
 		};
 

@@ -16,7 +16,7 @@ import {
 
 import Pagination from '../../common/Pagination';
 import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
@@ -368,7 +368,7 @@ export default function PolicyDocumentExplorer({
 				'DocumentExplorerInteraction',
 				'PDFOpen',
 				null,
-				CustomDimensions.create(true, fileName, pageNumber)
+				makeCustomDimensions(fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

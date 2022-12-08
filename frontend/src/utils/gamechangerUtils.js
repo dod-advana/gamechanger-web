@@ -2,7 +2,7 @@ import _ from 'underscore';
 import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
-import { CustomDimensions } from '../components/telemetry/utils';
+import { makeCustomDimensions } from '../components/telemetry/utils/customDimensions';
 import Config from '../config/config.js';
 import { useEffect } from 'react';
 import styled from 'styled-components';
@@ -441,7 +441,7 @@ const crawlerMapping = {
 	dfar_subpart_regs: ['Defense Federal Acquisition Regulation'],
 	far_subpart_regs: ['Federal Acquisition Regulation'],
 	Chief_National_Guard_Bureau_Instructions: ['National Guard Bureau Instructions'],
-	code_of_federal_regulations: ['Code of Federal Regulations'],
+	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board'],
 };
 export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
@@ -732,7 +732,7 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 					'Highlight',
 					filename,
 					null,
-					CustomDimensions.create(true, filename)
+					makeCustomDimensions(filename)
 				);
 				gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
 			}
@@ -747,7 +747,7 @@ const handleOnScroll = (distance, filename, category) => {
 			distance > 0 ? 'onScrollUp' : 'onScrollDown',
 			filename,
 			distance,
-			CustomDimensions.create(true, filename)
+			makeCustomDimensions(filename)
 		);
 	}
 };

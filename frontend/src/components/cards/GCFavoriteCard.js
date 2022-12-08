@@ -13,7 +13,7 @@ import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { trackEvent } from '../telemetry/Matomo';
 import { encode, getTrackingNameForFactory } from '../../utils/gamechangerUtils';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
@@ -400,7 +400,7 @@ const GCFavoriteCard = (props) => {
 						'UserDashboardFavoritesInteraction',
 						'PDFOpen',
 						null,
-						CustomDimensions.create(true, favoriteObject.filename)
+						makeCustomDimensions(favoriteObject.filename)
 					);
 					window.open(
 						`/#/pdfviewer/gamechanger?filename=${encode(favoriteObject.filename)}&prevSearchText=${

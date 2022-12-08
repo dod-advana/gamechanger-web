@@ -4,47 +4,23 @@ import { Typography } from '@material-ui/core';
 import TabStyles from '../../common/TabStyles';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { styles } from '../util/GCAdminStyles';
-import Training from './training';
-import Inference from './inference';
+import Info from './info';
+import S3 from './s3';
+import Models from './models';
 
 const gameChangerAPI = new GameChangerAPI();
 const status = ['ok', 'warning', 'error'];
 const logs = [];
-const trainLogs = [];
 let processTimer;
-
-/**
- * Checks all of the flags. If any of them are true then check again in 5 seconds.
- * @method
- */
-const checkProcesses = (processesData, getProcesses) => {
-	if (processesData && processesData.process_status && processesData.process_status.flags) {
-		let checkProcess = false;
-		const flags = processesData.process_status.flags;
-		for (const key in flags) {
-			if (flags[key]) {
-				checkProcess = true;
-			}
-		}
-		if (checkProcess) {
-			clearTimeout(processTimer);
-			processTimer = setTimeout(getProcesses, 10000);
-		}
-	}
-};
-
 /**
  * This class queries the ml api information and provides controls
  * for the different endpoints
  * @class MLDashboard
  */
 export default () => {
-	const [tabIndex, setTabIndex] = useState('train');
+	const [tabIndex, setTabIndex] = useState('info');
 	const [apiErrors, setApiErrors] = useState([]);
-	const [apiTrainErrors, setApiTrainErrors] = useState([]);
 	const [processes, setProcesses] = useState({});
-	const [processesTrain, setProcessesTrain] = useState({});
-
 	/**
 	 * Creates log objects with the inital message,
 	 * status level, and time it was triggered.
@@ -63,23 +39,6 @@ export default () => {
 	};
 
 	/**
-	 * Creates log objects with the inital message,
-	 * status level, and time it was triggered.
-	 * @method updateTrainLogs
-	 * @param {String} log - the message
-	 * @param {Number} logStatus - 0,1,2 which correlate to a status const
-	 */
-	const updateTrainLogs = (log, logStatus) => {
-		const enterStatus = status[logStatus].toUpperCase();
-		trainLogs.push({
-			response: log,
-			timeStamp: new Date(Date.now()).toLocaleString(),
-			status: enterStatus,
-		});
-		setApiTrainErrors([].concat(trainLogs));
-	};
-
-	/**
 	 * Get the current and past processes and flags for the API
 	 * @method getProcesses
 	 */
@@ -88,32 +47,34 @@ export default () => {
 			// set processes
 			const processesData = await gameChangerAPI.getProcessStatus();
 			setProcesses(processesData.data);
-			checkProcesses(processesData.data, getProcesses);
+			checkProcesses(processesData.data);
 		} catch (e) {
 			updateLogs('Error querying processes: ' + e.toString(), 2);
 			throw e;
 		}
 	};
-
 	/**
-	 * Get the current and past processes and flags for the API
-	 * @method getProcesses
+	 * Checks all of the flags. If any of them are true then check again in 5 seconds.
+	 * @method
 	 */
-	const getProcessesTrain = async () => {
-		try {
-			// set processes
-			const processesData = await gameChangerAPI.getProcessStatusTrain();
-			setProcessesTrain(processesData.data);
-			checkProcesses(processesData.data, getProcessesTrain);
-		} catch (e) {
-			updateLogs('Error querying processes: ' + e.toString(), 2);
-			throw e;
+	const checkProcesses = (processesData) => {
+		if (processesData && processesData.process_status && processesData.process_status.flags) {
+			let checkProcess = false;
+			const flags = processesData.process_status.flags;
+			for (const key in flags) {
+				if (flags[key]) {
+					checkProcess = true;
+				}
+			}
+			if (checkProcess) {
+				clearTimeout(processTimer);
+				processTimer = setTimeout(getProcesses, 10000);
+			}
 		}
 	};
 
 	useEffect(() => {
 		getProcesses();
-		getProcessesTrain();
 		return () => {
 			clearTimeout(processTimer);
 		};
@@ -141,6 +102,19 @@ export default () => {
 					}}
 				>
 					<TabList style={TabStyles.tabsList}>
+						<Tab
+							style={{
+								...TabStyles.tabStyle,
+								...(tabIndex === 'info' ? TabStyles.tabSelectedStyle : {}),
+								borderRadius: `5px 0 0 0`,
+							}}
+							title="info"
+							onClick={() => setTabIndex('info')}
+						>
+							<Typography variant="h6" display="inline">
+								INFORMATION
+							</Typography>
+						</Tab>
 						{/* <Tab
 							style={{
 								...TabStyles.tabStyle,
@@ -157,49 +131,43 @@ export default () => {
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'train' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 's3' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 0 0 0`,
 							}}
-							title="train"
-							onClick={() => setTabIndex('train')}
+							title="s3"
+							onClick={() => setTabIndex('s3')}
 						>
 							<Typography variant="h6" display="inline">
-								TRAINING
+								DATA CONTROL
 							</Typography>
 						</Tab>
 						<Tab
 							style={{
 								...TabStyles.tabStyle,
-								...(tabIndex === 'infer' ? TabStyles.tabSelectedStyle : {}),
+								...(tabIndex === 'models' ? TabStyles.tabSelectedStyle : {}),
 								borderRadius: `0 5px 0 0`,
 							}}
-							title="infer"
-							onClick={() => setTabIndex('infer')}
+							title="models"
+							onClick={() => setTabIndex('models')}
 						>
 							<Typography variant="h6" display="inline">
-								INFERENCE
+								MODEL CONTROL
 							</Typography>
 						</Tab>
 					</TabList>
+
 					<div style={TabStyles.spacer} />
 				</div>
 
 				<div style={TabStyles.panelContainer}>
 					<TabPanel>
-						<Training
-							apiTrainErrors={apiTrainErrors}
-							updateTrainLogs={updateTrainLogs}
-							processes={processesTrain}
-							getProcesses={getProcessesTrain}
-						/>
+						<Info apiErrors={apiErrors} updateLogs={updateLogs} />
 					</TabPanel>
 					<TabPanel>
-						<Inference
-							apiErrors={apiErrors}
-							updateLogs={updateLogs}
-							processes={processes}
-							getProcesses={getProcesses}
-						/>
+						<S3 processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
+					</TabPanel>
+					<TabPanel>
+						<Models processes={processes} getProcesses={getProcesses} updateLogs={updateLogs} />
 					</TabPanel>
 				</div>
 			</Tabs>

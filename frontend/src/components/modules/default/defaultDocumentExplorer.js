@@ -18,7 +18,7 @@ import {
 import Pagination from 'react-js-pagination';
 import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import sanitizeHtml from 'sanitize-html';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -187,7 +187,7 @@ export default function DocumentExplorer({
 				'DocumentExplorerInteraction',
 				'PDFOpen',
 				null,
-				CustomDimensions.create(true, fileName, pageNumber, key)
+				makeCustomDimensions(fileName, pageNumber, key)
 			);
 			setPdfLoaded(false);
 		}

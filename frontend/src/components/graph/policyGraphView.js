@@ -22,7 +22,7 @@ import GameChangerAPI from '../api/gameChanger-service-api';
 import { Card } from '../cards/GCCard';
 import { backgroundWhite } from '../common/gc-colors';
 import { Warning } from '@material-ui/icons';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const _ = require('lodash');
 
@@ -582,7 +582,7 @@ function PolicyGraphView(props) {
 			'GraphNodeClicked',
 			node.name,
 			null,
-			CustomDimensions.create(true, node.name)
+			makeCustomDimensions(node.name)
 		);
 		setShouldCenter(false);
 

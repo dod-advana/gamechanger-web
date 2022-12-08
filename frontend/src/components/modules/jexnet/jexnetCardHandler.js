@@ -29,7 +29,7 @@ import {
 	clickFn,
 	makeRows,
 } from '../default/defaultCardHandler';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const getCardHeaderHandler = ({ item, state, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
@@ -166,7 +166,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages',
 									null,
-									CustomDimensions.create(true, item.filename)
+									makeCustomDimensions(item.filename)
 								);
 								setHitsExpanded(!hitsExpanded);
 							}}
@@ -235,7 +235,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 									null,
-									CustomDimensions.create(true, item.filename)
+									makeCustomDimensions(item.filename)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -310,7 +310,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 									null,
-									CustomDimensions.create(true, item.filename)
+									makeCustomDimensions(item.filename)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -462,7 +462,7 @@ const cardHandler = {
 										'CardInteraction',
 										'Close Graph Card',
 										null,
-										CustomDimensions.create(true, filename)
+										makeCustomDimensions(filename)
 									);
 									e.preventDefault();
 									closeGraphCard();
