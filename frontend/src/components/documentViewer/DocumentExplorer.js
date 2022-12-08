@@ -21,7 +21,7 @@ import Pagination from 'react-js-pagination';
 import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../telemetry/Matomo';
 import GCTooltip from '../common/GCToolTip';
 import { EDA_FIELDS, EDA_FIELD_JSON_MAP } from '../modules/eda/edaCardHandler';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -173,7 +173,7 @@ const DocumentExplorer = ({
 				'DocumentExplorerInteraction',
 				'PDFOpen',
 				null,
-				CustomDimensions.create(true, fileName, pageNumber)
+				makeCustomDimensions(fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

@@ -17,7 +17,7 @@ import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 import { addFavoriteTopicToMetadata } from '../modules/policy/policyCardHandler';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -418,7 +418,7 @@ const DocumentDetailsPage = (props) => {
 										`${trackingAction}-OpenDocumentButton`,
 										'PDFOpen',
 										null,
-										CustomDimensions.create(true, document?.filename)
+										makeCustomDimensions(document?.filename)
 									);
 									window.open(
 										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${

@@ -3,43 +3,37 @@ const loggerLib = require('@dod-advana/advana-logger');
 const axiosLib = require('axios');
 
 const mlBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
-const mlTrainBaseUrl = constants.GAMECHANGER_ML_API_TRAIN_BASE_URL;
+const transformerBaseUrl = constants.GAMECHANGER_ML_API_BASE_URL;
 
 const MLRoutes = {
-	getLoadedModels: `${mlBaseUrl}/getLoadedModels`,
-	getS3List: `${mlBaseUrl}/s3?function=models`,
-	getS3DataList: `${mlTrainBaseUrl}/s3?function=data`,
-	downloadS3File: `${mlBaseUrl}/downloadS3File`,
-	downloadS3FileTrain: `${mlTrainBaseUrl}/downloadS3File`,
-	deleteLocalModel: `${mlBaseUrl}/deleteLocalModel`,
-	deleteLocalModelTrain: `${mlTrainBaseUrl}/deleteLocalModel`,
-	downloadDependencies: `${mlBaseUrl}/download`,
-	getAPIInformation: `${mlBaseUrl}/`,
-	getAPIInformationTrain: `${mlTrainBaseUrl}/`,
-	getModelsList: `${mlBaseUrl}/getModelsList`,
-	getModelsListTrain: `${mlTrainBaseUrl}/getModelsList`,
-	getDataList: `${mlTrainBaseUrl}/getDataList`,
-	getFilesInCorpus: `${mlBaseUrl}/getFilesInCorpus`,
-	getFilesInCorpusTrain: `${mlTrainBaseUrl}/getFilesInCorpus`,
-	getProcessStatus: `${mlBaseUrl}/getProcessStatus`,
-	getProcessStatusTrain: `${mlTrainBaseUrl}/getProcessStatus`,
-	getCache: `${mlBaseUrl}/getCache`,
+	getLoadedModels: `${transformerBaseUrl}/getLoadedModels`,
+	getS3List: `${transformerBaseUrl}/s3?function=models`,
+	getS3DataList: `${transformerBaseUrl}/s3?function=data`,
+	downloadS3File: `${transformerBaseUrl}/downloadS3File`,
+	deleteLocalModel: `${transformerBaseUrl}/deleteLocalModel`,
+	downloadDependencies: `${transformerBaseUrl}/download`,
+	getAPIInformation: `${transformerBaseUrl}/`,
+	getModelsList: `${transformerBaseUrl}/getModelsList`,
+	getDataList: `${transformerBaseUrl}/getDataList`,
+	getFilesInCorpus: `${transformerBaseUrl}/getFilesInCorpus`,
+	getProcessStatus: `${transformerBaseUrl}/getProcessStatus`,
+	getCache: `${transformerBaseUrl}/getCache`,
 
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
-	transSentenceSearch: `${mlBaseUrl}/transSentenceSearch`,
-	textExtractions: `${mlBaseUrl}/textExtractions`,
-	documentCompare: `${mlBaseUrl}/documentCompare`,
-	transformResults: `${mlBaseUrl}/transformerSearch`,
-	reloadModels: `${mlBaseUrl}/reloadModels`,
-	downloadCorpus: `${mlTrainBaseUrl}/downloadCorpus`,
-	trainModel: `${mlTrainBaseUrl}/trainModel`,
-	initializeLTR: `${mlTrainBaseUrl}/LTR/initLTR`,
-	createModelLTR: `${mlTrainBaseUrl}/LTR/createModel`,
-	recommender: `${mlBaseUrl}/recommender`,
-	stopProcess: `${mlBaseUrl}/stopProcess`,
-	sendUserAggregations: `${mlTrainBaseUrl}/sendUserAggregations`,
-	clearCache: `${mlBaseUrl}/clearCache`,
+	transSentenceSearch: `${transformerBaseUrl}/transSentenceSearch`,
+	textExtractions: `${transformerBaseUrl}/textExtractions`,
+	documentCompare: `${transformerBaseUrl}/documentCompare`,
+	transformResults: `${transformerBaseUrl}/transformerSearch`,
+	reloadModels: `${transformerBaseUrl}/reloadModels`,
+	downloadCorpus: `${transformerBaseUrl}/downloadCorpus`,
+	trainModel: `${transformerBaseUrl}/trainModel`,
+	initializeLTR: `${transformerBaseUrl}/LTR/initLTR`,
+	createModelLTR: `${transformerBaseUrl}/LTR/createModel`,
+	recommender: `${transformerBaseUrl}/recommender`,
+	stopProcess: `${transformerBaseUrl}/stopProcess`,
+	sendUserAggregations: `${transformerBaseUrl}/sendUserAggregations`,
+	clearCache: `${transformerBaseUrl}/clearCache`,
 };
 /**
  * @class MLApiClient
@@ -57,21 +51,17 @@ class MLApiClient {
 		this.getSentenceTransformerResultsForCompare = this.getSentenceTransformerResultsForCompare.bind(this);
 		this.recommender = this.recommender.bind(this);
 		this.queryExpansion = this.queryExpansion.bind(this);
-		this.getAPIInformation = this.getAPIInformation.bind(this);
-		this.getAPIInformationTrain = this.getAPIInformationTrain.bind(this);
 
 		// Get methods
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
-		this.getModelsListTrain = this.getData.bind(this, 'getModelsListTrain');
 		this.getDataList = this.getData.bind(this, 'getDataList');
+		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
-		this.getFilesInCorpusTrain = this.getData.bind(this, 'getFilesInCorpusTrain');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
-		this.getProcessStatusTrain = this.getData.bind(this, 'getProcessStatusTrain');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		this.getCache = this.getData.bind(this, 'getCache');
@@ -80,9 +70,7 @@ class MLApiClient {
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
-		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
-		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 		this.clearCache = this.postData.bind(this, 'clearCache');
@@ -130,17 +118,6 @@ class MLApiClient {
 		const data = { filenames: doc };
 		return this.postData('recommender', userId, data);
 	}
-
-	async getAPIInformation() {
-		let data = await this.getData('getAPIInformation', 'unkown');
-		data['host'] = mlBaseUrl;
-		return data;
-	}
-	async getAPIInformationTrain() {
-		let data = await this.getData('getAPIInformationTrain', 'unkown');
-		data['host'] = mlTrainBaseUrl;
-		return data;
-	}
 	/**
 	 * A generic get method to query the ML API.
 	 * @method getData
@@ -182,6 +159,7 @@ class MLApiClient {
 		};
 		try {
 			let url = MLRoutes[key];
+
 			if (queryString) url += queryString;
 			const { data } = await this.axios({
 				url,

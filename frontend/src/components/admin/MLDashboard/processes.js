@@ -65,11 +65,6 @@ const Process = (props) => {
 			Cell: (row) => <TableRow>{row.value}</TableRow>,
 		},
 		{
-			Header: 'Container',
-			accessor: 'container',
-			Cell: (row) => <TableRow>{row.value}</TableRow>,
-		},
-		{
 			Header: '',
 			accessor: 'message',
 			Cell: (row) => (

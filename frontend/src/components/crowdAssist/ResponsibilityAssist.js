@@ -19,7 +19,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils';
-import { CustomDimensions } from '../telemetry/utils';
+import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -349,7 +349,7 @@ class ResponsibilityAssist extends Component {
 			'ResponsibilityTracker',
 			'PDFOpen',
 			null,
-			CustomDimensions.create(true, filename, pageNumber)
+			makeCustomDimensions(filename, pageNumber)
 		);
 		let searchTextArray;
 		let tempSearchText;

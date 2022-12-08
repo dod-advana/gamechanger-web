@@ -16,23 +16,16 @@ class TransformerController {
 		// A mapping to the methods in MLApiClient
 		this.registry = {
 			getAPIInformation: this.mlApi.getAPIInformation,
-			getAPIInformationTrain: this.mlApi.getAPIInformationTrain,
 			getS3List: this.mlApi.getS3List,
 			getS3DataList: this.mlApi.getS3DataList,
 			downloadDependencies: this.mlApi.downloadDependencies,
 			downloadS3File: this.mlApi.downloadS3File,
-			downloadS3FileTrain: this.mlApi.downloadS3FileTrain,
 			deleteLocalModel: this.mlApi.deleteLocalModel,
-			deleteLocalModelTrain: this.mlApi.deleteLocalModelTrain,
 			getModelsList: this.mlApi.getModelsList,
-			getModelsListTrain: this.mlApi.getModelsListTrain,
 			getDataList: this.mlApi.getDataList,
 			getLoadedModels: this.mlApi.getLoadedModels,
 			getFilesInCorpus: this.mlApi.getFilesInCorpus,
-			getFilesInCorpusTrain: this.mlApi.getFilesInCorpusTrain,
 			getProcessStatus: this.mlApi.getProcessStatus,
-			getProcessStatusTrain: this.mlApi.getProcessStatusTrain,
-
 			getCache: this.mlApi.getCache,
 			reloadModels: this.mlApi.reloadModels,
 			downloadCorpus: this.mlApi.downloadCorpus,
@@ -46,18 +39,14 @@ class TransformerController {
 
 		// Get methods
 		this.getAPIInformation = this.getData.bind(this, 'getAPIInformation');
-		this.getAPIInformationTrain = this.getData.bind(this, 'getAPIInformationTrain');
 		this.getS3List = this.getData.bind(this, 'getS3List');
 		this.getS3DataList = this.getData.bind(this, 'getS3DataList');
 		this.getModelsList = this.getData.bind(this, 'getModelsList');
-		this.getModelsListTrain = this.getData.bind(this, 'getModelsListTrain');
 		this.getDataList = this.getData.bind(this, 'getDataList');
 		this.getLoadedModels = this.getData.bind(this, 'getLoadedModels');
 		this.downloadDependencies = this.getData.bind(this, 'downloadDependencies');
 		this.getProcessStatus = this.getData.bind(this, 'getProcessStatus');
-		this.getProcessStatusTrain = this.getData.bind(this, 'getProcessStatusTrain');
 		this.getFilesInCorpus = this.getData.bind(this, 'getFilesInCorpus');
-		this.getFilesInCorpusTrain = this.getData.bind(this, 'getFilesInCorpusTrain');
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		this.getCache = this.getData.bind(this, 'getCache');
@@ -67,9 +56,7 @@ class TransformerController {
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
 		this.downloadS3File = this.postData.bind(this, 'downloadS3File');
-		this.downloadS3FileTrain = this.postData.bind(this, 'downloadS3FileTrain');
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
-		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
 		this.clearCache = this.postData.bind(this, 'clearCache');

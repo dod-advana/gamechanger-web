@@ -23,7 +23,7 @@ import {
 	StyledListViewFrontCardContent,
 	RevokedTag,
 } from '../default/defaultCardHandler';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
@@ -247,7 +247,7 @@ const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
 		'CardInteraction',
 		'PDFOpen',
 		null,
-		CustomDimensions.create(true, filename, pageNumber)
+		makeCustomDimensions(filename, pageNumber)
 	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`

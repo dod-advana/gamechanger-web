@@ -29,7 +29,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -575,7 +575,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											'CancelFavorite',
 											'', // empty because topic getFilename always returns empty string
 											null,
-											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
+											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -635,7 +635,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											'Favorite',
 											'', // empty because topic getFilename always returns empty string
 											null,
-											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
+											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -658,13 +658,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 };
 
 const handleTopicClick = (topic, cloneName, idx) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'TopicOpened',
-		topic,
-		null,
-		CustomDimensions.create(true, null, null, idx)
-	);
+	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic, null, makeCustomDimensions(null, null, idx));
 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
 };
 
@@ -683,7 +677,7 @@ const handlePageHitHover = (
 		`${trackingAction}-PageHit`,
 		'onMouseEnter',
 		pageNumber,
-		CustomDimensions.create(true, fileName, pageNumber, resultIdx)
+		makeCustomDimensions(fileName, pageNumber, resultIdx)
 	);
 };
 
@@ -1131,7 +1125,7 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 						`${trackingActionForListView}-PageHits`,
 						isExpanding ? 'onExpand' : 'onCollapse',
 						null,
-						CustomDimensions.create(true, item.filename, null, idx)
+						makeCustomDimensions(item.filename, null, idx)
 					)
 				}
 			>
@@ -1276,7 +1270,7 @@ const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody, cloneNam
 					`${trackingActionForListView}-DocumentMetadata`,
 					isExpanding ? 'onExpand' : 'onCollapse',
 					null,
-					CustomDimensions.create(true, item.filename)
+					makeCustomDimensions(item.filename)
 				);
 			}}
 		>
@@ -1380,7 +1374,7 @@ const renderListView = (
 							trackingActionForListView,
 							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 							null,
-							CustomDimensions.create(true, item.filename)
+							makeCustomDimensions(item.filename)
 						);
 						setMetadataExpanded(!metadataExpanded);
 					}}
@@ -1664,7 +1658,7 @@ const cardHandler = {
 												trackingActionForCard,
 												'Close Graph Card',
 												null,
-												CustomDimensions.create(true, filename)
+												makeCustomDimensions(filename)
 											);
 											e.preventDefault();
 											closeGraphCard();
@@ -1682,7 +1676,7 @@ const cardHandler = {
 											trackingActionForCard,
 											'showDocumentDetails',
 											null,
-											CustomDimensions.create(true, filename, null, idx)
+											makeCustomDimensions(filename, null, idx)
 										);
 										window.open(
 											`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`
@@ -1712,7 +1706,7 @@ const cardHandler = {
 									trackFlipCardEvent(
 										getTrackingNameForFactory(cloneName),
 										toggledMore,
-										CustomDimensions.create(true, filename, null, idx)
+										makeCustomDimensions(filename, null, idx)
 									);
 									setToggledMore(!toggledMore);
 								}}
@@ -2046,7 +2040,7 @@ const cardHandler = {
 										trackingActionForGraphCard,
 										'Close Graph Card',
 										null,
-										CustomDimensions.create(true, item.name)
+										makeCustomDimensions(item.name)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -2062,7 +2056,7 @@ const cardHandler = {
 							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
 								toggledMore,
-								CustomDimensions.create(true, item.name)
+								makeCustomDimensions(item.name)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -2281,7 +2275,7 @@ const cardHandler = {
 								trackFlipCardEvent(
 									getTrackingNameForFactory(cloneName),
 									toggledMore,
-									CustomDimensions.create(true, item.name)
+									makeCustomDimensions(item.name)
 								);
 								setToggledMore(!toggledMore);
 							}}

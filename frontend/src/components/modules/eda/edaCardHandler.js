@@ -35,7 +35,7 @@ import {
 	RevokedTag,
 } from '../default/defaultCardHandler';
 import EDAListViewCard from './edaListViewCard';
-import { CustomDimensions } from '../../telemetry/utils';
+import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -188,7 +188,7 @@ const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
 		'CardInteraction',
 		'PDFOpen',
 		null,
-		CustomDimensions.create(true, filename, pageNumber)
+		makeCustomDimensions(filename, pageNumber)
 	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(
@@ -629,7 +629,7 @@ const cardHandler = {
 										'CardInteraction',
 										'Close Graph Card',
 										null,
-										CustomDimensions.create(true, filename)
+										makeCustomDimensions(filename)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -648,7 +648,7 @@ const cardHandler = {
 										'CardInteraction',
 										'showDocumentDetails',
 										null,
-										CustomDimensions.create(true, filename)
+										makeCustomDimensions(filename)
 									);
 									window.open(
 										`#/gamechanger-details?cloneName=${cloneName}&type=contract&awardID=${item.award_id_eda_ext}`
@@ -666,7 +666,7 @@ const cardHandler = {
 							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
 								toggledMore,
-								CustomDimensions.create(true, filename)
+								makeCustomDimensions(filename)
 							);
 							setToggledMore(!toggledMore);
 						}}

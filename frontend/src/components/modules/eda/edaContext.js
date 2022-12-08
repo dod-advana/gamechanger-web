@@ -5,6 +5,7 @@ const initState = {
 	filterDataFetched: false,
 	edaFilterData: {
 		fiscalYear: [],
+		majcom: [],
 		issueOfficeName: [],
 		issueOfficeDoDAAC: [],
 		vendorName: [],
@@ -13,6 +14,8 @@ const initState = {
 		psc: [],
 		naics: [],
 		duns: [],
+		idvPIID: [],
+		PIID: [],
 		modNumber: [],
 	},
 	edaSearchSettings: {

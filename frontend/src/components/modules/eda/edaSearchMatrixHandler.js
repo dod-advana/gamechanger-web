@@ -200,14 +200,16 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 
 const getIssuingOrgData = (issuingOrgs) => {
 	const COLORS = ['#010691', '#007506', '#ad0202', '#6c0299', '#006069', '#969902'];
-	console.log('issueingOrgs: ', issuingOrgs);
+
 	// for the stats pie chart
 	return Object.keys(issuingOrgs).map((org, index) => {
 		let orgData = issuingOrgs[org];
 		return {
 			type: org,
 			count: orgData.count,
-			obligatedAmount: !isNaN(orgData.obligatedAmount) ? orgData.obligatedAmount : 0,
+			obligatedAmount: !isNaN(orgData.obligatedAmount)
+				? '$' + numberWithCommas((orgData.obligatedAmount / 1000000).toFixed(2)) + ' M'
+				: '',
 			color: COLORS[index],
 		};
 	});
@@ -215,35 +217,21 @@ const getIssuingOrgData = (issuingOrgs) => {
 
 const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 	let data = getIssuingOrgData(issuingOrgs);
+	let amount = 0;
+
+	if (!isNaN(totalObligatedAmount)) {
+		amount = Math.floor(totalObligatedAmount / 1000000) ?? 0;
+	}
 
 	const renderChartLabel = (entry) => {
 		return entry.type;
-	};
-
-	const renderObligatedAmountMBT = (obligatedAmount) => {
-		if (isNaN(obligatedAmount)) {
-			return '$0';
-		}
-
-		const amountMillions = obligatedAmount / 1000000;
-		if (amountMillions < 1000) {
-			return '$' + numberWithCommas(amountMillions.toFixed(2)) + 'M';
-		}
-		const amountBillions = amountMillions / 1000;
-		if (amountBillions < 1000) {
-			return '$' + numberWithCommas(amountBillions.toFixed(2)) + 'B';
-		}
-		const amountTrillions = amountBillions / 1000;
-		return '$' + numberWithCommas(amountTrillions.toFixed(2)) + 'T';
 	};
 
 	const CustomTooltip = ({ payload }) => {
 		let tooltipText = '';
 		if (payload.length > 0) {
 			let agency = payload[0];
-			tooltipText = `${agency.name}: ${renderObligatedAmountMBT(
-				agency.payload.obligatedAmount
-			)}/${numberWithCommas(agency.payload.count)} contracts`;
+			tooltipText += agency.name + ': ' + agency.payload.obligatedAmount;
 		}
 		return <div style={{ backgroundColor: 'white', border: '1px black solid', padding: 5 }}>{tooltipText}</div>;
 	};
@@ -257,7 +245,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					data={data}
 					cx="50%"
 					cy="50%"
-					dataKey="obligatedAmount"
+					dataKey="count"
 					nameKey="type"
 					label={renderChartLabel}
 					isAnimationActive={false}
@@ -267,7 +255,7 @@ const SearchStats = ({ issuingOrgs, totalObligatedAmount }) => {
 					))}
 				</Pie>
 				<text x={'50%'} y={'50%'} dy={8} textAnchor="middle">
-					{renderObligatedAmountMBT(totalObligatedAmount)}
+					{numberWithCommas(Math.floor(amount))}$M
 				</text>
 				<Tooltip content={<CustomTooltip />} />
 			</PieChart>
@@ -536,32 +524,35 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 };
 
 const renderFiscalYearFilter = (state, dispatch) => {
-	const { fiscalYear } = state.edaFilterData;
+	const now = new Date();
 	const yearCheckboxes = [];
 
-	for (let year of fiscalYear) {
+	const start = 2000;
+	const end = now.getFullYear() + 1;
+
+	for (let i = end; i >= start; i--) {
 		yearCheckboxes.push(
 			<FormControlLabel
-				name={year}
-				value={year}
+				name={i.toString()}
+				value={i.toString()}
 				style={styles.titleText}
 				control={
 					<Checkbox
 						style={styles.filterBox}
-						onClick={() => setEDASearchSetting('fiscalYear', year, state, dispatch)}
+						onClick={() => setEDASearchSetting('fiscalYear', i.toString(), state, dispatch)}
 						icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 						checked={
 							state.edaSearchSettings &&
 							state.edaSearchSettings.fiscalYears &&
-							state.edaSearchSettings.fiscalYears.indexOf(year) !== -1
+							state.edaSearchSettings.fiscalYears.indexOf(i.toString()) !== -1
 						}
 						checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-						name={year}
+						name={i.toString()}
 					/>
 				}
-				label={year}
+				label={i.toString()}
 				labelPlacement="end"
-				id={'year' + year + 'Checkbox'}
+				id={'year' + i.toString() + 'Checkbox'}
 			/>
 		);
 	}

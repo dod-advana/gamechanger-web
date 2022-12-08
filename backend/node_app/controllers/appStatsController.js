@@ -293,7 +293,7 @@ class AppStatsController {
 				[userId],
 				(error, results) => {
 					if (error) {
-						this.logger.info(`No userids found for ${userId}`);
+						this.logger.error('No userids found', 'B07IQHT');
 						resolve([]);
 					} else {
 						resolve(results);

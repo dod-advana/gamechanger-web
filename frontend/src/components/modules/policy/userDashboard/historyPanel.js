@@ -227,7 +227,7 @@ const HistoryPanel = ({
 
 		if (userData.export_history) {
 			userData.export_history = userData.export_history.filter(
-				(search) => search.download_request_body.cloneData?.clone_name === cloneData.clone_name
+				(search) => search.download_request_body.cloneData.clone_name === cloneData.clone_name
 			);
 			userData.export_history.forEach((hist) => {
 				let orgFilterText = '';
