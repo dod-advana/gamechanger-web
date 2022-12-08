@@ -18,7 +18,7 @@ import { MemoizedNodeCluster2D } from '../graph/GraphNodeCluster2D';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { trackEvent } from '../telemetry/Matomo';
 import IngestStats from './IngestStats';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 
 const GoalIcon = styled.div`
 	height: 20px;
@@ -499,7 +499,7 @@ const GCDataStatusTracker = (props) => {
 				`${trackingAction}-${tabIndex}Tab`,
 				'PDFOpen',
 				null,
-				makeCustomDimensions(filename)
+				CustomDimensions.create(true, filename)
 			);
 			window.open(
 				`/#/pdfviewer/gamechanger?filename=${filename.replace(/'/g, '')}&cloneIndex=${

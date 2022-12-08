@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { setState } from '../../../utils/sharedFunctions';
 import { makeStyles } from '@material-ui/core/styles';
 import { trackEvent } from '../../telemetry/Matomo';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const styles = {
 	innerContainer: {
@@ -242,7 +242,7 @@ export default function JBookSideBar(props) {
 						'QueryExpansion',
 						'SearchTermAdded',
 						null,
-						makeCustomDimensions(`${phrase}_${source}`)
+						CustomDimensions.create(true, `${phrase}_${source}`)
 					);
 					//newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 					newSearchText = phrase;
