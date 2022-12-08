@@ -19,7 +19,7 @@ import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle }
 import GCTooltip from '../../common/GCToolTip';
 import { EDA_FIELDS, EDA_FIELD_JSON_MAP, EDA_FPDS_MAP } from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -168,7 +168,7 @@ export default function EDADocumentExplorer({
 				'DocumentExplorerInteraction',
 				'PDFOpen',
 				null,
-				makeCustomDimensions(fileName, pageNumber)
+				CustomDimensions.create(true, fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

@@ -23,7 +23,7 @@ import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissio
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
 import { Divider } from '@material-ui/core';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 export const colWidth = {
 	maxWidth: '900px',
@@ -540,7 +540,7 @@ export const clickFn = (filename, cloneName, searchText, sourceUrl, idx, pageNum
 		'CardInteraction',
 		'PDFOpen',
 		null,
-		makeCustomDimensions(filename, pageNumber, idx)
+		CustomDimensions.create(true, filename, pageNumber, idx)
 	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
@@ -641,7 +641,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages',
 									null,
-									makeCustomDimensions(item.filename, null, idx)
+									CustomDimensions.create(true, item.filename, null, idx)
 								);
 								setHitsExpanded(!hitsExpanded);
 							}}
@@ -712,7 +712,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 									null,
-									makeCustomDimensions(item.filename, null, idx)
+									CustomDimensions.create(true, item.filename, null, idx)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -789,7 +789,7 @@ const cardHandler = {
 									'ListViewInteraction',
 									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 									null,
-									makeCustomDimensions(item.filename, null, idx)
+									CustomDimensions.create(true, item.filename, null, idx)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -934,7 +934,7 @@ const cardHandler = {
 										'CardInteraction',
 										'Close Graph Card',
 										null,
-										makeCustomDimensions(filename, null, idx)
+										CustomDimensions.create(true, filename, null, idx)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -962,7 +962,7 @@ const cardHandler = {
 							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
 								toggledMore,
-								makeCustomDimensions(filename, null, idx)
+								CustomDimensions.create(true, filename, null, idx)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -1172,7 +1172,7 @@ const cardHandler = {
 										'CardInteraction',
 										'Close Graph Card',
 										null,
-										makeCustomDimensions(name, null, idx)
+										CustomDimensions.create(true, name, null, idx)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -1188,7 +1188,7 @@ const cardHandler = {
 							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
 								toggledMore,
-								makeCustomDimensions(name)
+								CustomDimensions.create(true, name)
 							);
 							setToggledMore(!toggledMore);
 						}}
