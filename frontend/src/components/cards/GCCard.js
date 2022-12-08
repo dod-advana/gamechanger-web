@@ -654,33 +654,43 @@ const FavoriteComponent = (props) => {
 					</div>
 				)}
 			</Popover>
-			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
-				<i
-					onClick={(event) => {
-						switch (cardType) {
-							case 'applications':
-							case 'dashboards':
-							case 'dataSources':
-							case 'databases':
-							case 'models':
-								handleSaveFavorite(!favorite);
-								break;
-							default:
-								openFavoritePopper(event.target);
-								break;
-						}
-					}}
-					data-cy="card-favorite-star"
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						marginLeft: 'auto',
-						cursor: 'pointer',
-						fontSize: 26,
-						alignSelf: 'center',
-					}}
-				/>
-			</GCTooltip>
+			{cardType !== 'organization' && cardType !== 'topic' && (
+				<GCTooltip
+					title={
+						favorite
+							? `Unfavorite this ${cardType} to stop tracking in the User Dashboard`
+							: `Favorite this ${cardType} to track in the User Dashboard`
+					}
+					placement="top"
+					arrow
+				>
+					<i
+						onClick={(event) => {
+							switch (cardType) {
+								case 'applications':
+								case 'dashboards':
+								case 'dataSources':
+								case 'databases':
+								case 'models':
+									handleSaveFavorite(!favorite);
+									break;
+								default:
+									openFavoritePopper(event.target);
+									break;
+							}
+						}}
+						data-cy="card-favorite-star"
+						className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
+						style={{
+							color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
+							marginLeft: 'auto',
+							cursor: 'pointer',
+							fontSize: 26,
+							alignSelf: 'center',
+						}}
+					/>
+				</GCTooltip>
+			)}
 		</>
 	);
 };
@@ -742,7 +752,11 @@ function GCCard(props) {
 
 	const checkboxComponent = (key, value, tmpId) => {
 		return (
-			<GCTooltip title={'Select a document for export'} placement="top" arrow>
+			<GCTooltip
+				title={selected ? 'Deselect document for export' : 'Select document for export'}
+				placement="top"
+				arrow
+			>
 				<Checkbox
 					style={styles.checkbox}
 					onChange={() => handleCheckbox(key, value, tmpId)}
