@@ -1,8 +1,12 @@
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { setState } from '../../../utils/sharedFunctions';
+import { trackEvent } from '../../telemetry/Matomo';
 
 const DefaultMainViewUtilityHandler = {
 	handleCategoryTabChange: (props) => {
 		const { tabName, state, dispatch } = props;
+
+		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CategoryTabChange', tabName);
 
 		if (tabName === 'all') {
 			// if sort is relevance descending

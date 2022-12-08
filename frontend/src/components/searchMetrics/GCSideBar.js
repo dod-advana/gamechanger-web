@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import './sidebar.css';
 import styled from 'styled-components';
 import { trackEvent } from '../telemetry/Matomo';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 import { getTrackingNameForFactory, /*orgColorMap,*/ exactMatch } from '../../utils/gamechangerUtils';
 import GCTooltip from '../common/GCToolTip';
 import GCAccordion from '../common/GCAccordion';
@@ -366,7 +366,7 @@ export default function SideBar(props) {
 						'QueryExpansion',
 						'SearchTermAdded',
 						null,
-						makeCustomDimensions(`${phrase}_${source}`)
+						CustomDimensions.create(true, `${phrase}_${source}`)
 					);
 					//newSearchText = newSearchText.trim() ? `${newSearchText} OR ${phrase}` : phrase;
 					newSearchText = phrase;

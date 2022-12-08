@@ -17,7 +17,7 @@ import { Card } from '../cards/GCCard';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import '../../containers/gamechanger.css';
 import { addFavoriteTopicToMetadata } from '../modules/policy/policyCardHandler';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -30,6 +30,8 @@ const colWidth = {
 };
 
 const RESULTS_PER_PAGE = 10;
+
+const trackingAction = 'DocumentDetailsPage';
 
 const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, setBackendError) => {
 	gameChangerAPI
@@ -90,6 +92,8 @@ const DocumentDetailsPage = (props) => {
 
 	const [notInCorpusDocs, setNotInCorpusDocs] = useState(0);
 	const [refList, setRefList] = useState([]);
+
+	const trackingCategory = getTrackingNameForFactory(cloneData.clone_name);
 
 	useEffect(() => {
 		if (document?.refList) {
@@ -372,12 +376,7 @@ const DocumentDetailsPage = (props) => {
 								}
 								pageRangeDisplayed={8}
 								onChange={(page) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneData.clone_name),
-										'DetailsPaginationChanged',
-										'page',
-										page
-									);
+									trackEvent(trackingCategory, `${trackingAction}-Pagination`, null, page);
 									handleChangeDocsPage(section, page);
 								}}
 							/>
@@ -389,6 +388,10 @@ const DocumentDetailsPage = (props) => {
 				</div>
 			</div>
 		);
+	};
+
+	const handlePanelToggle = (panelName, isExpanding) => {
+		trackEvent(trackingCategory, `${trackingAction}-${panelName}Panel`, isExpanding ? 'onExpand' : 'onCollapse');
 	};
 
 	return (
@@ -411,11 +414,11 @@ const DocumentDetailsPage = (props) => {
 									e.preventDefault();
 									const isDLA = document.display_org_s === 'Defense Logistics Agency';
 									trackEvent(
-										getTrackingNameForFactory(cloneData?.clone_name),
-										'CardInteraction',
+										trackingCategory,
+										`${trackingAction}-OpenDocumentButton`,
 										'PDFOpen',
 										null,
-										makeCustomDimensions(document?.filename)
+										CustomDimensions.create(true, document?.filename)
 									);
 									window.open(
 										`/#/pdfviewer/gamechanger?filename=${document?.filename}&cloneIndex=${
@@ -482,7 +485,12 @@ const DocumentDetailsPage = (props) => {
 				</div>
 				<div className={'graph-top-docs'}>
 					<div className={'section'} ref={ref}>
-						<GCAccordion expanded={true} header={'GRAPH VIEW (BETA)'} backgroundColor={'rgb(238,241,242)'}>
+						<GCAccordion
+							expanded={true}
+							header={'GRAPH VIEW (BETA)'}
+							backgroundColor={'rgb(238,241,242)'}
+							onChange={(isExpanding) => handlePanelToggle('GraphView', isExpanding)}
+						>
 							<MemoizedPolicyGraphView
 								width={ref?.current?.clientWidth ? ref.current.clientWidth - 25 : undefined}
 								graphData={graphData}
@@ -505,6 +513,7 @@ const DocumentDetailsPage = (props) => {
 							header={'SIMILAR DOCUMENTS'}
 							itemCount={similarDocs.docs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
+							onChange={(isExpanding) => handlePanelToggle('SimilarDocuments', isExpanding)}
 						>
 							{renderDocs(similarDocs, similarDocsPage, 'similarDocs', runningSimilarDocsQuery)}
 						</GCAccordion>
@@ -516,6 +525,7 @@ const DocumentDetailsPage = (props) => {
 							header={'DOCUMENTS REFERENCED'}
 							itemCount={docsReferenced.docs.length + notInCorpusDocs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
+							onChange={(isExpanding) => handlePanelToggle('DocumentsReferenced', isExpanding)}
 						>
 							{renderDocs(
 								docsReferenced,
@@ -532,6 +542,7 @@ const DocumentDetailsPage = (props) => {
 							header={'DOCUMENTS REFERENCED BY'}
 							itemCount={referencedByDocs.docs.length || 0}
 							backgroundColor={'rgb(238,241,242)'}
+							onChange={(isExpanding) => handlePanelToggle('DocumentsReferencedBy', isExpanding)}
 						>
 							{renderDocs(
 								referencedByDocs,

@@ -27,6 +27,8 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
 
+const trackingAction = 'DocumentComparisonTool';
+
 const saveDocToFavorites = (filename, selectedParagraph, paragraphs, state, dispatch) => {
 	const text = paragraphs.find((input) => input.id === selectedParagraph.paragraphIdBeingMatched).text;
 	handleSaveFavoriteDocument(
@@ -383,10 +385,11 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
 	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
-
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
+
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	const getPresearchData = useCallback(async () => {
 		const { cloneData } = state;
@@ -664,6 +667,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	};
 
 	const handleCompare = () => {
+		trackEvent(trackingCategory, `${trackingAction}-Submit`, paragraphs.map((par) => par.text).join('\n'));
 		if (!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
@@ -874,7 +878,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
-						onClick={() => resetAdvancedSettings(dispatch)}
+						onClick={() => {
+							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
+							resetAdvancedSettings(dispatch);
+						}}
 						style={{ margin: 0, width: '100%' }}
 					>
 						Clear Filters

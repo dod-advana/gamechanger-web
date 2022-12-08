@@ -17,7 +17,7 @@ import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import Link from '@material-ui/core/Link';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const CloseButton = styled.div`
 	padding: 6px;
@@ -173,7 +173,7 @@ const GetQAResults = (props) => {
 				'CardCheckboxUnchecked',
 				key,
 				0,
-				makeCustomDimensions(key)
+				CustomDimensions.create(true, key)
 			);
 		} else {
 			selectedDocuments.set(key, value);
@@ -182,7 +182,7 @@ const GetQAResults = (props) => {
 				'CardCheckboxChecked',
 				key,
 				1,
-				makeCustomDimensions(key)
+				CustomDimensions.create(true, key)
 			);
 		}
 
@@ -242,7 +242,10 @@ const GetQAResults = (props) => {
 												'CardInteraction',
 												'QAThumbsUp',
 												null,
-												makeCustomDimensions(`question : ${question}, answer: ${answer}`)
+												CustomDimensions.create(
+													true,
+													`question : ${question}, answer: ${answer}`
+												)
 											);
 										} else {
 											gameChangerAPI.sendIntelligentSearchFeedback(
@@ -256,7 +259,10 @@ const GetQAResults = (props) => {
 												'CardInteraction',
 												'IntelligentSearchThumbsUp',
 												null,
-												makeCustomDimensions(`search : ${state.searchText}, title: ${title}`)
+												CustomDimensions.create(
+													true,
+													`search : ${state.searchText}, title: ${title}`
+												)
 											);
 										}
 									}
@@ -283,7 +289,10 @@ const GetQAResults = (props) => {
 												'CardInteraction',
 												'QAThumbsDown',
 												null,
-												makeCustomDimensions(`question : ${question}, title: ${answer}`)
+												CustomDimensions.create(
+													true,
+													`question : ${question}, title: ${answer}`
+												)
 											);
 										} else {
 											gameChangerAPI.sendIntelligentSearchFeedback(
@@ -297,7 +306,10 @@ const GetQAResults = (props) => {
 												'CardInteraction',
 												'IntelligentSearchThumbsDown',
 												null,
-												makeCustomDimensions(`search : ${state.searchText}, title: ${title}`)
+												CustomDimensions.create(
+													true,
+													`search : ${state.searchText}, title: ${title}`
+												)
 											);
 										}
 									}

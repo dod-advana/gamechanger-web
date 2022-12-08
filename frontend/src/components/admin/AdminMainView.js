@@ -4,6 +4,8 @@ import TitleBar from '../searchBar/TitleBar';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import AdminMainViewFactory from '../factories/adminMainViewFactory';
+import { trackPageTitleClick } from '../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
 const AdminMainView = (props) => {
 	const { jupiter, context } = props;
@@ -62,6 +64,7 @@ const AdminMainView = (props) => {
 						onTitleClick={() => {
 							window.location.href = `#/${state.cloneData.clone_name}/admin`;
 							setPageToView(pages.general);
+							trackPageTitleClick(getTrackingNameForFactory(state.cloneData.clone_name), 'AdminMainView');
 						}}
 						titleBarModule={'admin/adminTitleBarHandler'}
 						jupiter={jupiter}

@@ -106,8 +106,8 @@ export function trackPageView(documentTitle, customDimensions) {
  * @param {string} action - Event action.
  * @param {string} name - Event name.
  * @param {Number} value - Event value. Non-number value will be ignored by Matomo.
- * @param {CustomDimension[]} - Custom dimensions for the event. See
- * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ * @param {{id: number, value: any}[]|{}} customDimensions - Custom dimensions
+ * 		for the event. See CustomDimensions.create().
  * @param {bool} isCustomDimensionsForOneActionOnly - Optional. True to track
  * 		customDimensions only for this event, false to track customDimensions
  * 		for all events following this event. Default is true.
@@ -143,8 +143,8 @@ export function trackEvent(category, action, name, value, customDimensions, isCu
  * @param {string} category - Event category. Use a GAMECHANGER clone name.
  * @param {boolean} toggledOverview - True if the card was flipped from the
  * 		'Overview' side, false if it was flipped from the 'More' side.
- * @param {CustomDimension[]} - Custom dimensions for the event. See
- * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ * @param {{id: number, value: any}[]|{}} - Custom dimensions for the event.
+ * 		 See CustomDimensions.create().
  */
 export function trackFlipCardEvent(category, toggledOverview, customDimensions) {
 	trackEvent(category, 'CardInteraction', `flipCard${toggledOverview ? 'Overview' : 'More'}`, null, customDimensions);
@@ -159,13 +159,30 @@ export function trackFlipCardEvent(category, toggledOverview, customDimensions) 
  *		right panel was toggled.
  * @param {boolean} wasOpen - True if the panel was open when the event occurred,
  *		false if the panel was closed when the event occurred.
- * @param {CustomDimension[]} - Custom dimensions for the event. See
- * 		makeCustomDimensions() in ./utils/customDimensions.js.
+ * @param {{id: number, value: any}[]|{}} - Custom dimensions for the event.
+ * 		 See CustomDimensions.create().
  */
 export function trackLeftRightPanelToggle(category, action, isLeft, wasOpen, customDimensions) {
 	const panelDirection = isLeft ? 'Left' : 'Right';
 	const panelState = wasOpen ? 'Close' : 'Open';
 	trackEvent(category, action, `${panelDirection}PanelToggle${panelState}`, null, customDimensions);
+}
+
+/**
+ * Track an event in Matomo when a page title is clicked.
+ *
+ * @param {string} category - Event category. Use a GAMECHANGER clone name.
+ * @param {string} pageName
+ * @param {number|null} numValue - Optional integer value associated with the event
+ * @param {{id: number, value: any}[]|{}} - Custom dimensions for the event.
+ * 		 See CustomDimensions.create().
+ */
+export function trackPageTitleClick(category, pageName, numValue = null, customDimensions = []) {
+	trackEvent(category, `${pageName}PageTitle`, 'onClick', numValue, customDimensions);
+}
+
+export function trackDocumentExplorerToggleAll(category, onExpand) {
+	trackEvent(category, 'DocumentExplorerResultsViewToggle', onExpand ? 'onExpandAll' : 'onCollapseAll');
 }
 
 /***

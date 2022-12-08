@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createCopyTinyUrl, setState } from '../../../utils/sharedFunctions';
-import { getCurrentView } from '../../../utils/gamechangerUtils';
+import { getCurrentView, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import _ from 'lodash';
 
 import GCButton from '../../common/GCButton';
@@ -9,6 +9,7 @@ import GCTooltip from '../../common/GCToolTip';
 import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useStyles } from '../default/defaultViewHeaderHandler.js';
+import { trackEvent } from '../../telemetry/Matomo';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -34,6 +35,8 @@ const PolicyViewHeaderHandler = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
+
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -65,6 +68,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeSort = (event) => {
+		trackEvent(trackingCategory, 'ChangeSortSelection', event.target.value);
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.isFilterUpdate = true;
 		const {
@@ -96,6 +100,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeView = (event) => {
+		trackEvent(trackingCategory, 'ChangeResultsView', event.target.value);
 		const {
 			target: { value },
 		} = event;
@@ -307,7 +312,7 @@ const PolicyViewHeaderHandler = (props) => {
 				<GCButton
 					className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 					id={'gcShareSearch'}
-					onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
+					onClick={() => createCopyTinyUrl(cloneData.url, dispatch, cloneData.clone_name)}
 					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 					disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 				>

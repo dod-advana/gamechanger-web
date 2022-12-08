@@ -14,7 +14,7 @@ import { getTrackingNameForFactory, encode } from '../../utils/gamechangerUtils'
 import GCTooltip from '../common/GCToolTip';
 import GCButton from '../common/GCButton';
 import { CardButton } from '../common/CardButton';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 
 const StyledFavoriteDocumentCard = styled.div`
 	width: 387px !important;
@@ -292,7 +292,7 @@ const GroupFavoriteCard = (props) => {
 			'CardInteraction',
 			'PDFOpen',
 			null,
-			makeCustomDimensions(filename, pageNumber)
+			CustomDimensions.create(true, filename, pageNumber)
 		);
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${encode(filename)}${
@@ -437,7 +437,7 @@ const GroupFavoriteCard = (props) => {
 									'CardInteraction',
 									'showDocumentDetails',
 									null,
-									makeCustomDimensions(documentObject.filename)
+									CustomDimensions.create(true, documentObject.filename)
 								);
 								window.open(
 									`#/gamechanger-details?cloneName=${cloneData.clone_name}&type=document&documentName=${documentObject.id}`
