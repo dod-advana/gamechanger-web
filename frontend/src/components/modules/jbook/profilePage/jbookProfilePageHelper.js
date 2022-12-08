@@ -274,7 +274,7 @@ const Accomplishments = ({ accomplishments }) => {
 							whiteSpace: 'nowrap',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
-							width: 60,
+							width: 210,
 						}}
 						useInnerHtml={true}
 					/>
