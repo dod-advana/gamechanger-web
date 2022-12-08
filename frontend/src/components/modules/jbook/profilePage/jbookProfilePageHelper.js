@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { PieChart, Pie, Label } from 'recharts';
 import SimpleTable from '../../../common/SimpleTable';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography, Tooltip } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { StyledTableContainer, StyledNavButton, StyledLeftContainer } from './profilePageStyles';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -16,6 +16,7 @@ import {
 } from '../../../../utils/jbookUtilities';
 import { JBookContext } from '../jbookContext';
 import JBookCommentSection from './jbookCommentSection';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const firstColWidth = {
 	maxWidth: 150,
@@ -420,7 +421,14 @@ const Contracts = (props) => {
 		);
 	}
 
-	return <StyledTableContainer>{contractTables}</StyledTableContainer>;
+	return (
+		<StyledTableContainer>
+			<Tooltip placement="right" arrow title={'Contract data may be incomplete.'}>
+				<InfoOutlinedIcon style={{ marginBottom: '12px' }} />
+			</Tooltip>
+			{contractTables}
+		</StyledTableContainer>
+	);
 };
 
 const NavButtons = () => {
