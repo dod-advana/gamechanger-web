@@ -184,8 +184,8 @@ class GlobalSearchHandler extends SearchHandler {
 					return { hits: [], totalCount: 0, count: 0 };
 				}
 				hitQuery = `select description, permission, href, link_label, id
-          from megamenu_links
-          where id in (${tmpFavorites.join(',')})`;
+		  from megamenu_links
+		  where id in (${tmpFavorites.join(',')})`;
 			}
 			let results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
 			let tmpReturn;
@@ -239,7 +239,7 @@ class GlobalSearchHandler extends SearchHandler {
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
 			// get user apps from Qlik
-			const userApps = this.getUserApps(userId, cloneSpecificObject);
+			const userApps = await this.getUserApps(userId, cloneSpecificObject);
 
 			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
