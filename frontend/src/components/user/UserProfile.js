@@ -22,27 +22,27 @@ const StyledUserProfileDataDiv = styled.div`
 	box-shadow: 0px 3px 6px ${'#00000029'};
 	width: 100%;
 	height: 100%;
-	
+
 	& .user-picture {
 		padding-top: 20px;
-	
+
 		& .user-name {
 			font-family: Montserrat;
 			font-weight: bold;
 			font-size: 24px;
-			color: ${'#000000DE'}
+			color: ${'#000000DE'};
 			margin-top: 20px;
 		}
 	}
-	
+
 	& .user-data {
 		margin-left: 30px;
 	}
-	
+
 	& .user-edit-button {
 		margin-bottom: 20px;
 	}
-	
+
 	.input-field {
 		margin-bottom: 12px;
 	}
