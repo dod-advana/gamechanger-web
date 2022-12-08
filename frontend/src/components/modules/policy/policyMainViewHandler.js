@@ -532,10 +532,19 @@ const renderHideTabs = (props) => {
 									marginTop: 8,
 								}}
 							>
-								<Typography style={styles.containerText}>
-									<i className="fa fa-search" style={{ marginRight: 12 }} />
-									{`   ${idx + 1}. ${search.length < 18 ? search : search.substring(0, 20) + '...'}`}
-								</Typography>
+								<GCTooltip title={search.length < 18 ? '' : search} placement="top" arrow>
+									<Typography
+										style={{
+											...styles.containerText,
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+										}}
+									>
+										<i className="fa fa-search" style={{ marginRight: 12 }} />
+										{`   ${idx + 1}. ${search}`}
+									</Typography>
+								</GCTooltip>
 							</div>
 						</TrendingSearchContainer>
 					))}
@@ -559,7 +568,7 @@ const renderHideTabs = (props) => {
 							}}
 						>
 							{item.name}
-							<i
+							{/* <i
 								className={item.favorite ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
 									color: item.favorite ? '#E9691D' : 'rgb(224,224,224)',
@@ -571,7 +580,7 @@ const renderHideTabs = (props) => {
 									event.stopPropagation();
 									handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
 								}}
-							/>
+							/> */}
 						</div>
 					))}
 				</GameChangerThumbnailRow>
