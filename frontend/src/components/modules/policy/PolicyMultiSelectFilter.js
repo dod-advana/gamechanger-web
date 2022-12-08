@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import MultiSelectFilter from '../../common/MultiSelectFilter';
@@ -18,8 +17,6 @@ const PolicyMultiSelectFilter = ({
 	showNumResultsPerOption = false,
 	preventSearchOnChange = false,
 }) => {
-	const [showClear, setShowClear] = useState(false);
-
 	const isChecked = (option) => {
 		return state[searchSettingsName][filter][option];
 	};
@@ -29,7 +26,6 @@ const PolicyMultiSelectFilter = ({
 		if (state[searchSettingsName][allSelected]) {
 			newSearchSettings[allSelected] = false;
 			newSearchSettings[specificSelected] = true;
-			setShowClear(true);
 		}
 		let name = showNumResultsPerOption
 			? event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1)
@@ -41,7 +37,6 @@ const PolicyMultiSelectFilter = ({
 		if (Object.values(newSearchSettings[filter]).filter((value) => value).length === 0) {
 			newSearchSettings[allSelected] = true;
 			newSearchSettings[specificSelected] = false;
-			setShowClear(false);
 		}
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
@@ -66,7 +61,6 @@ const PolicyMultiSelectFilter = ({
 		newSearchSettings[specificSelected] = false;
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
-		setShowClear(false);
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
@@ -87,7 +81,7 @@ const PolicyMultiSelectFilter = ({
 			showNumResultsPerOption={showNumResultsPerOption}
 			handleFilterChange={handleFilterChange}
 			handleClear={handleClear}
-			showClear={showClear}
+			showClear={Object.values(state[searchSettingsName][filter]).filter((value) => value).length !== 0}
 			isChecked={isChecked}
 		/>
 	);
