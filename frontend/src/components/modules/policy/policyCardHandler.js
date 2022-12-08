@@ -28,7 +28,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -437,6 +437,10 @@ const StyledEntityTopicFrontCardContent = styled.div`
 	}
 `;
 
+const trackingActionForCard = 'CardInteraction';
+const trackingActionForGraphCard = 'GraphCardInteraction';
+const trackingActionForListView = 'ListViewInteraction';
+
 const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, cloneName }) => {
 	const classes = useStyles();
 	const [popperIsOpen, setPopperIsOpen] = useState(false);
@@ -537,7 +541,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											'CancelFavorite',
 											'', // empty because topic getFilename always returns empty string
 											null,
-											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
+											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -597,7 +601,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											'Favorite',
 											'', // empty because topic getFilename always returns empty string
 											null,
-											makeCustomDimensions(`search : ${searchText}, topic: ${topic}`)
+											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -620,8 +624,33 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 };
 
 const handleTopicClick = (topic, cloneName, idx) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic, null, makeCustomDimensions(null, null, idx));
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'TopicOpened',
+		topic,
+		null,
+		CustomDimensions.create(true, null, null, idx)
+	);
 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+};
+
+const handlePageHitHover = (
+	setHoveredHitFunc,
+	pageIdx,
+	trackingCategory,
+	trackingAction,
+	pageNumber,
+	fileName,
+	resultIdx
+) => {
+	setHoveredHitFunc && setHoveredHitFunc(pageIdx);
+	trackEvent(
+		trackingCategory,
+		`${trackingAction}-PageHit`,
+		'onMouseEnter',
+		pageNumber,
+		CustomDimensions.create(true, fileName, pageNumber, resultIdx)
+	);
 };
 
 export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText, maxWidth) => {
@@ -835,6 +864,11 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 							onClick={() => {
 								setShowDocIngestModal(true);
 								requestDocIngest(item);
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'RequestThisDataButton',
+									item.display_title_s
+								);
 							}}
 						>
 							Request This Data
@@ -1046,8 +1080,10 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 	setHoveredHit,
 	cloneName,
 	searchText,
-	contextHtml
+	contextHtml,
+	idx
 ) => {
+	const trackingCategory = getTrackingNameForFactory(cloneName);
 	return (
 		item.pageHits?.length > 0 && (
 			<GCAccordion
@@ -1055,6 +1091,15 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				onChange={(isExpanding) =>
+					trackEvent(
+						trackingCategory,
+						`${trackingActionForListView}-PageHits`,
+						isExpanding ? 'onExpand' : 'onCollapse',
+						null,
+						CustomDimensions.create(true, item.filename, null, idx)
+					)
+				}
 			>
 				<div className={'expanded-hits'}>
 					<div className={'page-hits'}>
@@ -1070,7 +1115,17 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											handlePageHitHover(
+												setHoveredHit,
+												key,
+												trackingCategory,
+												trackingActionForListView,
+												page.pageNumber,
+												item.filename,
+												idx
+											);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1108,13 +1163,22 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 	);
 };
 
-const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
+const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody, cloneName) => {
 	return !item.notInCorpus ? (
 		<GCAccordion
 			header={'DOCUMENT METADATA'}
 			headerBackground={'rgb(238,241,242)'}
 			headerTextColor={'black'}
 			headerTextWeight={'normal'}
+			onChange={(isExpanding) => {
+				trackEvent(
+					getTrackingNameForFactory(cloneName),
+					`${trackingActionForListView}-DocumentMetadata`,
+					isExpanding ? 'onExpand' : 'onCollapse',
+					null,
+					CustomDimensions.create(true, item.filename)
+				);
+			}}
 		>
 			<div className={'metadata'}>
 				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
@@ -1133,7 +1197,8 @@ const renderListView = (
 	metadataExpandedState,
 	cloneName,
 	searchText,
-	intelligentFeedbackComponent
+	intelligentFeedbackComponent,
+	idx
 ) => {
 	const { hoveredHit, setHoveredHit } = hoveredHitState;
 	const { metadataExpanded, setMetadataExpanded } = metadataExpandedState;
@@ -1148,9 +1213,10 @@ const renderListView = (
 					setHoveredHit,
 					cloneName,
 					searchText,
-					contextHtml
+					contextHtml,
+					idx
 				)}
-				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody)}
+				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody, cloneName)}
 			</StyledListViewFrontCardContent>
 		);
 	} else if (intelligentSearch) {
@@ -1170,7 +1236,9 @@ const renderListView = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											setHoveredHit(key);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1208,10 +1276,10 @@ const renderListView = (
 					onClick={() => {
 						trackEvent(
 							getTrackingNameForFactory(cloneName),
-							'ListViewInteraction',
+							trackingActionForListView,
 							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
 							null,
-							makeCustomDimensions(item.filename)
+							CustomDimensions.create(true, item.filename)
 						);
 						setMetadataExpanded(!metadataExpanded);
 					}}
@@ -1232,7 +1300,7 @@ const renderListView = (
 	}
 };
 
-const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
+const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, documentIdx, trackingCategory) => {
 	if (page.title || key < 5) {
 		return (
 			<div
@@ -1244,7 +1312,17 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						color: 'white',
 					}),
 				}}
-				onMouseEnter={() => setHoveredHit(key)}
+				onMouseEnter={() => {
+					handlePageHitHover(
+						setHoveredHit,
+						key,
+						trackingCategory,
+						trackingActionForCard,
+						page.pageNumber,
+						item.filename,
+						documentIdx
+					);
+				}}
 				onClick={(e) => {
 					e.preventDefault();
 					clickFn(
@@ -1252,7 +1330,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						state.cloneData.clone_name,
 						state.searchText,
 						page.pageNumber,
-						item.download_url_s
+						item.download_url_s,
+						documentIdx
 					);
 				}}
 			>
@@ -1294,10 +1373,12 @@ const cardHandler = {
 				setMetadataExpanded,
 				intelligentSearch,
 				intelligentFeedbackComponent,
+				idx,
 			} = props;
 
 			const contextHtml = getHoveredSnippet(item, hoveredHit);
 			const publicationDate = getPublicationDate(item.publication_date_dt);
+			const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 			if (state.listView) {
 				return renderListView(
@@ -1306,7 +1387,8 @@ const cardHandler = {
 					{ metadataExpanded, setMetadataExpanded },
 					state.cloneData.clone_name,
 					state.searchText,
-					intelligentFeedbackComponent
+					intelligentFeedbackComponent,
+					idx
 				);
 			} else {
 				return (
@@ -1335,7 +1417,16 @@ const cardHandler = {
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
-										return renderPageHit(page, key, hoveredHit, setHoveredHit, item, state);
+										return renderPageHit(
+											page,
+											key,
+											hoveredHit,
+											setHoveredHit,
+											item,
+											state,
+											idx,
+											trackingCategory
+										);
 									})
 									.value()}
 							</div>
@@ -1420,10 +1511,10 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'CardInteraction',
+												trackingActionForCard,
 												'Close Graph Card',
 												null,
-												makeCustomDimensions(filename)
+												CustomDimensions.create(true, filename)
 											);
 											e.preventDefault();
 											closeGraphCard();
@@ -1438,10 +1529,10 @@ const cardHandler = {
 									onClick={(e) => {
 										trackEvent(
 											getTrackingNameForFactory(cloneName),
-											'CardInteraction',
+											trackingActionForCard,
 											'showDocumentDetails',
 											null,
-											makeCustomDimensions(filename, null, idx)
+											CustomDimensions.create(true, filename, null, idx)
 										);
 										window.open(
 											`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`
@@ -1471,7 +1562,7 @@ const cardHandler = {
 									trackFlipCardEvent(
 										getTrackingNameForFactory(cloneName),
 										toggledMore,
-										makeCustomDimensions(filename, null, idx)
+										CustomDimensions.create(true, filename, null, idx)
 									);
 									setToggledMore(!toggledMore);
 								}}
@@ -1549,7 +1640,11 @@ const cardHandler = {
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 							href={'#'}
 							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
+								trackEvent(
+									getTrackingNameForFactory(cloneName),
+									trackingActionForCard,
+									'Close Graph Card'
+								);
 								e.preventDefault();
 								closeGraphCard();
 							}}
@@ -1726,7 +1821,7 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'GraphCardInteraction',
+												trackingActionForGraphCard,
 												`Open${item.name}DetailsPage`
 											);
 											e.preventDefault();
@@ -1780,7 +1875,7 @@ const cardHandler = {
 							onClick={(e) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
-									'GraphCardInteraction',
+									trackingActionForGraphCard,
 									`Open${item.name}DetailsPage`
 								);
 								e.preventDefault();
@@ -1798,10 +1893,10 @@ const cardHandler = {
 								onClick={(e) => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
+										trackingActionForGraphCard,
 										'Close Graph Card',
 										null,
-										makeCustomDimensions(item.name)
+										CustomDimensions.create(true, item.name)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -1817,7 +1912,7 @@ const cardHandler = {
 							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
 								toggledMore,
-								makeCustomDimensions(item.name)
+								CustomDimensions.create(true, item.name)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -2018,7 +2113,11 @@ const cardHandler = {
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
 								onClick={(e) => {
-									trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Close');
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										`${trackingActionForGraphCard}-TopicCardOnClick`,
+										'Close'
+									);
 									e.preventDefault();
 									closeGraphCard();
 								}}
@@ -2032,7 +2131,7 @@ const cardHandler = {
 								trackFlipCardEvent(
 									getTrackingNameForFactory(cloneName),
 									toggledMore,
-									makeCustomDimensions(item.name)
+									CustomDimensions.create(true, item.name)
 								);
 								setToggledMore(!toggledMore);
 							}}

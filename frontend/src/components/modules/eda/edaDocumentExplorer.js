@@ -15,11 +15,11 @@ import {
 } from '../../../utils/gamechangerUtils';
 import { getEDAMetadataForPropertyTable, getDisplayTitle } from '../../modules/eda/edaUtils';
 import Pagination from 'react-js-pagination';
-import { trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
+import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
 import { EDA_FIELDS, EDA_FIELD_JSON_MAP, EDA_FPDS_MAP } from '../../modules/eda/edaCardHandler';
 import sanitizeHtml from 'sanitize-html';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 const grey800 = grey[800];
@@ -146,6 +146,7 @@ export default function EDADocumentExplorer({
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
 	function handleViewToggle() {
+		trackDocumentExplorerToggleAll(cloneData.clone_name, viewTogle);
 		if (collapseKeys) {
 			let collapse = Object.assign({}, collapseKeys);
 			for (let key in collapse) {
@@ -167,7 +168,7 @@ export default function EDADocumentExplorer({
 				'DocumentExplorerInteraction',
 				'PDFOpen',
 				null,
-				makeCustomDimensions(fileName, pageNumber)
+				CustomDimensions.create(true, fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

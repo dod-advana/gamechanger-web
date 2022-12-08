@@ -65,7 +65,7 @@ const handleOrganizationFilterChangeAdv = (event, state, dispatch) => {
 		getTrackingNameForFactory(state.cloneData.clone_name),
 		'OrgFilterToggle',
 		event.target.name,
-		event.target.value ? 1 : 0
+		event.target.checked ? 1 : 0
 	);
 };
 
@@ -145,6 +145,12 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 };
 
 const handleSelectArchivedCongress = (event, state, dispatch) => {
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'TypeFilterToggle',
+		'ArchivedCongress',
+		event.target.checked ? 1 : 0
+	);
 	const newSearchSettings = structuredClone(state.searchSettings);
 	newSearchSettings.archivedCongressSelected = event.target.checked;
 	newSearchSettings.isFilterUpdate = true;
@@ -179,7 +185,7 @@ const handleTypeFilterChangeSearchbar = (event, type, state, dispatch) => {
 		getTrackingNameForFactory(state.cloneData.clone_name),
 		'TypeFilterToggle',
 		event.target.name,
-		event.target.value ? 1 : 0
+		event.target.checked ? 1 : 0
 	);
 };
 
@@ -259,6 +265,12 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 };
 
 const handleDateRangeChange = (date, isStartDate, filterType, state, dispatch) => {
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		`Publication${isStartDate ? 'Start' : 'End'}DateFilterChange`,
+		date ? date.toString() : date
+	);
+
 	const newSearchSettings = _.cloneDeep(state.searchSettings);
 	newSearchSettings.publicationDateAllTime = false;
 	const { publicationDateFilter, accessDateFilter } = newSearchSettings;
@@ -382,6 +394,12 @@ const handleRevokedChange = (event, state, dispatch) => {
 		runSearch: true,
 		runGraphSearch: true,
 	});
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'StatusFilterToggle',
+		'IncludeCanceledDocuments',
+		event.target.checked ? 1 : 0
+	);
 };
 
 const renderStatus = (state, dispatch, classes) => {
@@ -431,13 +449,15 @@ const renderStatus = (state, dispatch, classes) => {
 	);
 };
 
-const resetAdvancedSettings = (dispatch) => {
+const resetAdvancedSettings = (dispatch, state) => {
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'AdvancedSearchSettings', 'onClickClearFilters');
 	dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
 };
 
-const clearFilters = (dispatch) => {
+const clearFilters = (dispatch, state) => {
 	dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 	setState(dispatch, { runSearch: true, runGraphSearch: true });
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ClearFilters', 'onClick');
 };
 
 const getSearchMatrixItems = (props) => {
@@ -512,7 +532,7 @@ const getSearchMatrixItems = (props) => {
 					borderRadius: 5,
 				}}
 				onClick={() => {
-					clearFilters(dispatch);
+					clearFilters(dispatch, state);
 				}}
 			>
 				<span
@@ -570,7 +590,7 @@ export const getAdvancedOptions = (props) => {
 							padding: '0px',
 						}}
 						isSecondaryBtn={true}
-						onClick={() => resetAdvancedSettings(dispatch)}
+						onClick={() => resetAdvancedSettings(dispatch, state)}
 					>
 						Clear Filters
 					</GCButton>

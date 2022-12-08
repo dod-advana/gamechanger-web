@@ -52,6 +52,8 @@ const sortEntities = (data) => {
 	});
 };
 
+const trackingAction = 'ResponsibilityExplorer';
+
 export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const classes = useStyles();
 	const DOCS_PER_PAGE = 15;
@@ -72,6 +74,8 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+
+	const trackingCategory = getTrackingNameForFactory(state?.cloneData?.clone_name);
 
 	useEffect(() => {
 		if (stepIndex === 5) {
@@ -216,6 +220,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		const { value } = event.target;
 		setReView(value);
 		if (value === 'Document') setReloadResponsibilities(true);
+		trackEvent(trackingCategory, `${trackingAction}-ChangeView`, value);
 	};
 
 	const exportCSV = async () => {
@@ -227,12 +232,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				where: filters,
 			});
 
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'ResponsibilityTracker',
-				'ExportCSV',
-				data?.results?.length
-			);
+			trackEvent(trackingCategory, trackingAction, 'ExportCSV', data?.results?.length);
 			exportToCsv('ResponsibilityData.csv', data.results, true);
 		} catch (e) {
 			console.error(e);

@@ -7,7 +7,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { handleSaveFavoriteSearch, setState } from '../../utils/sharedFunctions';
 import SearchBarFactory from '../factories/searchBarFactory';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -110,6 +110,8 @@ const ModularSearchBarHandler = (props) => {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	const [searchBarHandler, setSearchBarHandler] = useState();
+
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	useEffect(() => {
 		const queryText = context.state.searchText ? context.state.searchText : null;
@@ -290,6 +292,7 @@ const ModularSearchBarHandler = (props) => {
 		});
 		document.activeElement.blur();
 		setDropdownOpen(false);
+		trackEvent(trackingCategory, 'SearchButton', 'onClickOrEnter');
 	};
 
 	useEffect(() => {
@@ -409,11 +412,11 @@ const ModularSearchBarHandler = (props) => {
 
 			if (rowType) {
 				trackEvent(
-					getTrackingNameForFactory(state.cloneData),
+					trackingCategory,
 					'SearchSuggestionSelected',
 					rowType,
 					null,
-					makeCustomDimensions(text)
+					CustomDimensions.create(true, text)
 				);
 			}
 		};
@@ -437,6 +440,7 @@ const ModularSearchBarHandler = (props) => {
 		presearchTopic,
 		presearchOrg,
 		setDataRows,
+		trackingCategory,
 	]);
 
 	const noResults = Boolean(state.rawSearchResults?.length === 0);
