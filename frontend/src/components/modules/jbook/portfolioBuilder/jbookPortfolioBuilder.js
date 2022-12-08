@@ -299,7 +299,7 @@ const PortfolioBuilder = (props) => {
 								<ul>
 									<li>Create a new portfolio</li>
 									<li>Define a portfolio description</li>
-									<li>Upload a portfolio ontology</li>
+									{/* <li>Upload a portfolio ontology</li> */}
 									<li>Create tags/labels for use within the portfolio</li>
 									<li>Set user permissions</li>
 									<li>View all portfolios</li>
