@@ -1,7 +1,7 @@
 import React from 'react';
 import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
-import { makeCustomDimensions } from '../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../telemetry/utils';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { DidYouMean } from '../searchBar/SearchBarStyledComponents';
 import MagellanTrendingLinkList from '../common/MagellanTrendingLinkList';
@@ -14,7 +14,7 @@ export const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
 		'SuggestionSelected',
 		'DidYouMean',
 		null,
-		makeCustomDimensions(didYouMean)
+		CustomDimensions.create(true, didYouMean)
 	);
 	setState(dispatch, { searchText: didYouMean, runSearch: true });
 };

@@ -6,7 +6,7 @@ import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
 import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import { makeCustomDimensions } from '../../telemetry/utils/customDimensions';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const trackingAction = 'ResponsibilityExplorer-DocumentResults';
 
@@ -33,7 +33,7 @@ export default function GCResponsibilityResults({
 			`${trackingAction}-Toggle${wasDocOpen ? 'Close' : 'Open'}`,
 			docName,
 			null,
-			makeCustomDimensions(null, null, idx)
+			CustomDimensions.create(true, null, null, idx)
 		);
 	};
 
@@ -43,7 +43,7 @@ export default function GCResponsibilityResults({
 			`${trackingAction}-ToggleResponsibility${wasOpen ? 'Close' : 'Open'}`,
 			entityText,
 			null,
-			makeCustomDimensions(doc, null, idx)
+			CustomDimensions.create(true, doc, null, idx)
 		);
 	};
 
@@ -102,7 +102,7 @@ export default function GCResponsibilityResults({
 															`${trackingAction}-InfoIconClick`,
 															doc,
 															null,
-															makeCustomDimensions(null, null, key)
+															CustomDimensions.create(true, null, null, key)
 														);
 														window.open(
 															`#/gamechanger?q=${responsibilityData[doc].entities[0].responsibilities[0].filename}&view=Explorer`
