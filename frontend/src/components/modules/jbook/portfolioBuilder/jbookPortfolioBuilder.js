@@ -302,7 +302,7 @@ const PortfolioBuilder = (props) => {
 									{/* <li>Upload a portfolio ontology</li> */}
 									<li>Create tags/labels for use within the portfolio</li>
 									<li>Set user permissions</li>
-									<li>View all portfolios</li>
+									<li>View all portfolios I have permission to access</li>
 								</ul>
 							</div>
 						</div>
