@@ -133,7 +133,7 @@ export default class SimpleTable extends React.Component {
 				{title && (
 					<tr>
 						<th colSpan={loading ? 1 : cols.length} style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
-							<Tooltip title={title.length > 255 ? `${title}` : ''} placement="top-start" arrow>
+							<Tooltip title={title.length > 100 ? `${title}` : ''} placement="top-start" arrow>
 								<p style={titleText}>{title}</p>
 							</Tooltip>
 						</th>
