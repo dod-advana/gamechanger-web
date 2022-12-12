@@ -5,6 +5,7 @@ const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
 const USER = require('../models').user;
 const FEEDBACK = require('../models').feedback;
+const CLONE_META = require('../models').clone_meta;
 const CRAWLER_INFO = require('../models').crawler_info;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { sendExcelFile } = require('../utils/sendFileUtility');
@@ -28,6 +29,7 @@ class AppStatsController {
 			sparkMD5 = sparkMD5Lib,
 			user = USER,
 			feedback = FEEDBACK,
+			clone_meta = CLONE_META,
 			crawlerInfo = CRAWLER_INFO,
 		} = opts;
 
@@ -39,6 +41,7 @@ class AppStatsController {
 		this.sparkMD5 = sparkMD5;
 		this.user = user;
 		this.feedback = feedback;
+		this.clone_meta = clone_meta;
 		this.crawlerInfo = crawlerInfo;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
@@ -665,7 +668,11 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const clones = await this.queryClones(connection, this.constants.MATOMO_CLONE_LIST);
+			const cloneList = await this.clone_meta.findAll({ raw: true }).then((c) => {
+				return c.map((clone) => `GAMECHANGER_${clone.clone_name}`);
+			});
+			cloneList.push('GlobalSearch');
+			const clones = await this.queryClones(connection, cloneList);
 			const defaultClone = await this.getDefualtClone(connection);
 			res.status(200).send({ clones: clones, default: defaultClone[0] });
 		} catch (err) {
