@@ -48,6 +48,7 @@ class SearchUtility {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
+		this.getDocOrgAndTypeCounts = this.getDocOrgAndTypeCounts.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
 		this.findAliases = this.findAliases.bind(this);
@@ -1534,6 +1535,22 @@ class SearchUtility {
 		}
 	}
 
+	cleanUpAggResults({ raw, user }) {
+		try {
+			let results = {};
+
+			const { body = {} } = raw;
+			const { aggregations = {} } = body;
+			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
+			results.doc_types = doc_type_aggs.buckets || [];
+			results.doc_orgs = doc_org_aggs.buckets || [];
+
+			return results;
+		} catch (err) {
+			this.logger.error(err.message, 'GL7EDI3', user);
+		}
+	}
+
 	highlight_keywords(all_words, highlights) {
 		// purpose is to highlight words from the entire list.
 		const resultHighlights = highlights.map(function (x) {
@@ -1760,6 +1777,42 @@ class SearchUtility {
 				index: esIndex,
 				query: esQuery,
 			});
+		}
+	}
+
+	async getDocOrgAndTypeCounts(_req, body, clientObj, userId) {
+		try {
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
+			body.searchTerms = searchTerms;
+			body.parsedQuery = parsedQuery;
+			let { esClientName, esIndex } = clientObj;
+
+			const sourceCountESQuery = this.getElasticsearchQuery({ ...body, orgFilterString: [], limit: 0 }, userId);
+			const sourceCountResults = await this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				JSON.stringify(sourceCountESQuery),
+				userId
+			);
+			const sourceCountAggs = this.cleanUpAggResults({ raw: sourceCountResults, user: userId }).doc_orgs;
+
+			const typeCountESQuery = this.getElasticsearchQuery({ ...body, typeFilterString: [], limit: 0 }, userId);
+			const typeCountResults = await this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				JSON.stringify(typeCountESQuery),
+				userId
+			);
+			const typeCountAggs = this.cleanUpAggResults({ raw: typeCountResults, user: userId }).doc_types;
+
+			return {
+				doc_orgs: sourceCountAggs,
+				doc_types: typeCountAggs,
+			};
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'WBJNDK3', userId);
+			throw e;
 		}
 	}
 
