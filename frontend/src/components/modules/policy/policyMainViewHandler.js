@@ -532,10 +532,19 @@ const renderHideTabs = (props) => {
 									marginTop: 8,
 								}}
 							>
-								<Typography style={styles.containerText}>
-									<i className="fa fa-search" style={{ marginRight: 12 }} />
-									{`   ${idx + 1}. ${search.length < 18 ? search : search.substring(0, 20) + '...'}`}
-								</Typography>
+								<GCTooltip title={search.length < 18 ? '' : search} placement="top" arrow>
+									<Typography
+										style={{
+											...styles.containerText,
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+										}}
+									>
+										<i className="fa fa-search" style={{ marginRight: 12 }} />
+										{`   ${idx + 1}. ${search}`}
+									</Typography>
+								</GCTooltip>
 							</div>
 						</TrendingSearchContainer>
 					))}
@@ -559,7 +568,7 @@ const renderHideTabs = (props) => {
 							}}
 						>
 							{item.name}
-							<i
+							{/* <i
 								className={item.favorite ? 'fa fa-star' : 'fa fa-star-o'}
 								style={{
 									color: item.favorite ? '#E9691D' : 'rgb(224,224,224)',
@@ -571,7 +580,7 @@ const renderHideTabs = (props) => {
 									event.stopPropagation();
 									handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
 								}}
-							/>
+							/> */}
 						</div>
 					))}
 				</GameChangerThumbnailRow>
@@ -739,7 +748,11 @@ const getExtraViewPanels = (props) => {
 		panel: (
 			<StyledCenterContainer showSideFilters={false}>
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
+					<ViewHeader
+						{...props}
+						extraStyle={{ margin: `20px 0 0 ${state.docsExplorerLeftPanelOpen ? '470' : '0'}px` }}
+						resultsText=" "
+					/>
 					<PolicyDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
 						totalCount={count}
@@ -1196,7 +1209,9 @@ const PolicyMainViewHandler = (props) => {
 	const getViewPanels = () => {
 		const viewPanels = { Card: getCardViewPanel({ context: { state, dispatch } }) };
 
-		const extraViewPanels = getExtraViewPanels({ context: { state, dispatch } });
+		const extraViewPanels = getExtraViewPanels({
+			context: { state, dispatch },
+		});
 		extraViewPanels.forEach(({ panelName, panel }) => {
 			viewPanels[panelName] = panel;
 		});

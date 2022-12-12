@@ -81,6 +81,10 @@ const useStyles = makeStyles({
 	titleText: {
 		fontSize: '14px',
 	},
+	checkboxText: {
+		fontSize: '14px',
+		textAlign: 'left',
+	},
 	tipText: {
 		maxWidth: '250px',
 		width: '250px',

@@ -5,6 +5,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
 import styled from 'styled-components';
+import { trackEvent } from '../../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 
 const AccordianWrapper = styled.div`
 	.MuiAccordionSummary-root {
@@ -28,6 +30,8 @@ const useStyles = makeStyles({
 	},
 });
 
+const trackingAction = 'ResponsibilityExplorer-FilterChange';
+
 export default function ResponsibilityFilters({
 	filters,
 	documentList,
@@ -41,8 +45,22 @@ export default function ResponsibilityFilters({
 	setResultsPage,
 	setReloadResponsibilities,
 	setCollapseKeys,
+	cloneData,
 }) {
 	const [clearFilters, setClearFilters] = useState(false);
+
+	const handleRespFilterChange = (e) => {
+		if (e.target.value) {
+			setResponsibilityText({
+				id: 'responsibilityText',
+				value: e.target.value,
+			});
+		} else {
+			setResponsibilityText({});
+		}
+	};
+
+	const trackingCategory = getTrackingNameForFactory(cloneData.clone_name);
 
 	const classes = useStyles();
 
@@ -77,6 +95,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={documentList}
+								disableClearable
 								getOptionLabel={(option) => option.documentTitle}
 								defaultValue={docTitle}
 								onChange={(_event, newValue) => {
@@ -97,13 +116,15 @@ export default function ResponsibilityFilters({
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<AccordianWrapper>
 						<GCAccordion
-							expanded={filters.find((filter) => filter.id === 'organizationPersonnel') ? true : false}
+							expanded={
+								filters.find((filter) => filter.id === 'organizationPersonnelText') ? true : false
+							}
 							header={
 								<span>
 									ENTITY{' '}
-									{filters.filter((f) => f.id === 'organizationPersonnel').length ? (
+									{filters.filter((f) => f.id === 'organizationPersonnelText').length ? (
 										<span style={{ color: '#ed691d' }}>{`(${
-											filters.filter((f) => f.id === 'organizationPersonnel').length
+											filters.filter((f) => f.id === 'organizationPersonnelText').length
 										})`}</span>
 									) : (
 										''
@@ -119,6 +140,7 @@ export default function ResponsibilityFilters({
 								key={clearFilters}
 								multiple
 								options={[]}
+								disableClearable
 								freeSolo
 								autoSelect
 								getOptionLabel={(option) => option}
@@ -165,12 +187,7 @@ export default function ResponsibilityFilters({
 									variant="outlined"
 									placeholder="Responsibility Text"
 									value={responsibilityText?.value || ''}
-									onChange={(e) =>
-										setResponsibilityText({
-											id: 'responsibilityText',
-											value: e.target.value,
-										})
-									}
+									onChange={handleRespFilterChange}
 								/>
 							</div>
 						</GCAccordion>
@@ -184,6 +201,7 @@ export default function ResponsibilityFilters({
 							setFilters([]);
 							setResultsPage(1);
 							setReloadResponsibilities(true);
+							trackEvent(trackingCategory, trackingAction, 'onClickClearFiltersButton');
 						}}
 						style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
 						isSecondaryBtn
@@ -196,7 +214,7 @@ export default function ResponsibilityFilters({
 							if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 							if (organization.length) {
 								organization.forEach((org) => {
-									newFilters.push({ id: 'organizationPersonnel', value: org });
+									newFilters.push({ id: 'organizationPersonnelText', value: org });
 								});
 							}
 							if (docTitle.length) {
@@ -208,6 +226,12 @@ export default function ResponsibilityFilters({
 							setFilters(newFilters);
 							setResultsPage(1);
 							setReloadResponsibilities(true);
+
+							let eventName = newFilters
+								.map((item) => `category:${item.id}, value:${item.value}`)
+								.join(' -- ');
+							!eventName && (eventName = 'filtersEmpty');
+							trackEvent(trackingCategory, trackingAction, eventName);
 						}}
 						style={{ display: 'block', width: '100%', margin: 0 }}
 					>

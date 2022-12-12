@@ -49,10 +49,10 @@ export const handleSearchTypeUpdate = ({ value = SEARCH_TYPES.keyword }, dispatc
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
 	});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', 'value', value);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', value);
 };
 
-export const createCopyTinyUrl = (toolUrl, dispatch) => {
+export const createCopyTinyUrl = (toolUrl, dispatch, cloneName) => {
 	let url = window.location.hash.toString();
 	url = url.replace('#/', '');
 	gameChangerAPI.shortenSearchURLPOST(url).then((res) => {
@@ -70,6 +70,7 @@ export const createCopyTinyUrl = (toolUrl, dispatch) => {
 				showSnackbar: true,
 				snackBarMsg: 'Link copied to clipboard',
 			});
+			trackEvent(cloneName, 'CopyLinkForShare', url);
 		} catch (err) {
 			console.log(err);
 		}
@@ -271,44 +272,46 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 					/>
 				)}
 				<React.Fragment>
-					{state.pageDisplayed !== 'aboutUs' && state.pageDisplayed !== 'faq' && (
-						<Button
-							style={{
-								marginLeft: '10px',
-								marginTop: '8px',
-								fontFamily: 'Montserrat',
-								color: '#313541',
-								position: 'absolute',
-							}}
-							startIcon={<ArrowBackIcon />}
-							onClick={() => {
-								window.history.pushState(
-									null,
-									document.title,
-									`/#/${state.cloneData.url.toLowerCase()}`
-								);
-								setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
-								let viewName;
-								switch (state.pageDisplayed) {
-									case PAGE_DISPLAYED.dataTracker:
-										viewName = 'DataTracker';
-										break;
-									case PAGE_DISPLAYED.userDashboard:
-										viewName = 'UserDashboard';
-										break;
-									case PAGE_DISPLAYED.analystTools:
-										viewName = 'AnalystTools';
-										break;
-									default:
-										viewName = 'Main';
-										break;
-								}
-								trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
-							}}
-						>
-							<></>
-						</Button>
-					)}
+					{state.pageDisplayed !== 'aboutUs' &&
+						state.pageDisplayed !== 'faq' &&
+						state.pageDisplayed !== 'userDashboard' && (
+							<Button
+								style={{
+									marginLeft: '10px',
+									marginTop: '8px',
+									fontFamily: 'Montserrat',
+									color: '#313541',
+									position: 'absolute',
+								}}
+								startIcon={<ArrowBackIcon />}
+								onClick={() => {
+									window.history.pushState(
+										null,
+										document.title,
+										`/#/${state.cloneData.url.toLowerCase()}`
+									);
+									setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.main });
+									let viewName;
+									switch (state.pageDisplayed) {
+										case PAGE_DISPLAYED.dataTracker:
+											viewName = 'DataTracker';
+											break;
+										case PAGE_DISPLAYED.userDashboard:
+											viewName = 'UserDashboard';
+											break;
+										case PAGE_DISPLAYED.analystTools:
+											viewName = 'AnalystTools';
+											break;
+										default:
+											viewName = 'Main';
+											break;
+									}
+									trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), viewName, 'Back');
+								}}
+							>
+								<></>
+							</Button>
+						)}
 					<div>
 						<p
 							style={{
@@ -328,6 +331,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 								</span>
 							)}
 							{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
+							{state.pageDisplayed === PAGE_DISPLAYED.portfolio && <span>Portfolio Builder</span>}
 						</p>
 					</div>
 

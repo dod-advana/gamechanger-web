@@ -49,6 +49,152 @@ const defaultIframPreviewLink = {
 	responsibilityIdx: 0,
 };
 
+const PanelArrowIcon = ({ leftFacing }) => {
+	return (
+		<i
+			className={`fa ${leftFacing ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
+			style={{
+				color: 'white',
+				verticalAlign: 'sub',
+				height: 20,
+				width: 20,
+				margin: '20px 0 20px 2px',
+			}}
+		/>
+	);
+};
+
+const EntityResult = ({
+	setCollapseKeys,
+	collapseKeys,
+	doc,
+	entity,
+	docOpen,
+	responsibilityData,
+	iframePreviewLink,
+	docKey,
+	handleQuoteLinkClick,
+	entKey,
+}) => {
+	const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
+	return (
+		<>
+			<div
+				className="searchdemo-modal-result-header"
+				onClick={() => {
+					setCollapseKeys({
+						...collapseKeys,
+						[doc + entity]: !entOpen,
+					});
+				}}
+				style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
+			>
+				<i
+					style={{
+						marginRight: entOpen ? 10 : 14,
+						fontSize: 20,
+						cursor: 'pointer',
+					}}
+					className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
+				/>
+				<span className="gc-document-explorer-result-header-text">{entity}</span>
+			</div>
+			<Collapse isOpened={entOpen && docOpen}>
+				<div>
+					{responsibilityData[doc][entity].map((responsibility, respKey) => {
+						let isHighlighted = false;
+						const pageObj = responsibilityData?.[doc]?.[entity][iframePreviewLink.entityIdx];
+						if (pageObj) {
+							const selectedDoc = Object.keys(responsibilityData)[iframePreviewLink.dataIdx];
+							let selectedEntity;
+							if (responsibilityData[selectedDoc])
+								selectedEntity =
+									Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx] ===
+									'NO ENTITY'
+										? null
+										: Object.keys(responsibilityData[selectedDoc])[iframePreviewLink.entityIdx];
+							isHighlighted =
+								selectedDoc === responsibility.documentTitle &&
+								selectedEntity === responsibility.organizationPersonnelText &&
+								respKey === iframePreviewLink.responsibilityIdx;
+						}
+
+						let blockquoteClass = 'searchdemo-blockquote-sm';
+
+						if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
+						return (
+							<div key={docKey + respKey} style={{ position: 'relative' }}>
+								<div
+									className="searchdemo-quote-link"
+									onClick={() => {
+										handleQuoteLinkClick(respKey, entKey, docKey);
+									}}
+								>
+									<div className={blockquoteClass} style={{ marginLeft: 40 }}>
+										<span>{responsibility.responsibilityText}</span>
+									</div>
+								</div>
+								{isHighlighted && <span className="searchdemo-arrow-right-sm"></span>}
+							</div>
+						);
+					})}
+				</div>
+			</Collapse>
+		</>
+	);
+};
+
+const DocumentResult = ({
+	docKey,
+	setCollapseKeys,
+	collapseKeys,
+	doc,
+	responsibilityData,
+	iframePreviewLink,
+	handleQuoteLinkClick,
+}) => {
+	const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
+
+	return (
+		<div key={docKey}>
+			<div
+				className="searchdemo-modal-result-header"
+				onClick={() => {
+					setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
+				}}
+			>
+				<i
+					style={{
+						marginRight: docOpen ? 10 : 14,
+						fontSize: 20,
+						cursor: 'pointer',
+					}}
+					className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
+				/>
+				<span className="gc-document-explorer-result-header-text">{doc}</span>
+			</div>
+			<Collapse isOpened={docOpen}>
+				{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
+					return (
+						<EntityResult
+							setCollapseKeys={setCollapseKeys}
+							collapseKeys={collapseKeys}
+							doc={doc}
+							entity={entity}
+							docOpen={docOpen}
+							responsibilityData={responsibilityData}
+							iframePreviewLink={iframePreviewLink}
+							docKey={docKey}
+							handleQuoteLinkClick={handleQuoteLinkClick}
+							entKey={entKey}
+						/>
+					);
+				})}
+			</Collapse>
+		</div>
+	);
+};
+
 export default function ResponsibilityUpdates() {
 	const DOCS_PER_PAGE = 3;
 
@@ -215,7 +361,7 @@ export default function ResponsibilityUpdates() {
 		const groupedData = {};
 		data.forEach((responsibility) => {
 			const doc = responsibility.documentTitle;
-			let entity = responsibility.organizationPersonnel;
+			let entity = responsibility.organizationPersonnelText;
 			if (!entity) entity = 'NO ENTITY';
 			if (!groupedData[doc]) groupedData[doc] = {};
 			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];
@@ -277,10 +423,7 @@ export default function ResponsibilityUpdates() {
 		setLeftPanelOpen(!leftPanelOpen);
 	}
 
-	// This toggles whether the Document Header texts are open or not by setting collapseKeys
-
-	function handleQuoteLinkClick(e, respKey, entKey, key) {
-		e.preventDefault();
+	function handleQuoteLinkClick(respKey, entKey, key) {
 		setIframePreviewLink({
 			responsibilityIdx: respKey,
 			entityIdx: entKey,
@@ -299,7 +442,7 @@ export default function ResponsibilityUpdates() {
 		const keyMap = {
 			filename: 'File Name',
 			documentTitle: 'Document Title',
-			organizationPersonnel: 'Organization/Personnel',
+			organizationPersonnelText: 'Organization/Personnel',
 			responsibilityText: 'Responsibility Text',
 		};
 		const metaData = [];
@@ -414,8 +557,9 @@ export default function ResponsibilityUpdates() {
 		return metaData;
 	};
 
-	const iframePanelSize =
-		12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+	const getIframePanelSize = () => {
+		return 12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+	};
 
 	let leftBarExtraStyles = {};
 	let rightBarExtraStyles = { right: 0 };
@@ -483,150 +627,21 @@ export default function ResponsibilityUpdates() {
 					)}
 					{!loading &&
 						_.map(Object.keys(responsibilityData), (doc, key) => {
-							const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
-							const displayTitle = doc;
 							return (
-								<div key={key}>
-									<div
-										className="searchdemo-modal-result-header"
-										onClick={(e) => {
-											e.preventDefault();
-											setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
-										}}
-									>
-										<i
-											style={{
-												marginRight: docOpen ? 10 : 14,
-												fontSize: 20,
-												cursor: 'pointer',
-											}}
-											className={`fa fa-caret-${docOpen ? 'down' : 'right'}`}
-										/>
-										<span className="gc-document-explorer-result-header-text">{displayTitle}</span>
-									</div>
-									<Collapse isOpened={docOpen}>
-										{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
-											const entOpen = collapseKeys[doc + entity]
-												? collapseKeys[doc + entity]
-												: false;
-											return (
-												<>
-													<div
-														className="searchdemo-modal-result-header"
-														onClick={(e) => {
-															e.preventDefault();
-															setCollapseKeys({
-																...collapseKeys,
-																[doc + entity]: !entOpen,
-															});
-														}}
-														style={{ marginLeft: 20, backgroundColor: '#eceff1' }}
-													>
-														<i
-															style={{
-																marginRight: entOpen ? 10 : 14,
-																fontSize: 20,
-																cursor: 'pointer',
-															}}
-															className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
-														/>
-														<span className="gc-document-explorer-result-header-text">
-															{entity}
-														</span>
-													</div>
-													<Collapse isOpened={entOpen && docOpen}>
-														<div>
-															{responsibilityData[doc][entity].map(
-																(responsibility, respKey) => {
-																	let isHighlighted = false;
-																	const dataObj = responsibilityData[doc];
-																	if (dataObj) {
-																		const pageObj =
-																			responsibilityData[doc][entity][
-																				iframePreviewLink.entityIdx
-																			];
-																		if (pageObj) {
-																			const selectedDoc =
-																				Object.keys(responsibilityData)[
-																					iframePreviewLink.dataIdx
-																				];
-																			let selectedEntity;
-																			if (responsibilityData[selectedDoc])
-																				selectedEntity =
-																					Object.keys(
-																						responsibilityData[selectedDoc]
-																					)[iframePreviewLink.entityIdx] ===
-																					'NO ENTITY'
-																						? null
-																						: Object.keys(
-																								responsibilityData[
-																									selectedDoc
-																								]
-																						  )[
-																								iframePreviewLink
-																									.entityIdx
-																						  ];
-																			isHighlighted =
-																				selectedDoc ===
-																					responsibility.documentTitle &&
-																				selectedEntity ===
-																					responsibility.organizationPersonnel &&
-																				respKey ===
-																					iframePreviewLink.responsibilityIdx;
-																		}
-																	}
-
-																	let blockquoteClass = 'searchdemo-blockquote-sm';
-
-																	if (isHighlighted)
-																		blockquoteClass +=
-																			' searchdemo-blockquote-sm-active';
-																	return (
-																		<div
-																			key={key + respKey}
-																			style={{ position: 'relative' }}
-																		>
-																			<div
-																				className="searchdemo-quote-link"
-																				onClick={(e) => {
-																					handleQuoteLinkClick(
-																						e,
-																						respKey,
-																						entKey,
-																						key
-																					);
-																				}}
-																			>
-																				<div
-																					className={blockquoteClass}
-																					style={{ marginLeft: 40 }}
-																				>
-																					<span>
-																						{
-																							responsibility.responsibilityText
-																						}
-																					</span>
-																				</div>
-																			</div>
-																			{isHighlighted && (
-																				<span className="searchdemo-arrow-right-sm"></span>
-																			)}
-																		</div>
-																	);
-																}
-															)}
-														</div>
-													</Collapse>
-												</>
-											);
-										})}
-									</Collapse>
-								</div>
+								<DocumentResult
+									docKey={key}
+									setCollapseKeys={setCollapseKeys}
+									collapseKeys={collapseKeys}
+									doc={doc}
+									responsibilityData={responsibilityData}
+									iframePreviewLink={iframePreviewLink}
+									handleQuoteLinkClick={handleQuoteLinkClick}
+								/>
 							);
 						})}
 				</div>
 				<div
-					className={`col-xs-${iframePanelSize}`}
+					className={`col-xs-${getIframePanelSize()}`}
 					style={{ paddingLeft: 0, paddingRight: 0, height: 800, position: 'relative' }}
 				>
 					<div
@@ -642,27 +657,9 @@ export default function ResponsibilityUpdates() {
 							style={{ ...leftBarExtraStyles, bottom: '0px' }}
 							onClick={() => handleLeftPanelToggle()}
 						>
-							<i
-								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
+							<PanelArrowIcon leftFacing={leftPanelOpen} />
 							<span>{leftPanelOpen ? 'Hide' : 'Show'} Search Results</span>
-							<i
-								className={`fa ${leftPanelOpen ? 'fa-rotate-270' : 'fa-rotate-90'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
+							<PanelArrowIcon leftFacing={leftPanelOpen} />
 						</div>
 						<div
 							style={{
@@ -699,27 +696,9 @@ export default function ResponsibilityUpdates() {
 							style={{ ...rightBarExtraStyles, bottom: '0px', zIndex: 100 }}
 							onClick={() => handleRightPanelToggle()}
 						>
-							<i
-								className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
+							<PanelArrowIcon leftFacing={!rightPanelOpen} />
 							<span>{rightPanelOpen ? 'Hide' : 'Show'} Metadata</span>
-							<i
-								className={`fa ${rightPanelOpen ? 'fa-rotate-90' : 'fa-rotate-270'} fa-angle-double-up`}
-								style={{
-									color: 'white',
-									verticalAlign: 'sub',
-									height: 20,
-									width: 20,
-									margin: '20px 0 20px 2px',
-								}}
-							/>
+							<PanelArrowIcon leftFacing={!rightPanelOpen} />
 						</div>
 					</div>
 				</div>

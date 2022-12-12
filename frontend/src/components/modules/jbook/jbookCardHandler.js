@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import { CARD_FONT_SIZE, getTrackingNameForFactory, encode } from '../../../utils/gamechangerUtils';
 import { primary } from '../../common/gc-colors';
 import { CardButton } from '../../common/CardButton';
@@ -23,6 +23,7 @@ import {
 	StyledListViewFrontCardContent,
 	RevokedTag,
 } from '../default/defaultCardHandler';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
@@ -129,7 +130,7 @@ const StyledFrontCardHeader = styled.div`
 		.title-text {
 			cursor: pointer;
 			display: ${({ docListView }) => (docListView ? 'flex' : '')};
-			alignitems: ${({ docListView }) => (docListView ? 'top' : '')};
+			align-items: ${({ docListView }) => (docListView ? 'top' : '')};
 			height: ${({ docListView }) => (docListView ? 'fit-content' : '')};
 
 			.text {
@@ -205,6 +206,7 @@ const metadataNameToSearchFilterName = {
 	'Budget Year (FY)': 'budgetYear',
 	'Program Element': 'programElement',
 	'Project Number': 'projectNum',
+	'Budget Line Item': 'budgetLineItem',
 	Project: 'projectTitle',
 	Keywords: 'hasKeywords',
 	'Total Cost': ['minTotalCost', 'maxTotalCost'],
@@ -240,9 +242,13 @@ const clickFn = (cloneName, searchText, item, portfolioName) => {
 };
 
 const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen',
+		null,
+		CustomDimensions.create(true, filename, pageNumber)
+	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 	);
@@ -308,6 +314,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 			Key: 'Project Number',
 			Value: budgetType === 'ODOC' ? projectData.budgetLineItem : projectData.projectNum,
 			Hidden: budgetType === 'PDOC',
+		},
+		{
+			Key: 'Budget Line Item',
+			Value: projectData.budgetLineItem,
+			Hidden: budgetType !== 'PDOC',
 		},
 		{
 			Key: 'Budget Year 1 Requested',
@@ -483,6 +494,15 @@ const isSearchFilterModified = (modifiedSearchSettings, metadataName) => {
 */
 const sortMetadataByAppliedSearchFilters = (modifiedSearchSettings) => {
 	return (a, b) => {
+		if (modifiedSearchSettings.includes('programElement') && !modifiedSearchSettings.includes('budgetLineItem')) {
+			modifiedSearchSettings.push('budgetLineItem');
+		}
+		if (
+			!modifiedSearchSettings.includes('programElement') &&
+			modifiedSearchSettings.indexOf('budgetLineItem') !== -1
+		) {
+			modifiedSearchSettings.splice(modifiedSearchSettings.indexOf('budgetLineItem'), 1);
+		}
 		const metadataNames = Object.keys(metadataNameToSearchFilterName);
 		if (!metadataNames.includes(a.Key) && !metadataNames.includes(b.Key)) return 0;
 
@@ -1034,12 +1054,7 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
+							trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 							setToggledMore(!toggledMore);
 						}}
 					>

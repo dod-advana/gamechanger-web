@@ -5,6 +5,8 @@ import SearchTabBar from '../globalSearch/SearchTabBar';
 import { getTitleBarStyle, styles } from '../default/defaultTitleBarHandler';
 import PropTypes from 'prop-types';
 import AdvanaMegaMenuPill from '@dod-advana/advana-platform-ui/dist/megamenu/AdvanaMegaMenuPill';
+import { trackEvent } from '../../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 
 const getTitleBar = (props) => {
 	const { onTitleClick, componentStepNumbers } = props;
@@ -43,6 +45,7 @@ const getCategoryTabs = (props) => {
 						setActiveTab: setActiveCategoryTab,
 						resultMetaData: categoryMetadata,
 						returnHome: () => {
+							trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'ReturnToHome', 'onClick');
 							window.location.href = `/#/${cloneData.clone_name}`;
 							dispatch({ type: 'RESET_STATE' });
 						},
