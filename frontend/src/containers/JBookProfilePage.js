@@ -1258,14 +1258,6 @@ const JBookProfilePage = () => {
 					<JBookSimpleReviewForm
 						renderReenableModal={renderReenableModal}
 						reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										permissions.is_primary_reviewer &&
-										Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
-								  )
-						}
 						finished={reviewData.primaryReviewStatus === 'Finished Review'}
 						submitReviewForm={submitReviewForm}
 						setReviewDataMultiple={setReviewDataMultiple}
