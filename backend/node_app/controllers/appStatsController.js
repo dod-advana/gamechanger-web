@@ -38,8 +38,7 @@ class AppStatsController {
 		this.sparkMD5 = sparkMD5;
 		this.user = user;
 		this.feedback = feedback;
-		this.clone_meta = clone_meta,
-		this.getAppStats = this.getAppStats.bind(this);
+		(this.clone_meta = clone_meta), (this.getAppStats = this.getAppStats.bind(this));
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.exportUserData = this.exportUserData.bind(this);
 		this.getClones = this.getClones.bind(this);
@@ -663,10 +662,10 @@ class AppStatsController {
 			});
 			connection.connect();
 			const cloneList = await this.clone_meta.findAll({ raw: true }).then((c) => {
-				return c.map( clone => `GAMECHANGER_${clone.clone_name}`)
-			})
+				return c.map((clone) => `GAMECHANGER_${clone.clone_name}`);
+			});
 			cloneList.push('GlobalSearch');
-			const clones = await this.queryClones(connection, cloneList)
+			const clones = await this.queryClones(connection, cloneList);
 			const defaultClone = await this.getDefualtClone(connection);
 			res.status(200).send({ clones: clones, default: defaultClone[0] });
 		} catch (err) {
