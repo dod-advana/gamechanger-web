@@ -60,7 +60,7 @@ class PolicySearchHandler extends SearchHandler {
 		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, true); // TODO: link last param to frontend
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
@@ -274,7 +274,7 @@ class PolicySearchHandler extends SearchHandler {
 		return abbreviationExpansions;
 	}
 
-	async doSearch(req, expansionDict, clientObj, userId) {
+	async doSearch(req, expansionDict, clientObj, userId, fromRefreshOrLink = false) {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
@@ -287,6 +287,20 @@ class PolicySearchHandler extends SearchHandler {
 				clientObj,
 				userId
 			);
+
+			if (fromRefreshOrLink) {
+				const aggregations = await this.searchUtility.getDocOrgAndTypeCounts(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+				searchResults = {
+					...searchResults,
+					...aggregations,
+				};
+			}
+
 			// insert crawler dates into search results
 			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
 			return searchResults;
