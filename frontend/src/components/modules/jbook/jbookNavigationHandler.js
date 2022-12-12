@@ -15,6 +15,7 @@ import { setState } from '../../../utils/sharedFunctions';
 import UserFeedbackIcon from '../../../images/icon/userfeedback.png';
 // eslint-disable-next-line no-unused-vars
 import UserIcon from '../../../images/icon/UserIcon.png';
+import FolderIcon from '@mui/icons-material/Folder';
 import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuContent';
 import { SlideOutToolContext } from '@dod-advana/advana-side-nav/dist/SlideOutMenuContext';
 import PropTypes from 'prop-types';
@@ -126,6 +127,18 @@ const generateClosedContentArea = (state, dispatch) => {
 					</PageLink>
 				</GCTooltip>
 			)}
+			<GCTooltip title="Portfolio Builder" placement="right" arrow>
+				<HoverNavItem
+					centered
+					onClick={() => {
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.portfolio });
+					}}
+					active={state.pageDisplayed === PAGE_DISPLAYED.portfolio}
+					toolTheme={toolTheme}
+				>
+					<FolderIcon style={{ fontSize: 30 }} />
+				</HoverNavItem>
+			</GCTooltip>
 			<GCTooltip title="User Guide" placement="right" arrow>
 				<a
 					href="https://wiki.advana.data.mil/display/SDKB/JBOOK+Search+Training+Resources"
@@ -213,6 +226,18 @@ const generateOpenedContentArea = (state, dispatch) => {
 					</PageLink>
 				</GCTooltip>
 			)}
+			<GCTooltip title="Portfolio Builder" placement="right" arrow>
+				<HoverNavItem
+					onClick={() => {
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.portfolio });
+					}}
+					active={state.pageDisplayed === PAGE_DISPLAYED.portfolio}
+					toolTheme={toolTheme}
+				>
+					<FolderIcon style={{ fontSize: 30 }} />
+					<span style={{ marginLeft: '10px' }}>Portfolio Builder</span>
+				</HoverNavItem>
+			</GCTooltip>
 			<GCTooltip title="User Guide" placement="right" arrow>
 				<a
 					href="https://wiki.advana.data.mil/display/SDKB/GAMECHANGER+Training+Resources"

@@ -1,3 +1,18 @@
 .ReactTable .rt-tbody {
   overflow: overlay;
 }
+
+.ReactTable .rt-thead .rt-resizable-header-content {
+    white-space: normal !important;
+}
+
+.source-interaction-row {
+  white-space: normal;
+}
+
+.source-interaction-bullet {
+    text-align: left;
+    text-indent: 20px;
+    white-space: normal;
+}
+

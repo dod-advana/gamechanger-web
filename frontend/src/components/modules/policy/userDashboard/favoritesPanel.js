@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Config from '../../../../config/config';
+// import Config from '../../../../config/config';
 import GCAccordion from '../../../common/GCAccordion';
 import { gcOrange } from '../../../common/gc-colors';
 import _ from 'lodash';
@@ -33,19 +33,19 @@ const FavoritesPanel = ({
 	setFavoriteSearchesSlice,
 	documentGroups,
 }) => {
-	const [topicFavoritesPage, setTopicFavoritesPage] = useState(1);
-	const [organizationFavoritesPage, setOrganizationFavoritesPage] = useState(1);
+	// const [topicFavoritesPage, setTopicFavoritesPage] = useState(1);
+	// const [organizationFavoritesPage, setOrganizationFavoritesPage] = useState(1);
 
-	const [favoriteTopicsLoading, setFavoriteTopicsLoading] = useState(false);
+	// const [favoriteTopicsLoading, setFavoriteTopicsLoading] = useState(false);
 
-	const [topicFavoritesTotalCount, setTopicFavoritesTotalCount] = useState(0);
-	const [favoriteTopics, setFavoriteTopics] = useState([]);
-	const [favoriteTopicsSlice, setFavoriteTopicsSlice] = useState([]);
+	// const [topicFavoritesTotalCount, setTopicFavoritesTotalCount] = useState(0);
+	// const [favoriteTopics, setFavoriteTopics] = useState([]);
+	// const [favoriteTopicsSlice, setFavoriteTopicsSlice] = useState([]);
 
-	const [favoriteOrganizationsLoading, setFavoriteOrganizationsLoading] = useState(false);
-	const [organizationFavoritesTotalCount, setOrganizationFavoritesTotalCount] = useState(0);
-	const [favoriteOrganizations, setFavoriteOrganizations] = useState([]);
-	const [favoriteOrganizationsSlice, setFavoriteOrganizationsSlice] = useState([]);
+	// const [favoriteOrganizationsLoading, setFavoriteOrganizationsLoading] = useState(false);
+	// const [organizationFavoritesTotalCount, setOrganizationFavoritesTotalCount] = useState(0);
+	// const [favoriteOrganizations, setFavoriteOrganizations] = useState([]);
+	// const [favoriteOrganizationsSlice, setFavoriteOrganizationsSlice] = useState([]);
 
 	const [favoriteSearchesLoading, setFavoriteSearchesLoading] = useState(true);
 	const [searchFavoritesPage, setSearchFavoritesPage] = useState(1);
@@ -87,226 +87,226 @@ const FavoritesPanel = ({
 			setFavoriteDocumentsLoading(false);
 		}
 
-		if (userData.favorite_topics) {
-			setFavoriteTopics(userData.favorite_topics);
-			setTopicFavoritesTotalCount(userData.favorite_topics ? userData.favorite_topics.length : 0);
-			setFavoriteTopicsSlice(userData.favorite_topics.slice(0, RESULTS_PER_PAGE));
-			setFavoriteTopicsLoading(false);
-		}
+		// if (userData.favorite_topics) {
+		// 	setFavoriteTopics(userData.favorite_topics);
+		// 	setTopicFavoritesTotalCount(userData.favorite_topics ? userData.favorite_topics.length : 0);
+		// 	setFavoriteTopicsSlice(userData.favorite_topics.slice(0, RESULTS_PER_PAGE));
+		// 	setFavoriteTopicsLoading(false);
+		// }
 
-		if (userData.favorite_organizations) {
-			setFavoriteOrganizations(userData.favorite_organizations);
-			setOrganizationFavoritesTotalCount(
-				userData.favorite_organizations ? userData.favorite_organizations.length : 0
-			);
-			setFavoriteOrganizationsSlice(userData.favorite_organizations.slice(0, RESULTS_PER_PAGE));
-			setFavoriteOrganizationsLoading(false);
-		}
+		// if (userData.favorite_organizations) {
+		// 	setFavoriteOrganizations(userData.favorite_organizations);
+		// 	setOrganizationFavoritesTotalCount(
+		// 		userData.favorite_organizations ? userData.favorite_organizations.length : 0
+		// 	);
+		// 	setFavoriteOrganizationsSlice(userData.favorite_organizations.slice(0, RESULTS_PER_PAGE));
+		// 	setFavoriteOrganizationsLoading(false);
+		// }
 	}, [userData, cloneData.clone_name, cloneData.url, setFavoriteSearchesSlice]);
 
-	const handleDeleteFavoriteTopic = async (idx) => {
-		favoriteTopicsSlice[idx].favorite = false;
-		handleFavoriteTopic(favoriteTopicsSlice[idx]);
-		updateUserData();
-	};
+	// const handleDeleteFavoriteTopic = async (idx) => {
+	// 	favoriteTopicsSlice[idx].favorite = false;
+	// 	handleFavoriteTopic(favoriteTopicsSlice[idx]);
+	// 	updateUserData();
+	// };
 
-	const renderFavoriteTopicCard = (topic, idx) => {
-		const toggleActive = () => {
-			topic.active = !topic.active;
-		};
+	// const renderFavoriteTopicCard = (topic, idx) => {
+	// 	const toggleActive = () => {
+	// 		topic.active = !topic.active;
+	// 	};
 
-		const createdDate = moment(Date.parse(topic.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
+	// 	const createdDate = moment(Date.parse(topic.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
-		const searchDetails = (
-			<div className={'stats-details'}>
-				<div className={'favorited-date'}>{createdDate}</div>
-				<div className={'stats-details-stat-div'}>
-					<GCTooltip title={'The number of times this topic has been favorited by others'} placement="top">
-						<div className={'stats-stat'}>
-							<span className={'stats-text'}>{topic.favorited}</span>
-							<Icon className="fa fa-heart-o" />
-						</div>
-					</GCTooltip>
-					<GCTooltip title={'Click to see comments'} placement="top">
-						<div className={'stats-comment'}>
-							<Icon
-								className="fa fa-comment"
-								onClick={() => {
-									toggleActive();
-									setReload(!reload);
-								}}
-							/>
-						</div>
-					</GCTooltip>
-				</div>
-			</div>
-		);
+	// 	const searchDetails = (
+	// 		<div className={'stats-details'}>
+	// 			<div className={'favorited-date'}>{createdDate}</div>
+	// 			<div className={'stats-details-stat-div'}>
+	// 				<GCTooltip title={'The number of times this topic has been favorited by others'} placement="top">
+	// 					<div className={'stats-stat'}>
+	// 						<span className={'stats-text'}>{topic.favorited}</span>
+	// 						<Icon className="fa fa-heart-o" />
+	// 					</div>
+	// 				</GCTooltip>
+	// 				<GCTooltip title={'Click to see comments'} placement="top">
+	// 					<div className={'stats-comment'}>
+	// 						<Icon
+	// 							className="fa fa-comment"
+	// 							onClick={() => {
+	// 								toggleActive();
+	// 								setReload(!reload);
+	// 							}}
+	// 						/>
+	// 					</div>
+	// 				</GCTooltip>
+	// 			</div>
+	// 		</div>
+	// 	);
 
-		return (
-			<FavoriteCard
-				key={`topic-favorite-${idx}`}
-				favoriteObject={topic}
-				favoriteType={'topic'}
-				handleDeleteFavorite={handleDeleteFavoriteTopic}
-				details={searchDetails}
-				reload={reload}
-				setReload={setReload}
-				idx={idx}
-				toggleActive={toggleActive}
-				cloneData={cloneData}
-			/>
-		);
-	};
+	// 	return (
+	// 		<FavoriteCard
+	// 			key={`topic-favorite-${idx}`}
+	// 			favoriteObject={topic}
+	// 			favoriteType={'topic'}
+	// 			handleDeleteFavorite={handleDeleteFavoriteTopic}
+	// 			details={searchDetails}
+	// 			reload={reload}
+	// 			setReload={setReload}
+	// 			idx={idx}
+	// 			toggleActive={toggleActive}
+	// 			cloneData={cloneData}
+	// 		/>
+	// 	);
+	// };
 
-	const renderTopicFavorites = () => {
-		if (favoriteTopicsLoading) {
-			return (
-				<div style={{ width: '100%', height: '100%' }}>
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
-				</div>
-			);
-		} else {
-			return (
-				<div style={{ width: '100%', height: '100%' }}>
-					{favoriteTopicsSlice.length > 0 ? (
-						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
-							<div className={'col-xs-12'} style={{ padding: 0 }}>
-								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-									{_.map(favoriteTopicsSlice, (topic, idx) => {
-										return renderFavoriteTopicCard(topic, idx);
-									})}
-								</div>
-							</div>
-						</div>
-					) : (
-						<StyledPlaceHolder>Favorite a topic to see it listed here</StyledPlaceHolder>
-					)}
+	// const renderTopicFavorites = () => {
+	// 	if (favoriteTopicsLoading) {
+	// 		return (
+	// 			<div style={{ width: '100%', height: '100%' }}>
+	// 				<div style={{ margin: '0 auto' }}>
+	// 					<LoadingIndicator customColor={gcOrange} />
+	// 				</div>
+	// 			</div>
+	// 		);
+	// 	} else {
+	// 		return (
+	// 			<div style={{ width: '100%', height: '100%' }}>
+	// 				{favoriteTopicsSlice.length > 0 ? (
+	// 					<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
+	// 						<div className={'col-xs-12'} style={{ padding: 0 }}>
+	// 							<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+	// 								{_.map(favoriteTopicsSlice, (topic, idx) => {
+	// 									return renderFavoriteTopicCard(topic, idx);
+	// 								})}
+	// 							</div>
+	// 						</div>
+	// 					</div>
+	// 				) : (
+	// 					<StyledPlaceHolder>Favorite a topic to see it listed here</StyledPlaceHolder>
+	// 				)}
 
-					{favoriteTopicsSlice.length > 0 && (
-						<div className="gcPagination">
-							<Pagination
-								activePage={topicFavoritesPage}
-								itemsCountPerPage={RESULTS_PER_PAGE}
-								totalItemsCount={topicFavoritesTotalCount}
-								pageRangeDisplayed={8}
-								onChange={(page) => {
-									trackEvent(
-										getTrackingNameForFactory(cloneData.clone_name),
-										'UserDashboardTopicFavorites',
-										'pagination',
-										page
-									);
-									handlePaginationChange(page, 'topicFavorites');
-								}}
-							/>
-						</div>
-					)}
-				</div>
-			);
-		}
-	};
+	// 				{favoriteTopicsSlice.length > 0 && (
+	// 					<div className="gcPagination">
+	// 						<Pagination
+	// 							activePage={topicFavoritesPage}
+	// 							itemsCountPerPage={RESULTS_PER_PAGE}
+	// 							totalItemsCount={topicFavoritesTotalCount}
+	// 							pageRangeDisplayed={8}
+	// 							onChange={(page) => {
+	// 								trackEvent(
+	// 									getTrackingNameForFactory(cloneData.clone_name),
+	// 									'UserDashboardTopicFavorites',
+	// 									'pagination',
+	// 									page
+	// 								);
+	// 								handlePaginationChange(page, 'topicFavorites');
+	// 							}}
+	// 						/>
+	// 					</div>
+	// 				)}
+	// 			</div>
+	// 		);
+	// 	}
+	// };
 
-	const handleDeleteFavoriteOrganization = async (idx) => {
-		favoriteOrganizationsSlice[idx].favorite = false;
-		handleFavoriteOrganization(favoriteOrganizationsSlice[idx]);
-		updateUserData();
-	};
+	// const handleDeleteFavoriteOrganization = async (idx) => {
+	// 	favoriteOrganizationsSlice[idx].favorite = false;
+	// 	handleFavoriteOrganization(favoriteOrganizationsSlice[idx]);
+	// 	updateUserData();
+	// };
 
-	const renderFavoriteOrganizationCard = (organization, idx) => {
-		const toggleActive = () => {
-			organization.active = !organization.active;
-		};
+	// const renderFavoriteOrganizationCard = (organization, idx) => {
+	// 	const toggleActive = () => {
+	// 		organization.active = !organization.active;
+	// 	};
 
-		const createdDate = moment(Date.parse(organization.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
+	// 	const createdDate = moment(Date.parse(organization.createdAt)).utc().format('YYYY-MM-DD HH:mm UTC');
 
-		const searchDetails = (
-			<div className={'stats-details'}>
-				<div className={'favorited-date'}>{createdDate}</div>
-				<div className={'stats-details-stat-div'}>
-					<GCTooltip
-						title={'The number of times this organization has been favorited by others'}
-						placement="top"
-					>
-						<div className={'stats-stat'}>
-							<span className={'stats-text'}>{organization.favorited}</span>
-							<Icon className="fa fa-heart-o" />
-						</div>
-					</GCTooltip>
-					<GCTooltip title={'Click to see comments'} placement="top">
-						<div className={'stats-comment'}>
-							<Icon
-								className="fa fa-comment"
-								onClick={() => {
-									toggleActive();
-									setReload(!reload);
-								}}
-							/>
-						</div>
-					</GCTooltip>
-				</div>
-			</div>
-		);
-		return (
-			<FavoriteCard
-				key={`organization-favorite-${idx}`}
-				favoriteObject={organization}
-				favoriteType={'organization'}
-				handleDeleteFavorite={handleDeleteFavoriteOrganization}
-				details={searchDetails}
-				reload={reload}
-				setReload={setReload}
-				idx={idx}
-				toggleActive={toggleActive}
-				cloneData={cloneData}
-			/>
-		);
-	};
+	// 	const searchDetails = (
+	// 		<div className={'stats-details'}>
+	// 			<div className={'favorited-date'}>{createdDate}</div>
+	// 			<div className={'stats-details-stat-div'}>
+	// 				<GCTooltip
+	// 					title={'The number of times this organization has been favorited by others'}
+	// 					placement="top"
+	// 				>
+	// 					<div className={'stats-stat'}>
+	// 						<span className={'stats-text'}>{organization.favorited}</span>
+	// 						<Icon className="fa fa-heart-o" />
+	// 					</div>
+	// 				</GCTooltip>
+	// 				<GCTooltip title={'Click to see comments'} placement="top">
+	// 					<div className={'stats-comment'}>
+	// 						<Icon
+	// 							className="fa fa-comment"
+	// 							onClick={() => {
+	// 								toggleActive();
+	// 								setReload(!reload);
+	// 							}}
+	// 						/>
+	// 					</div>
+	// 				</GCTooltip>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// 	return (
+	// 		<FavoriteCard
+	// 			key={`organization-favorite-${idx}`}
+	// 			favoriteObject={organization}
+	// 			favoriteType={'organization'}
+	// 			handleDeleteFavorite={handleDeleteFavoriteOrganization}
+	// 			details={searchDetails}
+	// 			reload={reload}
+	// 			setReload={setReload}
+	// 			idx={idx}
+	// 			toggleActive={toggleActive}
+	// 			cloneData={cloneData}
+	// 		/>
+	// 	);
+	// };
 
-	const renderOrganizationFavorites = () => {
-		if (favoriteOrganizationsLoading) {
-			return (
-				<div style={{ width: '100%', height: '100%' }}>
-					<div style={{ margin: '0 auto' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
-				</div>
-			);
-		} else {
-			return (
-				<div style={{ width: '100%', height: '100%' }}>
-					{favoriteOrganizationsSlice.length > 0 ? (
-						<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
-							<div className={'col-xs-12'} style={{ padding: 0 }}>
-								<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-									{_.map(favoriteOrganizationsSlice, (organization, idx) => {
-										return renderFavoriteOrganizationCard(organization, idx);
-									})}
-								</div>
-							</div>
-						</div>
-					) : (
-						<StyledPlaceHolder>Favorite an organization to see it listed here</StyledPlaceHolder>
-					)}
+	// const renderOrganizationFavorites = () => {
+	// 	if (favoriteOrganizationsLoading) {
+	// 		return (
+	// 			<div style={{ width: '100%', height: '100%' }}>
+	// 				<div style={{ margin: '0 auto' }}>
+	// 					<LoadingIndicator customColor={gcOrange} />
+	// 				</div>
+	// 			</div>
+	// 		);
+	// 	} else {
+	// 		return (
+	// 			<div style={{ width: '100%', height: '100%' }}>
+	// 				{favoriteOrganizationsSlice.length > 0 ? (
+	// 					<div style={{ height: '100%', overflow: 'hidden', marginBottom: 10 }}>
+	// 						<div className={'col-xs-12'} style={{ padding: 0 }}>
+	// 							<div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+	// 								{_.map(favoriteOrganizationsSlice, (organization, idx) => {
+	// 									return renderFavoriteOrganizationCard(organization, idx);
+	// 								})}
+	// 							</div>
+	// 						</div>
+	// 					</div>
+	// 				) : (
+	// 					<StyledPlaceHolder>Favorite an organization to see it listed here</StyledPlaceHolder>
+	// 				)}
 
-					{favoriteOrganizationsSlice.length > 0 && (
-						<div className="gcPagination">
-							<Pagination
-								activePage={organizationFavoritesPage}
-								itemsCountPerPage={RESULTS_PER_PAGE}
-								totalItemsCount={organizationFavoritesTotalCount}
-								pageRangeDisplayed={8}
-								onChange={(page) => {
-									handlePaginationChange(page, 'organizationFavorites');
-								}}
-							/>
-						</div>
-					)}
-				</div>
-			);
-		}
-	};
+	// 				{favoriteOrganizationsSlice.length > 0 && (
+	// 					<div className="gcPagination">
+	// 						<Pagination
+	// 							activePage={organizationFavoritesPage}
+	// 							itemsCountPerPage={RESULTS_PER_PAGE}
+	// 							totalItemsCount={organizationFavoritesTotalCount}
+	// 							pageRangeDisplayed={8}
+	// 							onChange={(page) => {
+	// 								handlePaginationChange(page, 'organizationFavorites');
+	// 							}}
+	// 						/>
+	// 					</div>
+	// 				)}
+	// 			</div>
+	// 		);
+	// 	}
+	// };
 
 	const handleAcknowledgeUpdatesToDocs = (idx, name) => {
 		switch (name) {
@@ -385,7 +385,7 @@ const FavoritesPanel = ({
 							placement="top"
 						>
 							<div className={'stats-stat'}>
-								<span className={'stats-text'}>{document.favorited}</span>
+								<span className={'stats-text'}>{document.favorited - 1}</span>
 								<Icon className="fa fa-heart-o" />
 							</div>
 						</GCTooltip>
@@ -669,23 +669,23 @@ const FavoritesPanel = ({
 					favoriteDocuments.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
 				);
 				break;
-			case 'topicFavorites':
-				setTopicFavoritesPage(page);
-				setFavoriteTopicsSlice(favoriteTopics.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
-				break;
-			case 'organizationFavorites':
-				setOrganizationFavoritesPage(page);
-				setFavoriteOrganizationsSlice(
-					favoriteOrganizations.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
-				);
-				break;
+			// case 'topicFavorites':
+			// 	setTopicFavoritesPage(page);
+			// 	setFavoriteTopicsSlice(favoriteTopics.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE));
+			// 	break;
+			// case 'organizationFavorites':
+			// 	setOrganizationFavoritesPage(page);
+			// 	setFavoriteOrganizationsSlice(
+			// 		favoriteOrganizations.slice((page - 1) * RESULTS_PER_PAGE, page * RESULTS_PER_PAGE)
+			// 	);
+			// 	break;
 			default:
 		}
 	};
 
 	return (
-		<div>
-			{Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
+		<div style={{ marginBottom: 10 }}>
+			{/* {Config.GAMECHANGER.SHOW_TOPICS && cloneData.clone_name === 'gamechanger' && (
 				<GCAccordion expanded={false} header={'FAVORITE TOPICS'} itemCount={topicFavoritesTotalCount}>
 					{renderTopicFavorites()}
 				</GCAccordion>
@@ -698,14 +698,14 @@ const FavoritesPanel = ({
 				>
 					{renderOrganizationFavorites()}
 				</GCAccordion>
-			)}
+			)} */}
 			{cloneData.clone_name === 'gamechanger' && (
 				<GCAccordion expanded={false} header={'FAVORITE DOCUMENTS'} itemCount={documentFavoritesTotalCount}>
 					{renderDocumentFavorites()}
 				</GCAccordion>
 			)}
 
-			<GCAccordion expanded={true} header={'FAVORITE SEARCHES'} itemCount={searchFavoritesTotalCount}>
+			<GCAccordion expanded={false} header={'FAVORITE SEARCHES'} itemCount={searchFavoritesTotalCount}>
 				{renderSearchFavorites()}
 			</GCAccordion>
 		</div>

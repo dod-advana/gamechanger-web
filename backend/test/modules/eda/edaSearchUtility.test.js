@@ -13,12 +13,12 @@ const contractAggQuery = {
 								aggs: {
 									sum_agg: {
 										sum: {
-											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+											field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 										},
 									},
 								},
 								nested: {
-									path: 'extracted_data_eda_n',
+									path: 'fpds_ng_n',
 								},
 							},
 						},
@@ -41,12 +41,12 @@ const contractAggQuery = {
 				aggs: {
 					sum_agg: {
 						sum: {
-							field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+							field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 						},
 					},
 				},
 				nested: {
-					path: 'extracted_data_eda_n',
+					path: 'fpds_ng_n',
 				},
 			},
 		},

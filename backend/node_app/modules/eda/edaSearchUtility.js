@@ -67,7 +67,7 @@ class EDASearchUtility {
 							date_histogram: {
 								field: 'fpds_ng_n.date_signed_eda_ext_dt',
 								calendar_interval: '1y',
-								format: 'YYYY',
+								format: 'uuuu',
 								min_doc_count: 0,
 							},
 						},
@@ -267,12 +267,12 @@ class EDASearchUtility {
 										aggs: {
 											obligatedAmounts: {
 												nested: {
-													path: 'extracted_data_eda_n',
+													path: 'fpds_ng_n',
 												},
 												aggs: {
 													sum_agg: {
 														sum: {
-															field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+															field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 														},
 													},
 												},
@@ -303,12 +303,12 @@ class EDASearchUtility {
 						aggs: {
 							obligatedAmounts: {
 								nested: {
-									path: 'extracted_data_eda_n',
+									path: 'fpds_ng_n',
 								},
 								aggs: {
 									sum_agg: {
 										sum: {
-											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+											field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 										},
 									},
 								},

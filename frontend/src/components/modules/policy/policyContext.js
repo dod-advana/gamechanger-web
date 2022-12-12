@@ -88,7 +88,7 @@ const initState = {
 	loading: false,
 	isResetting: false,
 	documentProperties: [],
-	pageDisplayed: 'main',
+	pageDisplayed: 'userDashboard',
 	analystToolsPageDisplayed: '',
 	listView: false,
 
@@ -141,6 +141,7 @@ const initState = {
 	resultsPage: 1,
 	docsPagination: false,
 	docsLoading: false,
+	docsExplorerLeftPanelOpen: true,
 
 	entityCount: 0,
 	entityPage: 1,
@@ -305,7 +306,7 @@ function reducer(state, action) {
 			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
 			return newState;
 		case 'RESET_STATE':
-			window.location.href = `#/${state.cloneData.url}`;
+			window.location.href = `#/${state.cloneData.url}/userDashboard`;
 			return {
 				...initState,
 				searchSettings: state.searchSettings,
