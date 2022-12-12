@@ -38,7 +38,7 @@ class AppStatsController {
 		this.sparkMD5 = sparkMD5;
 		this.user = user;
 		this.feedback = feedback;
-		this.clone_meta = clone_meta 
+		this.clone_meta = clone_meta;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.exportUserData = this.exportUserData.bind(this);
