@@ -445,7 +445,7 @@ const FavoritesPanel = ({
 								width: '95%',
 							}}
 						>
-							{userData.favorite_groups.length > 0 && (
+							{/* {userData.favorite_groups.length > 0 && (
 								<GCButton
 									onClick={() => {
 										setShowAddToGroupModal(true);
@@ -453,7 +453,7 @@ const FavoritesPanel = ({
 								>
 									Add To Group
 								</GCButton>
-							)}
+							)} */}
 						</div>
 						<AddToGroupModal
 							showAddToGroupModal={showAddToGroupModal}
