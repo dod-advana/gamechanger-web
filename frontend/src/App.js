@@ -363,28 +363,9 @@ const App = () => {
 												<Route
 													exact
 													path="/"
-													render={() => {
-														if (Config.ROOT_CLONE === 'gamechanger') {
-															return <Redirect to={'/gamechanger/userDashboard'} />;
-														} else
-															return (
-																<Redirect
-																	to={`/${Config.ROOT_CLONE || 'gamechanger'}`}
-																/>
-															);
-													}}
-												/>
-												<Route
-													exact
-													path="/gamechanger"
-													render={() => {
-														if (
-															window.location.href.endsWith('gamechanger/') ||
-															window.location.href.endsWith('gamechanger')
-														) {
-															return <Redirect to={'/gamechanger/userDashboard'} />;
-														}
-													}}
+													render={() => (
+														<Redirect to={`/${Config.ROOT_CLONE || 'gamechanger'}`} />
+													)}
 												/>
 												<Route
 													exact
