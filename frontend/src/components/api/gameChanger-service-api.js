@@ -143,6 +143,7 @@ const endpoints = {
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 	updateClonesVisitedPOST: '/api/gamechanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcPublicUserData: '/api/gameChanger/user/getPublicUserData',
 	getUserDataByIDs: '/api/gameChanger/user/getUserDataByIDs',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
@@ -1141,6 +1142,11 @@ export default class GameChangerAPI {
 
 	getUserData = async (cloneName) => {
 		const url = endpoints.gcUserDataGET;
+		return axiosPOST(this.axios, url, { cloneName });
+	};
+
+	getPublicUserData = async (cloneName) => {
+		const url = endpoints.gcPublicUserData;
 		return axiosPOST(this.axios, url, { cloneName });
 	};
 
