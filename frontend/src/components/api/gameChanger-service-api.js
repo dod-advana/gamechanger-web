@@ -1147,7 +1147,7 @@ export default class GameChangerAPI {
 
 	getPublicUserData = async (cloneName) => {
 		const url = endpoints.gcPublicUserData;
-		return axiosPOST(this.axios, url, { cloneName });
+		return axiosGET(this.axios, url, { cloneName });
 	};
 
 	getUserDataByIDs = async (ids) => {
