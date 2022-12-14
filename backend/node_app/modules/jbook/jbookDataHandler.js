@@ -1529,15 +1529,18 @@ class JBookDataHandler extends DataHandler {
 				reviewData.agency = reviewData.agency_service;
 			}
 
-			if (reviewData.budget_activity.length === 1) {
-				reviewData.budget_activity = `0${reviewData.budget_activity}`;
+			if (reviewData.budget_activity.length !== 2) {
+				reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
 			}
 
+			if (reviewData.appn_num.length !== 4) {
+				reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
+			}
 			let refString = '';
-			if (reviewData.budgetType === 'pdoc') {
+			if (reviewData.budget_type === 'pdoc') {
 				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-			} else if (reviewData.budgetType === 'rdoc') {
-				refString = `rdoc#${reviewData.budget_line_item}#${reviewData.program_element}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budget_type === 'rdoc') {
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 			} else {
 				// refString = `odoc#${reviewData.budget_line_item}#${reviewData.program_element}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 			}
@@ -1559,8 +1562,9 @@ class JBookDataHandler extends DataHandler {
 		let created = [];
 		let dupes = [];
 		let failed = [];
-		for (let reviewData of reviewArray) {
-			console.log(reviewData);
+		let failES = [];
+		for (let [index, reviewData] of reviewArray.entries()) {
+			// console.log(reviewData);
 			const result = await this.rev.findAll({
 				where: {
 					budget_line_item: reviewData.budget_line_item,
@@ -1571,19 +1575,18 @@ class JBookDataHandler extends DataHandler {
 					portfolio_name: reviewData.portfolio_name,
 				},
 			});
-			console.log(result);
+			// console.log(result);
 			let newOrUpdatedReview;
 			if (result.length === 0) {
 				if (reviewData.budget_type !== 'odoc') {
 					newOrUpdatedReview = await this.rev.create(reviewData);
-					created.push(createReview);
+					created.push(newOrUpdatedReview);
 					newOrUpdatedReview = newOrUpdatedReview.dataValues;
 				}
 			} else if (result.length > 1) {
 				dupes.push(...result);
 			} else {
 				let item = result[0].dataValues;
-				console.log(item);
 				reviewData.jbook_ref_id = item.jbook_ref_id;
 				newOrUpdatedReview = await this.rev.update(
 					{
@@ -1603,18 +1606,59 @@ class JBookDataHandler extends DataHandler {
 						},
 					}
 				);
-				newOrUpdatedReview = { ...reviewData };
-				newOrUpdatedReview.id = tmpId;
 
-				console.log(newOrUpdatedReview);
+				// newOrUpdatedReview = { ...reviewData };
+				// console.log(newOrUpdatedReview);
+
 				if (newOrUpdatedReview[0] !== 1) {
 					failed.push(reviewData);
 				} else {
-					// Now update ES
+					newOrUpdatedReview = { ...reviewData };
+
+					// 	// Now update ES
 					let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 					tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
-					const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+					// 	const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
+					// Get ES Data
+					const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+					const esQuery = {
+						query: {
+							bool: {
+								must: [
+									{ term: { appropriationNumber_s: reviewData.appn_num } },
+									{ term: { budgetActivityNumber_s: reviewData.budget_activity } },
+									{ term: { budgetYear_s: reviewData.budget_year } },
+								],
+							},
+						},
+					};
+
+					if (reviewData.budget_type === 'rdoc') {
+						esQuery.query.bool.must.push({ term: { programElement_s: reviewData.program_element } });
+						esQuery.query.bool.must.push({ term: { projectNum_s: reviewData.budget_line_item } });
+					} else {
+						esQuery.query.bool.must.push({ term: { budgetLineItem_s: reviewData.budget_line_item } });
+					}
+
+					const esResults = await this.dataLibrary.queryElasticSearch(
+						clientObj.esClientName,
+						clientObj.esIndex,
+						esQuery,
+						userId
+					);
+
+					const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+					if (docs.length === 0) {
+						failed.push(reviewData);
+						console.log(JSON.stringify(esQuery));
+						failES.push([index, esQuery]);
+						console.log(index);
+
+						continue;
+					}
+					const doc = docs[0];
+					const id = doc.id;
 
 					let esReviews = [];
 					if (doc.review_n && Array.isArray(doc.review_n)) {
@@ -1624,7 +1668,6 @@ class JBookDataHandler extends DataHandler {
 					} else {
 						esReviews = [];
 					}
-
 					// Find if there already is a review in esReviews for this portfolio if so then replace if not add
 					const newReviews = [];
 					esReviews.forEach((review) => {
@@ -1634,7 +1677,6 @@ class JBookDataHandler extends DataHandler {
 					});
 					newReviews.push(tmpPGToES);
 
-					const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
 					const updated = await this.dataLibrary.updateDocument(
 						clientObj.esClientName,
 						clientObj.esIndex,
@@ -1645,16 +1687,16 @@ class JBookDataHandler extends DataHandler {
 					if (!updated) {
 						console.log('ES NOT UPDATED for REVIEW');
 					}
-
-					return { created: wasUpdated && updated };
 				}
 			}
 		}
 
 		var endTime = performance.now();
-		console.log(reviewArray);
+		console.log(JSON.stringify(failed));
 		console.log(`not found: ${created.length}`);
 		console.log(`dupes: ${dupes.length}`);
+		console.log(`failures: ${failed.length}`);
+		console.log(JSON.stringify(failES));
 		console.log(`Call took ${(endTime - startTime) / 60000} minutes`);
 		return {
 			created,
