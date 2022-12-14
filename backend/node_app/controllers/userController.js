@@ -114,6 +114,7 @@ class UserController {
 		this.getUserSettings = this.getUserSettings.bind(this);
 		this.getUserData = this.getUserData.bind(this);
 		this.getUserDataForUserList = this.getUserDataForUserList.bind(this);
+		this.getPubUserDataForPortfolioBuilder = this.getPubUserDataForPortfolioBuilder.bind(this);
 		this.getUserDataByIDs = this.getUserDataByIDs.bind(this);
 		this.updateOrCreateUser = this.updateOrCreateUser.bind(this);
 		this.updateOrCreateUserHelper = this.updateOrCreateUserHelper.bind(this);
@@ -279,6 +280,38 @@ class UserController {
 
 			if (cloneName) {
 				filteredResults = filteredResults.filter((result) => {
+					if (result.extra_fields.clones_visited) {
+						return result.extra_fields.clones_visited.includes(cloneName);
+					} else {
+						return false;
+					}
+				});
+			}
+
+			res.status(200).send({ users: filteredResults, timeStamp: new Date().toISOString() });
+		} catch (err) {
+			this.logger.error(err, 'RQ0WSQP', userId);
+			res.status(500).send(`Error getting users: ${err.message}`);
+		}
+	}
+
+	async getPubUserDataForPortfolioBuilder(req, res) {
+		let userId = 'webapp_unknown';
+
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+
+			const { cloneName } = req.body;
+
+			const results = await this.user.findAll({
+				attributes: ['id', 'first_name', 'last_name', 'email', 'extra_fields'],
+				raw: true,
+			});
+
+			let filteredResults = results;
+
+			if (cloneName) {
+				filteredResults = results.filter((result) => {
 					if (result.extra_fields.clones_visited) {
 						return result.extra_fields.clones_visited.includes(cloneName);
 					} else {
