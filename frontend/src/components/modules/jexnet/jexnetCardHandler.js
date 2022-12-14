@@ -12,7 +12,7 @@ import {
 } from '../../../utils/gamechangerUtils';
 import SimpleTable from '../../common/SimpleTable';
 import { CardButton } from '../../common/CardButton';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import { primary } from '../../common/gc-colors';
 import _ from 'lodash';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
@@ -29,6 +29,7 @@ import {
 	clickFn,
 	makeRows,
 } from '../default/defaultCardHandler';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const getCardHeaderHandler = ({ item, state, graphView, intelligentSearch }) => {
 	const displayTitle = getDisplayTitle(item);
@@ -163,7 +164,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages'
+									!hitsExpanded ? 'Expand hit pages' : 'Collapse hit pages',
+									null,
+									CustomDimensions.create(true, item.filename)
 								);
 								setHitsExpanded(!hitsExpanded);
 							}}
@@ -230,7 +233,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+									null,
+									CustomDimensions.create(true, item.filename)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -303,7 +308,9 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'ListViewInteraction',
-									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+									!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+									null,
+									CustomDimensions.create(true, item.filename)
 								);
 								setMetadataExpanded(!metadataExpanded);
 							}}
@@ -453,7 +460,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'Close Graph Card'
+										'Close Graph Card',
+										null,
+										CustomDimensions.create(true, filename)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -478,12 +487,7 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
+							trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 							setToggledMore(!toggledMore);
 						}}
 					>
