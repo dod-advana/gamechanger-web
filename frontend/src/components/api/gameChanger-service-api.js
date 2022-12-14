@@ -95,6 +95,7 @@ const endpoints = {
 	getAppStats: '/api/gamechanger/getAppStats',
 	getClonesMatomo: '/api/gamechanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gamechanger/admin/getSearchPdfMapping',
+	getSourceInteractions: '/api/gamechanger/admin/getSourceInteractions',
 	exportUserData: '/api/gamechanger/admin/exportUserData',
 	getDocumentUsage: '/api/gamechanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
@@ -821,6 +822,11 @@ export default class GameChangerAPI {
 
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
+	getSourceInteractions = async (body) => {
+		const url = endpoints.getSourceInteractions;
 		return axiosGET(this.axios, url, { params: body });
 	};
 
