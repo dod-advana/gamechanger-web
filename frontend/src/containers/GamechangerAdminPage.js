@@ -159,7 +159,7 @@ const GamechangerAdminPage = (props) => {
 	const { path } = useRouteMatch();
 
 	const renderSwitch = (page) => {
-		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', 'onChange', page.toString());
+		trackEvent('GAMECHANGER_Admin', 'ChangeAdminPage', `onChangeTo${page.toString()}`);
 
 		switch (page) {
 			case PAGES.general:

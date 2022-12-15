@@ -649,6 +649,10 @@ class EDASearchUtility {
 					},
 				};
 
+				const orgAndMajcomQuery = {
+					bool: { should: [] },
+				};
+
 				const orgMap = {
 					army: 'W*',
 					navy: 'N* OR M*',
@@ -657,11 +661,24 @@ class EDASearchUtility {
 				};
 
 				let orgString = '';
+				let setMajcomQuery = false;
+				let setOrgQuery = false;
 
 				const orgs = settings.organizations;
-				for (let i = 0; i < orgs.length; i++) {
-					const org = orgs[i];
+				// figure out if we will have both org and majcom queries
+				// if so then we will need to wrap them in the orgAndMajcomQuery
+				for (const org of orgs) {
+					if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
+						setMajcomQuery = true;
+					}
+					if (!settings.majcoms[org] || settings.majcoms[org].length === 0) {
+						setOrgQuery = true;
+					}
+				}
+				const orgAndMajcoms = setOrgQuery && setMajcomQuery;
 
+				let firstOrgQuery = true;
+				for (const org of orgs) {
 					// for filtering by MAJCOM / sub orgs
 					if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
 						for (const subOrg of settings.majcoms[org]) {
@@ -674,7 +691,11 @@ class EDASearchUtility {
 								},
 							});
 						}
-						filterQueries.push(majcomQuery);
+						if (orgAndMajcoms) {
+							orgAndMajcomQuery.bool.should.push(majcomQuery);
+						} else {
+							filterQueries.push(majcomQuery);
+						}
 					}
 
 					// for Issue Organization (no specific majcoms selected)
@@ -685,7 +706,8 @@ class EDASearchUtility {
 							orgText = orgMap[org];
 						}
 
-						orgString += `${i !== 0 ? ' OR ' : ''}${orgText}`;
+						orgString += `${!firstOrgQuery ? ' OR ' : ''}${orgText}`;
+						firstOrgQuery = false;
 					}
 				}
 
@@ -696,7 +718,15 @@ class EDASearchUtility {
 							default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
 						},
 					});
-					filterQueries.push(orgQuery);
+					if (orgAndMajcoms) {
+						orgAndMajcomQuery.bool.should.push(orgQuery);
+					} else {
+						filterQueries.push(orgQuery);
+					}
+				}
+
+				if (orgAndMajcoms) {
+					filterQueries.push(orgAndMajcomQuery);
 				}
 			}
 
