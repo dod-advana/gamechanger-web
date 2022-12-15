@@ -64,6 +64,8 @@ const PolicyDocumentsComparisonTool = ({
 	const [selectedInput, setSelectedInput] = useState(undefined);
 	const [returnedDocs, setReturnedDocs] = useState([]);
 	const [viewableDocs, setViewableDocs] = useState([]);
+	const [resultsLoading, setResultsLoading] = useState(false);
+	const [filterCountsLoading, setFilterCountsLoading] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
@@ -121,6 +123,7 @@ const PolicyDocumentsComparisonTool = ({
 	useEffect(() => {
 		if (updateFilters) {
 			setUpdateFilters(false);
+			setFilterCountsLoading(true);
 			const newSearchSettings = { ...state.analystToolsSearchSettings };
 
 			const filters = {
@@ -141,13 +144,15 @@ const PolicyDocumentsComparisonTool = ({
 					newSearchSettings.orgCount = orgCount;
 					newSearchSettings.typeCount = typeCount;
 					setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+					setFilterCountsLoading(false);
 				})
 				.catch(() => {
-					// What do I need to clean up here? should we still be 'loading'?
+					// What do I need to clean up here? should we still be 'resultsLoading'?
 					setReturnedDocs([]);
 					setState(dispatch, {
 						analystToolsSearchSettings: state.analystToolsSearchSettings,
 					});
+					setFilterCountsLoading(false);
 				});
 		}
 	}, [
@@ -167,6 +172,10 @@ const PolicyDocumentsComparisonTool = ({
 		publicationDateFilter,
 		includeRevoked,
 	]);
+
+	useEffect(() => {
+		setLoading(resultsLoading || filterCountsLoading);
+	}, [resultsLoading, filterCountsLoading]);
 
 	useEffect(() => {
 		setUpdateFilters(true);
@@ -214,7 +223,7 @@ const PolicyDocumentsComparisonTool = ({
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
-			setLoading(true);
+			setResultsLoading(true);
 			setCollapseKeys([]);
 
 			const filters = {
@@ -249,14 +258,14 @@ const PolicyDocumentsComparisonTool = ({
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
-					setLoading(false);
+					setResultsLoading(false);
 				})
 				.catch(() => {
 					setReturnedDocs([]);
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
-					setLoading(false);
+					setResultsLoading(false);
 					console.log('server error');
 				});
 		}
