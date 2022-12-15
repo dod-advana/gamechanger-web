@@ -1,6 +1,7 @@
 import React from 'react';
 import { setState } from '../../utils/sharedFunctions';
 import { trackEvent } from '../telemetry/Matomo';
+import { CustomDimensions } from '../telemetry/utils';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import { DidYouMean } from '../searchBar/SearchBarStyledComponents';
 import MagellanTrendingLinkList from '../common/MagellanTrendingLinkList';
@@ -8,7 +9,13 @@ import { styles } from './commonStyles';
 import UserProfile from '../user/UserProfile';
 
 export const handleDidYouMeanClicked = (didYouMean, state, dispatch) => {
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SuggestionSelected', 'DidYouMean');
+	trackEvent(
+		getTrackingNameForFactory(state.cloneData.clone_name),
+		'SuggestionSelected',
+		'DidYouMean',
+		null,
+		CustomDimensions.create(true, didYouMean)
+	);
 	setState(dispatch, { searchText: didYouMean, runSearch: true });
 };
 
@@ -40,7 +47,7 @@ export const renderHideTabs = (props) => {
 	}
 
 	const handleLinkListItemClick = (searchText) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', searchText);
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', searchText);
 		setState(dispatch, {
 			searchText,
 			autoCompleteItems: [],
@@ -116,7 +123,12 @@ export const getUserProfilePage = (displayUserRelatedItems, gameChangerUserAPI, 
 			getAppRelatedUserData={() => {}}
 			updateAppRelatedUserData={() => {}}
 			displayCustomAppContent={displayUserRelatedItems}
-			style={{ width: '100%', padding: '15px 22px 15px 30px', minHeight: 'calc(100vh - 245px)' }}
+			style={{
+				width: '100%',
+				padding: '15px 22px 15px 30px',
+				marginBottom: '-6px',
+				minHeight: 'calc(100vh - 245px)',
+			}}
 			primaryColor={primaryColor || '#1C2D65'}
 			secondaryColor={secondaryColor || '#8091A5'}
 		/>
