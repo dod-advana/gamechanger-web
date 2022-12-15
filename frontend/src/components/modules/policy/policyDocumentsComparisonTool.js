@@ -122,27 +122,51 @@ const PolicyDocumentsComparisonTool = ({
 		if (updateFilters) {
 			setUpdateFilters(false);
 			const newSearchSettings = { ...state.analystToolsSearchSettings };
-			const sourceCount = {};
-			const typeCount = {};
 
-			returnedDocs.forEach((doc) => {
-				if (typeCount[doc.display_doc_type_s]) {
-					typeCount[doc.display_doc_type_s]++;
-				} else {
-					typeCount[doc.display_doc_type_s] = 1;
-				}
-				if (sourceCount[doc.display_org_s]) {
-					sourceCount[doc.display_org_s]++;
-				} else {
-					sourceCount[doc.display_org_s] = 1;
-				}
-			});
-			newSearchSettings.orgCount = sourceCount;
-			newSearchSettings.typeCount = typeCount;
+			const filters = {
+				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
+				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
+				dateFilter: publicationDateFilter,
+				canceledDocs: includeRevoked,
+			};
 
-			setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+			gameChangerAPI
+				.getFilterCountsPOST({
+					cloneName: state.cloneData.clone_name,
+					paragraphs: paragraphs,
+					filters,
+				})
+				.then((resp) => {
+					const { orgCount, typeCount } = resp.data;
+					newSearchSettings.orgCount = orgCount;
+					newSearchSettings.typeCount = typeCount;
+					setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+				})
+				.catch(() => {
+					// What do I need to clean up here? should we still be 'loading'?
+					setReturnedDocs([]);
+					setState(dispatch, {
+						analystToolsSearchSettings: state.analystToolsSearchSettings,
+					});
+				});
 		}
-	}, [dispatch, returnedDocs, state.analystToolsSearchSettings, updateFilters]);
+	}, [
+		dispatch,
+		gameChangerAPI,
+		returnedDocs,
+		noResults,
+		paragraphs,
+		updateFilters,
+		paragraphText,
+		state.cloneData.clone_name,
+		state.analystToolsSearchSettings,
+		allOrgsSelected,
+		orgFilter,
+		allTypesSelected,
+		typeFilter,
+		publicationDateFilter,
+		includeRevoked,
+	]);
 
 	useEffect(() => {
 		setUpdateFilters(true);
@@ -222,12 +246,16 @@ const PolicyDocumentsComparisonTool = ({
 						setSelectedParagraph(paragraph);
 					}
 					setReturnedDocs(resp.data.docs);
-					setState(dispatch, { runDocumentComparisonSearch: false });
+					setState(dispatch, {
+						runDocumentComparisonSearch: false,
+					});
 					setLoading(false);
 				})
 				.catch(() => {
 					setReturnedDocs([]);
-					setState(dispatch, { runDocumentComparisonSearch: false });
+					setState(dispatch, {
+						runDocumentComparisonSearch: false,
+					});
 					setLoading(false);
 					console.log('server error');
 				});
