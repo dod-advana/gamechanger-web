@@ -39,7 +39,7 @@ const getToolTheme = (_cloneData) => {
 				<img src={GamechangerTextIcon} href="#/gamechanger" alt="tool logo" />
 			</PageLink>
 		),
-		toolIconHref: '#/gamechanger',
+		toolIconHref: '#/gamechanger/',
 	};
 };
 
