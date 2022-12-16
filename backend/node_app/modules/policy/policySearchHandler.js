@@ -43,7 +43,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId, storeHistory) {
-		const { searchText } = req.body;
+		const { searchText, fromRefreshOrLink = false } = req.body;
 
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(
 			req.body,
@@ -60,7 +60,7 @@ class PolicySearchHandler extends SearchHandler {
 		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, true); // TODO: link last param to frontend
+		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, fromRefreshOrLink);
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
