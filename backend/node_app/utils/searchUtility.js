@@ -1787,14 +1787,14 @@ class SearchUtility {
 			body.parsedQuery = parsedQuery;
 			let { esClientName, esIndex } = clientObj;
 
-			const sourceCountESQuery = this.getElasticsearchQuery({ ...body, orgFilterString: [], limit: 0 }, userId);
-			const sourceCountResults = await this.dataLibrary.queryElasticSearch(
+			const orgCountESQuery = this.getElasticsearchQuery({ ...body, orgFilterString: [], limit: 0 }, userId);
+			const orgCountResults = await this.dataLibrary.queryElasticSearch(
 				esClientName,
 				esIndex,
-				JSON.stringify(sourceCountESQuery),
+				JSON.stringify(orgCountESQuery),
 				userId
 			);
-			const sourceCountAggs = this.cleanUpAggResults({ raw: sourceCountResults, user: userId }).doc_orgs;
+			const orgCountAggs = this.cleanUpAggResults({ raw: orgCountResults, user: userId }).doc_orgs;
 
 			const typeCountESQuery = this.getElasticsearchQuery({ ...body, typeFilterString: [], limit: 0 }, userId);
 			const typeCountResults = await this.dataLibrary.queryElasticSearch(
@@ -1806,7 +1806,7 @@ class SearchUtility {
 			const typeCountAggs = this.cleanUpAggResults({ raw: typeCountResults, user: userId }).doc_types;
 
 			return {
-				doc_orgs: sourceCountAggs,
+				doc_orgs: orgCountAggs,
 				doc_types: typeCountAggs,
 			};
 		} catch (e) {

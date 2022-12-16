@@ -385,6 +385,7 @@ const PolicySearchHandler = {
 			runningSearch,
 			currentSort,
 			currentOrder,
+			fromRefreshOrLink,
 		} = state;
 
 		const {
@@ -429,6 +430,7 @@ const PolicySearchHandler = {
 			pageDisplayed: PAGE_DISPLAYED.main,
 			didYouMean: '',
 			infiniteScrollPage: 1,
+			fromRefreshOrLink: false,
 		});
 
 		const trimmed = searchText.trim();
@@ -547,6 +549,7 @@ const PolicySearchHandler = {
 					options: {
 						searchType,
 						orgFilterString,
+						fromRefreshOrLink,
 						transformResults,
 						charsPadding,
 						typeFilterString,

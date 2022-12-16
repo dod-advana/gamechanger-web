@@ -162,6 +162,9 @@ export const handlePageLoad = async (props) => {
 	if (parsedURL.searchText) {
 		newState = { ...newState, ...parsedURL, runSearch: true };
 
+		if (newState.cloneData.clone_name === 'gamechanger') {
+			newState = { ...newState, fromRefreshOrLink: true };
+		}
 		/* 
 			only setState with the fields that have actually changed
 			otherwise this can overwrite other changes to state that may have happened
