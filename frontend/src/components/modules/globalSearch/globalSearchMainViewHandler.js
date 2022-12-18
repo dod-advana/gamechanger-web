@@ -28,10 +28,10 @@ import SearchHandlerFactory from '../../factories/searchHandlerFactory';
 
 const PRIMARY_COLOR = '#13A792';
 
-const dataLoading = (extras) => {
+const dataLoaded = (extras) => {
 	const { applications, dashboards, dataSources, databases, models } = extras;
 
-	return applications.loading || dashboards.loading || dataSources.loading || databases.loading || models.loading;
+	return !(applications.loading && dashboards.loading && dataSources.loading && databases.loading && models.loading);
 };
 
 const getHeaderStyles = (view) => {
@@ -63,7 +63,7 @@ const getViewHeader = (state, dispatch, extras) => {
 
 	return (
 		<div style={styles.showingResultsRow}>
-			{state.searchText && !dataLoading(extras) && (
+			{state.searchText && dataLoaded(extras) && (
 				<>
 					<Typography variant="h3" style={{ ...styles.text, margin: '20px 15px' }}>
 						{state.showFavorites ? 'Showing' : 'Showing results for'}{' '}
