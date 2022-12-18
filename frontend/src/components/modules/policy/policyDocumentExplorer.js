@@ -15,7 +15,8 @@ import {
 } from '../../../utils/gamechangerUtils';
 
 import Pagination from '../../common/Pagination';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackDocumentExplorerToggleAll, trackEvent, trackLeftRightPanelToggle } from '../../telemetry/Matomo';
+import { CustomDimensions } from '../../telemetry/utils';
 import sanitizeHtml from 'sanitize-html';
 import { setState } from '../../../utils/sharedFunctions';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
@@ -323,27 +324,29 @@ export default function PolicyDocumentExplorer({
 	}, [data, collapseKeys]);
 
 	function handleRightPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
+			false,
+			rightPanelOpen
 		);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackEvent(
+		trackLeftRightPanelToggle(
 			getTrackingNameForFactory(cloneData.clone_name),
 			'DocumentExplorerInteraction',
-			'LeftPanelToggle',
-			state.docsExplorerLeftPanelOpen ? 'Close' : 'Open'
+			true,
+			state.docsExplorerLeftPanelOpen
 		);
 		setState(dispatch, { docsExplorerLeftPanelOpen: !state.docsExplorerLeftPanelOpen });
 	}
 
 	// This toggles whether the Document Header texts are open or not by setting collapseKeys
 	function handleViewToggle() {
+		trackDocumentExplorerToggleAll(cloneData.clone_name, viewToggle);
+
 		if (collapseKeys) {
 			let collapse = Object.assign({}, collapseKeys);
 			for (let key in collapse) {
@@ -360,18 +363,12 @@ export default function PolicyDocumentExplorer({
 			const fileName = rec.id;
 			const pageObj = rec.pageHits[pageKey];
 			const pageNumber = pageObj ? pageObj.pageNumber : 1;
-			trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'DocumentExplorerInteraction', 'PDFOpen');
 			trackEvent(
 				getTrackingNameForFactory(cloneData.clone_name),
 				'DocumentExplorerInteraction',
-				'filename',
-				fileName
-			);
-			trackEvent(
-				getTrackingNameForFactory(cloneData.clone_name),
-				'DocumentExplorerInteraction',
-				'pageNumber',
-				pageNumber
+				'PDFOpen',
+				null,
+				CustomDimensions.create(true, fileName, pageNumber)
 			);
 			setPdfLoaded(false);
 		}

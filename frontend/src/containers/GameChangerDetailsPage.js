@@ -52,11 +52,11 @@ export const MainContainer = styled.div`
 	display: flex;
 	margin: 10px 4%;
 	font-family: Montserrat !important;
-	
+
 	.details-header {
 		text-align: left;
 		color: white;
-		background-color: #131E43;
+		background-color: #131e43;
 		margin: 0 0 5px 0;
 		padding: 12px 5px;
 		font-family: Montserrat !important;
@@ -65,49 +65,49 @@ export const MainContainer = styled.div`
 		display: flex;
 		justify-content: space-between;
 	}
-	
+
 	> .details {
 		> div {
-			border: 1px solid rgb(208,214,218);
+			border: 1px solid rgb(208, 214, 218);
 			text-align: center;
-			background-color: rgb(255,255,255) !important;
+			background-color: rgb(255, 255, 255) !important;
 			height: fit-content !important;
 			width: 300px;
 			font-family: Montserrat !important;
 			box-shadow: unset !important;
-			
+
 			> .name {
 				font-size: 20px;
 				margin: 5px;
 				font-weight: bold;
 			}
-			
+
 			> img {
 				width: 160px;
 				margin: 10px auto;
 			}
-			
+
 			> .details-table {
 				text-align: left;
 				margin: 0 5px;
 			}
 		}
 	}
-	
+
 	> .graph-top-docs {
 		width: 100%;
 		margin-left: 10px;
-	
+
 		> .section {
 			> div {
 				border-top-right-radius: 6px;
-    			border-top-left-radius: 6px;
-    			margin-bottom: 5px;
-				
+				border-top-left-radius: 6px;
+				margin-bottom: 5px;
+
 				> #graph2dContainer {
-					margin 5px;
+					margin: 5px;
 				}
-				
+
 				> .related-documents {
 					margin: 0 10px;
 				}
