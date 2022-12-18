@@ -78,7 +78,7 @@ const PortfolioBuilder = (props) => {
 
 	useEffect(() => {
 		const initFunction = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
+			const data = await gameChangerAPI.getPublicUserData('jbook');
 			setUserList(data.data.users);
 			const newMap = {};
 			data.data.users.forEach((user) => {

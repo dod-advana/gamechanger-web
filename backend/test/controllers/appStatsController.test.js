@@ -5,6 +5,7 @@ const { AppStatsController } = require('../../node_app/controllers/appStatsContr
 describe('AppStatsController', function () {
 	const opts = {
 		...constructorOptionsMock,
+		clone_meta: {},
 		dataApi: {},
 		searchUtility: {},
 		constants: {
