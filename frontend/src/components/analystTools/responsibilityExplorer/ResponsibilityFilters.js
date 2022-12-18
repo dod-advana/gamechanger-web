@@ -5,6 +5,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import GCAccordion from '../../common/GCAccordion';
 import GCButton from '../../common/GCButton';
 import styled from 'styled-components';
+import { trackEvent } from '../../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 
 const AccordianWrapper = styled.div`
 	.MuiAccordionSummary-root {
@@ -28,6 +30,8 @@ const useStyles = makeStyles({
 	},
 });
 
+const trackingAction = 'ResponsibilityExplorer-FilterChange';
+
 export default function ResponsibilityFilters({
 	filters,
 	documentList,
@@ -41,6 +45,7 @@ export default function ResponsibilityFilters({
 	setResultsPage,
 	setReloadResponsibilities,
 	setCollapseKeys,
+	cloneData,
 }) {
 	const [clearFilters, setClearFilters] = useState(false);
 
@@ -54,6 +59,8 @@ export default function ResponsibilityFilters({
 			setResponsibilityText({});
 		}
 	};
+
+	const trackingCategory = getTrackingNameForFactory(cloneData.clone_name);
 
 	const classes = useStyles();
 
@@ -194,6 +201,7 @@ export default function ResponsibilityFilters({
 							setFilters([]);
 							setResultsPage(1);
 							setReloadResponsibilities(true);
+							trackEvent(trackingCategory, trackingAction, 'onClickClearFiltersButton');
 						}}
 						style={{ display: 'block', width: '100%', margin: '20px 0 10px 0' }}
 						isSecondaryBtn
@@ -218,6 +226,12 @@ export default function ResponsibilityFilters({
 							setFilters(newFilters);
 							setResultsPage(1);
 							setReloadResponsibilities(true);
+
+							let eventName = newFilters
+								.map((item) => `category:${item.id}, value:${item.value}`)
+								.join(' -- ');
+							!eventName && (eventName = 'filtersEmpty');
+							trackEvent(trackingCategory, trackingAction, eventName);
 						}}
 						style={{ display: 'block', width: '100%', margin: 0 }}
 					>

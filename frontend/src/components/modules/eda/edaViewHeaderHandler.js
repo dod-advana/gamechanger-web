@@ -388,7 +388,7 @@ const EDAViewHeaderHandler = (props) => {
 					<GCButton
 						className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 						id={'gcShareSearch'}
-						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
+						onClick={() => createCopyTinyUrl(cloneData.url, dispatch, cloneData.clone_name)}
 						style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>

@@ -137,3 +137,15 @@
 #faq-section [class*="MuiAccordionSummary-content"] {
     margin: 0 !important;
 }
+
+.dct-feedback {
+    font-size: 25px;
+	margin: auto 0 auto 10px;
+	justify-content: center;
+	color: white;
+	-webkit-text-stroke: 1px #808080;
+}
+.dct-feedback:hover {
+    cursor: pointer;
+	-webkit-text-stroke: 1px black;
+}
