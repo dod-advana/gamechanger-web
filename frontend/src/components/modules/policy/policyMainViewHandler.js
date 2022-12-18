@@ -558,13 +558,16 @@ const renderHideTabs = (props) => {
 					{adminTopics.map((item) => (
 						<div
 							style={styles.checkboxPill}
+							// onClick={() => {
+							// 	trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name);
+							// 	window.open(
+							// 		`#/gamechanger-details?cloneName=${
+							// 			cloneData.clone_name
+							// 		}&type=topic&topicName=${item.name.toLowerCase()}`
+							// 	);
+							// }}
 							onClick={() => {
-								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name);
-								window.open(
-									`#/gamechanger-details?cloneName=${
-										cloneData.clone_name
-									}&type=topic&topicName=${item.name.toLowerCase()}`
-								);
+								setState(dispatch, { searchText: item.name, runSearch: true });
 							}}
 						>
 							{item.name}
