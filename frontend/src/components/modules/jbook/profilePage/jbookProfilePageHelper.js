@@ -208,7 +208,6 @@ const Metadata = ({ budgetType, keywordCheckboxes, setKeywordCheck }) => {
 };
 
 const ProjectDescription = ({ profileLoading, projectData, programElement, projectNum, projectDescriptions }) => {
-	console.log('here is projectDescriptions', projectDescriptions);
 	return (
 		<>
 			{profileLoading ? (
