@@ -5,13 +5,17 @@ const SearchUtility = require('../utils/searchUtility');
 const { DataLibrary } = require('../lib/dataLibrary');
 const USER = require('../models').user;
 const FEEDBACK = require('../models').feedback;
+const CLONE_META = require('../models').clone_meta;
+const CRAWLER_INFO = require('../models').crawler_info;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { sendExcelFile } = require('../utils/sendFileUtility');
 const sparkMD5Lib = require('spark-md5');
+const { Sequelize } = require('sequelize');
+const { QueryTypes } = require('sequelize');
+const { sortByValueDescending } = require('../utils/objectUtils');
 
 /**
- * This class queries matomo for app stats and passes
- * them back to REST requests.
+ * This class queries Matomo, Postgres, and Elasticsearch for app stats and passes them back to REST requests.
  * @class AppStatsController
  */
 class AppStatsController {
@@ -25,6 +29,8 @@ class AppStatsController {
 			sparkMD5 = sparkMD5Lib,
 			user = USER,
 			feedback = FEEDBACK,
+			clone_meta = CLONE_META,
+			crawlerInfo = CRAWLER_INFO,
 		} = opts;
 
 		this.logger = logger;
@@ -35,6 +41,8 @@ class AppStatsController {
 		this.sparkMD5 = sparkMD5;
 		this.user = user;
 		this.feedback = feedback;
+		this.clone_meta = clone_meta;
+		this.crawlerInfo = crawlerInfo;
 		this.getAppStats = this.getAppStats.bind(this);
 		this.getSearchPdfMapping = this.getSearchPdfMapping.bind(this);
 		this.exportUserData = this.exportUserData.bind(this);
@@ -47,7 +55,9 @@ class AppStatsController {
 		this.getUserAggregations = this.getUserAggregations.bind(this);
 		this.getDashboardData = this.getDashboardData.bind(this);
 		this.getUserLastOpened = this.getUserLastOpened.bind(this);
+		this.getSourceInteractions = this.getSourceInteractions.bind(this);
 	}
+
 	/**
 	 *
 	 * @param {Number} daysAgo
@@ -464,7 +474,7 @@ class AppStatsController {
 	 * @returns
 	 *
 	 */
-	async queryClones(connection) {
+	async queryClones(connection, clones) {
 		return new Promise((resolve) => {
 			connection.query(
 				`
@@ -475,8 +485,9 @@ class AppStatsController {
 				matomo_log_action a,
 				matomo_log_link_visit_action b
 			where a.idaction = b.idaction_event_category
-			and a.name LIKE 'GAMECHANGER_%'
+			and a.name in (?)
 			`,
+				[clones],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP6');
@@ -657,7 +668,11 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			const clones = await this.queryClones(connection);
+			const cloneList = await this.clone_meta.findAll({ raw: true }).then((c) => {
+				return c.map((clone) => `GAMECHANGER_${clone.clone_name}`);
+			});
+			cloneList.push('GlobalSearch');
+			const clones = await this.queryClones(connection, cloneList);
 			const defaultClone = await this.getDefualtClone(connection);
 			res.status(200).send({ clones: clones, default: defaultClone[0] });
 		} catch (err) {
@@ -699,8 +714,12 @@ class AppStatsController {
 					{ header: 'Document Opened', key: 'display_title_s' },
 					{ header: 'Document Time', key: 'documenttime_formatted' },
 					{ header: 'Document Type', key: 'doc_type' },
-					{ header: 'Source', key: 'display_org_s' },
+					{ header: 'Displayed Document Type', key: 'display_doc_type_s' },
+					{ header: 'Organization', key: 'display_org_s' },
+					{ header: 'Topics', key: 'topics_rs' },
 					{ header: 'Keywords', key: 'keyw_5' },
+					{ header: 'Crawler', key: 'crawler_used_s' },
+					{ header: 'Source', key: 'display_source_s' },
 				];
 				const excelData = await this.querySearchPdfMapping(opts, null, connection);
 				sendExcelFile(res, 'Searches', columns, excelData);
@@ -753,6 +772,28 @@ class AppStatsController {
 				];
 				const docData = await this.createDocumentUsageData(opts.startDate, opts.endDate, userId, connection);
 				sendExcelFile(res, 'Documents', columns, docData);
+			} else if (table == 'SourceInteractions') {
+				const columns = [
+					{ header: 'Crawler', key: 'crawler' },
+					{ header: 'Data Source', key: 'dataSource' },
+					{ header: 'Organization', key: 'org' },
+					{ header: '# Total Documents (current)', key: 'numTotalDocs' },
+					{ header: '# Events', key: 'numTotalEvents' },
+					{ header: '# Unique Documents Interacted With', key: 'numUniqueDocuments' },
+					{ header: '# Unique Users', key: 'numUniqueUsers' },
+					{ header: '# Events by User', key: 'userCounts' },
+					{ header: '# Events by Type', key: 'actionCounts' },
+					{ header: '# Events by Filename', key: 'fileCounts' },
+				];
+				const data = await this.querySourceInteractions(
+					opts.startDate,
+					opts.endDate,
+					opts.cloneID,
+					userId,
+					null,
+					connection
+				);
+				sendExcelFile(res, 'SourceInteractions', columns, data.data);
 			}
 		} catch (err) {
 			this.logger.error(err, '11MLULU');
@@ -960,6 +1001,7 @@ class AppStatsController {
 		const esIndex = 'gamechanger';
 		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 		esResults = esResults.body.hits.hits;
+
 		const filenameMap = {};
 		for (const doc of esResults) {
 			const item = doc._source;
@@ -1545,6 +1587,343 @@ class AppStatsController {
 		} finally {
 			if (connection) connection.end();
 		}
+	}
+
+	/** Creates a mysql connection and calls querySourceInteractions(). */
+	async getSourceInteractions(req, res) {
+		const userID = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const { startDate, endDate, cloneID } = req.query;
+
+		let mysqlClient;
+		try {
+			mysqlClient = this.mysql.createConnection({
+				host: this.constants.MATOMO_DB_CONFIG.host,
+				user: this.constants.MATOMO_DB_CONFIG.user,
+				password: this.constants.MATOMO_DB_CONFIG.password,
+				database: this.constants.MATOMO_DB_CONFIG.database,
+			});
+			mysqlClient.connect();
+			const results = { data: [] };
+			results.data = await this.querySourceInteractions(startDate, endDate, cloneID, userID, null, mysqlClient);
+			res.status(200).send(results);
+		} catch (err) {
+			this.logger.error(err);
+			res.status(500).send(err);
+		} finally {
+			mysqlClient.end();
+		}
+	}
+
+	/**
+	 * Query and aggregate document interactions and source metadata.
+	 *
+	 * @param {Date} startDate - Query events on or after this date/ time.
+	 * @param {Date} endDate - Query events on or before this date/ time.
+	 * @param {string} cloneID - GAMECHANGER clone ID.
+	 * @param {string} userID
+	 * @param {number} limit - Limit results of each query to this number.
+	 * @param {mysql.Connection} mysqlConnection - Connection to Matomo mysql database.
+	 * @returns {Promise<{
+	 * 				data: Array<{
+	 * 					crawler: string,
+	 * 					numTotalDocuments: number,
+	 * 					numUniqueDocuments: number,
+	 *					numUniqueUsers: number,
+	 * 					numTotalEvents: number,
+	 * 					actionCounts: Map<string, number>,
+	 * 					userCounts: Map<string, number>,
+	 * 					fileCounts: Map<string, number>,
+	 * 					dataSource: string,
+	 * 					org: string,
+	 * 				}>,
+	 * 				missing: any
+	 * 			}>}
+	 */
+	async querySourceInteractions(startDate, endDate, cloneID, userID, limit, mysqlConnection) {
+		// Query Matomo for events where a user interacts with a document (e.g., flips a document card).
+		let events = await this.queryDocumentInteractionEvents(startDate, endDate, cloneID, limit, mysqlConnection);
+		this.filterEventsWithFilenames(events);
+
+		// Query Matomo for PDFViewer events.
+		let pdfViewerEvents = await this.queryPdfOpend(startDate, endDate, limit, mysqlConnection);
+		pdfViewerEvents.forEach((item) => this.addFieldsToPDFViewerEvent(item));
+		events.push(...pdfViewerEvents);
+
+		// Query Elasticsearch for data related to the source of each document.
+		let filenames = events.map((event) => event.filename);
+		const filenameMap = await this.getSourceMetadataForFilenames(filenames, userID);
+		events = events.map((item) => ({ ...item, ...filenameMap[item.filename] }));
+
+		// Query postgres for the total number of documents processed by each crawler.
+		const totalSourceCounts = await this.getSourceCounts();
+
+		// Query Postgres for crawler source information.
+		const crawlerInfo = await this.getCrawlerInfo();
+
+		const result = this.aggregateSourceInteractions(events, totalSourceCounts, crawlerInfo);
+
+		return result;
+	}
+
+	/**
+	 * Query Matomo for events where a user interacts with a document (e.g.,
+	 * flips a document card).
+	 *
+	 * @param {Date} startDate - Return events that occur on or after this date/ time.
+	 * @param {Date} endDate - Return events that occur on or before this date/ time.
+	 * @param {string} cloneID - Return events with this clone ID.
+	 * @param {number} limit - Integer. Limit the result to this number of events.
+	 * @param {mysql.Connection} connection - Connection to Matomo mysql database.
+	 * @returns
+	 */
+	async queryDocumentInteractionEvents(startDate, endDate, cloneID, limit, connection) {
+		const params = [cloneID, startDate, endDate];
+		let query = `
+				SELECT 
+					CONVERT_TZ(llva.server_time,'UTC','EST') as event_time,
+					hex(llva.idvisitor) as idvisitor,
+					la_names.name as event_name,
+					la.name as event_action,
+					llva.custom_dimension_1 as event_text
+				FROM
+					matomo_log_link_visit_action llva,
+				 	matomo_log_action as la,
+				 	matomo_log_action as la_names
+				WHERE llva.idaction_event_action = la.idaction
+					AND llva.idaction_name = la_names.idaction
+					AND llva.idaction_event_category = ?
+					AND server_time >= ?
+					AND server_time <= ?
+					AND (
+						llva.custom_dimension_1 LIKE '%.pdf' 
+						OR la_names.name LIKE '%.pdf' 
+						OR la.name LIKE '%.pdf'
+					)
+				ORDER BY
+					llva.server_time desc
+		`;
+		if (limit) {
+			params.push(limit);
+			query += ` LIMIT ?`;
+		}
+		return new Promise((resolve) => {
+			connection.query(query, params, (error, results) => {
+				if (error) {
+					this.logger.error(error, 'BAP9ZIP5');
+					throw error;
+				}
+				resolve(results);
+			});
+		});
+	}
+
+	/**
+	 * For each event in the array: If a filename exists, assign it to the
+	 * event's 'filename' field. Otherwise, remove the event from the array.
+	 *
+	 * We look for a pdf filename in multiple fields of an event:
+	 *	 ['event_text', 'event_name', 'event_action']
+	 * This is necessary because Matomo event tracking is not yet standardized
+	 * in this repository, and therefore filenames can exist in multiple fields.
+	 *
+	 * Modifies the given array in place.
+	 *
+	 * @param {Object[]} events - Array of objects that represent Matomo events.
+	 * @returns The modified array.
+	 */
+	filterEventsWithFilenames(events) {
+		// Check these fields to find a pdf file name associated with an event.
+		const fields = ['event_text', 'event_name', 'event_action'];
+
+		let i = 0;
+		while (i < events.length) {
+			let event = events[i];
+			for (const field of fields) {
+				if (
+					event[field] &&
+					Object.prototype.toString.call(event[field]) === '[object String]' &&
+					event[field].endsWith('.pdf')
+				) {
+					event.filename = event[field];
+					break;
+				}
+			}
+			// If a filename was not found, remove the event from the array.
+			event.filename ? i++ : events.splice(i, 1);
+		}
+
+		return events;
+	}
+
+	/**
+	 * Add the following fields to a PDFViewer event: 'filename', 'clone_name',
+	 * 'event_action'.
+	 * Modifies the object in place.
+	 *
+	 * @param event - Object representing a PDFViewer event.
+	 */
+	addFieldsToPDFViewerEvent(event) {
+		// Example 'document' value: `PDFViewer - Title 10 - Armed Forces.pdf - gamechanger`
+		let action = event['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
+
+		if (event['document'].endsWith('.pdf')) {
+			event['filename'] = action;
+			event['clone_name'] = 'UNKNOWN';
+		} else {
+			// Clone name is after the last hyphen. File name is before the last
+			// hyphen. Note: file names can include hyphens!
+			action = action.split(' - ');
+			event['filename'] = action.slice(0, action.length - 1).join(' - ');
+			event['clone_name'] = action[action.length - 1];
+		}
+
+		event['event_action'] = 'PDFViewer';
+	}
+
+	/**
+	 * Query Elasticsearch for data related to the source of each document.
+	 *
+	 * @param {string[]} filenames - Filenames to get data for.
+	 * @param {string} userId
+	 * @returns - Object such that keys are (string) filename and values are
+	 * 	associated metadata from Elasticsearch.
+	 */
+	async getSourceMetadataForFilenames(filenames, userId) {
+		filenames = [...new Set(filenames)];
+
+		const esQuery = this.searchUtility.getDocMetadataQuery('source', filenames);
+		const esClientName = 'gamechanger';
+		const esIndex = 'gamechanger';
+		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+		esResults = esResults.body.hits.hits;
+
+		const filenameMap = {};
+		for (const doc of esResults) {
+			const item = doc._source;
+			filenameMap[item.filename] = item;
+		}
+
+		return filenameMap;
+	}
+
+	/**
+	 * Query Postgres for the number of documents processed by each crawler.
+	 *
+	 * @returns - Object such that keys are (string) crawler
+	 * name and values are (integer) number of documents processed by the crawler.
+	 */
+	async getSourceCounts() {
+		let client;
+		let counts = {};
+		try {
+			const config = this.constants.POSTGRES_CONFIG.databases['gc-orchestration'];
+			client = new Sequelize(config.database, config.username, config.password, {
+				host: config.host,
+				port: config.port,
+				database: config.database,
+				dialect: config.dialect,
+			});
+			counts = await client.query(
+				`
+				SELECT
+					json_metadata ->> 'crawler_used' as crawler_used, COUNT(*)
+				FROM
+					gc_document_corpus_snapshot_vw
+				GROUP BY json_metadata ->> 'crawler_used'
+				`,
+				{ type: QueryTypes.SELECT, plain: false, raw: true }
+			);
+		} catch (err) {
+			this.logger.error(err);
+			throw err;
+		}
+
+		counts = counts.reduce((obj, item) => ((obj[item.crawler_used] = item.count), obj), {});
+
+		return counts;
+	}
+
+	/**
+	 * Query Postgres for GAMECHANGER crawler names and associated organizations
+	 * and data sources.
+	 *
+	 * @returns - Object such that keys are (string) crawler name and values are
+	 *	{ crawler: <string>, display_org: <string>, data_source_s: <string>}.
+	 */
+	async getCrawlerInfo() {
+		let crawlerMap = {};
+		try {
+			const info = await this.crawlerInfo.findAll({
+				attributes: ['crawler', 'display_org', 'data_source_s'],
+			});
+			for (const item of info) {
+				const crawler = item?.dataValues.crawler;
+				crawler && (crawlerMap[crawler] = item.dataValues);
+			}
+		} catch (error) {
+			this.logger.error(error);
+			throw error;
+		}
+
+		return crawlerMap;
+	}
+
+	/**
+	 * Aggregate events, source counts, and crawler info.
+	 *
+	 * @param {Object[]} events - Events from Matomo.
+	 * @param {Map<string, number>}sourceCountsMap - Object such that keys are
+	 * (string) crawler name and values are (integer) number of documents that
+	 * have been processed by the crawler.
+	 * @param {Map<string, Object>} crawlerInfo - Object such that keys are
+	 * (string) crawler name and values are
+	 * { crawler: <string>, display_org: <string>, data_source_s: <string>}.
+	 */
+	aggregateSourceInteractions(events, sourceCountsMap, crawlerInfo) {
+		const data = [];
+		const missing = {};
+
+		for (const [crawler, numTotalDocuments] of Object.entries(sourceCountsMap)) {
+			const crawlerEvents = events.filter((item) => item.crawler_used_s == crawler);
+			const actionCounts = {}; // # of events by type
+			const userCounts = {}; // # of events by user
+			const fileCounts = {}; // # of events by filename
+			for (const item of crawlerEvents) {
+				let action = item.event_action;
+				item.event_name && !item.event_name.endsWith('.pdf') && (action += ' - ' + item.event_name);
+				actionCounts[action] = (actionCounts[action] || 0) + 1;
+				userCounts[item.idvisitor] = (userCounts[item.idvisitor] || 0) + 1;
+				fileCounts[item.filename] = (fileCounts[item.filename] || 0) + 1;
+			}
+
+			const numUniqueDocuments = new Set(crawlerEvents.map((item) => item.filename)).size;
+			const numUniqueUsers = new Set(crawlerEvents.map((item) => item.idvisitor)).size;
+			const info = crawlerInfo[crawler];
+			data.push({
+				crawler: crawler,
+				numTotalDocuments: numTotalDocuments,
+				numUniqueDocuments: numUniqueDocuments,
+				numUniqueUsers: numUniqueUsers,
+				numTotalEvents: crawlerEvents.length,
+				actionCounts: sortByValueDescending(actionCounts),
+				userCounts: sortByValueDescending(userCounts),
+				fileCounts: sortByValueDescending(fileCounts),
+				dataSource: info?.data_source_s,
+				org: info?.display_org,
+			});
+		}
+
+		const crawlerNames = data.map((item) => item.crawler);
+
+		for (const item of events) {
+			const crawler = item.crawler_used_s;
+			if (!crawlerNames.includes(crawler)) {
+				missing[crawler] = missing[crawler] || [];
+				missing[crawler].push(item);
+			}
+		}
+
+		return { data: data, missing: missing };
 	}
 }
 

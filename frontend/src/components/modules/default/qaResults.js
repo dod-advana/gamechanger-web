@@ -17,6 +17,7 @@ import { trackEvent } from '../../telemetry/Matomo';
 import GCTooltip from '../../common/GCToolTip';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import Link from '@material-ui/core/Link';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const CloseButton = styled.div`
 	padding: 6px;
@@ -167,10 +168,22 @@ const GetQAResults = (props) => {
 
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxUnchecked',
+				key,
+				0,
+				CustomDimensions.create(true, key)
+			);
 		} else {
 			selectedDocuments.set(key, value);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxChecked',
+				key,
+				1,
+				CustomDimensions.create(true, key)
+			);
 		}
 
 		setState(dispatch, { selectedDocuments: new Map(selectedDocuments) });
@@ -228,7 +241,11 @@ const GetQAResults = (props) => {
 												getTrackingNameForFactory(state.cloneData.clone_name),
 												'CardInteraction',
 												'QAThumbsUp',
-												`question : ${question}, answer: ${answer}`
+												null,
+												CustomDimensions.create(
+													true,
+													`question : ${question}, answer: ${answer}`
+												)
 											);
 										} else {
 											gameChangerAPI.sendIntelligentSearchFeedback(
@@ -241,7 +258,11 @@ const GetQAResults = (props) => {
 												getTrackingNameForFactory(state.cloneData.clone_name),
 												'CardInteraction',
 												'IntelligentSearchThumbsUp',
-												`search : ${state.searchText}, title: ${title}`
+												null,
+												CustomDimensions.create(
+													true,
+													`search : ${state.searchText}, title: ${title}`
+												)
 											);
 										}
 									}
@@ -267,7 +288,11 @@ const GetQAResults = (props) => {
 												getTrackingNameForFactory(state.cloneData.clone_name),
 												'CardInteraction',
 												'QAThumbsDown',
-												`question : ${question}, title: ${answer}`
+												null,
+												CustomDimensions.create(
+													true,
+													`question : ${question}, title: ${answer}`
+												)
 											);
 										} else {
 											gameChangerAPI.sendIntelligentSearchFeedback(
@@ -280,7 +305,11 @@ const GetQAResults = (props) => {
 												getTrackingNameForFactory(state.cloneData.clone_name),
 												'CardInteraction',
 												'IntelligentSearchThumbsDown',
-												`search : ${state.searchText}, title: ${title}`
+												null,
+												CustomDimensions.create(
+													true,
+													`search : ${state.searchText}, title: ${title}`
+												)
 											);
 										}
 									}
