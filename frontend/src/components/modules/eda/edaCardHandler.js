@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
 	encode,
@@ -35,6 +35,7 @@ import {
 	RevokedTag,
 } from '../default/defaultCardHandler';
 import EDAListViewCard from './edaListViewCard';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -182,9 +183,13 @@ const styles = {
 const tableColumns = [{ id: 'name' }, { id: 'fpds' }, { id: 'eda' }];
 
 const clickFn = (filename, cloneName, searchText, pageNumber = 0) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'CardInteraction',
+		'PDFOpen',
+		null,
+		CustomDimensions.create(true, filename, pageNumber)
+	);
 	window.open(
 		`/#/pdfviewer/gamechanger?filename=${encode(
 			filename
@@ -622,7 +627,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'Close Graph Card'
+										'Close Graph Card',
+										null,
+										CustomDimensions.create(true, filename)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -639,7 +646,9 @@ const cardHandler = {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
 										'CardInteraction',
-										'showDocumentDetails'
+										'showDocumentDetails',
+										null,
+										CustomDimensions.create(true, filename)
 									);
 									window.open(
 										`#/gamechanger-details?cloneName=${cloneName}&type=contract&awardID=${item.award_id_eda_ext}`
@@ -654,11 +663,10 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: primary }}
 						onClick={() => {
-							trackEvent(
+							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
+								toggledMore,
+								CustomDimensions.create(true, filename)
 							);
 							setToggledMore(!toggledMore);
 						}}
