@@ -7,10 +7,9 @@ import _ from 'lodash';
 import GCButton from '../../common/GCButton';
 import GCTooltip from '../../common/GCToolTip';
 import { SelectedDocsDrawer } from '../../searchBar/GCSelectedDocsDrawer';
-import { FormControl, InputLabel, MenuItem, Select, Button } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import { trackEvent } from '../../telemetry/Matomo';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useStyles } from '../default/defaultViewHeaderHandler.js';
+import { trackEvent } from '../../telemetry/Matomo';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -18,59 +17,11 @@ const IS_IE = /*@cc_on!@*/ !!document.documentMode;
 // Edge 20+
 const IS_EDGE = !IS_IE && !!window.StyleMedia;
 
-const handleTypeFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let typeName = event.currentTarget.value;
-	newSearchSettings.typeFilter = {
-		...newSearchSettings.typeFilter,
-		[typeName]: false,
-	};
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.typeUpdate = true;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'typeFilterToggle',
-		event.target.innerHTML,
-		event.currentTarget.ariaPressed ? 1 : 0
-	);
-};
-
-const handleOrganizationFilterChange = (event, state, dispatch) => {
-	const newSearchSettings = _.cloneDeep(state.searchSettings);
-	let orgName = event.currentTarget.value;
-	newSearchSettings.orgFilter = {
-		...newSearchSettings.orgFilter,
-		[orgName]: false,
-	};
-
-	newSearchSettings.isFilterUpdate = true;
-	newSearchSettings.orgUpdate = true;
-	setState(dispatch, {
-		searchSettings: newSearchSettings,
-		metricsCounted: false,
-		runSearch: true,
-		runGraphSearch: true,
-	});
-	trackEvent(
-		getTrackingNameForFactory(state.cloneData.clone_name),
-		'OrgFilterToggle',
-		event.target.innerHTML,
-		event.currentTarget.ariaPressed ? 1 : 0
-	);
-};
-
 const PolicyViewHeaderHandler = (props) => {
 	const classes = useStyles();
 	const { context = {}, extraStyle = {} } = props;
 
 	const { state, dispatch } = context;
-	const { typeFilter, orgFilter } = state.searchSettings;
 	const {
 		activeCategoryTab,
 		cloneData,
@@ -84,6 +35,8 @@ const PolicyViewHeaderHandler = (props) => {
 	} = state;
 
 	const [dropdownValue, setDropdownValue] = useState(getCurrentView(currentViewName, listView));
+
+	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 	useEffect(() => {
 		if (IS_EDGE) {
@@ -115,6 +68,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeSort = (event) => {
+		trackEvent(trackingCategory, 'ChangeSortSelection', event.target.value);
 		const newSearchSettings = _.cloneDeep(state.searchSettings);
 		newSearchSettings.isFilterUpdate = true;
 		const {
@@ -146,6 +100,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	const handleChangeView = (event) => {
+		trackEvent(trackingCategory, 'ChangeResultsView', event.target.value);
 		const {
 			target: { value },
 		} = event;
@@ -267,96 +222,7 @@ const PolicyViewHeaderHandler = (props) => {
 	};
 
 	return (
-		<div
-			className={'results-count-view-buttons-container'}
-			style={{ ...extraStyle, justifyContent: 'space-between' }}
-		>
-			<div className={'view-filters-container'}>
-				{state.searchSettings.specificOrgsSelected &&
-					Object.keys(orgFilter).map((org) => {
-						if (state.searchSettings.orgFilter[org]) {
-							return (
-								<Button
-									variant="outlined"
-									backgroundColor="white"
-									display="inline-flex"
-									name={org}
-									value={org}
-									style={{
-										marginRight: '10px',
-										marginBottom: '5px',
-										padding: '10px 15px',
-										backgroundColor: 'white',
-										color: 'orange',
-										height: 40,
-										ariaPressed: 'true',
-									}}
-									endIcon={<CloseIcon />}
-									onClick={(event) => {
-										handleOrganizationFilterChange(event, state, dispatch);
-									}}
-								>
-									<span
-										style={{
-											fontFamily: 'Montserrat',
-											fontWeight: 300,
-											color: 'black',
-											width: '100%',
-											marginTop: '5px',
-											marginBottom: '5px',
-										}}
-									>
-										{org}
-									</span>
-								</Button>
-							);
-						} else {
-							return null;
-						}
-					})}
-
-				{state.searchSettings.specificTypesSelected &&
-					Object.keys(typeFilter).map((type) => {
-						if (state.searchSettings.typeFilter[type]) {
-							return (
-								<Button
-									variant="outlined"
-									backgroundColor="white"
-									display="inline-flex"
-									style={{
-										marginRight: '10px',
-										marginBottom: '5px',
-										padding: '10px 15px',
-										backgroundColor: 'white',
-										color: 'orange',
-										height: 40,
-									}}
-									endIcon={<CloseIcon />}
-									value={type}
-									onClick={(event) => {
-										handleTypeFilterChange(event, state, dispatch);
-									}}
-								>
-									<span
-										style={{
-											fontFamily: 'Montserrat',
-											fontWeight: 300,
-											color: 'black',
-											width: '100%',
-											marginTop: '5px',
-											marginBottom: '5px',
-										}}
-									>
-										{type}
-									</span>
-								</Button>
-							);
-						} else {
-							return null;
-						}
-					})}
-			</div>
-
+		<div className={'results-count-view-buttons-container'} style={{ ...extraStyle, justifyContent: 'right' }}>
 			<div
 				className={'view-buttons-container'}
 				style={
@@ -446,7 +312,7 @@ const PolicyViewHeaderHandler = (props) => {
 				<GCButton
 					className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 					id={'gcShareSearch'}
-					onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
+					onClick={() => createCopyTinyUrl(cloneData.url, dispatch, cloneData.clone_name)}
 					style={{ height: 50, padding: '0px 7px', margin: '16px 0px 0px 10px', minWidth: 50 }}
 					disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 				>

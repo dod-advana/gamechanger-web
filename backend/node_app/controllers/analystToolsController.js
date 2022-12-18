@@ -94,7 +94,6 @@ class AnalystToolsController {
 				const ids = Object.keys(resultsObject);
 				// Query ES
 				esQuery = this.searchUtility.getDocumentParagraphsByParIDs(ids, filters);
-
 				esResults = await this.dataLibrary.queryElasticSearch(
 					clientObj.esClientName,
 					clientObj.esIndex,
