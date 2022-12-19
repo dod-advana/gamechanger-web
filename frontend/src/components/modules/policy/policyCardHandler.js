@@ -9,9 +9,8 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import { handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
+import { handleSaveFavoriteTopic, setState } from '../../../utils/sharedFunctions';
 import { CardButton } from '../../common/CardButton';
-import { setState } from '../../../utils/sharedFunctions';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
 import _ from 'lodash';
