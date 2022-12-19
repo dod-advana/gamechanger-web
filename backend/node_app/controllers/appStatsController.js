@@ -1276,9 +1276,7 @@ class AppStatsController {
 						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
 						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
 					}
-				} catch (error) {
-					
-				}
+				} catch (error) {}
 			}
 		}
 		return [visitIDMap, documentMap];
@@ -1536,16 +1534,21 @@ class AppStatsController {
 
 			let cards, userCards, searchBar, userBar, newUser, inactiveUser;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise, inactiveUserPromise]).then(
-				(data) => {
-					cards = data[0];
-					userCards = data[1];
-					searchBar = data[2];
-					userBar = data[3];
-					newUser = data[4];
-					inactiveUser = data[5];
-				}
-			);
+			await Promise.all([
+				cardPromise,
+				userCardPromise,
+				searchBarPromise,
+				userBarPromise,
+				newUserPromise,
+				inactiveUserPromise,
+			]).then((data) => {
+				cards = data[0];
+				userCards = data[1];
+				searchBar = data[2];
+				userBar = data[3];
+				newUser = data[4];
+				inactiveUser = data[5];
+			});
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 			cards[0]['new_users'] = newUser[0]['new_users'];
