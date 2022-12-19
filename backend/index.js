@@ -126,6 +126,10 @@ if (constants.GAME_CHANGER_OPTS.isDemoDeployment) {
 	});
 }
 
+app.get('/health', (_req, res) => {
+	res.status(200).send('OK');
+});
+
 app.use(AAA.redisSession());
 AAA.setupSaml(app);
 app.use(AAA.ensureAuthenticated);

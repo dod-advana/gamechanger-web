@@ -332,18 +332,38 @@ class EdaSearchHandler extends SearchHandler {
 
 	async getPresearchData(userId) {
 		try {
-			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.filterPicklistIndex;
 			let esClientName = 'eda';
-			const query = this.edaSearchUtility.getElasticsearchFilterOptionsQuery();
+
+			// don't get hierarchal naics/psc data for now
+			const query = {
+				size: 12,
+				query: {
+					bool: {
+						must_not: [
+							{
+								match: {
+									picklist_name_s: 'naics',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'psc',
+								},
+							},
+						],
+					},
+				},
+			};
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, query, userId);
 
 			let cleanedResults = {};
-			for (let aggregation of Object.keys(results.body.aggregations)) {
-				cleanedResults[aggregation] = results.body.aggregations[aggregation].val.buckets
-					.map((item) => item.key_as_string || item.key)
-					.filter((item) => item !== null);
-			}
+
+			results.body.hits.hits.forEach((hit) => {
+				const { picklist_name_s, picklist_s } = hit._source;
+				cleanedResults[picklist_name_s] = picklist_s;
+			});
 
 			return cleanedResults;
 		} catch (e) {

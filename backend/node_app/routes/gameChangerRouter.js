@@ -102,13 +102,17 @@ router.get('/responsibilities/getUpdates', responsibility.getResponsibilityUpdat
 
 router.get('/admin/downloadDependencies', transformer.downloadDependencies);
 router.get('/admin/getAPIInformation', transformer.getAPIInformation);
+router.get('/admin/getAPIInformationTrain', transformer.getAPIInformationTrain);
 router.get('/admin/getS3List', transformer.getS3List);
 router.get('/admin/getS3DataList', transformer.getS3DataList);
 router.get('/admin/getModelsList', transformer.getModelsList);
+router.get('/admin/getModelsListTrain', transformer.getModelsListTrain);
 router.get('/admin/getDataList', transformer.getDataList);
 router.get('/admin/getLoadedModels', transformer.getLoadedModels);
 router.get('/admin/getFilesInCorpus', transformer.getFilesInCorpus);
+router.get('/admin/getFilesInCorpusTrain', transformer.getFilesInCorpusTrain);
 router.get('/admin/getProcessStatus', transformer.getProcessStatus);
+router.get('/admin/getProcessStatusTrain', transformer.getProcessStatusTrain);
 router.get('/admin/getCache', transformer.getCache);
 router.get('/admin/initializeLTR', transformer.initializeLTR);
 router.get('/admin/createModelLTR', transformer.createModelLTR);
@@ -116,7 +120,9 @@ router.post('/admin/downloadCorpus', transformer.downloadCorpus);
 router.post('/admin/trainModel', transformer.trainModel);
 router.post('/admin/reloadModels', transformer.reloadModels);
 router.post('/admin/downloadS3File', transformer.downloadS3File);
+router.post('/admin/downloadS3FileTrain', transformer.downloadS3FileTrain);
 router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
+router.post('/admin/deleteLocalModelTrain', transformer.deleteLocalModelTrain);
 router.post('/admin/stopProcess', transformer.stopProcess);
 router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
 router.post('/admin/clearCache', transformer.clearCache);
@@ -159,6 +165,7 @@ router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBl
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.post('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/user/getPublicUserData', user.getPubUserDataForPortfolioBuilder);
 router.get('/user/getUserDataByIDs', user.getUserDataByIDs);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
@@ -196,6 +203,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.post('/getAppStats', appStatsController.getAppStats);
 	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+	router.get('/admin/getSourceInteractions', appStatsController.getSourceInteractions);
 	router.get('/admin/exportUserData', appStatsController.exportUserData);
 	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
