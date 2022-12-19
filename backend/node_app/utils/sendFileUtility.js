@@ -1,4 +1,5 @@
 const ExcelJS = require('exceljs');
+const LOGGER = require('@dod-advana/advana-logger');
 
 const sendExcelFile = async (res, sheetName, columns, data) => {
 	try {
@@ -12,7 +13,7 @@ const sendExcelFile = async (res, sheetName, columns, data) => {
 		await workbook.xlsx.write(res);
 		res.end();
 	} catch (err) {
-		this.logger.error(err, '11MLULU');
+		LOGGER.error(err, '11MLULU');
 		res.status(500).send(err);
 	}
 };
