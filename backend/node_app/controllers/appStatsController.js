@@ -1527,8 +1527,6 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-			console.log(startDate);
-			console.log(endDate);
 			const cardPromise = this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
 			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
 			const newUserPromise = this.getCardNewUsers(startDate, endDate, cloneID, connection);
