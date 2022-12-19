@@ -444,7 +444,7 @@ const PolicySearchHandler = {
 
 		setState(dispatch, {
 			selectedDocuments: new Map(),
-			loading: searchSettings.isFilterUpdate ? false : true,
+			loading: !searchSettings.isFilterUpdate,
 			replaceResults: true,
 			metricsLoading: false,
 			noResultsMessage: null,
@@ -486,10 +486,6 @@ const PolicySearchHandler = {
 		try {
 			if (cloneData.show_graph && currentViewName === 'Graph') {
 				setState(dispatch, { runGraphSearch: true });
-			}
-
-			if (t0 < mostRecentSearchTS) {
-				throw 'cancelling due to more recent search';
 			}
 
 			gameChangerAPI
@@ -535,7 +531,7 @@ const PolicySearchHandler = {
 			ltr = ltr.data.value === 'true';
 
 			if (t0 < mostRecentSearchTS) {
-				throw 'cancelling due to more recent search';
+				throw new Error('cancelling due to more recent search');
 			}
 
 			const resp = await gameChangerAPI.modularSearch({
@@ -565,7 +561,7 @@ const PolicySearchHandler = {
 			});
 
 			if (t0 < mostRecentSearchTS) {
-				throw 'cancelling render due to more recent search';
+				throw new Error('cancelling render due to more recent search');
 			}
 
 			let getUserDataFlag = true;
