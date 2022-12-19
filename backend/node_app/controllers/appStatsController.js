@@ -1277,7 +1277,7 @@ class AppStatsController {
 						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
 					}
 				} catch (error) {
-					console.log(open.idvisitor);
+					
 				}
 			}
 		}
@@ -1471,7 +1471,45 @@ class AppStatsController {
 			);
 		});
 	}
-
+	/**
+	 * This method gets graph data for users by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getInactiveUsers(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				SELECT
+					COUNT(t.user_id) as inactive_user
+				FROM (
+					select
+						user_id,
+						MAX(visit_last_action_time) as last_visit
+					from
+						matomo_log_visit b
+					where 
+						b.idvisitor in (
+							select distinct idvisitor
+							from matomo_log_link_visit_action
+							where idaction_event_category=?
+						)
+					GROUP BY user_id
+				) t
+				WHERE
+					t.last_visit >= DATE_SUB(STR_TO_DATE(?, '%Y-%m-%d %H:%i'), INTERVAL 6 WEEK)
+					AND t.last_visit <= DATE_SUB(STR_TO_DATE(?, '%Y-%m-%d %H:%i'), INTERVAL 6 WEEK)
+				`,
+				[cloneName, startDate, endDate],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
 	/**
 	 * This method is called by an endpoint to get the card and graph data
 	 * @param {*} req
@@ -1489,27 +1527,31 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-
+			console.log(startDate);
+			console.log(endDate);
 			const cardPromise = this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
 			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
 			const newUserPromise = this.getCardNewUsers(startDate, endDate, cloneID, connection);
+			const inactiveUserPromise = this.getInactiveUsers(startDate, endDate, cloneID, connection);
 			const searchBarPromise = this.getSearchGraphData(cloneName, connection);
 			const userBarPromise = this.getUserGraphData(cloneID, connection);
 
-			let cards, userCards, searchBar, userBar, newUser;
+			let cards, userCards, searchBar, userBar, newUser, inactiveUser;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise]).then(
+			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise, inactiveUserPromise]).then(
 				(data) => {
 					cards = data[0];
 					userCards = data[1];
 					searchBar = data[2];
 					userBar = data[3];
 					newUser = data[4];
+					inactiveUser = data[5];
 				}
 			);
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 			cards[0]['new_users'] = newUser[0]['new_users'];
+			cards[0]['inactive_users'] = inactiveUser[0]['inactive_user'];
 
 			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
 		} catch (err) {
