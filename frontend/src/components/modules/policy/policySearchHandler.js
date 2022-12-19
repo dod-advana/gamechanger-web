@@ -488,6 +488,10 @@ const PolicySearchHandler = {
 				setState(dispatch, { runGraphSearch: true });
 			}
 
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling due to more recent search');
+			}
+
 			gameChangerAPI
 				.getDataForSearch({
 					options: {
@@ -523,6 +527,10 @@ const PolicySearchHandler = {
 						runningTopicSearch: false,
 					});
 				});
+
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling due to more recent search');
+			}
 
 			let combinedSearch = await gameChangerAPI.getCombinedSearchMode();
 			combinedSearch = combinedSearch.data.value === 'true';
