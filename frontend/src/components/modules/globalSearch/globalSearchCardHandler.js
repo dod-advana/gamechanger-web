@@ -3,7 +3,7 @@ import { KeyboardArrowRight } from '@material-ui/icons';
 import styled from 'styled-components';
 import { capitalizeFirst, CARD_FONT_SIZE, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import { CardButton } from '../../common/CardButton';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import _ from 'underscore';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import CONFIG from '../../../config/config';
@@ -15,6 +15,7 @@ import sanitizeHtml from 'sanitize-html';
 import GCAccordion from '../../common/GCAccordion';
 import SimpleTable from '../../common/SimpleTable';
 import PropTypes from 'prop-types';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const MAX_KEYS = 8;
 
@@ -535,7 +536,7 @@ const getCollibraHighlights = (item, showFavorites) => {
 };
 
 const handleToggleMore = (toggledMore, setToggledMore, cloneName) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'flipCard', toggledMore ? 'Overview' : 'More');
+	trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 	setToggledMore(!toggledMore);
 };
 
@@ -716,7 +717,8 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Application Card Request Access' : 'Application Card Launch',
-							url
+							null,
+							CustomDimensions.create(true, url)
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -866,7 +868,8 @@ const cardHandler = {
 							getTrackingNameForFactory(cloneName),
 							'CardInteraction',
 							restricted ? 'Qlik Card Request Access' : 'Qlik Card Launch',
-							getUrl(item, restricted, 'dashboards')
+							null,
+							CustomDimensions.create(true, getUrl(item, restricted, 'dashboards'))
 						);
 					}}
 					style={{ ...styles.footerButtonBack, CARD_FONT_SIZE, color: '#1E88E5' }}
@@ -882,12 +885,7 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: PRIMARY_COLOR }}
 						onClick={() => {
-							trackEvent(
-								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
-							);
+							trackFlipCardEvent(getTrackingNameForFactory(cloneName), toggledMore);
 							setToggledMore(!toggledMore);
 						}}
 					>
