@@ -95,6 +95,7 @@ const endpoints = {
 	getAppStats: '/api/gamechanger/getAppStats',
 	getClonesMatomo: '/api/gamechanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gamechanger/admin/getSearchPdfMapping',
+	getSourceInteractions: '/api/gamechanger/admin/getSourceInteractions',
 	exportUserData: '/api/gamechanger/admin/exportUserData',
 	getDocumentUsage: '/api/gamechanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
@@ -144,6 +145,7 @@ const endpoints = {
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 	updateClonesVisitedPOST: '/api/gamechanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcPublicUserData: '/api/gameChanger/user/getPublicUserData',
 	getUserDataByIDs: '/api/gameChanger/user/getUserDataByIDs',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
@@ -824,6 +826,11 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url, { params: body });
 	};
 
+	getSourceInteractions = async (body) => {
+		const url = endpoints.getSourceInteractions;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
 	getClonesMatomo = async (body) => {
 		const url = endpoints.getClonesMatomo;
 		return axiosGET(this.axios, url, { params: body });
@@ -1148,6 +1155,11 @@ export default class GameChangerAPI {
 	getUserData = async (cloneName) => {
 		const url = endpoints.gcUserDataGET;
 		return axiosPOST(this.axios, url, { cloneName });
+	};
+
+	getPublicUserData = async (cloneName) => {
+		const url = endpoints.gcPublicUserData;
+		return axiosGET(this.axios, url, { cloneName });
 	};
 
 	getUserDataByIDs = async (ids) => {

@@ -23,10 +23,6 @@ const PolicyMultiSelectFilter = ({
 
 	const handleFilterChange = (event) => {
 		const newSearchSettings = structuredClone(state[searchSettingsName]);
-		if (state[searchSettingsName][allSelected]) {
-			newSearchSettings[allSelected] = false;
-			newSearchSettings[specificSelected] = true;
-		}
 		let name = showNumResultsPerOption
 			? event.target.name.substring(0, event.target.name.lastIndexOf('(') - 1)
 			: event.target.name;
@@ -34,10 +30,21 @@ const PolicyMultiSelectFilter = ({
 			...newSearchSettings[filter],
 			[name]: event.target.checked,
 		};
-		if (Object.values(newSearchSettings[filter]).filter((value) => value).length === 0) {
+
+		const noFiltersSelected = Object.values(newSearchSettings[filter]).filter((value) => value).length === 0;
+		const allAvailableSelected = originalFilters.reduce(
+			(availableSelected, originalFilter) =>
+				availableSelected && (!originalFilter[1] || newSearchSettings[filter][originalFilter[0]]),
+			true
+		);
+		if (noFiltersSelected || allAvailableSelected) {
 			newSearchSettings[allSelected] = true;
 			newSearchSettings[specificSelected] = false;
+		} else {
+			newSearchSettings[allSelected] = false;
+			newSearchSettings[specificSelected] = true;
 		}
+
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
 		setState(dispatch, {
@@ -69,6 +76,31 @@ const PolicyMultiSelectFilter = ({
 		});
 	};
 
+	const handleSelectAll = () => {
+		const newSearchSettings = structuredClone(state[searchSettingsName]);
+
+		// Set all filters with nonzero options to true
+		// in reg search, filters come in with [string: filter name, string | 0: number of docs]
+		const newFilter = originalFilters.reduce((accumulator, originalFilter) => {
+			if (showNumResultsPerOption) {
+				return { ...accumulator, [originalFilter[0]]: !!originalFilter[1] };
+			}
+			return { ...accumulator, [originalFilter[0]]: true };
+		}, {});
+
+		newSearchSettings[filter] = newFilter;
+		newSearchSettings[allSelected] = true;
+		newSearchSettings[specificSelected] = false;
+		newSearchSettings.isFilterUpdate = true;
+		newSearchSettings[update] = true;
+		setState(dispatch, {
+			[searchSettingsName]: newSearchSettings,
+			metricsCounted: false,
+			runSearch: !preventSearchOnChange,
+			runGraphSearch: !preventSearchOnChange,
+		});
+	};
+
 	return (
 		<MultiSelectFilter
 			state={state}
@@ -83,6 +115,8 @@ const PolicyMultiSelectFilter = ({
 			handleClear={handleClear}
 			showClear={Object.values(state[searchSettingsName][filter]).filter((value) => value).length !== 0}
 			isChecked={isChecked}
+			showSelectAll={true}
+			handleSelectAll={handleSelectAll}
 		/>
 	);
 };

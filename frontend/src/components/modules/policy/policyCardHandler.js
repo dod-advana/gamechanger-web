@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackEvent, trackFlipCardEvent } from '../../telemetry/Matomo';
 import {
 	CARD_FONT_SIZE,
-	convertDCTScoreToText,
 	getDocTypeStyles,
 	getMetadataForPropertyTable,
 	policyMetadata,
@@ -18,7 +17,7 @@ import _ from 'lodash';
 import styled from 'styled-components';
 import GCButton from '../../common/GCButton';
 import DocIngestModal from './policyDocIngestModal';
-import { Popover, TextField, Typography } from '@material-ui/core';
+import { Popover, TextField } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import GCAccordion from '../../common/GCAccordion';
@@ -29,6 +28,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { getDefaultComponent, styles, colWidth, clickFn, RevokedTag } from '../default/defaultCardHandler';
 import PolicyDocumentReferenceTable from './policyDocumentReferenceTable';
+import { CustomDimensions } from '../../telemetry/utils';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -437,38 +437,9 @@ const StyledEntityTopicFrontCardContent = styled.div`
 	}
 `;
 
-const StyledQuickCompareContent = styled.div`
-	background-color: ${'#E1E8EE'};
-	padding: 20px 0px;
-
-	.prev-next-buttons {
-		display: flex;
-		justify-content: right;
-		margin-right: 20px;
-		margin-bottom: 10px;
-	}
-
-	.paragraph-display {
-		display: flex;
-		place-content: space-evenly;
-
-		& .compare-block {
-			background-color: ${'#ffffff'};
-			border: 2px solid ${'#BCCBDB'};
-			border-radius: 6px;
-			width: 48%;
-			padding: 5px;
-
-			& .compare-header {
-				color: ${'#000000DE'};
-				font-size: 16px;
-				font-family: Montserrat;
-				font-weight: bold;
-				margin-bottom: 10px;
-			}
-		}
-	}
-`;
+const trackingActionForCard = 'CardInteraction';
+const trackingActionForGraphCard = 'GraphCardInteraction';
+const trackingActionForListView = 'ListViewInteraction';
 
 const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, cloneName }) => {
 	const classes = useStyles();
@@ -569,7 +540,8 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											getTrackingNameForFactory(cloneName),
 											'CancelFavorite',
 											'', // empty because topic getFilename always returns empty string
-											`search : ${searchText}`
+											null,
+											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -628,7 +600,8 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 											getTrackingNameForFactory(cloneName),
 											'Favorite',
 											'', // empty because topic getFilename always returns empty string
-											`search : ${searchText}`
+											null,
+											CustomDimensions.create(true, `search : ${searchText}, topic: ${topic}`)
 										);
 									}}
 									style={{
@@ -650,9 +623,34 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-const handleTopicClick = (topic, cloneName) => {
-	trackEvent(getTrackingNameForFactory(cloneName), 'TopicOpened', topic);
+const handleTopicClick = (topic, cloneName, idx) => {
+	trackEvent(
+		getTrackingNameForFactory(cloneName),
+		'TopicOpened',
+		topic,
+		null,
+		CustomDimensions.create(true, null, null, idx)
+	);
 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+};
+
+const handlePageHitHover = (
+	setHoveredHitFunc,
+	pageIdx,
+	trackingCategory,
+	trackingAction,
+	pageNumber,
+	fileName,
+	resultIdx
+) => {
+	setHoveredHitFunc && setHoveredHitFunc(pageIdx);
+	trackEvent(
+		trackingCategory,
+		`${trackingAction}-PageHit`,
+		'onMouseEnter',
+		pageNumber,
+		CustomDimensions.create(true, fileName, pageNumber, resultIdx)
+	);
 };
 
 export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, searchText, maxWidth) => {
@@ -691,7 +689,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												maxWidth: 'calc(100% - 15px)',
 											}}
 											onClick={() => {
-												handleTopicClick(topic, cloneData.clone_name);
+												handleTopicClick(topic, cloneData.clone_name, index);
 											}}
 										>
 											{topic}
@@ -706,7 +704,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											maxWidth: 'calc(100% - 15px)',
 										}}
 										onClick={() => {
-											handleTopicClick(topic, cloneData.clone_name);
+											handleTopicClick(topic, cloneData.clone_name, index);
 										}}
 									>
 										{topic}
@@ -866,6 +864,11 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 							onClick={() => {
 								setShowDocIngestModal(true);
 								requestDocIngest(item);
+								trackEvent(
+									getTrackingNameForFactory(state.cloneData.clone_name),
+									'RequestThisDataButton',
+									item.display_title_s
+								);
 							}}
 						>
 							Request This Data
@@ -1077,8 +1080,10 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 	setHoveredHit,
 	cloneName,
 	searchText,
-	contextHtml
+	contextHtml,
+	idx
 ) => {
+	const trackingCategory = getTrackingNameForFactory(cloneName);
 	return (
 		item.pageHits?.length > 0 && (
 			<GCAccordion
@@ -1086,6 +1091,15 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 				headerBackground={'rgb(238,241,242)'}
 				headerTextColor={'black'}
 				headerTextWeight={'normal'}
+				onChange={(isExpanding) =>
+					trackEvent(
+						trackingCategory,
+						`${trackingActionForListView}-PageHits`,
+						isExpanding ? 'onExpand' : 'onCollapse',
+						null,
+						CustomDimensions.create(true, item.filename, null, idx)
+					)
+				}
 			>
 				<div className={'expanded-hits'}>
 					<div className={'page-hits'}>
@@ -1101,7 +1115,17 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											handlePageHitHover(
+												setHoveredHit,
+												key,
+												trackingCategory,
+												trackingActionForListView,
+												page.pageNumber,
+												item.filename,
+												idx
+											);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1139,77 +1163,22 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 	);
 };
 
-const renderListViewParagraphHitsWithoutIntelligentSearch = (item, hoveredHit, setHoveredHit, contextHtml) => {
-	return (
-		item.paragraphs?.length > 0 && (
-			<GCAccordion
-				header={`PARAGRAPH HITS: ${item.paragraphs.length}`}
-				headerBackground={'rgb(238,241,242)'}
-				headerTextColor={'black'}
-				headerTextWeight={'normal'}
-			>
-				<div className={'expanded-hits'}>
-					<div className={'page-hits'}>
-						{_.chain(item.paragraphs)
-							.map((paragraph, key) => {
-								return (
-									<div
-										className={'paragraph-hit'}
-										key={key}
-										style={{
-											...(hoveredHit === key && {
-												backgroundColor: '#E9691D',
-												color: 'white',
-											}),
-										}}
-										onMouseEnter={() => setHoveredHit(key)}
-										onClick={(e) => {
-											e.preventDefault();
-										}}
-									>
-										<div>
-											{paragraph.id && (
-												<div className={'par-hit'}>{`Page: ${paragraph.page_num_i} Par: ${
-													paragraph.id.split('_')[1]
-												}`}</div>
-											)}
-											{paragraph.score && (
-												<div className={'par-hit'}>{`Score: ${convertDCTScoreToText(
-													paragraph.score
-												)}`}</div>
-											)}
-										</div>
-										<i
-											className="fa fa-chevron-right"
-											style={{
-												color: hoveredHit === key ? 'white' : 'rgb(189, 189, 189)',
-											}}
-										/>
-									</div>
-								);
-							})
-							.value()}
-					</div>
-					<div className={'expanded-metadata'}>
-						<blockquote
-							dangerouslySetInnerHTML={{
-								__html: sanitizeHtml(contextHtml),
-							}}
-						/>
-					</div>
-				</div>
-			</GCAccordion>
-		)
-	);
-};
-
-const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody) => {
+const renderListViewMetaDataWithoutIntelligentSearch = (item, backBody, cloneName) => {
 	return !item.notInCorpus ? (
 		<GCAccordion
 			header={'DOCUMENT METADATA'}
 			headerBackground={'rgb(238,241,242)'}
 			headerTextColor={'black'}
 			headerTextWeight={'normal'}
+			onChange={(isExpanding) => {
+				trackEvent(
+					getTrackingNameForFactory(cloneName),
+					`${trackingActionForListView}-DocumentMetadata`,
+					isExpanding ? 'onExpand' : 'onCollapse',
+					null,
+					CustomDimensions.create(true, item.filename)
+				);
+			}}
 		>
 			<div className={'metadata'}>
 				<div className={'inner-scroll-container'} style={{ textAlign: 'left' }}>
@@ -1228,7 +1197,8 @@ const renderListView = (
 	metadataExpandedState,
 	cloneName,
 	searchText,
-	intelligentFeedbackComponent
+	intelligentFeedbackComponent,
+	idx
 ) => {
 	const { hoveredHit, setHoveredHit } = hoveredHitState;
 	const { metadataExpanded, setMetadataExpanded } = metadataExpandedState;
@@ -1243,10 +1213,10 @@ const renderListView = (
 					setHoveredHit,
 					cloneName,
 					searchText,
-					contextHtml
+					contextHtml,
+					idx
 				)}
-				{renderListViewParagraphHitsWithoutIntelligentSearch(item, hoveredHit, setHoveredHit, contextHtml)}
-				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody)}
+				{renderListViewMetaDataWithoutIntelligentSearch(item, backBody, cloneName)}
 			</StyledListViewFrontCardContent>
 		);
 	} else if (intelligentSearch) {
@@ -1266,7 +1236,9 @@ const renderListView = (
 												color: 'white',
 											}),
 										}}
-										onMouseEnter={() => setHoveredHit(key)}
+										onMouseEnter={() => {
+											setHoveredHit(key);
+										}}
 										onClick={(e) => {
 											e.preventDefault();
 											clickFn(
@@ -1304,8 +1276,10 @@ const renderListView = (
 					onClick={() => {
 						trackEvent(
 							getTrackingNameForFactory(cloneName),
-							'ListViewInteraction',
-							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata'
+							trackingActionForListView,
+							!metadataExpanded ? 'Expand metadata' : 'Collapse metadata',
+							null,
+							CustomDimensions.create(true, item.filename)
 						);
 						setMetadataExpanded(!metadataExpanded);
 					}}
@@ -1326,7 +1300,7 @@ const renderListView = (
 	}
 };
 
-const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
+const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, documentIdx, trackingCategory) => {
 	if (page.title || key < 5) {
 		return (
 			<div
@@ -1338,7 +1312,17 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						color: 'white',
 					}),
 				}}
-				onMouseEnter={() => setHoveredHit(key)}
+				onMouseEnter={() => {
+					handlePageHitHover(
+						setHoveredHit,
+						key,
+						trackingCategory,
+						trackingActionForCard,
+						page.pageNumber,
+						item.filename,
+						documentIdx
+					);
+				}}
 				onClick={(e) => {
 					e.preventDefault();
 					clickFn(
@@ -1346,7 +1330,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 						state.cloneData.clone_name,
 						state.searchText,
 						page.pageNumber,
-						item.download_url_s
+						item.download_url_s,
+						documentIdx
 					);
 				}}
 			>
@@ -1388,10 +1373,12 @@ const cardHandler = {
 				setMetadataExpanded,
 				intelligentSearch,
 				intelligentFeedbackComponent,
+				idx,
 			} = props;
 
 			const contextHtml = getHoveredSnippet(item, hoveredHit);
 			const publicationDate = getPublicationDate(item.publication_date_dt);
+			const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
 			if (state.listView) {
 				return renderListView(
@@ -1400,7 +1387,8 @@ const cardHandler = {
 					{ metadataExpanded, setMetadataExpanded },
 					state.cloneData.clone_name,
 					state.searchText,
-					intelligentFeedbackComponent
+					intelligentFeedbackComponent,
+					idx
 				);
 			} else {
 				return (
@@ -1429,7 +1417,16 @@ const cardHandler = {
 							<div className={'page-hits'}>
 								{_.chain(item.pageHits)
 									.map((page, key) => {
-										return renderPageHit(page, key, hoveredHit, setHoveredHit, item, state);
+										return renderPageHit(
+											page,
+											key,
+											hoveredHit,
+											setHoveredHit,
+											item,
+											state,
+											idx,
+											trackingCategory
+										);
 									})
 									.value()}
 							</div>
@@ -1445,55 +1442,6 @@ const cardHandler = {
 					</StyledFrontCardContent>
 				);
 			}
-		},
-
-		getDocumentQuickCompare: (props) => {
-			const { item, compareIndex, handleChangeCompareIndex } = props;
-
-			return (
-				<StyledQuickCompareContent>
-					{item.paragraphs.length > 1 && (
-						<div className={'prev-next-buttons'}>
-							<GCButton
-								id={'prev'}
-								onClick={() => {
-									handleChangeCompareIndex(-1);
-								}}
-								isSecondaryBtn={true}
-								style={{ height: 36 }}
-								disabled={compareIndex === 0}
-							>
-								Previous
-							</GCButton>
-							<GCButton
-								id={'next'}
-								onClick={() => {
-									handleChangeCompareIndex(1);
-								}}
-								isSecondaryBtn={true}
-								style={{ height: 36 }}
-								disabled={compareIndex >= item.paragraphs.length - 1}
-							>
-								Next
-							</GCButton>
-						</div>
-					)}
-					<div className={'paragraph-display'}>
-						<div className={'compare-block'}>
-							<Typography className={'compare-header'}>Uploaded Paragraph</Typography>
-							{item.dataToQuickCompareTo[item.paragraphs[compareIndex].paragraphIdBeingMatched]}
-						</div>
-						<div className={'compare-block'}>
-							<Typography className={'compare-header'}>
-								Relevant Paragraph - Page: {item.paragraphs[compareIndex].page_num_i} Paragraph:{' '}
-								{item.paragraphs[compareIndex].id.split('_')[1]} Score:{' '}
-								{convertDCTScoreToText(item.paragraphs[compareIndex].score)}
-							</Typography>
-							{item.paragraphs[compareIndex]?.par_raw_text_t}
-						</div>
-					</div>
-				</StyledQuickCompareContent>
-			);
 		},
 
 		getCardBack: ({ item, state, dispatch }) => {
@@ -1538,6 +1486,7 @@ const cardHandler = {
 				item,
 				searchText,
 				state,
+				idx,
 			} = props;
 			return (
 				<>
@@ -1562,8 +1511,10 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'CardInteraction',
-												'Close Graph Card'
+												trackingActionForCard,
+												'Close Graph Card',
+												null,
+												CustomDimensions.create(true, filename)
 											);
 											e.preventDefault();
 											closeGraphCard();
@@ -1578,8 +1529,10 @@ const cardHandler = {
 									onClick={(e) => {
 										trackEvent(
 											getTrackingNameForFactory(cloneName),
-											'CardInteraction',
-											'showDocumentDetails'
+											trackingActionForCard,
+											'showDocumentDetails',
+											null,
+											CustomDimensions.create(true, filename, null, idx)
 										);
 										window.open(
 											`#/gamechanger-details?cloneName=${cloneName}&type=document&documentName=${item.id}`
@@ -1606,11 +1559,10 @@ const cardHandler = {
 								data-cy="card-footer-more"
 								style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 								onClick={() => {
-									trackEvent(
+									trackFlipCardEvent(
 										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'flipCard',
-										toggledMore ? 'Overview' : 'More'
+										toggledMore,
+										CustomDimensions.create(true, filename, null, idx)
 									);
 									setToggledMore(!toggledMore);
 								}}
@@ -1688,7 +1640,11 @@ const cardHandler = {
 							style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 							href={'#'}
 							onClick={(e) => {
-								trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'Close Graph Card');
+								trackEvent(
+									getTrackingNameForFactory(cloneName),
+									trackingActionForCard,
+									'Close Graph Card'
+								);
 								e.preventDefault();
 								closeGraphCard();
 							}}
@@ -1865,9 +1821,8 @@ const cardHandler = {
 										onClick={(e) => {
 											trackEvent(
 												getTrackingNameForFactory(cloneName),
-												'GraphCardInteraction',
-												'Open',
-												`${item.name}DetailsPage`
+												trackingActionForGraphCard,
+												`Open${item.name}DetailsPage`
 											);
 											e.preventDefault();
 											window.open(
@@ -1920,9 +1875,8 @@ const cardHandler = {
 							onClick={(e) => {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
-									'GraphCardInteraction',
-									'Open',
-									`${item.name}DetailsPage`
+									trackingActionForGraphCard,
+									`Open${item.name}DetailsPage`
 								);
 								e.preventDefault();
 								window.open(
@@ -1939,8 +1893,10 @@ const cardHandler = {
 								onClick={(e) => {
 									trackEvent(
 										getTrackingNameForFactory(cloneName),
-										'CardInteraction',
-										'Close Graph Card'
+										trackingActionForGraphCard,
+										'Close Graph Card',
+										null,
+										CustomDimensions.create(true, item.name)
 									);
 									e.preventDefault();
 									closeGraphCard();
@@ -1953,11 +1909,10 @@ const cardHandler = {
 					<div
 						style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 						onClick={() => {
-							trackEvent(
+							trackFlipCardEvent(
 								getTrackingNameForFactory(cloneName),
-								'CardInteraction',
-								'flipCard',
-								toggledMore ? 'Overview' : 'More'
+								toggledMore,
+								CustomDimensions.create(true, item.name)
 							);
 							setToggledMore(!toggledMore);
 						}}
@@ -2143,8 +2098,7 @@ const cardHandler = {
 								trackEvent(
 									getTrackingNameForFactory(cloneName),
 									'TopicCardOnClick',
-									'Open',
-									`${item.name.toLowerCase()}DetailsPage`
+									`Open${item.name.toLowerCase()}DetailsPage`
 								);
 								e.preventDefault();
 								window.open(
@@ -2159,7 +2113,11 @@ const cardHandler = {
 								style={{ ...styles.footerButtonBack, CARD_FONT_SIZE }}
 								href={'#'}
 								onClick={(e) => {
-									trackEvent(getTrackingNameForFactory(cloneName), 'TopicCardOnClick', 'Close');
+									trackEvent(
+										getTrackingNameForFactory(cloneName),
+										`${trackingActionForGraphCard}-TopicCardOnClick`,
+										'Close'
+									);
 									e.preventDefault();
 									closeGraphCard();
 								}}
@@ -2170,11 +2128,10 @@ const cardHandler = {
 						<div
 							style={{ ...styles.viewMoreButton, color: '#1E88E5' }}
 							onClick={() => {
-								trackEvent(
+								trackFlipCardEvent(
 									getTrackingNameForFactory(cloneName),
-									'CardInteraction',
-									'flipCard',
-									toggledMore ? 'Overview' : 'More'
+									toggledMore,
+									CustomDimensions.create(true, item.name)
 								);
 								setToggledMore(!toggledMore);
 							}}
