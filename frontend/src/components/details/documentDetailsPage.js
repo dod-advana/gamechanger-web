@@ -44,6 +44,7 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, se
 		})
 		.then((graph) => {
 			if (graph?.data?.error) setBackendError(graph.data.error);
+			console.log('HERE IS GRAPH DATA', graph);
 			setGraphData(graph.data.graph);
 			setRunningQuery(false);
 		});
@@ -169,7 +170,7 @@ const DocumentDetailsPage = (props) => {
 	);
 
 	useEffect(() => {
-		if (!graphData.nodes.length > 0 || !cloneData) return;
+		if (!graphData?.nodes.length > 0 || !cloneData) return;
 
 		// Find doc Ids to get the docs that are similar to
 		let docIdSet = new Set();
