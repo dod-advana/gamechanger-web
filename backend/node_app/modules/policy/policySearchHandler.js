@@ -43,7 +43,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId, storeHistory) {
-		const { searchText, fromRefreshOrLink = false } = req.body;
+		const { searchText, reviseFilterCounts = false } = req.body;
 
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(
 			req.body,
@@ -58,9 +58,10 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/"+/g, '');
 		}
 		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
+
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, fromRefreshOrLink);
+		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts);
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
@@ -70,6 +71,7 @@ class PolicySearchHandler extends SearchHandler {
 				endTimeInt - startTimeInt
 			}`
 		);
+
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId);
 		}
@@ -274,7 +276,7 @@ class PolicySearchHandler extends SearchHandler {
 		return abbreviationExpansions;
 	}
 
-	async doSearch(req, expansionDict, clientObj, userId, fromRefreshOrLink = false) {
+	async doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts = false) {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
@@ -288,7 +290,7 @@ class PolicySearchHandler extends SearchHandler {
 				userId
 			);
 
-			if (fromRefreshOrLink) {
+			if (reviseFilterCounts) {
 				const aggregations = await this.searchUtility.getDocOrgAndTypeCounts(
 					req,
 					{ ...req.body, expansionDict, operator },
