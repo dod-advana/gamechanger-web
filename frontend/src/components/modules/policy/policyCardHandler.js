@@ -664,13 +664,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 
 	temp.map((metaData) => {
 		if (metaData.Key === 'Topics') {
-			metaData.Key = (
-				<div>
-					Topics
-					<br />
-					<b style={{ color: 'red' }}>(Beta)</b>
-				</div>
-			);
+			metaData.Key = <div>Topics</div>;
 			const topics = metaData.Value;
 			metaData.Value = (
 				<div>
@@ -692,6 +686,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											// 	handleTopicClick(topic, cloneData.clone_name, index);
 											// }}
 											onClick={() => {
+												dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
 												setState(dispatch, { searchText: topic, runSearch: true });
 											}}
 										>
@@ -710,6 +705,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 										// 	handleTopicClick(topic, cloneData.clone_name, index);
 										// }}
 										onClick={() => {
+											dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
 											setState(dispatch, { searchText: topic, runSearch: true });
 										}}
 									>
