@@ -136,7 +136,6 @@ const initState = {
 	search_after: [],
 	search_before: [],
 	visitEarlierPage: false,
-	fromRefreshOrLink: false,
 
 	count: 0,
 	resultsPage: 1,
