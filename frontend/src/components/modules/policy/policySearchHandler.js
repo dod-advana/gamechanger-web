@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import axios from 'axios';
 
 import {
 	getOrgToOrgQuery,
@@ -19,7 +18,7 @@ import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
 const gameChangerAPI = new GameChangerAPI();
-let cancelToken = axios.CancelToken.source();
+let mostRecentSearchTS = 0;
 
 const getAndSetDidYouMean = (index, searchText, dispatch) => {
 	gameChangerAPI
@@ -382,7 +381,6 @@ const PolicySearchHandler = {
 			searchSettings,
 			currentViewName,
 			cloneData,
-			runningSearch,
 			currentSort,
 			currentOrder,
 		} = state;
@@ -400,11 +398,6 @@ const PolicySearchHandler = {
 			publicationDateAllTime,
 			searchFields,
 		} = searchSettings;
-
-		if (runningSearch) {
-			cancelToken.cancel('cancelled axios with consecutive call');
-			cancelToken = axios.CancelToken.source();
-		}
 
 		let favSearchUrls = [];
 		if (userData !== undefined && userData.favorite_searches !== undefined) {
@@ -443,6 +436,7 @@ const PolicySearchHandler = {
 		handleRecentSearchesLocalStorage(recentSearchesParsed, searchText, cloneData);
 
 		const t0 = new Date().getTime();
+		mostRecentSearchTS = t0;
 
 		let searchResults = [];
 
@@ -450,7 +444,7 @@ const PolicySearchHandler = {
 
 		setState(dispatch, {
 			selectedDocuments: new Map(),
-			loading: searchSettings.isFilterUpdate ? false : true,
+			loading: !searchSettings.isFilterUpdate,
 			replaceResults: true,
 			metricsLoading: false,
 			noResultsMessage: null,
@@ -494,27 +488,28 @@ const PolicySearchHandler = {
 				setState(dispatch, { runGraphSearch: true });
 			}
 
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling due to more recent search');
+			}
+
 			gameChangerAPI
-				.getDataForSearch(
-					{
-						options: {
-							orgFilterString,
-							orgFilter: modifiedOrgFilter,
-							typeFilterString,
-							typeFilter: modifiedTypeFilter,
-							cloneData,
-							useGCCache,
-							searchFields,
-							accessDateFilter,
-							publicationDateFilter,
-							publicationDateAllTime,
-							searchText,
-							includeRevoked,
-						},
-						cloneName: cloneData.clone_name,
+				.getDataForSearch({
+					options: {
+						orgFilterString,
+						orgFilter: modifiedOrgFilter,
+						typeFilterString,
+						typeFilter: modifiedTypeFilter,
+						cloneData,
+						useGCCache,
+						searchFields,
+						accessDateFilter,
+						publicationDateFilter,
+						publicationDateAllTime,
+						searchText,
+						includeRevoked,
 					},
-					cancelToken
-				)
+					cloneName: cloneData.clone_name,
+				})
 				.then((res) => {
 					setState(dispatch, {
 						entitiesForSearch: res.data.entities,
@@ -533,41 +528,50 @@ const PolicySearchHandler = {
 					});
 				});
 
-			let combinedSearch = await gameChangerAPI.getCombinedSearchMode(cancelToken);
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling due to more recent search');
+			}
+
+			let combinedSearch = await gameChangerAPI.getCombinedSearchMode();
 			combinedSearch = combinedSearch.data.value === 'true';
 
 			let ltr = await gameChangerAPI.getLTRMode();
 			ltr = ltr.data.value === 'true';
 
-			const resp = await gameChangerAPI.modularSearch(
-				{
-					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
-					offset,
-					options: {
-						searchType,
-						orgFilterString,
-						transformResults,
-						charsPadding,
-						typeFilterString,
-						showTutorial,
-						useGCCache,
-						tiny_url,
-						searchFields,
-						accessDateFilter,
-						publicationDateFilter,
-						publicationDateAllTime,
-						includeRevoked,
-						archivedCongressSelected,
-						ltr,
-						sort: currentSort,
-						order: currentOrder,
-						reviseFilterCounts: true,
-					},
-					limit: 18,
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling due to more recent search');
+			}
+
+			const resp = await gameChangerAPI.modularSearch({
+				cloneName: cloneData.clone_name,
+				searchText: searchObject.search,
+				offset,
+				options: {
+					searchType,
+					orgFilterString,
+					transformResults,
+					charsPadding,
+					typeFilterString,
+					showTutorial,
+					useGCCache,
+					tiny_url,
+					searchFields,
+					accessDateFilter,
+					publicationDateFilter,
+					publicationDateAllTime,
+					includeRevoked,
+					archivedCongressSelected,
+					ltr,
+					sort: currentSort,
+					order: currentOrder,
+					reviseFilterCounts: true,
 				},
-				cancelToken
-			);
+				limit: 18,
+			});
+
+			if (t0 < mostRecentSearchTS) {
+				throw new Error('cancelling render due to more recent search');
+			}
 
 			let getUserDataFlag = true;
 
