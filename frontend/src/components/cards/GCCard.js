@@ -196,7 +196,7 @@ const StyledCardContainer = styled.div`
 						position: relative;
 						padding: 5px 5px;
 						display: inline-block;
-						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
+						overflow-y: scroll;
 					}
 
 					.styled-card-front-buttons {
@@ -238,7 +238,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
 						display: block;
-						overflow: auto;
+						overflow-y: scroll;
 						height: 100%;
 					}
 
@@ -714,7 +714,6 @@ function GCCard(props) {
 
 	const isRevoked = item.is_revoked_b;
 	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
-	const allowScroll = true;
 
 	const classes = useStyles();
 
@@ -904,7 +903,6 @@ function GCCard(props) {
 			toggledMore={toggledMore}
 			isRevoked={isRevoked}
 			selected={selected}
-			allowScroll={allowScroll}
 			showSideFilters={state.showSideFilters}
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}
