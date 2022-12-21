@@ -817,9 +817,24 @@ const cardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
-
-			const review =
-				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
+			let review = [];
+			if (item.review_n) {
+				item.review_n
+					.filter((review) => {
+						return (
+							review.portfolio_name_s === state.selectedPortfolio &&
+							Object.keys(review).some((key) => key.includes('class_label_s'))
+						);
+					})
+					.forEach((rev) => {
+						const existingTags = Object.keys(rev).filter((key) => key.includes('class_label_s'));
+						for (const tag of existingTags) {
+							review.push(rev[tag]);
+						}
+					});
+			}
+			review = [...new Set(review)];
+			console.log('what is review', review, 'and item', item);
 
 			try {
 				const toggleExpandMetadata = () => {
@@ -875,10 +890,12 @@ const cardHandler = {
 								setHoveredHit={setHoveredHit}
 								contextHtml={contextHtml}
 							/>
-							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-								{review && review.primaryClassLabel && 'Tag:'}{' '}
-								{renderPortfolioTags([review.primaryClassLabel])}
-							</div>
+
+							{review.length > 0 && (
+								<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
+									Tags: {renderPortfolioTags(review)}
+								</div>
+							)}
 						</StyledFrontCardContent>
 					);
 				}
