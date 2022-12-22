@@ -385,8 +385,19 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 
 const getHoveredSnippet = (item, hoveredHit) => {
 	let hoveredSnippet = '';
+
 	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
+		let doLoop = true;
+		let pointer = hoveredHit + 1;
+		while (doLoop) {
+			if (item.pageHits[hoveredHit].title === item.pageHits[pointer].title) {
+				hoveredSnippet += `<br>${item.pageHits[pointer].snippet}`;
+				pointer++;
+			} else {
+				doLoop = false;
+			}
+		}
 	}
 	return hoveredSnippet;
 };
@@ -570,10 +581,19 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 };
 
 const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
+	const newObj = {};
+	for (let i = 0; i < item.pageHits.length; i++) {
+		if (!newObj[item.pageHits[i].title]) {
+			newObj[item.pageHits[i].title] = item.pageHits[i].snippet;
+		} else {
+			newObj[item.pageHits[i].title] = newObj[item.pageHits[i].title] + `<br>${item.pageHits[i].snippet} `;
+		}
+	}
+	const resultArr = Object.keys(newObj).map((title) => ({ title, snippet: newObj[title] }));
 	return (
 		<div className="hits-container">
 			<div className={'page-hits'}>
-				{_.chain(item.pageHits)
+				{_.chain(resultArr)
 					.map((page, key) => {
 						return (
 							<div
@@ -817,6 +837,8 @@ const cardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
+			console.log('here is hoveredHit', hoveredHit);
+			console.log('here is item', item);
 			let review = [];
 			if (item.review_n) {
 				item.review_n
@@ -834,7 +856,6 @@ const cardHandler = {
 					});
 			}
 			review = [...new Set(review)];
-			console.log('what is review', review, 'and item', item);
 
 			try {
 				const toggleExpandMetadata = () => {
@@ -858,6 +879,7 @@ const cardHandler = {
 				}
 
 				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
+				console.log('here is hoveredsnipped', hoveredSnippet);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
 
