@@ -21,6 +21,7 @@ const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const ExcelJS = require('exceljs');
 const path = require('path');
+const fs = require('fs');
 
 const { performance } = require('perf_hooks');
 
@@ -1470,10 +1471,13 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async bulkUpload(req, userId) {
-		const { portfolio } = req.body;
+		const { portfolio, file } = req.body;
+		console.log(req.body);
+
+		console.log(file);
 
 		const workbook = new ExcelJS.Workbook();
-		const filepath = path.join(__dirname, './real-excel.xlsx');
+		const filepath = path.join(__dirname, '../../../' + file.path);
 		let excelFile = await workbook.xlsx.readFile(filepath);
 		let sheet1 = excelFile.getWorksheet('Primary Review Worksheet');
 		const cols = [
@@ -1558,13 +1562,13 @@ class JBookDataHandler extends DataHandler {
 			}
 		});
 
-		var startTime = performance.now();
+		const startTime = performance.now();
 		let created = [];
 		let dupes = [];
 		let failed = [];
 		let failES = [];
 		for (let [index, reviewData] of reviewArray.entries()) {
-			// console.log(reviewData);
+			console.log(reviewData);
 			const result = await this.rev.findAll({
 				where: {
 					budget_line_item: reviewData.budget_line_item,
@@ -1575,7 +1579,6 @@ class JBookDataHandler extends DataHandler {
 					portfolio_name: reviewData.portfolio_name,
 				},
 			});
-			// console.log(result);
 			let newOrUpdatedReview;
 			if (result.length === 0) {
 				if (reviewData.budget_type !== 'odoc') {
@@ -1606,9 +1609,6 @@ class JBookDataHandler extends DataHandler {
 						},
 					}
 				);
-
-				// newOrUpdatedReview = { ...reviewData };
-				// console.log(newOrUpdatedReview);
 
 				if (newOrUpdatedReview[0] !== 1) {
 					failed.push(reviewData);
@@ -1691,7 +1691,16 @@ class JBookDataHandler extends DataHandler {
 			}
 		}
 
-		var endTime = performance.now();
+		fs.unlink(file.path, function (err) {
+			if (err) {
+				console.error(err);
+				console.log('File not found');
+			} else {
+				console.log('File Delete Successfuly');
+			}
+		});
+
+		const endTime = performance.now();
 		console.log(JSON.stringify(failed));
 		console.log(`not found: ${created.length}`);
 		console.log(`dupes: ${dupes.length}`);
