@@ -8,11 +8,10 @@ import ViewHeader from '../mainView/ViewHeader';
 import _ from 'lodash';
 
 const gameChangerAPI = new GameChangerAPI();
+let mostRecentSearchTS = 0;
 
 const getGraphData = async (
 	setRunningSearch,
-	setGraphResultsFound,
-	graphResultsFound,
 	setGraph,
 	setNoSearches,
 	setNodeLimit,
@@ -49,7 +48,8 @@ const getGraphData = async (
 
 	try {
 		const gT0 = new Date().getTime();
-		setGraphResultsFound(false);
+		mostRecentSearchTS = gT0;
+
 		const graphResp = await gameChangerAPI.graphSearchPOST({
 			cloneName: cloneData.clone_name,
 			searchText: searchObject.search,
@@ -70,7 +70,8 @@ const getGraphData = async (
 				loadAll,
 			},
 		});
-		if (graphResultsFound) return;
+
+		if (gT0 < mostRecentSearchTS) return;
 
 		const { graphData = {} } = graphResp?.data ?? {};
 
@@ -79,12 +80,10 @@ const getGraphData = async (
 		if (graphData.nodes?.length > 0) {
 			setGraph({ ...graphData, timeFound: (gT1 - gT0) / 1000 });
 			setRunningSearch(false);
-			setGraphResultsFound(true);
 			setNoSearches(false);
 		} else {
 			setGraph({ nodes: [], edges: [] });
 			setRunningSearch(false);
-			setGraphResultsFound(true);
 			setNoSearches(true);
 		}
 		setNodeLimit(graphResp?.data?.query?.limit);
@@ -98,7 +97,6 @@ const DefaultGraphView = (props) => {
 	const { context } = props;
 	const { state, dispatch } = context;
 
-	const [graphResultsFound, setGraphResultsFound] = useState(false);
 	const [runningSearch, setRunningSearch] = useState(false);
 	const [noSearches, setNoSearches] = useState(true);
 	const [graph, setGraph] = useState({ nodes: [], edges: [], timeFound: 0 });
@@ -118,22 +116,12 @@ const DefaultGraphView = (props) => {
 
 	useEffect(() => {
 		if (state.runGraphSearch) {
-			getGraphData(
-				setRunningSearch,
-				setGraphResultsFound,
-				graphResultsFound,
-				setGraph,
-				setNoSearches,
-				setNodeLimit,
-				setMockedFromES,
-				state,
-				dispatch
-			);
+			getGraphData(setRunningSearch, setGraph, setNoSearches, setNodeLimit, setMockedFromES, state, dispatch);
 			const newSearchSettings = _.cloneDeep(state.searchSettings);
 			newSearchSettings.loadAll = false;
 			setState(dispatch, { searchSettings: newSearchSettings });
 		}
-	}, [state, graphResultsFound, dispatch]);
+	}, [state, dispatch]);
 
 	const resultsText = runningSearch
 		? 'Running search...'
@@ -166,7 +154,7 @@ const DefaultGraphView = (props) => {
 						searchSettings: { ...state.searchSettings, loadAll: true },
 						runGraphSearch: true,
 					});
-					setGraphResultsFound(false);
+					mostRecentSearchTS = new Date().getTime();
 				}}
 				nodeLimit={nodeLimit}
 				mockedFromES={mockedFromES}
