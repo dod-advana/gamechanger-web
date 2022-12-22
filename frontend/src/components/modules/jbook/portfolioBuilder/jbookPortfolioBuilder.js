@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import FormData from 'form-data';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
-
+import DragAndDrop from '../../../common/DragAndDrop';
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
@@ -67,7 +68,10 @@ const PortfolioBuilder = (props) => {
 
 	const [showModal, setShowModal] = useState(false);
 	const [showPublicModal, setShowPublicModal] = useState(false);
+	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
+
+	const [selectedFile, setSelectedFile] = useState(null);
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -264,17 +268,12 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
-
+					<hr />
 					<div style={{ marginTop: '20px' }}>
 						<GCButton
 							onClick={async () => {
-								gameChangerAPI.callDataFunction({
-									functionName: 'bulkUpload',
-									cloneName: 'jbook',
-									options: {
-										portfolio,
-									},
-								});
+								setShowUploadModal(true);
+								setModalData(portfolio);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -287,6 +286,14 @@ const PortfolioBuilder = (props) => {
 
 		return portfolios;
 	};
+
+	const onDrop = useCallback(
+		async (acceptedFiles) => {
+			const [file] = acceptedFiles;
+			await setSelectedFile(file);
+		},
+		[setSelectedFile]
+	);
 
 	return (
 		<>
@@ -445,6 +452,96 @@ const PortfolioBuilder = (props) => {
 								style={{ margin: '10px' }}
 							>
 								Delete
+							</GCButton>
+						</DialogActions>
+					</Dialog>
+					<Dialog
+						open={showUploadModal}
+						scroll={'paper'}
+						maxWidth="sm"
+						disableEscapeKeyDown
+						disableBackdropClick
+						classes={{
+							paperWidthSm: classes.dialogSm,
+						}}
+					>
+						<DialogTitle>
+							<div style={{ display: 'flex', width: '100%' }}>
+								<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+									Bulk upload
+								</Typography>
+							</div>
+							<IconButton
+								aria-label="close"
+								style={{
+									position: 'absolute',
+									right: '0px',
+									top: '0px',
+									height: 60,
+									width: 60,
+									color: 'black',
+									backgroundColor: styles.backgroundGreyLight,
+									borderRadius: 0,
+								}}
+								onClick={() => {
+									setShowUploadModal(false);
+								}}
+							>
+								<CloseIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</DialogTitle>
+						<DialogContent>
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Upload Excel Document
+							</Typography>
+
+							<DragAndDrop
+								text="Drag and drop a file here, or click to select a file (.xlsx files only)"
+								acceptedFileTypes={[
+									'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+									'application/vnd.ms-excel',
+								]}
+								handleFileDrop={onDrop}
+							/>
+
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
+							</Typography>
+						</DialogContent>
+						<DialogActions>
+							<GCButton
+								id={'editReviewerClose'}
+								onClick={() => {
+									setShowUploadModal(false);
+									setSelectedFile(null);
+								}}
+								style={{ margin: '10px' }}
+								buttonColor={'#8091A5'}
+							>
+								Cancel
+							</GCButton>
+							<GCButton
+								id={'uploadSubmit'}
+								onClick={async () => {
+									const form = new FormData();
+									console.log(selectedFile);
+									form.append('file', selectedFile, selectedFile.name);
+									form.append('functionName', 'bulkUpload');
+									form.append('cloneName', 'jbook');
+									form.append('options', JSON.stringify({ portfolio: modalData }));
+
+									await gameChangerAPI.callUploadFunction(form, {
+										headers: form.getHeaders
+											? form.getHeaders()
+											: { 'Content-Type': 'multipart/form-data' },
+									});
+									setShowUploadModal(false);
+									setSelectedFile(null);
+								}}
+								disabled={selectedFile === null}
+								style={{ margin: '10px' }}
+							>
+								Upload
 							</GCButton>
 						</DialogActions>
 					</Dialog>
