@@ -161,6 +161,12 @@ const renderRecentSearches = (search, state, dispatch) => {
 		run_at,
 	} = search;
 
+	const formattedSourceFilter = orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ');
+	const formattedTypeFilter = typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ');
+	const formattedPublicationDate = publicationDateAllTime
+		? 'All'
+		: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
+
 	return (
 		<RecentSearchContainer
 			onClick={() => {
@@ -195,26 +201,38 @@ const renderRecentSearches = (search, state, dispatch) => {
 					<Typography
 						style={{
 							...styles.containerText,
-							textOverflow: 'ellipsis',
-							whiteSpace: 'nowrap',
-							overflow: 'hidden',
+							...styles.overflowEllipsis,
 						}}
 					>
 						{searchText}
 					</Typography>
 				</GCTooltip>
 			</div>
-			<Typography style={styles.subtext}>
-				<strong>Source Filter: </strong>
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
-			</Typography>
-			<Typography style={styles.subtext}>
-				<strong>Type Filter: </strong>
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
-			</Typography>
+			<GCTooltip title={formattedSourceFilter} placement="top" arrow>
+				<Typography
+					style={{
+						...styles.subtext,
+						...styles.overflowEllipsis,
+					}}
+				>
+					<strong>Source Filter: </strong>
+					{formattedSourceFilter}
+				</Typography>
+			</GCTooltip>
+			<GCTooltip title={formattedTypeFilter} placement="top" arrow>
+				<Typography
+					style={{
+						...styles.subtext,
+						...styles.overflowEllipsis,
+					}}
+				>
+					<strong>Type Filter: </strong>
+					{formattedTypeFilter}
+				</Typography>
+			</GCTooltip>
 			<Typography style={styles.subtext}>
 				<strong>Publication Date: </strong>
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				{formattedPublicationDate}
 			</Typography>
 			<Typography style={styles.subtext}>
 				<strong>Include Canceled: </strong>
