@@ -9,6 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { CircularProgress } from '@material-ui/core';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
@@ -72,6 +73,7 @@ const PortfolioBuilder = (props) => {
 	const [deleteModal, setDeleteModal] = useState(false);
 
 	const [selectedFile, setSelectedFile] = useState(null);
+	const [loading, setLoading] = useState(false);
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -507,6 +509,14 @@ const PortfolioBuilder = (props) => {
 							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
 								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
 							</Typography>
+							{loading && (
+								<div>
+									<Typography style={{ fontFamily: 'Montserrat', fontSize: 12 }}>
+										Loading...
+									</Typography>
+									<CircularProgress />
+								</div>
+							)}
 						</DialogContent>
 						<DialogActions>
 							<GCButton
@@ -529,12 +539,14 @@ const PortfolioBuilder = (props) => {
 									form.append('functionName', 'bulkUpload');
 									form.append('cloneName', 'jbook');
 									form.append('options', JSON.stringify({ portfolio: modalData }));
-
-									await gameChangerAPI.callUploadFunction(form, {
+									setLoading(true);
+									const results = await gameChangerAPI.callUploadFunction(form, {
 										headers: form.getHeaders
 											? form.getHeaders()
 											: { 'Content-Type': 'multipart/form-data' },
 									});
+									console.log(results);
+									setLoading(false);
 									setShowUploadModal(false);
 									setSelectedFile(null);
 								}}
