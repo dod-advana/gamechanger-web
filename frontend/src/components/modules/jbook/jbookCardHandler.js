@@ -383,21 +383,24 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	];
 };
 
-const getHoveredSnippet = (item, hoveredHit) => {
+const getHoveredSnippet = (item, hoveredHit, isMultiple = false) => {
 	let hoveredSnippet = '';
-
+	console.log('this is the hoveredHit!!!', hoveredHit);
+	console.log('is this multiple??', isMultiple);
 	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-		let doLoop = true;
-		let pointer = hoveredHit + 1;
-		while (doLoop) {
-			if (item.pageHits[hoveredHit].title === item.pageHits[pointer].title) {
-				hoveredSnippet += `<br>${item.pageHits[pointer].snippet}`;
-				pointer++;
-			} else {
-				doLoop = false;
-			}
-		}
+		// let doLoop = true;
+		// let pointer = hoveredHit + 1;
+		// let counter = 0;
+
+		// while (doLoop) {
+		// 	if (item.pageHits[hoveredHit].title === item.pageHits[pointer].title) {
+		// 		hoveredSnippet += `<br>${item.pageHits[pointer].snippet}`;
+		// 		pointer++;
+		// 	} else {
+		// 		doLoop = false;
+		// 	}
+		// }
 	}
 	return hoveredSnippet;
 };
@@ -837,8 +840,6 @@ const cardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
-			console.log('here is hoveredHit', hoveredHit);
-			console.log('here is item', item);
 			let review = [];
 			if (item.review_n) {
 				item.review_n
@@ -877,8 +878,11 @@ const cardHandler = {
 				) {
 					item.pageHits = getItemPageHits(item);
 				}
-
-				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
+				const hoveredSnippet = getHoveredSnippet(
+					item,
+					hoveredHit,
+					item.pageHits[hoveredHit].title === item.pageHits[hoveredHit + 1]?.title
+				);
 				console.log('here is hoveredsnipped', hoveredSnippet);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
