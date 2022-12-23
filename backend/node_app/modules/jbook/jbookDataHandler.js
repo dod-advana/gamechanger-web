@@ -1711,6 +1711,7 @@ class JBookDataHandler extends DataHandler {
 			created,
 			dupes,
 			failedRows: failed,
+			time: endTime
 		};
 	}
 
