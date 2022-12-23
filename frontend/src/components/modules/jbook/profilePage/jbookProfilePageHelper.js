@@ -239,7 +239,11 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 												style={{ borderLeft: 'none' }}
 												dangerouslySetInnerHTML={{
 													__html: sanitizeHtml(pd.value, {
-														allowedAttributes: { span: ['style'], div: ['style'] },
+														allowedAttributes: {
+															span: ['style'],
+															div: ['style'],
+															p: ['style'],
+														},
 													}),
 												}}
 											/>
@@ -354,13 +358,18 @@ const aggregateProjectDescriptions = (projectData) => {
 			let obj = { ...titleMapping[key], value: projectData[key] };
 			if (key === 'r4a_schedule_details_n') {
 				obj.value.sort((a, b) => new Date(b.toComplete_s) - new Date(a.toComplete_s));
-				let str = `<div style='display: flex; justify-content: space-between'>`;
-				str += `<div style='display: flex; flex-direction: column'>`;
-				obj.value.map((d) => d.Event_Title_t).forEach((event) => (str += `<p>${event}</p>`));
-				str += `</div>`;
-				str += `<div style='display: flex; flex-direction: column;'>`;
-				obj.value.map((d) => d.toComplete_s).forEach((date) => (str += `<p>${date}</p>`));
-				str += `</div>`;
+				console.log('what is object value', obj.value);
+				let str = `<div style='display: flex; flex-direction: column;'>`;
+				obj.value.forEach(
+					(item) =>
+						(str += `<div style='display: flex; justify-content: space-between;'><p style='max-width: 500px;'>${
+							item.Event_Title_t
+						}</p><p>${
+							item.toComplete_s.split(' ')[0].length > 5
+								? `${item.toComplete_s.split(' ')[0].slice(0, 3)}. ${item.toComplete_s.split(' ')[1]}`
+								: item.toComplete_s
+						}</p></div>`)
+				);
 				str += '</div>';
 				obj.value = str;
 			}
