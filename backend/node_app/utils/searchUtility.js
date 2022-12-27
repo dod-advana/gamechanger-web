@@ -1788,21 +1788,27 @@ class SearchUtility {
 			let { esClientName, esIndex } = clientObj;
 
 			const orgCountESQuery = this.getElasticsearchQuery({ ...body, orgFilterString: [], limit: 0 }, userId);
-			const orgCountResults = await this.dataLibrary.queryElasticSearch(
+			const orgCountResultsPromise = this.dataLibrary.queryElasticSearch(
 				esClientName,
 				esIndex,
 				JSON.stringify(orgCountESQuery),
 				userId
 			);
-			const orgCountAggs = this.cleanUpAggResults({ raw: orgCountResults, user: userId }).doc_orgs;
 
 			const typeCountESQuery = this.getElasticsearchQuery({ ...body, typeFilterString: [], limit: 0 }, userId);
-			const typeCountResults = await this.dataLibrary.queryElasticSearch(
+			const typeCountResultsPromise = this.dataLibrary.queryElasticSearch(
 				esClientName,
 				esIndex,
 				JSON.stringify(typeCountESQuery),
 				userId
 			);
+
+			const [orgCountResults, typeCountResults] = await Promise.all([
+				orgCountResultsPromise,
+				typeCountResultsPromise,
+			]);
+
+			const orgCountAggs = this.cleanUpAggResults({ raw: orgCountResults, user: userId }).doc_orgs;
 			const typeCountAggs = this.cleanUpAggResults({ raw: typeCountResults, user: userId }).doc_types;
 
 			return {
@@ -1811,7 +1817,7 @@ class SearchUtility {
 			};
 		} catch (e) {
 			const { message } = e;
-			this.logger.error(message, 'WBJNDK3', userId);
+			this.logger.error(message, 'DMAL3RR', userId);
 			throw e;
 		}
 	}

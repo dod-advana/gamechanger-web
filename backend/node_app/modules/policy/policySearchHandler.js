@@ -281,31 +281,56 @@ class PolicySearchHandler extends SearchHandler {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
 
-			let searchResults;
+			let fullSearchResults;
 			const operator = 'and';
-			searchResults = await this.searchUtility.documentSearch(
-				req,
-				{ ...req.body, expansionDict, operator },
-				clientObj,
-				userId
-			);
 
-			if (reviseFilterCounts) {
-				const aggregations = await this.searchUtility.getDocOrgAndTypeCounts(
+			if (!reviseFilterCounts) {
+				fullSearchResults = await this.searchUtility.documentSearch(
 					req,
 					{ ...req.body, expansionDict, operator },
 					clientObj,
 					userId
 				);
-				searchResults = {
-					...searchResults,
+			} else {
+				const docResultsPromise = this.searchUtility.documentSearch(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+				const aggregationsPromise = this.searchUtility.getDocOrgAndTypeCounts(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+				const [docResults, aggregationsResults] = await Promise.allSettled([
+					docResultsPromise,
+					aggregationsPromise,
+				]);
+
+				let aggregations;
+				if (docResults.status === 'rejected') {
+					throw new Error(docResults.reason);
+				} else if (aggregationsResults.status === 'rejected') {
+					this.logger.error(aggregationsResults.reason);
+					aggregations = {
+						doc_orgs: [],
+						doc_types: [],
+					};
+				} else {
+					aggregations = aggregationsResults.value;
+				}
+
+				fullSearchResults = {
+					...docResults.value,
 					...aggregations,
 				};
 			}
 
 			// insert crawler dates into search results
-			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-			return searchResults;
+			fullSearchResults = await this.dataTracker.crawlerDateHelper(fullSearchResults, userId);
+			return fullSearchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
 		}

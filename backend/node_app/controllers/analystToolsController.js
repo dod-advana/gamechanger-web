@@ -151,7 +151,7 @@ class AnalystToolsController {
 			let typeCount = {};
 
 			if (cloneName !== 'eda') {
-				const resultsForOrgCount = await policyCompareDocumentHelper(
+				const orgCountResultsPromise = policyCompareDocumentHelper(
 					paragraphs,
 					{ ...filters, orgFilters: [] },
 					clientObj,
@@ -160,15 +160,8 @@ class AnalystToolsController {
 					this.searchUtility,
 					this.dataLibrary
 				);
-				resultsForOrgCount.docs.forEach((doc) => {
-					if (orgCount[doc.display_org_s]) {
-						orgCount[doc.display_org_s]++;
-					} else {
-						orgCount[doc.display_org_s] = 1;
-					}
-				});
 
-				const resultsForTypeCount = await policyCompareDocumentHelper(
+				const typeCountResultsPromise = policyCompareDocumentHelper(
 					paragraphs,
 					{ ...filters, typeFilters: [] },
 					clientObj,
@@ -177,7 +170,21 @@ class AnalystToolsController {
 					this.searchUtility,
 					this.dataLibrary
 				);
-				resultsForTypeCount.docs.forEach((doc) => {
+
+				const [orgCountResults, typeCountResults] = await Promise.all([
+					orgCountResultsPromise,
+					typeCountResultsPromise,
+				]);
+
+				orgCountResults.docs.forEach((doc) => {
+					if (orgCount[doc.display_org_s]) {
+						orgCount[doc.display_org_s]++;
+					} else {
+						orgCount[doc.display_org_s] = 1;
+					}
+				});
+
+				typeCountResults.docs.forEach((doc) => {
 					if (typeCount[doc.display_doc_type_s]) {
 						typeCount[doc.display_doc_type_s]++;
 					} else {
