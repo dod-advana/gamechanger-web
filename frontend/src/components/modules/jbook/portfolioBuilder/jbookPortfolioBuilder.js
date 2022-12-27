@@ -74,6 +74,8 @@ const PortfolioBuilder = (props) => {
 
 	const [selectedFile, setSelectedFile] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [results, setResults] = useState(null);
+
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -270,18 +272,22 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
-					<hr />
-					<div style={{ marginTop: '20px' }}>
-						<GCButton
-							onClick={async () => {
-								setShowUploadModal(true);
-								setModalData(portfolio);
-							}}
-							style={{ minWidth: 'unset' }}
-						>
-							Bulk Upload
-						</GCButton>
-					</div>
+					{portfolio.name === 'AI Inventory' && (
+						<>
+							<hr />
+							<div style={{ marginTop: '20px' }}>
+								<GCButton
+									onClick={async () => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
+								</GCButton>
+							</div>
+						</>
+					)}
 				</div>
 			);
 		});
@@ -487,6 +493,8 @@ const PortfolioBuilder = (props) => {
 								}}
 								onClick={() => {
 									setShowUploadModal(false);
+									setSelectedFile(null);
+									setResults(null);
 								}}
 							>
 								<CloseIcon style={{ fontSize: 30 }} />
@@ -497,25 +505,34 @@ const PortfolioBuilder = (props) => {
 								Upload Excel Document
 							</Typography>
 
-							<DragAndDrop
-								text="Drag and drop a file here, or click to select a file (.xlsx files only)"
-								acceptedFileTypes={[
-									'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-									'application/vnd.ms-excel',
-								]}
-								handleFileDrop={onDrop}
-							/>
+							{results === null && (
+								<DragAndDrop
+									text="Drag and drop a file here, or click to select a file (.xlsx files only)"
+									acceptedFileTypes={[
+										'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+										'application/vnd.ms-excel',
+									]}
+									handleFileDrop={onDrop}
+								/>
+							)}
 
 							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
 								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
+								{loading && ' Loading...'}
+								{loading && <CircularProgress size={'20px'} />}
 							</Typography>
-							{loading && (
-								<div>
-									<Typography style={{ fontFamily: 'Montserrat', fontSize: 12 }}>
-										Loading...
-									</Typography>
-									<CircularProgress />
-								</div>
+
+							{results !== null && (
+								<>
+									<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Results</Typography>
+									<ul>
+										<li>Rows Written: {results.written}</li>
+										<li>
+											Failed Rows:{' '}
+											{results.failedRows.length === 0 ? '0' : JSON.stringify(results.failedRows)}
+										</li>
+									</ul>
+								</>
 							)}
 						</DialogContent>
 						<DialogActions>
@@ -524,11 +541,12 @@ const PortfolioBuilder = (props) => {
 								onClick={() => {
 									setShowUploadModal(false);
 									setSelectedFile(null);
+									setResults(null);
 								}}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}
 							>
-								Cancel
+								{results === null ? 'Cancel' : 'Close'}
 							</GCButton>
 							<GCButton
 								id={'uploadSubmit'}
@@ -540,17 +558,15 @@ const PortfolioBuilder = (props) => {
 									form.append('cloneName', 'jbook');
 									form.append('options', JSON.stringify({ portfolio: modalData }));
 									setLoading(true);
-									const results = await gameChangerAPI.callUploadFunction(form, {
+									const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
 										headers: form.getHeaders
 											? form.getHeaders()
 											: { 'Content-Type': 'multipart/form-data' },
 									});
-									console.log(results);
+									setResults(uploadResponse.data);
 									setLoading(false);
-									setShowUploadModal(false);
-									setSelectedFile(null);
 								}}
-								disabled={selectedFile === null}
+								disabled={selectedFile === null || results !== null}
 								style={{ margin: '10px' }}
 							>
 								Upload
