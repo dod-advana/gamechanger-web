@@ -1567,6 +1567,7 @@ class JBookDataHandler extends DataHandler {
 		let dupes = [];
 		let failed = [];
 		let failES = [];
+		let written = 0;
 		for (let [index, reviewData] of reviewArray.entries()) {
 			console.log(reviewData);
 			const result = await this.rev.findAll({
@@ -1687,6 +1688,7 @@ class JBookDataHandler extends DataHandler {
 					if (!updated) {
 						console.log('ES NOT UPDATED for REVIEW');
 					}
+					written += 1;
 				}
 			}
 		}
@@ -1708,10 +1710,10 @@ class JBookDataHandler extends DataHandler {
 		console.log(JSON.stringify(failES));
 		console.log(`Call took ${(endTime - startTime) / 60000} minutes`);
 		return {
-			created,
+			written,
 			dupes,
 			failedRows: failed,
-			time: endTime
+			time: (endTime - startTime) / 60000,
 		};
 	}
 
