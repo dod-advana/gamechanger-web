@@ -126,14 +126,22 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 		);
 
 		if (option.example) {
-			examples.push(<span style={{ margin: '10px 0' }}>{option.example}</span>);
+			examples.push(<div style={{ margin: '10px 0' }}>{option.example}</div>);
 		}
 	}
 
 	return (
-		<FormControl style={{ margin: '15px 0 15px 10px', flexDirection: 'row', color: 'gray' }}>
-			<FormGroup>{radioButtons}</FormGroup>
-			<FormGroup style={{ margin: '0 0 0 15px' }}>{examples}</FormGroup>
+		<FormControl
+			style={{
+				margin: '15px 0 15px 10px',
+				flexDirection: 'row',
+				color: 'gray',
+				justifyContent: 'space-between',
+				alignItems: 'stretch',
+			}}
+		>
+			<FormGroup style={{ justifyContent: 'space-around' }}>{radioButtons}</FormGroup>
+			<FormGroup>{examples}</FormGroup>
 		</FormControl>
 	);
 };
@@ -1252,6 +1260,7 @@ const DataTypeValue = React.memo((props) => {
 						{ name: 'Structured Text', example: 'Tabular/form data, computer protocol data' },
 						{ name: 'Unstructured Text', example: 'Written language, chat, documents/articles' },
 						{ name: 'Signal', example: 'Radio frequency data, time-series data' },
+						{ name: 'Geospatial', example: 'Geographical/terrestrial location data' },
 						{ name: 'RADAR', example: 'Synthetic Aperture Radar' },
 						{ name: 'SONAR', example: 'Underwater acoustic emanations' },
 						{ name: 'LIDAR', example: 'Light-based signal detection' },
