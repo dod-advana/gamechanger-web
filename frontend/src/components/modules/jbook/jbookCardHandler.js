@@ -383,24 +383,11 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 	];
 };
 
-const getHoveredSnippet = (item, hoveredHit, isMultiple = false) => {
+const getHoveredSnippet = (item, hoveredHit) => {
 	let hoveredSnippet = '';
-	console.log('this is the hoveredHit!!!', hoveredHit);
-	console.log('is this multiple??', isMultiple);
+
 	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
-		// let doLoop = true;
-		// let pointer = hoveredHit + 1;
-		// let counter = 0;
-
-		// while (doLoop) {
-		// 	if (item.pageHits[hoveredHit].title === item.pageHits[pointer].title) {
-		// 		hoveredSnippet += `<br>${item.pageHits[pointer].snippet}`;
-		// 		pointer++;
-		// 	} else {
-		// 		doLoop = false;
-		// 	}
-		// }
 	}
 	return hoveredSnippet;
 };
@@ -486,6 +473,29 @@ const getItemPageHits = (item) => {
 	}
 
 	return pageHits;
+};
+
+const consolidateItemPageHits = (item) => {
+	const consolidateHits = [];
+
+	for (const { title, snippet } of item.pageHits) {
+		if (title === 'Appropriation Title') {
+			continue;
+		}
+		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
+			consolidateHits[consolidateHits.length - 1].occurrences += 1;
+			consolidateHits[consolidateHits.length - 1].snippet += `<br><br>— ${snippet} `;
+		} else {
+			consolidateHits.push({ title, snippet, occurrences: 1 });
+		}
+	}
+	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
+		if (occurrences > 1) {
+			snippet = `<b>${title}: ${occurrences}</b><br>— ${snippet}`;
+		}
+		return { title, snippet };
+	});
+	return consolidateMod;
 };
 
 /* takes list of modified searchSettings and the name of a metadata field
@@ -584,19 +594,10 @@ const HitsExpandedButton = ({ item, clone_name, hitsExpanded, setHitsExpanded })
 };
 
 const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
-	const newObj = {};
-	for (let i = 0; i < item.pageHits.length; i++) {
-		if (!newObj[item.pageHits[i].title]) {
-			newObj[item.pageHits[i].title] = item.pageHits[i].snippet;
-		} else {
-			newObj[item.pageHits[i].title] = newObj[item.pageHits[i].title] + `<br>${item.pageHits[i].snippet} `;
-		}
-	}
-	const resultArr = Object.keys(newObj).map((title) => ({ title, snippet: newObj[title] }));
 	return (
 		<div className="hits-container">
 			<div className={'page-hits'}>
-				{_.chain(resultArr)
+				{_.chain(item.pageHits)
 					.map((page, key) => {
 						return (
 							<div
@@ -868,7 +869,6 @@ const cardHandler = {
 					setMetadataExpanded(!metadataExpanded);
 				};
 				// render the hover menu and options
-
 				if (
 					!state.searchText ||
 					state.searchText === null ||
@@ -877,13 +877,10 @@ const cardHandler = {
 					item.pageHits.length <= 0
 				) {
 					item.pageHits = getItemPageHits(item);
+				} else {
+					item.pageHits = consolidateItemPageHits(item);
 				}
-				const hoveredSnippet = getHoveredSnippet(
-					item,
-					hoveredHit,
-					item.pageHits[hoveredHit].title === item.pageHits[hoveredHit + 1]?.title
-				);
-				console.log('here is hoveredsnipped', hoveredSnippet);
+				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
 

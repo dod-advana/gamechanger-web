@@ -358,7 +358,6 @@ const aggregateProjectDescriptions = (projectData) => {
 			let obj = { ...titleMapping[key], value: projectData[key] };
 			if (key === 'r4a_schedule_details_n') {
 				obj.value.sort((a, b) => new Date(b.toComplete_s) - new Date(a.toComplete_s));
-				console.log('what is object value', obj.value);
 				let str = `<div style='display: flex; flex-direction: column;'>`;
 				obj.value.forEach(
 					(item) =>
