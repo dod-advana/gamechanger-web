@@ -475,10 +475,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					setFilterCountsLoading(false);
 				})
 				.catch(() => {
-					// What do I need to clean up here? should we still be 'resultsLoading'?
-					setReturnedDocs([]);
+					newSearchSettings.orgCount = {};
+					newSearchSettings.typeCount = {};
 					setState(dispatch, {
-						analystToolsSearchSettings: state.analystToolsSearchSettings,
+						analystToolsSearchSettings: newSearchSettings,
 					});
 					setFilterCountsLoading(false);
 				});
