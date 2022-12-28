@@ -154,7 +154,6 @@ const DefaultGraphView = (props) => {
 						searchSettings: { ...state.searchSettings, loadAll: true },
 						runGraphSearch: true,
 					});
-					mostRecentSearchTS = new Date().getTime();
 				}}
 				nodeLimit={nodeLimit}
 				mockedFromES={mockedFromES}
