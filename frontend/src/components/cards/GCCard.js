@@ -196,7 +196,7 @@ const StyledCardContainer = styled.div`
 						position: relative;
 						padding: 5px 5px;
 						display: inline-block;
-						overflow-y: scroll;
+						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
 					}
 
 					.styled-card-front-buttons {
@@ -238,7 +238,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
 						display: block;
-						overflow-y: scroll;
+						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
 						height: 100%;
 					}
 
