@@ -1178,14 +1178,6 @@ const JBookProfilePage = () => {
 	};
 
 	const renderPOCReviewerSection = () => {
-		let totalBudget = 3000;
-		if (projectData.currentYearAmountMax > 0) {
-			totalBudget = projectData.currentYearAmountMax;
-		}
-		if (projectData.currentYearAmount > 0) {
-			totalBudget = projectData.currentYearAmount;
-		}
-
 		return (
 			<StyledAccordionContainer id={'POC Reviewer Section'}>
 				<GCAccordion
@@ -1215,7 +1207,7 @@ const JBookProfilePage = () => {
 						vendorData={projectData.vendors}
 						submitReviewForm={submitReviewForm}
 						setReviewData={setReviewData}
-						totalBudget={totalBudget}
+						totalBudget={projectData.by1Request}
 					/>
 				</GCAccordion>
 			</StyledAccordionContainer>
