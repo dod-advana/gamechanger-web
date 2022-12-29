@@ -44,7 +44,6 @@ const getGraphDataFull = (cloneName, document, setGraphData, setRunningQuery, se
 		})
 		.then((graph) => {
 			if (graph?.data?.error) setBackendError(graph.data.error);
-			console.log('HERE IS GRAPH DATA', graph);
 			setGraphData(graph.data.graph);
 			setRunningQuery(false);
 		});
