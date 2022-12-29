@@ -427,6 +427,19 @@ export default function PolicyDocumentExplorer({
 		return toggleState ? '+' : '-';
 	};
 
+	const modifySnippet = (snippet) => {
+		let foundIndex = 0;
+		for (let i = 0; i < snippet.length; i++) {
+			if (snippet[i].includes('<em>')) {
+				foundIndex = i;
+			}
+		}
+		if (foundIndex !== 0 && foundIndex !== 1) {
+			return snippet.slice(foundIndex - 2).join(' ');
+		}
+		return snippet.join(' ');
+	};
+
 	const renderHighlightedSections = (pageHits, item, key) => {
 		return _.chain(pageHits)
 			.map((page, pageKey) => {
@@ -443,6 +456,8 @@ export default function PolicyDocumentExplorer({
 
 				let blockquoteClass = 'searchdemo-blockquote-sm';
 
+				let modifiedSnippet = modifySnippet(page.snippet.split(' '));
+
 				if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 				return (
 					<div key={key + pageKey} style={{ position: 'relative' }}>
@@ -457,7 +472,7 @@ export default function PolicyDocumentExplorer({
 								className={blockquoteClass}
 								dangerouslySetInnerHTML={{
 									__html: sanitizeHtml(
-										page.snippet
+										modifiedSnippet
 											.replace(
 												/<em>/g,
 												'<span class="highlight-search-demo" style="background-color: #E9691D;">'
