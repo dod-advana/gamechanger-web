@@ -3,7 +3,7 @@ import { trackEvent } from '../components/telemetry/Matomo';
 import { CustomDimensions } from '../components/telemetry/utils';
 import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
-import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
+import { Typography, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip } from '@material-ui/core';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import JBookJAICReviewForm from '../components/modules/jbook/jbookJAICReviewForm';
 import JBookServiceReviewForm from '../components/modules/jbook/jbookServiceReviewForm';
@@ -20,6 +20,7 @@ import { setState } from '../utils/sharedFunctions';
 import { getClassLabel, getSearchTerms, formatNum } from '../utils/jbookUtilities';
 import { JBookContext } from '../components/modules/jbook/jbookContext';
 import jca_data from '../components/modules/jbook/JCA.json';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 import {
 	Accomplishments,
@@ -1419,9 +1420,15 @@ const JBookProfilePage = () => {
 							<GCAccordion
 								contentPadding={0}
 								expanded={false}
-								header={`CONTRACT DATA (FROM GENERAL LEDGER AND FPDS-NG) ${
-									contracts ? `(${contracts.length})` : ''
-								}`}
+								header={
+									<>
+										CONTRACT DATA (FROM GENERAL LEDGER AND FPDS-NG)
+										{contracts ? ` (${contracts.length}) ` : ' '}
+										<Tooltip placement="top" arrow title={'Contract data may be incomplete.'}>
+											<InfoOutlinedIcon />
+										</Tooltip>
+									</>
+								}
 								headerBackground={'rgb(238,241,242)'}
 								headerTextColor={'black'}
 								headerTextWeight={'600'}
