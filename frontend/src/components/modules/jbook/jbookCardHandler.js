@@ -29,6 +29,7 @@ const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
 	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -41,7 +42,6 @@ const StyledFrontCardContent = styled.div`
 
 	.hits-container {
 		display: flex;
-		height: 100%;
 
 		.expanded-metadata {
 			width: 100%;
@@ -105,6 +105,11 @@ const StyledFrontCardContent = styled.div`
 			}
 		}
 	}
+	.portfolio-tags-container {
+		position: absolute;
+		bottom: 0;
+		margin: 5px 0;
+	}
 `;
 
 const StyledFrontCardHeader = styled.div`
@@ -119,6 +124,7 @@ const StyledFrontCardHeader = styled.div`
 	padding: ${({ listView }) => (listView ? '0px' : '5px')};
 	margin-left: ${({ listView }) => (listView ? '10px' : '0px')};
 	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
+	flex-grow: 1;
 
 	.title-text-selected-favorite-div {
 		max-height: ${({ listView }) => (listView ? '' : '50px')};
@@ -477,25 +483,35 @@ const getItemPageHits = (item) => {
 
 const consolidateItemPageHits = (item) => {
 	const consolidateHits = [];
+	const desiredOrder = [
+		'Project Description',
+		'Justification',
+		'Summary Remarks',
+		'Schedule Details',
+		'Project Notes',
+		'Acquisition Strat.',
+		'Accomplishments',
+		'Contracts',
+	];
 
 	for (const { title, snippet } of item.pageHits) {
-		if (title === 'Appropriation Title') {
+		if (title === 'Appropriation Title' || title === 'PE Title') {
 			continue;
 		}
 		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
 			consolidateHits[consolidateHits.length - 1].occurrences += 1;
-			consolidateHits[consolidateHits.length - 1].snippet += `<br><br>— ${snippet} `;
+			consolidateHits[consolidateHits.length - 1].snippet += `<br>- ${snippet} `;
 		} else {
 			consolidateHits.push({ title, snippet, occurrences: 1 });
 		}
 	}
 	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
 		if (occurrences > 1) {
-			snippet = `<b>${title}: ${occurrences}</b><br>— ${snippet}`;
+			snippet = `<b>${title}: ${occurrences}</b><br>- ${snippet}`;
 		}
 		return { title, snippet };
 	});
-	return consolidateMod;
+	return consolidateMod.sort((a, b) => desiredOrder.indexOf(a.title) - desiredOrder.indexOf(b.title));
 };
 
 /* takes list of modified searchSettings and the name of a metadata field
@@ -739,7 +755,12 @@ const cardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
+				<StyledFrontCardHeader
+					style={{ flexGrow: 1 }}
+					listView={state.listView}
+					docListView={docListView}
+					data-cy="jbook-card-header"
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={tooltipTitle} placement="top" arrow>
 							<div
@@ -904,9 +925,6 @@ const cardHandler = {
 				} else {
 					return (
 						<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
-							<div className={'currents-as-of-div'}>
-								<div className={'current-text'}>{/*currentAsOfText*/}</div>
-							</div>
 							<ExpandedHits
 								item={item}
 								hoveredHit={hoveredHit}
@@ -915,9 +933,7 @@ const cardHandler = {
 							/>
 
 							{review.length > 0 && (
-								<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-									Tags: {renderPortfolioTags(review)}
-								</div>
+								<div className={'portfolio-tags-container'}>Tags: {renderPortfolioTags(review)}</div>
 							)}
 						</StyledFrontCardContent>
 					);

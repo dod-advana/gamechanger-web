@@ -194,9 +194,11 @@ const StyledCardContainer = styled.div`
 						font-size: ${CARD_FONT_SIZE}px;
 						font-family: 'Noto Sans';
 						position: relative;
-						padding: 5px 5px;
+						padding: 5px;
 						display: inline-block;
 						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
+						flex-grow: 2;
+						height: 100%;
 					}
 
 					.styled-card-front-buttons {
@@ -208,6 +210,7 @@ const StyledCardContainer = styled.div`
 						min-height: 60px;
 						justify-content: flex-end;
 						overflow: hidden;
+						flex-grow: 1;
 
 						.styled-action-buttons-group {
 							flex: 1 1 0%;
