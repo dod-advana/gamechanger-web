@@ -43,6 +43,7 @@ const SearchTabBar = (props) => {
 			<div style={styles.tabsContainer} data-cy="tabs-container">
 				{_.map(searchTypesWithAll, (enabled, searchType) => {
 					if (!enabled) return null;
+					if (searchType !== 'all' && _.isUndefined(resultMetaData[searchType])) return null;
 					if (resultMetaData[searchType]?.total <= 0) return null;
 
 					let style = styles.tab;

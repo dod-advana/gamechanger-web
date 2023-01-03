@@ -40,7 +40,6 @@ const DetailsTitleBar = (props) => {
 		closeButtonRight,
 		closeButtonTop,
 	} = props;
-
 	return (
 		<div
 			style={{ ...styles.container, ...style }}

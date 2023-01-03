@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackEvent } from '../components/telemetry/Matomo';
+import { CustomDimensions } from '../components/telemetry/utils';
 import { getTrackingNameForFactory, encode, getQueryVariable } from '../utils/gamechangerUtils';
 import GCAccordion from '../components/common/GCAccordion';
 import { Typography, Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
@@ -112,9 +113,13 @@ const JBookProfilePage = () => {
 	}, [budgetYearProjectData, budgetYear, selectedPortfolio]);
 
 	const clickFnPDF = (filename, cloneName, pageNumber = 0) => {
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'PDFOpen');
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'filename', filename);
-		trackEvent(getTrackingNameForFactory(cloneName), 'CardInteraction', 'pageNumber', pageNumber);
+		trackEvent(
+			getTrackingNameForFactory(cloneName),
+			'CardInteraction',
+			'PDFOpen',
+			null,
+			CustomDimensions.create(true, filename, pageNumber)
+		);
 		window.open(
 			`/#/pdfviewer/gamechanger?filename=${encode(filename)}&pageNumber=${pageNumber}&cloneIndex=${cloneName}`
 		);
@@ -1258,14 +1263,6 @@ const JBookProfilePage = () => {
 					<JBookSimpleReviewForm
 						renderReenableModal={renderReenableModal}
 						reviewStatus={reviewData.primaryReviewStatus ?? 'Needs Review'}
-						roleDisabled={
-							Permissions.hasPermission('JBOOK Admin')
-								? false
-								: !(
-										permissions.is_primary_reviewer &&
-										Auth.getTokenPayload().email === reviewData.primaryReviewerEmail
-								  )
-						}
 						finished={reviewData.primaryReviewStatus === 'Finished Review'}
 						submitReviewForm={submitReviewForm}
 						setReviewDataMultiple={setReviewDataMultiple}
