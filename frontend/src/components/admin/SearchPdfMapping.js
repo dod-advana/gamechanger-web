@@ -924,8 +924,17 @@ export default () => {
 											</CardContent>
 										</Card>
 									</Grid>
-									<Grid item xs={1}></Grid>
-									<Grid item lg={2} xs={3}>
+									<Grid item xs={2}>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Inactive Users
+												</p>
+												{cardData.inactive_users}
+											</CardContent>
+										</Card>
+									</Grid>
+									<Grid item xs={2}>
 										<GCPrimaryButton
 											onClick={() => {
 												trackEvent('GAMECHANGER', 'ExportUserData', 'onClick');
