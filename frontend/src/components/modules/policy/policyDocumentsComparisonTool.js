@@ -917,6 +917,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						onClick={() => {
 							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
 							resetAdvancedSettings(dispatch);
+							setNoResults(false);
+							setReturnedDocs([]);
+							setNeedsSort(true);
+							setState(dispatch, { runDocumentComparisonSearch: true });
 						}}
 						style={{ margin: 0, width: '100%' }}
 					>
@@ -933,7 +937,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							style={{ margin: '10px 0 0 0', width: '100%' }}
 							disabled={!filterChange}
 						>
-							Apply filters
+							Apply Filters
 						</GCButton>
 					)}
 				</div>
