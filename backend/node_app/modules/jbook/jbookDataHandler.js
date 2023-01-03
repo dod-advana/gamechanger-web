@@ -33,12 +33,6 @@ const types = {
 	'O&M': 'odoc',
 };
 
-const types_reverse = {
-	rdoc: 'RDT&E',
-	pdoc: 'Procurement',
-	odoc: 'O&M',
-};
-
 class JBookDataHandler extends DataHandler {
 	constructor(opts = {}) {
 		const {
@@ -1545,9 +1539,8 @@ class JBookDataHandler extends DataHandler {
 				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 			} else if (reviewData.budget_type === 'rdoc') {
 				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-			} else {
-				// refString = `odoc#${reviewData.budget_line_item}#${reviewData.program_element}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 			}
+
 			reviewData.jbook_ref_id = refString;
 			delete reviewData.agency_office;
 			delete reviewData.agency_service;
@@ -1703,12 +1696,6 @@ class JBookDataHandler extends DataHandler {
 		});
 
 		const endTime = performance.now();
-		console.log(JSON.stringify(failed));
-		console.log(`not found: ${created.length}`);
-		console.log(`dupes: ${dupes.length}`);
-		console.log(`failures: ${failed.length}`);
-		console.log(JSON.stringify(failES));
-		console.log(`Call took ${(endTime - startTime) / 60000} minutes`);
 		return {
 			written,
 			dupes,
