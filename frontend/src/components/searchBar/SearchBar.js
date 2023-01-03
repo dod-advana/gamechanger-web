@@ -5,6 +5,8 @@ import ModularSearchBarHandler from './ModularSearchBarHandler';
 import TitleBar from './TitleBar';
 import SearchHandlerFactory from '../factories/searchHandlerFactory';
 import MainViewUtilityFactory from '../factories/mainViewUtilityFactory';
+import { trackPageTitleClick } from '../telemetry/Matomo';
+import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 
 const SearchBar = (props) => {
 	const { context } = props;
@@ -51,6 +53,7 @@ const SearchBar = (props) => {
 					onTitleClick={() => {
 						window.location.href = `#/${state.cloneData.url}`;
 						dispatch({ type: 'RESET_STATE' });
+						trackPageTitleClick(getTrackingNameForFactory(state.cloneData.clone_name), 'Search');
 					}}
 					componentStepNumbers={state.componentStepNumbers}
 					toggleMenu={toggleMenu}

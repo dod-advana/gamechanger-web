@@ -4,7 +4,7 @@ import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/Loadin
 import '../../cards/keyword-result-card.css';
 import '../../../containers/gamechanger.css';
 import { handlePdfOnLoad, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
-import { trackEvent } from '../../telemetry/Matomo';
+import { trackLeftRightPanelToggle } from '../../telemetry/Matomo';
 import PDFHighlighter from './PDFHighlighter';
 import UOTAlert from '../../common/GCAlert';
 import GCResponsiblityEditModal from './GCResponsiblityEditModal';
@@ -16,6 +16,8 @@ const gameChangerAPI = new GameChangerAPI();
 const SIDEBAR_TOGGLE_WIDTH = 20;
 const LEFT_PANEL_COL_WIDTH = 2;
 const RIGHT_PANEL_COL_WIDTH = 4;
+
+const trackingAction = 'ResponsibilityExplorer';
 
 const cleanHighlightText = (text) => {
 	if (text) {
@@ -112,16 +114,14 @@ export default function GCResponsibilityDocumentView({
 	const [alertMessage, setAlertMessage] = useState('');
 	const [editModalOpen, setEditModalOpen] = useState(false);
 
+	const trackingCategory = getTrackingNameForFactory(cloneData.clone_name);
+
 	const createAlert = (title, type, message) => {
 		setAlertTitle(title);
 		setAlertType(type);
 		setAlertMessage(message);
 		setAlertActive(true);
 	};
-
-	useEffect(() => {
-		console.log('responsibilityData: ', responsibilityData);
-	}, [responsibilityData]);
 
 	useEffect(() => {
 		if (!iframeLoading) {
@@ -200,22 +200,12 @@ export default function GCResponsibilityDocumentView({
 	);
 
 	function handleRightPanelToggle() {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'ResponsibilityExplorerInteraction',
-			'RightPanelToggle',
-			rightPanelOpen ? 'Close' : 'Open'
-		);
+		trackLeftRightPanelToggle(trackingCategory, trackingAction, false, rightPanelOpen);
 		setRightPanelOpen(!rightPanelOpen);
 	}
 
 	function handleLeftPanelToggle() {
-		trackEvent(
-			getTrackingNameForFactory(cloneData.clone_name),
-			'ResponsibilityExplorerInteraction',
-			'LeftPanelToggle',
-			leftPanelOpen ? 'Close' : 'Open'
-		);
+		trackLeftRightPanelToggle(trackingCategory, trackingAction, true, leftPanelOpen);
 		setLeftPanelOpen(!leftPanelOpen);
 	}
 
@@ -380,6 +370,7 @@ export default function GCResponsibilityDocumentView({
 						setResultsPage={setResultsPage}
 						setReloadResponsibilities={setReloadResponsibilities}
 						setCollapseKeys={setCollapseKeys}
+						cloneData={state.cloneData}
 					/>
 				</div>
 			</div>
@@ -485,6 +476,7 @@ export default function GCResponsibilityDocumentView({
 					setDocumentLink={setDocumentLink}
 					setEditModalOpen={setEditModalOpen}
 					loading={loading}
+					cloneData={state.cloneData}
 				/>
 			</div>
 			{alertActive ? (
