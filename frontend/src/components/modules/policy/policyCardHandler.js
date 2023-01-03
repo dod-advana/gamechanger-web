@@ -1035,10 +1035,7 @@ const getCardExtrasHandler = (props) => {
 	);
 };
 
-const getDisplayTitle = (item, currentViewName) => {
-	if (currentViewName === 'Card') {
-		return item.display_title_s ? `${item.doc_type} ${item.doc_num}: ${item.title}` : item.title;
-	}
+const getDisplayTitle = (item) => {
 	return item.display_title_s || item.title;
 };
 
@@ -1366,8 +1363,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state) => {
 
 const cardHandler = {
 	document: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -1638,8 +1635,8 @@ const cardHandler = {
 	},
 
 	publication: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -2202,13 +2199,12 @@ const cardHandler = {
 };
 
 const PolicyCardHandler = (props) => {
-	const { state, setFilename, setDisplayTitle, item, cardType } = props;
-	const { currentViewName } = state;
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
 	useEffect(() => {
 		setFilename(cardHandler[cardType].getFilename(item));
-		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item, currentViewName));
-	}, [cardType, item, setDisplayTitle, setFilename, currentViewName]);
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
