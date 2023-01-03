@@ -536,10 +536,14 @@ const renderTextFieldFilter = (state, dispatch, displayName, fieldName) => {
 };
 
 const renderFiscalYearFilter = (state, dispatch) => {
-	const { fiscalYear } = state.edaFilterData;
+	const now = new Date();
 	const yearCheckboxes = [];
 
-	for (let year of fiscalYear) {
+	const start = 2000;
+	const end = now.getFullYear() + 1;
+
+	for (let i = end; i >= start; i--) {
+		const year = i;
 		yearCheckboxes.push(
 			<FormControlLabel
 				name={year}

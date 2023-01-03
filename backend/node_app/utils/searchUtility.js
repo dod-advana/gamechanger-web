@@ -2102,7 +2102,12 @@ class SearchUtility {
 					'display_doc_type_s',
 					'topics_rs',
 					'keyw_5',
+					'display_source_s',
+					'crawler_used_s',
 				];
+				break;
+			case 'source':
+				source = ['filename', 'display_org_s', 'display_source_s', 'display_doc_type_s', 'crawler_used_s'];
 				break;
 			default:
 				source = [];

@@ -54,6 +54,16 @@ export const filterCaseInsensitiveIncludes = (filter, row) => {
 	return row[id] !== undefined ? String(row[id].toLowerCase()).includes(filter.value.toLowerCase()) : false;
 };
 
+const getDateAsStringWithoutSeconds = (date) => {
+	return date.toLocaleString([], {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+};
+
 const columns = [
 	{
 		Header: 'User ID',
@@ -101,13 +111,13 @@ const columns = [
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Document Type',
+		Header: 'Displayed Document Type',
 		accessor: 'display_doc_type_s',
 		width: 175,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
 	},
 	{
-		Header: 'Source',
+		Header: 'Document Type',
 		accessor: 'doc_type',
 		width: 100,
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
@@ -135,6 +145,20 @@ const columns = [
 	{
 		Header: 'Keywords',
 		accessor: 'keyw_5',
+		width: 250,
+		style: { whiteSpace: 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Crawler',
+		accessor: 'crawler_used_s',
+		width: 250,
+		style: { whiteSpace: 'unset' },
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Source',
+		accessor: 'display_source_s',
 		width: 250,
 		style: { whiteSpace: 'unset' },
 		Cell: (row) => <TableRow>{row.value}</TableRow>,
@@ -240,6 +264,93 @@ const documentUsageColumns = [
 	},
 ];
 
+const sourceInteractionsColumns = [
+	{
+		Header: 'Crawler',
+		accessor: 'crawler',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: 'Data Source',
+		accessor: 'dataSource',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: 'Organization',
+		accessor: 'org',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: '# Total Documents (current)',
+		accessor: 'numTotalDocuments',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: '# Events',
+		accessor: 'numTotalEvents',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: '# Unique Documents Interacted With',
+		accessor: 'numUniqueDocuments',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: '# Unique Users',
+		accessor: 'numUniqueUsers',
+		width: 200,
+		Cell: (row) => <TableRow className="source-interaction-row">{row.value}</TableRow>,
+	},
+	{
+		Header: '# Events by User',
+		accessor: 'userCounts',
+		width: 300,
+		Cell: (row) => (
+			<TableRow>
+				{Object.entries(row.value).map(([userId, count]) => (
+					<li className="source-interaction-bullet">
+						{userId} : {count}
+					</li>
+				))}
+			</TableRow>
+		),
+	},
+	{
+		Header: '# Events by Type',
+		accessor: 'actionCounts',
+		width: 450,
+		Cell: (row) => (
+			<TableRow>
+				{Object.entries(row.value).map(([action, count]) => (
+					<li className="source-interaction-bullet">
+						{action} : {count}
+					</li>
+				))}
+			</TableRow>
+		),
+	},
+	{
+		Header: '# Events by Filename',
+		accessor: 'fileCounts',
+		width: 400,
+		Cell: (row) => (
+			<TableRow>
+				{Object.entries(row.value).map(([filename, count]) => (
+					<li className="source-interaction-bullet">
+						{filename} : {count}
+					</li>
+				))}
+			</TableRow>
+		),
+	},
+];
+
 /**
  * This method renders the documents for react table
  * @method subComponent
@@ -306,6 +417,30 @@ const subComponent = (row) => {
 };
 
 /**
+ * Takes in a set time to go back in the query
+ * @param {string} back
+ * @method timeBack
+ */
+const timeBack = async (back, setStartDateFunction, setEndDateFunction) => {
+	switch (back) {
+		case 'day':
+			setStartDateFunction(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		case 'week':
+			setStartDateFunction(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		case 'month':
+			setStartDateFunction(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
+			setEndDateFunction(moment()._d);
+			break;
+		default:
+			break;
+	}
+};
+
+/**
  * This class queries a search to pdf mapping from matomo
  * and visualizes it as a tabel as well as provide the option
  * to download as a csv
@@ -324,10 +459,12 @@ export default () => {
 	const [tabIndex, setTabIndex] = useState('userAgg');
 	const [cloneName, setCloneName] = useState('');
 	const [cloneList, setCloneList] = useState([]);
+	const [sourceInteractions, setSourceInteractions] = useState([]);
 	const [loaded, setLoading] = useState({
 		userGraph: false,
 		userData: false,
 		searchMapping: false,
+		sourceInteractions: false,
 	});
 
 	const handleDateChange = (date, setFunction) => {
@@ -392,6 +529,35 @@ export default () => {
 				searchMapping: true,
 			}));
 		});
+	}, [startDate, endDate, cloneName]);
+
+	const getSourceInteractions = useCallback(() => {
+		setLoading((prevState) => ({
+			...prevState,
+			sourceInteractions: false,
+		}));
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			cloneID: cloneName.split('-')[0],
+		};
+		gameChangerAPI
+			.getSourceInteractions(params)
+			.then((data) => {
+				setSourceInteractions(data.data.data.data);
+				setLoading((prevState) => ({
+					...prevState,
+					sourceInteractions: true,
+				}));
+			})
+			.catch((error) => {
+				console.log(error);
+				setSourceInteractions([]);
+				setLoading((prevState) => ({
+					...prevState,
+					sourceInteractions: true,
+				}));
+			});
 	}, [startDate, endDate, cloneName]);
 
 	/**
@@ -494,29 +660,6 @@ export default () => {
 				}));
 			});
 	}, [startDate, endDate, cloneName]);
-	/**
-	 * Takes in a set time to go back in the query
-	 * @param {string} back
-	 * @method timeBack
-	 */
-	const timeBack = async (back) => {
-		switch (back) {
-			case 'day':
-				setStartDate(moment().subtract(1, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
-				break;
-			case 'week':
-				setStartDate(moment().subtract(7, 'days').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
-				break;
-			case 'month':
-				setStartDate(moment().subtract(1, 'months').set({ hour: 0, minute: 0 })._d);
-				setEndDate(moment()._d);
-				break;
-			default:
-				break;
-		}
-	};
 
 	useEffect(() => {
 		if (cloneName !== '') {
@@ -534,6 +677,9 @@ export default () => {
 				case 'feedback':
 					getFeedbackData();
 					break;
+				case 'sourceInteractions':
+					getSourceInteractions();
+					break;
 				default:
 					console.log('no tab selected');
 					getUserAggData();
@@ -541,7 +687,16 @@ export default () => {
 					break;
 			}
 		}
-	}, [tabIndex, cloneName, getUserGraphData, getUserAggData, getDocumentData, getFeedbackData, getSearchPdfMapping]);
+	}, [
+		tabIndex,
+		cloneName,
+		getUserGraphData,
+		getUserAggData,
+		getDocumentData,
+		getFeedbackData,
+		getSearchPdfMapping,
+		getSourceInteractions,
+	]);
 
 	useEffect(() => {
 		getCloneData();
@@ -582,7 +737,7 @@ export default () => {
 					<Grid item lg={4} xs={4}>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('day');
+								timeBack('day', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -590,7 +745,7 @@ export default () => {
 						</GCPrimaryButton>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('week');
+								timeBack('week', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -598,7 +753,7 @@ export default () => {
 						</GCPrimaryButton>
 						<GCPrimaryButton
 							onClick={() => {
-								timeBack('month');
+								timeBack('month', setStartDate, setEndDate);
 							}}
 							style={{ minWidth: 'unset' }}
 						>
@@ -696,6 +851,21 @@ export default () => {
 						>
 							<Typography variant="h6" display="inline">
 								User Tracker Tools
+							</Typography>
+						</Tab>
+						<Tab
+							style={{
+								...TabStyles.tabStyle,
+								...(tabIndex === 'sourceInteractions' ? TabStyles.tabSelectedStyle : {}),
+								borderRadius: `0 0 0 0`,
+							}}
+							title="sourceInteractions"
+							onClick={() => {
+								setTabIndex('sourceInteractions');
+							}}
+						>
+							<Typography variant="h6" display="inline">
+								Source Interactions
 							</Typography>
 						</Tab>
 					</TabList>
@@ -937,6 +1107,35 @@ export default () => {
 							style={{ margin: '0 80px 20px 80px', height: 700 }}
 							defaultSorted={[{ id: 'visit_count', desc: true }]}
 						/>
+					</TabPanel>
+					<TabPanel>
+						<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+							<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+								Source Interactions
+								<br></br>
+								{getDateAsStringWithoutSeconds(startDate)} - {getDateAsStringWithoutSeconds(endDate)}
+							</p>
+							<GCPrimaryButton
+								onClick={() => {
+									trackEvent('GAMECHANGER', 'ExportSourceInteractionsData', 'onClick');
+									exportData('SourceInteractions');
+								}}
+								style={{ minWidth: 'unset' }}
+							>
+								Export Mapping
+							</GCPrimaryButton>
+							<br></br>
+						</div>
+						{loaded.sourceInteractions ? (
+							<ReactTable
+								data={sourceInteractions}
+								columns={sourceInteractionsColumns}
+								defaultSorted={[{ id: 'crawler', desc: true }]}
+								style={{ margin: '0 80px 20px 80px', height: 700 }}
+							/>
+						) : (
+							<LoadingIndicator customColor={gcOrange} />
+						)}
 					</TabPanel>
 				</div>
 			</Tabs>
