@@ -12,7 +12,7 @@
     height: 150px;
     border-left: 0;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
     font-family: Noto Sans, Arial, Helvetica, sans-serif;
     padding: 0.5em 10px;
     font-size: 14px;
