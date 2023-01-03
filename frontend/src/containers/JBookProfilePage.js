@@ -982,6 +982,17 @@ const JBookProfilePage = () => {
 		return validated;
 	};
 
+	const updateReviewDataPrimaryReviewer = (reviewData, userData) => {
+		const { first_name, last_name, email } = userData;
+		if (first_name && last_name) {
+			reviewData.primaryReviewer = `${last_name}, ${first_name}`;
+			if (email) {
+				reviewData.primaryReviewerEmail = email;
+			}
+		}
+		return reviewData;
+	};
+
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
 		if (
 			!isSubmit ||
@@ -1004,13 +1015,7 @@ const JBookProfilePage = () => {
 				reviewType === 'primary' &&
 				!reviewData.hasOwnProperty('primaryReviewer' || !reviewData.primaryReviewer)
 			) {
-				const { first_name, last_name, email } = userData;
-				if (first_name && last_name) {
-					reviewData.primaryReviewer = `${last_name}, ${first_name}`;
-					if (email) {
-						reviewData.primaryReviewerEmail = email;
-					}
-				}
+				updateReviewDataPrimaryReviewer(reviewData, userData);
 			}
 
 			await gameChangerAPI.callDataFunction({
