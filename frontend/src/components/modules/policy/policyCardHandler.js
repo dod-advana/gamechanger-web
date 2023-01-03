@@ -686,8 +686,19 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											// 	handleTopicClick(topic, cloneData.clone_name, index);
 											// }}
 											onClick={() => {
-												dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
-												setState(dispatch, { searchText: topic, runSearch: true });
+												if (
+													window.location.href
+														.split('#')[1]
+														.startsWith('/gamechanger-details')
+												) {
+													window.location.href = `#/gamechanger?q=${topic.replace(
+														/ /g,
+														'+'
+													)}&categories=Documents_Organizations_Topics`;
+												} else {
+													dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
+													setState(dispatch, { searchText: topic, runSearch: true });
+												}
 											}}
 										>
 											{topic}
