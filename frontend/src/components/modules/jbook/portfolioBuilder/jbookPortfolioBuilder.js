@@ -2,15 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import FormData from 'form-data';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 import DragAndDrop from '../../../common/DragAndDrop';
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { CircularProgress } from '@material-ui/core';
-
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
 
