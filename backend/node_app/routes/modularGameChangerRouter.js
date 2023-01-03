@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer({ dest: './public/data/uploads/' });
+const upload = multer({
+	dest: './public/data/uploads/',
+	limits: {
+		fileSize: 1048576, // 10 Mb
+	},
+});
 
 const { ModularGameChangerController } = require('../controllers/modularGameChangerController');
 const controller = new ModularGameChangerController();

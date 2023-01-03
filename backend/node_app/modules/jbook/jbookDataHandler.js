@@ -1556,7 +1556,6 @@ class JBookDataHandler extends DataHandler {
 		});
 
 		const startTime = performance.now();
-		let created = [];
 		let dupes = [];
 		let failed = [];
 		let failES = [];
@@ -1577,7 +1576,6 @@ class JBookDataHandler extends DataHandler {
 			if (result.length === 0) {
 				if (reviewData.budget_type !== 'odoc') {
 					newOrUpdatedReview = await this.rev.create(reviewData);
-					created.push(newOrUpdatedReview);
 					newOrUpdatedReview = newOrUpdatedReview.dataValues;
 				}
 			} else if (result.length > 1) {
@@ -1699,7 +1697,7 @@ class JBookDataHandler extends DataHandler {
 		return {
 			written,
 			dupes,
-			failedRows: failed,
+			failedRows: [...failed, ...failES],
 			time: (endTime - startTime) / 60000,
 		};
 	}
