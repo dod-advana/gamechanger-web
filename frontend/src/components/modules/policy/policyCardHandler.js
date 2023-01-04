@@ -9,7 +9,7 @@ import {
 	getTypeIcon,
 	getTypeTextColor,
 } from '../../../utils/gamechangerUtils';
-import { handleSaveFavoriteTopic } from '../../../utils/sharedFunctions';
+import { handleSaveFavoriteTopic, setState } from '../../../utils/sharedFunctions';
 import { CardButton } from '../../common/CardButton';
 import GCTooltip from '../../common/GCToolTip';
 import SimpleTable from '../../common/SimpleTable';
@@ -452,15 +452,15 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 		setFavorite(favorited);
 	}, [favorited]);
 
-	const openFavoritePopper = (target) => {
-		if (popperIsOpen) {
-			setPopperIsOpen(false);
-			setPopperAnchorEl(null);
-		} else {
-			setPopperIsOpen(true);
-			setPopperAnchorEl(target);
-		}
-	};
+	// const openFavoritePopper = (target) => {
+	// 	if (popperIsOpen) {
+	// 		setPopperIsOpen(false);
+	// 		setPopperAnchorEl(null);
+	// 	} else {
+	// 		setPopperIsOpen(true);
+	// 		setPopperAnchorEl(target);
+	// 	}
+	// };
 
 	const handleCancelFavorite = () => {
 		setPopperIsOpen(false);
@@ -477,7 +477,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 
 	return (
 		<>
-			<GCTooltip title={`Favorite this topic to track in the User Dashboard`} placement="top" arrow>
+			{/* <GCTooltip title={`Favorite this topic to track in the User Dashboard`} placement="top" arrow>
 				<i
 					onClick={(event) => {
 						openFavoritePopper(event.target);
@@ -488,7 +488,7 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 						alignSelf: 'center',
 					}}
 				/>
-			</GCTooltip>
+			</GCTooltip> */}
 			<Popover
 				onClose={() => handleCancelFavorite()}
 				id={topic}
@@ -623,16 +623,16 @@ const FavoriteTopicFromCardBack = ({ topic, favorited, dispatch, searchText, clo
 	);
 };
 
-const handleTopicClick = (topic, cloneName, idx) => {
-	trackEvent(
-		getTrackingNameForFactory(cloneName),
-		'TopicOpened',
-		topic,
-		null,
-		CustomDimensions.create(true, null, null, idx)
-	);
-	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
-};
+// const handleTopicClick = (topic, cloneName, idx) => {
+// 	trackEvent(
+// 		getTrackingNameForFactory(cloneName),
+// 		'TopicOpened',
+// 		topic,
+// 		null,
+// 		CustomDimensions.create(true, null, null, idx)
+// 	);
+// 	window.open(`#/gamechanger-details?cloneName=${cloneName}&type=topic&topicName=${topic}`);
+// };
 
 const handlePageHitHover = (
 	setHoveredHitFunc,
@@ -664,13 +664,7 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 
 	temp.map((metaData) => {
 		if (metaData.Key === 'Topics') {
-			metaData.Key = (
-				<div>
-					Topics
-					<br />
-					<b style={{ color: 'red' }}>(Beta)</b>
-				</div>
-			);
+			metaData.Key = <div>Topics</div>;
 			const topics = metaData.Value;
 			metaData.Value = (
 				<div>
@@ -686,10 +680,25 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 												overflow: 'hidden',
 												textOverflow: 'ellipsis',
 												marginTop: '-1px',
-												maxWidth: 'calc(100% - 15px)',
+												// maxWidth: 'calc(100% - 15px)',
 											}}
+											// onClick={() => {
+											// 	handleTopicClick(topic, cloneData.clone_name, index);
+											// }}
 											onClick={() => {
-												handleTopicClick(topic, cloneData.clone_name, index);
+												if (
+													window.location.href
+														.split('#')[1]
+														.startsWith('/gamechanger-details')
+												) {
+													window.location.href = `#/gamechanger?q=${topic.replace(
+														/ /g,
+														'+'
+													)}&categories=Documents_Organizations_Topics`;
+												} else {
+													dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
+													setState(dispatch, { searchText: topic, runSearch: true });
+												}
 											}}
 										>
 											{topic}
@@ -701,10 +710,21 @@ export const addFavoriteTopicToMetadata = (data, userData, dispatch, cloneData, 
 											overflow: 'hidden',
 											textOverflow: 'ellipsis',
 											marginTop: '-1px',
-											maxWidth: 'calc(100% - 15px)',
+											// maxWidth: 'calc(100% - 15px)',
 										}}
+										// onClick={() => {
+										// 	handleTopicClick(topic, cloneData.clone_name, index);
+										// }}
 										onClick={() => {
-											handleTopicClick(topic, cloneData.clone_name, index);
+											if (window.location.href.split('#')[1].startsWith('/gamechanger-details')) {
+												window.location.href = `#/gamechanger?q=${topic.replace(
+													/ /g,
+													'+'
+												)}&categories=Documents_Organizations_Topics`;
+											} else {
+												dispatch({ type: 'RESET_PRESEARCH_SETTINGS' });
+												setState(dispatch, { searchText: topic, runSearch: true });
+											}
 										}}
 									>
 										{topic}
@@ -912,7 +932,7 @@ const getCardSubHeaderHandler = ({ item, state, toggledMore }) => {
 							<p>{displayType}</p>
 						</div>
 					)}
-					{displayOrg.length > 25 ? (
+					{displayOrg.length > 19 ? (
 						<GCTooltip title={displayOrg} placement="top" arrow>
 							<div data-cy={'card-org'} className={'sub-header-two'}>
 								{displayOrg}
