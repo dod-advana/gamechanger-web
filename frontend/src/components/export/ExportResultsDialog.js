@@ -119,11 +119,14 @@ const ExportResultsDialog = ({
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
 	const isEda = cloneData.clone_name === 'eda';
+	const isJbookReviewer =
+		state?.userData.extra_fields.jbook.is_poc_reviewer ||
+		state?.userData.extra_fields.jbook.is_primary_reviewer ||
+		state?.userData.extra_fields.jbook.is_service_reviewer;
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv' : 'pdf');
 	const [classificationMarking, setClassificationMarking] = useState('');
 	const index = cloneData.clone_name;
 	const classes = useStyles();
-
 	const classificationMarkingOptions = ['None', 'CUI'];
 
 	const handleChange = ({ target: { value } }) => {
@@ -186,7 +189,12 @@ const ExportResultsDialog = ({
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(data, selectedFormat, classificationMarking, cloneData);
+			downloadFile(
+				data,
+				selectedFormat === 'csv-reviews' ? 'csv' : selectedFormat,
+				classificationMarking,
+				cloneData
+			);
 			getUserData();
 			if (
 				selectedFormat === 'pdf' &&
@@ -288,6 +296,16 @@ const ExportResultsDialog = ({
 							<MenuItem style={styles.menuItem} value="csv" key="csv" data-cy={`export-option-csv`}>
 								CSV
 							</MenuItem>
+							{cloneData.clone_name === 'jbook' && isJbookReviewer && (
+								<MenuItem
+									style={styles.menuItem}
+									value="csv-reviews"
+									key="csv-reviews"
+									data-cy={`export-option-csv-reviews`}
+								>
+									CSV (Reviews)
+								</MenuItem>
+							)}
 						</Select>
 					</FormControl>
 				</div>

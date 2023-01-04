@@ -89,14 +89,14 @@ class Reports {
 		}
 	}
 
-	jbookCreateCsvStream(data, userId) {
+	jbookCreateCsvStream(data, userId, includeReviews = false) {
 		try {
 			const stringifier = this.csvStringify({ delimiter: ',' });
 			stringifier.on('error', (err) => {
 				this.logger.error(err.message, 'NL71UTC', userId);
 				throw new Error(err);
 			});
-			this.jbookWriteCSV(stringifier, data);
+			this.jbookWriteCSV(stringifier, data, includeReviews);
 			stringifier.end();
 			return stringifier;
 		} catch (e) {
@@ -105,7 +105,7 @@ class Reports {
 		}
 	}
 
-	jbookWriteCSV(stringifier, data) {
+	jbookWriteCSV(stringifier, data, includeReviews = false) {
 		if (data && data.docs && data.docs.length > 0) {
 			const header = [
 				'Budget Year',
@@ -127,7 +127,38 @@ class Reports {
 				'Has Keywords',
 				'Primary Reviewer',
 				'RAI Lead Reviewer',
+				...(includeReviews
+					? [
+							'RAI Secondary Reviewer',
+							'RAI Tagging Label Agree',
+							'RAI Tagging Label',
+							'RAI Transition Partner Agree',
+							'RAI Transition Partner',
+							'RAI Mission Partners',
+							'RAI Review Notes',
+							'RAI POC Email',
+							'RAI POC Phone Number',
+					  ]
+					: []),
 				'POC Reviewer',
+				...(includeReviews
+					? [
+							'POC Tagging Label Agree',
+							'POC Transition Partners Agree',
+							'POC Mission Partners Label',
+							'POC Mission Partners List',
+							'POC Dollars Attributed',
+							'POC Percentage Attributed',
+							'POC Joint Capability Area 1',
+							'POC Joint Capability Area 2',
+							'POC Joint Capability Area 3',
+							'Domain Task',
+							'POC AI Type',
+							'POC AI Role Description',
+							'POC AI Type Description',
+							'Robotics System',
+					  ]
+					: []),
 				'Review Status',
 				'Labels',
 				'Source',
@@ -137,6 +168,7 @@ class Reports {
 
 			data.docs.forEach((doc) => {
 				const docData = doc.dataValues ?? doc;
+				console.log('Here is the docData', docData);
 				const item = [
 					docData.budgetYear,
 					docData.budgetType,
@@ -157,7 +189,38 @@ class Reports {
 					docData.hasKeywords ? 'Yes' : 'No',
 					docData.primary_reviewer_s,
 					docData.service_reviewer_s,
+					...(includeReviews
+						? [
+								docData.serviceSecondaryReviewer,
+								docData.serviceAgreeLabel,
+								docData.serviceClassLabel,
+								docData.servicePTPAgreeLabel,
+								docData.servicePlannedTransitionPartner,
+								docData.serviceMissionPartnersList,
+								docData.service_review_notes_s,
+								docData.servicePOCEmail,
+								docData.servicePOCPhoneNumber,
+						  ]
+						: []),
 					docData.service_poc_name_s,
+					...(includeReviews
+						? [
+								docData.pocAgreeLabel,
+								docData.pocPTPAgreeLabel,
+								docData.pocMPAgreeLabel,
+								docData.pocMissionPartnersList,
+								docData.pocDollarsAttributed,
+								docData.pocPercentageAttributed,
+								docData.pocJointCapabilityArea,
+								docData.pocJointCapabilityArea2,
+								docData.pocJointCapabilityArea3,
+								docData.domainTask,
+								docData.pocAIType,
+								docData.pocAIRoleDescription,
+								docData.pocAITypeDescription,
+								docData.roboticsSystemAgree,
+						  ]
+						: []),
 					docData.review_status_s,
 					docData.primary_class_label_s,
 					docData.source_tag_s,
