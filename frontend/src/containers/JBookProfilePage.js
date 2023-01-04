@@ -983,6 +983,17 @@ const JBookProfilePage = () => {
 		return validated;
 	};
 
+	const updateReviewDataPrimaryReviewer = (reviewData, userData) => {
+		const { first_name, last_name, email } = userData;
+		if (first_name && last_name) {
+			reviewData.primaryReviewer = `${last_name}, ${first_name}`;
+			if (email) {
+				reviewData.primaryReviewerEmail = email;
+			}
+		}
+		return reviewData;
+	};
+
 	const submitReviewForm = async (loading, isSubmit, reviewType) => {
 		if (
 			!isSubmit ||
@@ -999,6 +1010,15 @@ const JBookProfilePage = () => {
 			if (reviewData.pocAgreeLabel === 'No') {
 				reviewData.latestClassLabel = reviewData.pocClassLabel;
 			}
+
+			// if there is no selected primary reviewer, set the primary reviewer to the current user
+			if (
+				reviewType === 'primary' &&
+				!reviewData.hasOwnProperty('primaryReviewer' || !reviewData.primaryReviewer)
+			) {
+				updateReviewDataPrimaryReviewer(reviewData, userData);
+			}
+
 			await gameChangerAPI.callDataFunction({
 				functionName: 'storeBudgetReview',
 				cloneName: cloneData.clone_name,
