@@ -564,6 +564,7 @@ const PolicySearchHandler = {
 					ltr,
 					sort: currentSort,
 					order: currentOrder,
+					reviseFilterCounts: true,
 				},
 				limit: 18,
 			});
