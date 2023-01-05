@@ -243,7 +243,7 @@ const JBookProfilePage = () => {
 		}
 	};
 
-	// grab all profile page relaetd data
+	// grab all profile page related data
 	const getAllBYProjectData = async (id, year, portfolioName) => {
 		let allBYProjectData;
 		const currentUserData = await gameChangerUserAPI.getUserProfileData();
@@ -439,12 +439,12 @@ const JBookProfilePage = () => {
 					const tmpMatches = descriptions.value.match(regex);
 					matches = matches.concat(tmpMatches);
 				}
-
+				matches = [...new Set(matches)];
 				if (matches) {
 					for (const match of matches) {
 						descriptions.value = descriptions.value.replaceAll(
 							match,
-							`<span style="background-color: #1C2D64; color: white; padding: 0 4px;">${match}</span>`
+							`<span style="background-color: #1C2D64; color: white; padding: 0 4px; margin: 0 2px;">${match}</span>`
 						);
 					}
 				}
@@ -472,11 +472,12 @@ const JBookProfilePage = () => {
 						const tmpMatches = accompObject.Value.match(regex);
 						matches = matches.concat(tmpMatches);
 					});
+					matches = [...new Set(matches)];
 					if (matches && matches.length > 0 && matches !== null) {
 						for (const match of matches) {
 							accompObject.Value = accompObject.Value.replaceAll(
 								match,
-								`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px;">${match}</span>`
+								`<span style="background-color: ${'#1C2D64'}; color: white; padding: 0 4px; margin: 0 2px;">${match}</span>`
 							);
 						}
 					}
@@ -505,10 +506,11 @@ const JBookProfilePage = () => {
 
 	const applyHighlighting = useCallback(
 		(textObject, keywordBoxes, matches, keyword, property) => {
-			for (const match of matches) {
+			const uniqueMatches = [...new Set(matches)];
+			for (const match of uniqueMatches) {
 				textObject[property] = textObject[property].replaceAll(
 					match,
-					`<span style="background-color: ${gcOrange}; color: white; padding: 0 4px;">${match}</span>`
+					`<span style="background-color: ${gcOrange}; color: white; padding: 0 4px; margin: 0 2px;">${match}</span>`
 				);
 
 				if (!isCheckboxSet && keywordBoxes.indexOf(keyword) === -1) {
@@ -1091,7 +1093,6 @@ const JBookProfilePage = () => {
 			let latestReviewer;
 			if (reviewData.pocClassLabel) {
 				latestReviewer = reviewData.servicePOCName || 'The POC Reviewer';
-				console.log('latestReviewer: ', latestReviewer);
 			} else if (reviewData.serviceClassLabel) {
 				latestReviewer = reviewData.serviceReviewer || 'The RAI Lead Reviewer';
 			} else {
