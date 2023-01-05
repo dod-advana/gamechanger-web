@@ -194,9 +194,11 @@ const StyledCardContainer = styled.div`
 						font-size: ${CARD_FONT_SIZE}px;
 						font-family: 'Noto Sans';
 						position: relative;
-						padding: 5px 5px;
+						padding: 5px;
 						display: inline-block;
 						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
+						flex-grow: 2;
+						height: 100%;
 					}
 
 					.styled-card-front-buttons {
@@ -208,6 +210,7 @@ const StyledCardContainer = styled.div`
 						min-height: 60px;
 						justify-content: flex-end;
 						overflow: hidden;
+						flex-grow: 1;
 
 						.styled-action-buttons-group {
 							flex: 1 1 0%;
@@ -238,7 +241,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
 						display: block;
-						overflow: auto;
+						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
 						height: 100%;
 					}
 
@@ -714,7 +717,6 @@ function GCCard(props) {
 
 	const isRevoked = item.is_revoked_b;
 	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
-	const allowScroll = true;
 
 	const classes = useStyles();
 
@@ -904,7 +906,6 @@ function GCCard(props) {
 			toggledMore={toggledMore}
 			isRevoked={isRevoked}
 			selected={selected}
-			allowScroll={allowScroll}
 			showSideFilters={state.showSideFilters}
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}
