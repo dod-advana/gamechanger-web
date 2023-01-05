@@ -125,38 +125,43 @@ class Reports {
 				'BY4 Funding',
 				'BY5 Funding',
 				'Has Keywords',
-				'Primary Reviewer',
+				'Initial Reviewer',
+				...(includeReviews ? ['Initial Reviewer Transition Partner', 'Initial Reviewer Notes'] : []),
 				'RAI Lead Reviewer',
 				...(includeReviews
 					? [
 							'RAI Secondary Reviewer',
-							'RAI Tagging Label Agree',
-							'RAI Tagging Label',
+							'RAI AI Tagging Label Agree',
+							'RAI AI Tagging Label',
 							'RAI Transition Partner Agree',
 							'RAI Transition Partner',
 							'RAI Mission Partners',
 							'RAI Review Notes',
-							'RAI POC Email',
-							'RAI POC Phone Number',
 					  ]
 					: []),
 				'POC Reviewer',
 				...(includeReviews
 					? [
-							'POC Tagging Label Agree',
-							'POC Transition Partners Agree',
-							'POC Mission Partners Label',
-							'POC Mission Partners List',
-							'POC Dollars Attributed',
-							'POC Percentage Attributed',
+							'POC Email',
+							'POC Phone Number',
+							'POC Organization',
+							'POC AI Tagging Label Agree',
+							'POC AI Tagging Label',
+							'POC Transition Partner Agree',
+							'POC Transition Partner',
+							'POC Mission Partners Agree',
+							'POC Mission Partners',
+							'POC Dollars Attributed (M)',
+							'POC Percentage Attributed (%)',
 							'POC Joint Capability Area 1',
 							'POC Joint Capability Area 2',
 							'POC Joint Capability Area 3',
+							'POC AI Role Description',
 							'Domain Task',
 							'POC AI Type',
-							'POC AI Role Description',
 							'POC AI Type Description',
-							'Robotics System',
+							'Deployment System',
+							'Intelligent System',
 					  ]
 					: []),
 				'Review Status',
@@ -168,7 +173,6 @@ class Reports {
 
 			data.docs.forEach((doc) => {
 				const docData = doc.dataValues ?? doc;
-				console.log('Here is the docData', docData);
 				const item = [
 					docData.budgetYear,
 					docData.budgetType,
@@ -188,6 +192,7 @@ class Reports {
 					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? 'N/A',
 					docData.hasKeywords ? 'Yes' : 'No',
 					docData.primary_reviewer_s,
+					...(includeReviews ? [docData.primaryPlannedTransitionPartner, docData.primaryReviewNotes] : []),
 					docData.service_reviewer_s,
 					...(includeReviews
 						? [
@@ -196,29 +201,33 @@ class Reports {
 								docData.serviceClassLabel,
 								docData.servicePTPAgreeLabel,
 								docData.servicePlannedTransitionPartner,
-								docData.serviceMissionPartnersList,
+								docData.serviceMissionPartnersList.replace(/\|/g, ', '),
 								docData.service_review_notes_s,
-								docData.servicePOCEmail,
-								docData.servicePOCPhoneNumber,
 						  ]
 						: []),
-					docData.service_poc_name_s,
+					this.getPocReviewer(docData),
 					...(includeReviews
 						? [
+								this.getPocEmail(docData),
+								this.getPocPhone(docData),
+								this.getPocOrganization(docData),
 								docData.pocAgreeLabel,
+								docData.pocClassLabel,
 								docData.pocPTPAgreeLabel,
+								docData.pocPlannedTransitionPartner,
 								docData.pocMPAgreeLabel,
 								docData.pocMissionPartnersList,
 								docData.pocDollarsAttributed,
 								docData.pocPercentageAttributed,
 								docData.pocJointCapabilityArea,
-								docData.pocJointCapabilityArea2,
-								docData.pocJointCapabilityArea3,
-								docData.domainTask,
-								docData.pocAIType,
+								docData.pocJointCapabilityArea2?.join(', '),
+								docData.pocJointCapabilityArea3?.join(', '),
 								docData.pocAIRoleDescription,
+								this.getDomainTask(docData),
+								docData.pocAIType,
 								docData.pocAITypeDescription,
 								docData.roboticsSystemAgree,
+								docData.intelligentSystemsAgree,
 						  ]
 						: []),
 					docData.review_status_s,
@@ -1153,7 +1162,6 @@ class Reports {
 	constructJCAData(docData) {
 		const JCAData = this.budgetSearchUtility.getJCAData();
 		const tmpJCAData = this.formatJCAData(JCAData, docData);
-		console.log(docData);
 		let currentYear = parseInt(docData.budgetYear);
 
 		return {
