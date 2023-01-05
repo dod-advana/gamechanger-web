@@ -165,7 +165,8 @@ const ExportResultsDialog = ({
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
 			const cleanSearchSettings =
 				searchHandler !== undefined ? searchHandler.processSearchSettings(state, dispatch) : {};
-
+			console.log('here is cleansearch settings', cleanSearchSettings);
+			console.log('here is clone data', cloneData);
 			const exportInput = {
 				cloneName: cloneData.clone_name,
 				format: selectedFormat,
@@ -176,8 +177,8 @@ const ExportResultsDialog = ({
 					index,
 					classificationMarking: classificationMarking === 'None' ? '' : classificationMarking,
 					cloneData,
-					orgFilter: orgFilter,
-					orgFilterString: orgFilterString,
+					orgFilter,
+					orgFilterString,
 					typeFilter,
 					typeFilterString,
 					selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [],

@@ -253,6 +253,7 @@ export default class GameChangerAPI {
 	modularExport = async (data) => {
 		const url = endpoints.modularExport;
 		const options = (data?.format ?? '') === 'pdf' ? {} : { responseType: 'blob' };
+
 		data.searchVersion = Config.GAMECHANGER.SEARCH_VERSION;
 		return axiosPOST(this.axios, url, data, options);
 	};

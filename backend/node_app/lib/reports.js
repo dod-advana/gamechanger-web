@@ -125,8 +125,15 @@ class Reports {
 				'BY4 Funding',
 				'BY5 Funding',
 				'Has Keywords',
+				'Keywords',
 				'Initial Reviewer',
-				...(includeReviews ? ['Initial Reviewer Transition Partner', 'Initial Reviewer Notes'] : []),
+				...(includeReviews
+					? [
+							'Initial Reviewer AI Tagging Label',
+							'Initial Reviewer Transition Partner',
+							'Initial Reviewer Notes',
+					  ]
+					: []),
 				'RAI Lead Reviewer',
 				...(includeReviews
 					? [
@@ -173,6 +180,7 @@ class Reports {
 
 			data.docs.forEach((doc) => {
 				const docData = doc.dataValues ?? doc;
+				console.log('here is docdatax', docData);
 				const item = [
 					docData.budgetYear,
 					docData.budgetType,
@@ -191,8 +199,15 @@ class Reports {
 					docData.proj_fund_by4_d ?? docData.p4084_toa_by4_d ?? 'N/A',
 					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? 'N/A',
 					docData.hasKeywords ? 'Yes' : 'No',
+					docData.keywords?.join(', '),
 					docData.primary_reviewer_s,
-					...(includeReviews ? [docData.primaryPlannedTransitionPartner, docData.primaryReviewNotes] : []),
+					...(includeReviews
+						? [
+								docData.primaryClassLabel,
+								docData.primaryPlannedTransitionPartner,
+								docData.primaryReviewNotes,
+						  ]
+						: []),
 					docData.service_reviewer_s,
 					...(includeReviews
 						? [
