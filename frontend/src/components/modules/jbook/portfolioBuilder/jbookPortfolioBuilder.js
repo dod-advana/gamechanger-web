@@ -97,8 +97,6 @@ const PortfolioBuilder = (props) => {
 					},
 				})
 				.then((data) => {
-					console.log(data);
-
 					const alphaSort = (a, b) => {
 						const nameA = a.name.toUpperCase(); // ignore upper and lowercase
 						const nameB = b.name.toUpperCase(); // ignore upper and lowercase
