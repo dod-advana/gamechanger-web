@@ -150,7 +150,7 @@ describe('EDAExportHandler', function () {
 			const target = new EDAExportHandler(opts);
 			const expectedStatus = 200;
 			const expectedResults =
-				'Filename (U),Contract Number (U),Page Count (U),Issuing Organization (U),PCS Code (FPDS-NG) (CUI//SP-PROCURE),PSC Description (FPDS-NG) (CUI//SP-PROCURE),Obligated Amount (CUI//SP-PROCURE),Clin Number (CUI//SP-PROCURE),Unit (CUI//SP-PROCURE),Unit Price (CUI//SP-PROCURE),Amount (CUI//SP-PROCURE),Purchase Request Number (CUI//SP-PROCURE),PSC Code (CUI//SP-PROCURE),NAICS (CUI//SP-PROCURE)EDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,2017-09-21.pdf-undefined,48,Army,,,6472000see previous filename*,,,,,,,test,test,test,test,test,test,test';
+				'(U) Filename,(U) Contract Number,(U) Page Count,(U) Issuing Organization,(CUI//SP-PROCURE) PCS Code (FPDS-NG),(CUI//SP-PROCURE) PSC Description (FPDS-NG),(CUI//SP-PROCURE) Obligated Amount,(CUI//SP-PROCURE) Clin Number,(CUI//SP-PROCURE) Unit,(CUI//SP-PROCURE) Unit Price,(CUI//SP-PROCURE) Amount,(CUI//SP-PROCURE) Purchase Request Number,(CUI//SP-PROCURE) PSC Code,(CUI//SP-PROCURE) NAICSEDAPDF-59BE6A9B163C1247E05400215A9BA3BA-W911NF17D0002-0002-empty-empty-PDS-2017-09-21.pdf,2017-09-21.pdf-undefined,48,Army,,,6472000see previous filename*,,,,,,,test,test,test,test,test,test,test';
 			try {
 				await target.exportHelper(mockReq, mockRes, 'test');
 
