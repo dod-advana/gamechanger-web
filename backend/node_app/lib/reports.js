@@ -856,9 +856,9 @@ class Reports {
 			docData.serviceSecondaryReviewer !== null &&
 			docData.serviceSecondaryReviewer !== ''
 		) {
-			return docData.serviceSecondaryReviewer.split('(')[1].replace(')', '');
+			return docData.serviceSecondaryReviewer.split('(')[1]?.replace(')', '');
 		} else if (docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '') {
-			return docData.serviceReviewer.split('(')[1].replace(')', '');
+			return docData.serviceReviewer.split('(')[1]?.replace(')', '');
 		} else {
 			return 'N/A';
 		}
