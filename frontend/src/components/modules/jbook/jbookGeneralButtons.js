@@ -37,7 +37,6 @@ const JBOOKGeneralAdminButtons = () => {
 
 	const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
 		//Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
-		console.log('autodownload file');
 
 		const a = document.createElement('a');
 		a.style = 'display: none';

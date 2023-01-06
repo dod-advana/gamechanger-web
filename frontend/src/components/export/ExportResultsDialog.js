@@ -121,9 +121,10 @@ const ExportResultsDialog = ({
 	const [errorMsg, setErrorMsg] = useState('');
 	const isEda = cloneData.clone_name === 'eda';
 	const isJbookReviewer =
-		state?.userData.extra_fields.jbook.is_poc_reviewer ||
-		state?.userData.extra_fields.jbook.is_primary_reviewer ||
-		state?.userData.extra_fields.jbook.is_service_reviewer;
+		state.userData?.extra_fields?.jbook.is_admin ||
+		state.userData?.extra_fields?.jbook.is_poc_reviewer ||
+		state.userData?.extra_fields?.jbook.is_primary_reviewer ||
+		state.userData?.extra_fields?.jbook.is_service_reviewer;
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv' : 'pdf');
 	const [classificationMarking, setClassificationMarking] = useState('');
 	const index = cloneData.clone_name;
@@ -165,8 +166,6 @@ const ExportResultsDialog = ({
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
 			const cleanSearchSettings =
 				searchHandler !== undefined ? searchHandler.processSearchSettings(state, dispatch) : {};
-			console.log('here is cleansearch settings', cleanSearchSettings);
-			console.log('here is clone data', cloneData);
 			const exportInput = {
 				cloneName: cloneData.clone_name,
 				format: selectedFormat,
