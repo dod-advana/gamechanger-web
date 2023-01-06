@@ -68,7 +68,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --no-progress
+    - yarn install --cache-folder ../.yarn-cache --no-progress --network-timeout 600000
     - cd ../backend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
@@ -81,12 +81,6 @@ sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - echo "This works"
-
-eslint-sast:
-  stage: "🧪 static-test"
-  cache: []
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 nodejs-scan-sast:
   stage: "🧪 static-test"
