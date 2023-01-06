@@ -169,7 +169,7 @@ const DocumentDetailsPage = (props) => {
 	);
 
 	useEffect(() => {
-		if (!graphData.nodes.length > 0 || !cloneData) return;
+		if (!graphData?.nodes.length > 0 || !cloneData) return;
 
 		// Find doc Ids to get the docs that are similar to
 		let docIdSet = new Set();
