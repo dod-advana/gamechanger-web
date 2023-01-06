@@ -371,6 +371,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [selectedInput, setSelectedInput] = useState(undefined);
 	const [returnedDocs, setReturnedDocs] = useState([]);
 	const [viewableDocs, setViewableDocs] = useState([]);
+	const [resultsLoading, setResultsLoading] = useState(false);
+	const [filterCountsLoading, setFilterCountsLoading] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
@@ -449,28 +451,58 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	useEffect(() => {
 		if (updateFilters) {
 			setUpdateFilters(false);
+			setFilterCountsLoading(true);
 			const newSearchSettings = { ...state.analystToolsSearchSettings };
-			const sourceCount = {};
-			const typeCount = {};
 
-			returnedDocs.forEach((doc) => {
-				if (typeCount[doc.display_doc_type_s]) {
-					typeCount[doc.display_doc_type_s]++;
-				} else {
-					typeCount[doc.display_doc_type_s] = 1;
-				}
-				if (sourceCount[doc.display_org_s]) {
-					sourceCount[doc.display_org_s]++;
-				} else {
-					sourceCount[doc.display_org_s] = 1;
-				}
-			});
-			newSearchSettings.orgCount = sourceCount;
-			newSearchSettings.typeCount = typeCount;
+			const filters = {
+				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
+				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
+				dateFilter: publicationDateFilter,
+				canceledDocs: includeRevoked,
+			};
 
-			setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+			gameChangerAPI
+				.getFilterCountsPOST({
+					cloneName: state.cloneData.clone_name,
+					paragraphs: paragraphs,
+					filters,
+				})
+				.then((resp) => {
+					const { orgCount, typeCount } = resp.data;
+					newSearchSettings.orgCount = orgCount;
+					newSearchSettings.typeCount = typeCount;
+					setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
+					setFilterCountsLoading(false);
+				})
+				.catch(() => {
+					newSearchSettings.orgCount = {};
+					newSearchSettings.typeCount = {};
+					setState(dispatch, {
+						analystToolsSearchSettings: newSearchSettings,
+					});
+					setFilterCountsLoading(false);
+				});
 		}
-	}, [dispatch, returnedDocs, state.analystToolsSearchSettings, updateFilters]);
+	}, [
+		dispatch,
+		returnedDocs,
+		noResults,
+		paragraphs,
+		updateFilters,
+		paragraphText,
+		state.cloneData.clone_name,
+		state.analystToolsSearchSettings,
+		allOrgsSelected,
+		orgFilter,
+		allTypesSelected,
+		typeFilter,
+		publicationDateFilter,
+		includeRevoked,
+	]);
+
+	useEffect(() => {
+		setLoading(resultsLoading || filterCountsLoading);
+	}, [resultsLoading, filterCountsLoading]);
 
 	useEffect(() => {
 		setUpdateFilters(true);
@@ -518,7 +550,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
-			setLoading(true);
+			setResultsLoading(true);
 
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
@@ -549,13 +581,17 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						setSelectedParagraph(paragraph);
 					}
 					setReturnedDocs(resp.data.docs);
-					setState(dispatch, { runDocumentComparisonSearch: false });
-					setLoading(false);
+					setState(dispatch, {
+						runDocumentComparisonSearch: false,
+					});
+					setResultsLoading(false);
 				})
 				.catch(() => {
 					setReturnedDocs([]);
-					setState(dispatch, { runDocumentComparisonSearch: false });
-					setLoading(false);
+					setState(dispatch, {
+						runDocumentComparisonSearch: false,
+					});
+					setResultsLoading(false);
 					console.log('server error');
 				});
 		}
@@ -881,6 +917,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						onClick={() => {
 							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
 							resetAdvancedSettings(dispatch);
+							setNoResults(false);
+							setReturnedDocs([]);
+							setNeedsSort(true);
+							setState(dispatch, { runDocumentComparisonSearch: true });
 						}}
 						style={{ margin: 0, width: '100%' }}
 					>
@@ -897,7 +937,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							style={{ margin: '10px 0 0 0', width: '100%' }}
 							disabled={!filterChange}
 						>
-							Apply filters
+							Apply Filters
 						</GCButton>
 					)}
 				</div>
