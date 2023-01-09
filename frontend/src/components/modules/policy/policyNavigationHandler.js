@@ -420,16 +420,26 @@ const getToolState = (state) => {
 
 const PolicyNavigationHandler = (props) => {
 	const { state, dispatch } = props;
+	const { slideOutMenuRef } = state;
 
-	const { setToolState, unsetTool } = useContext(SlideOutToolContext);
+	const { setToolState, setMenuOpened } = useContext(SlideOutToolContext);
+
+	useEffect(() => {
+		const handleClick = (event) => {
+			if (slideOutMenuRef.current && !slideOutMenuRef.current.contains(event.target)) {
+				setMenuOpened(false);
+			}
+		};
+		document.addEventListener('click', handleClick);
+
+		return () => {
+			document.removeEventListener('click', handleClick);
+		};
+	}, [slideOutMenuRef, setMenuOpened]);
 
 	useEffect(() => {
 		setToolState(getToolState(state));
-
-		return () => {
-			unsetTool();
-		};
-	}, [unsetTool, setToolState, state]);
+	}, [setToolState, state]);
 
 	return (
 		<>
