@@ -31,6 +31,7 @@ const initState = {
 
 	// Slide out menu
 	slideOutMenuRef: null,
+	closeSlideOutMenu: false,
 
 	// Notifications
 	notifications: [],
