@@ -137,7 +137,10 @@ const renderSources = (state, dispatch, classes, searchbar = false) => {
 					specificSelected={'specificOrgsSelected'}
 					update={'orgUpdate'}
 					trackingName={'OrgFilterToggle'}
-					showNumResultsPerOption
+					showNumResultsPerOption={originalOrgFilters.reduce(
+						(nonzeroCountExists, filter) => nonzeroCountExists || !!filter[1],
+						false
+					)}
 				/>
 			)}
 		</FormControl>
@@ -256,7 +259,10 @@ const renderTypes = (state, dispatch, classes, searchbar = false) => {
 						specificSelected={'specificTypesSelected'}
 						update={'typeUpdate'}
 						trackingName={'TypeFilterToggle'}
-						showNumResultsPerOption
+						showNumResultsPerOption={originalTypeFilters.reduce(
+							(nonzeroCountExists, filter) => nonzeroCountExists || !!filter[1],
+							false
+						)}
 					/>
 				</>
 			)}
