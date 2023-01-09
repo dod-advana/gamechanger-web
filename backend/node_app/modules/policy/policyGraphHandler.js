@@ -605,18 +605,18 @@ class PolicyGraphHandler extends GraphHandler {
 			const nodeIds = [];
 			const edgeIds = [];
 			resps.forEach((resp) => {
-				resp[0].labels.forEach((label) => {
+				resp[0].labels?.forEach((label) => {
 					if (!graph.labels.includes(label)) {
 						graph.labels.push(label);
 					}
 				});
-				resp[0].nodes.forEach((node) => {
+				resp[0].nodes?.forEach((node) => {
 					if (!nodeIds.includes(node.id)) {
 						graph.nodes.push(node);
 						nodeIds.push(node.id);
 					}
 				});
-				resp[0].edges.forEach((edge) => {
+				resp[0].edges?.forEach((edge) => {
 					if (!edgeIds.includes(edge.id)) {
 						graph.edges.push(edge);
 						edgeIds.push(edge.id);
