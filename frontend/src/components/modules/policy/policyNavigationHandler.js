@@ -244,6 +244,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="Show Notifications" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
+							setState(dispatch, { closeSlideOutMenu: true });
 							clickNotification(state, dispatch);
 						}}
 						toolTheme={toolTheme}
@@ -261,6 +262,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 				<GCTooltip title="How-to, features, and tips" placement="right" arrow>
 					<HoverNavItem
 						onClick={() => {
+							setState(dispatch, { closeSlideOutMenu: true });
 							clickTutorial(state, dispatch);
 						}}
 						toolTheme={toolTheme}
@@ -279,7 +281,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 			<GCTooltip title="Tell us what you think!" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
-						setState(dispatch, { showFeedbackModal: true });
+						setState(dispatch, { showFeedbackModal: true, closeSlideOutMenu: true });
 						trackEvent(
 							getTrackingNameForFactory(state.cloneData.clone_name),
 							'SidebarInteraction',
@@ -295,7 +297,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 			<GCTooltip title="Help us verify data" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
-						setState(dispatch, { showAssistModal: true });
+						setState(dispatch, { showAssistModal: true, closeSlideOutMenu: true });
 						trackEvent(
 							getTrackingNameForFactory(state.cloneData.clone_name),
 							'SidebarInteraction',
@@ -316,7 +318,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 							document.title,
 							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.dataTracker}`
 						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker });
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.dataTracker, closeSlideOutMenu: true });
 						trackEvent(
 							getTrackingNameForFactory(state.cloneData.clone_name),
 							'SidebarInteraction',
@@ -340,6 +342,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 						);
 						setState(dispatch, {
 							pageDisplayed: PAGE_DISPLAYED.analystTools,
+							closeSlideOutMenu: true,
 						});
 						trackEvent('DataTracker', 'onCLick');
 					}}
@@ -353,6 +356,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 			<GCTooltip title="About Us" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
+						setState(dispatch, { closeSlideOutMenu: true });
 						clickAboutUs(state, dispatch);
 					}}
 					active={state.pageDisplayed === PAGE_DISPLAYED.aboutUs}
@@ -370,7 +374,7 @@ const generateOpenedContentArea = (state, dispatch) => {
 							document.title,
 							`/#/${state.cloneData.url.toLowerCase()}/${PAGE_DISPLAYED.userDashboard}`
 						);
-						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard });
+						setState(dispatch, { pageDisplayed: PAGE_DISPLAYED.userDashboard, closeSlideOutMenu: true });
 						trackEvent(
 							getTrackingNameForFactory(state.cloneData.clone_name),
 							'SidebarInteraction',
@@ -422,24 +426,39 @@ const PolicyNavigationHandler = (props) => {
 	const { state, dispatch } = props;
 	const { slideOutMenuRef } = state;
 
-	const { setToolState, setMenuOpened } = useContext(SlideOutToolContext);
+	const { setToolState, setMenuOpened, menuOpened, unsetTool } = useContext(SlideOutToolContext);
 
 	useEffect(() => {
-		const handleClick = (event) => {
-			if (slideOutMenuRef.current && !slideOutMenuRef.current.contains(event.target)) {
-				setMenuOpened(false);
-			}
-		};
-		document.addEventListener('click', handleClick);
+		if (menuOpened) {
+			const handleClick = (event) => {
+				if (slideOutMenuRef.current && !slideOutMenuRef.current.contains(event.target)) {
+					setState(dispatch, { closeSlideOutMenu: true });
+				}
+			};
+			document.addEventListener('click', handleClick);
 
-		return () => {
-			document.removeEventListener('click', handleClick);
-		};
-	}, [slideOutMenuRef, setMenuOpened]);
+			return () => {
+				document.removeEventListener('click', handleClick);
+			};
+		}
+	}, [menuOpened, slideOutMenuRef, dispatch]);
 
 	useEffect(() => {
 		setToolState(getToolState(state));
 	}, [setToolState, state]);
+
+	useEffect(() => {
+		if (state.closeSlideOutMenu) {
+			setMenuOpened(false);
+			setState(dispatch, { closeSlideOutMenu: false });
+		}
+	}, [setMenuOpened, dispatch, state.closeSlideOutMenu]);
+
+	useEffect(() => {
+		return () => {
+			unsetTool();
+		};
+	}, [unsetTool]);
 
 	return (
 		<>
