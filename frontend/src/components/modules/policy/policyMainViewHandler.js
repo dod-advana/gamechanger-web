@@ -42,7 +42,7 @@ import DocumentIcon from '../../../images/icon/Document.png';
 import OrganizationIcon from '../../../images/icon/Organization.png';
 import ApplicationsIcon from '../../../images/icon/slideout-menu/applications icon.png';
 import {
-	TrendingSearchContainer,
+	// TrendingSearchContainer,
 	RecentSearchContainer,
 	SourceContainer,
 } from '../../mainView/HomePageStyledComponents';
@@ -161,6 +161,12 @@ const renderRecentSearches = (search, state, dispatch) => {
 		run_at,
 	} = search;
 
+	const formattedSourceFilter = orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ');
+	const formattedTypeFilter = typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ');
+	const formattedPublicationDate = publicationDateAllTime
+		? 'All'
+		: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
+
 	return (
 		<RecentSearchContainer
 			onClick={() => {
@@ -195,26 +201,38 @@ const renderRecentSearches = (search, state, dispatch) => {
 					<Typography
 						style={{
 							...styles.containerText,
-							textOverflow: 'ellipsis',
-							whiteSpace: 'nowrap',
-							overflow: 'hidden',
+							...styles.overflowEllipsis,
 						}}
 					>
 						{searchText}
 					</Typography>
 				</GCTooltip>
 			</div>
-			<Typography style={styles.subtext}>
-				<strong>Source Filter: </strong>
-				{orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ')}
-			</Typography>
-			<Typography style={styles.subtext}>
-				<strong>Type Filter: </strong>
-				{typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ')}
-			</Typography>
+			<GCTooltip title={formattedSourceFilter} placement="top" arrow>
+				<Typography
+					style={{
+						...styles.subtext,
+						...styles.overflowEllipsis,
+					}}
+				>
+					<strong>Source Filter: </strong>
+					{formattedSourceFilter}
+				</Typography>
+			</GCTooltip>
+			<GCTooltip title={formattedTypeFilter} placement="top" arrow>
+				<Typography
+					style={{
+						...styles.subtext,
+						...styles.overflowEllipsis,
+					}}
+				>
+					<strong>Type Filter: </strong>
+					{formattedTypeFilter}
+				</Typography>
+			</GCTooltip>
 			<Typography style={styles.subtext}>
 				<strong>Publication Date: </strong>
-				{publicationDateAllTime ? 'All' : publicationDateFilter.join(' - ')}
+				{formattedPublicationDate}
 			</Typography>
 			<Typography style={styles.subtext}>
 				<strong>Include Canceled: </strong>
@@ -461,7 +479,7 @@ const renderHideTabs = (props) => {
 	const { state, dispatch, searchHandler } = props;
 	const {
 		adminTopics,
-		searchMajorPubs,
+		// searchMajorPubs,
 		recDocs,
 		loadingrecDocs,
 		cloneData,
@@ -516,73 +534,32 @@ const renderHideTabs = (props) => {
 			{renderPrevSearchText(prevSearchText, resetSettingsSwitch, dispatch, searchHandler, state)}
 			{renderShowDidYouMean(didYouMean, loading, state, dispatch)}
 			<div style={{ margin: '0 70px 0 70px' }}>
-				<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
-					{trendingLinks.map(({ search }, idx) => (
-						<TrendingSearchContainer
-							onClick={() => {
-								setState(dispatch, { searchText: search, runSearch: true });
-							}}
-						>
-							<div
-								style={{
-									display: 'flex',
-									justifyContent: 'space-between',
-									wordSpacing: 3,
-									letterSpacing: 2,
-									marginTop: 8,
-								}}
-							>
-								<GCTooltip title={search.length < 18 ? '' : search} placement="top" arrow>
-									<Typography
-										style={{
-											...styles.containerText,
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											overflow: 'hidden',
-										}}
-									>
-										<i className="fa fa-search" style={{ marginRight: 12 }} />
-										{`   ${idx + 1}. ${search}`}
-									</Typography>
-								</GCTooltip>
-							</div>
-						</TrendingSearchContainer>
-					))}
+				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
+					{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
 				</GameChangerThumbnailRow>
-				<GameChangerThumbnailRow
-					links={adminTopics}
-					title={"Editor's Choice: Top Topics"}
-					width="100px"
-					style={{ marginLeft: '0' }}
-				>
-					{adminTopics.map((item) => (
-						<div
-							style={styles.checkboxPill}
-							onClick={() => {
-								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name);
-								window.open(
-									`#/gamechanger-details?cloneName=${
-										cloneData.clone_name
-									}&type=topic&topicName=${item.name.toLowerCase()}`
-								);
-							}}
-						>
-							{item.name}
-							{/* <i
-								className={item.favorite ? 'fa fa-star' : 'fa fa-star-o'}
-								style={{
-									color: item.favorite ? '#E9691D' : 'rgb(224,224,224)',
-									marginLeft: 10,
-									cursor: 'pointer',
-									fontSize: 20,
+				<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
+					{lastOpened.length > 0 &&
+						lastOpened[0].imgSrc &&
+						lastOpened.map((pub) => recRecentlyViewedMap(cloneData, dispatch, pub))}
+					{loadingLastOpened && lastOpened.length === 0 && (
+						<div className="col-xs-12">
+							<LoadingIndicator
+								customColor={gcOrange}
+								inline={true}
+								containerStyle={{
+									height: '300px',
+									textAlign: 'center',
+									paddingTop: '75px',
+									paddingBottom: '75px',
 								}}
-								onClick={(event) => {
-									event.stopPropagation();
-									handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
-								}}
-							/> */}
+							/>
 						</div>
-					))}
+					)}
+					{!loadingLastOpened && lastOpened.length === 0 && (
+						<div className="col-xs-12" style={{ height: '140px' }}>
+							<Typography style={styles.containerText}>No recent documents to show.</Typography>
+						</div>
+					)}
 				</GameChangerThumbnailRow>
 				<GameChangerThumbnailRow links={recDocs} title="Recommended For You" width="215px">
 					{recDocs.length > 0 &&
@@ -610,31 +587,6 @@ const renderHideTabs = (props) => {
 						</div>
 					)}
 				</GameChangerThumbnailRow>
-				<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
-					{lastOpened.length > 0 &&
-						lastOpened[0].imgSrc &&
-						lastOpened.map((pub) => recRecentlyViewedMap(cloneData, dispatch, pub))}
-					{loadingLastOpened && lastOpened.length === 0 && (
-						<div className="col-xs-12">
-							<LoadingIndicator
-								customColor={gcOrange}
-								inline={true}
-								containerStyle={{
-									height: '300px',
-									textAlign: 'center',
-									paddingTop: '75px',
-									paddingBottom: '75px',
-								}}
-							/>
-						</div>
-					)}
-					{!loadingLastOpened && lastOpened.length === 0 && (
-						<div className="col-xs-12" style={{ height: '140px' }}>
-							<Typography style={styles.containerText}>No recent documents to show.</Typography>
-						</div>
-					)}
-				</GameChangerThumbnailRow>
-
 				<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 					{crawlerSources.length > 0 &&
 						crawlerSources[0].imgSrc &&
@@ -676,10 +628,75 @@ const renderHideTabs = (props) => {
 						</div>
 					)}
 				</GameChangerThumbnailRow>
-				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
-					{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
-				</GameChangerThumbnailRow>
-				<GameChangerThumbnailRow links={searchMajorPubs} title="Popular Publications" width="215px">
+				{/*<GameChangerThumbnailRow links={trendingLinks} title={'Trending Searches'} width={'300px'}>
+					{trendingLinks.map(({ search }, idx) => (
+						<TrendingSearchContainer
+							onClick={() => {
+								setState(dispatch, { searchText: search, runSearch: true });
+							}}
+						>
+							<div
+								style={{
+									display: 'flex',
+									justifyContent: 'space-between',
+									wordSpacing: 3,
+									letterSpacing: 2,
+									marginTop: 8,
+								}}
+							>
+								<GCTooltip title={search.length < 18 ? '' : search} placement="top" arrow>
+									<Typography
+										style={{
+											...styles.containerText,
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											overflow: 'hidden',
+										}}
+									>
+										<i className="fa fa-search" style={{ marginRight: 12 }} />
+										{`   ${idx + 1}. ${search}`}
+									</Typography>
+								</GCTooltip>
+							</div>
+						</TrendingSearchContainer>
+					))}
+				</GameChangerThumbnailRow>*/}
+				{/*<GameChangerThumbnailRow
+					links={adminTopics}
+					title={"Editor's Choice: Top Topics"}
+					width="100px"
+					style={{ marginLeft: '0' }}
+				>
+					{adminTopics.map((item) => (
+						<div
+							style={styles.checkboxPill}
+							onClick={() => {
+								trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TopicOpened', item.name);
+								window.open(
+									`#/gamechanger-details?cloneName=${
+										cloneData.clone_name
+									}&type=topic&topicName=${item.name.toLowerCase()}`
+								);
+							}}
+						>
+							{item.name}
+							{ <i // begin comment
+								className={item.favorite ? 'fa fa-star' : 'fa fa-star-o'}
+								style={{
+									color: item.favorite ? '#E9691D' : 'rgb(224,224,224)',
+									marginLeft: 10,
+									cursor: 'pointer',
+									fontSize: 20,
+								}}
+								onClick={(event) => {
+									event.stopPropagation();
+									handleSaveFavoriteTopic(item.name.toLowerCase(), '', !item.favorite, dispatch);
+								}}
+							/> } // end comment
+						</div>
+					))}
+				</GameChangerThumbnailRow>*/}
+				{/*<GameChangerThumbnailRow links={searchMajorPubs} title="Popular Publications" width="215px">
 					{searchMajorPubs.length > 0 &&
 						searchMajorPubs[0].imgSrc &&
 						searchMajorPubs.map((pub) => (
@@ -722,7 +739,7 @@ const renderHideTabs = (props) => {
 							/>
 						</div>
 					)}
-				</GameChangerThumbnailRow>
+				</GameChangerThumbnailRow>*/}
 			</div>
 		</div>
 	);
