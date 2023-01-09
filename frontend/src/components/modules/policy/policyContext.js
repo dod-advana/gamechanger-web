@@ -29,6 +29,9 @@ const initState = {
 	history: undefined,
 	historySet: false,
 
+	// Slide out menu
+	slideOutMenuRef: null,
+
 	// Notifications
 	notifications: [],
 	notificationIds: [],
