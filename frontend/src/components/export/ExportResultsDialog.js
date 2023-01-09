@@ -204,9 +204,10 @@ const ExportResultsDialog = ({
 			) {
 				sendNonstandardClassificationAlert(exportInput);
 			}
+			setErrorMsg('Successfully Generated Results!');
 		} catch (err) {
 			console.log(err);
-			setErrorMsg('Error Downloading Results');
+			setErrorMsg('Error Generating Results');
 		} finally {
 			setLoading(false);
 		}
@@ -295,7 +296,7 @@ const ExportResultsDialog = ({
 								</MenuItem>
 							)}
 							<MenuItem style={styles.menuItem} value="csv" key="csv" data-cy={`export-option-csv`}>
-								CSV
+								{cloneData.clone_name === 'jbook' ? 'CSV (Summary)' : 'CSV'}
 							</MenuItem>
 							{cloneData.clone_name === 'jbook' && isJbookReviewer && (
 								<MenuItem
@@ -304,7 +305,7 @@ const ExportResultsDialog = ({
 									key="csv-reviews"
 									data-cy={`export-option-csv-reviews`}
 								>
-									CSV (Reviews)
+									CSV (Detailed)
 								</MenuItem>
 							)}
 						</Select>
