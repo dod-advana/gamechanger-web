@@ -501,7 +501,7 @@ export default () => {
 		);
 		const link = document.createElement('a');
 		link.href = url;
-		link.setAttribute('download', `${name}.xlsx`); //or any other extension
+		link.setAttribute('download', `${name}.csv`); //or any other extension
 		document.body.appendChild(link);
 		link.click();
 	};
