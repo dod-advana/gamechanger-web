@@ -15,185 +15,6 @@ class EDASearchUtility {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 	}
 
-	getElasticsearchFilterOptionsQuery() {
-		return {
-			size: 0,
-			aggs: {
-				majcom: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.contracting_agency_name_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				issue_office_dodaac: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.contracting_office_code_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				issue_office_name: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.contracting_office_name_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				fiscal_year: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							date_histogram: {
-								field: 'fpds_ng_n.date_signed_eda_ext_dt',
-								calendar_interval: '1y',
-								format: 'YYYY',
-								min_doc_count: 0,
-							},
-						},
-					},
-				},
-				vendor_name: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.vendor_name_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				funding_office_dodaac: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.funding_office_code_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				funding_agency_name: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.funding_agency_name_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				psc: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.psc_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				naic: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.naics_code_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				duns: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.duns_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				piid_idv: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.idv_piid_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				piid: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.piid_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-				mod_number: {
-					nested: {
-						path: 'fpds_ng_n',
-					},
-					aggs: {
-						val: {
-							terms: {
-								field: 'fpds_ng_n.modification_number_eda_ext.keyword',
-								size: 10000,
-							},
-						},
-					},
-				},
-			},
-		};
-	}
-
 	getElasticsearchPagesQuery(
 		{
 			searchText = '',
@@ -267,12 +88,12 @@ class EDASearchUtility {
 										aggs: {
 											obligatedAmounts: {
 												nested: {
-													path: 'extracted_data_eda_n',
+													path: 'fpds_ng_n',
 												},
 												aggs: {
 													sum_agg: {
 														sum: {
-															field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+															field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 														},
 													},
 												},
@@ -303,12 +124,12 @@ class EDASearchUtility {
 						aggs: {
 							obligatedAmounts: {
 								nested: {
-									path: 'extracted_data_eda_n',
+									path: 'fpds_ng_n',
 								},
 								aggs: {
 									sum_agg: {
 										sum: {
-											field: 'extracted_data_eda_n.total_obligated_amount_eda_ext_f',
+											field: 'fpds_ng_n.dollars_obligated_eda_ext_f',
 										},
 									},
 								},
@@ -649,6 +470,10 @@ class EDASearchUtility {
 					},
 				};
 
+				const orgAndMajcomQuery = {
+					bool: { should: [] },
+				};
+
 				const orgMap = {
 					army: 'W*',
 					navy: 'N* OR M*',
@@ -657,11 +482,24 @@ class EDASearchUtility {
 				};
 
 				let orgString = '';
+				let setMajcomQuery = false;
+				let setOrgQuery = false;
 
 				const orgs = settings.organizations;
-				for (let i = 0; i < orgs.length; i++) {
-					const org = orgs[i];
+				// figure out if we will have both org and majcom queries
+				// if so then we will need to wrap them in the orgAndMajcomQuery
+				for (const org of orgs) {
+					if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
+						setMajcomQuery = true;
+					}
+					if (!settings.majcoms[org] || settings.majcoms[org].length === 0) {
+						setOrgQuery = true;
+					}
+				}
+				const orgAndMajcoms = setOrgQuery && setMajcomQuery;
 
+				let firstOrgQuery = true;
+				for (const org of orgs) {
 					// for filtering by MAJCOM / sub orgs
 					if (settings.majcoms && settings.majcoms[org] && settings.majcoms[org].length > 0) {
 						for (const subOrg of settings.majcoms[org]) {
@@ -674,7 +512,11 @@ class EDASearchUtility {
 								},
 							});
 						}
-						filterQueries.push(majcomQuery);
+						if (orgAndMajcoms) {
+							orgAndMajcomQuery.bool.should.push(majcomQuery);
+						} else {
+							filterQueries.push(majcomQuery);
+						}
 					}
 
 					// for Issue Organization (no specific majcoms selected)
@@ -685,7 +527,8 @@ class EDASearchUtility {
 							orgText = orgMap[org];
 						}
 
-						orgString += `${i !== 0 ? ' OR ' : ''}${orgText}`;
+						orgString += `${!firstOrgQuery ? ' OR ' : ''}${orgText}`;
+						firstOrgQuery = false;
 					}
 				}
 
@@ -696,7 +539,15 @@ class EDASearchUtility {
 							default_field: 'fpds_ng_n.contracting_office_code_eda_ext',
 						},
 					});
-					filterQueries.push(orgQuery);
+					if (orgAndMajcoms) {
+						orgAndMajcomQuery.bool.should.push(orgQuery);
+					} else {
+						filterQueries.push(orgQuery);
+					}
+				}
+
+				if (orgAndMajcoms) {
+					filterQueries.push(orgAndMajcomQuery);
 				}
 			}
 

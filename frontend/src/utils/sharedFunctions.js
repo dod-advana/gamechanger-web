@@ -49,10 +49,10 @@ export const handleSearchTypeUpdate = ({ value = SEARCH_TYPES.keyword }, dispatc
 		searchSettings: newSearchSettings,
 		metricsCounted: false,
 	});
-	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', 'value', value);
+	trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'SearchTypeChanged', value);
 };
 
-export const createCopyTinyUrl = (toolUrl, dispatch) => {
+export const createCopyTinyUrl = (toolUrl, dispatch, cloneName) => {
 	let url = window.location.hash.toString();
 	url = url.replace('#/', '');
 	gameChangerAPI.shortenSearchURLPOST(url).then((res) => {
@@ -70,6 +70,7 @@ export const createCopyTinyUrl = (toolUrl, dispatch) => {
 				showSnackbar: true,
 				snackBarMsg: 'Link copied to clipboard',
 			});
+			trackEvent(cloneName, 'CopyLinkForShare', url);
 		} catch (err) {
 			console.log(err);
 		}
@@ -328,6 +329,7 @@ export const getNonMainPageOuterContainer = (innerChildren, state, dispatch) => 
 								</span>
 							)}
 							{state.pageDisplayed === PAGE_DISPLAYED.userDashboard && <span>User Dashboard</span>}
+							{state.pageDisplayed === PAGE_DISPLAYED.portfolio && <span>Portfolio Builder</span>}
 						</p>
 					</div>
 

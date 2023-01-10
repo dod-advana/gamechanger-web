@@ -91,4 +91,5 @@
 .*/api/gamechanger/getElasticSearchIndex .*
 .*/api/gamechanger/getHomepageEditorData .*
 .*/api/gamechanger/analyticsTools/compareDocument .*
+.*/api/gamechanger/analyticsTools/getFilterCount .*
 

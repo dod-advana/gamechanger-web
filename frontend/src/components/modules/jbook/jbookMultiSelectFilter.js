@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Typography, FormControlLabel, Checkbox } from '@material-ui/core';
 
@@ -6,8 +6,6 @@ import MultiSelectFilter from '../../common/MultiSelectFilter';
 import { setState } from '../../../utils/sharedFunctions';
 
 const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) => {
-	const [showClear, setShowClear] = useState(false);
-
 	const allSelected = `${filter}AllSelected`;
 	const specificSelected = `${filter}SpecificSelected`;
 	const trackingName = `${filter}FilterToggle`;
@@ -16,7 +14,15 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 	const originalFilters = Object.values(options).map((option) => [option, 0]);
 
 	const isChecked = (option) => {
-		return state[searchSettingsName][specificSelected] && state[searchSettingsName][filter].includes(option);
+		let newOption = option;
+		if (option === 'Partial Review (Initial)') {
+			newOption = 'Partial Review (Primary)';
+		}
+		if (option === 'Partial Review (RAI Lead)') {
+			newOption = 'Partial Review (Service)';
+		}
+
+		return state[searchSettingsName][specificSelected] && state[searchSettingsName][filter].includes(newOption);
 	};
 
 	const handleFilterChange = (event, type = filter) => {
@@ -25,9 +31,14 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 			newSearchSettings[allSelected] = false;
 			newSearchSettings[specificSelected] = true;
 			newSearchSettings[type] = [];
-			setShowClear(true);
 		}
 		let name = event.target.name;
+		if (name === 'Partial Review (Initial)') {
+			name = 'Partial Review (Primary)';
+		}
+		if (name === 'Partial Review (RAI Lead)') {
+			name = 'Partial Review (Service)';
+		}
 		const index = newSearchSettings[type].indexOf(name);
 		if (index !== -1) {
 			newSearchSettings[type].splice(index, 1);
@@ -37,7 +48,6 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 		if (newSearchSettings[type].length === 0) {
 			newSearchSettings[allSelected] = true;
 			newSearchSettings[specificSelected] = false;
-			setShowClear(false);
 		}
 		newSearchSettings.isFilterUpdate = true;
 		newSearchSettings[update] = true;
@@ -75,7 +85,6 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 			newSearchSettings.raccts = [];
 			newSearchSettings.oaccts = [];
 		}
-		setShowClear(false);
 		setState(dispatch, {
 			[searchSettingsName]: newSearchSettings,
 			metricsCounted: false,
@@ -133,6 +142,9 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 		if (state.jbookSearchSettings.budgetTypeSpecificSelected && state.jbookSearchSettings.budgetType.length > 0) {
 			docs = state.jbookSearchSettings.budgetType.map((item) => map[item]);
 		}
+		const acctArrs = docs.map((doc) => state[searchSettingsName][doc]);
+		const arrsWithSelections = acctArrs.filter((arr) => arr.length > 0);
+		const showClear = arrsWithSelections.length > 0;
 
 		return (
 			<MultiSelectFilter
@@ -172,7 +184,7 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 				trackingName={trackingName}
 				handleFilterChange={handleFilterChange}
 				handleClear={handleClear}
-				showClear={showClear}
+				showClear={state[searchSettingsName][specificSelected]}
 				isChecked={isChecked}
 			/>
 		);

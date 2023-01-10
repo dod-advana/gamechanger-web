@@ -349,7 +349,6 @@ const App = () => {
 				<MuiThemeProvider theme={ThemeDefault}>
 					<ClassificationBanner />
 					<ConsentAgreement id={'consent-agreement'} />
-
 					<Route
 						exact
 						path="/"

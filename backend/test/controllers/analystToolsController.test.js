@@ -828,6 +828,45 @@ describe('AnalystToolsController', function () {
 		});
 	});
 
+	describe('#getFilterCounts', () => {
+		it('should get filter counts', async (done) => {
+			const req = {
+				...reqMock,
+				body: {
+					paragraphs: ['Test'],
+				},
+			};
+
+			let resCode;
+			let resMsg;
+			const res = {
+				status(code) {
+					resCode = code;
+					return this;
+				},
+				send(msg) {
+					resMsg = msg;
+					return this;
+				},
+			};
+
+			await controller.getFilterCounts(req, res);
+
+			const expected = {
+				orgCount: {
+					'Dept. of the Air Force': 1,
+					'Joint Chiefs of Staff': 1,
+					NATO: 2,
+					'Dept. of Defense': 1,
+				},
+				typeCount: { Document: 3, Instruction: 2 },
+			};
+
+			assert.deepStrictEqual(resMsg, expected);
+			done();
+		});
+	});
+
 	describe('#compareFeedback', () => {
 		it('should create a row in the compare_feedback table', async (done) => {
 			const req = {

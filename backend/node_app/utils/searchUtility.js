@@ -48,6 +48,7 @@ class SearchUtility {
 		this.cleanUpEsResults = this.cleanUpEsResults.bind(this);
 		this.cleanUpIdEsResultsForGraphCache = this.cleanUpIdEsResultsForGraphCache.bind(this);
 		this.documentSearchOneID = this.documentSearchOneID.bind(this);
+		this.getDocOrgAndTypeCounts = this.getDocOrgAndTypeCounts.bind(this);
 		this.documentSearch = this.documentSearch.bind(this);
 		this.makeAliasesQuery = this.makeAliasesQuery.bind(this);
 		this.findAliases = this.findAliases.bind(this);
@@ -1534,6 +1535,22 @@ class SearchUtility {
 		}
 	}
 
+	cleanUpAggResults({ raw, user }) {
+		try {
+			let results = {};
+
+			const { body = {} } = raw;
+			const { aggregations = {} } = body;
+			const { doc_type_aggs = {}, doc_org_aggs = {} } = aggregations;
+			results.doc_types = doc_type_aggs.buckets || [];
+			results.doc_orgs = doc_org_aggs.buckets || [];
+
+			return results;
+		} catch (err) {
+			this.logger.error(err.message, 'GL7EDI3', user);
+		}
+	}
+
 	highlight_keywords(all_words, highlights) {
 		// purpose is to highlight words from the entire list.
 		const resultHighlights = highlights.map(function (x) {
@@ -1760,6 +1777,48 @@ class SearchUtility {
 				index: esIndex,
 				query: esQuery,
 			});
+		}
+	}
+
+	async getDocOrgAndTypeCounts(_req, body, clientObj, userId) {
+		try {
+			const [parsedQuery, searchTerms] = this.getEsSearchTerms(body);
+			body.searchTerms = searchTerms;
+			body.parsedQuery = parsedQuery;
+			let { esClientName, esIndex } = clientObj;
+
+			const orgCountESQuery = this.getElasticsearchQuery({ ...body, orgFilterString: [], limit: 0 }, userId);
+			const orgCountResultsPromise = this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				JSON.stringify(orgCountESQuery),
+				userId
+			);
+
+			const typeCountESQuery = this.getElasticsearchQuery({ ...body, typeFilterString: [], limit: 0 }, userId);
+			const typeCountResultsPromise = this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				JSON.stringify(typeCountESQuery),
+				userId
+			);
+
+			const [orgCountResults, typeCountResults] = await Promise.all([
+				orgCountResultsPromise,
+				typeCountResultsPromise,
+			]);
+
+			const orgCountAggs = this.cleanUpAggResults({ raw: orgCountResults, user: userId }).doc_orgs;
+			const typeCountAggs = this.cleanUpAggResults({ raw: typeCountResults, user: userId }).doc_types;
+
+			return {
+				doc_orgs: orgCountAggs,
+				doc_types: typeCountAggs,
+			};
+		} catch (e) {
+			const { message } = e;
+			this.logger.error(message, 'DMAL3RR', userId);
+			throw e;
 		}
 	}
 
@@ -2102,7 +2161,12 @@ class SearchUtility {
 					'display_doc_type_s',
 					'topics_rs',
 					'keyw_5',
+					'display_source_s',
+					'crawler_used_s',
 				];
+				break;
+			case 'source':
+				source = ['filename', 'display_org_s', 'display_source_s', 'display_doc_type_s', 'crawler_used_s'];
 				break;
 			default:
 				source = [];
@@ -2320,30 +2384,30 @@ class SearchUtility {
 		result.records.forEach((record) => {
 			const recObj = record.toObject();
 
-			if (recObj.hasOwnProperty('entityScore')) {
+			if (recObj?.hasOwnProperty('entityScore')) {
 				const node = this.buildNodeVisObject(recObj.node, isTest, user);
 				node.entityScore = recObj.entityScore;
 				node.mentions = recObj.mentions.low;
 				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
-			} else if (recObj.hasOwnProperty('topicScore')) {
+			} else if (recObj?.hasOwnProperty('topicScore')) {
 				const node = this.buildNodeVisObject(recObj.node, isTest, user);
 				node.topicScore = recObj.topicScore;
 				this.addNode(nodes, node, nodeIds, nodeProperties, labels);
-			} else if (recObj.hasOwnProperty('doc_id')) {
+			} else if (recObj?.hasOwnProperty('doc_id')) {
 				docIds.push({ doc_id: recObj.doc_id, mentions: recObj.mentions?.low });
-			} else if (recObj.hasOwnProperty('primary_key')) {
+			} else if (recObj?.hasOwnProperty('primary_key')) {
 				graphMetaData.push({
 					label: recObj.label,
 					property: recObj.property,
 					type: recObj.type,
 					primary_key: recObj.primary_key,
 				});
-			} else if (recObj.hasOwnProperty('relTypesCount')) {
+			} else if (recObj?.hasOwnProperty('relTypesCount')) {
 				graphMetaData.push({
 					relationship_counts: recObj.relTypesCount,
 					node_counts: recObj.labels,
 				});
-			} else if (recObj.hasOwnProperty('topic')) {
+			} else if (recObj?.hasOwnProperty('topic')) {
 				this.addNode(
 					nodes,
 					this.buildNodeVisObject(recObj.topic, isTest, user),
@@ -2352,10 +2416,10 @@ class SearchUtility {
 					labels
 				);
 				nodeProperties.documentCountsForTopic = recObj.documentCountsForTopic;
-			} else if (recObj.hasOwnProperty('topic_name')) {
+			} else if (recObj?.hasOwnProperty('topic_name')) {
 				recObj.doc_count = recObj.doc_count.low;
 				graphMetaData.push(recObj);
-			} else if (recObj.hasOwnProperty('doc_count')) {
+			} else if (recObj?.hasOwnProperty('doc_count')) {
 				graphMetaData.push({
 					documents: recObj.doc_count.low,
 				});
@@ -2417,7 +2481,7 @@ class SearchUtility {
 			} else if (Object.keys(nodes).length <= 0 && result.records[0]) {
 				const record = result.records[0].toObject();
 				Object.keys(record).forEach((key) => {
-					if (record[key].hasOwnProperty('low')) {
+					if (record[key]?.hasOwnProperty('low')) {
 						record[key] = record[key].low;
 					}
 				});
@@ -2476,7 +2540,7 @@ class SearchUtility {
 			node.properties = [];
 
 			for (const key of title_properties) {
-				if (neo4jNode.properties.hasOwnProperty(key)) {
+				if (neo4jNode.properties?.hasOwnProperty(key)) {
 					if (!isTest && neo4jLib.isInt(neo4jNode.properties[key])) {
 						node[key] = neo4jNode.properties[key].toNumber();
 					} else if (isTest && neo4jNode.properties[key] && neo4jNode.properties[key].hasOwnProperty('low')) {
@@ -2488,7 +2552,7 @@ class SearchUtility {
 				}
 			}
 
-			if (!node.hasOwnProperty('value')) node.value = 1;
+			if (!node?.hasOwnProperty('value')) node.value = 1;
 		} catch (err) {
 			this.logger.error(err, 'BSCU681', user);
 		}
@@ -2509,7 +2573,7 @@ class SearchUtility {
 			edge.properties = [];
 
 			for (const key of title_properties) {
-				if (neo4jRel.properties.hasOwnProperty(key)) {
+				if (neo4jRel.properties?.hasOwnProperty(key)) {
 					if (!isTest && neo4jLib.isInt(neo4jRel.properties[key])) {
 						edge[key] = neo4jRel.properties[key].toNumber();
 					} else if (isTest && neo4jRel.properties[key] && neo4jRel.properties[key].hasOwnProperty('low')) {
@@ -2521,7 +2585,7 @@ class SearchUtility {
 				}
 			}
 
-			if (!edge.hasOwnProperty('value')) edge.value = 1;
+			if (!edge?.hasOwnProperty('value')) edge.value = 1;
 		} catch (err) {
 			this.logger.error(err, 'UPKARU0', user);
 		}

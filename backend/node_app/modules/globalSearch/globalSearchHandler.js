@@ -183,8 +183,8 @@ class GlobalSearchHandler extends SearchHandler {
 					return { hits: [], totalCount: 0, count: 0 };
 				}
 				hitQuery = `select description, permission, href, link_label, id
-          from megamenu_links
-          where id in (${tmpFavorites.join(',')})`;
+		  from megamenu_links
+		  where id in (${tmpFavorites.join(',')})`;
 			}
 			let results = await this.database.uot.query(hitQuery, { type: Sequelize.QueryTypes.SELECT, raw: true });
 			let tmpReturn;
@@ -237,7 +237,8 @@ class GlobalSearchHandler extends SearchHandler {
 
 			const returnData = cleanQlikESResults(esResults, userId, this.logger);
 
-			const userApps = await getQlikApps(userId.substring(0, userId.length - 4), this.logger, false, {});
+			// get user apps from Qlik
+			const userApps = await this.getUserApps(userId);
 
 			returnData.results = this.mergeUserApps(returnData.hits, userApps || []);
 
@@ -247,6 +248,27 @@ class GlobalSearchHandler extends SearchHandler {
 		} catch (err) {
 			this.logger.error(err, 'WS18EKR', userId);
 			return { hits: [], totalCount: 0, count: 0 };
+		}
+	}
+
+	/* Helper method for getDashboardResults */
+	async getUserApps(userId) {
+		// generate redis key
+		const redisKey = `globalSearchUserApps_${userId}`;
+
+		// get cached results
+		await this.redisDB.select(this.redisClientDB);
+		const cachedResults = JSON.parse(await this.redisDB.get(redisKey));
+
+		// if cache exists, return cached results
+		// else get user apps from API and create cache and store
+		if (cachedResults) {
+			return cachedResults;
+		} else {
+			const userApps = await getQlikApps(getUserIdFromSAMLUserId(userId, false), this.logger, false, {});
+			await this.redisDB.set(redisKey, JSON.stringify(userApps), 'EX', 43200); // in seconds
+
+			return userApps;
 		}
 	}
 

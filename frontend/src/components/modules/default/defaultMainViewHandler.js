@@ -161,7 +161,6 @@ export const handlePageLoad = async (props) => {
 	const parsedURL = searchHandler.parseSearchURL(newState);
 	if (parsedURL.searchText) {
 		newState = { ...newState, ...parsedURL, runSearch: true };
-
 		/* 
 			only setState with the fields that have actually changed
 			otherwise this can overwrite other changes to state that may have happened
@@ -278,7 +277,7 @@ const getExtraViewPanels = (props) => {
 		panel: (
 			<StyledCenterContainer showSideFilters={false}>
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
+					<ViewHeader {...props} resultsText=" " />
 					<DefaultDocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
 						data={docSearchResults}

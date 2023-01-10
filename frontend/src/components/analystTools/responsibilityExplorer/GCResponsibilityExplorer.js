@@ -13,7 +13,7 @@ import GCResponsibilityDocumentView from './GCResponsibilityDocumentView';
 import GCToolTip from '../../common/GCToolTip';
 import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
-import { reTutorialSteps } from './tutotialSteps';
+import { reTutorialSteps } from '../tutotialSteps';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -28,13 +28,39 @@ const parseFilename = (filename) => {
 	return `${letters} ${numbers}`;
 };
 
+const sortResponsibilities = (data) => {
+	Object.keys(data).forEach((doc) => {
+		Object.keys(data[doc].entityObj).forEach((entity) => {
+			data[doc].entityObj[entity].responsibilities.sort((a, b) => {
+				if (a.responsibilityNumbering > b.responsibilityNumbering) return 1;
+				if (b.responsibilityNumbering > a.responsibilityNumbering) return -1;
+				return 0;
+			});
+			data[doc].entities.push(data[doc].entityObj[entity]);
+		});
+		delete data[doc].entityObj;
+	});
+};
+
+const sortEntities = (data) => {
+	Object.keys(data).forEach((doc) => {
+		data[doc].entities.sort((a, b) => {
+			if (a.entityNumber > b.entityNumber) return 1;
+			if (b.entityNumber > a.entityNumber) return -1;
+			return 0;
+		});
+	});
+};
+
+const trackingAction = 'ResponsibilityExplorer';
+
 export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const classes = useStyles();
 	const DOCS_PER_PAGE = 15;
 
 	const [reView, setReView] = useState('Document');
 	const [responsibilityData, setResponsibilityData] = useState([]);
-	const [docResponsibilityData, setDocResponsibilityData] = useState([]);
+	const [docResponsibilityData, setDocResponsibilityData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [filters, setFilters] = useState([]);
 	const [offsets, setOffsets] = useState([]);
@@ -49,17 +75,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 
-	const tutorialSearch = () => {
-		setOrganization(['dod']);
-		const newFilters = [{ id: 'organizationPersonnel', value: 'dod' }];
-		setCollapseKeys({
-			'DoDI 1304.02 Accession Processing Data Collection Forms': true,
-			'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
-		});
-		setFilters(newFilters);
-		setInfiniteCount(1);
-		setReloadResponsibilities(true);
-	};
+	const trackingCategory = getTrackingNameForFactory(state?.cloneData?.clone_name);
 
 	useEffect(() => {
 		if (stepIndex === 5) {
@@ -72,12 +88,13 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			window.scrollTo(0, 0);
 			const resultsDiv = document.getElementById('re-results-col');
 			resultsDiv.scrollTop = 0;
+			const firstDoc = Object.keys(docResponsibilityData)[0];
 			setCollapseKeys({
-				'DoDI 1304.02 Accession Processing Data Collection Forms': true,
-				'DoDI 1304.02 Accession Processing Data Collection FormsThe Heads of the OSD and DoD Components': true,
+				[firstDoc]: true,
+				[`${firstDoc}${docResponsibilityData[firstDoc]?.entities?.[0]?.entityText}`]: true,
 			});
 		}
-	}, [stepIndex]);
+	}, [docResponsibilityData, stepIndex]);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -101,6 +118,11 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		setOrganization([]);
 		setResponsibilityText({});
 		setReloadResponsibilities(true);
+	};
+
+	const startTutorial = () => {
+		resetPage();
+		setShowTutorial(true);
 	};
 
 	const scrollRef = useBottomScrollListener(
@@ -139,32 +161,40 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 			});
 			if (scroll) {
 				setResponsibilityData([...responsibilityData, ...results]);
+				setDocResponsibilityData({ ...docResponsibilityData, ...groupResponsibilities(results) });
 			} else {
 				setResponsibilityData(results);
+				setDocResponsibilityData(groupResponsibilities(results));
 			}
 		} catch (e) {
 			setResponsibilityData([]);
+			setDocResponsibilityData({});
 			console.error(e);
 		} finally {
 			setLoading(false);
 		}
 	};
+
 	const groupResponsibilities = (data) => {
 		const groupedData = {};
 		data.forEach((responsibility) => {
 			const doc = `${parseFilename(responsibility.filename)} ${responsibility.documentTitle}`;
-			let entity = responsibility.organizationPersonnel;
-			if (!entity) entity = 'NO ENTITY';
-			if (!groupedData[doc]) groupedData[doc] = {};
-			if (!groupedData[doc][entity]) groupedData[doc][entity] = [];
-			groupedData[doc][entity].push(responsibility);
+			let entity = responsibility.organizationPersonnelText;
+			if (!groupedData[doc]) groupedData[doc] = { entities: [], entityObj: {} };
+			if (!groupedData[doc].entityObj[entity])
+				groupedData[doc].entityObj[entity] = {
+					entityText: responsibility.organizationPersonnelText,
+					entityNumber: responsibility.organizationPersonnelNumbering,
+					responsibilities: [],
+				};
+			if (!responsibility.responsibilityText)
+				responsibility.responsibilityText = responsibility.organizationPersonnelText;
+			groupedData[doc].entityObj[entity].responsibilities.push(responsibility);
 		});
-		setDocResponsibilityData(groupedData);
+		sortResponsibilities(groupedData);
+		sortEntities(groupedData);
+		return groupedData;
 	};
-
-	useEffect(() => {
-		groupResponsibilities(responsibilityData);
-	}, [responsibilityData]);
 
 	const getData = async ({ page = 1, offset = 0, filtered = [] }) => {
 		try {
@@ -190,6 +220,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		const { value } = event.target;
 		setReView(value);
 		if (value === 'Document') setReloadResponsibilities(true);
+		trackEvent(trackingCategory, `${trackingAction}-ChangeView`, value);
 	};
 
 	const exportCSV = async () => {
@@ -201,12 +232,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				where: filters,
 			});
 
-			trackEvent(
-				getTrackingNameForFactory(state.cloneData.clone_name),
-				'ResponsibilityTracker',
-				'ExportCSV',
-				data?.results?.length
-			);
+			trackEvent(trackingCategory, trackingAction, 'ExportCSV', data?.results?.length);
 			exportToCsv('ResponsibilityData.csv', data.results, true);
 		} catch (e) {
 			console.error(e);
@@ -225,13 +251,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 						in specific documents, by organization/role/entity, and/or by responsibility area.
 					</div>
 					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon
-							style={{ cursor: 'pointer' }}
-							onClick={() => {
-								setReView('Document');
-								setShowTutorial(true);
-							}}
-						/>
+						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
 					</GCToolTip>
 					<span
 						style={{
@@ -345,8 +365,6 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				setStepIndex={setStepIndex}
 				showSkipButton={false}
 			/>
-
-			<GCButton style={{ display: 'none' }} id="update-search" onClick={() => tutorialSearch()}></GCButton>
 		</div>
 	);
 }

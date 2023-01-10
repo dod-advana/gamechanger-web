@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { styles } from '../../../admin/util/GCAdminStyles';
+import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { Typography } from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
 
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 import JbookPortfolioModal from './jbookPortfolioModal';
+import JbookPublicRequestModal from './jbookPublicRequestModal';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -63,15 +66,19 @@ const PortfolioBuilder = (props) => {
 	const [privatePortfolios, setPrivatePortfolios] = useState([]);
 
 	const [showModal, setShowModal] = useState(false);
+	const [showPublicModal, setShowPublicModal] = useState(false);
+	const [deleteModal, setDeleteModal] = useState(false);
+	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
 	const [userMap, setUserMap] = useState({});
 	const [user, setUser] = useState(null);
 	let [init, setInit] = useState(false);
+	const classes = useStyles();
 
 	useEffect(() => {
 		const initFunction = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
+			const data = await gameChangerAPI.getPublicUserData('jbook');
 			setUserList(data.data.users);
 			const newMap = {};
 			data.data.users.forEach((user) => {
@@ -191,22 +198,39 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 						<div>
 							{editIcon && (
-								<IconButton
-									aria-label="close"
-									style={{
-										height: 30,
-										width: 30,
-										color: 'grey',
-										borderRadius: 0,
-										marginRight: '10px',
-									}}
-									onClick={() => {
-										setModalData(portfolio);
-										setShowModal(true);
-									}}
-								>
-									<EditIcon style={{ fontSize: 30 }} />
-								</IconButton>
+								<>
+									<IconButton
+										aria-label="close"
+										style={{
+											height: 30,
+											width: 30,
+											color: 'grey',
+											borderRadius: 0,
+											marginRight: '10px',
+										}}
+										onClick={() => {
+											setModalData(portfolio);
+											setShowModal(true);
+										}}
+									>
+										<EditIcon style={{ fontSize: 30 }} />
+									</IconButton>
+									<IconButton
+										aria-label="close"
+										style={{
+											height: 10,
+											width: 10,
+											color: 'red',
+											borderRadius: 0,
+										}}
+										onClick={() => {
+											setDeleteID(portfolio.id);
+											setDeleteModal(true);
+										}}
+									>
+										<CancelIcon style={{ fontSize: 30 }} />
+									</IconButton>
+								</>
 							)}
 						</div>
 					</div>
@@ -249,72 +273,165 @@ const PortfolioBuilder = (props) => {
 
 	return (
 		<>
-			<div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>JBOOK Portfolio Builder</p>
-				</div>
-				<div
-					style={{
-						display: 'flex',
-						margin: '10px 80px',
-						justifyContent: 'space-evenly',
-					}}
-				>
-					<div style={{ flex: 2 }}>
-						<div>
-							Rapidly discover and label all Program Elements/Budget Line Items related to a spend
-							category by creating a Portfolio.
+			<div
+				style={{
+					width: '100%',
+					padding: '15px 22px 15px 30px',
+					minHeight: 'calc(100vh - 245px)',
+				}}
+			>
+				<div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '5px' }}>
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}></div>
+					<div
+						style={{
+							display: 'flex',
+							margin: '10px 80px',
+							justifyContent: 'space-evenly',
+						}}
+					>
+						<div style={{ flex: 2 }}>
+							<div>
+								Rapidly discover and label all Program Elements/Budget Line Items related to a spend
+								category by creating a Portfolio.
+							</div>
+							<div style={{ marginTop: 15 }}>
+								Using the Portfolio Builder, users can:
+								<ul>
+									<li>Create a new portfolio</li>
+									<li>Define a portfolio description</li>
+									{/* <li>Upload a portfolio ontology</li> */}
+									<li>Create tags/labels for use within the portfolio</li>
+									<li>Set user permissions</li>
+									<li>View my portfolios</li>
+								</ul>
+							</div>
 						</div>
-						<div style={{ marginTop: 15 }}>
-							Using the Portfolio Builder, users can:
-							<ul>
-								<li>Create a new portfolio</li>
-								<li>Define a portfolio description</li>
-								<li>Upload a portfolio ontology</li>
-								<li>Create tags/labels for use within the portfolio</li>
-								<li>Set user permissions</li>
-								<li>View all portfolios</li>
-							</ul>
-						</div>
+						{user && (
+							<div style={{ display: 'flex', flexDirection: 'column' }}>
+								<GCButton
+									onClick={() => {
+										setShowModal(true);
+									}}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
+									Create a New Portfolio
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										setShowPublicModal(true);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Public Portfolio Request
+								</GCButton>
+							</div>
+						)}
 					</div>
-					{user && (
-						<div>
-							<GCButton
-								onClick={() => {
-									setShowModal(true);
-								}}
-								style={{ minWidth: 'unset' }}
-							>
-								Create a New Portfolio
-							</GCButton>
-						</div>
-					)}
-				</div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
-				</div>
-				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(publicPortfolios)}
-				</div>
-				<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
-					<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
-				</div>
-				<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
-					{listPortfolios(privatePortfolios)}
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+						<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Public Portfolios</p>
+					</div>
+					<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+						{listPortfolios(publicPortfolios)}
+					</div>
+					<div style={{ display: 'flex', justifyContent: 'space-between', margin: '10px 80px' }}>
+						<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>Private Portfolios</p>
+					</div>
+					<div style={{ display: 'flex', flexWrap: 'wrap', margin: '10px 80px' }}>
+						{listPortfolios(privatePortfolios)}
+					</div>
 				</div>
 			</div>
 			{user && (
-				<JbookPortfolioModal
-					showModal={showModal}
-					setShowModal={() => {
-						setShowModal(false);
-						setInit(false);
-					}}
-					modalData={modalData}
-					userList={userList}
-					userMap={userMap}
-					user={user}
-				/>
+				<>
+					<JbookPortfolioModal
+						showModal={showModal}
+						setShowModal={() => {
+							setShowModal(false);
+							setInit(false);
+						}}
+						modalData={modalData}
+						userList={userList}
+						userMap={userMap}
+						user={user}
+					/>
+					<JbookPublicRequestModal
+						showModal={showPublicModal}
+						setShowModal={() => {
+							setShowPublicModal(false);
+						}}
+						userMap={userMap}
+						user={user}
+						privatePortfolios={privatePortfolios.map((item) => item.name)}
+					/>
+					<Dialog
+						open={deleteModal}
+						scroll={'paper'}
+						maxWidth="sm"
+						disableEscapeKeyDown
+						disableBackdropClick
+						classes={{
+							paperWidthSm: classes.dialogSm,
+						}}
+					>
+						<DialogTitle>
+							<div style={{ display: 'flex', width: '100%' }}>
+								<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+									Are you sure you want to delete this portfolio?
+								</Typography>
+							</div>
+							<IconButton
+								aria-label="close"
+								style={{
+									position: 'absolute',
+									right: '0px',
+									top: '0px',
+									height: 60,
+									width: 60,
+									color: 'black',
+									backgroundColor: styles.backgroundGreyLight,
+									borderRadius: 0,
+								}}
+								onClick={() => {
+									setDeleteModal(false);
+								}}
+							>
+								<CloseIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</DialogTitle>
+						<DialogContent>
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								This portolio will be immediately deleted. You cannot undo this action.
+							</Typography>
+						</DialogContent>
+						<DialogActions>
+							<GCButton
+								id={'editReviewerClose'}
+								onClick={() => {
+									setDeleteModal(false);
+								}}
+								style={{ margin: '10px' }}
+								buttonColor={'#8091A5'}
+							>
+								Cancel
+							</GCButton>
+							<GCButton
+								id={'editReviewerSubmit'}
+								onClick={async () => {
+									await gameChangerAPI.callDataFunction({
+										functionName: 'deletePortfolio',
+										cloneName: 'jbook',
+										options: { id: deleteID },
+									});
+									setInit(false);
+									setDeleteModal(false);
+								}}
+								style={{ margin: '10px' }}
+							>
+								Delete
+							</GCButton>
+						</DialogActions>
+					</Dialog>
+				</>
 			)}
 		</>
 	);

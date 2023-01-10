@@ -410,7 +410,13 @@ const getSearchMatrixItemsAIInventory = (props) => {
 					headerTextColor={'black'}
 					headerTextWeight={'normal'}
 				>
-					{renderFilterOptions(state, dispatch, classes, 'reviewStatus')}
+					{renderFilterOptions(state, dispatch, classes, 'reviewStatus', [
+						'Finished Review',
+						'Needs Review',
+						'Partial Review (POC)',
+						'Partial Review (Initial)',
+						'Partial Review (RAI Lead)',
+					])}
 				</GCAccordion>
 			</div>
 			<div style={{ width: '100%', marginBottom: 10 }} data-cy="hasKeywords-filter">

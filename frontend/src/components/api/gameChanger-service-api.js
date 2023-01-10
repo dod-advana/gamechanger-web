@@ -72,14 +72,20 @@ const endpoints = {
 	getS3List: '/api/gamechanger/admin/getS3List',
 	getS3DataList: '/api/gamechanger/admin/getS3DataList',
 	downloadS3File: '/api/gamechanger/admin/downloadS3File',
+	downloadS3FileTrain: '/api/gamechanger/admin/downloadS3FileTrain',
 	deleteLocalModel: '/api/gamechanger/admin/deleteLocalModel',
+	deleteLocalModelTrain: '/api/gamechanger/admin/deleteLocalModelTrain',
 	stopProcess: '/api/gamechanger/admin/stopProcess',
 	getAPIInformation: '/api/gamechanger/admin/getAPIInformation',
+	getAPIInformationTrain: '/api/gamechanger/admin/getAPIInformationTrain',
 	getModelsList: '/api/gamechanger/admin/getModelsList',
+	getModelsListTrain: '/api/gamechanger/admin/getModelsListTrain',
 	getDataList: '/api/gamechanger/admin/getDataList',
 	getLoadedModels: '/api/gamechanger/admin/getLoadedModels',
 	getProcessStatus: '/api/gamechanger/admin/getProcessStatus',
+	getProcessStatusTrain: '/api/gamechanger/admin/getProcessStatusTrain',
 	getFilesInCorpus: '/api/gamechanger/admin/getFilesInCorpus',
+	getFilesInCorpusTrain: '/api/gamechanger/admin/getFilesInCorpusTrain',
 	getCache: '/api/gamechanger/admin/getCache',
 	clearCache: '/api/gamechanger/admin/clearCache',
 	getUserSettings: '/api/gamechanger/getUserSettings',
@@ -89,6 +95,7 @@ const endpoints = {
 	getAppStats: '/api/gamechanger/getAppStats',
 	getClonesMatomo: '/api/gamechanger/admin/getClonesMatomo',
 	getSearchPdfMapping: '/api/gamechanger/admin/getSearchPdfMapping',
+	getSourceInteractions: '/api/gamechanger/admin/getSourceInteractions',
 	exportUserData: '/api/gamechanger/admin/exportUserData',
 	getDocumentUsage: '/api/gamechanger/admin/getDocumentUsage',
 	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
@@ -132,11 +139,13 @@ const endpoints = {
 	saveOrgImageOverrideURL: '/api/gamechanger/saveOrgImageOverrideURL',
 	getFAQ: '/api/gamechanger/aboutGC/getFAQ',
 	compareDocumentPOST: '/api/gamechanger/analyticsTools/compareDocument',
+	getFilterCountsPOST: '/api/gamechanger/analyticsTools/getFilterCounts',
 	compareFeedbackPOST: '/api/gamechanger/analyticsTools/compareFeedback',
 	initializeLTR: '/api/gamechanger/admin/initializeLTR',
 	createModelLTR: '/api/gamechanger/admin/createModelLTR',
 	updateClonesVisitedPOST: '/api/gamechanger/user/updateClonesVisited',
 	gcUserDataGET: '/api/gameChanger/admin/getAllUserData',
+	gcPublicUserData: '/api/gameChanger/user/getPublicUserData',
 	getUserDataByIDs: '/api/gameChanger/user/getUserDataByIDs',
 	gcUserDataPOST: '/api/gameChanger/admin/createUpdateUser',
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
@@ -486,22 +495,22 @@ export default class GameChangerAPI {
 
 	getResponsibilityData = async (options) => {
 		const url = endpoints.getResponsibilityData;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
-	getResponsibilityDocTitles = async (options) => {
+	getResponsibilityDocTitles = async () => {
 		const url = endpoints.getResponsibilityDocTitles;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url);
 	};
 
 	getResponsibilityDocLink = async (options) => {
 		const url = endpoints.getResponsibilityDocLink;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
 	getResponsibilityDoc = async (options) => {
 		const url = endpoints.getResponsibilityDoc;
-		return axiosPOST(this.axios, url, options);
+		return axiosGET(this.axios, url, { params: options });
 	};
 
 	setRejectionStatus = async (options) => {
@@ -526,7 +535,7 @@ export default class GameChangerAPI {
 
 	getResponsibilityUpdates = async (data) => {
 		const url = endpoints.getResponsibilityUpdates;
-		return axiosPOST(this.axios, url, data);
+		return axiosGET(this.axios, url, { params: data });
 	};
 
 	getAdminData = async () => {
@@ -694,8 +703,18 @@ export default class GameChangerAPI {
 		return axiosGET(this.axios, url);
 	};
 
+	getAPIInformationTrain = async () => {
+		const url = endpoints.getAPIInformationTrain;
+		return axiosGET(this.axios, url);
+	};
+
 	getProcessStatus = async () => {
 		const url = endpoints.getProcessStatus;
+		return axiosGET(this.axios, url);
+	};
+
+	getProcessStatusTrain = async () => {
+		const url = endpoints.getProcessStatusTrain;
 		return axiosGET(this.axios, url);
 	};
 
@@ -714,6 +733,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, opts);
 	};
 
+	downloadS3FileTrain = async (opts) => {
+		const url = endpoints.downloadS3FileTrain;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	stopProcess = async (opts) => {
 		const url = endpoints.stopProcess;
 		return axiosPOST(this.axios, url, opts);
@@ -723,11 +747,21 @@ export default class GameChangerAPI {
 		const url = endpoints.deleteLocalModel;
 		return axiosPOST(this.axios, url, opts);
 	};
+
+	deleteLocalModelTrain = async (opts) => {
+		const url = endpoints.deleteLocalModelTrain;
+		return axiosPOST(this.axios, url, opts);
+	};
+
 	getModelsList = async () => {
 		const url = endpoints.getModelsList;
 		return axiosGET(this.axios, url);
 	};
 
+	getModelsListTrain = async () => {
+		const url = endpoints.getModelsListTrain;
+		return axiosGET(this.axios, url);
+	};
 	getDataList = async () => {
 		const url = endpoints.getDataList;
 		return axiosGET(this.axios, url);
@@ -740,6 +774,10 @@ export default class GameChangerAPI {
 
 	getFilesInCorpus = async () => {
 		const url = endpoints.getFilesInCorpus;
+		return axiosGET(this.axios, url);
+	};
+	getFilesInCorpusTrain = async () => {
+		const url = endpoints.getFilesInCorpusTrain;
 		return axiosGET(this.axios, url);
 	};
 	// End ML endpoints
@@ -785,6 +823,11 @@ export default class GameChangerAPI {
 
 	getSearchPdfMapping = async (body) => {
 		const url = endpoints.getSearchPdfMapping;
+		return axiosGET(this.axios, url, { params: body });
+	};
+
+	getSourceInteractions = async (body) => {
+		const url = endpoints.getSourceInteractions;
 		return axiosGET(this.axios, url, { params: body });
 	};
 
@@ -1084,6 +1127,11 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
 	};
 
+	getFilterCountsPOST = async ({ cloneName, paragraphs, filters }) => {
+		const url = endpoints.getFilterCountsPOST;
+		return axiosPOST(this.axios, url, { cloneName, paragraphs, filters });
+	};
+
 	compareFeedbackPOST = async (data) => {
 		const url = endpoints.compareFeedbackPOST;
 		return axiosPOST(this.axios, url, data);
@@ -1107,6 +1155,11 @@ export default class GameChangerAPI {
 	getUserData = async (cloneName) => {
 		const url = endpoints.gcUserDataGET;
 		return axiosPOST(this.axios, url, { cloneName });
+	};
+
+	getPublicUserData = async (cloneName) => {
+		const url = endpoints.gcPublicUserData;
+		return axiosGET(this.axios, url, { cloneName });
 	};
 
 	getUserDataByIDs = async (ids) => {
