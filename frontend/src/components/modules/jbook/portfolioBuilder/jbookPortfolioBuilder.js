@@ -78,7 +78,7 @@ const PortfolioBuilder = (props) => {
 
 	useEffect(() => {
 		const initFunction = async () => {
-			const data = await gameChangerAPI.getUserData('jbook');
+			const data = await gameChangerAPI.getPublicUserData('jbook');
 			setUserList(data.data.users);
 			const newMap = {};
 			data.data.users.forEach((user) => {
@@ -299,10 +299,10 @@ const PortfolioBuilder = (props) => {
 								<ul>
 									<li>Create a new portfolio</li>
 									<li>Define a portfolio description</li>
-									<li>Upload a portfolio ontology</li>
+									{/* <li>Upload a portfolio ontology</li> */}
 									<li>Create tags/labels for use within the portfolio</li>
 									<li>Set user permissions</li>
-									<li>View all portfolios</li>
+									<li>View my portfolios</li>
 								</ul>
 							</div>
 						</div>

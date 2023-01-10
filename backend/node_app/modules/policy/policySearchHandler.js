@@ -43,7 +43,7 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async searchHelper(req, userId, storeHistory) {
-		const { searchText } = req.body;
+		const { searchText, reviseFilterCounts = false } = req.body;
 
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(
 			req.body,
@@ -58,9 +58,10 @@ class PolicySearchHandler extends SearchHandler {
 			req.body.searchText = searchText.replace(/"+/g, '');
 		}
 		req.body.questionFlag = this.MLsearchUtility.isQuestion(searchText);
+
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId);
+		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts);
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
@@ -70,6 +71,7 @@ class PolicySearchHandler extends SearchHandler {
 				endTimeInt - startTimeInt
 			}`
 		);
+
 		if (storeHistory) {
 			await this.storeHistoryRecords(req, historyRec, enrichedResults, cloneSpecificObject, userId);
 		}
@@ -274,22 +276,61 @@ class PolicySearchHandler extends SearchHandler {
 		return abbreviationExpansions;
 	}
 
-	async doSearch(req, expansionDict, clientObj, userId) {
+	async doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts = false) {
 		try {
 			// caching db
 			await this.redisDB.select(redisAsyncClientDB);
 
-			let searchResults;
+			let fullSearchResults;
 			const operator = 'and';
-			searchResults = await this.searchUtility.documentSearch(
-				req,
-				{ ...req.body, expansionDict, operator },
-				clientObj,
-				userId
-			);
+
+			if (!reviseFilterCounts) {
+				fullSearchResults = await this.searchUtility.documentSearch(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+			} else {
+				const docResultsPromise = this.searchUtility.documentSearch(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+				const aggregationsPromise = this.searchUtility.getDocOrgAndTypeCounts(
+					req,
+					{ ...req.body, expansionDict, operator },
+					clientObj,
+					userId
+				);
+				const [docResults, aggregationsResults] = await Promise.allSettled([
+					docResultsPromise,
+					aggregationsPromise,
+				]);
+
+				let aggregations;
+				if (docResults.status === 'rejected') {
+					throw new Error(docResults.reason);
+				} else if (aggregationsResults.status === 'rejected') {
+					this.logger.error(aggregationsResults.reason);
+					aggregations = {
+						doc_orgs: [],
+						doc_types: [],
+					};
+				} else {
+					aggregations = aggregationsResults.value;
+				}
+
+				fullSearchResults = {
+					...docResults.value,
+					...aggregations,
+				};
+			}
+
 			// insert crawler dates into search results
-			searchResults = await this.dataTracker.crawlerDateHelper(searchResults, userId);
-			return searchResults;
+			fullSearchResults = await this.dataTracker.crawlerDateHelper(fullSearchResults, userId);
+			return fullSearchResults;
 		} catch (e) {
 			this.logger.error(e.message, 'ML8P7GO');
 		}

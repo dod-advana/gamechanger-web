@@ -5,6 +5,7 @@ const { AppStatsController } = require('../../node_app/controllers/appStatsContr
 describe('AppStatsController', function () {
 	const opts = {
 		...constructorOptionsMock,
+		clone_meta: {},
 		dataApi: {},
 		searchUtility: {},
 		constants: {
@@ -1103,6 +1104,11 @@ describe('AppStatsController', function () {
 					}
 				],
 				[
+					{
+						inactive_user:1
+					}
+				],
+				[
 					{ count: 3311, date: '2021-01' },
 					{ count: 4202, date: '2021-02' },
 					{ count: 1511, date: '2021-03' },
@@ -1121,7 +1127,8 @@ describe('AppStatsController', function () {
 					unique_users: 5,
 					unique_searches: 5,
 					total_searches: 20,
-					new_users: 2
+					new_users: 2,
+					inactive_users: 1
 				},
 				searchBar : [
 					{ count: 3311, date: '2021-01' },
