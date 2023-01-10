@@ -3,7 +3,7 @@ import { Link, Paper } from '@material-ui/core';
 import { styles } from '../../admin/util/GCAdminStyles';
 import UOTAlert from '../../common/GCAlert';
 import EditEsIndexModal from '../../admin/GeneralAdminButtons/EditEsIndexModal';
-import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
+// import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 // import fileDownload from 'js-file-download';
 import moment from 'moment';
@@ -18,14 +18,14 @@ const JBOOKGeneralAdminButtons = () => {
 
 	// EsIndexModal and TrendingBlacklistModal state variables
 	const [showEditEsIndexModal, setShowEditEsIndexModal] = useState(false);
-	const [showEditReviewStatusEmailModal, setShowEditReviewStatusEmailModal] = useState(false);
+	// const [showEditReviewStatusEmailModal, setShowEditReviewStatusEmailModal] = useState(false);
 
 	// Alert state variables
 	const [alertActive, setAlertActive] = useState(false);
 	const [alertTitle, setAlertTitle] = useState('');
 	const [alertType, setAlertType] = useState('');
 	const [alertMessage, setAlertMessage] = useState('');
-	const [reviewStatusEmails, setReviewStatusEmails] = useState('');
+	// const [reviewStatusEmails, setReviewStatusEmails] = useState('');
 
 	// eslint-disable-next-line
 	const createAlert = (title, type, message) => {
@@ -54,19 +54,19 @@ const JBOOKGeneralAdminButtons = () => {
 		document.body.removeChild(a);
 	};
 
-	const sendReviewStatusUpdates = async () => {
-		setShowEditReviewStatusEmailModal(false);
-		const title = 'Sending Review Status: ';
-		createAlert(title, 'info', 'Started');
-		try {
-			await gameChangerAPI.sendReviewStatusUpdates({ emails: reviewStatusEmails }).then((res) => {
-				createAlert('Sending Review Status', 'success', 'Review Status Sent');
-			});
-		} catch (e) {
-			console.log(e);
-			createAlert('Sending Review Status', 'error', 'Review Status Failed');
-		}
-	};
+	// const sendReviewStatusUpdates = async () => {
+	// 	setShowEditReviewStatusEmailModal(false);
+	// 	const title = 'Sending Review Status: ';
+	// 	createAlert(title, 'info', 'Started');
+	// 	try {
+	// 		await gameChangerAPI.sendReviewStatusUpdates({ emails: reviewStatusEmails }).then((res) => {
+	// 			createAlert('Sending Review Status', 'success', 'Review Status Sent');
+	// 		});
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 		createAlert('Sending Review Status', 'error', 'Review Status Failed');
+	// 	}
+	// };
 
 	return (
 		<>
@@ -120,7 +120,7 @@ const JBOOKGeneralAdminButtons = () => {
 							</Link>
 						</Paper>
 					</div>
-					<div style={styles.feature}>
+					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link
 								to="#"
@@ -133,7 +133,7 @@ const JBOOKGeneralAdminButtons = () => {
 								</h2>
 							</Link>
 						</Paper>
-					</div>
+					</div> */}
 					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link
@@ -186,12 +186,12 @@ const JBOOKGeneralAdminButtons = () => {
 				showEditEsIndexModal={showEditEsIndexModal}
 				setShowEditEsIndexModal={setShowEditEsIndexModal}
 			/>
-			<EditStatusEmailModal
+			{/* <EditStatusEmailModal
 				showEditReviewStatusEmailModal={showEditReviewStatusEmailModal}
 				setShowEditReviewStatusEmailModal={setShowEditReviewStatusEmailModal}
 				setEmailAddress={setReviewStatusEmails}
 				sendEmail={sendReviewStatusUpdates}
-			/>
+			/> */}
 		</>
 	);
 };
