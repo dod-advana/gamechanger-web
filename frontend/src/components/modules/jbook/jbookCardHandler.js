@@ -482,7 +482,6 @@ const getItemPageHits = (item) => {
 };
 
 const consolidateItemPageHits = (item) => {
-	const consolidateHits = [];
 	const desiredOrder = [
 		'Project Description',
 		'Justification',
@@ -490,20 +489,23 @@ const consolidateItemPageHits = (item) => {
 		'Schedule Details',
 		'Project Notes',
 		'Acquisition Strat.',
+		'Milestones',
 		'Accomplishments',
 		'Contracts',
 	];
-
+	let consolidateHits = [];
 	for (const { title, snippet } of item.pageHits) {
-		if (title === 'Appropriation Title' || title === 'PE Title') {
-			continue;
-		}
 		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
 			consolidateHits[consolidateHits.length - 1].occurrences += 1;
 			consolidateHits[consolidateHits.length - 1].snippet += `<br>- ${snippet} `;
 		} else {
 			consolidateHits.push({ title, snippet, occurrences: 1 });
 		}
+	}
+	if (consolidateHits.length > 1) {
+		consolidateHits = consolidateHits.filter(
+			(hit) => hit.title !== 'Appropriation Title' && hit.title !== 'PE Title'
+		);
 	}
 	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
 		if (occurrences > 1) {
