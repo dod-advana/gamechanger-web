@@ -18,7 +18,6 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import FolderIcon from '@mui/icons-material/Folder';
-import GeneralAdminButtons from './jbookGeneralButtons';
 import GamechangerUserManagementAPI from '../../api/GamechangerUserManagement';
 import GCButton from '../../common/GCButton';
 import { Typography } from '@mui/material';
@@ -200,7 +199,7 @@ const JBookAdminMainViewHandler = {
 	renderSwitch: (page, cloneName) => {
 		switch (page) {
 			case PAGES.general:
-				return <GeneralAdminButtons />;
+				return <></>;
 			case PAGES.notifications:
 				return <NotificationsManagement cloneName={cloneName} />;
 			case PAGES.userList:
@@ -229,7 +228,7 @@ const JBookAdminMainViewHandler = {
 					/>
 				);
 			default:
-				return <GeneralAdminButtons />;
+				return <></>;
 		}
 	},
 
