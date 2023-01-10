@@ -2195,7 +2195,7 @@ module.exports = {
 		projectPerformanceMetrics_t: 'Metrics',
 		otherProgramFundSummaryRemarks_t: 'Summary Remarks',
 		'P40-13_BSA_Title_t': 'P40-13_BSA_Title',
-		'P40-15_Justification_t': 'P40-15_Justification',
+		'P40-15_Justification_t': 'Justification',
 		projectTitle_s: 'Project Title',
 		r_2a_accomp_pp_n: 'Accomplishments',
 		p3a_contract_data_n: 'Contracts',
