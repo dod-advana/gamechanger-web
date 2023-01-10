@@ -8,7 +8,7 @@ const FEEDBACK = require('../models').feedback;
 const CLONE_META = require('../models').clone_meta;
 const CRAWLER_INFO = require('../models').crawler_info;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
-const { sendExcelFile } = require('../utils/sendFileUtility');
+// const { sendExcelFile } = require('../utils/sendFileUtility');
 const sparkMD5Lib = require('spark-md5');
 const { Sequelize } = require('sequelize');
 const { QueryTypes } = require('sequelize');
@@ -722,7 +722,8 @@ class AppStatsController {
 					{ header: 'Source', key: 'display_source_s' },
 				];
 				const excelData = await this.querySearchPdfMapping(opts, null, connection);
-				sendExcelFile(res, 'Searches', columns, excelData);
+				// sendExcelFile(res, 'Searches', columns, excelData);
+				console.log(res, 'Searches', columns, excelData);
 			} else if (table === 'UserData') {
 				const columns = [
 					{ header: 'User ID', key: 'user_id' },
@@ -735,7 +736,8 @@ class AppStatsController {
 					{ header: 'Favorited', key: 'Favorite' },
 				];
 				const excelData = await this.queryUserAggregations(opts, connection);
-				sendExcelFile(res, 'Users', columns, excelData.users);
+				// sendExcelFile(res, 'Users', columns, excelData.users);
+				console.log(res, 'Users', columns, excelData.users);
 			} else if (table === 'Feedback') {
 				const columns = [
 					{ header: 'Feedback Event', key: 'event_name' },
@@ -761,7 +763,8 @@ class AppStatsController {
 						'value_7',
 					],
 				});
-				sendExcelFile(res, 'Feedback', columns, feedbackData.rows);
+				// sendExcelFile(res, 'Feedback', columns, feedbackData.rows);
+				console.log(res, 'Feedback', columns, feedbackData.rows);
 			} else if (table === 'DocumentUsage') {
 				const columns = [
 					{ header: 'Document', key: 'document' },
@@ -771,7 +774,8 @@ class AppStatsController {
 					{ header: 'Searches', key: 'searches' },
 				];
 				const docData = await this.createDocumentUsageData(opts.startDate, opts.endDate, userId, connection);
-				sendExcelFile(res, 'Documents', columns, docData);
+				// sendExcelFile(res, 'Documents', columns, docData);
+				console.log(res, 'Documents', columns, docData);
 			} else if (table == 'SourceInteractions') {
 				const columns = [
 					{ header: 'Crawler', key: 'crawler' },
@@ -793,7 +797,8 @@ class AppStatsController {
 					null,
 					connection
 				);
-				sendExcelFile(res, 'SourceInteractions', columns, data.data);
+				// sendExcelFile(res, 'SourceInteractions', columns, data.data);
+				console.log(res, 'SourceInteractions', columns, data.data);
 			}
 		} catch (err) {
 			this.logger.error(err, '11MLULU');
