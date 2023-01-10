@@ -67,7 +67,7 @@ const getExtraViewPanels = (props) => {
 		panel: (
 			<StyledCenterContainer showSideFilters={false}>
 				<div className={'right-container'} style={{ ...styles.tabContainer, margin: '0', height: '800px' }}>
-					<ViewHeader {...props} mainStyles={{ margin: '20px 0 0 0' }} resultsText=" " />
+					<ViewHeader {...props} resultsText=" " />
 					<EDADocumentExplorer
 						handleSearch={() => setState(dispatch, { runSearch: true })}
 						data={docSearchResults}
@@ -94,15 +94,7 @@ const getExtraViewPanels = (props) => {
 			<div>
 				{!loading && (
 					<StyledCenterContainer>
-						<ViewHeader
-							resultsText={' '}
-							mainStyles={{
-								float: 'right',
-								marginLeft: '5px',
-								marginTop: '-10px',
-							}}
-							{...props}
-						/>
+						<ViewHeader resultsText={' '} {...props} />
 						<EDASummaryView
 							edaSearchSettings={edaSearchSettings}
 							searchResults={docSearchResults}
@@ -233,7 +225,7 @@ export const renderHideTabs = (props) => {
 	const latestLinks = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 
 	const handleLinkListItemClick = (text) => {
-		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', 'text', text);
+		trackEvent(getTrackingNameForFactory(cloneData.clone_name), 'TrendingSearchSelected', text);
 		setState(dispatch, {
 			searchText: text,
 			autoCompleteItems: [],

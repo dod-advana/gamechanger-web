@@ -82,8 +82,8 @@ const EDAContractDetailsPage = (props) => {
 					functionName: 'querySimilarDocs',
 					cloneName: cloneData.clone_name,
 					options: {
-						issueOfficeDoDAAC: contractAward.data.contract_issue_dodaac_eda_ext,
-						issueOfficeName: contractAward.data.contract_issue_name_eda_ext,
+						issueOfficeDoDAAC: [contractAward.data.contract_issue_dodaac_eda_ext],
+						issueOfficeName: [contractAward.data.contract_issue_name_eda_ext],
 					},
 				});
 				setSimilarDocsData(similarDocs.data);
@@ -111,7 +111,7 @@ const EDAContractDetailsPage = (props) => {
 			setTimeFound(((t1 - t0) / 1000).toFixed(2));
 			const contractModData = contractMods?.data;
 
-			if (contractModData) {
+			if (contractModData && contractModData.docs?.length > 0) {
 				// for the contract modifications section
 				contractModData.docs.sort((first, second) => {
 					if (first.modification_eda_ext && first.modification_eda_ext === 'Award') {

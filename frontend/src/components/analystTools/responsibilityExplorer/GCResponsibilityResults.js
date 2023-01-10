@@ -4,6 +4,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator.js';
 import GCTooltip from '../../common/GCToolTip';
 import GCButton from '../../common/GCButton';
+import { getTrackingNameForFactory } from '../../../utils/gamechangerUtils';
+import { trackEvent } from '../../telemetry/Matomo';
+import { CustomDimensions } from '../../telemetry/utils';
+
+const trackingAction = 'ResponsibilityExplorer-DocumentResults';
 
 export default function GCResponsibilityResults({
 	responsibilityData,
@@ -18,7 +23,30 @@ export default function GCResponsibilityResults({
 	setDocumentLink,
 	setEditModalOpen,
 	loading,
+	cloneData,
 }) {
+	const trackingCategory = getTrackingNameForFactory(cloneData?.clone_name);
+
+	const handleDocToggle = (docName, wasDocOpen, idx) => {
+		trackEvent(
+			trackingCategory,
+			`${trackingAction}-Toggle${wasDocOpen ? 'Close' : 'Open'}`,
+			docName,
+			null,
+			CustomDimensions.create(true, null, null, idx)
+		);
+	};
+
+	const handleResponsibilityToggle = (wasOpen, entityText, doc, idx) => {
+		trackEvent(
+			trackingCategory,
+			`${trackingAction}-ToggleResponsibility${wasOpen ? 'Close' : 'Open'}`,
+			entityText,
+			null,
+			CustomDimensions.create(true, doc, null, idx)
+		);
+	};
+
 	const handleQuoteLinkClick = (e, resp) => {
 		e.preventDefault();
 		setSelectedResponsibility(resp);
@@ -48,6 +76,7 @@ export default function GCResponsibilityResults({
 							<div
 								className="searchdemo-modal-result-header"
 								onClick={(e) => {
+									handleDocToggle(doc, docOpen, key);
 									e.preventDefault();
 									setCollapseKeys({ ...collapseKeys, [doc]: !docOpen });
 								}}
@@ -68,12 +97,15 @@ export default function GCResponsibilityResults({
 											<div>
 												<InfoIcon
 													onClick={() => {
+														trackEvent(
+															trackingCategory,
+															`${trackingAction}-InfoIconClick`,
+															doc,
+															null,
+															CustomDimensions.create(true, null, null, key)
+														);
 														window.open(
-															`#/gamechanger?q=${
-																responsibilityData[doc][
-																	Object.keys(responsibilityData[doc])[0]
-																][0].filename
-															}&view=Explorer`
+															`#/gamechanger?q=${responsibilityData[doc].entities[0].responsibilities[0].filename}&view=Explorer`
 														);
 													}}
 												/>
@@ -83,15 +115,22 @@ export default function GCResponsibilityResults({
 								)}
 							</div>
 							<UnmountClosed isOpened={docOpen}>
-								{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
-									const entOpen = collapseKeys[doc + entity] ? collapseKeys[doc + entity] : false;
+								{responsibilityData[doc].entities.map((entity, entKey) => {
+									const { entityText } = entity;
+									const entOpen = collapseKeys[doc + entityText]
+										? collapseKeys[doc + entityText]
+										: false;
 									return (
 										<div key={entKey}>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
+													handleResponsibilityToggle(entOpen, entityText, doc, key);
 													e.preventDefault();
-													setCollapseKeys({ ...collapseKeys, [doc + entity]: !entOpen });
+													setCollapseKeys({
+														...collapseKeys,
+														[doc + entityText]: !entOpen,
+													});
 												}}
 												style={{ margin: '0 0 0 20px', backgroundColor: '#eceff1' }}
 											>
@@ -104,103 +143,110 @@ export default function GCResponsibilityResults({
 													className={`fa fa-caret-${entOpen ? 'down' : 'right'}`}
 												/>
 												<span className="gc-document-explorer-result-header-text">
-													{entity}
+													{entityText}
 												</span>
 											</div>
 											<UnmountClosed isOpened={entOpen && docOpen}>
 												<div>
-													{responsibilityData[doc][entity].map((responsibility, respKey) => {
-														let isHighlighted =
-															selectedResponsibility.responsibilityText ===
-															responsibility.responsibilityText;
-														let blockquoteClass = 'searchdemo-blockquote-sm';
+													{responsibilityData[doc].entities[entKey].responsibilities.map(
+														(responsibility, respKey) => {
+															let isHighlighted =
+																selectedResponsibility.responsibilityText ===
+																responsibility.responsibilityText;
+															let blockquoteClass = 'searchdemo-blockquote-sm';
 
-														if (isHighlighted)
-															blockquoteClass += ' searchdemo-blockquote-sm-active';
-														return (
-															<div key={key + respKey} style={{ position: 'relative' }}>
+															if (isHighlighted)
+																blockquoteClass += ' searchdemo-blockquote-sm-active';
+															return (
 																<div
-																	className="searchdemo-quote-link"
-																	onClick={(e) => {
-																		handleQuoteLinkClick(e, responsibility);
-																	}}
+																	key={key + respKey}
+																	style={{ position: 'relative' }}
 																>
 																	<div
-																		className={blockquoteClass}
-																		style={{
-																			marginLeft: 40,
-																			marginRight: 0,
-																			borderLeft: 'none',
+																		className="searchdemo-quote-link"
+																		onClick={(e) => {
+																			handleQuoteLinkClick(e, responsibility);
 																		}}
 																	>
-																		<span>{responsibility.responsibilityText}</span>
-																	</div>
-																</div>
-																{isHighlighted && (
-																	<span
-																		style={{
-																			left: 20,
-																			borderTop: '14px solid transparent',
-																			borderBottom: '14px solid transparent',
-																		}}
-																		className="searchdemo-arrow-left-sm"
-																	></span>
-																)}
-																<UnmountClosed isOpened={isHighlighted}>
-																	<div
-																		className="searchdemo-blockquote-sm"
-																		style={{
-																			marginLeft: 40,
-																			marginRight: 0,
-																			border: '1px solid #DCDCDC',
-																			padding: '10px',
-																			whiteSpace: 'normal',
-																		}}
-																	>
-																		<span
-																			className="gc-document-explorer-result-header-text"
-																			style={{ fontWeight: 'normal' }}
-																		>
-																			{responsibility.responsibilityText}
-																		</span>
 																		<div
+																			className={blockquoteClass}
 																			style={{
-																				display: 'flex',
-																				justifyContent: 'right',
-																				marginTop: '10px',
+																				marginLeft: 40,
+																				marginRight: 0,
+																				borderLeft: 'none',
 																			}}
 																		>
-																			<GCTooltip
-																				title={
-																					'Report any existing issues with this data'
-																				}
-																				placement="Top"
-																				arrow
-																			>
-																				<div>
-																					<GCButton
-																						className="re-tutorial-step-3"
-																						onClick={handleReport}
-																						style={{
-																							height: 40,
-																							minWidth: 40,
-																							padding: '2px 8px 0px',
-																							fontSize: 14,
-																							margin: '16px 0px 0px 10px',
-																							width: 'auto',
-																						}}
-																						isSecondaryBtn={isEditing}
-																					>
-																						{reportBtnText}
-																					</GCButton>
-																				</div>
-																			</GCTooltip>
+																			<span>
+																				{responsibility.responsibilityText}
+																			</span>
 																		</div>
 																	</div>
-																</UnmountClosed>
-															</div>
-														);
-													})}
+																	{isHighlighted && (
+																		<span
+																			style={{
+																				left: 20,
+																				borderTop: '14px solid transparent',
+																				borderBottom: '14px solid transparent',
+																			}}
+																			className="searchdemo-arrow-left-sm"
+																		></span>
+																	)}
+																	<UnmountClosed isOpened={isHighlighted}>
+																		<div
+																			className="searchdemo-blockquote-sm"
+																			style={{
+																				marginLeft: 40,
+																				marginRight: 0,
+																				border: '1px solid #DCDCDC',
+																				padding: '10px',
+																				whiteSpace: 'normal',
+																			}}
+																		>
+																			<span
+																				className="gc-document-explorer-result-header-text"
+																				style={{ fontWeight: 'normal' }}
+																			>
+																				{responsibility.responsibilityText}
+																			</span>
+																			<div
+																				style={{
+																					display: 'flex',
+																					justifyContent: 'right',
+																					marginTop: '10px',
+																				}}
+																			>
+																				<GCTooltip
+																					title={
+																						'Report any existing issues with this data'
+																					}
+																					placement="Top"
+																					arrow
+																				>
+																					<div>
+																						<GCButton
+																							className="re-tutorial-step-3"
+																							onClick={handleReport}
+																							style={{
+																								height: 40,
+																								minWidth: 40,
+																								padding: '2px 8px 0px',
+																								fontSize: 14,
+																								margin: '16px 0px 0px 10px',
+																								width: 'auto',
+																							}}
+																							isSecondaryBtn={isEditing}
+																						>
+																							{reportBtnText}
+																						</GCButton>
+																					</div>
+																				</GCTooltip>
+																			</div>
+																		</div>
+																	</UnmountClosed>
+																</div>
+															);
+														}
+													)}
 												</div>
 											</UnmountClosed>
 										</div>

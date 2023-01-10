@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 import parse from 'html-react-parser';
-
+import { Tooltip } from '@material-ui/core';
 import { primary } from './gc-colors';
 import CONFIG from '../../config/config';
 import sanitizeHtml from 'sanitize-html';
@@ -15,7 +15,6 @@ const defaultColWidth = {
 };
 
 const titleWidth = {
-	whiteSpace: 'nowrap',
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
 	border: 'unset',
@@ -36,6 +35,15 @@ const noWrapStyle = {
 
 const loadingStyle = {
 	color: '#fff',
+};
+
+const titleText = {
+	display: '-webkit-box',
+	WebkitLineClamp: '2',
+	WebkitBoxOrient: 'vertical',
+	overflow: 'hidden',
+	padding: '0',
+	margin: '0',
 };
 
 const getCellText = (content, useParser) => {
@@ -119,22 +127,23 @@ export default class SimpleTable extends React.Component {
 
 	getHeader = (cols, colMap) => {
 		const { hideHeader, hideSubheader, headerExtraStyle, colWidth, firstColWidth, title, loading } = this.props;
-
 		if (hideHeader) return <thead></thead>;
 		return (
 			<thead>
 				{title && (
 					<tr>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
-							{title}
+						<th colSpan={loading ? 1 : cols.length} style={{ ...titleWidth, ...headerExtraStyle }} key={-1}>
+							<Tooltip title={title.length > 100 ? `${title}` : ''} placement="top-start" arrow>
+								<p style={titleText}>{title}</p>
+							</Tooltip>
 						</th>
-						<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}>
-							{loading && (
+						{loading && (
+							<th style={{ ...titleWidth, ...headerExtraStyle }} key={-2}>
 								<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
 									<CircularProgress size={24} sx={loadingStyle} />
 								</div>
-							)}
-						</th>
+							</th>
+						)}
 					</tr>
 				)}
 				{!hideSubheader && (
@@ -322,8 +331,9 @@ export default class SimpleTable extends React.Component {
 		} = this.props;
 		if (rows.length === 0) return <i></i>;
 		const cols = colKeys || _.keys(rows[0]);
-		const head = this.getHeader(cols, columnMap);
-		const body = this.getBody(rows, cols, columnMap, onRowClick);
+		let filtered_cols = cols.filter((col) => col !== 'Hidden');
+		const head = this.getHeader(filtered_cols, columnMap);
+		const body = this.getBody(rows, filtered_cols, columnMap, onRowClick);
 
 		const s = {
 			tbl: {

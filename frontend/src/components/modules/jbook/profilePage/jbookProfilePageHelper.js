@@ -223,27 +223,33 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 					</Typography>
 					<div style={{ overflow: 'auto' }} data-cy="jbook-project-descriptions">
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
-							{projectDescriptions.map((pd) => {
-								return (
-									<>
-										<Typography
-											key={pd.title}
-											variant="h3"
-											style={{ fontWeight: 'bold', width: '100%' }}
-										>
-											{pd.title}
-										</Typography>
-										<blockquote
-											style={{ borderLeft: 'none' }}
-											dangerouslySetInnerHTML={{
-												__html: sanitizeHtml(pd.value, {
-													allowedAttributes: { span: ['style'] },
-												}),
-											}}
-										/>
-									</>
-								);
-							})}
+							{projectDescriptions
+								.filter((pd) => pd.value !== 'N/A' && pd.value !== 'Not applicable for this item.')
+								.map((pd) => {
+									return (
+										<>
+											<Typography
+												key={pd.title}
+												variant="h3"
+												style={{ fontWeight: 'bold', width: '100%' }}
+											>
+												{pd.title}
+											</Typography>
+											<blockquote
+												style={{ borderLeft: 'none' }}
+												dangerouslySetInnerHTML={{
+													__html: sanitizeHtml(pd.value, {
+														allowedAttributes: {
+															span: ['style'],
+															div: ['style'],
+															p: ['style'],
+														},
+													}),
+												}}
+											/>
+										</>
+									);
+								})}
 						</Typography>
 					</div>
 				</>
@@ -274,7 +280,7 @@ const Accomplishments = ({ accomplishments }) => {
 							whiteSpace: 'nowrap',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
-							width: 60,
+							width: 210,
 						}}
 						useInnerHtml={true}
 					/>
@@ -295,7 +301,7 @@ const aggregateProjectDescriptions = (projectData) => {
 		projectMissionDescription: {
 			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
 		},
-		missionDescBudgetJustification: { title: 'Project Description' },
+		missionDescBudgetJustification: { title: 'Justification' },
 		SubProj_Title: { title: 'Sub-project Title' },
 		Adj_OtherAdj_Title: { title: 'Other Title' },
 		CongAdds_Title: { title: 'CongAdds Title' },
@@ -323,15 +329,20 @@ const aggregateProjectDescriptions = (projectData) => {
 		'P5-16_Item_Title': { title: 'P5-16 Item Title' },
 		'P40-11_BA_Title': { title: 'P40-11 BA Title' },
 		'P3a-20_Milestone_Desc': { title: 'P3a-20_Milestone_Desc' },
+		p3a_dev_milestones_n: { title: 'P3a Milestones' },
+		p3a_contract_data_n: { title: 'P3a Contract Titles' },
+		otherProgramFundSummaryRemarks: { title: 'Other Summary Remarks' },
+		r4a_schedule_details_n: { title: 'Schedule Details' },
+		projectNotes: { title: 'Project Notes' },
 
 		// odoc
 		budgetLineItemTitle: { title: 'Budget Line Item Title' },
 
 		// rdoc
 		// 'projectNotes': {title: 'Project Notes'},
-		// 'projectAquisitionStrategy': {title: 'Project Aquisition Strategy'},
-		// 'projectPerformanceMetrics': {title: 'Project Performance Metrics'},
 		// 'otherProgramFundSummaryRemarks': {title: 'Other Program Funded Summary Remarks'},
+		projectPerformanceMetrics: { title: 'Project Performance Metrics' },
+		projectAquisitionStrategy: { title: 'Project Acquisition Strategy' },
 	};
 
 	if (projectData.review && projectData.review.budgetType === 'rdoc') {
@@ -342,10 +353,35 @@ const aggregateProjectDescriptions = (projectData) => {
 		titleMapping['projectPerformanceMetrics'] = { title: 'Project Performance Metrics' };
 		titleMapping['otherProgramFundingSummaryRemarks'] = { title: 'Other Program Funding Summary Remarks' };
 	}
-
 	Object.keys(titleMapping).forEach((key) => {
 		if (projectData[key]) {
-			tmpProjectDescriptions.push({ ...titleMapping[key], value: projectData[key] });
+			let obj = { ...titleMapping[key], value: projectData[key] };
+			if (key === 'r4a_schedule_details_n') {
+				obj.value.sort((a, b) => new Date(b.toComplete_s) - new Date(a.toComplete_s));
+				let str = `<div style='display: flex; flex-direction: column;'>`;
+				obj.value.forEach(
+					(item) =>
+						(str += `<div style='display: flex; justify-content: space-between;'><p style='max-width: 500px;'>${
+							item.Event_Title_t
+						}</p><p>${
+							item.toComplete_s.split(' ')[0].length > 5
+								? `${item.toComplete_s.split(' ')[0].slice(0, 3)}. ${item.toComplete_s.split(' ')[1]}`
+								: item.toComplete_s
+						}</p></div>`)
+				);
+				str += '</div>';
+				obj.value = str;
+			}
+			if (key === 'p3a_dev_milestones_n' || key === 'p3a_contract_data_n') {
+				let str = ``;
+				for (let obj of projectData[key]) {
+					for (let innerKey of Object.keys(obj)) {
+						str += `${obj[innerKey]}<br/><br/>`;
+					}
+				}
+				obj.value = str;
+			}
+			tmpProjectDescriptions.push(obj);
 		}
 	});
 

@@ -18,6 +18,7 @@ import { backgroundGreyDark, backgroundGreyLight, backgroundWhite, gcOrange } fr
 import GCPrimaryButton from '../../common/GCButton';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import { trackEvent } from '../../telemetry/Matomo';
+import { CustomDimensions } from '../../telemetry/utils';
 import Link from '@material-ui/core/Link';
 import Icon from '@material-ui/core/Icon';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
@@ -161,7 +162,7 @@ const GCResponsibilityChartView = ({
 		if (Object.keys(responsibilityText).length) newFilters.push(responsibilityText);
 		if (organization.length) {
 			organization.forEach((org) => {
-				newFilters.push({ id: 'organizationPersonnel', value: org });
+				newFilters.push({ id: 'organizationPersonnelText', value: org });
 			});
 		}
 		if (docTitle.length) {
@@ -267,7 +268,7 @@ const GCResponsibilityChartView = ({
 			},
 			{
 				Header: 'Entity',
-				accessor: 'organizationPersonnel',
+				accessor: 'organizationPersonnelText',
 				style: { whiteSpace: 'unset' },
 				Filter: (
 					<FilterInput
@@ -291,14 +292,6 @@ const GCResponsibilityChartView = ({
 					/>
 				),
 				Cell: (row) => <TableRow>{row.value}</TableRow>,
-			},
-			{
-				Header: 'Documents Referenced',
-				accessor: 'documentsReferenced',
-				style: { whiteSpace: 'unset' },
-				width: 200,
-				filterable: false,
-				Cell: (row) => <TableRow>{row.value ? row.value.join(', ') : ''}</TableRow>,
 			},
 			{
 				Header: 'Select',
@@ -391,18 +384,12 @@ const GCResponsibilityChartView = ({
 	};
 
 	const fileClicked = (filename, searchText, pageNumber) => {
-		trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'ResponsibilityTracker', 'PDFOpen');
 		trackEvent(
 			getTrackingNameForFactory(state.cloneData.clone_name),
 			'ResponsibilityTracker',
-			'filename',
-			filename
-		);
-		trackEvent(
-			getTrackingNameForFactory(state.cloneData.clone_name),
-			'ResponsibilityTracker',
-			'pageNumber',
-			pageNumber
+			'PDFOpen',
+			null,
+			CustomDimensions.create(true, filename, pageNumber)
 		);
 		let tempSearchText;
 		if (searchText) {

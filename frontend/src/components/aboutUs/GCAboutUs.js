@@ -66,7 +66,7 @@ const GCAboutUs = (props) => {
 	const categoryRefs = useRef([]);
 
 	const categoryOrder = useMemo(() => {
-		return ['General', 'Clones', 'Search', 'Graph View', 'Data', 'Analyst Tools', 'Collaboration'];
+		return ['General', 'Search', 'Graph View', 'Data', 'Analyst Tools', 'Collaboration'];
 	}, []);
 
 	const arrLength = categoryOrder.length;
@@ -162,12 +162,11 @@ const GCAboutUs = (props) => {
 						Today, tens of thousands of documents govern how the Department of Defense (DoD) operates. The
 						documents exist in different repositories, often exist on different networks, are discoverable
 						to different communities, are updated independently, and evolve rapidly. No single ability has
-						ever existed that would enable navigation of the vast universe universe of governing
-						requirements and guidance documents, leaving the Department unable to make evidence-based,
-						data-driven decisions. Today, merely one year into development, GAMECHANGER offers a scalable
-						solution with with an authoritative corpus comprising a single trusted repository of all
-						statutory and policy driven requirements based on Artificial-Intelligence (AI) enabled
-						technologies.
+						ever existed that would enable navigation of the vast universe of governing requirements and
+						guidance documents, leaving the Department unable to make evidence-based, data-driven decisions.
+						Today, GAMECHANGER offers a scalable solution with an authoritative corpus comprising a single
+						trusted repository of all statutory and policy driven requirements based on
+						Artificial-Intelligence (AI) enabled technologies.
 					</Typography>
 					<Typography variant="h5" display="block" style={{ marginTop: '30px' }}>
 						Our Vision and Mission

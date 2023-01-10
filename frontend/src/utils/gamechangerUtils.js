@@ -2,6 +2,7 @@ import _ from 'underscore';
 import DocumentIcon from '../images/icon/Document.png';
 import OrganizationIcon from '../images/icon/Organization.png';
 import { trackEvent } from '../components/telemetry/Matomo';
+import { CustomDimensions } from '../components/telemetry/utils';
 import Config from '../config/config.js';
 import { useEffect } from 'react';
 import styled from 'styled-components';
@@ -39,6 +40,7 @@ export const PAGE_DISPLAYED = {
 	faq: 'faq',
 	searchFavorites: 'searchFavorites',
 	profile: 'profile',
+	portfolio: 'portfolio',
 };
 
 export const SEARCH_TYPES = {
@@ -439,7 +441,7 @@ const crawlerMapping = {
 	dfar_subpart_regs: ['Defense Federal Acquisition Regulation'],
 	far_subpart_regs: ['Federal Acquisition Regulation'],
 	Chief_National_Guard_Bureau_Instructions: ['National Guard Bureau Instructions'],
-	code_of_federal_regulations: ['Federal Accounting Standards Advisory Board'],
+	code_of_federal_regulations: ['Code of Federal Regulations'],
 };
 export const invertedCrawlerMappingFunc = (item) => {
 	let crawler = '';
@@ -725,7 +727,13 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 				text = doc.selection.createRange().text;
 			}
 			if (text !== '') {
-				trackEvent(getTrackingNameForFactory(cloneName), 'Highlight', filename);
+				trackEvent(
+					getTrackingNameForFactory(cloneName),
+					'Highlight',
+					filename,
+					null,
+					CustomDimensions.create(true, filename)
+				);
 				gameChangerAPI.sendIntelligentSearchFeedback('intelligent_search_highlight_text', filename, text);
 			}
 		});
@@ -734,7 +742,13 @@ export const handlePdfOnLoad = (iframeID, elementID, filename, category, cloneNa
 
 const handleOnScroll = (distance, filename, category) => {
 	if (filename) {
-		trackEvent(category, distance > 0 ? 'onScrollUp' : 'onScrollDown', filename, distance);
+		trackEvent(
+			category,
+			distance > 0 ? 'onScrollUp' : 'onScrollDown',
+			filename,
+			distance,
+			CustomDimensions.create(true, filename)
+		);
 	}
 };
 
