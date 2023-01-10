@@ -303,19 +303,16 @@ const EdaSearchHandler = {
 			});
 
 			const newFilterData = {
-				fiscalYear: resp.data.fiscal_year,
-				majcom: resp.data.majcom,
-				issueOfficeName: resp.data.issue_office_name.map((e) => e.toUpperCase()).sort(),
-				issueOfficeDoDAAC: resp.data.issue_office_dodaac.map((e) => e.toUpperCase()).sort(),
-				vendorName: resp.data.vendor_name,
-				fundingOfficeDoDAAC: resp.data.funding_office_dodaac.map((e) => e.toUpperCase()).sort(),
-				fundingAgencyName: resp.data.funding_agency_name.map((e) => e.toUpperCase()).sort(),
-				psc: resp.data.psc.map((e) => e.toUpperCase()).sort(),
-				naics: resp.data.naic.map((e) => e.toUpperCase()).sort(),
-				duns: resp.data.duns.map((e) => e.toUpperCase()).sort(),
-				idvPIID: resp.data.idv_piid,
-				PIID: resp.data.piid,
-				modNumber: resp.data.mod_number.map((e) => e.toUpperCase()).sort(),
+				fiscalYear: resp.data.fpds_date_signed_dt.reverse(),
+				issueOfficeName: resp.data.fpds_contracting_office_name,
+				issueOfficeDoDAAC: resp.data.fpds_contracting_office_code,
+				vendorName: resp.data.fpds_vendor_name,
+				fundingOfficeDoDAAC: resp.data.fpds_funding_office_code,
+				fundingAgencyName: resp.data.fpds_funding_agency_name,
+				psc: resp.data.fpds_psc,
+				naics: resp.data.fpds_naics_code,
+				duns: resp.data.fpds_duns,
+				modNumber: resp.data.fpds_modification_number,
 			};
 
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });

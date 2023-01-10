@@ -332,27 +332,88 @@ class EdaSearchHandler extends SearchHandler {
 
 	async getPresearchData(userId) {
 		try {
-			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
+			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.filterPicklistIndex;
 			let esClientName = 'eda';
-			const query = this.edaSearchUtility.getElasticsearchFilterOptionsQuery();
-			/*
-			const query = { size: 12 };
-			*/
+
+			// don't get hierarchal naics/psc/dodaac data for now
+			const query = {
+				size: 12,
+				query: {
+					bool: {
+						should: [
+							{
+								match: {
+									picklist_name_s: 'fpds_vendor_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_naics_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_global_parent_duns_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_office_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_agency_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_modification_number',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_funding_agency_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_date_signed_dt',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_office_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_psc',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_funding_office_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_duns',
+								},
+							},
+						],
+					},
+				},
+			};
 
 			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, query, userId);
 
 			let cleanedResults = {};
-			for (let aggregation of Object.keys(results.body.aggregations)) {
-				cleanedResults[aggregation] = results.body.aggregations[aggregation].val.buckets
-					.map((item) => item.key_as_string || item.key)
-					.filter((item) => item !== null);
-			}
-			/*
+
 			results.body.hits.hits.forEach((hit) => {
 				const { picklist_name_s, picklist_s } = hit._source;
 				cleanedResults[picklist_name_s] = picklist_s;
 			});
-			*/
 
 			return cleanedResults;
 		} catch (e) {

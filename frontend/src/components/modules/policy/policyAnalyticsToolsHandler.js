@@ -50,6 +50,8 @@ const AccordianWrapper = styled.div`
 
 const renderSources = (state, dispatch, classes, results) => {
 	const { orgFilter, orgCount } = state.analystToolsSearchSettings;
+	const orgCountsPresent = orgCount ? Object.keys(orgCount).length > 0 : false;
+
 	const sortedOrgs = Object.keys(orgFilter).map((org) => [org, orgCount?.[org] || 0]);
 	if (results.length) {
 		sortedOrgs.sort((a, b) => {
@@ -69,8 +71,8 @@ const renderSources = (state, dispatch, classes, results) => {
 				allSelected={'allOrgsSelected'}
 				specificSelected={'specificOrgsSelected'}
 				update={'orgUpdate'}
-				trackingName={'OrgFilterToggle'}
-				showNumResultsPerOption={results.length > 0}
+				trackingName={'DocumentComparisonTool-OrgFilterToggle'}
+				showNumResultsPerOption={orgCountsPresent && results.length > 0}
 				preventSearchOnChange
 			/>
 		</FormControl>
@@ -79,6 +81,8 @@ const renderSources = (state, dispatch, classes, results) => {
 
 const renderTypes = (state, dispatch, classes, results) => {
 	const { typeFilter, typeCount } = state.analystToolsSearchSettings;
+	const typeCountsPresent = typeCount ? Object.keys(typeCount).length > 0 : false;
+
 	const sortedTypes = Object.keys(typeFilter).map((type) => [type, typeCount?.[type] || 0]);
 	if (results.length) {
 		sortedTypes.sort((a, b) => {
@@ -98,8 +102,8 @@ const renderTypes = (state, dispatch, classes, results) => {
 				allSelected={'allTypesSelected'}
 				specificSelected={'specificTypesSelected'}
 				update={'typeUpdate'}
-				trackingName={'TypeFilterToggle'}
-				showNumResultsPerOption={results.length > 0}
+				trackingName={'DocumentComparisonTool-TypeFilterToggle'}
+				showNumResultsPerOption={typeCountsPresent && results.length > 0}
 				preventSearchOnChange
 			/>
 		</FormControl>
@@ -226,8 +230,8 @@ const renderStatus = (state, dispatch, classes) => {
 			<FormControl style={{ padding: '10px', paddingTop: '10px', paddingBottom: '10px' }}>
 				<FormGroup row style={{ marginBottom: '0px' }}>
 					<FormControlLabel
-						name="Revoked Docs"
-						value="Revoked Docs"
+						name="Include Canceled Documents"
+						value="Include Canceled Documents"
 						classes={{ label: classes.titleText }}
 						control={
 							<Checkbox
@@ -236,7 +240,7 @@ const renderStatus = (state, dispatch, classes) => {
 								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
 								checked={state.analystToolsSearchSettings.includeRevoked}
 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
-								name="Revoked Docs"
+								name="Include Canceled Documents"
 							/>
 						}
 						label="Include Canceled Documents"
@@ -254,15 +258,12 @@ const PolicyAnalyticsToolsHandler = {
 
 		const { analystToolsSearchSettings } = state;
 
-		const sourceCount =
-			analystToolsSearchSettings.specificOrgsSelected &&
-			Object.keys(analystToolsSearchSettings.orgFilter).filter((org) => analystToolsSearchSettings.orgFilter[org])
-				.length;
-		const typeCount =
-			analystToolsSearchSettings.specificTypesSelected &&
-			Object.keys(analystToolsSearchSettings.typeFilter).filter(
-				(type) => analystToolsSearchSettings.typeFilter[type]
-			).length;
+		const sourceCount = Object.keys(analystToolsSearchSettings.orgFilter).filter(
+			(org) => analystToolsSearchSettings.orgFilter[org]
+		).length;
+		const typeCount = Object.keys(analystToolsSearchSettings.typeFilter).filter(
+			(type) => analystToolsSearchSettings.typeFilter[type]
+		).length;
 		const dateActive =
 			analystToolsSearchSettings?.publicationDateFilter[0] &&
 			analystToolsSearchSettings?.publicationDateFilter[1];
@@ -271,7 +272,7 @@ const PolicyAnalyticsToolsHandler = {
 		return (
 			<>
 				<div>
-					<div style={{ marginBottom: 20 }}>Apply filters to your search</div>
+					<div style={{ marginBottom: 20 }}>Apply filters to streamline search results:</div>
 
 					<div style={{ width: '100%', marginBottom: 10 }}>
 						<AccordianWrapper>

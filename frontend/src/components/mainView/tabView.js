@@ -143,7 +143,7 @@ const TabView = (props) => {
 					<GCButton
 						className={`tutorial-step-${state.componentStepNumbers['Share Search']}`}
 						id={'gcShareSearch'}
-						onClick={() => createCopyTinyUrl(cloneData.url, dispatch)}
+						onClick={() => createCopyTinyUrl(cloneData.url, dispatch, cloneData.clone_name)}
 						style={{ height: 50, margin: '16px 0px 0px 10px', minWidth: 0 }}
 						disabled={!state.rawSearchResults || state.rawSearchResults.length <= 0}
 					>

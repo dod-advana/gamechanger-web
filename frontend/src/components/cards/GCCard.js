@@ -26,6 +26,7 @@ import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Checkbox } from '@material-ui/core';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 import { gcOrange } from '../common/gc-colors';
+import { CustomDimensions } from '../telemetry/utils';
 
 const DefaultCardHandler = LoadableVisibility({
 	loader: () => import('../modules/default/defaultCardHandler'),
@@ -193,9 +194,11 @@ const StyledCardContainer = styled.div`
 						font-size: ${CARD_FONT_SIZE}px;
 						font-family: 'Noto Sans';
 						position: relative;
-						padding: 5px 5px;
+						padding: 5px;
 						display: inline-block;
 						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
+						flex-grow: 2;
+						height: 100%;
 					}
 
 					.styled-card-front-buttons {
@@ -207,6 +210,7 @@ const StyledCardContainer = styled.div`
 						min-height: 60px;
 						justify-content: flex-end;
 						overflow: hidden;
+						flex-grow: 1;
 
 						.styled-action-buttons-group {
 							flex: 1 1 0%;
@@ -237,7 +241,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
 						display: block;
-						overflow: auto;
+						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
 						height: 100%;
 					}
 
@@ -574,7 +578,8 @@ const FavoriteComponent = (props) => {
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'CancelFavorite',
 											filename,
-											`search : ${state.searchText}`
+											null,
+											CustomDimensions.create(true, filename, null, idx)
 										);
 									}}
 									style={{
@@ -633,7 +638,8 @@ const FavoriteComponent = (props) => {
 											getTrackingNameForFactory(state.cloneData.clone_name),
 											'Favorite',
 											filename,
-											`search : ${state.searchText}`
+											null,
+											CustomDimensions.create(true, filename, null, idx)
 										);
 									}}
 									style={{
@@ -651,33 +657,43 @@ const FavoriteComponent = (props) => {
 					</div>
 				)}
 			</Popover>
-			<GCTooltip title={`Favorite this ${cardType} to track in the User Dashboard`} placement="top" arrow>
-				<i
-					onClick={(event) => {
-						switch (cardType) {
-							case 'applications':
-							case 'dashboards':
-							case 'dataSources':
-							case 'databases':
-							case 'models':
-								handleSaveFavorite(!favorite);
-								break;
-							default:
-								openFavoritePopper(event.target);
-								break;
-						}
-					}}
-					data-cy="card-favorite-star"
-					className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
-					style={{
-						color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
-						marginLeft: 'auto',
-						cursor: 'pointer',
-						fontSize: 26,
-						alignSelf: 'center',
-					}}
-				/>
-			</GCTooltip>
+			{cardType !== 'organization' && cardType !== 'topic' && (
+				<GCTooltip
+					title={
+						favorite
+							? `Unfavorite this ${cardType} to stop tracking in the User Dashboard`
+							: `Favorite this ${cardType} to track in the User Dashboard`
+					}
+					placement="top"
+					arrow
+				>
+					<i
+						onClick={(event) => {
+							switch (cardType) {
+								case 'applications':
+								case 'dashboards':
+								case 'dataSources':
+								case 'databases':
+								case 'models':
+									handleSaveFavorite(!favorite);
+									break;
+								default:
+									openFavoritePopper(event.target);
+									break;
+							}
+						}}
+						data-cy="card-favorite-star"
+						className={favorite ? 'fa fa-star' : 'fa fa-star-o'}
+						style={{
+							color: favorite ? '#E9691D' : 'rgb(224, 224, 224)',
+							marginLeft: 'auto',
+							cursor: 'pointer',
+							fontSize: 26,
+							alignSelf: 'center',
+						}}
+					/>
+				</GCTooltip>
+			)}
 		</>
 	);
 };
@@ -701,7 +717,6 @@ function GCCard(props) {
 
 	const isRevoked = item.is_revoked_b;
 	const intelligentSearch = item.search_mode && item.search_mode === 'Intelligent Search';
-	const allowScroll = true;
 
 	const classes = useStyles();
 
@@ -739,7 +754,11 @@ function GCCard(props) {
 
 	const checkboxComponent = (key, value, tmpId) => {
 		return (
-			<GCTooltip title={'Select a document for export'} placement="top" arrow>
+			<GCTooltip
+				title={selected ? 'Deselect document for export' : 'Select document for export'}
+				placement="top"
+				arrow
+			>
 				<Checkbox
 					style={styles.checkbox}
 					onChange={() => handleCheckbox(key, value, tmpId)}
@@ -762,15 +781,26 @@ function GCCard(props) {
 	const handleCheckbox = (key, value, tmpId) => {
 		const { selectedDocuments, selectedDocumentsForGraph = [] } = state;
 		let newDocArray = [...selectedDocumentsForGraph];
-
 		if (selectedDocuments.has(key)) {
 			selectedDocuments.delete(key);
 			newDocArray = newDocArray.filter((tmpItem) => tmpItem !== tmpId);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxUnchecked', key, 0);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxUnchecked',
+				key,
+				0,
+				CustomDimensions.create(true, key, null, idx)
+			);
 		} else {
 			selectedDocuments.set(key, value);
 			newDocArray.push(tmpId);
-			trackEvent(getTrackingNameForFactory(state.cloneData.clone_name), 'CardCheckboxChecked', key, 1);
+			trackEvent(
+				getTrackingNameForFactory(state.cloneData.clone_name),
+				'CardCheckboxChecked',
+				key,
+				1,
+				CustomDimensions.create(true, key, null, idx)
+			);
 		}
 
 		setState(dispatch, {
@@ -812,7 +842,9 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsUp',
-									filename`search : ${searchText}`
+									filename`search : ${searchText}`,
+									null,
+									CustomDimensions.create(true, filename)
 								);
 							}
 						}}
@@ -831,7 +863,9 @@ function GCCard(props) {
 								trackEvent(
 									getTrackingNameForFactory(state.cloneData.clone_name),
 									'thumbsDown',
-									filename`search : ${searchText}`
+									filename`search : ${searchText}`,
+									null,
+									CustomDimensions.create(true, filename)
 								);
 							}
 						}}
@@ -872,7 +906,6 @@ function GCCard(props) {
 			toggledMore={toggledMore}
 			isRevoked={isRevoked}
 			selected={selected}
-			allowScroll={allowScroll}
 			showSideFilters={state.showSideFilters}
 			intelligentSearch={intelligentSearch}
 			graphView={graphView}

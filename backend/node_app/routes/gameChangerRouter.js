@@ -165,6 +165,7 @@ router.post('/admin/trending/deleteTrendingBlacklist', trending.deleteTrendingBl
 router.post('/trending/getWeeklySearchCount', trending.getWeeklySearchCount);
 
 router.post('/admin/getAllUserData', user.getUserDataForUserList);
+router.get('/user/getPublicUserData', user.getPubUserDataForPortfolioBuilder);
 router.get('/user/getUserDataByIDs', user.getUserDataByIDs);
 router.get('/admin/syncUserTable', user.syncUserTable);
 router.post('/admin/createUpdateUser', user.updateOrCreateUser);
@@ -202,6 +203,7 @@ if (!constants.GAME_CHANGER_OPTS.disableStatsAPI) {
 	router.post('/getAppStats', appStatsController.getAppStats);
 	router.post('/getRecentlyOpenedDocs', appStatsController.getRecentlyOpenedDocs);
 	router.get('/admin/getSearchPdfMapping', appStatsController.getSearchPdfMapping);
+	router.get('/admin/getSourceInteractions', appStatsController.getSourceInteractions);
 	router.get('/admin/exportUserData', appStatsController.exportUserData);
 	router.get('/admin/getClonesMatomo', appStatsController.getClones);
 	router.get('/admin/getDocumentUsage', appStatsController.getDocumentUsageData);
@@ -242,6 +244,7 @@ router.post('/sendFeedback/requestDoc', feedback.requestDocIngest);
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
+router.post('/analyticsTools/getFilterCounts', analyticsTools.getFilterCounts);
 router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 
 module.exports = router;
