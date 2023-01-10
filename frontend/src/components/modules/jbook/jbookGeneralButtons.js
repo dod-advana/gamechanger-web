@@ -5,7 +5,7 @@ import UOTAlert from '../../common/GCAlert';
 import EditEsIndexModal from '../../admin/GeneralAdminButtons/EditEsIndexModal';
 import EditStatusEmailModal from '../../admin/GeneralAdminButtons/EditReviewSatusEmailModal';
 import GameChangerAPI from '../../api/gameChanger-service-api';
-import fileDownload from 'js-file-download';
+// import fileDownload from 'js-file-download';
 import moment from 'moment';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -134,7 +134,7 @@ const JBOOKGeneralAdminButtons = () => {
 							</Link>
 						</Paper>
 					</div>
-					<div style={styles.feature}>
+					{/* <div style={styles.feature}>
 						<Paper style={styles.paper} zDepth={2} circle>
 							<Link
 								to="#"
@@ -165,7 +165,7 @@ const JBOOKGeneralAdminButtons = () => {
 								</h2>
 							</Link>
 						</Paper>
-					</div>
+					</div> */}
 				</div>
 			</div>
 			<div>
