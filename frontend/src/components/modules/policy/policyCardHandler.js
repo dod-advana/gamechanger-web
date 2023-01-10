@@ -848,11 +848,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 						<div className={'selected-favorite'}>
 							<div style={{ display: 'flex' }}>
 								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(
-									item.filename,
-									`${item.doc_type} ${item.doc_num}: ${item.title}`,
-									item.id
-								)}
+								{checkboxComponent(item.filename, displayTitle, item.id)}
 								{favoriteComponent()}
 							</div>
 						</div>
