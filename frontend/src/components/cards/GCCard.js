@@ -241,7 +241,7 @@ const StyledCardContainer = styled.div`
 					.styled-card-back-content {
 						background-color: rgb(238, 241, 242);
 						display: block;
-						overflow: ${({ allowScroll }) => (allowScroll ? 'auto' : 'hidden')};
+						overflow: auto;
 						height: 100%;
 					}
 
