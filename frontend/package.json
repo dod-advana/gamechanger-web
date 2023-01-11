@@ -108,7 +108,7 @@
 	"scripts": {
 		"109": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=test109 yarn start",
 		"analyze": "source-map-explorer 'build/static/js/*.js'",
-		"start": "react-scripts --openssl-legacy-provider start",
+		"start": "react-scripts start",
 		"dev": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=development PORT=8080 yarn start",
 		"devDecoupled": "REACT_APP_GLUU_SSO=disabled NODE_ENV=development REACT_APP_NODE_ENV=development REACT_APP_GC_DECOUPLED=1 yarn start",
 		"awsDocker": "REACT_APP_GLUU_SSO=disabled REACT_APP_NODE_ENV=aws PORT=8080 react-scripts --openssl-legacy-provider --max_old_space_size=8096 start",

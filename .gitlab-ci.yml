@@ -25,7 +25,7 @@ variables:
     --set image.tag=${CI_COMMIT_SHA}-oci
     --set appVersion=${BUILD_VERSION}
   AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS: >-
-    --build-arg=BASE_IMAGE="092912502985.dkr.ecr.us-east-1.amazonaws.com/registry1.dso.mil/ironbank/opensource/nodejs/nodejs18:18.9.0"
+    --build-arg=BASE_IMAGE=${IRONBANK_NODEJS18}
     --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
     --build-arg=APP_UID=1001
     --build-arg=APP_GID=1001
