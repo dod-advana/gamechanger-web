@@ -16,6 +16,7 @@ stages: # List of stages for jobs, and their order of execution.
   - "🧪 integration-test"
 
 variables:
+  UPSTREAM_PROJECT_DIR: "."
   UPSTREAM_KANIKO: "true"
   UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
   HELM_CHART_DIR: "./chart"
@@ -229,8 +230,6 @@ trigger:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
-        UPSTREAM_PROJECT_DIR: "."
-        UPSTREAM_KANIKO: "true"
         UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
         NO_TEST: "true"
         ENVIRONMENT: "dev"
