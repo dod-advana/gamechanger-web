@@ -363,7 +363,8 @@ const StyledFrontCardContent = styled.div`
 
 		.page-hits {
 			min-width: 100px;
-			height: fit-content;
+			max-height: 160px;
+			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 
