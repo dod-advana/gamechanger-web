@@ -660,6 +660,7 @@ class JBookSearchUtility {
 			sortSelected,
 			search_after = [],
 			search_before = [],
+			portfolio = 'General',
 		},
 		userId
 	) {
@@ -709,6 +710,26 @@ class JBookSearchUtility {
 
 			if (filterQueries.length > 0) {
 				query.query.bool.filter = filterQueries;
+			}
+
+			// If the portfolio is not the general one, restrict results to only docs in that portfolio
+			if (portfolio !== 'General') {
+				query.query.bool.must.push({
+					nested: {
+						path: 'review_n',
+						query: {
+							bool: {
+								must: [
+									{
+										match: {
+											'review_n.portfolio_name_s': portfolio,
+										},
+									},
+								],
+							},
+						},
+					},
+				});
 			}
 
 			if (searchText !== '') {

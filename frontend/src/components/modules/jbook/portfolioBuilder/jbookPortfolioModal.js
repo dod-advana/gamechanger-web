@@ -366,7 +366,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 									rows={4}
 								/>
 								<hr />
-								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
+								{/* <Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 									Upload Ontology
 								</Typography>
 								<FormControl
@@ -389,7 +389,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 										<AddIcon style={{ cursor: 'pointer' }} />
 									</IconButton>
 								</FormControl>
-								<hr />
+								<hr /> */}
 								<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 									ADD ADMINISTRATORS
 								</Typography>

@@ -29,6 +29,7 @@ const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
 	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -41,7 +42,6 @@ const StyledFrontCardContent = styled.div`
 
 	.hits-container {
 		display: flex;
-		height: 100%;
 
 		.expanded-metadata {
 			width: 100%;
@@ -105,6 +105,11 @@ const StyledFrontCardContent = styled.div`
 			}
 		}
 	}
+	.portfolio-tags-container {
+		position: absolute;
+		bottom: 0;
+		margin: 5px 0;
+	}
 `;
 
 const StyledFrontCardHeader = styled.div`
@@ -119,6 +124,7 @@ const StyledFrontCardHeader = styled.div`
 	padding: ${({ listView }) => (listView ? '0px' : '5px')};
 	margin-left: ${({ listView }) => (listView ? '10px' : '0px')};
 	margin-right: ${({ listView }) => (listView ? '10px' : '0px')};
+	flex-grow: 1;
 
 	.title-text-selected-favorite-div {
 		max-height: ${({ listView }) => (listView ? '' : '50px')};
@@ -385,6 +391,7 @@ const getMetadataTable = (projectData, budgetType, selectedPortfolio) => {
 
 const getHoveredSnippet = (item, hoveredHit) => {
 	let hoveredSnippet = '';
+
 	if (Array.isArray(item.pageHits) && item.pageHits[hoveredHit]) {
 		hoveredSnippet = item.pageHits[hoveredHit]?.snippet ?? '';
 	}
@@ -472,6 +479,39 @@ const getItemPageHits = (item) => {
 	}
 
 	return pageHits;
+};
+
+const consolidateItemPageHits = (item) => {
+	const consolidateHits = [];
+	const desiredOrder = [
+		'Project Description',
+		'Justification',
+		'Summary Remarks',
+		'Schedule Details',
+		'Project Notes',
+		'Acquisition Strat.',
+		'Accomplishments',
+		'Contracts',
+	];
+
+	for (const { title, snippet } of item.pageHits) {
+		if (title === 'Appropriation Title' || title === 'PE Title') {
+			continue;
+		}
+		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
+			consolidateHits[consolidateHits.length - 1].occurrences += 1;
+			consolidateHits[consolidateHits.length - 1].snippet += `<br>- ${snippet} `;
+		} else {
+			consolidateHits.push({ title, snippet, occurrences: 1 });
+		}
+	}
+	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
+		if (occurrences > 1) {
+			snippet = `<b>${title}: ${occurrences}</b><br>- ${snippet}`;
+		}
+		return { title, snippet };
+	});
+	return consolidateMod.sort((a, b) => desiredOrder.indexOf(a.title) - desiredOrder.indexOf(b.title));
 };
 
 /* takes list of modified searchSettings and the name of a metadata field
@@ -715,7 +755,12 @@ const cardHandler = {
 			const docListView = state.listView && !graphView;
 
 			return (
-				<StyledFrontCardHeader listView={state.listView} docListView={docListView} data-cy="jbook-card-header">
+				<StyledFrontCardHeader
+					style={{ flexGrow: 1 }}
+					listView={state.listView}
+					docListView={docListView}
+					data-cy="jbook-card-header"
+				>
 					<div className={'title-text-selected-favorite-div'}>
 						<GCTooltip title={tooltipTitle} placement="top" arrow>
 							<div
@@ -817,9 +862,23 @@ const cardHandler = {
 				intelligentSearch,
 				intelligentFeedbackComponent,
 			} = props;
-
-			const review =
-				item.reviews && item.reviews[state.selectedPortfolio] ? item.reviews[state.selectedPortfolio] : {};
+			let review = [];
+			if (item.review_n) {
+				item.review_n
+					.filter((review) => {
+						return (
+							review.portfolio_name_s === state.selectedPortfolio &&
+							Object.keys(review).some((key) => key.includes('class_label_s'))
+						);
+					})
+					.forEach((rev) => {
+						const existingTags = Object.keys(rev).filter((key) => key.includes('class_label_s'));
+						for (const tag of existingTags) {
+							review.push(rev[tag]);
+						}
+					});
+			}
+			review = [...new Set(review)];
 
 			try {
 				const toggleExpandMetadata = () => {
@@ -831,7 +890,6 @@ const cardHandler = {
 					setMetadataExpanded(!metadataExpanded);
 				};
 				// render the hover menu and options
-
 				if (
 					!state.searchText ||
 					state.searchText === null ||
@@ -840,8 +898,9 @@ const cardHandler = {
 					item.pageHits.length <= 0
 				) {
 					item.pageHits = getItemPageHits(item);
+				} else {
+					item.pageHits = consolidateItemPageHits(item);
 				}
-
 				const hoveredSnippet = getHoveredSnippet(item, hoveredHit);
 				const contextHtml = hoveredSnippet;
 				const isWideCard = true;
@@ -866,19 +925,16 @@ const cardHandler = {
 				} else {
 					return (
 						<StyledFrontCardContent className={`tutorial-step-highlight-keyword`} isWideCard={isWideCard}>
-							<div className={'currents-as-of-div'}>
-								<div className={'current-text'}>{/*currentAsOfText*/}</div>
-							</div>
 							<ExpandedHits
 								item={item}
 								hoveredHit={hoveredHit}
 								setHoveredHit={setHoveredHit}
 								contextHtml={contextHtml}
 							/>
-							<div style={{ margin: '5px 0 0 0' }} className={'portfolio-tags-container'}>
-								{review && review.primaryClassLabel && 'Tag:'}{' '}
-								{renderPortfolioTags([review.primaryClassLabel])}
-							</div>
+
+							{review.length > 0 && (
+								<div className={'portfolio-tags-container'}>Tags: {renderPortfolioTags(review)}</div>
+							)}
 						</StyledFrontCardContent>
 					);
 				}

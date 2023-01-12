@@ -2492,21 +2492,6 @@ events@1.1.1:
   resolved "http://10.194.9.122/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
   integrity sha1-nr23Y1rQmccNzEwqH1AEKI6L2SQ=
 
-exceljs@4.3.0:
-  version "4.3.0"
-  resolved "http://10.194.9.122/exceljs/-/exceljs-4.3.0.tgz#939bc0d4c59c200acadb7051be34d25c109853c4"
-  integrity sha512-hTAeo5b5TPvf8Z02I2sKIT4kSfCnOO2bCxYX8ABqODCdAjppI3gI9VYiGCQQYVcBaBSKlFDMKlAQRqC+kV9O8w==
-  dependencies:
-    archiver "^5.0.0"
-    dayjs "^1.8.34"
-    fast-csv "^4.3.1"
-    jszip "^3.5.0"
-    readable-stream "^3.6.0"
-    saxes "^5.0.1"
-    tmp "^0.2.0"
-    unzipper "^0.10.11"
-    uuid "^8.3.0"
-
 exec-sh@^0.3.2:
   version "0.3.6"
   resolved "http://10.194.9.122/exec-sh/-/exec-sh-0.3.6.tgz#ff264f9e325519a60cb5e273692943483cca63bc"
@@ -5157,10 +5142,10 @@ pause@0.0.1:
   resolved "http://10.194.9.122/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha1-HUCLP9t2kjuVQ9lvtMnf1TXZy10=
 
-pdfmake@0.2.4:
-  version "0.2.4"
-  resolved "http://10.194.9.122/pdfmake/-/pdfmake-0.2.4.tgz#7d58d64b59f8e9b9ed0b2494b17a9d94c575825b"
-  integrity sha512-EM39waHUe/Dg1W9C3XqYbpx6tfhYyU14JHZlI1HaW0AUEY32GbkRBjDLGWo9f7z/k3ea6k1p9yyDrflnvtZS1A==
+pdfmake@0.2.6:
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.6.tgz#322d6ef94e2503d29353529286e452c801921966"
+  integrity sha512-gZARnKLJjTuHWKIkqF4G6dafIaPfH7NFqBz9U9wb26PV5koHQ5eeQ/0rgZmIdfJzMKqHzXB9aK25ykG2AnnzEQ==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.1"
     "@foliojs-fork/pdfkit" "^0.13.0"
