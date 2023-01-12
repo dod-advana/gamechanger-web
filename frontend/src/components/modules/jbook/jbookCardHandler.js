@@ -48,7 +48,7 @@ const StyledFrontCardContent = styled.div`
 		}
 
 		.page-hits {
-			min-width: 160px;
+			min-width: 170px;
 			height: 100%;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
@@ -483,10 +483,13 @@ const getItemPageHits = (item) => {
 
 const consolidateItemPageHits = (item) => {
 	const desiredOrder = [
+		'Budget Act. Title',
+		'Budget Sub Act. Title',
 		'Project Description',
 		'Justification',
 		'Summary Remarks',
 		'Schedule Details',
+		'Metrics',
 		'Project Notes',
 		'Acquisition Strat.',
 		'Milestones',
@@ -504,7 +507,7 @@ const consolidateItemPageHits = (item) => {
 	}
 	if (consolidateHits.length > 1) {
 		consolidateHits = consolidateHits.filter(
-			(hit) => hit.title !== 'Appropriation Title' && hit.title !== 'PE Title'
+			(hit) => hit.title !== 'Appropriation Title' && hit.title !== 'PE Title' && hit.title !== 'BLI'
 		);
 	}
 	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
