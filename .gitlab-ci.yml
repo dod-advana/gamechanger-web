@@ -186,12 +186,7 @@ chart-publish:
   extends: ".helm-publish"
   variables:
     CHART: "${PLATFORM_PROMOTION_CHART}"
-  script:
-    - 'cd "${HELM_CHART_DIR}"'
-    - 'eval eval CHART="${CHART}"'
-    - "helm dependency update ."
-    - 'helm chart save . "${CHART}"'
-    - 'helm chart push "${CHART}"'
+    CHART_ARTIFACT_TYPE: "application/vnd.cncf.helm.config.v1+json"
 
 dev-overrides:
   cache: []
@@ -234,6 +229,8 @@ trigger:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
+        UPSTREAM_PROJECT_DIR: "."
+        UPSTREAM_KANIKO: "true"
         UPSTREAM_COMMIT_BRANCH: ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
         NO_TEST: "true"
         ENVIRONMENT: "dev"
