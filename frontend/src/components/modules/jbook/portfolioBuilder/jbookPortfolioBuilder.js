@@ -526,8 +526,14 @@ const PortfolioBuilder = (props) => {
 									<ul>
 										<li>Rows Written: {results.written}</li>
 										<li>
-											Failed Rows:{' '}
-											{results.failedRows.length === 0 ? '0' : JSON.stringify(results.failedRows)}
+											Row numbers with multiple reviews found:{' '}
+											{results.dupes.length === 0 ? 'None' : JSON.stringify(results.dupes)}
+										</li>
+										<li>
+											Failed Row Numbers:{' '}
+											{results.failedRows.length === 0
+												? 'None'
+												: JSON.stringify(results.failedRows)}
 										</li>
 									</ul>
 								</>
