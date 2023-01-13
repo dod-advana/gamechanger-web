@@ -373,7 +373,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [resultsLoading, setResultsLoading] = useState(false);
 	const [filterCountsLoading, setFilterCountsLoading] = useState(false);
-	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
 	const [itemsToCombine, setItemsToCombine] = useState({});
@@ -390,6 +389,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
+	const loading = resultsLoading || filterCountsLoading || updateFilters;
 
 	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
@@ -450,8 +450,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 
 	useEffect(() => {
 		if (updateFilters) {
-			setUpdateFilters(false);
 			setFilterCountsLoading(true);
+			setUpdateFilters(false);
 			const newSearchSettings = { ...state.analystToolsSearchSettings };
 
 			const filters = {
@@ -499,14 +499,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		publicationDateFilter,
 		includeRevoked,
 	]);
-
-	useEffect(() => {
-		setLoading(resultsLoading || filterCountsLoading);
-	}, [resultsLoading, filterCountsLoading]);
-
-	useEffect(() => {
-		setUpdateFilters(true);
-	}, [returnedDocs]);
 
 	const handleSetParagraphs = useCallback(() => {
 		const newParagraphs = paragraphText
@@ -581,6 +573,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						setSelectedParagraph(paragraph);
 					}
 					setReturnedDocs(resp.data.docs);
+					setUpdateFilters(true);
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
@@ -588,6 +581,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				})
 				.catch(() => {
 					setReturnedDocs([]);
+					setUpdateFilters(true);
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
@@ -678,6 +672,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			return newReturnedDocsParagraphs.length;
 		});
 		setReturnedDocs(newReturnedDocs);
+		setUpdateFilters(true);
 	};
 
 	const handleCombine = () => {
