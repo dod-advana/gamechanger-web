@@ -167,4 +167,9 @@ export const styles = {
 		fontWeight: 'bold',
 		color: '#E9691D',
 	},
+	overflowEllipsis: {
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+	},
 };

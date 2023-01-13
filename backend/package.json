@@ -39,7 +39,6 @@
 		"csv-stringify": "5.5.3",
 		"d3-force-3d": "2.2.0",
 		"dotenv": "8.6.0",
-		"exceljs": "4.3.0",
 		"express": "4.17.1",
 		"hat": "0.0.3",
 		"jsonwebtoken": "8.5.1",

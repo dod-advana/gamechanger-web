@@ -1764,7 +1764,7 @@ function PolicyGraphView(props) {
 				/>
 			)}
 			{showGraphCard && <div style={styles.graphCard}>{displayGraphCard()}</div>}
-			{graphData.nodes.length === 0 && !runningSearchProp && (
+			{graphData?.nodes.length === 0 && !runningSearchProp && (
 				<div style={styles.centeredContent}>
 					<div style={styles.noResultsMessage}>
 						{detailsView ? DETAILS_NO_RESULTS_MESSAGE : NO_RESULTS_MESSAGE}

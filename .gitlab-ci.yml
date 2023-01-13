@@ -16,6 +16,7 @@ stages: # List of stages for jobs, and their order of execution.
   - "🧪 integration-test"
 
 variables:
+  UPSTREAM_PROJECT_DIR: "."
   UPSTREAM_KANIKO: "true"
   UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
   HELM_CHART_DIR: "./chart"
@@ -68,7 +69,7 @@ prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
     - cd frontend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
-    - yarn install --cache-folder ../.yarn-cache --no-progress
+    - yarn install --cache-folder ../.yarn-cache --no-progress --network-timeout 600000
     - cd ../backend
     - echo 'yarn-offline-mirror "../.yarn-cache/"' >> .yarnrc
     - echo 'yarn-offline-mirror-pruning true' >> .yarnrc
@@ -81,12 +82,6 @@ sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - echo "This works"
-
-eslint-sast:
-  stage: "🧪 static-test"
-  cache: []
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 nodejs-scan-sast:
   stage: "🧪 static-test"
@@ -192,12 +187,7 @@ chart-publish:
   extends: ".helm-publish"
   variables:
     CHART: "${PLATFORM_PROMOTION_CHART}"
-  script:
-    - 'cd "${HELM_CHART_DIR}"'
-    - 'eval eval CHART="${CHART}"'
-    - "helm dependency update ."
-    - 'helm chart save . "${CHART}"'
-    - 'helm chart push "${CHART}"'
+    CHART_ARTIFACT_TYPE: "application/vnd.cncf.helm.config.v1+json"
 
 dev-overrides:
   cache: []
@@ -237,6 +227,7 @@ test-overrides:
 
 trigger:
   stage: "🚀 deploy"
+  extends: ".helm-deploy-trigger"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
@@ -275,9 +266,9 @@ trigger:
           --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
           --set env.APPROVED_API_CALLERS=${DEV_URL}
     - if: $CI_COMMIT_BRANCH == "main"
-  trigger:
-    strategy: "depend"
-    project: "platform/promotion"
+  # trigger:
+  #   strategy: "depend"
+  #   project: "platform/promotion"
 
 integration-testing-cypress-job: # Start the integration testing
   image: cypress/browsers:node14.19.0-chrome100-ff99-edge
