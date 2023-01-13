@@ -1464,14 +1464,10 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async bulkUpload(req, userId) {
-		const { portfolio, file } = req.body;
-		console.log(req.body);
-
-		console.log(file);
-
+	async parseExcel(filePath, portfolio) {
+		// create helper function that parses excel file and outputs an array
 		const workbook = new ExcelJS.Workbook();
-		const filepath = path.join(__dirname, '../../../' + file.path);
+		const filepath = path.join(__dirname, '../../../' + filePath);
 		let excelFile = await workbook.xlsx.readFile(filepath);
 		let sheet1 = excelFile.getWorksheet('Primary Review Worksheet');
 		const cols = [
@@ -1554,150 +1550,195 @@ class JBookDataHandler extends DataHandler {
 				reviewArray.push(reviewData);
 			}
 		});
+		return reviewArray;
+	}
+
+	async updateRow(index, reviewData, userId) {
+		let res = {
+			created: [],
+			dupes: [],
+			failed: [],
+		};
+		// search PG reviews for row
+		const result = await this.rev.findAll({
+			where: {
+				budget_line_item: reviewData.budget_line_item,
+				program_element: reviewData.program_element,
+				appn_num: reviewData.appn_num,
+				budget_activity: reviewData.budget_activity,
+				budget_year: reviewData.budget_year,
+				portfolio_name: reviewData.portfolio_name,
+			},
+		});
+		let newOrUpdatedReview;
+		let created = false;
+		if (result.length === 0) {
+			// in the case that this review does not exist, we're writing a new one
+			if (reviewData.budget_type !== 'odoc') {
+				newOrUpdatedReview = await this.rev.create(reviewData);
+				created = true;
+			}
+		} else if (result.length > 1) {
+			// this search returned multiple reviews (something is wrong in the backend, skip this row)
+			res.dupes.push(index + 2);
+			return res;
+		} else {
+			// we have found exactly one review that matches
+			let item = result[0].dataValues;
+			reviewData.jbook_ref_id = item.jbook_ref_id;
+			newOrUpdatedReview = await this.rev.update(
+				{
+					primary_reviewer: reviewData.primary_reviewer,
+					primary_class_label: reviewData.primary_class_label,
+					service_reviewer: reviewData.service_reviewer,
+					primary_ptp: reviewData.primary_ptp,
+					service_mp_add: reviewData.service_mp_add,
+					primary_review_notes: reviewData.primary_review_notes,
+					latest_class_label: reviewData.latest_class_label,
+					primary_review_status: reviewData.primary_review_status,
+					review_status: reviewData.review_status,
+				},
+				{
+					where: {
+						id: item.id,
+					},
+				}
+			);
+		}
+
+		// newOrUpdatedReview is now either from update OR create
+		// if it was a dupe it would be returned by now
+		// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
+
+		// Now update ES
+		let tmpPGToES = this.jbookSearchUtility.parseFields({ ...reviewData }, false, 'review');
+		tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+		// Get ES Data
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+		const esQuery = {
+			query: {
+				bool: {
+					must: [
+						{ term: { appropriationNumber_s: reviewData.appn_num } },
+						{ term: { budgetActivityNumber_s: reviewData.budget_activity } },
+						{ term: { budgetYear_s: reviewData.budget_year } },
+					],
+				},
+			},
+		};
+
+		if (reviewData.budget_type === 'rdoc') {
+			esQuery.query.bool.must.push({ term: { programElement_s: reviewData.program_element } });
+			esQuery.query.bool.must.push({ term: { projectNum_s: reviewData.budget_line_item } });
+		} else {
+			esQuery.query.bool.must.push({ term: { budgetLineItem_s: reviewData.budget_line_item } });
+		}
+
+		const esResults = await this.dataLibrary.queryElasticSearch(
+			clientObj.esClientName,
+			clientObj.esIndex,
+			esQuery,
+			userId
+		);
+
+		const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+
+		if (docs.length === 0) {
+			if (created) {
+				// console.log('destroyed newly created PG row');
+				await newOrUpdatedReview.destroy();
+			}
+			res.failed.push(index + 2);
+			return res;
+		}
+
+		const doc = docs[0];
+		const id = doc.id;
+
+		let esReviews = [];
+		if (doc.review_n && Array.isArray(doc.review_n)) {
+			esReviews = doc.review_n;
+		} else if (doc.review_n) {
+			esReviews = [doc.review_n];
+		} else {
+			esReviews = [];
+		}
+		// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+		const newReviews = [];
+		esReviews.forEach((review) => {
+			if (review.portfolio_name_s !== reviewData.portfolio_name) {
+				newReviews.push(review);
+			}
+		});
+		newReviews.push(tmpPGToES);
+
+		const updated = await this.dataLibrary.updateDocument(
+			clientObj.esClientName,
+			clientObj.esIndex,
+			{ review_n: newReviews },
+			id,
+			userId
+		);
+		if (!updated) {
+			console.log('ES NOT UPDATED for REVIEW');
+			res.failed.push(index + 2);
+			// update PG again with original values:
+			await this.rev.update(
+				{
+					primary_reviewer: result.data.primary_reviewer,
+					primary_class_label: result.data.primary_class_label,
+					service_reviewer: result.data.service_reviewer,
+					primary_ptp: result.data.primary_ptp,
+					service_mp_add: result.data.service_mp_add,
+					primary_review_notes: result.data.primary_review_notes,
+					latest_class_label: result.data.latest_class_label,
+					primary_review_status: result.data.primary_review_status,
+					review_status: result.data.review_status,
+				},
+				{
+					where: {
+						id: newOrUpdatedReview.id,
+					},
+				}
+			);
+		}
+		return res;
+	}
+
+	async bulkUpload(req, userId) {
+		const { portfolio, file } = req.body;
+		const reviewArray = await this.parseExcel(file.path, portfolio);
 
 		const startTime = performance.now();
 		let dupes = [];
 		let failed = [];
-		let failES = [];
 		let written = 0;
 		for (let [index, reviewData] of reviewArray.entries()) {
-			console.log(reviewData);
-			const result = await this.rev.findAll({
-				where: {
-					budget_line_item: reviewData.budget_line_item,
-					program_element: reviewData.program_element,
-					appn_num: reviewData.appn_num,
-					budget_activity: reviewData.budget_activity,
-					budget_year: reviewData.budget_year,
-					portfolio_name: reviewData.portfolio_name,
-				},
-			});
-			let newOrUpdatedReview;
-			if (result.length === 0) {
-				if (reviewData.budget_type !== 'odoc') {
-					newOrUpdatedReview = await this.rev.create(reviewData);
-					newOrUpdatedReview = newOrUpdatedReview.dataValues;
-				}
-			} else if (result.length > 1) {
-				dupes.push(...result);
-			} else {
-				let item = result[0].dataValues;
-				reviewData.jbook_ref_id = item.jbook_ref_id;
-				newOrUpdatedReview = await this.rev.update(
-					{
-						primary_reviewer: reviewData.primary_reviewer,
-						primary_class_label: reviewData.primary_class_label,
-						service_reviewer: reviewData.service_reviewer,
-						primary_ptp: reviewData.primary_ptp,
-						service_mp_add: reviewData.service_mp_add,
-						primary_review_notes: reviewData.primary_review_notes,
-						latest_class_label: reviewData.latest_class_label,
-						primary_review_status: reviewData.primary_review_status,
-						review_status: reviewData.review_status,
-					},
-					{
-						where: {
-							id: item.id,
-						},
-					}
-				);
-
-				if (newOrUpdatedReview[0] !== 1) {
-					failed.push(reviewData);
-				} else {
-					newOrUpdatedReview = { ...reviewData };
-
-					// 	// Now update ES
-					let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
-					tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
-
-					// 	const { doc } = await this.getPortfolioAndDocument(id, portfolioName, userId);
-					// Get ES Data
-					const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
-					const esQuery = {
-						query: {
-							bool: {
-								must: [
-									{ term: { appropriationNumber_s: reviewData.appn_num } },
-									{ term: { budgetActivityNumber_s: reviewData.budget_activity } },
-									{ term: { budgetYear_s: reviewData.budget_year } },
-								],
-							},
-						},
-					};
-
-					if (reviewData.budget_type === 'rdoc') {
-						esQuery.query.bool.must.push({ term: { programElement_s: reviewData.program_element } });
-						esQuery.query.bool.must.push({ term: { projectNum_s: reviewData.budget_line_item } });
-					} else {
-						esQuery.query.bool.must.push({ term: { budgetLineItem_s: reviewData.budget_line_item } });
-					}
-
-					const esResults = await this.dataLibrary.queryElasticSearch(
-						clientObj.esClientName,
-						clientObj.esIndex,
-						esQuery,
-						userId
-					);
-
-					const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
-					if (docs.length === 0) {
-						failed.push(reviewData);
-						console.log(JSON.stringify(esQuery));
-						failES.push([index, esQuery]);
-						console.log(index);
-
-						continue;
-					}
-					const doc = docs[0];
-					const id = doc.id;
-
-					let esReviews = [];
-					if (doc.review_n && Array.isArray(doc.review_n)) {
-						esReviews = doc.review_n;
-					} else if (doc.review_n) {
-						esReviews = [doc.review_n];
-					} else {
-						esReviews = [];
-					}
-					// Find if there already is a review in esReviews for this portfolio if so then replace if not add
-					const newReviews = [];
-					esReviews.forEach((review) => {
-						if (review.portfolio_name_s !== portfolio.name) {
-							newReviews.push(review);
-						}
-					});
-					newReviews.push(tmpPGToES);
-
-					const updated = await this.dataLibrary.updateDocument(
-						clientObj.esClientName,
-						clientObj.esIndex,
-						{ review_n: newReviews },
-						id,
-						userId
-					);
-					if (!updated) {
-						console.log('ES NOT UPDATED for REVIEW');
-					}
-					written += 1;
-				}
+			// console.log(index);
+			const rowResults = await this.updateRow(index, reviewData, userId);
+			dupes.push(...rowResults.dupes);
+			failed.push(...rowResults.failed);
+			if (rowResults.dupes.length === 0 && rowResults.failed.length === 0) {
+				written += 1;
 			}
 		}
-
-		fs.unlink(file.path, function (err) {
-			if (err) {
-				console.error(err);
-				console.log('File not found');
-			} else {
-				console.log('File Delete Successfuly');
-			}
-		});
+		if (file.path.startsWith('public/data/uploads')) {
+			fs.unlink(file.path, function (err) {
+				if (err) {
+					console.error(err);
+					console.log('File not found');
+				} else {
+					console.log('File Delete Successfuly');
+				}
+			});
+		}
 
 		const endTime = performance.now();
 		return {
 			written,
 			dupes,
-			failedRows: [...failed, ...failES],
+			failedRows: failed,
 			time: (endTime - startTime) / 60000,
 		};
 	}
