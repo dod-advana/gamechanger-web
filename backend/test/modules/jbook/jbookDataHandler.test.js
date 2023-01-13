@@ -812,7 +812,7 @@ describe('JBookDataHandler', function () {
 		});
 	});
 
-	describe.only('bulk upload', () => {
+	describe('bulk upload', () => {
 		// create excel file in test/resources/bulkUpload/excelfile.xlsx
 
 		let mockReview = [
