@@ -543,7 +543,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setResultsLoading(true);
-
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
 				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
@@ -605,7 +604,14 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	]);
 
 	useEffect(() => {
+		if (returnedDocs.length > 0) {
+			setNeedsSort(true);
+		}
+	}, [returnedDocs]);
+
+	useEffect(() => {
 		if (needsSort && returnedDocs.length) {
+			console.log('did we make it, mama?');
 			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter((doc) => {
 				return doc.paragraphs.find((match) => match.paragraphIdBeingMatched === selectedInput);
@@ -693,7 +699,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setParagraphs(newParagraphs);
 		const newParagraphText = newParagraphs.map((paragraph) => paragraph.text).join('\n');
 		setParagraphText(newParagraphText);
-		setReturnedDocs([]);
 		handleCompare();
 	};
 
@@ -925,7 +930,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						<GCButton
 							onClick={() => {
 								setNoResults(false);
-								setReturnedDocs([]);
+								// setReturnedDocs([]);
 								setNeedsSort(true);
 								setState(dispatch, { runDocumentComparisonSearch: true });
 							}}
