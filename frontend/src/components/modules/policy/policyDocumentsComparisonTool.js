@@ -448,6 +448,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		}
 	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
+	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
+	// updateFilters is set alongside certain calls to setReturnedDocs().
 	useEffect(() => {
 		if (updateFilters) {
 			setFilterCountsLoading(true);
@@ -603,15 +605,19 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		selectedInput,
 	]);
 
+	// This useEffect ensures that returnedDocs changes before viewableDocs,
+	// thereby fixing a bug where viewableDocs would hold old returnedDocs.
+	// This is at the expense of possibly running the following useEffect
+	// in some unnecessary cases.
 	useEffect(() => {
 		if (returnedDocs.length > 0) {
 			setNeedsSort(true);
 		}
 	}, [returnedDocs]);
 
+	// This useEffect sorts docs, sets the selected paragraph, AND sets viewableDocs.
 	useEffect(() => {
 		if (needsSort && returnedDocs.length) {
-			console.log('did we make it, mama?');
 			setNeedsSort(false);
 			const newViewableDocs = returnedDocs.filter((doc) => {
 				return doc.paragraphs.find((match) => match.paragraphIdBeingMatched === selectedInput);
@@ -667,7 +673,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
 		if (id === selectedInput) {
 			setSelectedInput(newParagraphs[0].id);
-			setNeedsSort(true);
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
@@ -708,7 +713,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setNoResults(false);
 		setFilterChange(false);
 		setSelectedInput(paragraphs?.[0].id);
-		setNeedsSort(true);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
 	};
@@ -918,8 +922,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
 							resetAdvancedSettings(dispatch);
 							setNoResults(false);
-							setReturnedDocs([]);
-							setNeedsSort(true);
 							setState(dispatch, { runDocumentComparisonSearch: true });
 						}}
 						style={{ margin: 0, width: '100%' }}
@@ -930,8 +932,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						<GCButton
 							onClick={() => {
 								setNoResults(false);
-								// setReturnedDocs([]);
-								setNeedsSort(true);
 								setState(dispatch, { runDocumentComparisonSearch: true });
 							}}
 							style={{ margin: '10px 0 0 0', width: '100%' }}
