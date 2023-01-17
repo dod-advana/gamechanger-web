@@ -303,17 +303,19 @@ const EdaSearchHandler = {
 			});
 
 			const newFilterData = {
-				fiscalYear: resp.data.fpds_date_signed_dt.reverse(),
-				issueOfficeName: resp.data.fpds_contracting_office_name,
-				issueOfficeDoDAAC: resp.data.fpds_contracting_office_code,
-				vendorName: resp.data.fpds_vendor_name,
-				fundingOfficeDoDAAC: resp.data.fpds_funding_office_code,
-				fundingAgencyName: resp.data.fpds_funding_agency_name,
-				psc: resp.data.fpds_psc,
-				naics: resp.data.fpds_naics_code,
-				duns: resp.data.fpds_duns,
-				modNumber: resp.data.fpds_modification_number,
+				fiscalYear: resp.data.filters.fpds_date_signed_dt.reverse(),
+				issueOfficeName: resp.data.filters.fpds_contracting_office_name,
+				issueOfficeDoDAAC: resp.data.filters.fpds_contracting_office_code,
+				vendorName: resp.data.filters.fpds_vendor_name,
+				fundingOfficeDoDAAC: resp.data.filters.fpds_funding_office_code,
+				fundingAgencyName: resp.data.filters.fpds_funding_agency_name,
+				psc: resp.data.filters.fpds_psc,
+				naics: resp.data.filters.fpds_naics_code,
+				duns: resp.data.filters.fpds_duns,
+				modNumber: resp.data.filters.fpds_modification_number,
 			};
+
+			console.log(resp.data.hierarchical_filters);
 
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
 		}

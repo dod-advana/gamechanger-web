@@ -200,7 +200,6 @@ const setEDASearchSetting = (field, value, state, dispatch) => {
 
 const getIssuingOrgData = (issuingOrgs) => {
 	const COLORS = ['#010691', '#007506', '#ad0202', '#6c0299', '#006069', '#969902'];
-	console.log('issueingOrgs: ', issuingOrgs);
 	// for the stats pie chart
 	return Object.keys(issuingOrgs).map((org, index) => {
 		let orgData = issuingOrgs[org];

@@ -336,7 +336,7 @@ class EdaSearchHandler extends SearchHandler {
 			let esClientName = 'eda';
 
 			// don't get hierarchal naics/psc/dodaac data for now
-			const query = {
+			const filter_options_query = {
 				size: 12,
 				query: {
 					bool: {
@@ -406,19 +406,104 @@ class EdaSearchHandler extends SearchHandler {
 				},
 			};
 
-			const results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, query, userId);
+			const psc_hierarchical_filters_query = {
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									picklist_name_s: 'psc',
+								},
+							},
+						],
+						must_not: [
+							{
+								exists: {
+									field: 'parentCode_s',
+								},
+							},
+						],
+					},
+				},
+			};
 
-			let cleanedResults = {};
+			const naics_hierarchical_filters_query = {
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									picklist_name_s: 'naics',
+								},
+							},
+						],
+						must_not: [
+							{
+								exists: {
+									field: 'parentCode_s',
+								},
+							},
+						],
+					},
+				},
+			};
 
-			results.body.hits.hits.forEach((hit) => {
+			const filter_options_promise = this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				filter_options_query,
+				userId
+			);
+
+			const psc_hierarchical_filters_promise = this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				psc_hierarchical_filters_query,
+				userId
+			);
+
+			const naics_hierarchical_filters_promise = this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				naics_hierarchical_filters_query,
+				userId
+			);
+
+			const [filter_options_results, psc_hierarchical_results, naics_hierarchical_results] = await Promise.all([
+				filter_options_promise,
+				psc_hierarchical_filters_promise,
+				naics_hierarchical_filters_promise,
+			]);
+
+			let cleanedResults = {
+				filters: {},
+				hierarchical_filters: { psc: [], naics: [] },
+			};
+
+			filter_options_results.body.hits.hits.forEach((hit) => {
 				const { picklist_name_s, picklist_s } = hit._source;
-				cleanedResults[picklist_name_s] = picklist_s;
+				cleanedResults.filters[picklist_name_s] = picklist_s;
+			});
+
+			psc_hierarchical_results.body.hits.hits.forEach((hit) => {
+				cleanedResults.hierarchical_filters.psc.push({
+					code: hit._source.code_s,
+					name: hit._source.productName_s,
+				});
+			});
+
+			naics_hierarchical_results.body.hits.hits.forEach((hit) => {
+				cleanedResults.hierarchical_filters.naics.push({
+					code: hit._source.code_s,
+					name: hit._source.title_s,
+				});
 			});
 
 			return cleanedResults;
 		} catch (e) {
-			this.logger.error(e.message, 'OICE7JS');
-			return { orgs: [], types: [] };
+			console.log(e);
+			this.logger.error(e.message, 'BI5E7KT');
+			return {};
 		}
 	}
 
