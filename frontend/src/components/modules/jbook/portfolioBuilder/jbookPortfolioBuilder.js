@@ -546,6 +546,7 @@ const PortfolioBuilder = (props) => {
 									setShowUploadModal(false);
 									setSelectedFile(null);
 									setResults(null);
+									setLoading(false);
 								}}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}

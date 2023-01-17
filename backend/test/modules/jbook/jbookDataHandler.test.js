@@ -1121,7 +1121,7 @@ describe('JBookDataHandler', function () {
 			assert.deepStrictEqual(actual, expected);
 		});
 
-		it('works lol ', async () => {
+		it('parses and uploads each row', async () => {
 			console.log('welcome to the bulk upload testing ');
 			const target = new JBookDataHandler(opts);
 			const req = {
