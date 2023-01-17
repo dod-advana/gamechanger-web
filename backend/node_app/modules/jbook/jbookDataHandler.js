@@ -19,7 +19,8 @@ const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
-const ExcelJS = require('exceljs');
+const XLSX = require('xlsx');
+// const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
 
@@ -1466,51 +1467,34 @@ class JBookDataHandler extends DataHandler {
 
 	async parseExcel(filePath, portfolio) {
 		// create helper function that parses excel file and outputs an array
-		const workbook = new ExcelJS.Workbook();
-		const filepath = path.join(__dirname, '../../../' + filePath);
-		let excelFile = await workbook.xlsx.readFile(filepath);
-		let sheet1 = excelFile.getWorksheet('Primary Review Worksheet');
-		const cols = [
-			'primary_reviewer',
-			'primary_class_label',
-			'fy22_class_label',
-			'service_reviewer',
-			'fy22_service_reviewer',
-			'primary_ptp',
-			'service_mp_add',
-			'primary_review_notes',
-			'fy22_poc_reviewer',
-			'budget_year',
-			'budget_type',
-			'agency_service',
-			'agency_office',
-			'appn_num',
-			'appn_title',
-			'project',
-			'budget_activity',
-			'budget_activity_title',
-			'program_element',
-			'budget_line_item',
-			'total_funding',
-			'by1_funding',
-			'by2_funding',
-			'by3_funding',
-			'by4_funding',
-			'by5_funding',
-			'has-keywords',
-		];
+		// const workbook = new ExcelJS.Workbook();
+		// const filepath = path.join(__dirname, '../../../' + filePath);
+		// let excelFile = await workbook.xlsx.readFile(filepath);
+		const workbook = XLSX.readFile(filePath);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
 
 		const reviewArray = [];
-		sheet1.eachRow({ includeEmpty: true }, function (row, rowNumber) {
-			const currRow = sheet1.getRow(rowNumber);
-			const reviewData = {};
-			const indexSkip = new Set([3, 5, 9, 15, 16, 18, 21, 22, 23, 24, 25, 26, 27]);
-			for (let i = 1; i <= 27; i++) {
-				if (indexSkip.has(i)) {
-					continue;
-				}
-				reviewData[cols[i - 1]] = currRow.getCell(i).value !== null ? `${currRow.getCell(i).value}` : null;
-			}
+		sheet1.forEach((item) => {
+			const reviewData = {
+				primary_reviewer: `${item['Primary Reviewer']}`,
+				primary_class_label: `${item['AI Analysis ']}`,
+				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
+				primary_ptp: `${item['Planned Transition Partner ']}`,
+				service_mp_add:
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null,
+				primary_review_notes: `${item['Primary Reviewer Notes']}`,
+				budget_year: `${item['FY (BY1)']}`,
+				budget_type: `${item['Doc Type']}`,
+				agency_service: `${item['Service / Agency']}`,
+				// agency_office: item[],
+				appn_num: `${item['APPN Symbol']}`,
+				budget_activity: `${item['BA']}`,
+				program_element: `${item['PE / BLI']}`,
+				budget_line_item:
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+			};
 
 			if (reviewData.budget_type === 'pdoc') {
 				reviewData.budget_line_item = reviewData.program_element;
@@ -1546,10 +1530,9 @@ class JBookDataHandler extends DataHandler {
 			reviewData.primary_review_status = 'Finished Review';
 			reviewData.review_status = 'Partial Review (Service)';
 
-			if (rowNumber > 1) {
-				reviewArray.push(reviewData);
-			}
+			reviewArray.push(reviewData);
 		});
+
 		return reviewArray;
 	}
 
