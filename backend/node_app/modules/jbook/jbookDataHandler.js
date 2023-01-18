@@ -1627,7 +1627,6 @@ class JBookDataHandler extends DataHandler {
 
 		if (docs.length === 0) {
 			if (created) {
-				// console.log('destroyed newly created PG row');
 				await newOrUpdatedReview.destroy();
 			}
 			res.failed.push(index + 2);
