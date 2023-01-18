@@ -457,7 +457,6 @@ const SearchHistoryPanel = ({
 		if (userData === null) return;
 
 		if (userData.search_history) {
-			console.log(userData);
 			userData.search_history = userData.search_history.filter(
 				(search) => search.clone_name === cloneData.clone_name
 			);
