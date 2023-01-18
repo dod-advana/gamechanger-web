@@ -1069,7 +1069,7 @@ describe('JBookDataHandler', function () {
 			feedback: {},
 		};
 
-		it('parses exccel file correctly', async () => {
+		it('parses excel file correctly', async () => {
 			const target = new JBookDataHandler(opts);
 			console.log('welcome to the excel parsing experience');
 			const actual = await target.parseExcel('test/resources/bulkUpload/test-excel.xlsx', {
@@ -1117,12 +1117,10 @@ describe('JBookDataHandler', function () {
 					review_status: 'Partial Review (Service)',
 				},
 			];
-			console.log(actual);
 			assert.deepStrictEqual(actual, expected);
 		});
 
 		it('parses and uploads each row', async () => {
-			console.log('welcome to the bulk upload testing ');
 			const target = new JBookDataHandler(opts);
 			const req = {
 				body: {

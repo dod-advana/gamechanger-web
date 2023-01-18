@@ -1477,9 +1477,9 @@ class JBookDataHandler extends DataHandler {
 		sheet1.forEach((item) => {
 			const reviewData = {
 				primary_reviewer: `${item['Primary Reviewer']}`,
-				primary_class_label: `${item['AI Analysis ']}`,
+				primary_class_label: `${item['AI Analysis']}`,
 				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
-				primary_ptp: `${item['Planned Transition Partner ']}`,
+				primary_ptp: `${item['Planned Transition Partner']}`,
 				service_mp_add:
 					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
 						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
@@ -1698,7 +1698,6 @@ class JBookDataHandler extends DataHandler {
 		let failed = [];
 		let written = 0;
 		for (let [index, reviewData] of reviewArray.entries()) {
-			// console.log(index);
 			const rowResults = await this.updateRow(index, reviewData, userId);
 			dupes.push(...rowResults.dupes);
 			failed.push(...rowResults.failed);
