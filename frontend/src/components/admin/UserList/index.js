@@ -69,6 +69,7 @@ const UserList = React.memo((props) => {
 		const tableData = [];
 
 		const data = await gameChangerAPI.getUserData(cloneName);
+
 		_.forEach(data.data.users, (result) => {
 			tableData.push(result);
 		});

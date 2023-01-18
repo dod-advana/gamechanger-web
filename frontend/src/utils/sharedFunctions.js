@@ -197,7 +197,6 @@ export const getUserData = async (dispatch) => {
 		.getUserData()
 		.then((data) => {
 			setState(dispatch, { userData: data.data, userDataSet: true });
-			console.log(data);
 		})
 		.catch((err) => {
 			console.log(err);
