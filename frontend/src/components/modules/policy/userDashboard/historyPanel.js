@@ -527,7 +527,9 @@ const SearchHistoryPanel = ({
 										? row.original.request_body.orgFilterString.join(', ')
 										: row.original.orgFilterText,
 									row.original.pubDate,
-									row.original.typeFilterText
+									row.original.request_body.typeFilterString.length > 0
+										? row.original.request_body.typeFilterString.join(', ')
+										: row.original.typeFilterText
 								);
 							}}
 							className="fa fa-cogs"
