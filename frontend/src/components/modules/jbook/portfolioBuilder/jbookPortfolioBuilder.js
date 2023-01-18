@@ -196,6 +196,11 @@ const PortfolioBuilder = (props) => {
 				userText = '(none)';
 			}
 
+			const openBulkUpload = () => {
+				setShowUploadModal(true);
+				setModalData(portfolio);
+			};
+
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
 					<div style={portfolioStyles.portfolioHeader}>
@@ -274,13 +279,7 @@ const PortfolioBuilder = (props) => {
 						<>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
-								<GCButton
-									onClick={async () => {
-										setShowUploadModal(true);
-										setModalData(portfolio);
-									}}
-									style={{ minWidth: 'unset' }}
-								>
+								<GCButton onClick={openBulkUpload} style={{ minWidth: 'unset' }}>
 									Bulk Upload
 								</GCButton>
 							</div>
@@ -300,6 +299,27 @@ const PortfolioBuilder = (props) => {
 		},
 		[setSelectedFile]
 	);
+
+	const closeUploadModal = () => {
+		setShowUploadModal(false);
+		setSelectedFile(null);
+		setResults(null);
+		setLoading(false);
+	};
+
+	const uploadData = async () => {
+		const form = new FormData();
+		form.append('file', selectedFile, selectedFile.name);
+		form.append('functionName', 'bulkUpload');
+		form.append('cloneName', 'jbook');
+		form.append('options', JSON.stringify({ portfolio: modalData }));
+		setLoading(true);
+		const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
+			headers: form.getHeaders ? form.getHeaders() : { 'Content-Type': 'multipart/form-data' },
+		});
+		setResults(uploadResponse.data);
+		setLoading(false);
+	};
 
 	return (
 		<>
@@ -489,11 +509,7 @@ const PortfolioBuilder = (props) => {
 									backgroundColor: styles.backgroundGreyLight,
 									borderRadius: 0,
 								}}
-								onClick={() => {
-									setShowUploadModal(false);
-									setSelectedFile(null);
-									setResults(null);
-								}}
+								onClick={closeUploadModal}
 							>
 								<CloseIcon style={{ fontSize: 30 }} />
 							</IconButton>
@@ -542,12 +558,7 @@ const PortfolioBuilder = (props) => {
 						<DialogActions>
 							<GCButton
 								id={'editReviewerClose'}
-								onClick={() => {
-									setShowUploadModal(false);
-									setSelectedFile(null);
-									setResults(null);
-									setLoading(false);
-								}}
+								onClick={closeUploadModal}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}
 							>
@@ -555,22 +566,7 @@ const PortfolioBuilder = (props) => {
 							</GCButton>
 							<GCButton
 								id={'uploadSubmit'}
-								onClick={async () => {
-									const form = new FormData();
-									console.log(selectedFile);
-									form.append('file', selectedFile, selectedFile.name);
-									form.append('functionName', 'bulkUpload');
-									form.append('cloneName', 'jbook');
-									form.append('options', JSON.stringify({ portfolio: modalData }));
-									setLoading(true);
-									const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
-										headers: form.getHeaders
-											? form.getHeaders()
-											: { 'Content-Type': 'multipart/form-data' },
-									});
-									setResults(uploadResponse.data);
-									setLoading(false);
-								}}
+								onClick={uploadData}
 								disabled={selectedFile === null || results !== null}
 								style={{ margin: '10px' }}
 							>
