@@ -146,7 +146,7 @@ const renderTable = (data, columns) => {
 			minRows={1}
 			multiSort={false}
 			showPageSizeOptions={false}
-			showPagination={false}
+			showPagination={true}
 			getTbodyProps={() => {
 				return {
 					style: {
@@ -457,6 +457,7 @@ const SearchHistoryPanel = ({
 		if (userData === null) return;
 
 		if (userData.search_history) {
+			console.log(userData);
 			userData.search_history = userData.search_history.filter(
 				(search) => search.clone_name === cloneData.clone_name
 			);
@@ -522,7 +523,9 @@ const SearchHistoryPanel = ({
 								handleHideShowSearchHistorySettings(
 									event.target,
 									row.original.searchType,
-									row.original.orgFilterText,
+									row.original.request_body.orgFilterString.length > 0
+										? row.original.request_body.orgFilterString.join(', ')
+										: row.original.orgFilterText,
 									row.original.pubDate,
 									row.original.typeFilterText
 								);
