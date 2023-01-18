@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import FormData from 'form-data';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
-
+import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import DragAndDrop from '../../../common/DragAndDrop';
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
-
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
 
@@ -67,7 +67,13 @@ const PortfolioBuilder = (props) => {
 
 	const [showModal, setShowModal] = useState(false);
 	const [showPublicModal, setShowPublicModal] = useState(false);
+	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
+
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [results, setResults] = useState(null);
+
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -264,12 +270,36 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
+					{portfolio.name === 'AI Inventory' && (
+						<>
+							<hr />
+							<div style={{ marginTop: '20px' }}>
+								<GCButton
+									onClick={async () => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
+								</GCButton>
+							</div>
+						</>
+					)}
 				</div>
 			);
 		});
 
 		return portfolios;
 	};
+
+	const onDrop = useCallback(
+		async (acceptedFiles) => {
+			const [file] = acceptedFiles;
+			await setSelectedFile(file);
+		},
+		[setSelectedFile]
+	);
 
 	return (
 		<>
@@ -428,6 +458,123 @@ const PortfolioBuilder = (props) => {
 								style={{ margin: '10px' }}
 							>
 								Delete
+							</GCButton>
+						</DialogActions>
+					</Dialog>
+					<Dialog
+						open={showUploadModal}
+						scroll={'paper'}
+						maxWidth="sm"
+						disableEscapeKeyDown
+						disableBackdropClick
+						classes={{
+							paperWidthSm: classes.dialogSm,
+						}}
+					>
+						<DialogTitle>
+							<div style={{ display: 'flex', width: '100%' }}>
+								<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+									Bulk upload
+								</Typography>
+							</div>
+							<IconButton
+								aria-label="close"
+								style={{
+									position: 'absolute',
+									right: '0px',
+									top: '0px',
+									height: 60,
+									width: 60,
+									color: 'black',
+									backgroundColor: styles.backgroundGreyLight,
+									borderRadius: 0,
+								}}
+								onClick={() => {
+									setShowUploadModal(false);
+									setSelectedFile(null);
+									setResults(null);
+								}}
+							>
+								<CloseIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</DialogTitle>
+						<DialogContent>
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Upload Excel Document
+							</Typography>
+
+							{results === null && (
+								<DragAndDrop
+									text="Drag and drop a file here, or click to select a file (.xlsx files only)"
+									acceptedFileTypes={[
+										'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+										'application/vnd.ms-excel',
+									]}
+									handleFileDrop={onDrop}
+								/>
+							)}
+
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
+								{loading && ' Loading...'}
+								{loading && <CircularProgress size={'20px'} />}
+							</Typography>
+
+							{results !== null && (
+								<>
+									<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Results</Typography>
+									<ul>
+										<li>Rows Written: {results.written}</li>
+										<li>
+											Row numbers with multiple reviews found:{' '}
+											{results.dupes.length === 0 ? 'None' : JSON.stringify(results.dupes)}
+										</li>
+										<li>
+											Failed Row Numbers:{' '}
+											{results.failedRows.length === 0
+												? 'None'
+												: JSON.stringify(results.failedRows)}
+										</li>
+									</ul>
+								</>
+							)}
+						</DialogContent>
+						<DialogActions>
+							<GCButton
+								id={'editReviewerClose'}
+								onClick={() => {
+									setShowUploadModal(false);
+									setSelectedFile(null);
+									setResults(null);
+									setLoading(false);
+								}}
+								style={{ margin: '10px' }}
+								buttonColor={'#8091A5'}
+							>
+								{results === null ? 'Cancel' : 'Close'}
+							</GCButton>
+							<GCButton
+								id={'uploadSubmit'}
+								onClick={async () => {
+									const form = new FormData();
+									console.log(selectedFile);
+									form.append('file', selectedFile, selectedFile.name);
+									form.append('functionName', 'bulkUpload');
+									form.append('cloneName', 'jbook');
+									form.append('options', JSON.stringify({ portfolio: modalData }));
+									setLoading(true);
+									const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
+										headers: form.getHeaders
+											? form.getHeaders()
+											: { 'Content-Type': 'multipart/form-data' },
+									});
+									setResults(uploadResponse.data);
+									setLoading(false);
+								}}
+								disabled={selectedFile === null || results !== null}
+								style={{ margin: '10px' }}
+							>
+								Upload
 							</GCButton>
 						</DialogActions>
 					</Dialog>

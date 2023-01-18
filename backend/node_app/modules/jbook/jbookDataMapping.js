@@ -809,6 +809,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		jbook_ref_id: {
+			newName: 'jbookRefId',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	reviewESMapping: {

@@ -19,6 +19,11 @@ const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
+const XLSX = require('xlsx');
+const fs = require('fs');
+
+const { performance } = require('perf_hooks');
+
 const _ = require('underscore');
 
 const types = {
@@ -642,7 +647,7 @@ class JBookDataHandler extends DataHandler {
 
 			delete reviewData.id;
 
-			// in review table, budget_line_item is also projectNum
+			// in review table, budget_line_item is also PE
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
 					break;
@@ -1458,6 +1463,266 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async parseExcel(filePath, portfolio) {
+		// create helper function that parses excel file and outputs an array
+		// const workbook = new ExcelJS.Workbook();
+		// const filepath = path.join(__dirname, '../../../' + filePath);
+		// let excelFile = await workbook.xlsx.readFile(filepath);
+		const workbook = XLSX.readFile(filePath);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+
+		const reviewArray = [];
+		sheet1.forEach((item) => {
+			const reviewData = {
+				primary_reviewer: `${item['Primary Reviewer']}`,
+				primary_class_label: `${item['AI Analysis']}`,
+				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
+				primary_ptp: `${item['Planned Transition Partner']}`,
+				service_mp_add:
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null,
+				primary_review_notes: `${item['Primary Reviewer Notes']}`,
+				budget_year: `${item['FY (BY1)']}`,
+				budget_type: `${item['Doc Type']}`,
+				agency_service: `${item['Service / Agency']}`,
+				// agency_office: item[],
+				appn_num: `${item['APPN Symbol']}`,
+				budget_activity: `${item['BA']}`,
+				program_element: `${item['PE / BLI']}`,
+				budget_line_item:
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+			};
+
+			if (reviewData.budget_type === 'pdoc') {
+				reviewData.budget_line_item = reviewData.program_element;
+				reviewData.program_element = null;
+			}
+
+			if (reviewData.agency_service === 'Department of Defense (DOD)') {
+				reviewData.agency = reviewData.agency_office;
+			} else {
+				reviewData.agency = reviewData.agency_service;
+			}
+
+			if (reviewData.budget_activity.length !== 2) {
+				reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
+			}
+
+			if (reviewData.appn_num.length !== 4) {
+				reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
+			}
+			let refString = '';
+			if (reviewData.budget_type === 'pdoc') {
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budget_type === 'rdoc') {
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			}
+
+			reviewData.jbook_ref_id = refString;
+			delete reviewData.agency_office;
+			delete reviewData.agency_service;
+
+			reviewData.portfolio_name = portfolio.name;
+			reviewData.latest_class_label = reviewData.primary_class_label;
+			reviewData.primary_review_status = 'Finished Review';
+			reviewData.review_status = 'Partial Review (Service)';
+
+			reviewArray.push(reviewData);
+		});
+
+		return reviewArray;
+	}
+
+	async updateRow(index, reviewData, userId) {
+		let res = {
+			created: [],
+			dupes: [],
+			failed: [],
+		};
+		// search PG reviews for row
+		const result = await this.rev.findAll({
+			where: {
+				budget_line_item: reviewData.budget_line_item,
+				program_element: reviewData.program_element,
+				appn_num: reviewData.appn_num,
+				budget_activity: reviewData.budget_activity,
+				budget_year: reviewData.budget_year,
+				portfolio_name: reviewData.portfolio_name,
+			},
+		});
+		let newOrUpdatedReview;
+		let created = false;
+		if (result.length === 0) {
+			// in the case that this review does not exist, we're writing a new one
+			if (reviewData.budget_type !== 'odoc') {
+				newOrUpdatedReview = await this.rev.create(reviewData);
+				created = true;
+			}
+		} else if (result.length > 1) {
+			// this search returned multiple reviews (something is wrong in the backend, skip this row)
+			res.dupes.push(index + 2);
+			return res;
+		} else {
+			// we have found exactly one review that matches
+			let item = result[0].dataValues;
+			reviewData.jbook_ref_id = item.jbook_ref_id;
+			newOrUpdatedReview = await this.rev.update(
+				{
+					primary_reviewer: reviewData.primary_reviewer,
+					primary_class_label: reviewData.primary_class_label,
+					service_reviewer: reviewData.service_reviewer,
+					primary_ptp: reviewData.primary_ptp,
+					service_mp_add: reviewData.service_mp_add,
+					primary_review_notes: reviewData.primary_review_notes,
+					latest_class_label: reviewData.latest_class_label,
+					primary_review_status: reviewData.primary_review_status,
+					review_status: reviewData.review_status,
+				},
+				{
+					where: {
+						id: item.id,
+					},
+				}
+			);
+		}
+
+		// newOrUpdatedReview is now either from update OR create
+		// if it was a dupe it would be returned by now
+		// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
+
+		// Now update ES
+		let tmpPGToES = this.jbookSearchUtility.parseFields({ ...reviewData }, false, 'review');
+		tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
+
+		// Get ES Data
+		const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
+		const esQuery = {
+			query: {
+				bool: {
+					must: [
+						{ term: { appropriationNumber_s: reviewData.appn_num } },
+						{ term: { budgetActivityNumber_s: reviewData.budget_activity } },
+						{ term: { budgetYear_s: reviewData.budget_year } },
+					],
+				},
+			},
+		};
+
+		if (reviewData.budget_type === 'rdoc') {
+			esQuery.query.bool.must.push({ term: { programElement_s: reviewData.program_element } });
+			esQuery.query.bool.must.push({ term: { projectNum_s: reviewData.budget_line_item } });
+		} else {
+			esQuery.query.bool.must.push({ term: { budgetLineItem_s: reviewData.budget_line_item } });
+		}
+
+		const esResults = await this.dataLibrary.queryElasticSearch(
+			clientObj.esClientName,
+			clientObj.esIndex,
+			esQuery,
+			userId
+		);
+
+		const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+
+		if (docs.length === 0) {
+			if (created) {
+				// console.log('destroyed newly created PG row');
+				await newOrUpdatedReview.destroy();
+			}
+			res.failed.push(index + 2);
+			return res;
+		}
+
+		const doc = docs[0];
+		const id = doc.id;
+
+		let esReviews = [];
+		if (doc.review_n && Array.isArray(doc.review_n)) {
+			esReviews = doc.review_n;
+		} else if (doc.review_n) {
+			esReviews = [doc.review_n];
+		} else {
+			esReviews = [];
+		}
+		// Find if there already is a review in esReviews for this portfolio if so then replace if not add
+		const newReviews = [];
+		esReviews.forEach((review) => {
+			if (review.portfolio_name_s !== reviewData.portfolio_name) {
+				newReviews.push(review);
+			}
+		});
+		newReviews.push(tmpPGToES);
+
+		const updated = await this.dataLibrary.updateDocument(
+			clientObj.esClientName,
+			clientObj.esIndex,
+			{ review_n: newReviews },
+			id,
+			userId
+		);
+		if (!updated) {
+			console.log('ES NOT UPDATED for REVIEW');
+			res.failed.push(index + 2);
+			// update PG again with original values:
+			await this.rev.update(
+				{
+					primary_reviewer: result.data.primary_reviewer,
+					primary_class_label: result.data.primary_class_label,
+					service_reviewer: result.data.service_reviewer,
+					primary_ptp: result.data.primary_ptp,
+					service_mp_add: result.data.service_mp_add,
+					primary_review_notes: result.data.primary_review_notes,
+					latest_class_label: result.data.latest_class_label,
+					primary_review_status: result.data.primary_review_status,
+					review_status: result.data.review_status,
+				},
+				{
+					where: {
+						id: newOrUpdatedReview.id,
+					},
+				}
+			);
+		}
+		return res;
+	}
+
+	async bulkUpload(req, userId) {
+		const { portfolio, file } = req.body;
+		const reviewArray = await this.parseExcel(file.path, portfolio);
+
+		const startTime = performance.now();
+		let dupes = [];
+		let failed = [];
+		let written = 0;
+		for (let [index, reviewData] of reviewArray.entries()) {
+			const rowResults = await this.updateRow(index, reviewData, userId);
+			dupes.push(...rowResults.dupes);
+			failed.push(...rowResults.failed);
+			if (rowResults.dupes.length === 0 && rowResults.failed.length === 0) {
+				written += 1;
+			}
+		}
+		if (file.path.startsWith('public/data/uploads')) {
+			fs.unlink(file.path, function (err) {
+				if (err) {
+					console.error(err);
+					console.log('File not found');
+				} else {
+					console.log('File Delete Successfuly');
+				}
+			});
+		}
+
+		const endTime = performance.now();
+		return {
+			written,
+			dupes,
+			failedRows: failed,
+			time: (endTime - startTime) / 60000,
+		};
+	}
+
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
 
@@ -1501,6 +1766,8 @@ class JBookDataHandler extends DataHandler {
 					return await this.submitPublicPortfolioRequest(req, userId);
 				case 'getPublicPortfolioRequests':
 					return await this.getPublicPortfolioRequests(req, userId);
+				case 'bulkUpload':
+					return await this.bulkUpload(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,

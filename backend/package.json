@@ -39,7 +39,6 @@
 		"csv-stringify": "5.5.3",
 		"d3-force-3d": "2.2.0",
 		"dotenv": "8.6.0",
-		"exceljs": "4.3.0",
 		"express": "4.17.1",
 		"hat": "0.0.3",
 		"jsonwebtoken": "8.5.1",
@@ -47,6 +46,7 @@
 		"lunr": "2.3.9",
 		"moment": "2.29.4",
 		"moment-timezone": "0.5.31",
+		"multer": "^1.4.5-lts.1",
 		"mysql": "2.18.1",
 		"neo4j-driver": "4.4.4",
 		"node-cron": "2.0.3",
@@ -60,7 +60,8 @@
 		"ssh-key-decrypt": "0.1.2",
 		"swagger-jsdoc": "6.0.1",
 		"swagger-ui-express": "4.1.6",
-		"underscore": "1.13.1"
+		"underscore": "1.13.1",
+		"xlsx": "^0.18.5"
 	},
 	"devDependencies": {
 		"eslint": "^8.10.0",
