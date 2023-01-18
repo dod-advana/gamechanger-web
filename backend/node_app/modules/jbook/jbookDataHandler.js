@@ -20,8 +20,6 @@ const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const XLSX = require('xlsx');
-// const ExcelJS = require('exceljs');
-const path = require('path');
 const fs = require('fs');
 
 const { performance } = require('perf_hooks');
