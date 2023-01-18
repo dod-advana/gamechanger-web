@@ -776,7 +776,7 @@ const getPublicationDate = (publication_date_dt) => {
 
 const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
-	const displayTitle = getDisplayTitle(item, state.currentViewName);
+	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
 	const docListView = state.listView && !graphView;
