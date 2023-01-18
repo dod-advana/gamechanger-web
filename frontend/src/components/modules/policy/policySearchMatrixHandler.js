@@ -472,8 +472,6 @@ const getSearchMatrixItems = (props) => {
 	const sourceCount = Object.values(state.searchSettings.orgFilter).filter(Boolean).length;
 	const typeCount = Object.values(state.searchSettings.typeFilter).filter(Boolean).length;
 
-	// console.log(state);
-
 	return (
 		<>
 			<div data-cy={'source-accordion'} style={{ width: '100%', marginBottom: 10 }}>
