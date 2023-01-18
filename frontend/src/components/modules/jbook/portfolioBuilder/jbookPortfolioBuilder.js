@@ -196,10 +196,10 @@ const PortfolioBuilder = (props) => {
 				userText = '(none)';
 			}
 
-			const openBulkUpload = () => {
+			function openBulkUpload() {
 				setShowUploadModal(true);
 				setModalData(portfolio);
-			};
+			}
 
 			return (
 				<div style={portfolioStyles.portfolio} key={portfolio.id}>
@@ -300,14 +300,14 @@ const PortfolioBuilder = (props) => {
 		[setSelectedFile]
 	);
 
-	const closeUploadModal = () => {
+	function closeUploadModal() {
 		setShowUploadModal(false);
 		setSelectedFile(null);
 		setResults(null);
 		setLoading(false);
-	};
+	}
 
-	const uploadData = async () => {
+	async function uploadData() {
 		const form = new FormData();
 		form.append('file', selectedFile, selectedFile.name);
 		form.append('functionName', 'bulkUpload');
@@ -319,7 +319,7 @@ const PortfolioBuilder = (props) => {
 		});
 		setResults(uploadResponse.data);
 		setLoading(false);
-	};
+	}
 
 	return (
 		<>
