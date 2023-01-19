@@ -310,6 +310,10 @@ const PortfolioBuilder = (props) => {
 		setInit(false);
 	}, []);
 
+	const showPublicCallback = useCallback(() => {
+		setShowPublicModal(true);
+	}, []);
+
 	const closePublicCallback = useCallback(() => {
 		setShowPublicModal(false);
 	}, []);
@@ -392,7 +396,7 @@ const PortfolioBuilder = (props) => {
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton onClick={showModalCallback} style={{ minWidth: 'unset' }}>
+								<GCButton onClick={showPublicCallback} style={{ minWidth: 'unset' }}>
 									Public Portfolio Request
 								</GCButton>
 							</div>
