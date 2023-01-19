@@ -335,20 +335,70 @@ class EdaSearchHandler extends SearchHandler {
 			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.filterPicklistIndex;
 			let esClientName = 'eda';
 
-			// don't get hierarchal naics/psc data for now
+			// don't get hierarchal naics/psc/dodaac data for now
 			const query = {
 				size: 12,
 				query: {
 					bool: {
-						must_not: [
+						should: [
 							{
 								match: {
-									picklist_name_s: 'naics',
+									picklist_name_s: 'fpds_vendor_name',
 								},
 							},
 							{
 								match: {
-									picklist_name_s: 'psc',
+									picklist_name_s: 'fpds_naics_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_global_parent_duns_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_office_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_agency_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_modification_number',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_funding_agency_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_date_signed_dt',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_contracting_office_name',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_psc',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_funding_office_code',
+								},
+							},
+							{
+								match: {
+									picklist_name_s: 'fpds_duns',
 								},
 							},
 						],

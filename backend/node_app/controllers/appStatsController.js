@@ -8,7 +8,7 @@ const FEEDBACK = require('../models').feedback;
 const CLONE_META = require('../models').clone_meta;
 const CRAWLER_INFO = require('../models').crawler_info;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
-const { sendExcelFile } = require('../utils/sendFileUtility');
+const { sendCSVFile } = require('../utils/sendFileUtility');
 const sparkMD5Lib = require('spark-md5');
 const { Sequelize } = require('sequelize');
 const { QueryTypes } = require('sequelize');
@@ -721,8 +721,8 @@ class AppStatsController {
 					{ header: 'Crawler', key: 'crawler_used_s' },
 					{ header: 'Source', key: 'display_source_s' },
 				];
-				const excelData = await this.querySearchPdfMapping(opts, null, connection);
-				sendExcelFile(res, 'Searches', columns, excelData);
+				const csvData = await this.querySearchPdfMapping(opts, null, connection);
+				sendCSVFile(res, 'Searches', columns, csvData);
 			} else if (table === 'UserData') {
 				const columns = [
 					{ header: 'User ID', key: 'user_id' },
@@ -734,8 +734,8 @@ class AppStatsController {
 					{ header: 'Opened', key: 'opened' },
 					{ header: 'Favorited', key: 'Favorite' },
 				];
-				const excelData = await this.queryUserAggregations(opts, connection);
-				sendExcelFile(res, 'Users', columns, excelData.users);
+				const csvData = await this.queryUserAggregations(opts, connection);
+				sendCSVFile(res, 'Users', columns, csvData.users);
 			} else if (table === 'Feedback') {
 				const columns = [
 					{ header: 'Feedback Event', key: 'event_name' },
@@ -761,7 +761,7 @@ class AppStatsController {
 						'value_7',
 					],
 				});
-				sendExcelFile(res, 'Feedback', columns, feedbackData.rows);
+				sendCSVFile(res, 'Feedback', columns, feedbackData.rows);
 			} else if (table === 'DocumentUsage') {
 				const columns = [
 					{ header: 'Document', key: 'document' },
@@ -771,7 +771,7 @@ class AppStatsController {
 					{ header: 'Searches', key: 'searches' },
 				];
 				const docData = await this.createDocumentUsageData(opts.startDate, opts.endDate, userId, connection);
-				sendExcelFile(res, 'Documents', columns, docData);
+				sendCSVFile(res, 'Documents', columns, docData);
 			} else if (table == 'SourceInteractions') {
 				const columns = [
 					{ header: 'Crawler', key: 'crawler' },
@@ -793,7 +793,7 @@ class AppStatsController {
 					null,
 					connection
 				);
-				sendExcelFile(res, 'SourceInteractions', columns, data.data);
+				sendCSVFile(res, 'SourceInteractions', columns, data.data);
 			}
 		} catch (err) {
 			this.logger.error(err, '11MLULU');
@@ -1318,9 +1318,7 @@ class AppStatsController {
 						documentMap[visitIDMap[open.idvisitor]]['opened'].push(open.document);
 						documentMap[visitIDMap[open.idvisitor]]['opened'].shift();
 					}
-				} catch (error) {
-					console.log(open.idvisitor);
-				}
+				} catch (error) {}
 			}
 		}
 		return [visitIDMap, documentMap];
@@ -1513,7 +1511,45 @@ class AppStatsController {
 			);
 		});
 	}
-
+	/**
+	 * This method gets graph data for users by month
+	 * @returns an array of data from Matomo.
+	 */
+	async getInactiveUsers(startDate, endDate, cloneName, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				SELECT
+					COUNT(t.user_id) as inactive_user
+				FROM (
+					select
+						user_id,
+						MAX(visit_last_action_time) as last_visit
+					from
+						matomo_log_visit b
+					where 
+						b.idvisitor in (
+							select distinct idvisitor
+							from matomo_log_link_visit_action
+							where idaction_event_category=?
+						)
+					GROUP BY user_id
+				) t
+				WHERE
+					t.last_visit >= DATE_SUB(STR_TO_DATE(?, '%Y-%m-%d %H:%i'), INTERVAL 6 WEEK)
+					AND t.last_visit <= DATE_SUB(STR_TO_DATE(?, '%Y-%m-%d %H:%i'), INTERVAL 6 WEEK)
+				`,
+				[cloneName, startDate, endDate],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
 	/**
 	 * This method is called by an endpoint to get the card and graph data
 	 * @param {*} req
@@ -1531,27 +1567,34 @@ class AppStatsController {
 				database: this.constants.MATOMO_DB_CONFIG.database,
 			});
 			connection.connect();
-
 			const cardPromise = this.getCardSearchAggregationQuery(startDate, endDate, cloneName, connection);
 			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
 			const newUserPromise = this.getCardNewUsers(startDate, endDate, cloneID, connection);
+			const inactiveUserPromise = this.getInactiveUsers(startDate, endDate, cloneID, connection);
 			const searchBarPromise = this.getSearchGraphData(cloneName, connection);
 			const userBarPromise = this.getUserGraphData(cloneID, connection);
 
-			let cards, userCards, searchBar, userBar, newUser;
+			let cards, userCards, searchBar, userBar, newUser, inactiveUser;
 
-			await Promise.all([cardPromise, userCardPromise, searchBarPromise, userBarPromise, newUserPromise]).then(
-				(data) => {
-					cards = data[0];
-					userCards = data[1];
-					searchBar = data[2];
-					userBar = data[3];
-					newUser = data[4];
-				}
-			);
+			await Promise.all([
+				cardPromise,
+				userCardPromise,
+				searchBarPromise,
+				userBarPromise,
+				newUserPromise,
+				inactiveUserPromise,
+			]).then((data) => {
+				cards = data[0];
+				userCards = data[1];
+				searchBar = data[2];
+				userBar = data[3];
+				newUser = data[4];
+				inactiveUser = data[5];
+			});
 
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 			cards[0]['new_users'] = newUser[0]['new_users'];
+			cards[0]['inactive_users'] = inactiveUser[0]['inactive_user'];
 
 			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
 		} catch (err) {
