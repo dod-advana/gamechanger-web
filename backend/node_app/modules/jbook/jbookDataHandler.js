@@ -1695,7 +1695,7 @@ class JBookDataHandler extends DataHandler {
 			return {
 				created: [],
 				dupes: [],
-				failed: [],
+				failed: [index + 2],
 			};
 		}
 	}
