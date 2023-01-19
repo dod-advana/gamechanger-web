@@ -310,12 +310,38 @@ const EdaSearchHandler = {
 				fundingOfficeDoDAAC: resp.data.filters.fpds_funding_office_code,
 				fundingAgencyName: resp.data.filters.fpds_funding_agency_name,
 				psc: resp.data.filters.fpds_psc,
+				psc_hierarchy: resp.data.hierarchical_filters.psc.map((e) => {
+					return { ...e, children: [] };
+				}),
 				naics: resp.data.filters.fpds_naics_code,
+				naics_hierarchy: resp.data.hierarchical_filters.naics.map((e) => {
+					return { ...e, children: [] };
+				}),
 				duns: resp.data.filters.fpds_duns,
 				modNumber: resp.data.filters.fpds_modification_number,
 			};
 
 			console.log(resp.data.hierarchical_filters);
+
+			resp.data.hierarchical_filters.naics.forEach((parent) => {
+				console.log('parent of naics: ', parent);
+			});
+
+			const resp2 = await gameChangerAPI.callSearchFunction({
+				functionName: 'getHierarchicalFilterData',
+				cloneName: cloneData.clone_name,
+				options: {
+					parentCode: resp.data.hierarchical_filters.naics.map((e) => e.code)[0],
+					picklistName: 'naics',
+				},
+			});
+
+			newFilterData.naics_hierarchy[0].children = resp2.data.map((e) => {
+				return { ...e, children: [] };
+			});
+
+			console.log('resp2: ');
+			console.log(resp2.data);
 
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
 		}
