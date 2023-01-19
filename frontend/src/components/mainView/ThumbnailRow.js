@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import { Typography } from '@material-ui/core';
 import CheveronRightIcon from '@material-ui/icons/ChevronRight';
 import CheveronLeftIcon from '@material-ui/icons/ChevronLeft';
 

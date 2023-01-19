@@ -50,6 +50,8 @@ const AccordianWrapper = styled.div`
 
 const renderSources = (state, dispatch, classes, results) => {
 	const { orgFilter, orgCount } = state.analystToolsSearchSettings;
+	const orgCountsPresent = orgCount ? Object.keys(orgCount).length > 0 : false;
+
 	const sortedOrgs = Object.keys(orgFilter).map((org) => [org, orgCount?.[org] || 0]);
 	if (results.length) {
 		sortedOrgs.sort((a, b) => {
@@ -70,7 +72,7 @@ const renderSources = (state, dispatch, classes, results) => {
 				specificSelected={'specificOrgsSelected'}
 				update={'orgUpdate'}
 				trackingName={'DocumentComparisonTool-OrgFilterToggle'}
-				showNumResultsPerOption={results.length > 0}
+				showNumResultsPerOption={orgCountsPresent && results.length > 0}
 				preventSearchOnChange
 			/>
 		</FormControl>
@@ -79,6 +81,8 @@ const renderSources = (state, dispatch, classes, results) => {
 
 const renderTypes = (state, dispatch, classes, results) => {
 	const { typeFilter, typeCount } = state.analystToolsSearchSettings;
+	const typeCountsPresent = typeCount ? Object.keys(typeCount).length > 0 : false;
+
 	const sortedTypes = Object.keys(typeFilter).map((type) => [type, typeCount?.[type] || 0]);
 	if (results.length) {
 		sortedTypes.sort((a, b) => {
@@ -99,7 +103,7 @@ const renderTypes = (state, dispatch, classes, results) => {
 				specificSelected={'specificTypesSelected'}
 				update={'typeUpdate'}
 				trackingName={'DocumentComparisonTool-TypeFilterToggle'}
-				showNumResultsPerOption={results.length > 0}
+				showNumResultsPerOption={typeCountsPresent && results.length > 0}
 				preventSearchOnChange
 			/>
 		</FormControl>

@@ -2193,7 +2193,7 @@ module.exports = {
 		projectNotes_t: 'Project Notes',
 		projectAquisitionStrategy_t: 'Acquisition Strat.',
 		projectPerformanceMetrics_t: 'Metrics',
-		otherProgramFundSummaryRemarks_t: 'Other Summary Remarks',
+		otherProgramFundSummaryRemarks_t: 'Summary Remarks',
 		'P40-13_BSA_Title_t': 'P40-13_BSA_Title',
 		'P40-15_Justification_t': 'P40-15_Justification',
 		projectTitle_s: 'Project Title',

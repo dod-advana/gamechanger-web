@@ -9,14 +9,16 @@
     background: #dde1e0;
     /* border-left: 10px solid rgb(0, 131, 143); */
     margin-bottom: 0;
-    height: 165px;
+    height: 150px;
     border-left: 0;
-    overflow: hidden;
+    overflow: auto;
     font-family: Noto Sans, Arial, Helvetica, sans-serif;
     padding: 0.5em 10px;
     font-size: 14px;
     margin-left: 0;
     quotes: "\201C""\201D""\2018""\2019";
+    position: relative;
+    z-index: 1;
   }
   
   .searchdemo-blockquote em {
