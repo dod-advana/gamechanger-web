@@ -24,7 +24,7 @@ const { AppSettingsController } = require('../controllers/appSettingsController'
 const { FeedbackController } = require('../controllers/feedbackController');
 const { AboutGcController } = require('../controllers/aboutGcController');
 const { AnalystToolsController } = require('../controllers/analystToolsController');
-const { ReviewController } = require('../controllers/reviewController');
+// const { ReviewController } = require('../controllers/reviewController');
 const { ReviewerController } = require('../controllers/reviewerController');
 const { MlApiController } = require('../controllers/mlApiController');
 
@@ -49,7 +49,7 @@ const appSettings = new AppSettingsController();
 const feedback = new FeedbackController();
 const aboutGc = new AboutGcController();
 const analyticsTools = new AnalystToolsController();
-const reviewController = new ReviewController();
+// const reviewController = new ReviewController();
 const reviewer = new ReviewerController();
 const mlApi = new MlApiController();
 
@@ -79,7 +79,7 @@ router.post('/admin/setHomepageEditorData', admin.setHomepageEditorData);
 
 router.get('/admin/cacheQlikApps', admin.cacheQlikApps);
 
-router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
+// router.post('/admin/sendReviewStatusUpdates', reviewController.sendReviewStatusUpdates);
 
 router.get('/getDocumentProperties', document.getDocumentProperties);
 router.get('/v2/data/storage/download', document.getPDF);
@@ -244,6 +244,7 @@ router.post('/sendFeedback/requestDoc', feedback.requestDocIngest);
 router.get('/aboutGC/getFAQ', aboutGc.getFAQ);
 
 router.post('/analyticsTools/compareDocument', analyticsTools.compareDocument);
+router.post('/analyticsTools/getFilterCounts', analyticsTools.getFilterCounts);
 router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 
 module.exports = router;
