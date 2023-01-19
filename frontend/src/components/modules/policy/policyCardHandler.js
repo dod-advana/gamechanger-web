@@ -780,7 +780,7 @@ const getPublicationDate = (publication_date_dt) => {
 
 const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
-	const displayTitle = getDisplayTitle(item, state.currentViewName);
+	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
 	const docListView = state.listView && !graphView;
@@ -852,11 +852,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 						<div className={'selected-favorite'}>
 							<div style={{ display: 'flex' }}>
 								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(
-									item.filename,
-									`${item.doc_type} ${item.doc_num}: ${item.title}`,
-									item.id
-								)}
+								{checkboxComponent(item.filename, displayTitle, item.id)}
 								{favoriteComponent()}
 							</div>
 						</div>
@@ -1062,10 +1058,7 @@ const getCardExtrasHandler = (props) => {
 	);
 };
 
-const getDisplayTitle = (item, currentViewName) => {
-	if (currentViewName === 'Card') {
-		return item.display_title_s ? `${item.doc_type} ${item.doc_num}: ${item.title}` : item.title;
-	}
+const getDisplayTitle = (item) => {
 	return item.display_title_s || item.title;
 };
 
@@ -1375,8 +1368,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, docume
 
 const cardHandler = {
 	document: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -1614,8 +1607,8 @@ const cardHandler = {
 	},
 
 	publication: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -2183,13 +2176,12 @@ const cardHandler = {
 };
 
 const PolicyCardHandler = (props) => {
-	const { state, setFilename, setDisplayTitle, item, cardType } = props;
-	const { currentViewName } = state;
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
 	useEffect(() => {
 		setFilename(cardHandler[cardType].getFilename(item));
-		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item, currentViewName));
-	}, [cardType, item, setDisplayTitle, setFilename, currentViewName]);
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
 };
