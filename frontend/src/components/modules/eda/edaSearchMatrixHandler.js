@@ -12,6 +12,7 @@ import GCButton from '../../common/GCButton';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
 import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
+import EdaHierarchicalFilter from './edaHierarchicalFilter';
 
 const styles = {
 	titleText: {
@@ -1138,7 +1139,7 @@ const EDASearchMatrixHandler = (props) => {
 						headerTextWeight={'normal'}
 						id={'naicsAccordion'}
 					>
-						<div style={styles.width100}>
+						{/* <div style={styles.width100}>
 							<MultiSelectAutocomplete
 								value={state.edaSearchSettings.naicsCode}
 								setValue={(value) => {
@@ -1148,6 +1149,9 @@ const EDASearchMatrixHandler = (props) => {
 								placeholder="Search NAICS"
 								label="NAICS"
 							/>
+						</div> */}
+						<div style={styles.width100}>
+							<EdaHierarchicalFilter options={state.edaFilterData.naics_hierarchy} state />
 						</div>
 					</GCAccordion>
 
