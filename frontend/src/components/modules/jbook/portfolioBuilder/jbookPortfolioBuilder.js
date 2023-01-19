@@ -163,7 +163,7 @@ const PortfolioBuilder = (props) => {
 		if (tags.length > 0) {
 			portfolioTags = tags.map((tag, index) => {
 				return (
-					<Pill>
+					<Pill key={tag}>
 						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
 					</Pill>
 				);
@@ -194,11 +194,6 @@ const PortfolioBuilder = (props) => {
 				userText = '(All JBOOK users)';
 			} else if (portfolio.user_ids.length === 0) {
 				userText = '(none)';
-			}
-
-			function openBulkUpload() {
-				setShowUploadModal(true);
-				setModalData(portfolio);
 			}
 
 			return (
@@ -279,7 +274,13 @@ const PortfolioBuilder = (props) => {
 						<>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
-								<GCButton onClick={openBulkUpload} style={{ minWidth: 'unset' }}>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
 									Bulk Upload
 								</GCButton>
 							</div>
@@ -300,14 +301,41 @@ const PortfolioBuilder = (props) => {
 		[setSelectedFile]
 	);
 
-	function closeUploadModal() {
+	const showModalCallback = useCallback(() => {
+		setShowModal(true);
+	}, []);
+
+	const closeModalCallback = useCallback(() => {
+		setShowModal(false);
+		setInit(false);
+	}, []);
+
+	const closePublicCallback = useCallback(() => {
+		setShowPublicModal(false);
+	}, []);
+
+	const closeDeleteCallback = useCallback(() => {
+		setDeleteModal(false);
+	}, []);
+
+	const deleteCallback = useCallback(async () => {
+		await gameChangerAPI.callDataFunction({
+			functionName: 'deletePortfolio',
+			cloneName: 'jbook',
+			options: { id: deleteID },
+		});
+		setInit(false);
+		setDeleteModal(false);
+	}, [deleteID]);
+
+	const closeUploadModal = useCallback(() => {
 		setShowUploadModal(false);
 		setSelectedFile(null);
 		setResults(null);
 		setLoading(false);
-	}
+	}, []);
 
-	async function uploadData() {
+	const uploadCallback = useCallback(async () => {
 		const form = new FormData();
 		form.append('file', selectedFile, selectedFile.name);
 		form.append('functionName', 'bulkUpload');
@@ -319,7 +347,7 @@ const PortfolioBuilder = (props) => {
 		});
 		setResults(uploadResponse.data);
 		setLoading(false);
-	}
+	}, [selectedFile, modalData]);
 
 	return (
 		<>
@@ -359,19 +387,12 @@ const PortfolioBuilder = (props) => {
 						{user && (
 							<div style={{ display: 'flex', flexDirection: 'column' }}>
 								<GCButton
-									onClick={() => {
-										setShowModal(true);
-									}}
+									onClick={showModalCallback}
 									style={{ minWidth: 'unset', marginBottom: '10px' }}
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton
-									onClick={() => {
-										setShowPublicModal(true);
-									}}
-									style={{ minWidth: 'unset' }}
-								>
+								<GCButton onClick={showModalCallback} style={{ minWidth: 'unset' }}>
 									Public Portfolio Request
 								</GCButton>
 							</div>
@@ -395,10 +416,7 @@ const PortfolioBuilder = (props) => {
 				<>
 					<JbookPortfolioModal
 						showModal={showModal}
-						setShowModal={() => {
-							setShowModal(false);
-							setInit(false);
-						}}
+						setShowModal={closeModalCallback}
 						modalData={modalData}
 						userList={userList}
 						userMap={userMap}
@@ -406,9 +424,7 @@ const PortfolioBuilder = (props) => {
 					/>
 					<JbookPublicRequestModal
 						showModal={showPublicModal}
-						setShowModal={() => {
-							setShowPublicModal(false);
-						}}
+						setShowModal={closePublicCallback}
 						userMap={userMap}
 						user={user}
 						privatePortfolios={privatePortfolios.map((item) => item.name)}
@@ -441,9 +457,7 @@ const PortfolioBuilder = (props) => {
 									backgroundColor: styles.backgroundGreyLight,
 									borderRadius: 0,
 								}}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 							>
 								<CloseIcon style={{ fontSize: 30 }} />
 							</IconButton>
@@ -456,27 +470,13 @@ const PortfolioBuilder = (props) => {
 						<DialogActions>
 							<GCButton
 								id={'editReviewerClose'}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}
 							>
 								Cancel
 							</GCButton>
-							<GCButton
-								id={'editReviewerSubmit'}
-								onClick={async () => {
-									await gameChangerAPI.callDataFunction({
-										functionName: 'deletePortfolio',
-										cloneName: 'jbook',
-										options: { id: deleteID },
-									});
-									setInit(false);
-									setDeleteModal(false);
-								}}
-								style={{ margin: '10px' }}
-							>
+							<GCButton id={'editReviewerSubmit'} onClick={deleteCallback} style={{ margin: '10px' }}>
 								Delete
 							</GCButton>
 						</DialogActions>
@@ -566,7 +566,7 @@ const PortfolioBuilder = (props) => {
 							</GCButton>
 							<GCButton
 								id={'uploadSubmit'}
-								onClick={uploadData}
+								onClick={uploadCallback}
 								disabled={selectedFile === null || results !== null}
 								style={{ margin: '10px' }}
 							>
