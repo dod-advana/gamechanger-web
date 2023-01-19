@@ -389,7 +389,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
-	const loading = resultsLoading || filterCountsLoading || updateFilters;
+	const [loading, setLoading] = useState(false);
 
 	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
@@ -429,6 +429,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			setState(dispatch, { analystToolsSearchSettings: newSearchSettings });
 		}
 	}, [state, dispatch]);
+
+	useEffect(() => {
+		setLoading(resultsLoading || filterCountsLoading || updateFilters);
+	}, [resultsLoading, filterCountsLoading, updateFilters]);
 
 	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
 	useEffect(() => {
