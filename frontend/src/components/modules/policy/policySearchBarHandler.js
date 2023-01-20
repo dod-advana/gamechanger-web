@@ -30,7 +30,7 @@ const PolicySearchBarHandler = {
 		try {
 			const index = state?.elasticsearch_index || '';
 			if (!index) {
-				console.warn('Missing elasticsearch index')
+				console.warn('Missing elasticsearch index');
 			}
 
 			const { data } = await gameChangerAPI.getTextSuggestion({
