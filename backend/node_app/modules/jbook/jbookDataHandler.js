@@ -21,6 +21,7 @@ const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
 const XLSX = require('xlsx');
 const fs = require('fs');
+const path = require('path');
 
 const { performance } = require('perf_hooks');
 
@@ -1702,7 +1703,10 @@ class JBookDataHandler extends DataHandler {
 
 	async bulkUpload(req, userId) {
 		const { portfolio, file } = req.body;
-		const reviewArray = await this.parseExcel(file.path, portfolio, userId);
+		let reviewArray;
+		if (path.getFileExtension(file.path) === 'xlsx') {
+			reviewArray = await this.parseExcel(file.path, portfolio, userId);
+		}
 
 		const startTime = performance.now();
 		let dupes = [];
