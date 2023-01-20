@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import FormData from 'form-data';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
-
+import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import DragAndDrop from '../../../common/DragAndDrop';
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
-
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
 
@@ -67,7 +67,13 @@ const PortfolioBuilder = (props) => {
 
 	const [showModal, setShowModal] = useState(false);
 	const [showPublicModal, setShowPublicModal] = useState(false);
+	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
+
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [results, setResults] = useState(null);
+
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -155,7 +161,7 @@ const PortfolioBuilder = (props) => {
 		if (tags.length > 0) {
 			portfolioTags = tags.map((tag, index) => {
 				return (
-					<Pill>
+					<Pill key={tag}>
 						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
 					</Pill>
 				);
@@ -262,12 +268,90 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
+					{portfolio.name === 'AI Inventory' && (
+						<>
+							<hr />
+							<div style={{ marginTop: '20px' }}>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
+								</GCButton>
+							</div>
+						</>
+					)}
 				</div>
 			);
 		});
 
 		return portfolios;
 	};
+
+	const onDrop = useCallback(
+		(acceptedFiles) => {
+			if (acceptedFiles.length === 1) {
+				const [file] = acceptedFiles;
+				setSelectedFile(file);
+			}
+		},
+		[setSelectedFile]
+	);
+
+	const showModalCallback = useCallback(() => {
+		setShowModal(true);
+	}, []);
+
+	const closeModalCallback = useCallback(() => {
+		setShowModal(false);
+		setInit(false);
+	}, []);
+
+	const showPublicCallback = useCallback(() => {
+		setShowPublicModal(true);
+	}, []);
+
+	const closePublicCallback = useCallback(() => {
+		setShowPublicModal(false);
+	}, []);
+
+	const closeDeleteCallback = useCallback(() => {
+		setDeleteModal(false);
+	}, []);
+
+	const deleteCallback = useCallback(async () => {
+		await gameChangerAPI.callDataFunction({
+			functionName: 'deletePortfolio',
+			cloneName: 'jbook',
+			options: { id: deleteID },
+		});
+		setInit(false);
+		setDeleteModal(false);
+	}, [deleteID]);
+
+	const closeUploadModal = useCallback(() => {
+		setShowUploadModal(false);
+		setSelectedFile(null);
+		setResults(null);
+		setLoading(false);
+	}, []);
+
+	const uploadCallback = useCallback(async () => {
+		const form = new FormData();
+		form.append('file', selectedFile, selectedFile.name);
+		form.append('functionName', 'bulkUpload');
+		form.append('cloneName', 'jbook');
+		form.append('options', JSON.stringify({ portfolio: modalData }));
+		setLoading(true);
+		const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
+			headers: form.getHeaders ? form.getHeaders() : { 'Content-Type': 'multipart/form-data' },
+		});
+		setResults(uploadResponse.data);
+		setLoading(false);
+	}, [selectedFile, modalData]);
 
 	return (
 		<>
@@ -307,19 +391,12 @@ const PortfolioBuilder = (props) => {
 						{user && (
 							<div style={{ display: 'flex', flexDirection: 'column' }}>
 								<GCButton
-									onClick={() => {
-										setShowModal(true);
-									}}
+									onClick={showModalCallback}
 									style={{ minWidth: 'unset', marginBottom: '10px' }}
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton
-									onClick={() => {
-										setShowPublicModal(true);
-									}}
-									style={{ minWidth: 'unset' }}
-								>
+								<GCButton onClick={showPublicCallback} style={{ minWidth: 'unset' }}>
 									Public Portfolio Request
 								</GCButton>
 							</div>
@@ -343,10 +420,7 @@ const PortfolioBuilder = (props) => {
 				<>
 					<JbookPortfolioModal
 						showModal={showModal}
-						setShowModal={() => {
-							setShowModal(false);
-							setInit(false);
-						}}
+						setShowModal={closeModalCallback}
 						modalData={modalData}
 						userList={userList}
 						userMap={userMap}
@@ -354,9 +428,7 @@ const PortfolioBuilder = (props) => {
 					/>
 					<JbookPublicRequestModal
 						showModal={showPublicModal}
-						setShowModal={() => {
-							setShowPublicModal(false);
-						}}
+						setShowModal={closePublicCallback}
 						userMap={userMap}
 						user={user}
 						privatePortfolios={privatePortfolios.map((item) => item.name)}
@@ -389,9 +461,7 @@ const PortfolioBuilder = (props) => {
 									backgroundColor: styles.backgroundGreyLight,
 									borderRadius: 0,
 								}}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 							>
 								<CloseIcon style={{ fontSize: 30 }} />
 							</IconButton>
@@ -404,28 +474,107 @@ const PortfolioBuilder = (props) => {
 						<DialogActions>
 							<GCButton
 								id={'editReviewerClose'}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}
 							>
 								Cancel
 							</GCButton>
-							<GCButton
-								id={'editReviewerSubmit'}
-								onClick={async () => {
-									await gameChangerAPI.callDataFunction({
-										functionName: 'deletePortfolio',
-										cloneName: 'jbook',
-										options: { id: deleteID },
-									});
-									setInit(false);
-									setDeleteModal(false);
+							<GCButton id={'editReviewerSubmit'} onClick={deleteCallback} style={{ margin: '10px' }}>
+								Delete
+							</GCButton>
+						</DialogActions>
+					</Dialog>
+					<Dialog
+						open={showUploadModal}
+						scroll={'paper'}
+						maxWidth="sm"
+						disableEscapeKeyDown
+						disableBackdropClick
+						classes={{
+							paperWidthSm: classes.dialogSm,
+						}}
+					>
+						<DialogTitle>
+							<div style={{ display: 'flex', width: '100%' }}>
+								<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+									Bulk upload
+								</Typography>
+							</div>
+							<IconButton
+								aria-label="close"
+								style={{
+									position: 'absolute',
+									right: '0px',
+									top: '0px',
+									height: 60,
+									width: 60,
+									color: 'black',
+									backgroundColor: styles.backgroundGreyLight,
+									borderRadius: 0,
 								}}
+								onClick={closeUploadModal}
+							>
+								<CloseIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</DialogTitle>
+						<DialogContent>
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Upload Excel Document
+							</Typography>
+
+							{results === null && (
+								<DragAndDrop
+									text="Drag and drop a file here, or click to select a file (.xlsx files only)"
+									acceptedFileTypes={[
+										'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+										'application/vnd.ms-excel',
+									]}
+									handleFileDrop={onDrop}
+								/>
+							)}
+
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
+								{loading && ' Loading...'}
+								{loading && <CircularProgress size={'20px'} />}
+							</Typography>
+
+							{results !== null && (
+								<>
+									<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Results</Typography>
+									<ul>
+										<li>Rows Written: {results.written}</li>
+										<li>
+											Row numbers with multiple reviews found:{' '}
+											{results.dupes.length === 0 ? 'None' : JSON.stringify(results.dupes)}
+										</li>
+										<li>
+											Failed Row Numbers:{' '}
+											{results.failedRows.length === 0
+												? 'None'
+												: JSON.stringify(results.failedRows)}
+										</li>
+									</ul>
+								</>
+							)}
+						</DialogContent>
+						<DialogActions>
+							<GCButton
+								id={'editReviewerClose'}
+								onClick={closeUploadModal}
+								style={{ margin: '10px' }}
+								buttonColor={'#8091A5'}
+							>
+								{results === null ? 'Cancel' : 'Close'}
+							</GCButton>
+							<GCButton
+								id={'uploadSubmit'}
+								onClick={uploadCallback}
+								disabled={selectedFile === null || results !== null}
 								style={{ margin: '10px' }}
 							>
-								Delete
+								Upload
 							</GCButton>
 						</DialogActions>
 					</Dialog>
