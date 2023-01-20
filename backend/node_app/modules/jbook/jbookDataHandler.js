@@ -1704,7 +1704,7 @@ class JBookDataHandler extends DataHandler {
 	async bulkUpload(req, userId) {
 		const { portfolio, file } = req.body;
 		let reviewArray;
-		if (path.getFileExtension(file.path) === 'xlsx') {
+		if (path.extname(file.path) === '.xlsx' || path.extname(file.path) === '.xls') {
 			reviewArray = await this.parseExcel(file.path, portfolio, userId);
 		}
 
