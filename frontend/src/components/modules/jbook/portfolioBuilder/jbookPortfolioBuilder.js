@@ -294,9 +294,11 @@ const PortfolioBuilder = (props) => {
 	};
 
 	const onDrop = useCallback(
-		async (acceptedFiles) => {
-			const [file] = acceptedFiles;
-			await setSelectedFile(file);
+		(acceptedFiles) => {
+			if (acceptedFiles.length === 1) {
+				const [file] = acceptedFiles;
+				setSelectedFile(file);
+			}
 		},
 		[setSelectedFile]
 	);
