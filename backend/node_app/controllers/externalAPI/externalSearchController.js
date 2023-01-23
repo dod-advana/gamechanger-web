@@ -96,12 +96,24 @@ class ExternalSearchController {
 		}
 	}
 
-	/*
-	 * Endpoint designed for enterprise search to get all doc metadata.
-	 * searchAfterID may be omitted, implying that we are starting at document 0.
-	 * Elasticsearch treats omission of from and search_after as from: 0.
-	 * We know we've hit end of results when hits array is less than 10000,
+	/**
+	 * Gets metadata for all docs according to fields specified when building
+	 * this endpoint for Enterprise search.
+	 * We know we've hit end of results when hits.length is less than 10000,
 	 * though we've also surfaced total hits just in case.
+	 * @param {string} cloneName must line up with API key permissions
+	 * @param {string | undefined} searchAfterID single value from 'sort' array in
+	 *   last elem of 'hits' from prev search | undefined for first page of results
+	 * @returns {esHits}
+	 *
+	 * @typedef {Object} esHits
+	 * @property {Object} total holds total number of results
+	 * @property {Array<Hit>} hits holds results
+	 *
+	 * @typedef {Object} Hit
+	 * @property {Object} fields holds key-value pairs
+	 * @property {Array<string>} sort holds document ID; pass last ID to search_after
+	 *   of next call to getGCDocsMetadata to paginate
 	 */
 	async getGCDocsMetadata(req, res) {
 		let userId = 'API';
