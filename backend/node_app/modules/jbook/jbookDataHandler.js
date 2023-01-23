@@ -1703,8 +1703,8 @@ class JBookDataHandler extends DataHandler {
 
 	async bulkUpload(req, userId) {
 		const { portfolio, file } = req.body;
-		let reviewArray;
-		if (path.extname(file.path) === '.xlsx' || path.extname(file.path) === '.xls') {
+		let reviewArray = [];
+		if (path.extname(file.originalname) === '.xlsx' || path.extname(file.originalname) === '.xls') {
 			reviewArray = await this.parseExcel(file.path, portfolio, userId);
 		}
 
