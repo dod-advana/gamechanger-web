@@ -1,4 +1,5 @@
 const { ModularGameChangerController } = require('../modularGameChangerController');
+const SearchUtility = require('../../utils/searchUtility');
 const { ORGFILTER, getOrgOptions, getOrgToDocQuery } = require('../../utils/routeUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 
@@ -91,6 +92,25 @@ class ExternalSearchController {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'DP7GSEH', userId);
+			return res.status(500).send();
+		}
+	}
+
+	async getAllDocsMetadata(req, res) {
+		let userId = 'API';
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+			const searchUtility = new SearchUtility();
+			const esResults = await searchUtility.getDocumentsMetadata('gamechanger', [], 0, userId);
+
+			// let searchAfter = 0;
+			// if (req.query && req.query.searchAfter) {
+			// 	searchAfter = req.query.searchAfter;
+			// }
+			return res.status(200).send(esResults);
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'METAERR', userId);
 			return res.status(500).send();
 		}
 	}

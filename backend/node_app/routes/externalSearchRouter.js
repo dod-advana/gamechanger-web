@@ -82,4 +82,8 @@ router.get('/search/keywordSearch', async (req, res) => {
 	await controller.externalSearch(req, res);
 });
 
+router.get('/search/getAllDocsMetadata', async (req, res) => {
+	await controller.getAllDocsMetadata(req, res);
+});
+
 module.exports = router;
