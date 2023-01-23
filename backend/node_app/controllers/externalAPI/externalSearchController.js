@@ -1,5 +1,5 @@
 const { ModularGameChangerController } = require('../modularGameChangerController');
-const SearchUtility = require('../../utils/searchUtility');
+const { DataLibrary } = require('../../lib/dataLibrary');
 const { ORGFILTER, getOrgOptions, getOrgToDocQuery } = require('../../utils/routeUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 
@@ -96,17 +96,61 @@ class ExternalSearchController {
 		}
 	}
 
-	async getAllDocsMetadata(req, res) {
+	/*
+	 * Endpoint designed for enterprise search to get all doc metadata.
+	 * searchAfterID may be omitted, implying that we are starting at document 0.
+	 * Elasticsearch treats omission of from and search_after as from: 0.
+	 * We know we've hit end of results when hits array is less than 10000,
+	 * though we've also surfaced total hits just in case.
+	 */
+	async getGCDocsMetadata(req, res) {
 		let userId = 'API';
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-			const searchUtility = new SearchUtility();
-			const esResults = await searchUtility.getDocumentsMetadata('gamechanger', [], 0, userId);
 
-			// let searchAfter = 0;
-			// if (req.query && req.query.searchAfter) {
-			// 	searchAfter = req.query.searchAfter;
-			// }
+			const esQuery = {
+				_source: false,
+				stored_fields: [
+					'filename',
+					'title',
+					'page_count',
+					'doc_type',
+					'doc_num',
+					'ref_list',
+					'keyw_5',
+					'type',
+					'display_title_s',
+					'display_org_s',
+					'display_source_s',
+					'is_revoked_b',
+					'publication_date_dt',
+					'download_url_s',
+					'source_fqdn_s',
+					'source_title_s',
+					'top_entities_t',
+				],
+				track_total_hits: true,
+				size: 10000,
+				query: {
+					match_all: {},
+				},
+				sort: [
+					{
+						_id: 'asc',
+					},
+				],
+			};
+
+			if (req.query?.searchAfterID) {
+				esQuery.search_after = [req.query.searchAfterID];
+			}
+
+			const dataLibrary = new DataLibrary();
+			const esClientName = 'gamechanger';
+			const esIndex = 'gamechanger';
+			let esResults = await dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			esResults = esResults.body.hits;
+
 			return res.status(200).send(esResults);
 		} catch (err) {
 			const { message } = err;

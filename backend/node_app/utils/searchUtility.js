@@ -59,7 +59,6 @@ class SearchUtility {
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.autocorrect = this.autocorrect.bind(this);
 		this.getJBookPGQueryAndSearchTerms = this.getJBookPGQueryAndSearchTerms.bind(this);
-		this.getDocumentsMetadata = this.getDocumentsMetadata.bind(this);
 	}
 
 	createCacheKeyFromOptions({ searchText, cloneName = 'gamechangerDefault', index, cloneSpecificObject = {} }) {
@@ -2774,60 +2773,6 @@ class SearchUtility {
 		}
 
 		return query;
-	}
-
-	/*
-	 * Function for getting one "page" of document metadata from ES in the course of getting metadata for all documents.
-	 * This was designed as the implementation for enterprise search's API endpoint.
-	 */
-	async getDocumentsMetadata(cloneData, permissions, searchAfter, userId) {
-		try {
-			const searchText = '';
-			// THESE MIGHT JUST HAVE TO BE BLANK (arrays?):
-			const [parsedQuery, searchTerms] = this.getEsSearchTerms({ searchText, questionFlag: false });
-			const esQuery = this.getElasticsearchQuery(
-				{
-					searchText,
-					parsedQuery,
-					searchTerms,
-					storedFields: [
-						'filename',
-						'title',
-						'page_count',
-						'doc_type',
-						'doc_num',
-						'ref_list',
-						'keyw_5',
-						'type',
-						'display_title_s',
-						'display_org_s',
-						'display_source_s',
-						'is_revoked_b',
-						'publication_date_dt',
-						'download_url_s',
-						'source_fqdn_s',
-						'source_title_s',
-						'top_entities_t',
-					],
-				},
-				userId
-			);
-			// formerly cloneData.clone_name
-			let clientObj = this.getESClient('gamechanger', []);
-
-			let esResults = await this.dataLibrary.queryElasticSearch(
-				clientObj.esClientName,
-				clientObj.esIndex,
-				esQuery,
-				userId
-			);
-
-			return esResults;
-		} catch (err) {
-			const { message } = err;
-			this.logger.error(message, 'CV4K1FF', userId);
-			return {};
-		}
 	}
 }
 
