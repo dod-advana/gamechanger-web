@@ -54,7 +54,6 @@ class SearchUtility {
 		this.findAliases = this.findAliases.bind(this);
 		this.getOrgQuery = this.getOrgQuery.bind(this);
 		this.getTypeQuery = this.getTypeQuery.bind(this);
-		this.getTitle = this.getTitle.bind(this);
 		this.getElasticsearchDocDataFromId = this.getElasticsearchDocDataFromId.bind(this);
 		this.getSearchCount = this.getSearchCount.bind(this);
 		this.autocorrect = this.autocorrect.bind(this);
@@ -741,6 +740,16 @@ class SearchUtility {
 								},
 							},
 							{
+								fuzzy: {
+									'display_title_s.search': {
+										value: `${plainQuery.trim()}`,
+										fuzziness: 'AUTO', // https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#fuzziness
+										transpositions: false, // do not allow edits to include transpositions of adjacent characters (e.g., ba -> ab)
+										boost: 15,
+									},
+								},
+							},
+							{
 								wildcard: {
 									'filename.search': {
 										value: `*${plainQuery}*`,
@@ -848,32 +857,6 @@ class SearchUtility {
 		}
 
 		return verbatim;
-	}
-
-	async getTitle(parsedQuery, clientObj, userId) {
-		// get contents of single document searching by doc display title
-		try {
-			let results = {};
-			let { esClientName, esIndex } = clientObj;
-			let titleQuery = {
-				size: 1,
-				query: {
-					bool: {
-						must: [
-							{
-								match_phrase: {
-									display_title_s: `${parsedQuery}`,
-								},
-							},
-						],
-					},
-				},
-			};
-			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, titleQuery, userId);
-			return results;
-		} catch (err) {
-			this.logger.error(err, 'TJKBNOF', userId);
-		}
 	}
 
 	getESQueryUsingOneID(id, user, limit = 100, maxLength = 200) {
@@ -1747,7 +1730,6 @@ class SearchUtility {
 	}
 
 	documentSearchHandleValidResults({
-		titleResults,
 		results,
 		getIdList,
 		searchTerms,
@@ -1758,9 +1740,6 @@ class SearchUtility {
 		esIndex,
 		esQuery,
 	}) {
-		if (this.checkValidResults(titleResults)) {
-			results = this.reorderFirst(results, titleResults);
-		}
 		if (getIdList) {
 			return this.cleanUpIdEsResults(results, searchTerms, userId, expansionDict);
 		}
@@ -1837,14 +1816,12 @@ class SearchUtility {
 					esQuery = this.getElasticsearchQuery(body, userId);
 				}
 			}
-			const titleResults = await this.getTitle(body.searchText, clientObj, userId);
 
 			let results;
 
 			results = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, JSON.stringify(esQuery), userId);
 			if (this.checkValidResults(results)) {
 				return this.documentSearchHandleValidResults({
-					titleResults,
 					results,
 					getIdList,
 					searchTerms,
@@ -1879,30 +1856,6 @@ class SearchUtility {
 			results.body.hits.total.value &&
 			results.body.hits.total.value > 0
 		);
-	}
-
-	reorderFirst(results, titleResults) {
-		// reorders a matching title result to the top of the results
-		let reorderedHits = [];
-		let firstResult = titleResults.body.hits.hits[0];
-		let firstTitle = firstResult._source.display_title_s;
-		let inResults = false;
-		try {
-			results.body.hits.hits.forEach((r) => {
-				if (r.fields.display_title_s[0] !== firstTitle) {
-					reorderedHits.push(r);
-				} else {
-					inResults = true;
-					reorderedHits.unshift(r);
-				}
-			});
-			if (inResults === true) {
-				results.body.hits.hits = reorderedHits;
-			}
-			return results;
-		} catch (e) {
-			this.logger.error(e, 'JKJDFPOF', '');
-		}
 	}
 
 	getEntityQuery(searchText, offset = 0, limit = 6) {
