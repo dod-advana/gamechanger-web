@@ -531,6 +531,10 @@ const getMetadataTableData = (
 ) => {
 	return [
 		{
+			Key: projectData.budgetLineItem ? 'Budget Line Item' : 'Program Element',
+			Value: projectData.budgetLineItem ? projectData.budgetLineItem : projectData.programElement,
+		},
+		{
 			Key: 'Budget Year 1 Requested',
 			Value: getTableFormattedCost(projectData.by1Request),
 		},
