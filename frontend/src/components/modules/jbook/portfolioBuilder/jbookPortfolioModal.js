@@ -254,6 +254,13 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		}
 	}, [modalData]);
 
+	useEffect(() => {
+		//Automatically adds the user as the admin when they attempt to create a new portfolio
+		if (showModal) {
+			handleAddAdmin(user.id);
+		}
+	}, [showModal, user]);
+
 	/**
 	 *
 	 * @param {*} ReviewerToEdit
