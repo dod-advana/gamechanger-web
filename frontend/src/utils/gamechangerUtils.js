@@ -465,6 +465,7 @@ export const orgColorMap = {
 	'Intelligence Community': '#ff4000', // orange
 	'United States Code': '#490E67', // purple
 	'US Army': '#4b5320', // army green
+	'Dept. of the Army': '#4b5320', // army green
 	'US Navy': '#282053', // navy blue
 	'Dept. of the Air Force': '#00308f', // sky blue
 	'US Marine Corps': '#990000', // marine red
@@ -479,6 +480,7 @@ export const orgColorMap = {
 	NATO: '#003bd1', // blue
 	'Financial Mgmt. Reg': '#636363',
 	Legislation: '#ffbf00',
+	SSTRATCON: '#00308f', // air force blue
 };
 
 const linkColorMap = {
