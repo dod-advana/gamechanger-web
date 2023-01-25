@@ -8,8 +8,13 @@ const LOGGER = require('@dod-advana/advana-logger');
  */
 class ExternalSearchController {
 	constructor(opts = {}) {
-		const { logger = LOGGER, search = new ModularGameChangerController(opts) } = opts;
+		const {
+			logger = LOGGER,
+			search = new ModularGameChangerController(opts),
+			dataLibrary = new DataLibrary(opts),
+		} = opts;
 		this.searchController = search;
+		this.dataLibrary = dataLibrary;
 		this.logger = logger;
 	}
 
@@ -157,10 +162,9 @@ class ExternalSearchController {
 				esQuery.search_after = [req.query.searchAfterID];
 			}
 
-			const dataLibrary = new DataLibrary();
 			const esClientName = 'gamechanger';
 			const esIndex = 'gamechanger';
-			let esResults = await dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			let esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
 			esResults = esResults.body.hits;
 
 			return res.status(200).send(esResults);
