@@ -59,7 +59,7 @@ const GameChangerThumbnailRow = (props) => {
 					style={
 						scrollable
 							? { marginTop: '10px', marginRight: '3px', marginLeft: '3px' }
-							: { marginLeft: '40px', marginTop: '10px', marginBottom: '10px' }
+							: { marginLeft: '27px', marginTop: '10px', marginBottom: '10px' }
 					}
 				>
 					{children}
