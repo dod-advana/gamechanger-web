@@ -1216,6 +1216,7 @@ class SearchUtility {
 					},
 				},
 			];
+
 			let entitiesQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.entityIndex,
@@ -1228,12 +1229,13 @@ class SearchUtility {
 					query: {
 						prefix: {
 							name: {
-								value: `${plainQuery}`,
+								value: `${plainQuery.trim()}`,
 							},
 						},
 					},
 				},
 			];
+
 			if (queryTypes.includes('title')) {
 				query = query.concat(titleQuery);
 			}
