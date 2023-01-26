@@ -1198,7 +1198,7 @@ const EDASearchMatrixHandler = (props) => {
 									}
 									// we are selecting an option
 									else {
-										setEDASearchSetting('psc', currPsc.concat([currPsc]), state, dispatch);
+										setEDASearchSetting('psc', currPsc.concat([psc]), state, dispatch);
 									}
 								}}
 								optionsSelected={state.edaSearchSettings.psc}
