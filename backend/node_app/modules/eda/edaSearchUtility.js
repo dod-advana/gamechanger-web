@@ -862,7 +862,7 @@ class EDASearchUtility {
 						query_string: {
 							default_field: 'fpds_ng_n.psc_eda_ext',
 							default_operator: 'or',
-							query: psc,
+							query: `${psc}*`,
 						},
 					});
 				}

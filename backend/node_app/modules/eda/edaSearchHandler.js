@@ -509,7 +509,6 @@ class EdaSearchHandler extends SearchHandler {
 
 	async getHierarchicalFilterData(req, userId) {
 		try {
-			console.log('getHierarchicalFilterData');
 			const { body } = req;
 			const { picklistName = '', parentCode = '' } = body;
 			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.filterPicklistIndex;
@@ -554,9 +553,6 @@ class EdaSearchHandler extends SearchHandler {
 
 			let cleanedResults = [];
 
-			console.log('got results');
-			console.log(filter_options_results.body.hits);
-
 			filter_options_results.body.hits.hits.forEach((hit) => {
 				if (picklistName === 'naics') {
 					cleanedResults.push({
@@ -564,7 +560,7 @@ class EdaSearchHandler extends SearchHandler {
 						name: hit._source.title_s,
 					});
 				} else if (picklistName === 'psc') {
-					cleanedResults.hierarchical_filters.psc.push({
+					cleanedResults.push({
 						code: hit._source.code_s,
 						name: hit._source.productName_s,
 					});
