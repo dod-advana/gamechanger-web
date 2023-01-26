@@ -910,7 +910,7 @@ class EDASearchUtility {
 						query_string: {
 							default_field: 'fpds_ng_n.naics_code_eda_ext',
 							default_operator: 'or',
-							query: naicsCode,
+							query: `${naicsCode}*`,
 						},
 					});
 				}

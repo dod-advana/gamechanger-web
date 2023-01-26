@@ -13,6 +13,9 @@ import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
 import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
 import EdaHierarchicalFilter from './edaHierarchicalFilter';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+
+const gameChangerAPI = new GameChangerAPI();
 
 const styles = {
 	titleText: {
@@ -943,6 +946,56 @@ export const getAdvancedOptions = (props) => {
 	);
 };
 
+// helper function for getChildrenHierarchicalFilter
+// iterates breadth first through tree starting with root looking for parentOfChildren
+// once it finds parentOfChildren, updates parentOfChildren's children to newChildren
+const insertChildrenBF = (root, parentOfChildren, newChildren) => {
+	let nodesToVisit = [root];
+	while (nodesToVisit.length > 0) {
+		// get current node in breadth first traversal
+		const currNode = nodesToVisit[0];
+
+		if (currNode.code === parentOfChildren.code) {
+			currNode.children = newChildren;
+			return root;
+		}
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the end of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = nodesToVisit.concat(currNode.children);
+		}
+	}
+	return root;
+};
+
+const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) => {
+	const newFilterData = { ...state.edaFilterData };
+	const resp = await gameChangerAPI.callSearchFunction({
+		functionName: 'getHierarchicalFilterData',
+		cloneName: state.cloneData.clone_name,
+		options: {
+			parentCode: node.code,
+			picklistName: filterName,
+		},
+	});
+
+	const newChildren = resp.data.map((e) => {
+		return { ...e, children: [] };
+	});
+
+	newFilterData[filterName + '_hierarchy'] = newFilterData[filterName + '_hierarchy'].map((root) =>
+		insertChildrenBF(root, node, newChildren)
+	);
+
+	console.log('resp: ');
+	console.log(newChildren);
+
+	setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
+};
+
 const EDASearchMatrixHandler = (props) => {
 	const { state, dispatch } = props;
 
@@ -1151,7 +1204,34 @@ const EDASearchMatrixHandler = (props) => {
 							/>
 						</div> */}
 						<div style={styles.width100}>
-							<EdaHierarchicalFilter options={state.edaFilterData.naics_hierarchy} state />
+							<EdaHierarchicalFilter
+								options={state.edaFilterData.naics_hierarchy}
+								fetchChildren={(node) => getChildrenHierarchicalFilter(node, 'naics', state, dispatch)}
+								onOptionClick={(naicsCode) => {
+									const currNaicsCodes = state.edaSearchSettings.naicsCode;
+									console.log(currNaicsCodes);
+									console.log('clicked on: ', naicsCode);
+									// we are deselecting an option
+									if (currNaicsCodes.indexOf(naicsCode) !== -1) {
+										setEDASearchSetting(
+											'naicsCode',
+											currNaicsCodes.filter((code) => code !== naicsCode),
+											state,
+											dispatch
+										);
+									}
+									// we are selecting an option
+									else {
+										setEDASearchSetting(
+											'naicsCode',
+											currNaicsCodes.concat([naicsCode]),
+											state,
+											dispatch
+										);
+									}
+								}}
+								optionsSelected={state.edaSearchSettings.naicsCode}
+							/>
 						</div>
 					</GCAccordion>
 
