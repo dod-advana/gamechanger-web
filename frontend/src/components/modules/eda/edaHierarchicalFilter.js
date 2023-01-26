@@ -4,6 +4,7 @@ import { FormGroup, FormControlLabel, Checkbox, Button } from '@material-ui/core
 import CheveronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
 const styles = {
 	filterBox: {
@@ -56,13 +57,15 @@ const applyFunctionBF = (root, func) => {
 	}
 };
 
-const EdaHierarchicalFilter = ({ options, getChildOptions, state }) => {
+const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsSelected }) => {
 	// holds boolean for each node to represent whether that nodes children are expanded
 	const [optionsExpanded, setOptionsExpanded] = useState({});
 	// holds boolean for each node to represent whether we are currently fetching its children from server
 	const [fetchingChildrenFor, setFetchingChildrenFor] = useState({});
 	// false before mounting, true after mounting
 	const [didMount, setDidMount] = useState(false);
+
+	console.log('options selected: ', optionsSelected);
 
 	useEffect(() => {
 		// only update this initially
@@ -85,6 +88,37 @@ const EdaHierarchicalFilter = ({ options, getChildOptions, state }) => {
 
 	return options.map((root) => {
 		const currentlyExpanded = optionsExpanded[root.code];
+		const fetchingChildren = fetchingChildrenFor[root.code];
+		const childrenFetched = root.children && !(root.children.length <= 0);
+
+		const expandedSection = fetchingChildren ? (
+			<div>
+				<LoadingIndicator
+					inline
+					containerStyle={{
+						height: '40px',
+						textAlign: 'center',
+						paddingTop: '5px',
+						paddingBottom: '5px',
+					}}
+				/>
+			</div>
+		) : childrenFetched ? (
+			root.children.map((child) => {
+				return (
+					<EdaHierarchicalFilter
+						key={child.code}
+						options={[child]}
+						fetchChildren={fetchChildren}
+						onOptionClick={onOptionClick}
+						optionsSelected={optionsSelected}
+					/>
+				);
+			})
+		) : (
+			<></>
+		);
+
 		return (
 			<FormGroup key={root.code}>
 				<div style={{ display: 'flex', width: '100%' }}>
@@ -92,14 +126,24 @@ const EdaHierarchicalFilter = ({ options, getChildOptions, state }) => {
 						variant="text"
 						style={styles.hierarchicalFilterButton}
 						onClick={() => {
-							//kick off query?
-							if (root.children?.length === 0) {
+							// if we are currently expanding this section and
+							//    we are not currently fetching its children and
+							//    we have not already fetched its children
+							if (!currentlyExpanded && !fetchingChildren && !childrenFetched) {
 								const newFetchingChildrenFor = { ...fetchingChildrenFor };
 								newFetchingChildrenFor[root.code] = true;
 								setFetchingChildrenFor(newFetchingChildrenFor);
+								fetchChildren(root)
+									.then(() => {
+										console.log('fetched children');
+										const newFetchingChildrenFor = { ...fetchingChildrenFor };
+										newFetchingChildrenFor[root.code] = false;
+										setFetchingChildrenFor(newFetchingChildrenFor);
+									})
+									.catch((err) => console.log('error fetching children'));
 							}
 
-							// expand section
+							// handle toggling the section open/closed
 							const newOptionsExpanded = { ...optionsExpanded };
 							newOptionsExpanded[root.code] = !currentlyExpanded;
 							setOptionsExpanded(newOptionsExpanded);
@@ -118,15 +162,12 @@ const EdaHierarchicalFilter = ({ options, getChildOptions, state }) => {
 						control={
 							<Checkbox
 								style={styles.filterBox}
-								onClick={() => {
-									console.log('clicked this one: ', root);
+								onClick={(e) => {
+									console.log(e);
+									onOptionClick(root.code);
 								}}
 								icon={<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden' }} />}
-								// checked={
-								// 	state.edaSearchSettings &&
-								// 	state.edaSearchSettings.organizations &&
-								// 	state.edaSearchSettings.organizations.indexOf('air force') !== -1
-								// }
+								checked={optionsSelected.indexOf(root.code) !== -1}
 								checkedIcon={<i style={{ color: '#E9691D' }} className="fa fa-check" />}
 								name={root.name}
 							/>
@@ -146,19 +187,7 @@ const EdaHierarchicalFilter = ({ options, getChildOptions, state }) => {
 							marginBottom: '10px',
 						}}
 					>
-						{root.children.length === 0 ? (
-							<div>fetching rn</div>
-						) : (
-							root.children.map((child) => {
-								return (
-									<EdaHierarchicalFilter
-										options={[child]}
-										getChildOptions={getChildOptions}
-										state={state}
-									/>
-								);
-							})
-						)}
+						{expandedSection}
 					</div>
 				)}
 			</FormGroup>
