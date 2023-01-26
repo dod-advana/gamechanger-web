@@ -182,7 +182,16 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 								}
 								checked={optionsSelected.indexOf(root.code) !== -1}
 								checkedIcon={
-									<i style={{ color: '#E9691D', width: 15, height: 15 }} className="fa fa-check" />
+									<i
+										style={{
+											color: '#E9691D',
+											width: 15,
+											height: 15,
+											lineHeight: 15,
+											fontSize: 15,
+										}}
+										className="fa fa-check"
+									/>
 								}
 								name={root.name}
 							/>
