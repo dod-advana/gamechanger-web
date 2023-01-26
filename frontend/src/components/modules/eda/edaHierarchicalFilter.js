@@ -196,7 +196,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 						id={`${root.code}-checkbox`}
 					/>
 				</div>
-				{currentlyExpanded && <div>{expandedSection}</div>}
+				{currentlyExpanded && <div style={styles.width100}>{expandedSection}</div>}
 			</FormGroup>
 		);
 	});

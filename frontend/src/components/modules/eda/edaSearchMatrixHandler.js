@@ -1171,7 +1171,7 @@ const EDASearchMatrixHandler = (props) => {
 						id={'pscAccordion'}
 					>
 						<div style={styles.width100}>
-							<MultiSelectAutocomplete
+							{/* <MultiSelectAutocomplete
 								value={state.edaSearchSettings.psc}
 								setValue={(value) => {
 									setEDASearchSetting('psc', value, state, dispatch);
@@ -1179,6 +1179,29 @@ const EDASearchMatrixHandler = (props) => {
 								options={state.edaFilterData.psc}
 								placeholder="Search PSCs"
 								label="PSC"
+							/> */}
+							<EdaHierarchicalFilter
+								options={state.edaFilterData.psc_hierarchy}
+								fetchChildren={(node) => getChildrenHierarchicalFilter(node, 'psc', state, dispatch)}
+								onOptionClick={(psc) => {
+									const currPsc = state.edaSearchSettings.psc;
+									console.log(currPsc);
+									console.log('clicked on: ', psc);
+									// we are deselecting an option
+									if (currPsc.indexOf(psc) !== -1) {
+										setEDASearchSetting(
+											'psc',
+											currPsc.filter((code) => code !== psc),
+											state,
+											dispatch
+										);
+									}
+									// we are selecting an option
+									else {
+										setEDASearchSetting('psc', currPsc.concat([currPsc]), state, dispatch);
+									}
+								}}
+								optionsSelected={state.edaSearchSettings.psc}
 							/>
 						</div>
 					</GCAccordion>
