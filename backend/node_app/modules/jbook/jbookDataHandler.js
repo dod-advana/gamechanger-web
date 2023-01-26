@@ -648,7 +648,7 @@ class JBookDataHandler extends DataHandler {
 
 			delete reviewData.id;
 
-			// in review table, budget_line_item is also PE
+			// in review table, budget_line_item is also projectNum
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
 					break;
@@ -1783,8 +1783,6 @@ class JBookDataHandler extends DataHandler {
 					return await this.submitPublicPortfolioRequest(req, userId);
 				case 'getPublicPortfolioRequests':
 					return await this.getPublicPortfolioRequests(req, userId);
-				case 'bulkUpload':
-					return await this.bulkUpload(req, userId);
 				default:
 					this.logger.error(
 						`There is no function called ${functionName} defined in the JBookDataHandler`,
