@@ -438,7 +438,6 @@ class UserController {
 						tiny_url: { [Op.ne]: null },
 					},
 					order: [['id', 'DESC']],
-					limit: 20,
 					raw: true,
 				});
 				const export_history = await this.exportHistory.findAll({

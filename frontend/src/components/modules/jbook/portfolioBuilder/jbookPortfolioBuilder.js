@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import FormData from 'form-data';
+import React, { useState, useEffect } from 'react';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
-import DragAndDrop from '../../../common/DragAndDrop';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
+
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
 
@@ -67,13 +67,7 @@ const PortfolioBuilder = (props) => {
 
 	const [showModal, setShowModal] = useState(false);
 	const [showPublicModal, setShowPublicModal] = useState(false);
-	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
-
-	const [selectedFile, setSelectedFile] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [results, setResults] = useState(null);
-
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
