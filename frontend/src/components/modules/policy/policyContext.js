@@ -29,6 +29,10 @@ const initState = {
 	history: undefined,
 	historySet: false,
 
+	// Slide out menu
+	slideOutMenuRef: null,
+	closeSlideOutMenu: false,
+
 	// Notifications
 	notifications: [],
 	notificationIds: [],
@@ -302,6 +306,8 @@ function reducer(state, action) {
 				...state,
 				analystToolsSearchSettings: initState.analystToolsSearchSettings,
 			};
+			newState.analystToolsSearchSettings.typeCount = state.analystToolsSearchSettings.typeCount;
+			newState.analystToolsSearchSettings.orgCount = state.analystToolsSearchSettings.orgCount;
 			newState.analystToolsSearchSettings.typeFilter = state.presearchTypes;
 			newState.analystToolsSearchSettings.orgFilter = state.presearchSources;
 			return newState;
