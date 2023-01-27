@@ -3120,6 +3120,16 @@ describe('PolicyGraphHandler', function () {
 										},
 									},
 									{
+										fuzzy: {
+											'display_title_s.search': {
+												value: 'artificial intelligence',
+												fuzziness: 'AUTO',
+												transpositions: false,
+												boost: 15,
+											},
+										},
+									},
+									{
 										wildcard: {
 											'filename.search': {
 												value: '*artificial intelligence*',
