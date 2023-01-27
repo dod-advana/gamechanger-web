@@ -46,6 +46,7 @@
 		"lunr": "2.3.9",
 		"moment": "2.29.4",
 		"moment-timezone": "0.5.31",
+		"multer": "1.4.5-lts.1",
 		"mysql": "2.18.1",
 		"neo4j-driver": "4.4.4",
 		"node-cron": "2.0.3",
