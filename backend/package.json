@@ -59,7 +59,8 @@
 		"ssh-key-decrypt": "0.1.2",
 		"swagger-jsdoc": "6.0.1",
 		"swagger-ui-express": "4.1.6",
-		"underscore": "1.13.1"
+		"underscore": "1.13.1",
+		"xlsx": "0.18.5"
 	},
 	"devDependencies": {
 		"eslint": "^8.10.0",

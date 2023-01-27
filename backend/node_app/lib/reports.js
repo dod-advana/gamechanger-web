@@ -89,14 +89,14 @@ class Reports {
 		}
 	}
 
-	jbookCreateCsvStream(data, userId) {
+	jbookCreateCsvStream(data, userId, includeReviews = false) {
 		try {
 			const stringifier = this.csvStringify({ delimiter: ',' });
 			stringifier.on('error', (err) => {
 				this.logger.error(err.message, 'NL71UTC', userId);
 				throw new Error(err);
 			});
-			this.jbookWriteCSV(stringifier, data);
+			this.jbookWriteCSV(stringifier, data, includeReviews);
 			stringifier.end();
 			return stringifier;
 		} catch (e) {
@@ -105,7 +105,7 @@ class Reports {
 		}
 	}
 
-	jbookWriteCSV(stringifier, data) {
+	jbookWriteCSV(stringifier, data, includeReviews = false) {
 		if (data && data.docs && data.docs.length > 0) {
 			const header = [
 				'Budget Year',
@@ -125,9 +125,53 @@ class Reports {
 				'BY4 Funding',
 				'BY5 Funding',
 				'Has Keywords',
-				'Primary Reviewer',
+				'Keywords',
+				'Initial Reviewer',
+				...(includeReviews
+					? [
+							'Initial Reviewer AI Tagging Label',
+							'Initial Reviewer Transition Partner',
+							'Initial Reviewer Notes',
+					  ]
+					: []),
 				'RAI Lead Reviewer',
+				...(includeReviews
+					? [
+							'RAI Secondary Reviewer',
+							'RAI AI Tagging Label Agree',
+							'RAI AI Tagging Label',
+							'RAI Transition Partner Agree',
+							'RAI Transition Partner',
+							'RAI Mission Partners',
+							'RAI Review Notes',
+					  ]
+					: []),
 				'POC Reviewer',
+				...(includeReviews
+					? [
+							'POC Email',
+							'POC Phone Number',
+							'POC Organization',
+							'POC AI Tagging Label Agree',
+							'POC AI Tagging Label',
+							'POC Transition Partner Agree',
+							'POC Transition Partner',
+							'POC Mission Partners Agree',
+							'POC Mission Partners',
+							'Dollars Attributed (M)',
+							'Percentage Attributed (%)',
+							'Joint Capability Area 1',
+							'Joint Capability Area 2',
+							'Joint Capability Area 3',
+							'AI Role Description',
+							'AI Domain',
+							'AI Task',
+							'AI Type',
+							'AI Type Description',
+							'Deployment System',
+							'Intelligent System',
+					  ]
+					: []),
 				'Review Status',
 				'Labels',
 				'Source',
@@ -149,15 +193,59 @@ class Reports {
 					docData.programElement ?? docData.budgetLineItem_s,
 					docData.projectNum,
 					docData.totalCost,
-					docData.by1Request ?? 'N/A',
-					docData.proj_fund_by2_d ?? docData.p4082_toa_by2_d ?? 'N/A',
-					docData.proj_fund_by3_d ?? docData.p4083_toa_by3_d ?? 'N/A',
-					docData.proj_fund_by4_d ?? docData.p4084_toa_by4_d ?? 'N/A',
-					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? 'N/A',
+					docData.by1Request ?? '',
+					docData.proj_fund_by2_d ?? docData.p4082_toa_by2_d ?? '',
+					docData.proj_fund_by3_d ?? docData.p4083_toa_by3_d ?? '',
+					docData.proj_fund_by4_d ?? docData.p4084_toa_by4_d ?? '',
+					docData.proj_fund_by5_d ?? docData.p4085_toa_by5_d ?? '',
 					docData.hasKeywords ? 'Yes' : 'No',
+					docData.keywords?.join(', '),
 					docData.primary_reviewer_s,
+					...(includeReviews
+						? [
+								docData.primaryClassLabel ?? '',
+								docData.primaryPlannedTransitionPartner ?? '',
+								docData.primaryReviewNotes ?? '',
+						  ]
+						: []),
 					docData.service_reviewer_s,
-					docData.service_poc_name_s,
+					...(includeReviews
+						? [
+								docData.serviceSecondaryReviewer ?? '',
+								docData.serviceAgreeLabel ?? '',
+								docData.serviceClassLabel ?? '',
+								docData.servicePTPAgreeLabel ?? '',
+								docData.servicePlannedTransitionPartner ?? '',
+								docData.serviceMissionPartnersList?.replace(/\|/g, ', '),
+								docData.service_review_notes_s ?? '',
+						  ]
+						: []),
+					this.getPocReviewer(docData) === 'N/A' && '',
+					...(includeReviews
+						? [
+								this.getPocEmail(docData) === 'N/A' && '',
+								this.getPocPhone(docData) === 'N/A' && '',
+								this.getPocOrganization(docData) === 'N/A' && '',
+								docData.pocAgreeLabel ?? '',
+								docData.pocClassLabel ?? '',
+								docData.pocPTPAgreeLabel ?? '',
+								docData.pocPlannedTransitionPartner ?? '',
+								docData.pocMPAgreeLabel ?? '',
+								docData.pocMissionPartnersList ?? '',
+								docData.pocDollarsAttributed ?? '',
+								docData.pocPercentageAttributed ?? '',
+								docData.pocJointCapabilityArea ?? '',
+								docData.pocJointCapabilityArea2?.join(', '),
+								docData.pocJointCapabilityArea3?.join(', '),
+								docData.pocAIRoleDescription ?? '',
+								docData.domainTask ?? '',
+								docData.domainTaskSecondary?.join(', '),
+								docData.pocAIType ?? '',
+								docData.pocAITypeDescription ?? '',
+								docData.roboticsSystemAgree ?? '',
+								docData.intelligentSystemsAgree ?? '',
+						  ]
+						: []),
 					docData.review_status_s,
 					docData.primary_class_label_s,
 					docData.source_tag_s,
@@ -770,9 +858,9 @@ class Reports {
 			docData.serviceSecondaryReviewer !== null &&
 			docData.serviceSecondaryReviewer !== ''
 		) {
-			return docData.serviceSecondaryReviewer.split('(')[1].replace(')', '');
+			return docData.serviceSecondaryReviewer.split('(')[1]?.replace(')', '');
 		} else if (docData.serviceReviewer && docData.serviceReviewer !== null && docData.serviceReviewer !== '') {
-			return docData.serviceReviewer.split('(')[1].replace(')', '');
+			return docData.serviceReviewer.split('(')[1]?.replace(')', '');
 		} else {
 			return 'N/A';
 		}
@@ -1090,7 +1178,6 @@ class Reports {
 	constructJCAData(docData) {
 		const JCAData = this.budgetSearchUtility.getJCAData();
 		const tmpJCAData = this.formatJCAData(JCAData, docData);
-		console.log(docData);
 		let currentYear = parseInt(docData.budgetYear);
 
 		return {
