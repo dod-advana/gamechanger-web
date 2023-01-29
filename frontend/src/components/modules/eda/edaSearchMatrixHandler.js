@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import GCAccordion from '../../common/GCAccordion';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
@@ -14,6 +14,7 @@ import { numberWithCommas } from '../../../utils/gamechangerUtils';
 import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
 import EdaHierarchicalFilter from './edaHierarchicalFilter';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import _ from 'lodash';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -1006,6 +1007,67 @@ const EDASearchMatrixHandler = (props) => {
 		setState(dispatch, { runSearch: true });
 	};
 
+	const pscOnOptionClick = useCallback(
+		(pscNode) => {
+			const currPsc = state.edaSearchSettings.psc;
+			let newPsc = [...currPsc];
+			const psc = pscNode.code;
+			// we are deselecting an option
+			if (_.findIndex(currPsc, (node) => node.code === psc) !== -1) {
+				// if the node has children, also deselect them
+				if (pscNode.hasChildren) {
+					newPsc = currPsc.filter((node) => node.code !== psc);
+				} else {
+					newPsc = currPsc.filter((node) => node.code !== psc);
+				}
+			}
+			// we are selecting an option
+			else {
+				// if the node has children, also select them
+				if (pscNode.hasChildren) {
+					newPsc = currPsc.concat([pscNode]);
+				} else {
+					newPsc = currPsc.concat([pscNode]);
+				}
+			}
+			setEDASearchSetting('psc', newPsc, state, dispatch);
+		},
+		[dispatch, state]
+	);
+
+	const pscFetchChildren = useCallback(
+		(node) => getChildrenHierarchicalFilter(node, 'psc', state, dispatch),
+		[state, dispatch]
+	);
+
+	const naicsOnOptionClick = useCallback(
+		(naicsNode) => {
+			const currNaicsCodes = state.edaSearchSettings.naicsCode;
+			console.log(currNaicsCodes);
+			console.log('clicked on: ', naicsNode);
+			const naicsCode = naicsNode.code;
+			// we are deselecting an option
+			if (_.findIndex(currNaicsCodes, (node) => node.code === naicsCode) !== -1) {
+				setEDASearchSetting(
+					'naicsCode',
+					currNaicsCodes.filter((node) => node.code !== naicsCode),
+					state,
+					dispatch
+				);
+			}
+			// we are selecting an option
+			else {
+				setEDASearchSetting('naicsCode', currNaicsCodes.concat([naicsNode]), state, dispatch);
+			}
+		},
+		[state, dispatch]
+	);
+
+	const naicsFetchChildren = useCallback(
+		(node) => getChildrenHierarchicalFilter(node, 'naics', state, dispatch),
+		[state, dispatch]
+	);
+
 	return (
 		<div data-cy="eda-filter-container">
 			<GCAccordion
@@ -1171,36 +1233,10 @@ const EDASearchMatrixHandler = (props) => {
 						id={'pscAccordion'}
 					>
 						<div style={styles.width100}>
-							{/* <MultiSelectAutocomplete
-								value={state.edaSearchSettings.psc}
-								setValue={(value) => {
-									setEDASearchSetting('psc', value, state, dispatch);
-								}}
-								options={state.edaFilterData.psc}
-								placeholder="Search PSCs"
-								label="PSC"
-							/> */}
 							<EdaHierarchicalFilter
 								options={state.edaFilterData.psc_hierarchy}
-								fetchChildren={(node) => getChildrenHierarchicalFilter(node, 'psc', state, dispatch)}
-								onOptionClick={(psc) => {
-									const currPsc = state.edaSearchSettings.psc;
-									console.log(currPsc);
-									console.log('clicked on: ', psc);
-									// we are deselecting an option
-									if (currPsc.indexOf(psc) !== -1) {
-										setEDASearchSetting(
-											'psc',
-											currPsc.filter((code) => code !== psc),
-											state,
-											dispatch
-										);
-									}
-									// we are selecting an option
-									else {
-										setEDASearchSetting('psc', currPsc.concat([psc]), state, dispatch);
-									}
-								}}
+								fetchChildren={pscFetchChildren}
+								onOptionClick={pscOnOptionClick}
 								optionsSelected={state.edaSearchSettings.psc}
 							/>
 						</div>
@@ -1215,44 +1251,11 @@ const EDASearchMatrixHandler = (props) => {
 						headerTextWeight={'normal'}
 						id={'naicsAccordion'}
 					>
-						{/* <div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.naicsCode}
-								setValue={(value) => {
-									setEDASearchSetting('naicsCode', value, state, dispatch);
-								}}
-								options={state.edaFilterData.naics}
-								placeholder="Search NAICS"
-								label="NAICS"
-							/>
-						</div> */}
 						<div style={styles.width100}>
 							<EdaHierarchicalFilter
 								options={state.edaFilterData.naics_hierarchy}
-								fetchChildren={(node) => getChildrenHierarchicalFilter(node, 'naics', state, dispatch)}
-								onOptionClick={(naicsCode) => {
-									const currNaicsCodes = state.edaSearchSettings.naicsCode;
-									console.log(currNaicsCodes);
-									console.log('clicked on: ', naicsCode);
-									// we are deselecting an option
-									if (currNaicsCodes.indexOf(naicsCode) !== -1) {
-										setEDASearchSetting(
-											'naicsCode',
-											currNaicsCodes.filter((code) => code !== naicsCode),
-											state,
-											dispatch
-										);
-									}
-									// we are selecting an option
-									else {
-										setEDASearchSetting(
-											'naicsCode',
-											currNaicsCodes.concat([naicsCode]),
-											state,
-											dispatch
-										);
-									}
-								}}
+								fetchChildren={naicsFetchChildren}
+								onOptionClick={naicsOnOptionClick}
 								optionsSelected={state.edaSearchSettings.naicsCode}
 							/>
 						</div>
