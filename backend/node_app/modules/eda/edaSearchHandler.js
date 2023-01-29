@@ -425,6 +425,14 @@ class EdaSearchHandler extends SearchHandler {
 						],
 					},
 				},
+				sort: [
+					{
+						code_s: {
+							order: 'asc',
+						},
+					},
+				],
+				size: 100,
 			};
 
 			const naics_hierarchical_filters_query = {
@@ -446,6 +454,14 @@ class EdaSearchHandler extends SearchHandler {
 						],
 					},
 				},
+				sort: [
+					{
+						code_s: {
+							order: 'asc',
+						},
+					},
+				],
+				size: 100,
 			};
 
 			const filter_options_promise = this.dataLibrary.queryElasticSearch(

@@ -99,6 +99,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		const currentlyExpanded = optionsExpanded[root.code];
 		const fetchingChildren = fetchingChildrenFor[root.code];
 		const childrenFetched = root.children && !(root.children.length <= 0);
+		const displayName = root.name === root.code ? root.name : `${root.name} - ${root.code}`;
 
 		const expandedSection = fetchingChildren ? (
 			<div style={styles.expandedChildren}>
@@ -186,8 +187,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 										style={{
 											color: '#E9691D',
 											width: 15,
-											height: 15,
-											lineHeight: 15,
+											height: '15px',
 											fontSize: 15,
 										}}
 										className="fa fa-check"
@@ -198,7 +198,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 						}
 						label={
 							<Typography variant="body2" color="textSecondary">
-								{root.name}
+								{displayName}
 							</Typography>
 						}
 						labelPlacement="end"

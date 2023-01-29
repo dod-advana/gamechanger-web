@@ -321,28 +321,6 @@ const EdaSearchHandler = {
 				modNumber: resp.data.filters.fpds_modification_number,
 			};
 
-			console.log(resp.data.hierarchical_filters);
-
-			resp.data.hierarchical_filters.naics.forEach((parent) => {
-				console.log('parent of naics: ', parent);
-			});
-
-			const resp2 = await gameChangerAPI.callSearchFunction({
-				functionName: 'getHierarchicalFilterData',
-				cloneName: cloneData.clone_name,
-				options: {
-					parentCode: resp.data.hierarchical_filters.naics.map((e) => e.code)[0],
-					picklistName: 'naics',
-				},
-			});
-
-			newFilterData.naics_hierarchy[0].children = resp2.data.map((e) => {
-				return { ...e, children: [] };
-			});
-
-			console.log('resp2: ');
-			console.log(resp2.data);
-
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
 		}
 	},
