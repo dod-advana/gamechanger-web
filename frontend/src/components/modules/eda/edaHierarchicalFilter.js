@@ -6,6 +6,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
 
+import _ from 'lodash';
+
 const styles = {
 	filterBox: {
 		backgroundColor: '#ffffff',
@@ -184,7 +186,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 								icon={
 									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden', width: 15, height: 15 }} />
 								}
-								checked={optionsSelected.indexOf(root.code) !== -1}
+								checked={_.findIndex(optionsSelected, (node) => node.code === root.code) !== -1}
 								checkedIcon={
 									<i
 										style={{

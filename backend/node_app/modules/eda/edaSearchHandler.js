@@ -505,6 +505,7 @@ class EdaSearchHandler extends SearchHandler {
 				cleanedResults.hierarchical_filters.psc.push({
 					code: hit._source.code_s,
 					name: hit._source.productName_s,
+					hasChildren: hit._source.hasChildren_b === 'true',
 				});
 			});
 
@@ -512,6 +513,7 @@ class EdaSearchHandler extends SearchHandler {
 				cleanedResults.hierarchical_filters.naics.push({
 					code: hit._source.code_s,
 					name: hit._source.title_s,
+					hasChildren: hit._source.hasChildren_b === 'true',
 				});
 			});
 
@@ -574,11 +576,13 @@ class EdaSearchHandler extends SearchHandler {
 					cleanedResults.push({
 						code: hit._source.code_s,
 						name: hit._source.title_s,
+						hasChildren: hit._source.hasChildren_b === 'true',
 					});
 				} else if (picklistName === 'psc') {
 					cleanedResults.push({
 						code: hit._source.code_s,
 						name: hit._source.productName_s,
+						hasChildren: hit._source.hasChildren_b === 'true',
 					});
 				}
 			});
