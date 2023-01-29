@@ -98,69 +98,75 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 	return options.map((root) => {
 		const currentlyExpanded = optionsExpanded[root.code];
 		const fetchingChildren = fetchingChildrenFor[root.code];
-		const childrenFetched = root.children && !(root.children.length <= 0);
+		const childrenFetched = root.children && root.children.length > 0;
 		const displayName = root.name === root.code ? root.name : `${root.name} - ${root.code}`;
 
-		const expandedSection = fetchingChildren ? (
-			<div style={styles.expandedChildren}>
-				<LoadingIndicator
-					inline
-					containerStyle={{
-						height: '40px',
-						textAlign: 'center',
-						paddingTop: '5px',
-						paddingBottom: '5px',
-					}}
-				/>
-			</div>
-		) : childrenFetched ? (
-			<div style={styles.expandedChildren}>
-				{root.children.map((child) => {
-					return (
-						<EdaHierarchicalFilter
-							key={child.code}
-							options={[child]}
-							fetchChildren={fetchChildren}
-							onOptionClick={onOptionClick}
-							optionsSelected={optionsSelected}
-						/>
-					);
-				})}
-			</div>
-		) : (
-			<></>
-		);
+		let expandedSection = <></>;
+		if (fetchingChildren) {
+			expandedSection = (
+				<div style={styles.expandedChildren}>
+					<LoadingIndicator
+						inline
+						containerStyle={{
+							height: '40px',
+							textAlign: 'center',
+							paddingTop: '5px',
+							paddingBottom: '5px',
+						}}
+					/>
+				</div>
+			);
+		} else if (childrenFetched) {
+			expandedSection = (
+				<div style={styles.expandedChildren}>
+					{root.children.map((child) => {
+						return (
+							<EdaHierarchicalFilter
+								key={child.code}
+								options={[child]}
+								fetchChildren={fetchChildren}
+								onOptionClick={onOptionClick}
+								optionsSelected={optionsSelected}
+							/>
+						);
+					})}
+				</div>
+			);
+		}
+
+		function onCheckboxClick(e) {
+			console.log(e);
+			onOptionClick(root);
+		}
+
+		function onExpandClick() {
+			// if we are currently expanding this section and
+			//    we are not currently fetching its children and
+			//    we have not already fetched its children
+			if (!currentlyExpanded && !fetchingChildren && !childrenFetched) {
+				const newFetchingChildrenFor = { ...fetchingChildrenFor };
+				newFetchingChildrenFor[root.code] = true;
+				setFetchingChildrenFor(newFetchingChildrenFor);
+				fetchChildren(root)
+					.then(() => {
+						console.log('fetched children');
+						const newFetchingChildrenFor = { ...fetchingChildrenFor };
+						newFetchingChildrenFor[root.code] = false;
+						setFetchingChildrenFor(newFetchingChildrenFor);
+					})
+					.catch((err) => console.log('error fetching children'));
+			}
+
+			// handle toggling the section open/closed
+			const newOptionsExpanded = { ...optionsExpanded };
+			newOptionsExpanded[root.code] = !currentlyExpanded;
+			setOptionsExpanded(newOptionsExpanded);
+		}
 
 		return (
 			<FormGroup key={root.code}>
 				<div style={{ display: 'flex', width: '100%', marginBottom: '10px' }}>
-					<Button
-						variant="text"
-						style={styles.hierarchicalFilterButton}
-						onClick={() => {
-							// if we are currently expanding this section and
-							//    we are not currently fetching its children and
-							//    we have not already fetched its children
-							if (!currentlyExpanded && !fetchingChildren && !childrenFetched) {
-								const newFetchingChildrenFor = { ...fetchingChildrenFor };
-								newFetchingChildrenFor[root.code] = true;
-								setFetchingChildrenFor(newFetchingChildrenFor);
-								fetchChildren(root)
-									.then(() => {
-										console.log('fetched children');
-										const newFetchingChildrenFor = { ...fetchingChildrenFor };
-										newFetchingChildrenFor[root.code] = false;
-										setFetchingChildrenFor(newFetchingChildrenFor);
-									})
-									.catch((err) => console.log('error fetching children'));
-							}
-
-							// handle toggling the section open/closed
-							const newOptionsExpanded = { ...optionsExpanded };
-							newOptionsExpanded[root.code] = !currentlyExpanded;
-							setOptionsExpanded(newOptionsExpanded);
-						}}
-					>
+					<Button variant="text" style={styles.hierarchicalFilterButton} onClick={onExpandClick}>
 						{currentlyExpanded ? (
 							<ExpandMoreIcon style={styles.icon} />
 						) : (
@@ -174,10 +180,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 						control={
 							<Checkbox
 								style={styles.filterBox}
-								onClick={(e) => {
-									console.log(e);
-									onOptionClick(root.code);
-								}}
+								onClick={onCheckboxClick}
 								icon={
 									<CheckBoxOutlineBlankIcon style={{ visibility: 'hidden', width: 15, height: 15 }} />
 								}
