@@ -521,7 +521,6 @@ class EdaSearchHandler extends SearchHandler {
 
 			return cleanedResults;
 		} catch (e) {
-			console.log(e);
 			this.logger.error(e.message, 'BI5E7KT');
 			return {};
 		}
@@ -593,8 +592,7 @@ class EdaSearchHandler extends SearchHandler {
 
 			return cleanedResults;
 		} catch (e) {
-			console.log(e);
-			this.logger.error(e.message, 'testest');
+			this.logger.error(e.message, 'B5YNTJC');
 			return {};
 		}
 	}

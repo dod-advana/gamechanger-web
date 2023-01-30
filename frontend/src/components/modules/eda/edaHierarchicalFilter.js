@@ -5,6 +5,7 @@ import CheveronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import LoadingIndicator from '@dod-advana/advana-platform-ui/dist/loading/LoadingIndicator';
+import { applyFunctionBF } from './edaUtils';
 
 import _ from 'lodash';
 
@@ -49,25 +50,6 @@ const styles = {
 	},
 };
 
-const applyFunctionBF = (root, func) => {
-	let nodesToVisit = [root];
-	while (nodesToVisit.length > 0) {
-		// get current node in breadth first traversal
-		const currNode = nodesToVisit[0];
-
-		// apply func to current node
-		func(currNode);
-
-		// remove current node from array of nodes to visit
-		nodesToVisit = nodesToVisit.slice(1);
-
-		// if current node has children, add them to the end of array of nodes to visit
-		if (currNode.children && currNode.children.length > 0) {
-			nodesToVisit = nodesToVisit.concat(currNode.children);
-		}
-	}
-};
-
 const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsSelected }) => {
 	// holds boolean for each node to represent whether that nodes children are expanded
 	const [optionsExpanded, setOptionsExpanded] = useState({});
@@ -75,8 +57,6 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 	const [fetchingChildrenFor, setFetchingChildrenFor] = useState({});
 	// false before mounting, true after mounting
 	const [didMount, setDidMount] = useState(false);
-
-	console.log('options selected: ', optionsSelected);
 
 	useEffect(() => {
 		// only update this initially
@@ -90,7 +70,6 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 					newFetchingChildrenFor[node.code] = false;
 				});
 			});
-			console.log('newOptionsExpanded', newOptionsExpanded);
 			setOptionsExpanded(newOptionsExpanded);
 			setFetchingChildrenFor(newFetchingChildrenFor);
 			setDidMount(true);
@@ -137,7 +116,6 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		}
 
 		function onCheckboxClick(e) {
-			console.log(e);
 			onOptionClick(root);
 		}
 
@@ -151,7 +129,6 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 				setFetchingChildrenFor(newFetchingChildrenFor);
 				fetchChildren(root)
 					.then(() => {
-						console.log('fetched children');
 						const newFetchingChildrenFor = { ...fetchingChildrenFor };
 						newFetchingChildrenFor[root.code] = false;
 						setFetchingChildrenFor(newFetchingChildrenFor);
