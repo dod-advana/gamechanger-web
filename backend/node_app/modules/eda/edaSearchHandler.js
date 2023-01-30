@@ -506,6 +506,7 @@ class EdaSearchHandler extends SearchHandler {
 					code: hit._source.code_s,
 					name: hit._source.productName_s,
 					hasChildren: hit._source.hasChildren_b === 'true',
+					parent: hit._source.parentCode_s,
 				});
 			});
 
@@ -514,6 +515,7 @@ class EdaSearchHandler extends SearchHandler {
 					code: hit._source.code_s,
 					name: hit._source.title_s,
 					hasChildren: hit._source.hasChildren_b === 'true',
+					parent: hit._source.parentCode_s,
 				});
 			});
 
@@ -577,12 +579,14 @@ class EdaSearchHandler extends SearchHandler {
 						code: hit._source.code_s,
 						name: hit._source.title_s,
 						hasChildren: hit._source.hasChildren_b === 'true',
+						parent: hit._source.parentCode_s,
 					});
 				} else if (picklistName === 'psc') {
 					cleanedResults.push({
 						code: hit._source.code_s,
 						name: hit._source.productName_s,
 						hasChildren: hit._source.hasChildren_b === 'true',
+						parent: hit._source.parentCode_s,
 					});
 				}
 			});

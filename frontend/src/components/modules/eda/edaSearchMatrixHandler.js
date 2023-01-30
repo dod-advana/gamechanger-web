@@ -947,9 +947,17 @@ export const getAdvancedOptions = (props) => {
 	);
 };
 
-// helper function for getChildrenHierarchicalFilter
-// iterates breadth first through tree starting with root looking for parentOfChildren
-// once it finds parentOfChildren, updates parentOfChildren's children to newChildren
+// TREE FUNCTIONS (helpers for hierarchical filters)
+
+/**
+ * Insert children for a specific node in a tree (do nothing if node not present).
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Object} parentOfChildren - The node that is the parent for the inserted children.
+ * @param {Array} newChildren - The children nodes to be inserted.
+ *
+ * @return {Object} - returns root node of (possibly) modified tree.
+ */
 const insertChildrenBF = (root, parentOfChildren, newChildren) => {
 	let nodesToVisit = [root];
 	while (nodesToVisit.length > 0) {
@@ -972,6 +980,80 @@ const insertChildrenBF = (root, parentOfChildren, newChildren) => {
 	return root;
 };
 
+/**
+ * Navigate a tree of filter options to find the parents (including grandparents and so on) of a given node
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Object} childNode - The child node whose parents we are searching for.
+ *
+ * @return {Array} - of nodes of parents of childNode
+ *
+ * example: tree structured like this:
+ * 								A
+ * 						B				C
+ * 					D		E				F
+ * root = A, childNode = B, returns [A]
+ * root = A, childNode = F, returns [A, C]
+ */
+const getParentsOfChild = (root, childNode) => {
+	let nodesToVisit = [root];
+	let parentCodes = [];
+
+	while (nodesToVisit.length > 0) {
+		// get current node in depth first traversal
+		const currNode = nodesToVisit[0];
+
+		if (parentCodes.length > 1 && parentCodes[parentCodes.length - 1].parent === currNode.parent) {
+			parentCodes = parentCodes.slice(0, -1);
+		}
+		parentCodes.push(currNode);
+
+		// if we found the child our traversal is done
+		if (currNode.code === childNode.code) {
+			// don't include the childNode in the parentCodes
+			return parentCodes.slice(0, -1);
+		}
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the beginning of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = currNode.children.concat(nodesToVisit);
+		} else {
+			parentCodes = parentCodes.slice(0, -1);
+		}
+	}
+	return [];
+};
+
+/**
+ * Do a breadth-first traversal of a tree of and apply a function to each node
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Function} func - The function to apply to each node
+ *
+ * @return {undefined} - no return value, just applies the function to each node
+ */
+const applyFunctionBF = (root, func) => {
+	let nodesToVisit = [root];
+	while (nodesToVisit.length > 0) {
+		// get current node in breadth first traversal
+		const currNode = nodesToVisit[0];
+
+		// apply func to current node
+		func(currNode);
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the end of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = nodesToVisit.concat(currNode.children);
+		}
+	}
+};
+
 const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) => {
 	const newFilterData = { ...state.edaFilterData };
 	const resp = await gameChangerAPI.callSearchFunction({
@@ -991,9 +1073,6 @@ const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) 
 		insertChildrenBF(root, node, newChildren)
 	);
 
-	console.log('resp: ');
-	console.log(newChildren);
-
 	setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
 };
 
@@ -1007,32 +1086,56 @@ const EDASearchMatrixHandler = (props) => {
 		setState(dispatch, { runSearch: true });
 	};
 
+	const deselectHierarchicalFilterOption = useCallback((nodeToDeselect, selectedNodes, node_hierarchy) => {
+		const { code } = nodeToDeselect;
+		let newSelectedNodes = [...selectedNodes];
+		// if the node has children, also deselect them
+		if (nodeToDeselect.hasChildren) {
+			applyFunctionBF(nodeToDeselect, (node) => {
+				newSelectedNodes = newSelectedNodes.filter((e) => e.code !== node.code);
+			});
+		} else {
+			newSelectedNodes = newSelectedNodes.filter((node) => node.code !== code);
+		}
+		// if the node's parent is selected, deselect it (recursively)
+		if (nodeToDeselect.parent) {
+			let parentsToDeselect = [];
+			for (let root of node_hierarchy) {
+				const possibleParents = getParentsOfChild(root, nodeToDeselect);
+				if (possibleParents && possibleParents.length > 0) {
+					parentsToDeselect = possibleParents;
+					break;
+				}
+			}
+			newSelectedNodes = newSelectedNodes.filter(
+				(node) => _.findIndex(parentsToDeselect, (e) => e.code === node.code) === -1
+			);
+		}
+		return newSelectedNodes;
+	}, []);
+
 	const pscOnOptionClick = useCallback(
 		(pscNode) => {
 			const currPsc = state.edaSearchSettings.psc;
 			let newPsc = [...currPsc];
 			const psc = pscNode.code;
+
 			// we are deselecting an option
 			if (_.findIndex(currPsc, (node) => node.code === psc) !== -1) {
-				// if the node has children, also deselect them
-				if (pscNode.hasChildren) {
-					newPsc = currPsc.filter((node) => node.code !== psc);
-				} else {
-					newPsc = currPsc.filter((node) => node.code !== psc);
-				}
+				newPsc = deselectHierarchicalFilterOption(pscNode, newPsc, state.edaFilterData.psc_hierarchy);
 			}
-			// we are selecting an option
-			else {
-				// if the node has children, also select them
-				if (pscNode.hasChildren) {
-					newPsc = currPsc.concat([pscNode]);
-				} else {
-					newPsc = currPsc.concat([pscNode]);
-				}
+			// we are selecting an option, also select children
+			else if (pscNode.hasChildren) {
+				applyFunctionBF(pscNode, (node) => {
+					newPsc.push(node);
+				});
+			} else {
+				newPsc.push(pscNode);
 			}
+
 			setEDASearchSetting('psc', newPsc, state, dispatch);
 		},
-		[dispatch, state]
+		[dispatch, state, deselectHierarchicalFilterOption]
 	);
 
 	const pscFetchChildren = useCallback(
@@ -1042,25 +1145,26 @@ const EDASearchMatrixHandler = (props) => {
 
 	const naicsOnOptionClick = useCallback(
 		(naicsNode) => {
-			const currNaicsCodes = state.edaSearchSettings.naicsCode;
-			console.log(currNaicsCodes);
-			console.log('clicked on: ', naicsNode);
-			const naicsCode = naicsNode.code;
+			const currNaics = state.edaSearchSettings.naicsCode;
+			let newNaics = [...currNaics];
+			const naics = naicsNode.code;
+
 			// we are deselecting an option
-			if (_.findIndex(currNaicsCodes, (node) => node.code === naicsCode) !== -1) {
-				setEDASearchSetting(
-					'naicsCode',
-					currNaicsCodes.filter((node) => node.code !== naicsCode),
-					state,
-					dispatch
-				);
+			if (_.findIndex(newNaics, (node) => node.code === naics) !== -1) {
+				newNaics = deselectHierarchicalFilterOption(naicsNode, newNaics, state.edaFilterData.naics_hierarchy);
 			}
-			// we are selecting an option
-			else {
-				setEDASearchSetting('naicsCode', currNaicsCodes.concat([naicsNode]), state, dispatch);
+			// we are selecting an option, also select children
+			else if (naicsNode.hasChildren) {
+				applyFunctionBF(naicsNode, (node) => {
+					newNaics.push(node);
+				});
+			} else {
+				newNaics.push(naicsNode);
 			}
+
+			setEDASearchSetting('naicsCode', newNaics, state, dispatch);
 		},
-		[state, dispatch]
+		[dispatch, state, deselectHierarchicalFilterOption]
 	);
 
 	const naicsFetchChildren = useCallback(
