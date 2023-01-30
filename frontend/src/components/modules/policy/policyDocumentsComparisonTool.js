@@ -373,7 +373,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [viewableDocs, setViewableDocs] = useState([]);
 	const [resultsLoading, setResultsLoading] = useState(false);
 	const [filterCountsLoading, setFilterCountsLoading] = useState(false);
-	const [loading, setLoading] = useState(false);
 	const [compareDocument, setCompareDocument] = useState(undefined);
 	const [selectedParagraph, setSelectedParagraph] = useState(undefined);
 	const [itemsToCombine, setItemsToCombine] = useState({});
@@ -390,6 +389,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
@@ -430,6 +430,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		}
 	}, [state, dispatch]);
 
+	useEffect(() => {
+		setLoading(resultsLoading || filterCountsLoading || updateFilters);
+	}, [resultsLoading, filterCountsLoading, updateFilters]);
+
 	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
 	useEffect(() => {
 		if (stepIndex === 0 && showTutorial === true)
@@ -448,10 +452,12 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		}
 	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
+	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
+	// updateFilters is set alongside certain calls to setReturnedDocs().
 	useEffect(() => {
 		if (updateFilters) {
-			setUpdateFilters(false);
 			setFilterCountsLoading(true);
+			setUpdateFilters(false);
 			const newSearchSettings = { ...state.analystToolsSearchSettings };
 
 			const filters = {
@@ -500,14 +506,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		includeRevoked,
 	]);
 
-	useEffect(() => {
-		setLoading(resultsLoading || filterCountsLoading);
-	}, [resultsLoading, filterCountsLoading]);
-
-	useEffect(() => {
-		setUpdateFilters(true);
-	}, [returnedDocs]);
-
 	const handleSetParagraphs = useCallback(() => {
 		const newParagraphs = paragraphText
 			.split('\n')
@@ -551,7 +549,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	useEffect(() => {
 		if (state.runDocumentComparisonSearch) {
 			setResultsLoading(true);
-
 			const filters = {
 				orgFilters: getOrgToOrgQuery(allOrgsSelected, orgFilter),
 				typeFilters: getTypeQuery(allTypesSelected, typeFilter),
@@ -581,6 +578,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						setSelectedParagraph(paragraph);
 					}
 					setReturnedDocs(resp.data.docs);
+					setUpdateFilters(true);
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
@@ -588,6 +586,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				})
 				.catch(() => {
 					setReturnedDocs([]);
+					setUpdateFilters(true);
 					setState(dispatch, {
 						runDocumentComparisonSearch: false,
 					});
@@ -610,6 +609,17 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		selectedInput,
 	]);
 
+	// This useEffect ensures that returnedDocs changes before viewableDocs,
+	// thereby fixing a bug where viewableDocs would hold old returnedDocs.
+	// This is at the expense of possibly running the following useEffect
+	// in some unnecessary cases.
+	useEffect(() => {
+		if (returnedDocs.length > 0) {
+			setNeedsSort(true);
+		}
+	}, [returnedDocs]);
+
+	// This useEffect sorts docs, sets the selected paragraph, AND sets viewableDocs.
 	useEffect(() => {
 		if (needsSort && returnedDocs.length) {
 			setNeedsSort(false);
@@ -667,7 +677,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
 		if (id === selectedInput) {
 			setSelectedInput(newParagraphs[0].id);
-			setNeedsSort(true);
 			setToFirstResultofInput(newParagraphs[0].id);
 		}
 		setParagraphs(newParagraphs);
@@ -678,6 +687,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			return newReturnedDocsParagraphs.length;
 		});
 		setReturnedDocs(newReturnedDocs);
+		setUpdateFilters(true);
 	};
 
 	const handleCombine = () => {
@@ -698,7 +708,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setParagraphs(newParagraphs);
 		const newParagraphText = newParagraphs.map((paragraph) => paragraph.text).join('\n');
 		setParagraphText(newParagraphText);
-		setReturnedDocs([]);
 		handleCompare();
 	};
 
@@ -708,7 +717,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setNoResults(false);
 		setFilterChange(false);
 		setSelectedInput(paragraphs?.[0].id);
-		setNeedsSort(true);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
 	};
@@ -918,8 +926,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							trackEvent(trackingCategory, `${trackingAction}-ClearFiltersButton`, 'onClick');
 							resetAdvancedSettings(dispatch);
 							setNoResults(false);
-							setReturnedDocs([]);
-							setNeedsSort(true);
 							setState(dispatch, { runDocumentComparisonSearch: true });
 						}}
 						style={{ margin: 0, width: '100%' }}
@@ -930,8 +936,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 						<GCButton
 							onClick={() => {
 								setNoResults(false);
-								setReturnedDocs([]);
-								setNeedsSort(true);
 								setState(dispatch, { runDocumentComparisonSearch: true });
 							}}
 							style={{ margin: '10px 0 0 0', width: '100%' }}

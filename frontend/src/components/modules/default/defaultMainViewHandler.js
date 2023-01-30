@@ -204,6 +204,7 @@ export const getMainView = (props) => {
 		<>
 			{exportDialogVisible && (
 				<ExportResultsDialog
+					state={state}
 					open={exportDialogVisible}
 					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
 					searchObject={getSearchObjectFromString(prevSearchText)}

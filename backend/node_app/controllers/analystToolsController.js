@@ -118,7 +118,8 @@ class AnalystToolsController {
 					filters,
 					clientObj,
 					userId,
-					this.edaSearchUtility
+					this.edaSearchUtility,
+					this.dataLibrary
 				);
 			} else {
 				returnData = await policyCompareDocumentHelper(
