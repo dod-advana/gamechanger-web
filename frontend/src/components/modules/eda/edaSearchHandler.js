@@ -314,7 +314,7 @@ const EdaSearchHandler = {
 					return { ...e, children: [] };
 				}),
 				naics: resp.data.filters.fpds_naics_code,
-				naics_hierarchy: resp.data.hierarchical_filters.naics.map((e) => {
+				naicsCode_hierarchy: resp.data.hierarchical_filters.naics.map((e) => {
 					return { ...e, children: [] };
 				}),
 				duns: resp.data.filters.fpds_duns,

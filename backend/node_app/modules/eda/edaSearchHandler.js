@@ -547,7 +547,7 @@ class EdaSearchHandler extends SearchHandler {
 						must: [
 							{
 								match: {
-									picklist_name_s: picklistName,
+									picklist_name_s: picklistName === 'naicsCode' ? 'naics' : picklistName,
 								},
 							},
 						],
@@ -573,7 +573,7 @@ class EdaSearchHandler extends SearchHandler {
 			let cleanedResults = [];
 
 			filter_options_results.body.hits.hits.forEach((hit) => {
-				if (picklistName === 'naics') {
+				if (picklistName === 'naicsCode') {
 					cleanedResults.push({
 						code: hit._source.code_s,
 						name: hit._source.title_s,
