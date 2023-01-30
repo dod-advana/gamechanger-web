@@ -262,8 +262,9 @@ class SearchUtility {
 		// change all text to lower case, need upper case AND/OR for search so easier if everything is lower
 		const searchTextLower = searchText.toLowerCase();
 
-		//replace forward slashes will break ES query
-		let cleanSearch = searchTextLower.replace(/[\/{}]/g, '');
+		let cleanSearch = searchTextLower.replace(/[\{}]/g, '');
+		// escape forward slashes so they don't break ES query
+		cleanSearch = cleanSearch.replace(/[/]/g, '\\/');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
@@ -290,6 +291,7 @@ class SearchUtility {
 
 		const modSearchText = searchTextWithPlaceholders;
 		// return  query and list of search terms after parsing
+
 		return [modSearchText, termsArray];
 	}
 
@@ -332,7 +334,7 @@ class SearchUtility {
 
 	findLowerCaseWordsOrAcronyms(searchText) {
 		// finds lower case words, acronyms with . and with digits eg c2 or a.i.
-		return searchText.match(/\b([a-z\d\.])+(\b|)/g) || [];
+		return searchText.match(/\b([a-z\d\./\\])+(\b|)/g) || [];
 	}
 
 	convertPhraseToSequence(phrase) {
@@ -1199,6 +1201,7 @@ class SearchUtility {
 					},
 				},
 			];
+
 			let entitiesQuery = [
 				{
 					index: this.constants.GAME_CHANGER_OPTS.entityIndex,
@@ -1211,12 +1214,13 @@ class SearchUtility {
 					query: {
 						prefix: {
 							name: {
-								value: `${plainQuery}`,
+								value: `${plainQuery.trim()}`,
 							},
 						},
 					},
 				},
 			];
+
 			if (queryTypes.includes('title')) {
 				query = query.concat(titleQuery);
 			}
