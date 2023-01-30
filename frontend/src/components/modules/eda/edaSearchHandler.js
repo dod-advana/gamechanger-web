@@ -8,6 +8,7 @@ import {
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
+import { removeChildrenFromListDF } from './edaUtils';
 import { trackSearch } from '../../telemetry/Matomo';
 import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
@@ -355,6 +356,39 @@ const EdaSearchHandler = {
 
 			// regular search
 			let resp = {};
+			let minimizedEdaSearchSettings = { ...edaSearchSettings };
+			const naicsCode = [...minimizedEdaSearchSettings.naicsCode];
+			const psc = [...minimizedEdaSearchSettings.psc];
+
+			if (naicsCode && naicsCode.length > 0) {
+				// tidy up parent/child stuff
+				const rootOptions = naicsCode.filter((e) => !e.parent);
+				if (rootOptions.length > 0) {
+					rootOptions.forEach((root) => {
+						removeChildrenFromListDF(root, naicsCode);
+					});
+				}
+				naicsCode
+					.filter((e) => e.parent)
+					.sort((a, b) => a.code < b.code)
+					.forEach((node) => removeChildrenFromListDF(node, naicsCode));
+
+				minimizedEdaSearchSettings.naicsCode = naicsCode;
+			}
+			if (psc && psc.length > 0) {
+				// tidy up parent/child stuff
+				const rootOptions = psc.filter((e) => !e.parent);
+				if (rootOptions.length > 0) {
+					rootOptions.forEach((root) => {
+						removeChildrenFromListDF(root, psc);
+					});
+				}
+				psc.filter((e) => e.parent)
+					.sort((a, b) => a.code < b.code)
+					.forEach((node) => removeChildrenFromListDF(node, psc));
+
+				minimizedEdaSearchSettings.psc = psc;
+			}
 			try {
 				resp = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
@@ -365,7 +399,7 @@ const EdaSearchHandler = {
 						showTutorial,
 						tiny_url,
 						combinedSearch,
-						edaSearchSettings,
+						edaSearchSettings: minimizedEdaSearchSettings,
 					},
 				});
 
