@@ -13,7 +13,7 @@ const initState = {
 		psc: [],
 		psc_hierarchy: [],
 		naics: [],
-		naics_hierarchy: [],
+		naicsCode_hierarchy: [],
 		duns: [],
 		modNumber: [],
 	},

@@ -102,7 +102,7 @@ export const insertChildrenBF = (root, parentOfChildren, newChildren) => {
 
 		if (currNode.code === parentOfChildren.code) {
 			currNode.children = newChildren;
-			return currNode;
+			break;
 		}
 
 		// remove current node from array of nodes to visit

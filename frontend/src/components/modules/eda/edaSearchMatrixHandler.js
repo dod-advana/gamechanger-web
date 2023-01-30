@@ -978,7 +978,14 @@ const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) 
 		insertChildrenBF(root, node, newChildren)
 	);
 
-	setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
+	const searchSettings = { ...state.edaSearchSettings };
+	const selectedOptions = [...searchSettings[filterName]];
+
+	if (_.findIndex(selectedOptions, (e) => e.code === node.code) !== -1) {
+		searchSettings[filterName] = selectedOptions.concat(newChildren);
+	}
+
+	setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData, edaSearchSettings: searchSettings });
 };
 
 const EDASearchMatrixHandler = (props) => {
@@ -1066,7 +1073,11 @@ const EDASearchMatrixHandler = (props) => {
 
 			// we are deselecting an option
 			if (_.findIndex(newNaics, (node) => node.code === naics) !== -1) {
-				newNaics = deselectHierarchicalFilterOption(naicsNode, newNaics, state.edaFilterData.naics_hierarchy);
+				newNaics = deselectHierarchicalFilterOption(
+					naicsNode,
+					newNaics,
+					state.edaFilterData.naicsCode_hierarchy
+				);
 			}
 			// we are selecting an option, also select children
 			else if (naicsNode.hasChildren) {
@@ -1083,7 +1094,7 @@ const EDASearchMatrixHandler = (props) => {
 	);
 
 	const naicsFetchChildren = useCallback(
-		(node) => getChildrenHierarchicalFilter(node, 'naics', state, dispatch),
+		(node) => getChildrenHierarchicalFilter(node, 'naicsCode', state, dispatch),
 		[state, dispatch]
 	);
 
@@ -1272,7 +1283,7 @@ const EDASearchMatrixHandler = (props) => {
 					>
 						<div style={styles.width100}>
 							<EdaHierarchicalFilter
-								options={state.edaFilterData.naics_hierarchy}
+								options={state.edaFilterData.naicsCode_hierarchy}
 								fetchChildren={naicsFetchChildren}
 								onOptionClick={naicsOnOptionClick}
 								optionsSelected={state.edaSearchSettings.naicsCode}
