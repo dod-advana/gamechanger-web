@@ -82,3 +82,110 @@ export const getDisplayTitle = (item) => {
 		}
 	}
 };
+
+// TREE FUNCTIONS (helpers for hierarchical filters)
+
+/**
+ * Insert children for a specific node in a tree (do nothing if node not present).
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Object} parentOfChildren - The node that is the parent for the inserted children.
+ * @param {Array} newChildren - The children nodes to be inserted.
+ *
+ * @return {Object} - returns root node of unmodified tree or returns node that was modified.
+ */
+export const insertChildrenBF = (root, parentOfChildren, newChildren) => {
+	let nodesToVisit = [root];
+	while (nodesToVisit.length > 0) {
+		// get current node in breadth first traversal
+		const currNode = nodesToVisit[0];
+
+		if (currNode.code === parentOfChildren.code) {
+			currNode.children = newChildren;
+			return currNode;
+		}
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the end of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = nodesToVisit.concat(currNode.children);
+		}
+	}
+	return root;
+};
+
+/**
+ * Navigate a tree of filter options to find the parents (including grandparents and so on) of a given node
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Object} childNode - The child node whose parents we are searching for.
+ *
+ * @return {Array} - of nodes of parents of childNode
+ *
+ * example: tree structured like this:
+ * 								A
+ * 						B				C
+ * 					D		E				F
+ * root = A, childNode = B, returns [A]
+ * root = A, childNode = F, returns [A, C]
+ */
+export const getParentsOfChild = (root, childNode) => {
+	let nodesToVisit = [root];
+	let parentCodes = [];
+
+	while (nodesToVisit.length > 0) {
+		// get current node in depth first traversal
+		const currNode = nodesToVisit[0];
+
+		if (parentCodes.length > 1 && parentCodes[parentCodes.length - 1].parent === currNode.parent) {
+			parentCodes = parentCodes.slice(0, -1);
+		}
+		parentCodes.push(currNode);
+
+		// if we found the child our traversal is done
+		if (currNode.code === childNode.code) {
+			// don't include the childNode in the parentCodes
+			return parentCodes.slice(0, -1);
+		}
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the beginning of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = currNode.children.concat(nodesToVisit);
+		} else {
+			parentCodes = parentCodes.slice(0, -1);
+		}
+	}
+	return [];
+};
+
+/**
+ * Do a breadth-first traversal of a tree of and apply a function to each node
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Function} func - The function to apply to each node
+ *
+ * @return {undefined} - no return value, just applies the function to each node
+ */
+export const applyFunctionBF = (root, func) => {
+	let nodesToVisit = [root];
+	while (nodesToVisit.length > 0) {
+		// get current node in breadth first traversal
+		const currNode = nodesToVisit[0];
+
+		// apply func to current node
+		func(currNode);
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the end of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = nodesToVisit.concat(currNode.children);
+		}
+	}
+};

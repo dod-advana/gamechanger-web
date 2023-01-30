@@ -14,6 +14,7 @@ import { numberWithCommas } from '../../../utils/gamechangerUtils';
 import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
 import EdaHierarchicalFilter from './edaHierarchicalFilter';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import { insertChildrenBF, getParentsOfChild, applyFunctionBF } from './edaUtils';
 import _ from 'lodash';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -947,113 +948,17 @@ export const getAdvancedOptions = (props) => {
 	);
 };
 
-// TREE FUNCTIONS (helpers for hierarchical filters)
-
 /**
- * Insert children for a specific node in a tree (do nothing if node not present).
+ * Fetch the children for a particular node in the hierarchical filter data & update
+ * filter options in state.
  *
- * @param {Object} root - The root node of the tree.
- * @param {Object} parentOfChildren - The node that is the parent for the inserted children.
- * @param {Array} newChildren - The children nodes to be inserted.
+ * @param {Object} nodee - The node whose children are to be fetched
+ * @param {String} filterName - The name of the filter (ex: 'psc')
+ * @param {Object} state - The eda state object
+ * @param {Function} dispatch - The dispatch function provided by Context
  *
- * @return {Object} - returns root node of (possibly) modified tree.
+ * @return {undefined} - no return value, just calls setState
  */
-const insertChildrenBF = (root, parentOfChildren, newChildren) => {
-	let nodesToVisit = [root];
-	while (nodesToVisit.length > 0) {
-		// get current node in breadth first traversal
-		const currNode = nodesToVisit[0];
-
-		if (currNode.code === parentOfChildren.code) {
-			currNode.children = newChildren;
-			return root;
-		}
-
-		// remove current node from array of nodes to visit
-		nodesToVisit = nodesToVisit.slice(1);
-
-		// if current node has children, add them to the end of array of nodes to visit
-		if (currNode.children && currNode.children.length > 0) {
-			nodesToVisit = nodesToVisit.concat(currNode.children);
-		}
-	}
-	return root;
-};
-
-/**
- * Navigate a tree of filter options to find the parents (including grandparents and so on) of a given node
- *
- * @param {Object} root - The root node of the tree.
- * @param {Object} childNode - The child node whose parents we are searching for.
- *
- * @return {Array} - of nodes of parents of childNode
- *
- * example: tree structured like this:
- * 								A
- * 						B				C
- * 					D		E				F
- * root = A, childNode = B, returns [A]
- * root = A, childNode = F, returns [A, C]
- */
-const getParentsOfChild = (root, childNode) => {
-	let nodesToVisit = [root];
-	let parentCodes = [];
-
-	while (nodesToVisit.length > 0) {
-		// get current node in depth first traversal
-		const currNode = nodesToVisit[0];
-
-		if (parentCodes.length > 1 && parentCodes[parentCodes.length - 1].parent === currNode.parent) {
-			parentCodes = parentCodes.slice(0, -1);
-		}
-		parentCodes.push(currNode);
-
-		// if we found the child our traversal is done
-		if (currNode.code === childNode.code) {
-			// don't include the childNode in the parentCodes
-			return parentCodes.slice(0, -1);
-		}
-
-		// remove current node from array of nodes to visit
-		nodesToVisit = nodesToVisit.slice(1);
-
-		// if current node has children, add them to the beginning of array of nodes to visit
-		if (currNode.children && currNode.children.length > 0) {
-			nodesToVisit = currNode.children.concat(nodesToVisit);
-		} else {
-			parentCodes = parentCodes.slice(0, -1);
-		}
-	}
-	return [];
-};
-
-/**
- * Do a breadth-first traversal of a tree of and apply a function to each node
- *
- * @param {Object} root - The root node of the tree.
- * @param {Function} func - The function to apply to each node
- *
- * @return {undefined} - no return value, just applies the function to each node
- */
-const applyFunctionBF = (root, func) => {
-	let nodesToVisit = [root];
-	while (nodesToVisit.length > 0) {
-		// get current node in breadth first traversal
-		const currNode = nodesToVisit[0];
-
-		// apply func to current node
-		func(currNode);
-
-		// remove current node from array of nodes to visit
-		nodesToVisit = nodesToVisit.slice(1);
-
-		// if current node has children, add them to the end of array of nodes to visit
-		if (currNode.children && currNode.children.length > 0) {
-			nodesToVisit = nodesToVisit.concat(currNode.children);
-		}
-	}
-};
-
 const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) => {
 	const newFilterData = { ...state.edaFilterData };
 	const resp = await gameChangerAPI.callSearchFunction({
@@ -1086,6 +991,16 @@ const EDASearchMatrixHandler = (props) => {
 		setState(dispatch, { runSearch: true });
 	};
 
+	/**
+	 * Deselects an option in a hierarchical filter. Also deselects the option's children, and all its
+	 * parents (including grandparents, etc.).
+	 *
+	 * @param {Object} nodeToDeselect - The node being deselected
+	 * @param {Array} selectedNodes - The currently selected nodes/options
+	 * @param {Array} node_hierarchy - The root nodes of the tree of hierarchical filter options
+	 *
+	 * @return {Array} - Array of now selected nodes
+	 */
 	const deselectHierarchicalFilterOption = useCallback((nodeToDeselect, selectedNodes, node_hierarchy) => {
 		const { code } = nodeToDeselect;
 		let newSelectedNodes = [...selectedNodes];
