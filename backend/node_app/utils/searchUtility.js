@@ -2159,7 +2159,12 @@ class SearchUtility {
 		}
 
 		if (cloneName === 'eda') {
-			if (permissions.includes('View EDA') || permissions.includes('Webapp Super Admin')) {
+			if (
+				permissions.includes('View EDA') ||
+				permissions.includes('eda Admin') ||
+				permissions.includes('Webapp Super Admin') ||
+				permissions.includes('Gamechanger Super Admin')
+			) {
 				esClientName = 'eda';
 				esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.index;
 			} else {

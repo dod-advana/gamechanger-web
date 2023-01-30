@@ -60,7 +60,7 @@ describe('TextSuggestionController', function () {
 									_score: 1,
 									_source: {
 										display_title_s:
-											'H.R. 4402 To authorize the Secretary of the Navy to establish a surface danger zone over the Guam National Wildlife Refuge or any portion thereof to support the operation of a live-fire training range complex.',
+											'H.R. 4402: To authorize the Secretary of the Navy to establish a surface danger zone over the Guam National Wildlife Refuge or any portion thereof to support the operation of a live-fire training range complex.',
 									},
 								},
 								{
@@ -70,7 +70,7 @@ describe('TextSuggestionController', function () {
 									_score: 1,
 									_source: {
 										display_title_s:
-											'H.R. 3183 An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
+											'H.R. 3183: An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
 									},
 								},
 								{
@@ -80,7 +80,7 @@ describe('TextSuggestionController', function () {
 									_score: 1,
 									_source: {
 										display_title_s:
-											'H.R. 3183 An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
+											'H.R. 3183: An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
 									},
 								},
 								{
@@ -89,7 +89,7 @@ describe('TextSuggestionController', function () {
 									_id: '4cc4a309c86279761b140ff0e8581d0b442a024836219397a3be5489666232ed',
 									_score: 1,
 									_source: {
-										display_title_s: 'BUMEDINST 1500.29D NAVY MEDICINE COMMAND TRAINING PROGRAM',
+										display_title_s: 'BUMEDINST 1500.29D: NAVY MEDICINE COMMAND TRAINING PROGRAM',
 									},
 								},
 							],
@@ -413,10 +413,10 @@ describe('TextSuggestionController', function () {
 			const expected = {
 				autocorrect: ['navy'],
 				presearchTitle: [
-					'H.R. 4402 To authorize the Secretary of the Navy to establish a surface danger zone over the Guam National Wildlife Refuge or any portion thereof to support the operation of a live-fire training range complex.',
-					'H.R. 3183 An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
-					'H.R. 3183 An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
-					'BUMEDINST 1500.29D NAVY MEDICINE COMMAND TRAINING PROGRAM',
+					'H.R. 4402: To authorize the Secretary of the Navy to establish a surface danger zone over the Guam National Wildlife Refuge or any portion thereof to support the operation of a live-fire training range complex.',
+					'H.R. 3183: An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
+					'H.R. 3183: An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',
+					'BUMEDINST 1500.29D: NAVY MEDICINE COMMAND TRAINING PROGRAM',
 				],
 				presearchTopic: [],
 				presearchOrg: ['Navy Personnel Command', 'United States Navy'],

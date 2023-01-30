@@ -67,7 +67,7 @@ describe('AnalystToolsController', function () {
 									_source: { kw_doc_score_r: null },
 									fields: {
 										display_title_s: [
-											'DoDI 1304.12E DoD Military Personnel Accession Testing Programs',
+											'DoDI 1304.12E: DoD Military Personnel Accession Testing Programs',
 										],
 										display_org_s: ['Dept. of Defense'],
 										crawler_used_s: ['dod_issuances'],
@@ -143,7 +143,7 @@ describe('AnalystToolsController', function () {
 									_source: { kw_doc_score_r: null },
 									fields: {
 										display_title_s: [
-											'AFH 36-2235V12 INFORMATION FOR DESIGNERS OF INSTRUCTIONAL SYSTEMS TEST AND MEASUREMENT HANDBOOK',
+											'AFH 36-2235V12: INFORMATION FOR DESIGNERS OF INSTRUCTIONAL SYSTEMS TEST AND MEASUREMENT HANDBOOK',
 										],
 										display_org_s: ['Dept. of the Air Force'],
 										crawler_used_s: ['air_force_pubs'],
@@ -228,7 +228,7 @@ describe('AnalystToolsController', function () {
 									_source: { kw_doc_score_r: null },
 									fields: {
 										display_title_s: [
-											'CJCSI 6723.01B Global Combat Support System Family of Systems Requirements Management Structure',
+											'CJCSI 6723.01B: Global Combat Support System Family of Systems Requirements Management Structure',
 										],
 										display_org_s: ['Joint Chiefs of Staff'],
 										crawler_used_s: ['jcs_pubs'],
@@ -317,7 +317,7 @@ describe('AnalystToolsController', function () {
 									_score: 1,
 									_source: { kw_doc_score_r: 0.00001 },
 									fields: {
-										display_title_s: ['AECTP 400 MECHANICAL ENVIRONMENTAL TESTS'],
+										display_title_s: ['AECTP 400: MECHANICAL ENVIRONMENTAL TESTS'],
 										display_org_s: ['NATO'],
 										crawler_used_s: ['nato_stanag'],
 										doc_num: ['400'],
@@ -392,7 +392,7 @@ describe('AnalystToolsController', function () {
 									_source: { kw_doc_score_r: 0.00001 },
 									fields: {
 										display_title_s: [
-											'AOP 21 INITIATION SYSTEMS: TESTING FOR THE ASSESSMENT OF DETONATING EXPLOSIVE COMPONENTS',
+											'AOP 21: INITIATION SYSTEMS: TESTING FOR THE ASSESSMENT OF DETONATING EXPLOSIVE COMPONENTS',
 										],
 										display_org_s: ['NATO'],
 										crawler_used_s: ['nato_stanag'],
@@ -547,7 +547,7 @@ describe('AnalystToolsController', function () {
 						display_doc_type_s: 'Document',
 						display_org_s: 'Dept. of the Air Force',
 						display_title_s:
-							'AFH 36-2235V12 INFORMATION FOR DESIGNERS OF INSTRUCTIONAL SYSTEMS TEST AND MEASUREMENT HANDBOOK',
+							'AFH 36-2235V12: INFORMATION FOR DESIGNERS OF INSTRUCTIONAL SYSTEMS TEST AND MEASUREMENT HANDBOOK',
 						doc_num: '36-2235V12',
 						doc_type: 'AFH',
 						esIndex: null,
@@ -592,7 +592,7 @@ describe('AnalystToolsController', function () {
 						display_doc_type_s: 'Instruction',
 						display_org_s: 'Joint Chiefs of Staff',
 						display_title_s:
-							'CJCSI 6723.01B Global Combat Support System Family of Systems Requirements Management Structure',
+							'CJCSI 6723.01B: Global Combat Support System Family of Systems Requirements Management Structure',
 						doc_num: '6723.01B',
 						doc_type: 'CJCSI',
 						esIndex: null,
@@ -642,7 +642,7 @@ describe('AnalystToolsController', function () {
 						display_doc_type_s: 'Document',
 						display_org_s: 'NATO',
 						display_title_s:
-							'AOP 21 INITIATION SYSTEMS: TESTING FOR THE ASSESSMENT OF DETONATING EXPLOSIVE COMPONENTS',
+							'AOP 21: INITIATION SYSTEMS: TESTING FOR THE ASSESSMENT OF DETONATING EXPLOSIVE COMPONENTS',
 						doc_num: '21',
 						doc_type: 'AOP',
 						esIndex: null,
@@ -679,7 +679,7 @@ describe('AnalystToolsController', function () {
 						crawler_used_s: 'nato_stanag',
 						display_doc_type_s: 'Document',
 						display_org_s: 'NATO',
-						display_title_s: 'AECTP 400 MECHANICAL ENVIRONMENTAL TESTS',
+						display_title_s: 'AECTP 400: MECHANICAL ENVIRONMENTAL TESTS',
 						doc_num: '400',
 						doc_type: 'AECTP',
 						esIndex: null,
@@ -716,7 +716,7 @@ describe('AnalystToolsController', function () {
 						crawler_used_s: 'dod_issuances',
 						display_doc_type_s: 'Instruction',
 						display_org_s: 'Dept. of Defense',
-						display_title_s: 'DoDI 1304.12E DoD Military Personnel Accession Testing Programs',
+						display_title_s: 'DoDI 1304.12E: DoD Military Personnel Accession Testing Programs',
 						doc_num: '1304.12E',
 						doc_type: 'DoDI',
 						esIndex: null,
