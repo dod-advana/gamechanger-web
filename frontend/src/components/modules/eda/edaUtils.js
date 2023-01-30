@@ -1,4 +1,5 @@
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
+import _ from 'lodash';
 
 export const getEDAMetadataForPropertyTable = (edaFieldJSONMap, edaFields, item, edaFPDSMap) => {
 	const rows = [];
@@ -186,6 +187,35 @@ export const applyFunctionBF = (root, func) => {
 		// if current node has children, add them to the end of array of nodes to visit
 		if (currNode.children && currNode.children.length > 0) {
 			nodesToVisit = nodesToVisit.concat(currNode.children);
+		}
+	}
+};
+
+/**
+ * Remove all children of a root from a list
+ *
+ * @param {Object} root - The root node of the tree.
+ * @param {Array} list - The list of nodes
+ *
+ * @return {undefined} - no return value, just modifies the list
+ */
+export const removeChildrenFromListDF = (root, list) => {
+	let nodesToVisit = root.children;
+	if (!nodesToVisit) return;
+
+	while (nodesToVisit.length > 0) {
+		// get current node in depth first traversal
+		const currNode = nodesToVisit[0];
+
+		// remove curreent node from list
+		_.remove(list, currNode);
+
+		// remove current node from array of nodes to visit
+		nodesToVisit = nodesToVisit.slice(1);
+
+		// if current node has children, add them to the beginning of array of nodes to visit
+		if (currNode.children && currNode.children.length > 0) {
+			nodesToVisit = currNode.children.concat(nodesToVisit);
 		}
 	}
 };
