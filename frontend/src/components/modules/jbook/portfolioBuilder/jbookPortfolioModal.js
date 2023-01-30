@@ -259,7 +259,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		if (showModal) {
 			handleAddAdmin(user.id);
 		}
-	}, [showModal, user]);
+	}, [handleAddAdmin, showModal, user]);
 
 	/**
 	 *
