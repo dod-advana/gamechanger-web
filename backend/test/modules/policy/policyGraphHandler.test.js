@@ -156,7 +156,7 @@ describe('PolicyGraphHandler', function () {
 										properties: {
 											kw_doc_score_r: { low: 0, high: 0 },
 											display_org_s: 'Dept. of the Air Force',
-											display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+											display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 											signature: 'NA',
 											subject: 'NA',
 											change_date: 'NA',
@@ -237,7 +237,7 @@ describe('PolicyGraphHandler', function () {
 													kw_doc_score_r: { low: 0, high: 0 },
 													display_org_s: 'Dept. of the Air Force',
 													display_title_s:
-														'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+														'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 													signature: 'NA',
 													subject: 'NA',
 													change_date: 'NA',
@@ -364,7 +364,7 @@ describe('PolicyGraphHandler', function () {
 										properties: {
 											kw_doc_score_r: { low: 0, high: 0 },
 											display_org_s: 'Dept. of the Air Force',
-											display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+											display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 											signature: 'NA',
 											subject: 'NA',
 											change_date: 'NA',
@@ -445,7 +445,7 @@ describe('PolicyGraphHandler', function () {
 													kw_doc_score_r: { low: 0, high: 0 },
 													display_org_s: 'Dept. of the Air Force',
 													display_title_s:
-														'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+														'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 													signature: 'NA',
 													subject: 'NA',
 													change_date: 'NA',
@@ -778,7 +778,7 @@ describe('PolicyGraphHandler', function () {
 								crawler_used_s: 'air_force_pubs',
 								display_doc_type_s: 'Document',
 								display_org_s: 'Dept. of the Air Force',
-								display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+								display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 								doc_id: 'AFMAN 11-246V7.pdf_0',
 								doc_num: '11-246V7',
 								doc_type: 'AFMAN',
@@ -918,7 +918,7 @@ describe('PolicyGraphHandler', function () {
 									labels: ['Document'],
 									properties: {
 										kw_doc_score_r: 0.00001,
-										display_title_s: 'AASSEP 4 TYRE VALVE COUPLINGS',
+										display_title_s: 'AASSEP 4: TYRE VALVE COUPLINGS',
 										display_org_s: 'NATO',
 										signature: 'NA',
 										subject: 'NA',
@@ -1064,7 +1064,7 @@ describe('PolicyGraphHandler', function () {
 							crawler_used_s: 'nato_stanag',
 							display_doc_type_s: 'Document',
 							display_org_s: 'NATO',
-							display_title_s: 'AASSEP 4 TYRE VALVE COUPLINGS',
+							display_title_s: 'AASSEP 4: TYRE VALVE COUPLINGS',
 							doc_id: 'AASSEP 4.pdf_0',
 							doc_num: '4',
 							doc_type: 'AASSEP',
@@ -2880,7 +2880,7 @@ describe('PolicyGraphHandler', function () {
 									pagerank_r: 0.00001,
 								},
 								fields: {
-									display_title_s: ['DoDI 5000.02T Operation of the Defense Acquisition System'],
+									display_title_s: ['DoDI 5000.02T: Operation of the Defense Acquisition System'],
 									display_org_s: ['Dept. of Defense'],
 									crawler_used_s: ['dod_issuances'],
 									doc_num: ['5000.02T'],
@@ -3173,7 +3173,7 @@ describe('PolicyGraphHandler', function () {
 					totalCount: 1,
 					docs: [
 						{
-							display_title_s: 'DoDI 5000.02T Operation of the Defense Acquisition System',
+							display_title_s: 'DoDI 5000.02T: Operation of the Defense Acquisition System',
 							display_org_s: 'Dept. of Defense',
 							crawler_used_s: 'dod_issuances',
 							doc_num: '5000.02T',

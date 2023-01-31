@@ -49,9 +49,13 @@ const StyledFrontCardContent = styled.div`
 
 		.page-hits {
 			min-width: 160px;
-			height: 100%;
+			height: fit-content;
+			max-height: 150px;
+			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
+			position: relative;
+			z-index: 1;
 
 			.page-hit {
 				display: flex;
@@ -482,28 +486,33 @@ const getItemPageHits = (item) => {
 };
 
 const consolidateItemPageHits = (item) => {
-	const consolidateHits = [];
 	const desiredOrder = [
+		'Budget Act. Title',
+		'Budget Sub Act. Title',
 		'Project Description',
 		'Justification',
 		'Summary Remarks',
 		'Schedule Details',
+		'Metrics',
 		'Project Notes',
 		'Acquisition Strat.',
+		'Milestones',
 		'Accomplishments',
 		'Contracts',
 	];
-
+	let consolidateHits = [];
 	for (const { title, snippet } of item.pageHits) {
-		if (title === 'Appropriation Title' || title === 'PE Title') {
-			continue;
-		}
 		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
 			consolidateHits[consolidateHits.length - 1].occurrences += 1;
 			consolidateHits[consolidateHits.length - 1].snippet += `<br>- ${snippet} `;
 		} else {
 			consolidateHits.push({ title, snippet, occurrences: 1 });
 		}
+	}
+	if (consolidateHits.length > 1) {
+		consolidateHits = consolidateHits.filter(
+			(hit) => hit.title !== 'Appropriation Title' && hit.title !== 'PE Title' && hit.title !== 'BLI'
+		);
 	}
 	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
 		if (occurrences > 1) {

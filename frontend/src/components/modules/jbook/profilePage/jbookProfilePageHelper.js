@@ -297,6 +297,7 @@ const aggregateProjectDescriptions = (projectData) => {
 		// both or rdoc
 		appropriationTitle: { title: 'Appropriation Title' },
 		budgetActivityTitle: { title: 'Budget Activity Title' },
+		budgetSubActivityTitle: { title: 'Budget Sub Activity Title' },
 		programElementTitle: { title: 'Program Element Title' },
 		projectMissionDescription: {
 			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
