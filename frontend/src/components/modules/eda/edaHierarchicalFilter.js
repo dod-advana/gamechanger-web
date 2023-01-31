@@ -45,6 +45,10 @@ const styles = {
 		marginTop: '5px',
 		marginBottom: '15px',
 	},
+	icon: {
+		width: '24px',
+		height: '24px',
+	},
 	width100: {
 		width: '100%',
 	},
@@ -80,6 +84,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		const currentlyExpanded = optionsExpanded[root.code];
 		const fetchingChildren = fetchingChildrenFor[root.code];
 		const childrenFetched = root.children && root.children.length > 0;
+		const { hasChildren } = root;
 		const displayName = root.name === root.code ? root.name : `${root.name} - ${root.code}`;
 
 		let expandedSection = <></>;
@@ -133,7 +138,10 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 						newFetchingChildrenFor[root.code] = false;
 						setFetchingChildrenFor(newFetchingChildrenFor);
 					})
-					.catch((err) => console.log('error fetching children'));
+					.catch((err) => {
+						console.log(err);
+						console.log('error fetching children');
+					});
 			}
 
 			// handle toggling the section open/closed
@@ -145,13 +153,19 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		return (
 			<FormGroup key={root.code}>
 				<div style={{ display: 'flex', width: '100%', marginBottom: '10px' }}>
-					<Button variant="text" style={styles.hierarchicalFilterButton} onClick={onExpandClick}>
-						{currentlyExpanded ? (
-							<ExpandMoreIcon style={styles.icon} />
-						) : (
-							<CheveronRightIcon style={styles.icon} />
-						)}
-					</Button>
+					{hasChildren ? (
+						<Button variant="text" style={styles.hierarchicalFilterButton} onClick={onExpandClick}>
+							{currentlyExpanded ? (
+								<ExpandMoreIcon style={styles.icon} />
+							) : (
+								<CheveronRightIcon style={styles.icon} />
+							)}
+						</Button>
+					) : (
+						<div style={styles.hierarchicalFilterButton}>
+							<div style={styles.icon} />
+						</div>
+					)}
 					<FormControlLabel
 						name={root.name}
 						value={root.code}
