@@ -596,7 +596,7 @@ const getMetadataTableData = (
 			Value: retrieveProjectField(projectData.budgetCycle),
 		},
 		{
-			Key: 'Appropriation',
+			Key: 'Main Account',
 			Value: retrieveProjectField(projectData.appropriationNumber),
 		},
 		{
