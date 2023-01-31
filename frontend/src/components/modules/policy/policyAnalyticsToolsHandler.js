@@ -159,7 +159,7 @@ const renderDates = (state, dispatch) => {
 						<DatePickerWrapper>
 							<label>Start Date</label>
 							<DatePicker
-								selected={state.searchSettings.publicationDateFilter[0]}
+								selected={state.analystToolsSearchSettings.publicationDateFilter[0]}
 								value={
 									state.analystToolsSearchSettings.publicationDateFilter[0]
 										? state.analystToolsSearchSettings.publicationDateFilter[0]
@@ -168,7 +168,7 @@ const renderDates = (state, dispatch) => {
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										handleDateRangeChange(
-											state.searchSettings.publicationDateFilter[0],
+											state.analystToolsSearchSettings.publicationDateFilter[0],
 											true,
 											'publication',
 											state,
@@ -177,10 +177,10 @@ const renderDates = (state, dispatch) => {
 									}
 								}}
 								onChange={(date) => {
-									const newSearchSettings = _.cloneDeep(state.searchSettings);
+									const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 									newSearchSettings.publicationDateFilter[0] = date;
 									setState(dispatch, {
-										searchSettings: newSearchSettings,
+										analystToolsSearchSettings: newSearchSettings,
 									});
 								}}
 								onSelect={(date) => {
@@ -191,7 +191,7 @@ const renderDates = (state, dispatch) => {
 						<DatePickerWrapper>
 							<label>End Date</label>
 							<DatePicker
-								selected={state.searchSettings.publicationDateFilter[1]}
+								selected={state.analystToolsSearchSettings.publicationDateFilter[1]}
 								value={
 									state.analystToolsSearchSettings.publicationDateFilter[1]
 										? state.analystToolsSearchSettings.publicationDateFilter[1]
@@ -200,7 +200,7 @@ const renderDates = (state, dispatch) => {
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										handleDateRangeChange(
-											state.searchSettings.publicationDateFilter[1],
+											state.analystToolsSearchSettings.publicationDateFilter[1],
 											false,
 											'publication',
 											state,
@@ -209,10 +209,10 @@ const renderDates = (state, dispatch) => {
 									}
 								}}
 								onChange={(date) => {
-									const newSearchSettings = _.cloneDeep(state.searchSettings);
+									const newSearchSettings = _.cloneDeep(state.analystToolsSearchSettings);
 									newSearchSettings.publicationDateFilter[1] = date;
 									setState(dispatch, {
-										searchSettings: newSearchSettings,
+										analystToolsSearchSettings: newSearchSettings,
 									});
 								}}
 								onSelect={(date) => {
