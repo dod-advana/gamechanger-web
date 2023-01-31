@@ -254,8 +254,8 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		}
 	}, [modalData]);
 
+	//Automatically adds the user as the admin when they attempt to create a new portfolio
 	useEffect(() => {
-		//Automatically adds the user as the admin when they attempt to create a new portfolio
 		if (showModal) {
 			handleAddAdmin(user.id);
 		}
