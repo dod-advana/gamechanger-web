@@ -531,10 +531,6 @@ const getMetadataTableData = (
 ) => {
 	return [
 		{
-			Key: projectData.budgetLineItem ? 'Budget Line Item' : 'Program Element',
-			Value: projectData.budgetLineItem ? projectData.budgetLineItem : projectData.programElement,
-		},
-		{
 			Key: 'Budget Year 1 Requested',
 			Value: getTableFormattedCost(projectData.by1Request),
 		},
@@ -573,6 +569,10 @@ const getMetadataTableData = (
 			Key: 'BY5',
 			Value: getTableFormattedCost(projectData.p4085_toa_by5_d || projectData.proj_fund_by5_d),
 			Hidden: budgetType === 'O&M',
+		},
+		{
+			Key: projectData.budgetLineItem ? 'Budget Line Item' : 'Program Element',
+			Value: projectData.budgetLineItem ? projectData.budgetLineItem : projectData.programElement,
 		},
 		{
 			Key: 'Project Number',
