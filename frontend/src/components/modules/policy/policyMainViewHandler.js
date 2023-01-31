@@ -341,17 +341,7 @@ const handleSources = async (state, dispatch, cancelToken, gameChangerAPI) => {
 };
 
 const formatString = (text) => {
-	let titleCase = text
-		.split(' ')
-		.map(function (val) {
-			if (val.charAt(0) === '(' && val.charAt(val.length - 1) === ')') {
-				return val;
-			} else {
-				return val.charAt(0).toUpperCase() + val.substr(1).toLowerCase();
-			}
-		})
-		.join(' ');
-	return _.truncate(titleCase, { length: 60, separator: /,?\.* +/ });
+	return _.truncate(text, { length: 60, separator: /,?\.* +/ });
 };
 
 const handlePageLoad = async (props) => {

@@ -52,7 +52,7 @@ export const scrollToContentTop = () => {
 };
 
 const GameChangerPage = (props) => {
-	const { cloneData, history, jupiter, tutorialData, location } = props;
+	const { cloneData, history, jupiter, tutorialData, location, slideOutMenuRef } = props;
 
 	const cloneName = cloneData.clone_name;
 
@@ -68,10 +68,14 @@ const GameChangerPage = (props) => {
 			setState(dispatch, { history: history, historySet: true });
 		}
 
+		if (!state.slideOutMenuRef) {
+			setState(dispatch, { slideOutMenuRef: slideOutMenuRef });
+		}
+
 		if (state.cloneDataSet && state.cloneData?.display_name) {
 			document.title = `ADVANA | ${cloneData.display_name.toUpperCase()}`;
 		}
-	}, [cloneData, state, dispatch, history]);
+	}, [cloneData, state, dispatch, history, slideOutMenuRef]);
 
 	useEffect(() => {
 		if (!state.userDataSet) {
