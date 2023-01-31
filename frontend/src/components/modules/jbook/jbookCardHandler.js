@@ -933,12 +933,7 @@ const cardHandler = {
 							/>
 
 							{review.length > 0 && (
-								<div className={'portfolio-tags-container'}>
-									Tags:{' '}
-									{state.portfolios.map((el) => el.name).includes('AI Inventory')
-										? renderPortfolioTags(review)[review.length - 1]
-										: renderPortfolioTags(review)}
-								</div>
+								<div className={'portfolio-tags-container'}>Tags: {renderPortfolioTags(review)}</div>
 							)}
 						</StyledFrontCardContent>
 					);
