@@ -160,11 +160,7 @@ const renderDates = (state, dispatch) => {
 							<label>Start Date</label>
 							<DatePicker
 								selected={state.analystToolsSearchSettings.publicationDateFilter[0]}
-								value={
-									state.analystToolsSearchSettings.publicationDateFilter[0]
-										? state.analystToolsSearchSettings.publicationDateFilter[0]
-										: ''
-								}
+								value={state.analystToolsSearchSettings.publicationDateFilter[0] || ''}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										handleDateRangeChange(
@@ -192,11 +188,7 @@ const renderDates = (state, dispatch) => {
 							<label>End Date</label>
 							<DatePicker
 								selected={state.analystToolsSearchSettings.publicationDateFilter[1]}
-								value={
-									state.analystToolsSearchSettings.publicationDateFilter[1]
-										? state.analystToolsSearchSettings.publicationDateFilter[1]
-										: ''
-								}
+								value={state.analystToolsSearchSettings.publicationDateFilter[1] || ''}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										handleDateRangeChange(
