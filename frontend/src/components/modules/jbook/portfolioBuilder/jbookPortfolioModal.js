@@ -68,11 +68,12 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		setData(emptyData);
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleDataChange = useCallback((val, key) => {
 		const newData = { ...data };
 		newData[key] = val;
 		setData(newData);
-	}, []);
+	});
 
 	// add user to portfolio data user_ids
 	const handleAddUser = (id) => {
