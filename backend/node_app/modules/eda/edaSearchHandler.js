@@ -550,15 +550,12 @@ class EdaSearchHandler extends SearchHandler {
 									picklist_name_s: picklistName === 'naicsCode' ? 'naics' : picklistName,
 								},
 							},
-						],
-						should: [
 							{
 								match: {
 									parentCode_s: parentCode,
 								},
 							},
 						],
-						minimum_should_match: 1,
 					},
 				},
 			};
