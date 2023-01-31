@@ -10,7 +10,7 @@ import GCTooltip from '../../common/GCToolTip';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 import Typography from '@material-ui/core/Typography';
-import { removeChildrenFromListDF } from './edaUtils';
+import { removeChildrenFromListDF, applyFunctionBF } from './edaUtils';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -86,18 +86,26 @@ const EDAViewHeaderHandler = (props) => {
 		if (isArray(newSearchSettings[type])) {
 			let index;
 			if (type === 'naicsCode' || type === 'psc') {
-				index = _.findIndex(
+				const nodeToDeselect = _.find(
 					newSearchSettings[type],
 					(node) => node.code === option || `${node.code}*` === option
 				);
+				if (nodeToDeselect && nodeToDeselect.hasChildren) {
+					let newSelectedNodes = newSearchSettings[type];
+					applyFunctionBF(nodeToDeselect, (node) => {
+						newSelectedNodes = newSelectedNodes.filter(
+							(e) => e.code !== node.code && `${e.code}*` !== node.code
+						);
+					});
+					newSearchSettings[type] = newSelectedNodes;
+				}
 			} else {
 				index = newSearchSettings[type].indexOf(option);
-			}
-
-			if (index !== -1) {
-				newSearchSettings[type].splice(index, 1);
-			} else {
-				newSearchSettings[type].push(option);
+				if (index !== -1) {
+					newSearchSettings[type].splice(index, 1);
+				} else {
+					newSearchSettings[type].push(option);
+				}
 			}
 		} else if (typeof newSearchSettings[type] === 'string') {
 			if (type === 'contractsOrMods') {
