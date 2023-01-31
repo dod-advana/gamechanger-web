@@ -148,6 +148,21 @@ const EDADocumentsComparisonTool = ({
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
 			setCollapseKeys([]);
+			// This is necessary for documents that are dragged and dropped
+			// if their input is too big, we're chunking it down based on the text surrounding "Summary of Changes"
+			// cuz that seems to be a common section in all the sample documents I've seen
+			// 5000 chars is around the range for an acceptable search length
+			let newParagraphs = paragraphs;
+			if (newParagraphs.length === 1 && newParagraphs[0].text.length > 5500) {
+				if (newParagraphs[0].text.includes('SUMMARY OF CHANGES')) {
+					newParagraphs[0].text = newParagraphs[0].text.slice(
+						newParagraphs[0].text.indexOf('SUMMARY OF CHANGES'),
+						newParagraphs[0].text.indexOf('SUMMARY OF CHANGES') + 5000
+					);
+				} else {
+					newParagraphs[0].text = newParagraphs[0].text.slice(0, 5000);
+				}
+			}
 
 			const filters = {
 				allOrgsSelected,
@@ -160,7 +175,7 @@ const EDADocumentsComparisonTool = ({
 			};
 
 			gameChangerAPI
-				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
+				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: newParagraphs, filters })
 				.then((resp) => {
 					if (resp.data.docs.length <= 0) {
 						setNoResults(true);
