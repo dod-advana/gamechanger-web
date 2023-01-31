@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { Redirect, Route, HashRouter as Router, Switch } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -205,7 +205,7 @@ const TrackedPDFView = ({ component: Component, render: Render, location, ...res
 	return <Route {...rest} render={(props) => <RenderComponent {...rest} {...props} />} />;
 };
 
-const getGamechangerRoute = (clone, tutorialData) => {
+const getGamechangerRoute = (clone, tutorialData, slideOutMenuRef) => {
 	const cloneRoutes = [];
 	const name = clone.clone_name;
 	const GamechangerProvider = getProvider(name);
@@ -243,6 +243,7 @@ const getGamechangerRoute = (clone, tutorialData) => {
 							isClone={true}
 							cloneData={clone}
 							location={location}
+							slideOutMenuRef={slideOutMenuRef}
 						/>
 					</GamechangerProvider>
 				)}
@@ -264,13 +265,13 @@ const getGamechangerRoute = (clone, tutorialData) => {
 	return cloneRoutes;
 };
 
-const getGamechangerClones = async (tutorialData, setGameChangerCloneRoutes) => {
+const getGamechangerClones = async (tutorialData, setGameChangerCloneRoutes, slideOutMenuRef) => {
 	try {
 		const data = await gameChangerAPI.getCloneData();
 		const cloneRoutes = [];
 		_.forEach(data.data, (clone) => {
 			if (clone.is_live) {
-				cloneRoutes.push(...getGamechangerRoute(clone, tutorialData));
+				cloneRoutes.push(...getGamechangerRoute(clone, tutorialData, slideOutMenuRef));
 			}
 		});
 		setGameChangerCloneRoutes(cloneRoutes);
@@ -284,6 +285,7 @@ const App = () => {
 	const [gameChangerCloneRoutes, setGameChangerCloneRoutes] = useState([]);
 	const [initialized, setInitialized] = useState(false);
 	const [tokenLoaded, setTokenLoaded] = useState(false);
+	const slideOutMenuRef = useRef(null);
 
 	const isShowNothingButComponent = (location) => {
 		const includePaths = ['/pdfviewer/gamechanger', '/gamechanger/internalUsers/track/me', '/gamechanger-details'];
@@ -322,7 +324,7 @@ const App = () => {
 					console.log('Failed to retrieve Tutorial Overlay data');
 				}
 			}
-			await getGamechangerClones(tutorialData, setGameChangerCloneRoutes);
+			await getGamechangerClones(tutorialData, setGameChangerCloneRoutes, slideOutMenuRef);
 		};
 		if (!initialized) {
 			setInitialized(true);
@@ -357,7 +359,11 @@ const App = () => {
 								<SlideOutMenuContextHandler>
 									<>
 										<ErrorBoundary FallbackComponent={ErrorPage} onError={errorHandler}>
-											{!isShowNothingButComponent(location) && <SlideOutMenu />}
+											{!isShowNothingButComponent(location) && (
+												<div ref={slideOutMenuRef}>
+													<SlideOutMenu />
+												</div>
+											)}
 											<Switch>
 												{tokenLoaded && gameChangerCloneRoutes.map((route) => route(location))}
 												<Route
