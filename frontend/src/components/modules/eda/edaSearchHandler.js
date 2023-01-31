@@ -373,7 +373,9 @@ const EdaSearchHandler = {
 					.sort((a, b) => a.code < b.code)
 					.forEach((node) => removeChildrenFromListDF(node, naicsCode));
 
-				minimizedEdaSearchSettings.naicsCode = naicsCode;
+				minimizedEdaSearchSettings.naicsCode = naicsCode.map((e) => {
+					return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+				});
 			}
 			if (psc && psc.length > 0) {
 				// tidy up parent/child stuff
@@ -387,7 +389,9 @@ const EdaSearchHandler = {
 					.sort((a, b) => a.code < b.code)
 					.forEach((node) => removeChildrenFromListDF(node, psc));
 
-				minimizedEdaSearchSettings.psc = psc;
+				minimizedEdaSearchSettings.psc = psc.map((e) => {
+					return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+				});
 			}
 			try {
 				resp = await gameChangerAPI.modularSearch({
