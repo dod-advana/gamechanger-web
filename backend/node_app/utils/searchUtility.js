@@ -765,6 +765,13 @@ class SearchUtility {
 												},
 											},
 										},
+										{
+											term: {
+												doc_num: {
+													value: plainQueryTrimmed,
+												},
+											},
+										},
 									],
 									boost: 150,
 								},
