@@ -49,6 +49,18 @@ class TextSuggestionController {
 				}
 				if (corrected.length > 0 && esClientName !== 'eda') {
 					req.body.searchText = corrected;
+					const clientObj = {
+						esClientName: esClientName,
+						esIndex: index,
+					};
+					const originalText = req.body.searchText;
+					req.body.searchText = corrected;
+					// If the auto-corrected text doesn't return any results, don't suggest it to the user.
+					const correctedResults = this.searchUtility.documentSearch(null, req.body, clientObj, userId);
+					if (Object.keys(correctedResults).length === 0) {
+						req.body.searchText = originalText;
+						corrected = '';
+					}
 				}
 				if (suggestionsFlag === true) {
 					const data_presearch = await this.getPresearchSuggestion({
