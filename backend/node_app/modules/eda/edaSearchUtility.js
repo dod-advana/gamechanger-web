@@ -912,12 +912,20 @@ class EDASearchUtility {
 								},
 							});
 						}
-					} else {
+					} else if (psc.hasChildren) {
 						nestedQuery.nested.query.bool.should.push({
 							query_string: {
 								default_field: 'fpds_ng_n.psc_eda_ext',
 								default_operator: 'or',
 								query: `${psc.code}*`,
+							},
+						});
+					} else {
+						nestedQuery.nested.query.bool.should.push({
+							query_string: {
+								default_field: 'fpds_ng_n.psc_eda_ext',
+								default_operator: 'or',
+								query: psc.code,
 							},
 						});
 					}
@@ -962,13 +970,23 @@ class EDASearchUtility {
 					},
 				};
 				for (const naicsCode of settings.naicsCode) {
-					nestedQuery.nested.query.bool.should.push({
-						query_string: {
-							default_field: 'fpds_ng_n.naics_code_eda_ext',
-							default_operator: 'or',
-							query: `${naicsCode.code}*`,
-						},
-					});
+					if (naicsCode.hasChildren) {
+						nestedQuery.nested.query.bool.should.push({
+							query_string: {
+								default_field: 'fpds_ng_n.naics_code_eda_ext',
+								default_operator: 'or',
+								query: `${naicsCode.code}*`,
+							},
+						});
+					} else {
+						nestedQuery.nested.query.bool.should.push({
+							query_string: {
+								default_field: 'fpds_ng_n.naics_code_eda_ext',
+								default_operator: 'or',
+								query: naicsCode.code,
+							},
+						});
+					}
 				}
 				filterQueries.push(nestedQuery);
 			}
