@@ -868,11 +868,11 @@ const cardHandler = {
 					.filter((review) => {
 						return (
 							review.portfolio_name_s === state.selectedPortfolio &&
-							Object.keys(review).some((key) => key.includes('class_label_s'))
+							Object.keys(review).some((key) => key.includes('latest_class_label_s'))
 						);
 					})
 					.forEach((rev) => {
-						const existingTags = Object.keys(rev).filter((key) => key.includes('class_label_s'));
+						const existingTags = Object.keys(rev).filter((key) => key.includes('latest_class_label_s'));
 						for (const tag of existingTags) {
 							review.push(rev[tag]);
 						}
