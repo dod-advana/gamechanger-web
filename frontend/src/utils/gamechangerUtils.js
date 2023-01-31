@@ -480,7 +480,7 @@ export const orgColorMap = {
 	NATO: '#003bd1', // blue
 	'Financial Mgmt. Reg': '#636363',
 	Legislation: '#ffbf00',
-	SSTRATCON: '#00308f', // air force blue
+	USSTRATCON: '#00308f', // air force blue
 };
 
 const linkColorMap = {
