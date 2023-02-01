@@ -81,6 +81,32 @@ const EDADocumentsComparisonTool = ({
 		setNeedsSort(true);
 	};
 
+	/**
+	 * This is necessary for documents that are dragged and dropped.
+	 * If their input is too big, we're chunking it down based on important sections found in most contracts.
+	 * 5000 chars is around the range for an acceptable search length in DCT.
+	 *
+	 * @param {*} paragraph
+	 * @returns a array of paragraphs with snippets from the important sections found in the imported contract
+	 */
+	const modifyParagraphs = (paragraph) => {
+		const importantSections = ['SUMMARY OF CHANGES', 'PURPOSE OF MODIFICATION', 'PERFORMANCE WORK STATEMENT'];
+		let newParagraphs = [];
+		importantSections.forEach((section, index) => {
+			if (paragraph.text.includes(section)) {
+				newParagraphs.push({
+					id: index,
+					text: paragraph.text.slice(paragraph.text.indexOf(section), paragraph.text.indexOf(section) + 1700),
+				});
+			}
+		});
+		if (!newParagraphs.length) {
+			newParagraphs.push({ id: 0, text: paragraph.text.slice(0, 5000) });
+		}
+
+		return newParagraphs;
+	};
+
 	useEffect(() => {
 		if (updateFilters) {
 			setUpdateFilters(false);
@@ -148,20 +174,9 @@ const EDADocumentsComparisonTool = ({
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
 			setCollapseKeys([]);
-			// This is necessary for documents that are dragged and dropped
-			// if their input is too big, we're chunking it down based on the text surrounding "Summary of Changes"
-			// cuz that seems to be a common section in all the sample documents I've seen
-			// 5000 chars is around the range for an acceptable search length
-			let newParagraphs = paragraphs;
-			if (newParagraphs.length === 1 && newParagraphs[0].text.length > 5500) {
-				if (newParagraphs[0].text.includes('SUMMARY OF CHANGES')) {
-					newParagraphs[0].text = newParagraphs[0].text.slice(
-						newParagraphs[0].text.indexOf('SUMMARY OF CHANGES'),
-						newParagraphs[0].text.indexOf('SUMMARY OF CHANGES') + 5000
-					);
-				} else {
-					newParagraphs[0].text = newParagraphs[0].text.slice(0, 5000);
-				}
+
+			if (paragraphs.length === 1 && paragraphs[0].text.length > 5500) {
+				setParagraphs(modifyParagraphs(paragraphs[0]));
 			}
 
 			const filters = {
@@ -175,7 +190,7 @@ const EDADocumentsComparisonTool = ({
 			};
 
 			gameChangerAPI
-				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: newParagraphs, filters })
+				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
 				.then((resp) => {
 					if (resp.data.docs.length <= 0) {
 						setNoResults(true);
@@ -405,7 +420,7 @@ const EDADocumentsComparisonTool = ({
 		document.pageHits.forEach((page) => {
 			exportList.push(getExportDoc(page));
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
 	const exportAll = () => {
@@ -415,10 +430,10 @@ const EDADocumentsComparisonTool = ({
 				exportList.push(getExportDoc(page));
 			});
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
-	const heandleExport = (exportList, type) => {
+	const handleExport = (exportList, type) => {
 		try {
 			trackEvent(
 				getTrackingNameForFactory(state.cloneData.clone_name),
