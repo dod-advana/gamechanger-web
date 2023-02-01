@@ -57,6 +57,7 @@
 		"pluralize": "8.0.0",
 		"prop-types": "15.8.1",
 		"react": "18.2.0",
+		"react-app-rewired": "2.2.1",
 		"react-bottom-scroll-listener": "5.0.0",
 		"react-collapse": "4.0.3",
 		"react-datepicker": "3.3.0",
