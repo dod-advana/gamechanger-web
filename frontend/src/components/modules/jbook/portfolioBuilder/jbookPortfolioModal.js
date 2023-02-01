@@ -263,7 +263,8 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		if (showModal) {
 			handleAddAdmin(user.id);
 		}
-	}, [handleAddAdmin, showModal, user]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [showModal, user]);
 
 	/**
 	 *
