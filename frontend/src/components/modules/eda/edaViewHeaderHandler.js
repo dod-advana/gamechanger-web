@@ -98,6 +98,10 @@ const EDAViewHeaderHandler = (props) => {
 						);
 					});
 					newSearchSettings[type] = newSelectedNodes;
+				} else if (nodeToDeselect) {
+					newSearchSettings[type] = newSearchSettings[type].filter(
+						(e) => e.code !== option && `${e.code}*` !== option
+					);
 				}
 			} else {
 				index = newSearchSettings[type].indexOf(option);
