@@ -80,29 +80,31 @@ const EDAViewHeaderHandler = (props) => {
 		}
 	}, [dispatch]);
 
+	const handleNaicsPscChange = (newSearchSettings, type, option) => {
+		const nodeToDeselect = _.find(
+			newSearchSettings[type],
+			(node) => node.code === option || `${node.code}*` === option
+		);
+		if (nodeToDeselect && nodeToDeselect.hasChildren) {
+			let newSelectedNodes = newSearchSettings[type];
+			applyFunctionBF(nodeToDeselect, (node) => {
+				newSelectedNodes = newSelectedNodes.filter((e) => e.code !== node.code && `${e.code}*` !== node.code);
+			});
+			newSearchSettings[type] = newSelectedNodes;
+		} else if (nodeToDeselect) {
+			newSearchSettings[type] = newSearchSettings[type].filter(
+				(e) => e.code !== option && `${e.code}*` !== option
+			);
+		}
+	};
+
 	const handleFilterChange = (option, type) => {
 		const newSearchSettings = structuredClone(state.edaSearchSettings);
 
 		if (isArray(newSearchSettings[type])) {
 			let index;
 			if (type === 'naicsCode' || type === 'psc') {
-				const nodeToDeselect = _.find(
-					newSearchSettings[type],
-					(node) => node.code === option || `${node.code}*` === option
-				);
-				if (nodeToDeselect && nodeToDeselect.hasChildren) {
-					let newSelectedNodes = newSearchSettings[type];
-					applyFunctionBF(nodeToDeselect, (node) => {
-						newSelectedNodes = newSelectedNodes.filter(
-							(e) => e.code !== node.code && `${e.code}*` !== node.code
-						);
-					});
-					newSearchSettings[type] = newSelectedNodes;
-				} else if (nodeToDeselect) {
-					newSearchSettings[type] = newSearchSettings[type].filter(
-						(e) => e.code !== option && `${e.code}*` !== option
-					);
-				}
+				handleNaicsPscChange(newSearchSettings, type, option);
 			} else {
 				index = newSearchSettings[type].indexOf(option);
 				if (index !== -1) {
