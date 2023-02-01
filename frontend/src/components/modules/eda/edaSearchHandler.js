@@ -235,6 +235,44 @@ const parseContractDataURL = (contractDataURL, newSearchSettings) => {
 	newSearchSettings.contractData = contractData;
 };
 
+// minimize the naicsCode and psc selections for search
+// ie, if a parent is selected only send the parent not its redundant kids
+const minimizeNaicsPscFilterSelections = (naicsCode, psc, minimizedEdaSearchSettings) => {
+	if (naicsCode && naicsCode.length > 0) {
+		// tidy up parent/child stuff
+		const rootOptions = naicsCode.filter((e) => !e.parent);
+		if (rootOptions.length > 0) {
+			rootOptions.forEach((root) => {
+				removeChildrenFromListDF(root, naicsCode);
+			});
+		}
+		naicsCode
+			.filter((e) => e.parent)
+			.sort((a, b) => a.code < b.code)
+			.forEach((node) => removeChildrenFromListDF(node, naicsCode));
+
+		minimizedEdaSearchSettings.naicsCode = naicsCode.map((e) => {
+			return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+		});
+	}
+	if (psc && psc.length > 0) {
+		// tidy up parent/child stuff
+		const rootOptions = psc.filter((e) => !e.parent);
+		if (rootOptions.length > 0) {
+			rootOptions.forEach((root) => {
+				removeChildrenFromListDF(root, psc);
+			});
+		}
+		psc.filter((e) => e.parent)
+			.sort((a, b) => a.code < b.code)
+			.forEach((node) => removeChildrenFromListDF(node, psc));
+
+		minimizedEdaSearchSettings.psc = psc.map((e) => {
+			return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+		});
+	}
+};
+
 const EdaSearchHandler = {
 	setSearchURL(state) {
 		const { searchText, resultsPage, cloneData } = state;
@@ -359,40 +397,8 @@ const EdaSearchHandler = {
 			let minimizedEdaSearchSettings = { ...edaSearchSettings };
 			const naicsCode = [...minimizedEdaSearchSettings.naicsCode];
 			const psc = [...minimizedEdaSearchSettings.psc];
+			minimizeNaicsPscFilterSelections(naicsCode, psc, minimizedEdaSearchSettings);
 
-			if (naicsCode && naicsCode.length > 0) {
-				// tidy up parent/child stuff
-				const rootOptions = naicsCode.filter((e) => !e.parent);
-				if (rootOptions.length > 0) {
-					rootOptions.forEach((root) => {
-						removeChildrenFromListDF(root, naicsCode);
-					});
-				}
-				naicsCode
-					.filter((e) => e.parent)
-					.sort((a, b) => a.code < b.code)
-					.forEach((node) => removeChildrenFromListDF(node, naicsCode));
-
-				minimizedEdaSearchSettings.naicsCode = naicsCode.map((e) => {
-					return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
-				});
-			}
-			if (psc && psc.length > 0) {
-				// tidy up parent/child stuff
-				const rootOptions = psc.filter((e) => !e.parent);
-				if (rootOptions.length > 0) {
-					rootOptions.forEach((root) => {
-						removeChildrenFromListDF(root, psc);
-					});
-				}
-				psc.filter((e) => e.parent)
-					.sort((a, b) => a.code < b.code)
-					.forEach((node) => removeChildrenFromListDF(node, psc));
-
-				minimizedEdaSearchSettings.psc = psc.map((e) => {
-					return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
-				});
-			}
 			try {
 				resp = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
