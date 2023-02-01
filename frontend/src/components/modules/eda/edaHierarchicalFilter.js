@@ -85,7 +85,12 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		const fetchingChildren = fetchingChildrenFor[root.code];
 		const childrenFetched = root.children && root.children.length > 0;
 		const { hasChildren } = root;
-		const displayName = root.name === root.code ? root.name : `${root.name} - ${root.code}`;
+		let displayName;
+		if (!root.name) {
+			displayName = `${root.code}`;
+		} else {
+			displayName = root.name === root.code ? root.name : `${root.name} - ${root.code}`;
+		}
 
 		let expandedSection = <></>;
 		if (fetchingChildren) {
