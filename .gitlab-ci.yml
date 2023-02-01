@@ -204,9 +204,10 @@ dev-overrides:
         VALUES_FILE: "dev.values.yaml"
   extends:
     - ".helm-overrides"
+  # TODO: temporarily pull values from library branch for refactored chart's values
   script:
     - |
-      git clone https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
+      git clone -b library https://dev:${GITLAB_TOKEN}@gitlab.advana.boozallencsn.com/advana/gamechanger/gamechanger-ci-cd.git
       mv gamechanger-ci-cd/${VALUES_FILE} "${HELM_UPGRADE_VALUES_FILE}"
       rm -rf gamechanger-ci-cd
 
@@ -242,11 +243,11 @@ trigger:
           --set image.tag=${CI_COMMIT_SHA}-oci
           --set appVersion=${BUILD_VERSION}
           --set ingress.enabled=true
-          --set ingress.web.hostname=${HELM_RELEASE_NAME}
-          --set env.REACT_APP_BACKEND_URL=${DEV_URL}
-          --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
-          --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
-          --set env.APPROVED_API_CALLERS=${DEV_URL}
+          --set global.appName=${HELM_RELEASE_NAME}
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_BACKEND_URL=${DEV_URL}
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
+          --set deployment.web.container.gamechanger-web.env.APPROVED_API_CALLERS=${DEV_URL}
     - if: $DEPLOY_TO_PERSONAL != "false"
       variables:
         UPSTREAM_COMMIT_BRANCH: ${CI_COMMIT_BRANCH}
@@ -260,11 +261,11 @@ trigger:
           --set image.tag=${CI_COMMIT_SHA}-oci
           --set appVersion=${BUILD_VERSION}
           --set ingress.enabled=true
-          --set ingress.web.hostname=${HELM_RELEASE_NAME}
-          --set env.REACT_APP_BACKEND_URL=${DEV_URL}
-          --set env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
-          --set env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
-          --set env.APPROVED_API_CALLERS=${DEV_URL}
+          --set global.appName=${HELM_RELEASE_NAME}
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_BACKEND_URL=${DEV_URL}
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_USER_TOKEN_ENDPOINT=${DEV_URL}/api/auth/token
+          --set deployment.web.container.gamechanger-web.env.REACT_APP_LOGIN_ROUTE=${DEV_URL}/login
+          --set deployment.web.container.gamechanger-web.env.APPROVED_API_CALLERS=${DEV_URL}
     - if: $CI_COMMIT_BRANCH == "main"
   # trigger:
   #   strategy: "depend"

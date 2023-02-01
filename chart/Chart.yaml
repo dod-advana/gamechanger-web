@@ -1,8 +1,15 @@
 apiVersion: v2
-name: gamechanger-web-source
+name: gamechanger-web
 description: A Helm chart for Kubernetes
 
 type: application
 version: 1.0.0
-appVersion: "1.0.0"
+appVersion: "1.31.0.20230130"
 
+dependencies:
+  - name: advana-library
+    version: 1.0.2
+    # repository: https://gitlab.advana.boozallencsn.com/platform/charts/advana-library
+    repository: oci://092912502985.dkr.ecr.us-east-1.amazonaws.com/platform/charts
+    tags:
+      - library
