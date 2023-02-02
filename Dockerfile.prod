@@ -42,10 +42,12 @@ RUN mkdir -p \
     "${APP_SHARED_DIR}" \
     "${LOGS}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}" \
-    && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}" \
-    && npm install -g npm@9.4.0
+    && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
 RUN cd "$NPM_DIR" \
+    cd .. \
+    && npm install -g npm@9.4.0 \
+    && cd "$NPM_DIR" \
     && npm install query-string@7.1.3 --save-exact
 
 USER "${APP_UID}":"${APP_GID}"
