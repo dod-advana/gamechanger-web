@@ -32,6 +32,7 @@ ENV APP_FRONTEND_DIR="${APP_DIR}/frontend"
 ENV APP_SHARED_DIR="${APP_ROOT}/shared"
 ENV APP_SHARED_BIN="${APP_SHARED_DIR}/node_modules/.bin"
 ENV PATH="${APP_SHARED_BIN}:${PATH}"
+ENV NODE_MODULES_DIR="/usr/local/lib/node_modules"
 ENV NPM_DIR="/usr/local/lib/node_modules/npm"
 ENV LOGS="/logs/uotapp"
 
@@ -44,10 +45,10 @@ RUN mkdir -p \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
+RUN cd "$NODE_MODULES_DIR" \
+    && npm install -g npm@9.4.0
+
 RUN cd "$NPM_DIR" \
-    && cd .. \
-    && npm install -g npm@9.4.0 \
-    && cd "$NPM_DIR" \
     && npm install query-string@7.1.3 --save-exact
 
 USER "${APP_UID}":"${APP_GID}"
