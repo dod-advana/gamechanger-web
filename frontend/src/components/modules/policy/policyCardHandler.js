@@ -1346,9 +1346,9 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, docume
 						item.filename,
 						state.cloneData.clone_name,
 						state.searchText,
-						page.pageNumber,
 						item.download_url_s,
-						documentIdx
+						documentIdx,
+						page.pageNumber
 					);
 				}}
 			>
