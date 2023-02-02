@@ -199,7 +199,9 @@ const cardHandler = {
 															item.filename,
 															state.cloneData.clone_name,
 															state.searchText,
-															null
+															null,
+															null,
+															page.pageNumber
 														);
 													}}
 												>
