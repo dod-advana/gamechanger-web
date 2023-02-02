@@ -120,7 +120,7 @@
 		"test": "jest --watch",
 		"jenkins-test": "jest",
 		"test-coverage": "jest --coverage --coverageDirectory=coverage/jest",
-		"eject": "react-app-rewired eject",
+		"eject": "react-scripts eject",
 		"jest-coverage": "jest --coverage",
 		"sonarscan": "sonar-scanner",
 		"eslint": "eslint --max-warnings 0 --fix --debug -c .eslintrc.json ./src/",
