@@ -778,7 +778,16 @@ const getPublicationDate = (publication_date_dt) => {
 	}
 };
 
-const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+const CardHeaderHandler = ({
+	item,
+	state,
+	checkboxComponent,
+	favoriteComponent,
+	graphView,
+	intelligentSearch,
+	idx,
+	page,
+}) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
@@ -792,9 +801,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 	const typeTextColor = getTypeTextColor(cardType);
 
 	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
-
 	const publicationDate = getPublicationDate(item.publication_date_dt);
-
 	return (
 		<StyledFrontCardHeader
 			listView={state.listView}
@@ -814,8 +821,9 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 											item.filename,
 											state.cloneData.clone_name,
 											state.searchText,
-											0,
-											item.download_url_s
+											item.download_url_s,
+											idx,
+											page.pageNumber
 										)
 								: () => undefined
 						}
@@ -1149,8 +1157,9 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1262,8 +1271,9 @@ const renderListView = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1516,7 +1526,7 @@ const cardHandler = {
 									href={'#'}
 									onClick={(e) => {
 										e.preventDefault();
-										clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+										clickFn(filename, cloneName, searchText, item.download_url_s, idx);
 									}}
 								>
 									Open
