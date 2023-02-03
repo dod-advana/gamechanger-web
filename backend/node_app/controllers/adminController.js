@@ -119,9 +119,11 @@ class AdminController {
 		}
 		// remove pdf, and get exported docs
 		for (let obj of export_history) {
-			const sel_docs = obj.download_request_body.selectedDocuments;
-			for (let doc of sel_docs) {
-				exportDocList.push(doc.split('.pdf')[0]);
+			if (obj.download_request_body.cloneName === 'gamechanger') {
+				const sel_docs = obj.download_request_body.selectedDocuments;
+				for (let doc of sel_docs) {
+					exportDocList.push(doc.split('.pdf')[0]);
+				}
 			}
 		}
 		for (let obj of pdf_opened) {
