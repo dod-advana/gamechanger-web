@@ -126,7 +126,7 @@ class JBookExportHandler extends ExportHandler {
 						break;
 					case 'csv-reviews':
 						const reviews = this.generateCSVReviewList(searchResults);
-						let csvReviewStream = await this.reports.jbookCreateCsvStream({ docs: reviews }, userId);
+						let csvReviewStream = await this.reports.jbookCreateCsvStream({ docs: reviews }, userId, true);
 						res.status(200);
 						csvReviewStream.pipe(res);
 						break;

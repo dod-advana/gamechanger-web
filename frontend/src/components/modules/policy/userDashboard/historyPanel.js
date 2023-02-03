@@ -146,7 +146,7 @@ const renderTable = (data, columns) => {
 			minRows={1}
 			multiSort={false}
 			showPageSizeOptions={false}
-			showPagination={false}
+			showPagination={true}
 			getTbodyProps={() => {
 				return {
 					style: {
@@ -522,9 +522,13 @@ const SearchHistoryPanel = ({
 								handleHideShowSearchHistorySettings(
 									event.target,
 									row.original.searchType,
-									row.original.orgFilterText,
+									row.original.request_body.orgFilterString.length > 0
+										? row.original.request_body.orgFilterString.join(', ')
+										: row.original.orgFilterText,
 									row.original.pubDate,
-									row.original.typeFilterText
+									row.original.request_body.typeFilterString.length > 0
+										? row.original.request_body.typeFilterString.join(', ')
+										: row.original.typeFilterText
 								);
 							}}
 							className="fa fa-cogs"
