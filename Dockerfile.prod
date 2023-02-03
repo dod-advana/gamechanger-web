@@ -46,7 +46,7 @@ RUN mkdir -p \
     && chown -R "${APP_UID}":"${APP_GID}" "${LOGS}"
 
 RUN cd "$NODE_MODULES_DIR" \
-    && npm install -g npm@9.4.0
+    && npm install -g npm@9.4.1
 
 RUN cd "$NPM_DIR" \
     && npm install query-string@7.1.3 --save-exact
