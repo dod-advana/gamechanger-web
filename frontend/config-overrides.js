@@ -1,14 +1,11 @@
-module.exports = function override(config, env) {
-  // New config, e.g. config.plugins.push...
+const webpack = require('webpack');
 
-  config.module.rules = [...config.module.rules,
-  {
-    test: /\.m?js/,
-    resolve: {
-      fullySpecified: false
-    }
-  }
-  ]
+module.exports = function override(config) {
+  config.module.rules.push({
+    test: /\.mjs$/,
+    include: /node_modules/,
+    type: 'javascript/auto',
+  });
 
-  return config
-}
+  return config;
+};
