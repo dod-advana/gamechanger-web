@@ -6062,14 +6062,23 @@
 					var subTitle = '';
 
 					if (queryPhrases.length === 1) {
-						title = queryPhrases[0].substring(1, queryPhrases[0].length - 1);
+						title = queryPhrases[0];
+						if (title[0] === '[') {
+							title = title.substring(1, title.length - 1);
+						}
 						queryPhrasesEdited.push(title);
 					}
 
 					if (queryPhrases.length === 2) {
-						title = queryPhrases[0].substring(1, queryPhrases[0].length);
+						title = queryPhrases[0];
+						subTitle = queryPhrases[1];
+						if (title[0] === '[') {
+							title = title.substring(1, title.length - 1);
+						}
+						if (subTitle[subTitle.length - 1] === ']') {
+							subTitle = subTitle.substring(0, subTitle.length - 1);
+						}
 						queryPhrasesEdited.push(title);
-						subTitle = queryPhrases[1].substring(0, queryPhrases[1].length - 1);
 						queryPhrasesEdited.push(subTitle);
 					}
 
