@@ -22,7 +22,7 @@
 <!--- Describe details on testing the ticket - endpoints to call, cURL requests, data objects, frontend pages, etc. -->
 <!--- If there are multiple test cases, please list the expected input and output for each. -->
 
-## Checklist:
+## Requester Checklist:
 <!--- Not all of these are required, but it servers as a reminder for the pull requester and helps the reviewer know what is covered-->
 
 - [ ] Documentation updated
@@ -31,3 +31,11 @@
 - [ ] Clones involved and accounted for
 - [ ] RDS migrations or other data manipulation necessary
 - [ ] Dev tools or other infrastructure changed
+
+## Reviewer Checklist:
+<!--- Not all of these may be required/applicable -->
+
+- [ ] Review the Changelog/Code
+- [ ] Test locally and aggressively
+- [ ] Message original code author to gain context
+- [ ] List connected components that this code may affect below or in a comment
