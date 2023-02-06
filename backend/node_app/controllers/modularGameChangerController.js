@@ -23,6 +23,7 @@ class ModularGameChangerController {
 		this.graphQuery = this.graphQuery.bind(this);
 		this.callGraphFunction = this.callGraphFunction.bind(this);
 		this.callDataFunction = this.callDataFunction.bind(this);
+		this.upload = this.upload.bind(this);
 		this.exportReview = this.exportReview.bind(this);
 		this.exportChecklist = this.exportChecklist.bind(this);
 		this.exportUsers = this.exportUsers.bind(this);
@@ -346,6 +347,24 @@ class ModularGameChangerController {
 	async docFetcher(_req, res) {
 		// TODO add Doc Fetcher Handlers
 		res.status(200).send('TODO');
+	}
+	async upload(req, res) {
+		// upload function
+		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+		const cloneName = req.body.cloneName;
+		const functionName = req.body.functionName;
+		const options = JSON.parse(req.body.options);
+		options.file = req.file;
+
+		try {
+			const handler = this.handler_factory.createHandler('data', cloneName);
+			const results = await handler.callFunction(functionName, options, cloneName, req.permissions, userId);
+
+			res.status(200).send(results);
+		} catch (error) {
+			res.status(500).send(error, 'N1AF564', userId);
+			this.logger.error(error, 'N1AF564', userId);
+		}
 	}
 }
 
