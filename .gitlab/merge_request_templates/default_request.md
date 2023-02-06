@@ -38,4 +38,4 @@
 - [ ] Review the Changelog/Code
 - [ ] Test locally and aggressively
 - [ ] Message original code author to gain context
-- [ ] List connected components that this code may affect below:
+- [ ] List connected components that this code may affect below or in a comment
