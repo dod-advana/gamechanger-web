@@ -436,29 +436,25 @@ const PortfolioBuilder = (props) => {
 						reviewArray: reviewChunk,
 					},
 				});
-				setResults((prevResults) => {
-					const { written, dupes, failedRows, time } = uploadResponse.data;
-					if (!prevResults) {
-						return {
-							written,
-							dupes: [...dupes.map((rowNum) => rowNum + index * reviewLimit)],
-							failedRows: [...failedRows.map((rowNum) => rowNum + index * reviewLimit)],
-							time,
-						};
-					} else {
-						return {
-							written: prevResults.written + written,
-							dupes: [...prevResults.dupes, ...dupes.map((rowNum) => rowNum + index * reviewLimit)],
-							failedRows: [
-								...prevResults.failedRows,
-								...failedRows.map((rowNum) => rowNum + index * reviewLimit),
-							],
-							time: prevResults.time + uploadResponse.data.time,
-						};
-					}
-				});
+				return Promise.resolve({ ...uploadResponse.data, index });
 			})
-		).then(() => setLoading(false));
+		).then((results) => {
+			const combinedResults = { written: 0, dupes: [], failedRows: [], time: 0 };
+			results.forEach(({ written, dupes, failedRows, time, index }) => {
+				combinedResults.written = combinedResults.written + written;
+				combinedResults.dupes = [
+					...combinedResults.dupes,
+					...dupes.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.failedRows = [
+					...combinedResults.failedRows,
+					...failedRows.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.time = combinedResults.time + time;
+			});
+			setResults(combinedResults);
+			setLoading(false);
+		});
 	}, [selectedFile, modalData]);
 
 	return (
