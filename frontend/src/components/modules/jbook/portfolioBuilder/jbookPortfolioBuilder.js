@@ -418,16 +418,47 @@ const PortfolioBuilder = (props) => {
 
 	const uploadCallback = useCallback(async () => {
 		let reviewArray = await parseExcel(selectedFile, modalData);
-		const uploadResponse = await gameChangerAPI.callDataFunction({
-			functionName: 'bulkUpload',
-			cloneName: 'jbook',
-			options: {
-				portfolio: modalData,
-				reviewArray: reviewArray,
-			},
-		});
-		setResults(uploadResponse.data);
-		setLoading(false);
+		const reviewsChunked = [];
+		setLoading(true);
+		// I know this reviewLimit works in dev, but not sure in prod...
+		const reviewLimit = 85;
+		for (let i = 0; i < reviewArray.length; i += reviewLimit) {
+			const reviewChunk = reviewArray.slice(i, i + reviewLimit);
+			reviewsChunked.push(reviewChunk);
+		}
+		Promise.all(
+			reviewsChunked.map(async (reviewChunk, index) => {
+				const uploadResponse = await gameChangerAPI.callDataFunction({
+					functionName: 'bulkUpload',
+					cloneName: 'jbook',
+					options: {
+						portfolio: modalData,
+						reviewArray: reviewChunk,
+					},
+				});
+				setResults((prevResults) => {
+					const { written, dupes, failedRows, time } = uploadResponse.data;
+					if (!prevResults) {
+						return {
+							written,
+							dupes: [...dupes.map((rowNum) => rowNum + index * reviewLimit)],
+							failedRows: [...failedRows.map((rowNum) => rowNum + index * reviewLimit)],
+							time,
+						};
+					} else {
+						return {
+							written: prevResults.written + written,
+							dupes: [...prevResults.dupes, ...dupes.map((rowNum) => rowNum + index * reviewLimit)],
+							failedRows: [
+								...prevResults.failedRows,
+								...failedRows.map((rowNum) => rowNum + index * reviewLimit),
+							],
+							time: prevResults.time + uploadResponse.data.time,
+						};
+					}
+				});
+			})
+		).then(() => setLoading(false));
 	}, [selectedFile, modalData]);
 
 	return (
