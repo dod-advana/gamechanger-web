@@ -173,6 +173,7 @@ let data = [
 				average_position: 1,
 			},
 		],
+		total_number_of_documents_not_found: 0,
 		total_average: 30,
 	},
 	{
@@ -349,6 +350,7 @@ let data = [
 				average_position: 1,
 			},
 		],
+		total_number_of_documents_not_found: 0,
 		total_average: 0.5,
 	},
 	{
@@ -525,6 +527,7 @@ let data = [
 				average_position: 1,
 			},
 		],
+		total_number_of_documents_not_found: 0,
 		total_average: 0.5,
 	},
 ];
