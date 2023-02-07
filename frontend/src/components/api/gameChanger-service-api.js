@@ -1187,9 +1187,9 @@ export default class GameChangerAPI {
 		return axiosPOST(this.axios, url, { clone });
 	};
 
-	callDataFunction = async (body) => {
+	callDataFunction = async (body, options = {}) => {
 		const url = endpoints.callDataFunctionPOST;
-		return axiosPOST(this.axios, url, body);
+		return axiosPOST(this.axios, url, body, options);
 	};
 
 	queryExp = async (data) => {
