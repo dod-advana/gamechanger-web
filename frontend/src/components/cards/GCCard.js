@@ -93,7 +93,7 @@ const PolicyCardHandler = LoadableVisibility({
 	},
 });
 
-const CARD_HEIGHT = 412;
+const CARD_HEIGHT = 356;
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
