@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import FormData from 'form-data';
+import * as XLSX from 'xlsx';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
 import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
@@ -56,6 +56,83 @@ const Pill = styled.button`
 		color: #e9691d;
 	}
 `;
+
+const parseExcel = async (file, portfolio) => {
+	// create helper function that parses excel file and outputs an array
+	try {
+		const reviewArray = [];
+
+		const data = await file.arrayBuffer();
+		const workbook = XLSX.read(data);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+
+		sheet1.forEach((item) => {
+			const reviewData = {
+				primary_reviewer: `${item['Primary Reviewer']}`,
+				primary_class_label: `${item['AI Analysis']}`,
+				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
+				primary_ptp: `${item['Planned Transition Partner']}`,
+				service_mp_add:
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null,
+				primary_review_notes: `${item['Primary Reviewer Notes']}`,
+				budget_year: `${item['FY (BY1)']}`,
+				budget_type: `${item['Doc Type']}`,
+				agency_service: `${item['Service / Agency']}`,
+				// agency_office: item[],
+				appn_num: `${item['APPN Symbol']}`,
+				budget_activity: `${item['BA']}`,
+				program_element: `${item['PE / BLI']}`,
+				budget_line_item:
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+			};
+
+			if (reviewData.budget_type === 'pdoc') {
+				reviewData.budget_line_item = reviewData.program_element;
+				reviewData.program_element = null;
+			}
+
+			if (reviewData.agency_service === 'Department of Defense (DOD)') {
+				reviewData.agency = reviewData.agency_office;
+			} else {
+				reviewData.agency = reviewData.agency_service;
+			}
+
+			if (reviewData.budget_activity.length !== 2) {
+				reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
+			}
+
+			if (reviewData.appn_num.length !== 4) {
+				reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
+			}
+			let refString = '';
+			if (reviewData.budget_type === 'pdoc') {
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budget_type === 'rdoc') {
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			}
+
+			reviewData.jbook_ref_id = refString;
+			delete reviewData.agency_office;
+			delete reviewData.agency_service;
+
+			reviewData.portfolio_name = portfolio.name;
+			reviewData.latest_class_label = reviewData.primary_class_label;
+			reviewData.primary_review_status = 'Finished Review';
+			reviewData.review_status = 'Partial Review (Service)';
+
+			reviewArray.push(reviewData);
+		});
+
+		return reviewArray;
+	} catch (e) {
+		const { message } = e;
+		console.log(message);
+		return [];
+	}
+};
+
 /**
  *
  * @class PortfolioBuilder
@@ -340,17 +417,44 @@ const PortfolioBuilder = (props) => {
 	}, []);
 
 	const uploadCallback = useCallback(async () => {
-		const form = new FormData();
-		form.append('file', selectedFile, selectedFile.name);
-		form.append('functionName', 'bulkUpload');
-		form.append('cloneName', 'jbook');
-		form.append('options', JSON.stringify({ portfolio: modalData }));
+		let reviewArray = await parseExcel(selectedFile, modalData);
+		const reviewsChunked = [];
 		setLoading(true);
-		const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
-			headers: form.getHeaders ? form.getHeaders() : { 'Content-Type': 'multipart/form-data' },
+		// I know this reviewLimit works in dev, but not sure in prod...
+		const reviewLimit = 85;
+		for (let i = 0; i < reviewArray.length; i += reviewLimit) {
+			const reviewChunk = reviewArray.slice(i, i + reviewLimit);
+			reviewsChunked.push(reviewChunk);
+		}
+		Promise.all(
+			reviewsChunked.map(async (reviewChunk, index) => {
+				const uploadResponse = await gameChangerAPI.callDataFunction({
+					functionName: 'bulkUpload',
+					cloneName: 'jbook',
+					options: {
+						portfolio: modalData,
+						reviewArray: reviewChunk,
+					},
+				});
+				return Promise.resolve({ ...uploadResponse.data, index });
+			})
+		).then((results) => {
+			const combinedResults = { written: 0, dupes: [], failedRows: [], time: 0 };
+			results.forEach(({ written, dupes, failedRows, time, index }) => {
+				combinedResults.written = combinedResults.written + written;
+				combinedResults.dupes = [
+					...combinedResults.dupes,
+					...dupes.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.failedRows = [
+					...combinedResults.failedRows,
+					...failedRows.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.time = combinedResults.time + time;
+			});
+			setResults(combinedResults);
+			setLoading(false);
 		});
-		setResults(uploadResponse.data);
-		setLoading(false);
 	}, [selectedFile, modalData]);
 
 	return (
