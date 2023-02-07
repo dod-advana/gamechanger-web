@@ -54,7 +54,7 @@ RUN mkdir -p \
 USER "${APP_UID}":"${APP_GID}"
 
 RUN cd "$APP_SHARED_DIR" \
-    # && npm install query-string@7.1.3 --save-exact \
+    && npm install query-string@7.1.3 --save-exact \
     && npm install nodemon sequelize-cli
 
 FROM base AS builder
