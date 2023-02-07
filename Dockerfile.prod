@@ -104,6 +104,12 @@ RUN cd "${APP_BACKEND_DIR}" && \
     )) && \
     yarn install --production
 
+USER root
+
+RUN yum remove git -y
+
+USER "${APP_UID}":"${APP_GID}"
+
 COPY --chown="${APP_UID}":"${APP_GID}" ./backend "${APP_BACKEND_DIR}"
 COPY --from=builder --chown="${APP_UID}":"${APP_GID}" "${APP_FRONTEND_DIR}/build" "${APP_BACKEND_DIR}/build"
 
