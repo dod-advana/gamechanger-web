@@ -455,7 +455,6 @@ export default function PolicyDocumentExplorer({
 				let blockquoteClass = 'searchdemo-blockquote-sm';
 
 				let modifiedSnippet = modifySnippet(page.snippet.split(' '));
-
 				if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 				return (
 					<div key={key + pageKey} style={{ position: 'relative' }}>
