@@ -308,7 +308,7 @@ class Reports {
 			};
 
 			const printer = new this.pdfMake(fonts);
-			const docDefinition = await this.constructProfilePagePDF(data);
+			const docDefinition = await this.constructProfilePagePDF(data, userId);
 			const doc = printer.createPdfKitDocument(docDefinition);
 
 			let chunks = [];
@@ -778,7 +778,13 @@ class Reports {
 			// RDOC Content
 			const rdocContent = [];
 
-			for (const docData of fullData) {
+			// We need to filter out duplicated reviews that came as
+			// a result of data propagation from 2022-2023
+			const docIds = fullData.map((docData) => String(docData.id));
+			const filteredFullData = fullData.filter(
+				(docData, index) => !docIds.includes(String(docData.id), index + 1)
+			);
+			for (const docData of filteredFullData) {
 				switch (docData.budgetType) {
 					case 'pdoc':
 						procToc[1].table.body.push(
@@ -945,7 +951,7 @@ class Reports {
 
 			areas3.forEach((area3) => {
 				areas2.forEach((area2) => {
-					if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
+					if (JCAData[docData.pocJointCapabilityArea][area2]?.includes(area3)) {
 						areasCombined[area2].push(area3);
 					}
 				});

@@ -207,7 +207,7 @@ const ExportResultsDialog = ({
 			setErrorMsg('Successfully Generated Results!');
 		} catch (err) {
 			console.log(err);
-			setErrorMsg('Error Generating Results');
+			setErrorMsg('Error Generating Results (Timeout)');
 		} finally {
 			setLoading(false);
 		}
@@ -331,7 +331,15 @@ const ExportResultsDialog = ({
 				</div>
 			</div>
 			{errorMsg ? (
-				<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>{errorMsg}</div>
+				<div
+					style={
+						errorMsg[0] === 'S'
+							? { color: 'green', display: 'flex', justifyContent: 'center' }
+							: { color: 'red', display: 'flex', justifyContent: 'center' }
+					}
+				>
+					{errorMsg}
+				</div>
 			) : (
 				<LoadingBar color="primary" loading={loading} />
 			)}
