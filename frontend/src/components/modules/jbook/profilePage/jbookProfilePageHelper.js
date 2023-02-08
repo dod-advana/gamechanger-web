@@ -572,6 +572,10 @@ const getMetadataTableData = (
 			Hidden: budgetType === 'O&M',
 		},
 		{
+			Key: projectData.budgetLineItem ? 'Budget Line Item' : 'Program Element',
+			Value: projectData.budgetLineItem ? projectData.budgetLineItem : projectData.programElement,
+		},
+		{
 			Key: 'Project Number',
 			Value: projectData.projectNum,
 			Hidden: budgetType !== 'RDT&E',
@@ -593,7 +597,7 @@ const getMetadataTableData = (
 			Value: retrieveProjectField(projectData.budgetCycle),
 		},
 		{
-			Key: 'Appropriation',
+			Key: 'Main Account',
 			Value: retrieveProjectField(projectData.appropriationNumber),
 		},
 		{
