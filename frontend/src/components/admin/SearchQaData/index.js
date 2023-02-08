@@ -1,3 +1,4 @@
+import { Link } from '@material-ui/core';
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -20,8 +21,8 @@ export default () => {
 	const [tableColumns, setTableColumns] = useState([]);
 	const [resultSelected, setResultSelected] = useState(false);
 	const [selected, setSelected] = useState();
-
-	// console.log(gameChangerAPI.getCloneMeta('policy'));
+	const [results, setResults] = useState();
+	const [refresh, setRefresh] = useState(false);
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
@@ -31,16 +32,22 @@ export default () => {
 	}
 
 	function handleBackSelected() {
-		if (resultSelected) setResultSelected(false);
+		if (resultSelected) {
+			setSelected(null);
+			setResultSelected(false);
+		}
 	}
 
 	// The table columns : timestamp, GC version, JBOOK average score, Policy average score, EDA average score, Total average score
 	useEffect(() => {
-		let tmpColumns = resultSelected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
+		let tmpColumns = selected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
+		gameChangerAPI.getSearchTestResults().then(({ data }) => {
+			setResults(data);
+		});
 
 		setTableColumns(tmpColumns);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resultSelected]);
+	}, [resultSelected, refresh]);
 
 	// Component Methods
 
@@ -79,15 +86,38 @@ export default () => {
 				<GCButton
 					onClick={useCallback(() => {
 						//Run test
+						data.forEach((row) => {
+							gameChangerAPI.postSearchTestResults(row);
+						});
+						setRefresh(!refresh);
 					}, [])}
 					style={{ minWidth: 'unset' }}
 				>
 					Run Test
 				</GCButton>
+				<GCButton
+					onClick={useCallback(() => {
+						gameChangerAPI.resetSearchTestResults();
+						setRefresh(!refresh);
+
+						setRefresh(!refresh);
+					}, [])}
+					style={{ minWidth: 'unset' }}
+				>
+					RESET TABLE
+				</GCButton>
 			</div>
 			<div onClick={useCallback(handleRowSelected, [])}>
 				<ReactTable
-					data={resultSelected ? data[selected - 1].source_results : data}
+					data={
+						resultSelected
+							? results[
+									results.findIndex((el) => {
+										return el.test_id.toString() === selected;
+									})
+							  ].source_results
+							: results
+					}
 					columns={tableColumns}
 					style={{ margin: '0 80px 20px 80px', height: 600 }}
 					defaultPageSize={10}

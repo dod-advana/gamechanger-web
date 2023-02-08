@@ -6,7 +6,15 @@ const DEFAULT_COLUMNS = [
 		Header: 'Test ID',
 		accessor: 'test_id',
 		Cell: (row) => (
-			<TableRow className="test-id" style={{ cursor: 'pointer' }}>
+			<TableRow
+				className="test-id"
+				style={{
+					cursor: 'pointer',
+					backgroundColor: 'lightskyblue',
+					textAlign: 'center',
+					borderRadius: '3px',
+				}}
+			>
 				{row.value && row.value !== null ? row.value : 0}
 			</TableRow>
 		),

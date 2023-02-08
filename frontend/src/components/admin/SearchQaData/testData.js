@@ -1,6 +1,5 @@
 let data = [
 	{
-		test_id: 1,
 		gc_version: 'Latest',
 		timestamp: new Date(98, 1),
 		source_results: [
@@ -177,7 +176,6 @@ let data = [
 		total_average: 30,
 	},
 	{
-		test_id: 2,
 		gc_version: 'Latest',
 		timestamp: new Date(2022, 1),
 		source_results: [
@@ -351,10 +349,9 @@ let data = [
 			},
 		],
 		total_number_of_documents_not_found: 0,
-		total_average: 0.5,
+		total_average: 5,
 	},
 	{
-		test_id: 3,
 		gc_version: 'Latest',
 		timestamp: new Date(2023, 1),
 		source_results: [
@@ -528,7 +525,7 @@ let data = [
 			},
 		],
 		total_number_of_documents_not_found: 0,
-		total_average: 0.5,
+		total_average: 5,
 	},
 ];
 
