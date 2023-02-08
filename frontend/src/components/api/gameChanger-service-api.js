@@ -163,6 +163,7 @@ const endpoints = {
 	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
 	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
 	cacheQlikApps: '/api/gamechanger/admin/cacheQlikApps',
+	searchPerformanceTest: '/api/gamechanger/searchPerformanceTestingTool',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -1255,5 +1256,20 @@ export default class GameChangerAPI {
 	cacheQlikApps = async () => {
 		const url = endpoints.cacheQlikApps;
 		return axiosGET(this.axios, url);
+	};
+
+	postSearchTestResults = async (data) => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosPOST(this.axios, url, data);
+	};
+
+	getSearchTestResults = async () => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosGET(this.axios, url);
+	};
+
+	resetSearchTestResults = async () => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosDELETE(this.axios, url);
 	};
 }

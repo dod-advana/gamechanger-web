@@ -3,7 +3,7 @@
 const { Sequelize } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-	const POLICY_SEARCH_PERFORMANCE_TESTER = sequelize.define(
+	const policy_search_performance_tests = sequelize.define(
 		'policy_search_performance_tests',
 		{
 			test_id: {
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 			},
 			gc_version: {
-				type: DataTypes.VARCHAR(25),
+				type: DataTypes.TEXT,
 				allowNull: false,
 			},
 			total_average: {
@@ -36,5 +36,5 @@ module.exports = (sequelize, DataTypes) => {
 			timestamps: true,
 		}
 	);
-	return POLICY_SEARCH_PERFORMANCE_TESTER;
+	return policy_search_performance_tests;
 };
