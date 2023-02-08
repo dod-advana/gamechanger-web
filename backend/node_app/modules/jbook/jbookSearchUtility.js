@@ -34,6 +34,9 @@ class JBookSearchUtility {
 			const mapping = this.getMapping(docType, fromFrontend);
 
 			for (const field in data) {
+				if (field === 'id_s') {
+					continue;
+				}
 				if (data[field] && data[field] !== null && Object.keys(mapping).includes(field) && doMapping) {
 					const newKey = mapping[field].newName;
 					newData[newKey] = mapping[field].processValue(data[field]);

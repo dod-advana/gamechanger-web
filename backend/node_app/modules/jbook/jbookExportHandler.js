@@ -84,6 +84,9 @@ class JBookExportHandler extends ExportHandler {
 							cleanedReview = this.jbookSearchUtility.parseFields(findReview, false, 'reviewES');
 						}
 						docs[i] = { ...doc, ...cleanedReview };
+						console.log('AND NOW HERE is doc', doc);
+						console.log('AND NOW HERE is cleanedreview', cleanedReview);
+						console.log('AND HERE IS FULL DOC', docs[i]);
 					}
 				}
 
