@@ -520,7 +520,7 @@ const PortfolioBuilder = (props) => {
 								<GCButton
 									onClick={() => {
 										setShowUploadModal(true);
-										setModalData({ name: 'General' });
+										setModalData({ name: 'General', tags: [], user_ids: [], admins: [] });
 									}}
 									style={{ minWidth: 'unset' }}
 								>
