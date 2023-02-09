@@ -1,5 +1,6 @@
 import 'react-table/react-table.css';
 import { TableRow } from '../util/GCAdminStyles';
+import moment from 'moment';
 
 const DEFAULT_COLUMNS = [
 	{
@@ -29,7 +30,7 @@ const DEFAULT_COLUMNS = [
 		accessor: 'timestamp',
 		Cell: (row) => (
 			<TableRow>
-				{row.value && row.value !== null ? row.value.toString().substring(0, 25) : 'last friday'}
+				{row.value && row.value !== null ? moment(row.value).format('MMM Do YY, h:mm:ss a') : 'last friday'}
 			</TableRow>
 		),
 	},
