@@ -288,7 +288,7 @@ class AppStatsController {
 			connection.query(
 				`
 				select 
-						SUBSTRING_INDEX(b.name, '-', 2) as document, 
+						b.name as document, 
 						max(CONVERT_TZ(a.server_time,'UTC','EST')) as documenttime
 					from 
 						matomo_log_link_visit_action a, 
