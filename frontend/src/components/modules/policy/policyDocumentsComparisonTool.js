@@ -55,7 +55,7 @@ const getExportDoc = (selectedParagraph, paragraphs, document) => {
 	};
 };
 
-const heandleExport = (exportList, type) => {
+const handleExport = (exportList, type) => {
 	try {
 		trackEvent(getTrackingNameForFactory('gamechanger'), 'DocumentComparisonTool', type, exportList.length);
 		exportToCsv('DocumentComparisonData.csv', exportList, true);
@@ -82,7 +82,7 @@ const DocumentParagraph = ({
 		document.paragraphs.forEach((paragraph) => {
 			exportList.push(getExportDoc(paragraph, paragraphs, document));
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
 	const handleFeedback = (doc, paragraph, positiveFeedback) => {
@@ -728,7 +728,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				exportList.push(getExportDoc(paragraph, paragraphs, document));
 			});
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
 	const setToFirstResultofInput = (inputId) => {
