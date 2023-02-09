@@ -358,11 +358,11 @@ const StyledFrontCardContent = styled.div`
 
 	.hits-container {
 		display: grid;
-		grid-template-columns: 100px auto auto;
+		grid-template-columns: 110px auto auto;
 		height: 100%;
 
 		.page-hits {
-			min-width: 100px;
+			min-width: 110px;
 			height: fit-content;
 			max-height: 150px;
 			overflow: auto;
