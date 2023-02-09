@@ -1,4 +1,3 @@
-import { Link } from '@material-ui/core';
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -8,6 +7,7 @@ import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
 import data from './testData';
+import searchTests from './searchTests';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -38,6 +38,10 @@ export default () => {
 		}
 	}
 
+	function handleTests() {
+		return searchTests();
+	}
+
 	// The table columns : timestamp, GC version, JBOOK average score, Policy average score, EDA average score, Total average score
 	useEffect(() => {
 		let tmpColumns = selected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
@@ -46,8 +50,7 @@ export default () => {
 		});
 
 		setTableColumns(tmpColumns);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resultSelected, refresh]);
+	}, [resultSelected, refresh, selected]);
 
 	// Component Methods
 
@@ -86,10 +89,12 @@ export default () => {
 				<GCButton
 					onClick={useCallback(() => {
 						//Run test
-						data.forEach((row) => {
-							gameChangerAPI.postSearchTestResults(row);
-						});
+						console.log('final', handleTests());
+						// data.forEach((row) => {
+						// 	gameChangerAPI.postSearchTestResults(row);
+						// });
 						setRefresh(!refresh);
+						// eslint-disable-next-line react-hooks/exhaustive-deps
 					}, [])}
 					style={{ minWidth: 'unset' }}
 				>
@@ -98,9 +103,8 @@ export default () => {
 				<GCButton
 					onClick={useCallback(() => {
 						gameChangerAPI.resetSearchTestResults();
-						setRefresh(!refresh);
-
-						setRefresh(!refresh);
+						// setRefresh(!refresh);
+						// eslint-disable-next-line react-hooks/exhaustive-deps
 					}, [])}
 					style={{ minWidth: 'unset' }}
 				>

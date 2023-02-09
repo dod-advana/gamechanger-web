@@ -28,6 +28,7 @@ const { AnalystToolsController } = require('../controllers/analystToolsControlle
 const { ReviewerController } = require('../controllers/reviewerController');
 const { MlApiController } = require('../controllers/mlApiController');
 const { SearchPerformanceTestController } = require('../controllers/searchPerformanceTestController');
+const { SearchTestController } = require('../controllers/searchTestController');
 
 const tutorialOverlay = new TutorialOverlayController();
 const document = new DocumentController();
@@ -54,6 +55,7 @@ const analyticsTools = new AnalystToolsController();
 const reviewer = new ReviewerController();
 const mlApi = new MlApiController();
 const searchPerformanceTest = new SearchPerformanceTestController();
+const searchTest = new SearchTestController();
 
 router.post('/shortenSearchURL', search.shortenSearchURL);
 router.post('/convertTinyURL', search.convertTinyURL);
@@ -252,5 +254,7 @@ router.post('/analyticsTools/compareFeedback', analyticsTools.compareFeedback);
 router.get('/searchPerformanceTestingTool', searchPerformanceTest.getTests);
 router.delete('/searchPerformanceTestingTool', searchPerformanceTest.resetTestTable);
 router.post('/searchPerformanceTestingTool', searchPerformanceTest.postTests);
+
+router.post('/searchTest', searchTest.testSearch);
 
 module.exports = router;
