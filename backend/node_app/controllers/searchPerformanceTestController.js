@@ -10,7 +10,7 @@ class SearchPerformanceTestController {
 	}
 
 	async resetTestTable() {
-		await policy_search_performance_tests.destroy({
+		await this.policy_search_performance_tests.destroy({
 			truncate: true,
 		});
 	}

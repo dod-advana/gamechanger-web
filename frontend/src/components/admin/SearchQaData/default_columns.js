@@ -10,7 +10,7 @@ const DEFAULT_COLUMNS = [
 				className="test-id"
 				style={{
 					cursor: 'pointer',
-					backgroundColor: 'lightskyblue',
+					backgroundColor: 'rgba(223, 230, 238, 0.5)',
 					textAlign: 'center',
 					borderRadius: '3px',
 				}}
