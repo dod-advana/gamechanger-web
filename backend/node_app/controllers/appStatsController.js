@@ -288,18 +288,20 @@ class AppStatsController {
 			connection.query(
 				`
 				select 
-					b.name as document, 
-					CONVERT_TZ(a.server_time,'UTC','EST') as documenttime
-				from 
-					matomo_log_link_visit_action a, 
-					matomo_log_action b 
-				where 
-					a.idaction_name = b.idaction  
-					and b.name like 'PDFViewer%gamechanger'
-					and hex(a.idvisitor) in (?)
-				order by 
-					documenttime desc
-				limit 10`,
+						b.name as document, 
+						max(CONVERT_TZ(a.server_time,'UTC','EST')) as documenttime
+					from 
+						matomo_log_link_visit_action a, 
+						matomo_log_action b 
+					where 
+						a.idaction_name = b.idaction  
+						and b.name like 'PDFViewer%gamechanger'
+						and hex(a.idvisitor) in (?)
+					group by
+						document
+					order by 
+						documenttime desc
+					limit 10`,
 				[userId],
 				(error, results) => {
 					if (error) {
