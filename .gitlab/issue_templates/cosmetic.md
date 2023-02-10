@@ -1,6 +1,6 @@
 ## Description
 
-<!--- Describe what new feature you want implemented -->
+<!--- Describe what cosmetic changes you want implemented -->
 
 ## Mockups (if applicable)
 
