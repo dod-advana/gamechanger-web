@@ -395,6 +395,11 @@ const StyledFrontCardContent = styled.div`
 		> .expanded-metadata {
 			overflow-wrap: anywhere;
 			grid-column: 2 / 4;
+
+			.searchdemo-blockquote {
+				height: 90%;
+				overflow: auto;
+			}
 		}
 	}
 `;
