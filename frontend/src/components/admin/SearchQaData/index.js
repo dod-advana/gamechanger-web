@@ -7,7 +7,8 @@ import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
 import data from './testData';
-import searchTests from './searchTests';
+// import searchTests from './searchTests';
+import documents from './testDocumentsTESTING';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -23,6 +24,7 @@ export default () => {
 	const [selected, setSelected] = useState();
 	const [results, setResults] = useState();
 	const [refresh, setRefresh] = useState(false);
+	const [searchResults, setSearchResults] = useState([]);
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
@@ -38,8 +40,35 @@ export default () => {
 		}
 	}
 
-	function handleTests() {
-		return searchTests();
+	async function handleTests() {
+		let testSource;
+		for (const source in documents) {
+			let positionSum = 0;
+			testSource = {
+				source: source,
+				number_of_documents_tested: 0,
+				number_of_documents_not_found: 0,
+				number_of_docuemnts_found: 0,
+				average_position: 0,
+			};
+			for (const element of documents[source]) {
+				let term = { searchText: element.metaData.title };
+				let searchResults = await searchTests(term);
+				let position = searchResults.position;
+				let allResults = searchResults.results;
+				testSource.number_of_documents_tested++;
+				console.log('allresults', allResults);
+				if (position >= 0) {
+					testSource.number_of_docuemnts_found++;
+				} else {
+					testSource.number_of_documents_not_found++;
+				}
+				positionSum += position;
+			}
+			testSource.average_position = positionSum / testSource.number_of_documents_tested;
+			setSearchResults([...searchResults, testSource]);
+		}
+		// return results;
 	}
 
 	// The table columns : timestamp, GC version, JBOOK average score, Policy average score, EDA average score, Total average score
@@ -51,6 +80,10 @@ export default () => {
 
 		setTableColumns(tmpColumns);
 	}, [resultSelected, refresh, selected]);
+
+	useEffect(() => {
+		console.log(searchResults);
+	}, [searchResults]);
 
 	// Component Methods
 
@@ -89,7 +122,7 @@ export default () => {
 				<GCButton
 					onClick={useCallback(() => {
 						//Run test
-						console.log('final', handleTests());
+						handleTests();
 						// data.forEach((row) => {
 						// 	gameChangerAPI.postSearchTestResults(row);
 						// });
@@ -141,3 +174,28 @@ export default () => {
 		</>
 	);
 };
+
+function searchTests(term) {
+	let position = -1;
+	gameChangerAPI
+		.testSearch(term)
+		.then((data) => {
+			if (data.data === '') {
+				position = 404;
+			} else {
+				position = resultsPositionLocator(data.data.docs, term.searchText, 'title');
+			}
+			console.log(data.data.docs);
+			return { position: position, results: data.data.docs };
+		})
+		.catch((e) => {
+			console.log('This is bad', e);
+		});
+
+	return 'Something Broke';
+}
+
+function resultsPositionLocator(results, expectedResult, metaDataSearched) {
+	let position = results.findIndex((el) => el[metaDataSearched] === expectedResult);
+	return position >= 0 ? position + 1 : 404;
+}
