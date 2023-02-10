@@ -1494,6 +1494,7 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				// we have found exactly one review that matches
 				let item = result[0].dataValues;
+				console.log('what is in item??', item);
 				reviewData.jbook_ref_id = item.jbook_ref_id;
 				newOrUpdatedReview = await this.rev.update(
 					{
@@ -1511,15 +1512,20 @@ class JBookDataHandler extends DataHandler {
 						where: {
 							id: item.id,
 						},
+						returning: true,
+						plain: true,
 					}
 				);
 			}
-
+			// const newerReview =
 			// newOrUpdatedReview is now either from update OR create
 			// if it was a dupe it would be returned by now
 			// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
 
 			// Now update ES
+			console.log('comparing reviewData to neworUpdated');
+			console.log('here is review:', reviewData);
+			console.log('updatedReview', newOrUpdatedReview[1].dataValues);
 			let tmpPGToES = this.jbookSearchUtility.parseFields({ ...reviewData }, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
