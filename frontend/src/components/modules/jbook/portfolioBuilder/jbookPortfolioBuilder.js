@@ -67,26 +67,38 @@ const parseExcel = async (file, portfolio) => {
 		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
 
 		sheet1.forEach((item) => {
+			// general review fields
 			const reviewData = {
 				primary_reviewer: `${item['Primary Reviewer']}`,
-				primary_class_label: `${item['AI Analysis']}`,
-				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
-				primary_ptp: `${item['Planned Transition Partner']}`,
-				service_mp_add:
-					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
-						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
-						: null,
 				primary_review_notes: `${item['Primary Reviewer Notes']}`,
-				budget_year: `${item['FY (BY1)']}`,
-				budget_type: `${item['Doc Type']}`,
 				agency_service: `${item['Service / Agency']}`,
 				// agency_office: item[],
-				appn_num: `${item['APPN Symbol']}`,
-				budget_activity: `${item['BA']}`,
 				program_element: `${item['PE / BLI']}`,
 				budget_line_item:
 					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
 			};
+
+			if (portfolio.name === 'AI Inventory') {
+				reviewData.primary_class_label = `${item['AI Analysis']}`;
+				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer']}`;
+				reviewData.service_mp_add =
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null;
+				reviewData.primary_ptp = `${item['Planned Transition Partner']}`;
+				reviewData.budget_year = `${item['FY (BY1)']}`;
+				reviewData.budget_type = `${item['Doc Type']}`;
+				reviewData.appn_num = `${item['APPN Symbol']}`;
+				reviewData.budget_activity = `${item['BA']}`;
+				reviewData.portfolio_name = 'AI Inventory';
+			} else {
+				reviewData.primary_class_label = `${item['Label']}`;
+				reviewData.budget_year = `${item['FY']}`;
+				reviewData.budget_type = `${item['PL Type']}`;
+				reviewData.appn_num = `${item['APPN Number']}`;
+				reviewData.budget_activity = `${item['BA Number']}`;
+				reviewData.portfolio_name = `${item['Portfolio Name']}`;
+			}
 
 			if (reviewData.budget_type === 'pdoc') {
 				reviewData.budget_line_item = reviewData.program_element;
@@ -117,7 +129,6 @@ const parseExcel = async (file, portfolio) => {
 			delete reviewData.agency_office;
 			delete reviewData.agency_service;
 
-			reviewData.portfolio_name = portfolio.name;
 			reviewData.latest_class_label = reviewData.primary_class_label;
 			reviewData.primary_review_status = 'Finished Review';
 			reviewData.review_status = 'Partial Review (Service)';
@@ -356,7 +367,7 @@ const PortfolioBuilder = (props) => {
 									}}
 									style={{ minWidth: 'unset' }}
 								>
-									Bulk Upload
+									AI Inventory Bulk Upload
 								</GCButton>
 							</div>
 						</>
@@ -500,8 +511,20 @@ const PortfolioBuilder = (props) => {
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton onClick={showPublicCallback} style={{ minWidth: 'unset' }}>
+								<GCButton
+									onClick={showPublicCallback}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
 									Public Portfolio Request
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData({ name: 'General', tags: [], user_ids: [], admins: [] });
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
 								</GCButton>
 							</div>
 						)}
