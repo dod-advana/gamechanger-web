@@ -12,6 +12,7 @@
 <!--- Please link to the issue/ticket here: -->
 
 ## Types of changes
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Optimization (provides speedup with no functional changes)
@@ -23,6 +24,7 @@
 <!--- If there are multiple test cases, please list the expected input and output for each. -->
 
 ## Requester Checklist:
+
 <!--- Not all of these are required, but it servers as a reminder for the pull requester and helps the reviewer know what is covered-->
 
 - [ ] Documentation updated
@@ -33,7 +35,8 @@
 - [ ] Dev tools or other infrastructure changed
 
 ## Reviewer Checklist:
-<!--- Not all of these may be required/applicable -->
+
+Not all of these may be required/applicable.
 
 - [ ] Review the Changelog/Code
 - [ ] Test locally and aggressively
