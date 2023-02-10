@@ -534,7 +534,7 @@ const getDisplayTitle = (item) => {
 	return item.title;
 };
 
-export const clickFn = (filename, cloneName, searchText, sourceUrl, idx, pageNumber = 0) => {
+export const clickFn = (filename, cloneName, searchText, sourceUrl, idx = null, pageNumber = 0) => {
 	trackEvent(
 		getTrackingNameForFactory(cloneName),
 		'CardInteraction',
