@@ -10,7 +10,7 @@ class SearchTestController {
 	async testSearch(req, res) {
 		console.log('controller', req.body);
 		try {
-			let results = await this.policySearchHandler.searchHelper(req, 342, []);
+			let results = await this.policySearchHandler.searchHelper(req, '979832340@mil', false);
 			res.send(results);
 		} catch (e) {
 			console.log(e);
