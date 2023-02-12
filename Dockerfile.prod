@@ -97,7 +97,13 @@ RUN cd "${APP_BACKEND_DIR}" && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    npm install --production
+    npm install --production 
+
+USER root
+
+RUN yum remove git -y
+
+USER "${APP_UID}":"${APP_GID}"
 
 USER root
 
