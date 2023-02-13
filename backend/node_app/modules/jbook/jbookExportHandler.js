@@ -133,6 +133,11 @@ class JBookExportHandler extends ExportHandler {
 						res.status(200);
 						csvReviewStream.pipe(res);
 						break;
+					case 'xlsx':
+						const xlsxList = await this.reports.prepareXlsxJson(searchResults.docs);
+						res.end(JSON.stringify(xlsxList));
+						res.status(200);
+						break;
 					default:
 						res.end(JSON.stringify(searchResults));
 						res.status(200);
