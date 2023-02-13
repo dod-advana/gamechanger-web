@@ -1,7 +1,11 @@
+{{ include "common.notes" $ }}
+{{- range $deploymentName, $deploymentValues := $.Values.deployment }}
+{{- range $typeName, $typeValues := $deploymentValues.service }}
+{{- if eq ($typeName | toString ) "NodePort" }}
 1. Get the application URL by running these commands:
-{{- if .Values.service }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "chart.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  export NODE_PORT=$(kubectl get --namespace {{ $.Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "common.fullname" $ }}-{{ $deploymentName }}-{{ lower $typeName }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ $.Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 {{- end }}
-
+{{- end }}
+{{- end }}
