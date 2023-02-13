@@ -77,6 +77,18 @@ Env Config Secret Name
 {{- printf "%s.%s" (include "chart.fullname" .) "env-config-secret" }}
 {{- end }}
 
+{{- define "chart.envConfigSecretNameVault" }}
+{{- printf "%s.%s" (include "chart.fullname" .) "env-config-secret-vault" }}
+{{- end }}
+
+{{- define "chart.vaultKey" }}
+{{- printf "%s/%s" (.Values.vaultKey) (include "chart.fullname" .) }}
+{{- end }}
+
+{{- define "chart.vaultCertsKey" }}
+{{- printf "%s/%s" (include "chart.vaultKey" .)  "certs" }}
+{{- end }}
+
 
 {{/*
 File Config Secret Name
@@ -96,7 +108,7 @@ Check File Config Defined
 One Time Job Name
 */}}
 {{- define "chart.oneTimeJobName" }}
-{{- printf "%s.%s.%s" (include "chart.fullname" .) "one-time-job" (now | date "20060102-150405") }}
+{{- printf "%s.%s" "job" (now | date "20060102-150405") }}
 {{- end }}
 
 {{/*
@@ -135,6 +147,10 @@ Usage:
     {{- end }}
 {{- end -}}
 
+#check if service type is defined
+{{- define "app.isNodePort" }}
+{{- if .Values.service.http.nodePort -}}{{- if .Values.service.https.nodePort -}}1{{- else -}}{{- end -}}{{- end -}}
+{{- end }}
 
 {{/*
 Generate backend entry that is compatible with all Kubernetes API versions.
@@ -220,8 +236,8 @@ Usage:
 
 {{- define "app.web.fqdn" -}}
 {{ $name := default (include "app.web.name" . | lower ) .Values.ingress.web.hostname }}
-{{- if .Values.externalDomain -}}
-{{- printf "%s.%s" $name .Values.externalDomain -}}
+{{- if .Values.baseDomain -}}
+{{- printf "%s.%s" $name .Values.baseDomain -}}
 {{- else -}}
 {{ printf "%s" $name }}
 {{- end -}}
