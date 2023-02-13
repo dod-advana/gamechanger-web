@@ -74,7 +74,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 			</Tooltip>
 
 			{/* TESTING......................................................... */}
-			<Tooltip title="Test" placement="right" arrow>
+			<Tooltip title="Search Performance Tool" placement="right" arrow>
 				<HoverNavItem
 					centered
 					onClick={() => {
@@ -242,7 +242,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					toolTheme={toolTheme}
 				>
 					<ConstrainedIcon src={TestIcon} />
-					<span style={{ marginLeft: '10px' }}>Test</span>
+					<span style={{ marginLeft: '10px' }}>Search Performance Tool</span>
 				</HoverNavItem>
 			</Tooltip>
 			{/* TESTING......................................................... */}
