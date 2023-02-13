@@ -256,6 +256,25 @@ class Reports {
 		}
 	}
 
+	prepareXlsxJson(data) {
+		// NOTE: not sure if all the Nullish Coalescing Operators(??) are necessary, does database guarentee no undefined values?
+		const jsonData = data.map((doc) => ({
+			'Primary Reviewer': doc.primary_reviewer_s ?? '',
+			Label: doc.primary_class_label_s ?? '',
+			'Primary Reviewer Notes': doc.primaryReviewNotes ?? '',
+			FY: doc.budgetYear ?? '',
+			'PL Type': doc.budgetType ?? '',
+			'Service / Agency': doc.serviceAgency ?? '',
+			'Agency / Office': doc.org_jbook_desc_s ?? '',
+			'APPN Number': doc.appropriationNumber ?? '',
+			'BA Number': doc.budgetActivityNumber ?? '',
+			'PE / BLI': doc.programElement ?? doc.budgetLineItem_s ?? '',
+			'Project # (RDT&E Only)': doc.projectNum ?? '',
+			'Portfolio Name': doc.portfolio_name_s ?? '',
+		}));
+		return jsonData;
+	}
+
 	createPdfBuffer(data, userId, settings, callback = () => {}) {
 		try {
 			const fonts = {
