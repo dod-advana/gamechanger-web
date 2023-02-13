@@ -652,7 +652,7 @@ class AppStatsController {
 		for (let result of results) {
 			let action = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
 			let idx = action.lastIndexOf('-');
-			result['document'] = action.substr(0, idx);
+			result['document'] = action.substr(0, idx - 1);
 			result['clone_name'] = action.substr(idx + 1);
 		}
 		return results;
