@@ -1,0 +1,6 @@
+dependencies:
+  - name: advana-library
+    repository: oci://092912502985.dkr.ecr.us-east-1.amazonaws.com/platform/charts
+    version: 1.0.2
+digest: sha256:01cdd204f42640bd6a23d2344ee4a82ab1c21ce09cbffd35f457fa5d027008c1
+generated: "2023-01-26T11:09:50.284308-08:00"
