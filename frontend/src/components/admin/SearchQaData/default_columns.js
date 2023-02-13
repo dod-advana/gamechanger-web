@@ -37,12 +37,12 @@ const DEFAULT_COLUMNS = [
 	{
 		Header: 'Total Documents Missed',
 		accessor: 'total_number_of_documents_not_found',
-		Cell: (row) => <TableRow>{row.value}</TableRow>,
+		Cell: (row) => <TableRow style={{ textAlign: 'center' }}>{row.value}</TableRow>,
 	},
 	{
 		Header: 'Total Average',
 		accessor: 'total_average',
-		Cell: (row) => <TableRow>{Math.floor(row.value)}</TableRow>,
+		Cell: (row) => <TableRow style={{ textAlign: 'center' }}>{Math.floor(row.value)}</TableRow>,
 	},
 ];
 

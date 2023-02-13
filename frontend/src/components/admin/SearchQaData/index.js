@@ -6,9 +6,7 @@ import GCButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
-import data from './testData';
-// import searchTests from './searchTests';
-import documents from './testDocumentsTESTING';
+import documents from './testDocuments';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -25,6 +23,8 @@ export default () => {
 	const [results, setResults] = useState();
 	const [refresh, setRefresh] = useState(false);
 	const [searchResults, setSearchResults] = useState([]);
+	const [searching, setSearching] = useState(false);
+	const [gcVersion, setGcVersion] = useState();
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
@@ -40,35 +40,55 @@ export default () => {
 		}
 	}
 
-	async function handleTests() {
-		let testSource;
-		for (const source in documents) {
-			let positionSum = 0;
-			testSource = {
-				source: source,
-				number_of_documents_tested: 0,
-				number_of_documents_not_found: 0,
-				number_of_docuemnts_found: 0,
-				average_position: 0,
-			};
-			for (const element of documents[source]) {
-				let term = { searchText: element.metaData.title };
-				let searchResults = await searchTests(term);
-				let position = searchResults.position;
-				let allResults = searchResults.results;
-				testSource.number_of_documents_tested++;
-				console.log('allresults', allResults);
-				if (position >= 0) {
-					testSource.number_of_docuemnts_found++;
-				} else {
-					testSource.number_of_documents_not_found++;
-				}
-				positionSum += position;
-			}
-			testSource.average_position = positionSum / testSource.number_of_documents_tested;
-			setSearchResults([...searchResults, testSource]);
+	let searchTests = useCallback(async (source) => {
+		let positionSum = 0;
+		let sourceData = {
+			source: 'source',
+			number_of_documents_tested: 0,
+			number_of_documents_not_found: 0,
+			number_of_documents_found: 0,
+			average_position: 0,
+		};
+		for (const element of documents[source]) {
+			let term = { searchText: element.metaData.title };
+			let data = await gameChangerAPI.testSearch(term);
+
+			positionSum += handleAPI(data, source, term, sourceData);
 		}
-		// return results;
+		sourceData.average_position = positionSum / sourceData.number_of_documents_tested;
+		return sourceData;
+	}, []);
+
+	let handleTests = useCallback(async () => {
+		let results = [];
+		for (const source in documents) {
+			results.push(await searchTests(source));
+		}
+		setSearchResults(results);
+	}, [searchTests]);
+
+	function handleAPI(data, source, term, sourceData) {
+		let position = 404;
+
+		sourceData.source = source;
+		sourceData.number_of_documents_tested++;
+		if (data.data === '' || data.data.docs.length < 1) {
+			sourceData.number_of_documents_not_found++;
+		} else {
+			position = resultsPositionLocator(data.data.docs, term.searchText, 'title');
+			if (position === 404) {
+				sourceData.number_of_documents_not_found++;
+			} else {
+				sourceData.number_of_documents_found++;
+			}
+		}
+
+		console.log('searched');
+		return position;
+	}
+
+	function handleGcVersionChange(e) {
+		setGcVersion(e.target.value);
 	}
 
 	// The table columns : timestamp, GC version, JBOOK average score, Policy average score, EDA average score, Total average score
@@ -82,7 +102,24 @@ export default () => {
 	}, [resultSelected, refresh, selected]);
 
 	useEffect(() => {
+		if (searchResults.length < 1) return;
+		let totalAvg = 0;
+		let totalDocsNotFound = 0;
 		console.log(searchResults);
+		searchResults.forEach((el) => {
+			totalAvg += el.average_position;
+			totalDocsNotFound += el.number_of_documents_not_found;
+		});
+		gameChangerAPI.postSearchTestResults({
+			gc_version: gcVersion,
+			timestamp: Date.now(),
+			source_results: searchResults,
+			total_average: Math.floor(totalAvg / searchResults.length),
+			total_number_of_documents_not_found: totalDocsNotFound,
+		});
+		setSearching(false);
+		setRefresh(!refresh);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchResults]);
 
 	// Component Methods
@@ -117,32 +154,29 @@ export default () => {
 				<div></div>
 				<div></div>
 				<div style={{ paddingTop: '10px' }}>
-					GC Version: <input />
+					GC Version: <input onChange={handleGcVersionChange} />
 				</div>
 				<GCButton
 					onClick={useCallback(() => {
 						//Run test
-						handleTests();
-						// data.forEach((row) => {
-						// 	gameChangerAPI.postSearchTestResults(row);
-						// });
-						setRefresh(!refresh);
-						// eslint-disable-next-line react-hooks/exhaustive-deps
-					}, [])}
+						if (gcVersion) {
+							handleTests();
+							setSearching(true);
+						}
+					}, [gcVersion, handleTests])}
+					disabled={searching || !gcVersion}
 					style={{ minWidth: 'unset' }}
 				>
 					Run Test
 				</GCButton>
-				<GCButton
+				{/* <GCButton
 					onClick={useCallback(() => {
 						gameChangerAPI.resetSearchTestResults();
-						// setRefresh(!refresh);
-						// eslint-disable-next-line react-hooks/exhaustive-deps
 					}, [])}
 					style={{ minWidth: 'unset' }}
 				>
 					RESET TABLE
-				</GCButton>
+				</GCButton> */}
 			</div>
 			<div onClick={useCallback(handleRowSelected, [])}>
 				<ReactTable
@@ -174,26 +208,6 @@ export default () => {
 		</>
 	);
 };
-
-function searchTests(term) {
-	let position = -1;
-	gameChangerAPI
-		.testSearch(term)
-		.then((data) => {
-			if (data.data === '') {
-				position = 404;
-			} else {
-				position = resultsPositionLocator(data.data.docs, term.searchText, 'title');
-			}
-			console.log(data.data.docs);
-			return { position: position, results: data.data.docs };
-		})
-		.catch((e) => {
-			console.log('This is bad', e);
-		});
-
-	return 'Something Broke';
-}
 
 function resultsPositionLocator(results, expectedResult, metaDataSearched) {
 	let position = results.findIndex((el) => el[metaDataSearched] === expectedResult);
