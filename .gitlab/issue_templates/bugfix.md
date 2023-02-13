@@ -12,6 +12,6 @@
 
 ## Initial thoughts / Potential relevant files
 
-<!--- Jot down some notes about potential strategy -->
+<!--- Provide any additional information or theories you may have regarding the cause or affected areas in the codebase -->
 
 <!-- Remember to add labels (which clone, what priority--high/low) -->

@@ -13,6 +13,7 @@
 
 ## Types of changes
 
+- [ ] User interface improvement (non-breaking change that that improves the UI cosmetically)
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Optimization (provides speedup with no functional changes)
