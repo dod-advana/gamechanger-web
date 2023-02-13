@@ -344,8 +344,8 @@ const StyledListViewFrontCardContent = styled.div`
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
-	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -359,7 +359,7 @@ const StyledFrontCardContent = styled.div`
 	.hits-container {
 		display: grid;
 		grid-template-columns: 100px auto auto;
-		height: 100%;
+		height: calc(100% - 24px);
 
 		.page-hits {
 			min-width: 100px;
@@ -393,12 +393,12 @@ const StyledFrontCardContent = styled.div`
 		}
 
 		> .expanded-metadata {
-			overflow-wrap: anywhere;
 			grid-column: 2 / 4;
+			height: 100%;
+			overflow: auto;
 
 			.searchdemo-blockquote {
 				height: 100%;
-				overflow-y: auto;
 			}
 		}
 	}
