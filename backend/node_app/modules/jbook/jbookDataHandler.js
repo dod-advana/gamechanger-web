@@ -1484,6 +1484,14 @@ class JBookDataHandler extends DataHandler {
 			if (result.length === 0) {
 				// in the case that this review does not exist, we're writing a new one
 				if (reviewData.budget_type !== 'odoc') {
+					let refString = '';
+					if (reviewData.budget_type === 'pdoc') {
+						refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+					} else if (reviewData.budget_type === 'rdoc') {
+						refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+					}
+
+					reviewData.jbook_ref_id = refString;
 					newOrUpdatedReview = await this.rev.create(reviewData);
 					created = true;
 				}
@@ -1494,7 +1502,7 @@ class JBookDataHandler extends DataHandler {
 			} else {
 				// we have found exactly one review that matches
 				let item = result[0].dataValues;
-				console.log('what is in item??', item);
+
 				reviewData.jbook_ref_id = item.jbook_ref_id;
 				newOrUpdatedReview = await this.rev.update(
 					{
@@ -1516,6 +1524,7 @@ class JBookDataHandler extends DataHandler {
 						plain: true,
 					}
 				);
+				newOrUpdatedReview = newOrUpdatedReview[1].dataValues;
 			}
 			// const newerReview =
 			// newOrUpdatedReview is now either from update OR create
@@ -1523,10 +1532,8 @@ class JBookDataHandler extends DataHandler {
 			// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
 
 			// Now update ES
-			console.log('comparing reviewData to neworUpdated');
-			console.log('here is review:', reviewData);
-			console.log('updatedReview', newOrUpdatedReview[1].dataValues);
-			let tmpPGToES = this.jbookSearchUtility.parseFields({ ...reviewData }, false, 'review');
+
+			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
 			// Get ES Data
