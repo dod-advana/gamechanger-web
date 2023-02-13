@@ -340,7 +340,11 @@ class AppStatsController {
 				matomo_log_action b
 			where
 				a.idaction_name = b.idaction
-				${cloneName ? `and (search_cat = '${cloneName}_combined'  or search_cat = '${cloneName}')` : 'and search_cat is not null'}
+				${
+					cloneName
+						? `and (search_cat = '${cloneName}_combined'  or search_cat = '${cloneName}')`
+						: 'and search_cat is not null'
+				}
 				and a.server_time > ?
 				and a.server_time <= ?
 			order by
@@ -647,9 +651,9 @@ class AppStatsController {
 	cleanFilePath(results) {
 		for (let result of results) {
 			let action = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
-			let idx = action.lastIndexOf('-')
+			let idx = action.lastIndexOf('-');
 			result['document'] = action.substr(0, idx);
-			result['clone_name'] =  action.substr(idx+1);
+			result['clone_name'] = action.substr(idx + 1);
 		}
 		return results;
 	}
