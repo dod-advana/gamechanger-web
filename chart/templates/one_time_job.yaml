@@ -50,12 +50,6 @@ spec:
           env:
             - name: REACT_APP_VERSION
               value: {{ default "1.0.0" .Chart.AppVersion | quote }}
-            - name: REACT_APP_VERSION
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "chart.envConfigSecretName" .  | quote }}
-                  key: REACT_APP_VERSION
-                  optional: true
           envFrom:
             - secretRef:
                 name: {{ include "chart.envConfigSecretName" .  | quote }}
