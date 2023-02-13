@@ -7,6 +7,7 @@ import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
 import documents from './testDocuments';
+import LoadingBar from '../../common/LoadingBar';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -25,6 +26,7 @@ export default () => {
 	const [searchResults, setSearchResults] = useState([]);
 	const [searching, setSearching] = useState(false);
 	const [gcVersion, setGcVersion] = useState();
+	const [currentSearch, setCurrentSearch] = useState();
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
@@ -40,6 +42,11 @@ export default () => {
 		}
 	}
 
+	function handleGcVersionChange(e) {
+		setGcVersion(e.target.value);
+	}
+
+	//Calls the API to run the test and receive the data
 	let searchTests = useCallback(async (source) => {
 		let positionSum = 0;
 		let sourceData = {
@@ -51,6 +58,7 @@ export default () => {
 		};
 		for (const element of documents[source]) {
 			let term = { searchText: element.metaData.title };
+			setCurrentSearch(term.searchText);
 			let data = await gameChangerAPI.testSearch(term);
 
 			positionSum += handleAPI(data, source, term, sourceData);
@@ -59,6 +67,7 @@ export default () => {
 		return sourceData;
 	}, []);
 
+	//Loops through the sources and runs searchTests with each source
 	let handleTests = useCallback(async () => {
 		let results = [];
 		for (const source in documents) {
@@ -67,6 +76,7 @@ export default () => {
 		setSearchResults(results);
 	}, [searchTests]);
 
+	//Handles the data gathered in searchTests and changes it to the format needed to push it to the database
 	function handleAPI(data, source, term, sourceData) {
 		let position = 404;
 
@@ -83,15 +93,10 @@ export default () => {
 			}
 		}
 
-		console.log('searched');
+		console.log(`Searching ${source}`);
 		return position;
 	}
 
-	function handleGcVersionChange(e) {
-		setGcVersion(e.target.value);
-	}
-
-	// The table columns : timestamp, GC version, JBOOK average score, Policy average score, EDA average score, Total average score
 	useEffect(() => {
 		let tmpColumns = selected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
 		gameChangerAPI.getSearchTestResults().then(({ data }) => {
@@ -179,6 +184,7 @@ export default () => {
 				</GCButton> */}
 			</div>
 			<div onClick={useCallback(handleRowSelected, [])}>
+				<LoadingBar loading={searching} />
 				<ReactTable
 					data={
 						resultSelected
@@ -204,6 +210,7 @@ export default () => {
 						},
 					]}
 				/>
+				{searching && <div>{'Searching for: ' + currentSearch}</div>}
 			</div>
 		</>
 	);
