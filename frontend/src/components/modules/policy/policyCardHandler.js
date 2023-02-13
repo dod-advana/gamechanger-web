@@ -397,8 +397,8 @@ const StyledFrontCardContent = styled.div`
 			grid-column: 2 / 4;
 
 			.searchdemo-blockquote {
-				height: 90%;
-				overflow: auto;
+				height: 100%;
+				overflow-y: auto;
 			}
 		}
 	}
