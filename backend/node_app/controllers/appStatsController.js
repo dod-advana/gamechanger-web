@@ -340,7 +340,7 @@ class AppStatsController {
 				matomo_log_action b
 			where
 				a.idaction_name = b.idaction
-				and (search_cat = ? or search_cat = ?)
+				${cloneName ? `and (search_cat = '${cloneName}_combined'  or search_cat = '${cloneName}')` : 'and search_cat is not null'}
 				and a.server_time > ?
 				and a.server_time <= ?
 			order by
@@ -348,7 +348,7 @@ class AppStatsController {
 				searchtime desc
 			
 			` + (limit ? `limit ${limit * 3};` : ';'),
-				[cloneName + '_combined', cloneName, startDate, endDate],
+				[startDate, endDate],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP2');
@@ -450,7 +450,7 @@ class AppStatsController {
 				WHERE llva.idaction_event_action = la.idaction
 					AND llva.idaction_name = la_names.idaction
 					AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument' OR la.name LIKE 'Highlight')
-					AND llva.idaction_event_category = ?
+					${cloneName ? `AND llva.idaction_event_category = ${cloneName}` : ''}
 					AND server_time >= ?
 					AND server_time <= ?
 				order by 
@@ -458,7 +458,7 @@ class AppStatsController {
 					idvisit
 				
 				` + (limit ? `limit ${limit};` : ';'),
-				[cloneName, startDate, endDate],
+				[startDate, endDate],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP5');
@@ -596,11 +596,11 @@ class AppStatsController {
 	 * @param {Object} opts - This object is of the form {daysBack=3, offset=0, limit=50, filters, sorting, pageSize}
 	 * @returns an array of data from Matomo.
 	 */
-	async querySearchPdfMapping(opts, limit, connection) {
+	async querySearchPdfMapping(opts, connection) {
 		const { userId } = opts;
-		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, limit, connection);
-		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, limit, connection);
-		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, limit, connection);
+		const searches = await this.querySearches(opts.startDate, opts.endDate, opts.cloneName, opts.limit, connection);
+		const documents = await this.queryPdfOpend(opts.startDate, opts.endDate, opts.limit, connection);
+		const events = await this.queryEvents(opts.startDate, opts.endDate, opts.cloneID, opts.limit, connection);
 
 		const searchPdfMapping = [];
 		const searchMap = this.mapSearchMappings(searches, documents, events, searchPdfMapping);
@@ -647,9 +647,9 @@ class AppStatsController {
 	cleanFilePath(results) {
 		for (let result of results) {
 			let action = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
-			const [filename, clone_name] = action.split(' - ');
-			result['document'] = filename;
-			result['clone_name'] = clone_name;
+			let idx = action.lastIndexOf('-')
+			result['document'] = action.substr(0, idx);
+			result['clone_name'] =  action.substr(idx+1);
 		}
 		return results;
 	}
@@ -813,9 +813,9 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, cloneName, cloneID, offset = 0 } = req.query;
+		const { startDate, endDate, cloneName, cloneID, limit, offset = 0 } = req.query;
 
-		const opts = { startDate, endDate, cloneName, cloneID, offset, userId };
+		const opts = { startDate, endDate, cloneName, cloneID, limit, offset, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -829,7 +829,7 @@ class AppStatsController {
 				daysBack: 3,
 				data: [],
 			};
-			results.data = await this.querySearchPdfMapping(opts, 100, connection);
+			results.data = await this.querySearchPdfMapping(opts, connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '88ZHUHU');
