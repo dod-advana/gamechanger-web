@@ -8,6 +8,6 @@
 
 ## Initial thoughts / Potential relevant files
 
-<!--- Jot down some notes about potential strategy -->
+<!--- Provide any additional information or suggestions you may have regarding implementation or affected areas of the codebase -->
 
 <!-- Remember to add labels (which clone, what priority--high/low) -->
