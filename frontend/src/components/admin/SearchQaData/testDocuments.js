@@ -784,10 +784,8 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'RESPERSMAN 1534-040: Strategic Sealift Officer Program (SSOP) Selected Reserve (SELRES) and Voluntary Training Unit (VTU) Membership',
-
 				filename: 'RESPERSMAN 1534-040.pdf',
 				title: 'Strategic Sealift Officer Program (SSOP) Selected Reserve (SELRES) and Voluntary Training Unit (VTU) Membership',
-
 				doc_num: '1534-040',
 			},
 		},
@@ -796,7 +794,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'COMNAVRESFORCOMINST 5450.38B: Missions, Functions, and Tasks of Commander, Naval Air Forces Command',
-
 				filename: 'COMNAVRESFORCOMINST 5450.38B.pdf',
 				title: 'Missions, Functions, and Tasks of Commander, Naval Air Forces Command',
 				doc_num: '5450.38B',
@@ -865,7 +862,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'TRADOC Regulations (TRs) TR220-90C1: Utilization of the U.S. Army Training and Doctrine Command Band with Change 1',
-
 				filename: 'TRADOC TR220-90C1.pdf',
 				title: 'Utilization of the U.S. Army Training and Doctrine Command Band with Change 1',
 				doc_num: 'TR220-90C1',
@@ -885,7 +881,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'TRADOC Pamphlets (TPs) TP350-70-1: Training Development in Support of the Operational Training Domain',
-
 				filename: 'TRADOC TP350-70-1.pdf',
 				title: 'Training Development in Support of the Operational Training Domain',
 				doc_num: 'TP350-70-1',
@@ -907,7 +902,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'FASAB Technical Release 11: Implementation Guidance on Cleanup Costs Associated with Equipment (PDF)',
-
 				filename: 'FASAB Technical Release 11.pdf',
 				doc_num: '11',
 				title: 'Implementation Guidance on Cleanup Costs Associated with Equipment (PDF)',
@@ -927,7 +921,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'FASAB Technical Release 4: Reporting on Non-Valued Seized and Forfeited Property (PDF)',
-
 				filename: 'FASAB Technical Release 4.pdf',
 				doc_num: '4',
 				title: 'Reporting on Non-Valued Seized and Forfeited Property (PDF)',
@@ -947,7 +940,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'FASAB Interpretation 3: Measurement Date for Pension and Retirement Health Care Liabilities (PDF)',
-
 				filename: 'FASAB Interpretation 3.pdf',
 				title: 'Measurement Date for Pension and Retirement Health Care Liabilities (PDF)',
 				doc_num: '3',
@@ -1104,7 +1096,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'ICD 501: Discovery and Dissemination or Retrieval of Information within the Intelligence Community',
-
 				filename: 'ICD 501.pdf',
 				title: 'Discovery and Dissemination or Retrieval of Information within the Intelligence Community',
 				doc_num: '501',
@@ -1171,10 +1162,8 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'STIG V1R1: Microsoft Windows Privileged Access Workstation (PAW) STIG Ver 1 - Release Memo',
-
-				filename: [
+				filename:
 					'STIG V1R1 Microsoft Windows Privileged Access Workstation (PAW) STIG Ver 1 - Release Memo.pdf',
-				],
 				title: 'Microsoft Windows Privileged Access Workstation (PAW) STIG Ver 1 - Release Memo',
 				doc_num: 'V1R1',
 			},
@@ -1204,7 +1193,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'DSCA 21-64: DSCA DoD Golden Sentry End-Use Monitoring (EUM) Virtual Compliance Assessments (VCA)',
-
 				filename: 'DSCA 21-64.html',
 				title: 'DSCA DoD Golden Sentry End-Use Monitoring (EUM) Virtual Compliance Assessments (VCA)',
 				doc_num: '21-64',
@@ -1215,7 +1203,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'DSCA 21-87: Assignment of Program Code TE to track Fiscal Year 2022 Operation and Maintenance Funding Provided for 10 USC  332 Foreign Security Forces Authority to Build Capacity (Section 332)',
-
 				filename: 'DSCA 21-87.html',
 				title: 'Assignment of Program Code TE to track Fiscal Year 2022 Operation and Maintenance Funding Provided for 10 USC  332 Foreign Security Forces Authority to Build Capacity (Section 332)',
 
@@ -1236,7 +1223,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'DSCA 21-60: International Military Student (IMS) Security Vetting Requirements Update',
-
 				filename: 'DSCA 21-60.html',
 				doc_num: '21-60',
 				title: 'International Military Student (IMS) Security Vetting Requirements Update',
@@ -1247,7 +1233,6 @@ const documents = {
 			metaData: {
 				display_title_s:
 					'DSCA 21-85: Assignment of Program Code NV to track Fiscal Year 20222023 Operation and Maintenance Base Funding Provided for 10 USC  333 Foreign Security Forces Authority to Build Capacity (Section 333)',
-
 				filename: 'DSCA 21-85.html',
 				doc_num: '21-85',
 				title: 'Assignment of Program Code NV to track Fiscal Year 20222023 Operation and Maintenance Base Funding Provided for 10 USC  333 Foreign Security Forces Authority to Build Capacity (Section 333)',
