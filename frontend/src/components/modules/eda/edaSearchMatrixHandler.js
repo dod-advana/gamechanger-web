@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import GCAccordion from '../../common/GCAccordion';
 
 import { FormControl, FormGroup, FormControlLabel, Checkbox, TextField, Radio } from '@material-ui/core';
@@ -12,6 +12,12 @@ import GCButton from '../../common/GCButton';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { numberWithCommas } from '../../../utils/gamechangerUtils';
 import MultiSelectAutocomplete from '../../common/GCMultiSelectAutoComplete';
+import EdaHierarchicalFilter from './edaHierarchicalFilter';
+import GameChangerAPI from '../../api/gameChanger-service-api';
+import { insertChildrenBF, getParentsOfChild, applyFunctionBF } from './edaUtils';
+import _ from 'lodash';
+
+const gameChangerAPI = new GameChangerAPI();
 
 const styles = {
 	titleText: {
@@ -942,6 +948,46 @@ export const getAdvancedOptions = (props) => {
 	);
 };
 
+/**
+ * Fetch the children for a particular node in the hierarchical filter data & update
+ * filter options in state.
+ *
+ * @param {Object} nodee - The node whose children are to be fetched
+ * @param {String} filterName - The name of the filter (ex: 'psc')
+ * @param {Object} state - The eda state object
+ * @param {Function} dispatch - The dispatch function provided by Context
+ *
+ * @return {undefined} - no return value, just calls setState
+ */
+const getChildrenHierarchicalFilter = async (node, filterName, state, dispatch) => {
+	const newFilterData = { ...state.edaFilterData };
+	const resp = await gameChangerAPI.callSearchFunction({
+		functionName: 'getHierarchicalFilterData',
+		cloneName: state.cloneData.clone_name,
+		options: {
+			parentCode: node.code,
+			picklistName: filterName,
+		},
+	});
+
+	const newChildren = resp.data.map((e) => {
+		return { ...e, children: [] };
+	});
+
+	newFilterData[filterName + '_hierarchy'] = newFilterData[filterName + '_hierarchy'].map((root) =>
+		insertChildrenBF(root, node, newChildren)
+	);
+
+	const searchSettings = { ...state.edaSearchSettings };
+	const selectedOptions = [...searchSettings[filterName]];
+
+	if (_.findIndex(selectedOptions, (e) => e.code === node.code) !== -1) {
+		searchSettings[filterName] = selectedOptions.concat(newChildren);
+	}
+
+	setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData, edaSearchSettings: searchSettings });
+};
+
 const EDASearchMatrixHandler = (props) => {
 	const { state, dispatch } = props;
 
@@ -951,6 +997,106 @@ const EDASearchMatrixHandler = (props) => {
 		dispatch({ type: 'RESET_SEARCH_SETTINGS' });
 		setState(dispatch, { runSearch: true });
 	};
+
+	/**
+	 * Deselects an option in a hierarchical filter. Also deselects the option's children, and all its
+	 * parents (including grandparents, etc.).
+	 *
+	 * @param {Object} nodeToDeselect - The node being deselected
+	 * @param {Array} selectedNodes - The currently selected nodes/options
+	 * @param {Array} node_hierarchy - The root nodes of the tree of hierarchical filter options
+	 *
+	 * @return {Array} - Array of now selected nodes
+	 */
+	const deselectHierarchicalFilterOption = useCallback((nodeToDeselect, selectedNodes, node_hierarchy) => {
+		const { code } = nodeToDeselect;
+		let newSelectedNodes = [...selectedNodes];
+		// if the node has children, also deselect them
+		if (nodeToDeselect.hasChildren) {
+			applyFunctionBF(nodeToDeselect, (node) => {
+				newSelectedNodes = newSelectedNodes.filter((e) => e.code !== node.code);
+			});
+		} else {
+			newSelectedNodes = newSelectedNodes.filter((node) => node.code !== code);
+		}
+		// if the node's parent is selected, deselect it (recursively)
+		if (nodeToDeselect.parent) {
+			let parentsToDeselect = [];
+			for (let root of node_hierarchy) {
+				const possibleParents = getParentsOfChild(root, nodeToDeselect);
+				if (possibleParents && possibleParents.length > 0) {
+					parentsToDeselect = possibleParents;
+					break;
+				}
+			}
+			newSelectedNodes = newSelectedNodes.filter(
+				(node) => _.findIndex(parentsToDeselect, (e) => e.code === node.code) === -1
+			);
+		}
+		return newSelectedNodes;
+	}, []);
+
+	const pscOnOptionClick = useCallback(
+		(pscNode) => {
+			const currPsc = state.edaSearchSettings.psc;
+			let newPsc = [...currPsc];
+			const psc = pscNode.code;
+
+			// we are deselecting an option
+			if (_.findIndex(currPsc, (node) => node.code === psc) !== -1) {
+				newPsc = deselectHierarchicalFilterOption(pscNode, newPsc, state.edaFilterData.psc_hierarchy);
+			}
+			// we are selecting an option, also select children
+			else if (pscNode.hasChildren) {
+				applyFunctionBF(pscNode, (node) => {
+					newPsc.push(node);
+				});
+			} else {
+				newPsc.push(pscNode);
+			}
+
+			setEDASearchSetting('psc', newPsc, state, dispatch);
+		},
+		[dispatch, state, deselectHierarchicalFilterOption]
+	);
+
+	const pscFetchChildren = useCallback(
+		(node) => getChildrenHierarchicalFilter(node, 'psc', state, dispatch),
+		[state, dispatch]
+	);
+
+	const naicsOnOptionClick = useCallback(
+		(naicsNode) => {
+			const currNaics = state.edaSearchSettings.naicsCode;
+			let newNaics = [...currNaics];
+			const naics = naicsNode.code;
+
+			// we are deselecting an option
+			if (_.findIndex(newNaics, (node) => node.code === naics) !== -1) {
+				newNaics = deselectHierarchicalFilterOption(
+					naicsNode,
+					newNaics,
+					state.edaFilterData.naicsCode_hierarchy
+				);
+			}
+			// we are selecting an option, also select children
+			else if (naicsNode.hasChildren) {
+				applyFunctionBF(naicsNode, (node) => {
+					newNaics.push(node);
+				});
+			} else {
+				newNaics.push(naicsNode);
+			}
+
+			setEDASearchSetting('naicsCode', newNaics, state, dispatch);
+		},
+		[dispatch, state, deselectHierarchicalFilterOption]
+	);
+
+	const naicsFetchChildren = useCallback(
+		(node) => getChildrenHierarchicalFilter(node, 'naicsCode', state, dispatch),
+		[state, dispatch]
+	);
 
 	return (
 		<div data-cy="eda-filter-container">
@@ -1117,14 +1263,11 @@ const EDASearchMatrixHandler = (props) => {
 						id={'pscAccordion'}
 					>
 						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.psc}
-								setValue={(value) => {
-									setEDASearchSetting('psc', value, state, dispatch);
-								}}
-								options={state.edaFilterData.psc}
-								placeholder="Search PSCs"
-								label="PSC"
+							<EdaHierarchicalFilter
+								options={state.edaFilterData.psc_hierarchy}
+								fetchChildren={pscFetchChildren}
+								onOptionClick={pscOnOptionClick}
+								optionsSelected={state.edaSearchSettings.psc}
 							/>
 						</div>
 					</GCAccordion>
@@ -1139,14 +1282,11 @@ const EDASearchMatrixHandler = (props) => {
 						id={'naicsAccordion'}
 					>
 						<div style={styles.width100}>
-							<MultiSelectAutocomplete
-								value={state.edaSearchSettings.naicsCode}
-								setValue={(value) => {
-									setEDASearchSetting('naicsCode', value, state, dispatch);
-								}}
-								options={state.edaFilterData.naics}
-								placeholder="Search NAICS"
-								label="NAICS"
+							<EdaHierarchicalFilter
+								options={state.edaFilterData.naicsCode_hierarchy}
+								fetchChildren={naicsFetchChildren}
+								onOptionClick={naicsOnOptionClick}
+								optionsSelected={state.edaSearchSettings.naicsCode}
 							/>
 						</div>
 					</GCAccordion>
