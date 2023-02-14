@@ -385,7 +385,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
@@ -673,6 +673,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		handleSetParagraphs();
 	}, [paragraphText, handleSetParagraphs]);
 
+	useEffect(() => {
+		setLeftPanelOpen(returnedDocs.length > 0);
+	}, [returnedDocs]);
+
 	const removeParagraph = (id) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
 		if (id === selectedInput) {
@@ -716,6 +720,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		if (!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
+		// setLeftPanelOpen(true);
 		setSelectedInput(paragraphs?.[0].id);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
@@ -753,7 +758,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setViewableDocs([]);
 		setNoResults(false);
 		setFilterChange(false);
-		setLeftPanelOpen(true);
+		setLeftPanelOpen(false);
 		setStepIndex(0);
 		setTutorialLogicSwitch(false);
 	};
