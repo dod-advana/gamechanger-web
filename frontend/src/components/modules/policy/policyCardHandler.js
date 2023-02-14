@@ -363,13 +363,12 @@ const StyledFrontCardContent = styled.div`
 
 		.page-hits {
 			min-width: 100px;
-			height: fit-content;
-			max-height: 150px;
 			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 			position: relative;
 			z-index: 1;
+			height: 100%;
 
 			.page-hit {
 				display: flex;
@@ -380,6 +379,7 @@ const StyledFrontCardContent = styled.div`
 				border-top: 1px solid rgb(189, 189, 189);
 				cursor: pointer;
 				color: #386f94;
+				border-bottom: 1px solid rgb(189, 189, 189);
 
 				span {
 					font-size: ${CARD_FONT_SIZE}px;
