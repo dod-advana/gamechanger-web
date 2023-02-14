@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@dod-advana/advana-api-auth": "2.0.8",
-		"@dod-advana/advana-logger": "0.0.4",
+		"@dod-advana/advana-logger": "0.2.1",
 		"@elastic/elasticsearch": "7.10.0",
 		"async-redis": "2.0.0",
 		"aws-sdk": "2.1198.0",
