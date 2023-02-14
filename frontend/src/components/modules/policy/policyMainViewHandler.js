@@ -267,9 +267,12 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let cleanedDocs = [];
 	let filteredPubs = [];
-
+	debugger;
 	for (let doc of last_opened_docs) {
-		cleanedDocs.push(doc.document.split(' - ')[1].split('.pdf')[0]);
+		doc = doc.document;
+		let cleanedDoc = doc.substring(doc.indexOf('-') + 1, doc.lastIndexOf('-')).trim();
+		cleanedDoc = cleanedDoc.substring(0, cleanedDoc.lastIndexOf('.'));
+		cleanedDocs.push(cleanedDoc);
 		cleanedDocs = [...new Set(cleanedDocs)];
 	}
 	try {
