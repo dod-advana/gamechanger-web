@@ -37,6 +37,7 @@ const PolicySearchBarHandler = {
 				index,
 				searchText: value,
 				suggestions: true,
+				cloneName: 'policy',
 			});
 			setAutocorrect(data?.autocorrect?.map((item) => ({ text: item })) ?? []);
 			setPresearchTitle(data?.presearchTitle?.map((item) => ({ text: item })) ?? []);
