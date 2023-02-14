@@ -1027,7 +1027,7 @@ const EDADocumentsComparisonTool = ({
 									handlePdfOnLoad(
 										'pdfViewer',
 										'viewerContainer',
-										compareDocument.filename,
+										compareDocument?.filename,
 										'PDF Viewer'
 									)
 								}
