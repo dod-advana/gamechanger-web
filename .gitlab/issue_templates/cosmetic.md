@@ -1,6 +1,6 @@
 ## Description
 
-<!--- Describe what new feature you want implemented -->
+<!--- Describe what cosmetic changes you want implemented -->
 
 ## Mockups (if applicable)
 
@@ -8,6 +8,6 @@
 
 ## Initial thoughts / Potential relevant files
 
-<!--- Provide any additional information or suggestions you may have regarding implementation or affected areas of the codebase -->
+<!--- Provide any additional information you may have regarding relevant areas of the codebase -->
 
 <!-- Remember to add labels (which clone, what priority--high/low) -->
