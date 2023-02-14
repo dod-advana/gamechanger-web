@@ -915,9 +915,9 @@ class EDASearchUtility {
 					} else if (psc.hasChildren) {
 						nestedQuery.nested.query.bool.should.push({
 							query_string: {
-								default_field: 'fpds_ng_n.psc_eda_ext',
+								default_field: 'fpds_ng_n.psc_hierarchy_eda_ext',
 								default_operator: 'or',
-								query: `${psc.code}*`,
+								query: `${psc.code}`,
 							},
 						});
 					} else {
@@ -973,9 +973,9 @@ class EDASearchUtility {
 					if (naicsCode.hasChildren) {
 						nestedQuery.nested.query.bool.should.push({
 							query_string: {
-								default_field: 'fpds_ng_n.naics_code_eda_ext',
+								default_field: 'fpds_ng_n.naics_hierarchy_eda_ext',
 								default_operator: 'or',
-								query: `${naicsCode.code}*`,
+								query: `${naicsCode.code}`,
 							},
 						});
 					} else {
