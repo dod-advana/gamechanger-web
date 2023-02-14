@@ -28,7 +28,11 @@ const PolicySearchBarHandler = {
 		setPredictions
 	) {
 		try {
-			const index = state.cloneData?.clone_data?.esCluster ?? '';
+			const index = state?.elasticsearch_index || '';
+			if (!index) {
+				console.warn('Missing elasticsearch index');
+			}
+
 			const { data } = await gameChangerAPI.getTextSuggestion({
 				index,
 				searchText: value,
