@@ -11,6 +11,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
+import xlsxSample from '../../../../resources/jbook-excel-sample.xlsx';
+import aiInvSample from '../../../../resources/jbook-ai-inv-sample.xlsx';
+import { ReactComponent as ExcelSvg } from '../../../../images/icon/excel_iconcolor.svg';
+import { SvgIcon } from '@mui/material';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -194,6 +198,15 @@ const parseExcel = async (file, portfolio) => {
 		const { message } = e;
 		console.log(message);
 		return [];
+	}
+};
+
+const getExample = (name) => {
+	switch (name) {
+		case 'AI Inventory':
+			return aiInvSample;
+		default:
+			return xlsxSample;
 	}
 };
 
@@ -740,6 +753,10 @@ const PortfolioBuilder = (props) => {
 							)}
 						</DialogContent>
 						<DialogActions>
+							<GCButton href={getExample(modalData.name)} download style={{ margin: '10px' }}>
+								<SvgIcon component={ExcelSvg} inheritViewBox />
+								&nbsp;Download Sample
+							</GCButton>
 							<GCButton
 								id={'editReviewerClose'}
 								onClick={closeUploadModal}
