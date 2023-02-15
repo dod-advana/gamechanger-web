@@ -49,8 +49,8 @@ cache: &global_cache
 
 .setup-github-npm:
   before_script: # Setups the npm vars
-    - npm config set "@dod-advana:registry" "https://npm.pkg.github.com"
-    - npm config set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm config set "@dod-advana:registry"="https://npm.pkg.github.com"
+    - npm config set "//npm.pkg.github.com/:_authToken"="${NPM_AUTH_TOKEN}"
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
   image: node:18
