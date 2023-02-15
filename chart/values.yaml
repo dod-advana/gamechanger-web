@@ -1,21 +1,17 @@
+###############################################################################
+## Global Values                                                             ##
+###############################################################################
+
+global:
+  awsRegion: us-east-1
+  appName: gamechanger
+  # main domain for the application dev.advana.us for dev tests.advana.us for test
+  baseDomain: "dev.advana.us" # advana.example.local
+  registry: docker.io
+  imagePullSecrets: {}
+
 # DEFAULT VALUES
-
-# replicaCount - <Integer >= 1>
-#   Number of app pod replicas to launch in the load-balancing group.
-#
-#   Tips:
-#   - when troubleshooting, set to 1 to avoid dealing with complications of load-balanced traffic
-replicaCount: 1
-
-# startCommand - <Array of strings>
-#   Entrypoint/command to be executed by the main application pod.
-#   Will completely override any entrypoint/cmd baked into the container.
-#
-#   Tips:
-#     - when troubleshooting, set to ["sleep", "infinity"] then exec into container and tweak/relaunch app as necessary
-startCommand:
-  - node
-  - index.js
+vaultKey: kv/aws-us-gov/default/prod
 
 # scripts - <Object>
 #   BASH scripts that run during various points in the deployment
@@ -39,37 +35,11 @@ scripts:
     echo "This job runs every time helm upgrade/install runs, unless explicitly disabled"
     echo "Can be disabled at will by setting scripts.runOneTimeJob=false"
 
-# probes - <Object>
-#   Probes for determining pod/container health, as per ...
-#   https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-#
-#   Tips:
-#     - if troubleshooting, set to empty object {}; to avoid k8s restarting container and blocking traffic to it
-probes: {}
-
-# podAnnotations - <Object>  additional pod annotations
-podAnnotations:
-  iam.amazonaws.com/role: advana/k8s/s3.wildcard
-
-# service - <Object/Map>
-#   Port details of the service used to open application pod to connections from outside.
-#   Note: must be of type NodePort and only http/https keys are supported.
-#   For syntax, refer to service.spec.ports[*] definitions of the NodePort service https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
-service:
-  http:
-    port: 80
-    targetPort: 8990
-    protocol: TCP
-    name: http
-  https:
-    port: 443
-    targetPort: 8443
-    protocol: TCP
-    name: https
-
 # image - <Object>
 #   Main app image details - also used to run all jobs defined in .Values.scripts
 image:
+  registry: 092912502985.dkr.ecr.us-east-1.amazonaws.com
+  repository: advana/gamechanger/gamechanger-web
   pullPolicy: Always
   tag: "latest"
 
@@ -82,21 +52,98 @@ nameOverride: ""
 #   Has no effect on helm-provided .Chart.Name variable.
 fullnameOverride: ""
 
-# podSecurityContext - <Object>
-#   Sets security context for main application and job pods.
-#   This primarily comes into play when mounting files and volumes, but has other uses.
-#   For more on what goes in here, reference https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-podSecurityContext:
-  fsGroup: 1001
+# deployment - <Array>
+#   Sets all configuration for the deployment resource yaml.
+#
+# TODO: done, tplify secret name for envFrom
+deployment:
+  web:
+    autoscaling:
+      enabled: false
+    # replicaCount - <Integer >= 1>
+    #   Number of app pod replicas to launch in the load-balancing group.
+    #
+    #   Tips:
+    #   - when troubleshooting, set to 1 to avoid dealing with complications of load-balanced traffic
+    replicaCount: 1
+    # podAnnotations - <Object>  additional pod annotations
+    podAnnotations:
+      checksum/env-config-secret: 2660c5692715b67c1b913eda4cc32d3f5df69736a1dca4b92a9aa1fb0f2f10a0
+      checksum/file-config-secret: a65095aa0d9e48d2e2280cfbd183ac6c1695ade9d5b6c6ad126c75f1815afc33
+      iam.amazonaws.com/role: advana/k8s/s3.wildcard
+    serviceAccountName: "{{ .Release.Name}}-gamechanger-web"
+    initContainer: {}
+    container:
+      gamechanger-web:
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsGroup: 1001
+          runAsUser: 1001
+        # startCommand - <Array of strings>
+        #   Entrypoint/command to be executed by the main application pod.
+        #   Will completely override any entrypoint/cmd baked into the container.
+        #
+        #   Tips:
+        #     - when troubleshooting, set to ["sleep", "infinity"] then exec into container and tweak/relaunch app as necessary
+        command:
+          - "node"
+          - "index.js"
+        envFrom:
+          - secretRef: # TODO: done, need to make mr to template
+              name: '{{ .Release.Name | trunc 63 | trimSuffix "-" }}-{{ .Chart.Name }}.env-config-secret'
+        env:
+          REACT_APP_VERSION: '{{ default "1.0.0" .Chart.AppVersion }}'
+        resources:
+          requests:
+            cpu: "1"
+            memory: 512Mi
 
-# appContainerSecurityContext - <Map>
+        # probes - <Object>
+        #   Probes for determining pod/container health, as per ...
+        #   https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+        #
+        #   Tips:
+        #     - if troubleshooting, set to empty object {}; to avoid k8s restarting container and blocking traffic to it
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8443
+            scheme: HTTPS
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8443
+            scheme: HTTPS
+          timeoutSeconds: 10
+    # service - <Object/Map>
+    #   Port details of the service used to open application pod to connections from outside.
+    #   Note: must be of type NodePort and only http/https keys are supported.
+    #   Only define service in the dev/test values. Advana-library chart will create another service if a different type is set in the default values.yaml
+    #   For syntax, refer to service.spec.ports[*] definitions of the NodePort service https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+    # service:
+    #   # Change this key between ClusterIP to NodePort as needed, making sure to comment out nodePort keys when using clusterIP.
+    #   ClusterIP: #NodePort:
+    #     ports:
+    #       http:
+    #         port: 80
+    #         protocol: TCP
+    #         targetPort: 8990
+    #         # nodePort: 31007
+    #       https:
+    #         port: 443
+    #         protocol: TCP
+    #         targetPort: 8443
+    #         # nodePort: 31207
+
+# podSecurityContext - <Map>
 #   Security context for app and job containers.
 #   It's useful to define this to match user-id and group-id of the application and its' files inside container
 #   For more on what goes in here, reference https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-appContainerSecurityContext:
+podSecurityContext:
   runAsUser: 1001
   runAsGroup: 1001
-  allowPrivilegeEscalation: false
+  # allowPrivilegeEscalation: false
 
 # serviceAccount - <Map>
 #   Config of service account to be used by the app and job pods
@@ -105,94 +152,108 @@ serviceAccount:
   # create - <bool> - whether to attempt creating the service account
   create: true
   # name - <string> - override with custom name. useful if there is a pre-existing service account you should be using
-  name: ""
+  name: "{{ .Release.Name }}-gamechanger-web"
 
-# @param external DNS subdomain; used to build sub-components FQDNs and configure web CORS (if enabled)
-##
-externalDomain: "" #"dev.advana.boozallencsn.com"
 ingress:
   enabled: false
-  ## @param ingress.certManager Set to true to add the `kubernetes.io/tls-acme: "true"` annotation to gamechanger ingresses
-  ##
-  certManager: true
-  ## @param ingress.controller The ingress controller type. Currently supports `default`, `gce` and `ncp`
-  ## leave as `default` for most ingress controllers.
-  ## set to `gce` if using the GCE ingress controller
-  ## set to `ncp` if using the NCP (NSX-T Container Plugin) ingress controller
-  ##
-  controller: default
-  ingressClassName: ""
-  serversnippets: |
+  tls: true
+  className: nginx # set if default IngressClass is not configured
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/server-snippet: |
       underscores_in_headers on;
-  web:
-    enabled: true
-    hostname: gamechanger
-    ## @param ingress.web.pathType Ingress path type
-    ##
-    pathType: ImplementationSpecific
-    ## @param ingress.web.annotations [object] Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
-    ## Use this parameter to set the required annotations for cert-manager, see
-    ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
-    ## e.g:
-    ## annotations:
-    ##   kubernetes.io/ingress.class: nginx
-    ##   cert-manager.io/cluster-issuer: cluster-issuer-name
-    ##
-    annotations:
-      ingress.kubernetes.io/ssl-redirect: "true"
-      ingress.kubernetes.io/proxy-body-size: "0"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    tls: true
-    tlsSecretName: "advana.us-wildcard-tls"
-    ## @param ingress.web.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
-    selfSigned: false
-    ## @param ingress.web.extraHosts An array with additional hostname(s) to be covered with the ingress record
-    ## e.g:
-    ## extraHosts:
-    ##   - name: web.gamechanger.domain
-    ##     path: /
-    ##
-    extraHosts: []
-    ## @param ingress.web.secrets Custom TLS certificates as secrets
-    ## NOTE: 'key' and 'certificate' are expected in PEM format
-    ## NOTE: 'name' should line up with a 'secretName' set further up
-    ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
-    ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
-    ## It is also possible to create and manage the certificates outside of this helm chart
-    ## Please see README.md for more information
-    ## e.g:
-    ## secrets:
-    ##   - name: web.gamechanger.domain-tls
-    ##     key: |-
-    ##       -----BEGIN RSA PRIVATE KEY-----
-    ##       ...
-    ##       -----END RSA PRIVATE KEY-----
-    ##     certificate: |-
-    ##       -----BEGIN CERTIFICATE-----
-    ##       ...
-    ##       -----END CERTIFICATE-----
-    ##
-    secrets: []
-# resources - <Map>
-#   Defines minimum and maximum cpu/memory requirements for each application pod (except one-time-job pods)
-#   For more on what goes in here, reference https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-resources:
-  requests:
-    memory: "512Mi"
-    cpu: "1"
+  domain: "{{ $.Values.global.appName }}.{{ $.Values.global.baseDomain }}"
+  # hosts:
+  #   "{{ $.Values.ingress.domain }}":
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  #         deploymentName: web-deployment
+  #         serviceType: Nodeport
+  #         serviceName: https
 
-# env - <Map[string, string]>
-#   Map of environment variables to be defined for all containers (app & jobs)
-#   Keys correspond to env-var names (capitalization is important) and values are interpreted as strings
-env: {}
+###############################################################################
+## Environment Specific Secret Values                                        ##
+###############################################################################
 
-# fileConfig - <Map>
-#   Configuration for various text content meant to be exposed inside app containers as files rather than env vars
-#   This is useful for secrets and config files that are too long to be used as env vars (e.g. CA certificate bundles)
-fileConfig:
-  # baseMountPath - <string> - directory where the fileConfig.files will be exposed as actual files
-  baseMountPath: "/opt/app-root/src/secrets/"
-  # files - <Map[string, string]> - files to be mounted in the baseMountPath. Key corresponds to filename, Value correspond to content.
-  files: {}
+secret:
+  ingress:
+    tls:
+      "{{ $.Values.ingress.domain }}":
+        # reference existing tls secret
+        secretName: advana.us-wildcard-tls
+        # or define new tls secret
+        # tls.crt: |
+        #   -----BEGIN CERTIFICATE-----
+        #   tls-crt
+        #   -----END CERTIFICATE-----
+        # tls.key: |
+        #   -----BEGIN RSA PRIVATE KEY-----
+        #   tls-key
+        #   -----END RSA PRIVATE KEY-----
+
+  # public values that are stored as a secret object for convenience, remove if using values from vault
+  # put values from values.env here
+  env:
+    # secret - <Map[string, string]>
+    #   Map of environment variables to be defined for all containers (app & jobs)
+    #   Keys correspond to env-var names (capitalization is important) and values are interpreted as strings
+    secret:
+      '{{ include "chart.envConfigSecretName" . }}': # TODO: done, how to use templated key as secret name
+
+secretstore:
+  "vault":
+    kind: ClusterSecretStore
+    externalsecret:
+      '{{ include "chart.envConfigSecretNameVault" . }}': # TODO: done, make MR to externalsecret template to tplify name
+        data:
+          - secretKey: TLS_KEY
+            remoteRef:
+              key: '{{ include "chart.vaultCertsKey" . }}'
+              property: key
+          - secretKey: TLS_CERT
+            remoteRef:
+              key: '{{ include "chart.vaultCertsKey" . }}'
+              property: cert
+          - secretKey: TLS_CA
+            remoteRef:
+              key: '{{ include "chart.vaultCertsKey" . }}'
+              property: ca
+          - secretKey: TLS_KEY_PASSPHRASE
+            remoteRef:
+              key: '{{ include "chart.vaultCertsKey" . }}'
+              property: passphrase
+
+# job - <Map>
+#
+#
+job:
+  '{{ include "chart.oneTimeJobName" . }}':
+    podAnnotations:
+      checksum/secrets: '{{ include (print .Template.BasePath "/secrets.yaml") . | sha256sum }}'
+    restartPolicy: Never
+    container:
+      "init-scripts":
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            {{- .Values.scripts.oneTimeJobScript | trim | nindent 16 }}
+        env:
+          REACT_APP_VERSION: '{{ default "1.0.0" .Chart.AppVersion }}'
+        envFrom:
+          - secretRef:
+              name: '{{ include "chart.envConfigSecretName" . }}'
+
+# volume - <Map>
+# Configure which resources to attach to all pods as a volume
+volume:
+  secret:
+    file-config-vol:
+      secretName: '{{ include "chart.fileConfigSecretName" . }}'
+      volumeMount:
+        mountPath: /opt/app-root/src/secrets/
+        readOnly: true

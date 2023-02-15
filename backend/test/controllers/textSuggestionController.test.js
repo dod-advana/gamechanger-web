@@ -364,6 +364,13 @@ describe('TextSuggestionController', function () {
 					return [];
 				}
 			},
+			documentSearch(body) {
+				if (body) {
+					return { test: 'test' };
+				} else {
+					return {};
+				}
+			},
 		};
 
 		it('should return parsed data', async () => {
@@ -411,7 +418,7 @@ describe('TextSuggestionController', function () {
 			await target.getTextSuggestion(req, res);
 
 			const expected = {
-				autocorrect: ['navy'],
+				autocorrect: [],
 				presearchTitle: [
 					'H.R. 4402: To authorize the Secretary of the Navy to establish a surface danger zone over the Guam National Wildlife Refuge or any portion thereof to support the operation of a live-fire training range complex.',
 					'H.R. 3183: An Act To designate the facility of the United States Postal Service located at 13683 James Madison Highway in Palmyra, Virginia, as the U.S. Navy Seaman Dakota Kyle Rigsby Post Office.',

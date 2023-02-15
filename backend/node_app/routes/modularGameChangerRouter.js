@@ -1,12 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const upload = multer({
-	dest: './public/data/uploads/',
-	limits: {
-		fileSize: 1048576, // 10 Mb
-	},
-});
 
 const { ModularGameChangerController } = require('../controllers/modularGameChangerController');
 const controller = new ModularGameChangerController();
@@ -20,7 +13,6 @@ router.get('/getAllCloneMeta', controller.getAllCloneMeta);
 router.post('/search', controller.search);
 router.post('/callSearchFunction', controller.callSearchFunction);
 router.post('/callDataFunction', controller.callDataFunction);
-router.post('/callUploadFunction', upload.single('file'), controller.upload);
 router.post('/export', (req, res) => {
 	req.setTimeout(720000);
 	controller.export(req, res);
