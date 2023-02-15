@@ -76,7 +76,8 @@ RUN cd "${APP_FRONTEND_DIR}" && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc \
     )) && \
-    yarn config set registry ${NPM_REGISTRY} && \
+    yarn config set @dod-advana:registry ${NPM_REGISTRY} && \
+    yarn config set registry "https://registry.yarnpkg.com" && \
     yarn install --production
 
 COPY --chown="${APP_UID}":"${APP_GID}" ./frontend "${APP_FRONTEND_DIR}"
