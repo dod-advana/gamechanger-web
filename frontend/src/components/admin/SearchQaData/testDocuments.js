@@ -1,7 +1,7 @@
 const documents = {
 	'US Marine Corps': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'MARADMIN 107/15: AWARDING OF PRIMARY MOS 0532 UPDATE',
 				title: 'AWARDING OF PRIMARY MOS 0532 UPDATE',
@@ -10,7 +10,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 139/16: CALENDAR YEAR (CY) 2017  CONGRESSIONAL FELLOWSHIP SELECTION BOARD RESULTS FOR ACTIVE COMPONENT SNCOS',
@@ -20,7 +20,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 225/14: JULY 2014 SNCO MERITORIOUS PROMOTION ALLOCATIONS FOR SPECIAL DUTY ASSIGNMENTS (SDA)',
@@ -30,7 +30,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 017/17: AUDITABLE TRANSPORTATION WORKING CAPITAL FUND (TWCF) BILLING AND RECONCILIATION FOR  MARINE CORPS SPONSORED MOVEMENTS',
@@ -40,7 +40,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MCO P 1400.31C: MARINE CORPS PROMOTION MANUAL, VOLUME 1, OFFICER PROMOTIONS (SHORT TITLE:...',
@@ -52,7 +52,7 @@ const documents = {
 	],
 	Congress: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'Public Law 105-273: Joint resolution making further continuing appropriations for the fiscal year 1999, and for other purposes.',
@@ -62,7 +62,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Public Law 111-19: Civil Rights History Project Act of 2009',
 				title: 'Civil Rights History Project Act of 2009',
@@ -71,7 +71,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Public Law 113-186: Child Care and Development Block Grant Act of 2014',
 				title: 'Child Care and Development Block Grant Act of 2014',
@@ -80,7 +80,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'SASC Hearing Testimony : SASC Hearing - U.S. Policy and Posture in Support of Arctic Readiness Agenda Witnesses - Dr. James H. Anderson Testimony',
@@ -91,7 +91,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'Public Law 112-237: An act to amend the Federal Water Pollution Control Act to reauthorize the Lake Pontchartrain Basin Restoration Program, to designate certain Federal buildings, and for other purposes.',
@@ -103,7 +103,7 @@ const documents = {
 	],
 	'US Navy': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'NAVADMIN 240/17: NAVY CYBERSECURITY AWARENESS MONTH',
 				filename: 'NAVADMIN 240_17.txt',
@@ -112,7 +112,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'ALNAV 049/20: MODIFICATIONS TO ALNAV 044/20 REISSUANCE OF DEPARTMENT OF THE NAVY TRAVEL RESTRICTIONS IN RESPONSE TO CORONAVIRUS DISEASE 2019',
@@ -123,7 +123,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'pdf 1920-060: Involuntary Separation Pay (Non-Disability)  Pay Calculation and Payment Documentation',
@@ -134,7 +134,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'NAVADMIN 246/22: NAVY PHYSICAL SECURITY TRAINING AND PROFESSIONAL DEVELOPMENT',
 				filename: 'NAVADMIN 246_22.txt',
@@ -143,7 +143,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'pdf 1610-040: NAVPERS 5354/2 (Rev 2-02) Navy Equal Opportunity (EO)/ Sexual Harassment (SH) Formal Complaint Form',
@@ -156,7 +156,7 @@ const documents = {
 	],
 	Uncategorized: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS SUBPART 219.7: SUBPART 219.7 THE SMALL BUSINESS SUBCONTRACTING PROGRAM',
 				filename: 'DFARS SUBPART 219.7.html',
@@ -165,7 +165,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'ARMY 2017-17: INCAPACITATION OF RESERVE COMPONENT SOLDIERS',
 				filename: 'ARMY DIR 2017-17.pdf',
@@ -174,7 +174,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SECNAVINST 5200.43A: GOVERNMENT FURNISHED PROPERTY, ACCOUNTABILITY AND MANAGEMENT',
 				filename: 'SECNAVINST 5200.43A.pdf',
@@ -183,7 +183,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'MC MISC : CHAPLAINS WITH MARINES IN VIETNAM 1962-1971',
 				filename: 'CHAPLAINS MARINES IN VIETNAM 1962-1971.pdf',
@@ -192,7 +192,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'NAVMED MANMED CHANGE 115: NAVMED P-117, MANUAL OF THE MEDICAL DEPARTMENT, CHANGE 115, CHAPTER 9, HOSPITAL CORPS',
@@ -205,7 +205,7 @@ const documents = {
 	],
 	'Dept. of the Army': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'USAR Form 24-R: Individual-Claim for Active Duty Pay Allowances, and Adjustments',
 				filename: 'USAR Form 24-R.pdf',
@@ -214,7 +214,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'PAM 415-3: ECONOMIC ANALYSIS: DESCRIPTION AND METHODS',
 				filename: 'PAM 415-3.pdf',
@@ -223,7 +223,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'TM 5-814-3: DOMESTIC WASTEWATER TREATMENT {AFM 88-11, VOL 3}',
 				filename: 'TM 5-814-3.pdf',
@@ -232,7 +232,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'AGO 1987-62: HQDA GENERAL ORDERS: ORGANIZATIONAL ACTIONS OF UNITS TO FORM THE 101ST AVIATION REGIMENT UNDER THE U.S. ARMY REGIMENTAL SYSTEM (USARS)',
@@ -244,7 +244,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'AGO 1948-15: HQDA GENERAL ORDERS - (MULTIPLE TITLES BY PARAGRAPH)',
 				filename: 'AGO 1948-15.pdf',
@@ -255,7 +255,7 @@ const documents = {
 	],
 	'Dept. of Defense': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDI 7650.02: Engaging with the Government Accountability Office (GAO) on GAO Audits',
 
@@ -265,7 +265,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDI CPM 1261: Observance of Holidays in Foreign Areas',
 				filename: 'DoDI 1400.25 Volume 1261.pdf',
@@ -274,7 +274,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SORN E9-11347: Privacy Act of 1974; System of Records',
 				filename: 'SORN E9-11347.pdf',
@@ -283,7 +283,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SORN E7-1722: Privacy Act of 1974; System of Records',
 				filename: 'SORN E7-1722.pdf',
@@ -292,7 +292,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SORN 97-30486: Privacy Act of 1974; System of Records',
 				filename: 'SORN 97-30486.pdf',
@@ -303,7 +303,7 @@ const documents = {
 	],
 	'Dept. of the Air Force': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'AFI 36-7001: DIVERSITY  INCLUSION',
 				filename: 'AFI 36-7001.pdf',
@@ -312,7 +312,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'AFMAN 16-1406V2: National Industrial Security Program Industrial Security Procedures for Government Activities',
@@ -324,7 +324,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'AFI 16-113: USAF ATTACH PROGRAM',
 				filename: 'AFI 16-113.pdf',
@@ -333,7 +333,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'AFI 40-701: MEDICAL SUPPORT TO FAMILY MEMBER RELOCATION AND EXCEPTIONAL FAMILY MEMBER PROGRAM (EFMP)',
@@ -344,7 +344,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'AFMAN 11-2C-130V3ADDC: C-130 MODULAR AERIAL SPRAY SYSTEM (MASS) PROCEDURES',
 				filename: 'AFMAN 11-2C-130V3ADDC.pdf',
@@ -355,7 +355,7 @@ const documents = {
 	],
 	'Executive Branch': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: "EO 13237: Creation of the President's Council on Bioethics",
 				filename: 'EO 13237.pdf',
@@ -364,7 +364,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'EO 14049: White House Initiative on Advancing Educational Equity, Excellence, and Economic Opportunity for Native Americans and Strengthening Tribal Colleges and Universities',
@@ -376,7 +376,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'EO 13110: Nazi War Criminal Records Interagency Working Group',
 				filename: 'EO 13110.pdf',
@@ -385,7 +385,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'EO 13653: Preparing the United States for the Impacts of Climate Change',
 				filename: 'EO 13653.pdf',
@@ -394,7 +394,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'EO 13153: Actions To Improve Low-Performing Schools',
 				filename: 'EO 13153.pdf',
@@ -405,7 +405,7 @@ const documents = {
 	],
 	DFARS: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS SUBPART 209.1: RESPONSIBLE PROSPECTIVE CONTRACTORS',
 				filename: 'DFARS SUBPART 209.1 - RESPONSIBLE PROSPECTIVE CONTRACTORS.pdf',
@@ -414,7 +414,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS SUBPART 225.73: ACQUISITIONS FOR FOREIGN MILITARY SALES',
 				filename: 'DFARS SUBPART 225.73 - ACQUISITIONS FOR FOREIGN MILITARY SALES.pdf',
@@ -423,7 +423,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS SUBPART 225.4: TRADE AGREEMENTS',
 				filename: 'DFARS SUBPART 225.4 - TRADE AGREEMENTS.pdf',
@@ -432,7 +432,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS PART 249 TABLE OF CONTENTS: TERMINATION OF CONTRACTS',
 				filename: 'DFARS PART 249 TABLE OF CONTENTS - TERMINATION OF CONTRACTS.pdf',
@@ -441,7 +441,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DFARS PART 236 TABLE OF CONTENTS: CONSTRUCTION AND ARCHITECT-ENGINEER CONTRACTS',
 				filename: 'DFARS PART 236 TABLE OF CONTENTS - CONSTRUCTION AND ARCHITECT-ENGINEER CONTRACTS.pdf',
@@ -452,7 +452,7 @@ const documents = {
 	],
 	OMB: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'OMBM M-99-11: 1999 Discount Rates for OMB Circular No. A-94',
 				filename: 'OMBM M-99-11.pdf',
@@ -461,7 +461,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'OMBM M-22-15: Multi-Agency Research and Development Priorities for the FY 2024 Budget',
@@ -472,7 +472,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'OMBM M-16-16: 2016 Agency Open Government Plans',
 				filename: 'OMBM M-16-16.pdf',
@@ -481,7 +481,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'OMBM M-01-16: Year 2001 Inventory of Commercial Activities',
 				filename: 'OMBM M-01-16.pdf',
@@ -490,7 +490,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'OMBM M-10-04: Fiscal Year 2009 Audited Financial Statement Reporting Deadline',
 				filename: 'OMBM M-10-04.pdf',
@@ -501,7 +501,7 @@ const documents = {
 	],
 	'Coast Guard': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CI 16214.3: NORTHERN RIGHT WHALE MANDATORY SHIP REPORTING SYSTEM',
 				filename: 'CI 16214.3.pdf',
@@ -510,7 +510,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CI 16478.10: AIDS TO NAVIGATION (ATON) BATTERY RELEASE REPORTING REQUIREMENTS',
 				filename: 'CI 16478.10.pdf',
@@ -519,7 +519,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CIM 5310.6A: COAST GUARD MANPOWER REQUIREMENTS MANUAL',
 				filename: 'CIM 5310.6A.pdf',
@@ -528,7 +528,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CI 16475.7: PROTECTED LIVING MARINE RESOURCES PROGRAM',
 				filename: 'CI 16475.7.pdf',
@@ -537,7 +537,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CI 5300.13C: SPECIAL COMMAND AIDE MANAGEMENT',
 				filename: 'CI 5300.13C.pdf',
@@ -548,7 +548,7 @@ const documents = {
 	],
 	FAR: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'FAR Subpart 42.13: Subpart 42.13 - Suspension of Work, Stop-Work Orders, and Government Delay of Work',
@@ -559,7 +559,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'FAR Subpart 6.2: Subpart 6.2 - Full and Open Competition After Exclusion of Sources',
 
@@ -569,7 +569,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'FAR Part 34: Part 34 - Major System Acquisition',
 				filename: 'FAR Part 34.html',
@@ -578,7 +578,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'FAR Subpart 45.2: Subpart 45.2 - Solicitation and Evaluation Procedures',
 				filename: 'FAR Subpart 45.2.html',
@@ -587,7 +587,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'FAR Subpart 26.4: Subpart 26.4 - Food Donations to Nonprofit Organizations',
 				filename: 'FAR Subpart 26.4.html',
@@ -598,7 +598,7 @@ const documents = {
 	],
 	FMR: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDFMR V3CH8: Standards for Recording and Reviewing Commitments and Obligations',
 				filename: 'DoDFMR V3CH8.pdf',
@@ -607,7 +607,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDFMR V12CH3: Contributions for Defense Programs, Projects, and Activities',
 				filename: 'DoDFMR V12CH3.pdf',
@@ -616,7 +616,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDFMR V10CH12: Miscellaneous Payments',
 				filename: 'DoDFMR V10CH12.pdf',
@@ -625,7 +625,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDFMR V12CH4: Direct Loans and Loan Guarantees',
 				filename: 'DoDFMR V12CH4.pdf',
@@ -634,7 +634,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DoDFMR V7ACH43: Nondiscretionary Allotments',
 				filename: 'DoDFMR V7ACH43.pdf',
@@ -645,7 +645,7 @@ const documents = {
 	],
 	'US Navy Medicine': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'BUMEDNOTE 1500: FISCAL YEAR 2023 ENTERPRISE-WIDE COURSE ASSIGNMENTS',
 				filename: 'BUMEDNOTE 1500.pdf',
@@ -654,7 +654,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'BUMEDINST 1500.25C: NAVY MEDICINE MASTER TRAINING SPECIALIST PROGRAM',
 				filename: 'BUMEDINST 1500.25C.pdf',
@@ -663,7 +663,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'BUMEDINST 1551.4: NAVAL AVIATION SURVIVAL TRAINING PROGRAM DEVICES - QUALITY ASSURANCE AND REVALIDATION POLICY',
@@ -674,7 +674,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'BUMEDINST 1650.4: OUTSTANDING NAVY RESERVE OFFICERS OF THE YEAR AWARDS',
 				filename: 'BUMEDINST 1650.4.pdf',
@@ -683,7 +683,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'BUMEDINST 6320.80A: EMERGENCY MEDICINE CARE GUIDELINES',
 				filename: 'BUMEDINST 6320.80A.pdf',
@@ -694,7 +694,7 @@ const documents = {
 	],
 	'Defense Health Agency': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DHA Administrative Instruction 086: E-mail Address Certificates on Common Access Cards (CACs)',
@@ -705,7 +705,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DHA Administrative Instruction 4000.02: Financial Liability Investigation of Property Loss',
@@ -716,7 +716,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DHA Procedural Instruction 6040.04: Guidance for Amendment and Correction of Entries in Garrison Electronic Health Records (EHRs)',
@@ -728,7 +728,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DHA Procedural Instruction 6025.27: Integration of Primary Care Behavioral Health (PCBH) Services into Patient-Centered Medical Home (PCMH) and Other Primary Care Service Settings within the Military Health System (MHS)',
@@ -740,7 +740,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DHA Administrative Instruction 6430.08: Controlled Medical Items Management for Medical Logistics Areas',
@@ -753,7 +753,7 @@ const documents = {
 	],
 	'US Navy Reserve': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'RESPERSMAN 1300-080: Special Assignments Categories',
 				filename: 'RESPERSMAN 1300-080.pdf',
@@ -762,7 +762,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'COMNAVRESFORCOMINST 5420.14D: Navy Operational Support Officer Duty',
 				filename: 'COMNAVRESFORCOMINST 5420.14D.pdf',
@@ -771,7 +771,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'COMNAVRESFORCOMINST 1342.1D: Navy Reserve Warrior and Family Support Programs',
 				filename: 'COMNAVRESFORCOMINST 1342.1D.pdf',
@@ -780,7 +780,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'RESPERSMAN 1534-040: Strategic Sealift Officer Program (SSOP) Selected Reserve (SELRES) and Voluntary Training Unit (VTU) Membership',
@@ -790,7 +790,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'COMNAVRESFORCOMINST 5450.38B: Missions, Functions, and Tasks of Commander, Naval Air Forces Command',
@@ -802,7 +802,7 @@ const documents = {
 	],
 	'Joint Chiefs of Staff': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CJCSN 3150.07: CANCELLATION OF CJCS MANUAL 3150.07E',
 				filename: 'CJCSN 3150.07.pdf',
@@ -811,7 +811,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CJCSI 3156.01A: Management Of Joint Unit Reference Numbers',
 				filename: 'CJCSI 3156.01A.pdf',
@@ -820,7 +820,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CJCSN 5128.01: CANCELLATION OF CJCS INSTRUCTION 5128.01',
 				filename: 'CJCSN 5128.01.pdf',
@@ -829,7 +829,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CJCSN 5761: Preservation of Detainee Records',
 				filename: 'CJCSN 5761.pdf',
@@ -838,7 +838,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CJCSI 2300.01D: International Agreements',
 				filename: 'CJCSI 2300.01D.pdf',
@@ -849,7 +849,7 @@ const documents = {
 	],
 	'United States Army Training and Doctrine Command': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'TRADOC Regulations (TRs) TR37-3: Government Travel Charge Card Program',
 				filename: 'TRADOC TR37-3.pdf',
@@ -858,7 +858,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'TRADOC Regulations (TRs) TR220-90C1: Utilization of the U.S. Army Training and Doctrine Command Band with Change 1',
@@ -868,7 +868,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'TRADOC Regulations (TRs) TR27-2: Military Justice',
 				filename: 'TRADOC TR27-2.pdf',
@@ -877,7 +877,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'TRADOC Pamphlets (TPs) TP350-70-1: Training Development in Support of the Operational Training Domain',
@@ -887,7 +887,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'TRADOC Forms (TFs) TF5: Transmittal, Action and Control',
 				filename: 'TRADOC TF5.pdf',
@@ -898,7 +898,7 @@ const documents = {
 	],
 	FASAB: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'FASAB Technical Release 11: Implementation Guidance on Cleanup Costs Associated with Equipment (PDF)',
@@ -908,7 +908,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SFFAS 1: Accounting for Selected Assets and Liabilities (PDF)',
 				filename: 'SFFAS 1.pdf',
@@ -917,7 +917,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'FASAB Technical Release 4: Reporting on Non-Valued Seized and Forfeited Property (PDF)',
@@ -927,7 +927,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'SFFAS 6: Accounting for Property Plant and Equipment (PDF)',
 				filename: 'SFFAS 6.pdf',
@@ -936,7 +936,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'FASAB Interpretation 3: Measurement Date for Pension and Retirement Health Care Liabilities (PDF)',
@@ -948,7 +948,7 @@ const documents = {
 	],
 	'National Guard': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CNGBI 9550.01: Restrictions on the use of Federal Funds for Lobbying or Propaganda',
 				filename: 'CNGBI 9550.01.pdf',
@@ -957,7 +957,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CNGBI 1901.01: Uniformed Services Blended Retirement System',
 				filename: 'CNGBI 1901.01.pdf',
@@ -966,7 +966,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CNGBI 5000.01B: Chief of the National Guard Bureau Issuances Program',
 				filename: 'CNGBI 5000.01B.pdf',
@@ -975,7 +975,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'CNGBI 3300.03: Joint Lessons Learned Program',
 				filename: 'CNGBI 3300.03.pdf',
@@ -984,7 +984,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'CNGBI 0500.02: Development, Coordination, and Submission of National Guard Bureau (NGB) Legislative Initiatives',
@@ -998,7 +998,7 @@ const documents = {
 	],
 	'Security Technical Implementation Guides': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R0: STIG Viewer User Guide (Sep 2022)',
 				filename: 'STIG V0R0 STIG Viewer User Guide (Sep 2022).pdf',
@@ -1007,7 +1007,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V1R3: DoD Annex for PP - Module for MDM Agents V1.0 - Ver 1, Rel 3',
 				filename: 'STIG V1R3 DoD Annex for PP - Module for MDM Agents V1.0 - Ver 1, Rel 3.pdf',
@@ -1016,7 +1016,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V1R0: IBM MaaS360 with Watson v10-x MDM STIG Ver 1 Release memo',
 				filename: 'STIG V1R0 IBM MaaS360 with Watson v10-x MDM STIG Ver 1 Release memo.pdf',
@@ -1025,7 +1025,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R0: Compilation - SRG-STIG Library - READ ME',
 				filename: 'STIG V0R0 Compilation - SRG-STIG Library - READ ME.pdf',
@@ -1034,7 +1034,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R0: STIG Applicability Guide (BETA) - Windows MSI v2.2.0',
 				filename: 'STIG V0R0 STIG Applicability Guide (BETA) - Windows MSI v2.2.0.pdf',
@@ -1045,7 +1045,7 @@ const documents = {
 	],
 	'United States Code': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Title 28: Appendix',
 				filename: 'Title 28 - Appendix.pdf',
@@ -1054,7 +1054,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Title 7: Agriculture',
 				filename: 'Title 7 - Agriculture.pdf',
@@ -1063,7 +1063,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Title 37: Pay and Allowances of the Uniformed Services',
 				filename: 'Title 37 - Pay and Allowances of the Uniformed Services.pdf',
@@ -1072,7 +1072,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Title 14: Coast Guard',
 				filename: 'Title 14 - Coast Guard.pdf',
@@ -1081,7 +1081,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Title 42: The Public Health and Welfare',
 				filename: 'Title 42 - The Public Health and Welfare - Ch1 to Ch6 - Sec1 to Sec300.pdf',
@@ -1092,7 +1092,7 @@ const documents = {
 	],
 	'Intelligence Community': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'ICD 501: Discovery and Dissemination or Retrieval of Information within the Intelligence Community',
@@ -1102,7 +1102,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'ICD 110: Intelligence Community Equal Employment Opportunity and Diversity',
 				filename: 'ICD 110.pdf',
@@ -1111,7 +1111,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'ICD 111: Accountability Reviews',
 				filename: 'ICD 111.pdf',
@@ -1120,7 +1120,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: "ICPM 2007-700-1: - Security of Commonwealth Countries' SCI Facilities",
 				filename: 'ICPM 2007-700-1.pdf',
@@ -1129,7 +1129,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'ICD 703: Protection of Classified National Intelligence, Including SCI',
 				filename: 'ICD 703.pdf',
@@ -1140,7 +1140,7 @@ const documents = {
 	],
 	'Defense Information Systems Agency': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R1: VMware ESXi 5 Server STIG Release Memo',
 				filename: 'STIG V0R1 VMware ESXi 5 Server STIG Release Memo.pdf',
@@ -1149,7 +1149,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R0: STIG Viewer User Guide (Aug 2021)',
 				filename: 'STIG V0R0 STIG Viewer User Guide (Aug 2021).pdf',
@@ -1158,7 +1158,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'STIG V1R1: Microsoft Windows Privileged Access Workstation (PAW) STIG Ver 1 - Release Memo',
@@ -1169,7 +1169,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V0R0: STIG Viewer User Guide (Mar 2022)',
 				filename: 'STIG V0R0 STIG Viewer User Guide (Mar 2022).pdf',
@@ -1178,7 +1178,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'STIG V3R1: Voice and Video over Internet Protocol (VVoIP) Release Memo - Ver 3',
 				filename: 'STIG V3R1 Voice and Video over Internet Protocol (VVoIP) Release Memo - Ver 3.pdf',
@@ -1189,7 +1189,7 @@ const documents = {
 	],
 	'Defense Security Cooperation Agency': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DSCA 21-64: DSCA DoD Golden Sentry End-Use Monitoring (EUM) Virtual Compliance Assessments (VCA)',
@@ -1199,7 +1199,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DSCA 21-87: Assignment of Program Code TE to track Fiscal Year 2022 Operation and Maintenance Funding Provided for 10 USC  332 Foreign Security Forces Authority to Build Capacity (Section 332)',
@@ -1210,7 +1210,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'DSCA 21-43: Military Articles and Service List (MASL) Standardization Process',
 				filename: 'DSCA 21-43.html',
@@ -1219,7 +1219,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DSCA 21-60: International Military Student (IMS) Security Vetting Requirements Update',
@@ -1229,7 +1229,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'DSCA 21-85: Assignment of Program Code NV to track Fiscal Year 20222023 Operation and Maintenance Base Funding Provided for 10 USC  333 Foreign Security Forces Authority to Build Capacity (Section 333)',

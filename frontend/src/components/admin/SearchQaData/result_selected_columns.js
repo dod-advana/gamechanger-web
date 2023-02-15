@@ -23,7 +23,7 @@ const RESULT_SELECTED_COLUMNS = [
 		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 0}</TableRow>,
 	},
 	{
-		Header: 'Average Position',
+		Header: 'Average Position of Found Documents',
 		accessor: 'average_position',
 		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 0}</TableRow>,
 	},

@@ -1,7 +1,7 @@
 const documents = {
 	'US Marine Corps': [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'MARADMIN 107/15: AWARDING OF PRIMARY MOS 0532 UPDATE',
 				title: 'AWARDING OF PRIMARY MOS 0532 UPDATE',
@@ -10,7 +10,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 139/16: CALENDAR YEAR (CY) 2017  CONGRESSIONAL FELLOWSHIP SELECTION BOARD RESULTS FOR ACTIVE COMPONENT SNCOS',
@@ -20,7 +20,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 225/14: JULY 2014 SNCO MERITORIOUS PROMOTION ALLOCATIONS FOR SPECIAL DUTY ASSIGNMENTS (SDA)',
@@ -30,7 +30,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MARADMIN 017/17: AUDITABLE TRANSPORTATION WORKING CAPITAL FUND (TWCF) BILLING AND RECONCILIATION FOR  MARINE CORPS SPONSORED MOVEMENTS',
@@ -40,7 +40,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'MCO P 1400.31C: MARINE CORPS PROMOTION MANUAL, VOLUME 1, OFFICER PROMOTIONS (SHORT TITLE:...',
@@ -52,7 +52,7 @@ const documents = {
 	],
 	Congress: [
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'Public Law 105-273: Joint resolution making further continuing appropriations for the fiscal year 1999, and for other purposes.',
@@ -62,7 +62,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Public Law 111-19: Civil Rights History Project Act of 2009',
 				title: 'Civil Rights History Project Act of 2009',
@@ -71,7 +71,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s: 'Public Law 113-186: Child Care and Development Block Grant Act of 2014',
 				title: 'Child Care and Development Block Grant Act of 2014',
@@ -80,7 +80,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'SASC Hearing Testimony : SASC Hearing - U.S. Policy and Posture in Support of Arctic Readiness Agenda Witnesses - Dr. James H. Anderson Testimony',
@@ -91,7 +91,7 @@ const documents = {
 			},
 		},
 		{
-			searchText: '',
+			searchText: 'title',
 			metaData: {
 				display_title_s:
 					'Public Law 112-237: An act to amend the Federal Water Pollution Control Act to reauthorize the Lake Pontchartrain Basin Restoration Program, to designate certain Federal buildings, and for other purposes.',
