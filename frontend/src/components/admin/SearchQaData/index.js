@@ -57,36 +57,40 @@ export default () => {
 			average_position: 0,
 		};
 		for (const element of documents[source]) {
-			let term = { searchText: element.metaData.title };
+			let term = { searchText: element.metaData[element.searchText] };
 			setCurrentSearch(term.searchText);
 			let data = await gameChangerAPI.testSearch(term);
 
-			positionSum += handleAPI(data, source, term, sourceData);
+			positionSum += handleAPI(data, source, term, sourceData, element);
 		}
-		sourceData.average_position = positionSum / sourceData.number_of_documents_tested;
+		sourceData.average_position = sourceData.number_of_documents_found
+			? positionSum / sourceData.number_of_documents_found
+			: 0;
 		return sourceData;
 	}, []);
 
 	//Loops through the sources and runs searchTests with each source
 	let handleTests = useCallback(async () => {
 		let results = [];
+		let start = performance.now();
 		for (const source in documents) {
 			results.push(await searchTests(source));
 		}
+		console.log(`Finished in ${Math.floor((performance.now() - start) / 1000)}`);
 		setSearchResults(results);
 	}, [searchTests]);
 
 	//Handles the data gathered in searchTests and changes it to the format needed to push it to the database
-	function handleAPI(data, source, term, sourceData) {
-		let position = 404;
+	function handleAPI(data, source, term, sourceData, element) {
+		let position = 0;
 
 		sourceData.source = source;
 		sourceData.number_of_documents_tested++;
 		if (data.data === '' || data.data.docs.length < 1) {
 			sourceData.number_of_documents_not_found++;
 		} else {
-			position = resultsPositionLocator(data.data.docs, term.searchText, 'title');
-			if (position === 404) {
+			position = resultsPositionLocator(data.data.docs, term.searchText, element.searchText);
+			if (position === 0) {
 				sourceData.number_of_documents_not_found++;
 			} else {
 				sourceData.number_of_documents_found++;
@@ -149,39 +153,32 @@ export default () => {
 				>
 					{resultSelected ? '<<' : 'Search Test Results'}
 				</p>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div></div>
-				<div style={{ paddingTop: '10px' }}>
-					GC Version: <input onChange={handleGcVersionChange} />
-				</div>
-				<GCButton
-					onClick={useCallback(() => {
-						//Run test
-						if (gcVersion) {
-							handleTests();
-							setSearching(true);
-						}
-					}, [gcVersion, handleTests])}
-					disabled={searching || !gcVersion}
-					style={{ minWidth: 'unset' }}
-				>
-					Run Test
-				</GCButton>
-				{/* <GCButton
+				<div style={{ display: 'flex' }}>
+					<div style={{ paddingTop: '10px' }}>
+						GC Version: <input value={gcVersion} onChange={handleGcVersionChange} />
+					</div>
+					<GCButton
+						onClick={useCallback(() => {
+							//Run test
+							if (gcVersion) {
+								handleTests();
+								setSearching(true);
+							}
+						}, [gcVersion, handleTests])}
+						disabled={searching || !gcVersion}
+						style={{ minWidth: 'unset' }}
+					>
+						Run Test
+					</GCButton>
+					{/* <GCButton
 					onClick={useCallback(() => {
 						gameChangerAPI.resetSearchTestResults();
 					}, [])}
 					style={{ minWidth: 'unset' }}
-				>
+					>
 					RESET TABLE
 				</GCButton> */}
+				</div>
 			</div>
 			<div onClick={useCallback(handleRowSelected, [])}>
 				<LoadingBar loading={searching} />
@@ -218,5 +215,5 @@ export default () => {
 
 function resultsPositionLocator(results, expectedResult, metaDataSearched) {
 	let position = results.findIndex((el) => el[metaDataSearched] === expectedResult);
-	return position >= 0 ? position + 1 : 404;
+	return position >= 0 ? position + 1 : 0;
 }
