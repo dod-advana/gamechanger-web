@@ -422,6 +422,7 @@ class JBookDataHandler extends DataHandler {
 				appn_num: { [Op.iLike]: `${data.appropriationNumber}%` },
 				budget_activity: data.budgetActivityNumber,
 				agency: data.serviceAgency,
+				// ^ this needs to be data.org_jbook_desc_s
 			};
 
 			// in review table, budget_line_item is also projectNum
@@ -445,6 +446,8 @@ class JBookDataHandler extends DataHandler {
 			let reviewData = await this.rev.findAll({
 				where: query,
 			});
+
+			console.log('WHAT IS REVIEWDATA from this findall', reviewData);
 
 			if (reviewData && reviewData.dataValues) {
 				// parse mission partners
@@ -648,9 +651,11 @@ class JBookDataHandler extends DataHandler {
 			// in review table, budget_line_item is also projectNum
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
+					reviewData.jbook_ref_id = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 					break;
 				case 'rdoc':
 					reviewData.budget_line_item = reviewData.projectNum;
+					reviewData.jbook_ref_id = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
 					delete reviewData.projectNum;
 					break;
 				case 'om':
@@ -662,7 +667,6 @@ class JBookDataHandler extends DataHandler {
 			let newOrUpdatedReview;
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
-
 				const newReview = await this.rev.create(reviewData);
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
@@ -1483,15 +1487,8 @@ class JBookDataHandler extends DataHandler {
 			let created = false;
 			if (result.length === 0) {
 				// in the case that this review does not exist, we're writing a new one
+				// DO AN ES QUERY BASED ON REF_ID
 				if (reviewData.budget_type !== 'odoc') {
-					let refString = '';
-					if (reviewData.budget_type === 'pdoc') {
-						refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-					} else if (reviewData.budget_type === 'rdoc') {
-						refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-					}
-
-					reviewData.jbook_ref_id = refString;
 					newOrUpdatedReview = await this.rev.create(reviewData);
 					created = true;
 				}
@@ -1503,7 +1500,6 @@ class JBookDataHandler extends DataHandler {
 				// we have found exactly one review that matches
 				let item = result[0].dataValues;
 
-				reviewData.jbook_ref_id = item.jbook_ref_id;
 				newOrUpdatedReview = await this.rev.update(
 					{
 						primary_reviewer: reviewData.primary_reviewer,
@@ -1515,6 +1511,8 @@ class JBookDataHandler extends DataHandler {
 						latest_class_label: reviewData.latest_class_label,
 						primary_review_status: reviewData.primary_review_status,
 						review_status: reviewData.review_status,
+						jbook_ref_id: reviewData.jbook_ref_id,
+						// we need to add updatedAt
 					},
 					{
 						where: {

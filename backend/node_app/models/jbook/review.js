@@ -237,6 +237,9 @@ module.exports = (sequelize, DataTypes) => {
 			latest_class_label: {
 				type: DataTypes.TEXT,
 			},
+			jbook_ref_id: {
+				type: DataTypes.TEXT,
+			},
 		},
 		{
 			freezeTableName: true,
