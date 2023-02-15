@@ -68,29 +68,86 @@ const parseExcel = async (file, portfolio) => {
 
 		sheet1.forEach((item) => {
 			// general review fields
+			// everything is ?? '' because otherwise it becomes the text "undefined"
 			const reviewData = {
-				primary_reviewer: `${item['Primary Reviewer']}`,
-				primary_review_notes: `${item['Primary Reviewer Notes']}`,
-				agency_service: `${item['Service / Agency']}`,
-				// agency_office: item[],
-				program_element: `${item['PE / BLI']}`,
+				primary_reviewer: `${item['Primary Reviewer'] ?? ''}`,
+				primary_review_notes: `${item['Primary Reviewer Notes'] ?? ''}`,
+				agency_service: `${item['Service / Agency'] ?? ''}`,
+				program_element: `${item['PE / BLI'] ?? ''}`,
 				budget_line_item:
-					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)'] ?? ''}` : null,
 			};
 
 			if (portfolio.name === 'AI Inventory') {
-				reviewData.primary_class_label = `${item['AI Analysis']}`;
-				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer']}`;
+				reviewData.primary_class_label = `${item['AI Analysis'] ?? ''}`;
+				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer'] ?? ''}`;
 				reviewData.service_mp_add =
 					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
-						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						? `${item['Current Mission Partners (Academia, Industry, or Other)'] ?? ''}`
 						: null;
-				reviewData.primary_ptp = `${item['Planned Transition Partner']}`;
-				reviewData.budget_year = `${item['FY (BY1)']}`;
-				reviewData.budget_type = `${item['Doc Type']}`;
-				reviewData.appn_num = `${item['APPN Symbol']}`;
-				reviewData.budget_activity = `${item['BA']}`;
+				reviewData.primary_ptp = `${item['Planned Transition Partner'] ?? ''}`;
+				reviewData.budget_year = `${item['FY (BY1)'] ?? ''}`;
+				reviewData.budget_type = `${item['Doc Type'] ?? ''}`;
+				reviewData.appn_num = `${item['APPN Symbol'] ?? ''}`;
+				reviewData.budget_activity = `${item['BA'] ?? ''}`;
 				reviewData.portfolio_name = 'AI Inventory';
+
+				reviewData.latest_class_label = reviewData.primary_class_label;
+				reviewData.primary_review_status = 'Finished Review';
+				reviewData.review_status = 'Partial Review (Service)';
+
+				// service review section
+				// check if service review section is not all empty
+				let combined =
+					`${item['RAI Secondary Reviewer'] ?? ''}` +
+					`${item['RAI Tag Agree'] ?? ''}` +
+					`${item['RAI Tag'] ?? ''}` +
+					`${item['RAI Transition Partner Agree'] ?? ''}` +
+					`${item['RAI Transition Partner'] ?? ''}` +
+					`${item['RAI Mission Partners Agree'] ?? ''}` +
+					`${item['RAI Mission Partners'] ?? ''}` +
+					`${item['POC Name'] ?? ''}` +
+					`${item['POC Title'] ?? ''}` +
+					`${item['POC Email'] ?? ''}` +
+					`${item['POC Org'] ?? ''}` +
+					`${item['POC Phone Number'] ?? ''}` +
+					`${item['RAI Review Notes'] ?? ''}`;
+				if (combined.trim() !== '') {
+					reviewData.service_secondary_reviewer = `${item['RAI Secondary Reviewer'] ?? ''}`;
+					reviewData.service_agree_label = `${item['RAI Tag Agree'] ?? ''}`;
+					reviewData.service_class_label = `${item['RAI Tag'] ?? ''}`;
+					if (reviewData.service_agree_label === 'Yes') {
+						reviewData.service_class_label = reviewData.primary_class_label;
+					}
+					reviewData.service_ptp_agree_label = `${item['RAI Transition Partners Agree'] ?? ''}`;
+					reviewData.service_ptp = `${item['RAI Transition Partners'] ?? ''}`;
+					reviewData.service_mp_list = `${item['RAI Mission Partners'] ?? ''}`;
+					reviewData.service_poc_name = `${item['POC Name'] ?? ''}`;
+					reviewData.service_poc_title = `${item['POC Title'] ?? ''}`;
+					reviewData.service_poc_email = `${item['POC Email'] ?? ''}`;
+					reviewData.service_poc_org = `${item['POC Org'] ?? ''}`;
+					reviewData.poc_phone_number = `${item['POC Phone Number'] ?? ''}`;
+					reviewData.service_review_notes = `${item['RAI Review Notes'] ?? ''}`;
+					reviewData.service_review_status = 'Finished Review';
+
+					// setting service review level
+					if (
+						reviewData.service_secondary_reviewer === '' ||
+						reviewData.service_agree_label === '' ||
+						reviewData.service_class_label === '' ||
+						reviewData.service_ptp_agree_label === '' ||
+						reviewData.service_ptp === '' ||
+						reviewData.service_mp_list === '' ||
+						reviewData.service_poc_name === '' ||
+						reviewData.service_poc_title === '' ||
+						reviewData.service_poc_email === '' ||
+						reviewData.service_poc_org === '' ||
+						reviewData.poc_phone_number === '' ||
+						reviewData.service_review_notes === ''
+					) {
+						reviewData.service_review_status = 'Partial Review';
+					}
+				}
 			} else {
 				reviewData.primary_class_label = `${item['Label']}`;
 				reviewData.budget_year = `${item['FY']}`;
@@ -128,10 +185,6 @@ const parseExcel = async (file, portfolio) => {
 			reviewData.jbook_ref_id = refString;
 			delete reviewData.agency_office;
 			delete reviewData.agency_service;
-
-			reviewData.latest_class_label = reviewData.primary_class_label;
-			reviewData.primary_review_status = 'Finished Review';
-			reviewData.review_status = 'Partial Review (Service)';
 
 			reviewArray.push(reviewData);
 		});

@@ -638,6 +638,7 @@ class JBookDataHandler extends DataHandler {
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
 			const tmpId = reviewData.id;
+			console.log(tmpId);
 			const query = {
 				id: tmpId,
 				portfolio_name: portfolioName,
@@ -709,6 +710,7 @@ class JBookDataHandler extends DataHandler {
 					newReviews.push(review);
 				}
 			});
+			console.log(tmpPGToES);
 			newReviews.push(tmpPGToES);
 
 			const clientObj = { esClientName: 'gamechanger', esIndex: 'jbook' };
