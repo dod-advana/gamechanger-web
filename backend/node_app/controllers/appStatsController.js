@@ -727,7 +727,7 @@ class AppStatsController {
 					{ header: 'Crawler', key: 'crawler_used_s' },
 					{ header: 'Source', key: 'display_source_s' },
 				];
-				const csvData = await this.querySearchPdfMapping(opts, null, connection);
+				const csvData = await this.querySearchPdfMapping(opts, connection);
 				sendCSVFile(res, 'Searches', columns, csvData);
 			} else if (table === 'UserData') {
 				const columns = [
@@ -802,7 +802,7 @@ class AppStatsController {
 				sendCSVFile(res, 'SourceInteractions', columns, data.data);
 			}
 		} catch (err) {
-			this.logger.error(err, '11MLULU');
+			this.logger.error(err, '51ML1NV');
 			res.status(500).send(err);
 		} finally {
 			connection.end();
