@@ -151,7 +151,6 @@ const endpoints = {
 	gcUserDataDeletePOST: '/api/gameChanger/admin/deleteUserData',
 	syncUserTableGET: '/api/gameChanger/admin/syncUserTable',
 	callDataFunctionPOST: '/api/gameChanger/modular/callDataFunction',
-	callUploadFunctionPOST: '/api/gameChanger/modular/callUploadFunction',
 	queryExp: '/api/gameChanger/expandTerms',
 	reviewerDataGET: '/api/gameChanger/admin/getReviewerData',
 	reviewerDataDeletePOST: '/api/gameChanger/admin/deleteReviewerData',
@@ -1192,11 +1191,6 @@ export default class GameChangerAPI {
 
 	callDataFunction = async (body, options = {}) => {
 		const url = endpoints.callDataFunctionPOST;
-		return axiosPOST(this.axios, url, body, options);
-	};
-
-	callUploadFunction = async (body, options = {}) => {
-		const url = endpoints.callUploadFunctionPOST;
 		return axiosPOST(this.axios, url, body, options);
 	};
 
