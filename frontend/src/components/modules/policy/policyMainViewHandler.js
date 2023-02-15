@@ -267,6 +267,9 @@ const handlePopPubs = async (pop_pubs, pop_pubs_inactive, state, dispatch, cance
 const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, gameChangerAPI) => {
 	let cleanedDocs = [];
 	let filteredPubs = [];
+
+	// Extract filenames out of last_opened_docs, e.g.:
+	// 'Title 5 - Appendix' from 'PDFViewer - Title 5 - Appendix.pdf - gamechanger'
 	for (let { document } of last_opened_docs) {
 		let cleanedDoc = document.substring(document.indexOf('-') + 1, document.lastIndexOf('-')).trim();
 		cleanedDoc = cleanedDoc.substring(0, cleanedDoc.lastIndexOf('.'));
