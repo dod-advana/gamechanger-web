@@ -45,13 +45,15 @@ class PolicySearchHandler extends SearchHandler {
 	async searchHelper(req, userId, storeHistory) {
 		const { searchText, reviseFilterCounts = false } = req.body;
 
+		console.log('USERID: ', userId);
+
 		let { historyRec, cloneSpecificObject, clientObj } = await this.createRecObject(
 			req.body,
 			userId,
 			storeHistory,
 			getUserIdFromSAMLUserId(req)
 		);
-
+		console.log(clientObj);
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/"/g) || []).length;
 		if (doubleQuoteCount % 2 === 1) {
