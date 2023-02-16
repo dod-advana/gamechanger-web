@@ -1487,7 +1487,6 @@ class JBookDataHandler extends DataHandler {
 			let created = false;
 			if (result.length === 0) {
 				// in the case that this review does not exist, we're writing a new one
-				// DO AN ES QUERY BASED ON REF_ID
 				if (reviewData.budget_type !== 'odoc') {
 					newOrUpdatedReview = await this.rev.create(reviewData);
 					created = true;
