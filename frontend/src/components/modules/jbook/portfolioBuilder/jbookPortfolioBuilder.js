@@ -96,10 +96,21 @@ const parseExcel = async (file, portfolio) => {
 				reviewData.budget_activity = `${item['BA'] ?? ''}`;
 				reviewData.portfolio_name = 'AI Inventory';
 
-				reviewData.latest_class_label = reviewData.primary_class_label;
-				reviewData.primary_review_status = 'Finished Review';
-				reviewData.review_status = 'Partial Review (Service)';
-
+				if (
+					reviewData.primary_reviewer === '' ||
+					reviewData.primary_class_label === '' ||
+					reviewData.service_reviewer === '' ||
+					reviewData.primary_ptp === '' ||
+					reviewData.service_mp_add === '' ||
+					reviewData.primary_review_notes === ''
+				) {
+					// partial review
+					reviewData.primary_review_status = 'Partial Review';
+					reviewData.review_status = 'Partial Review (Primary)';
+				} else {
+					reviewData.primary_review_status = 'Finished Review';
+					reviewData.review_status = 'Partial Review (Service)';
+				}
 				// service review section
 				// check if service review section is not all empty
 				let combinedRAI =
@@ -135,9 +146,7 @@ const parseExcel = async (file, portfolio) => {
 					reviewData.service_poc_org = `${item['POC Org'] ?? ''}`;
 					reviewData.poc_phone_number = `${item['POC Phone Number'] ?? ''}`;
 					reviewData.service_review_notes = `${item['RAI Review Notes'] ?? ''}`;
-					reviewData.service_review_status = 'Finished Review';
 
-					// setting service review level
 					if (
 						reviewData.service_secondary_reviewer === '' ||
 						reviewData.service_agree_label === '' ||
@@ -152,9 +161,20 @@ const parseExcel = async (file, portfolio) => {
 						reviewData.poc_phone_number === '' ||
 						reviewData.service_review_notes === ''
 					) {
-						console.log('partial review service');
-						console.log(reviewData);
+						// partial service review
 						reviewData.service_review_status = 'Partial Review';
+						if (reviewData.primary_review_status === 'Finished Review') {
+							reviewData.review_status = 'Partial Review (Service)';
+						}
+					} else {
+						// finished service review
+						if (reviewData.primary_review_status === 'Finished Review') {
+							reviewData.service_review_status = 'Finished Review';
+							reviewData.review_status = 'Partial Review (POC)';
+						} else {
+							reviewData.service_review_status = 'Partial Review';
+							reviewData.review_status = 'Partial Review (Service)';
+						}
 					}
 				}
 			} else {
