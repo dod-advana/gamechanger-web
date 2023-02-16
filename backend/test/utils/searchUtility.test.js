@@ -1293,9 +1293,144 @@ describe('SearchUtility', function () {
 				typeFilterString: [],
 			});
 			const expected = {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
+				_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'] },
+				aggregations: {
+					doc_org_aggs: { terms: { field: 'display_org_s', size: 10000 } },
+					doc_type_aggs: { terms: { field: 'display_doc_type_s', size: 10000 } },
 				},
+				from: 0,
+				highlight: {
+					boundary_scanner: 'word',
+					fields: {
+						'display_source_s.search': {},
+						'display_title_s.search': {},
+						'filename.search': {},
+						keyw_5: {},
+						top_entities_t: {},
+						topics_s: {},
+					},
+					fragment_size: 10,
+					fragmenter: 'simple',
+					require_field_match: false,
+					type: 'unified',
+				},
+				query: {
+					bool: {
+						filter: [{ term: { is_revoked_b: 'false' } }],
+						minimum_should_match: 1,
+						must: [],
+						should: [
+							{
+								nested: {
+									inner_hits: {
+										_source: false,
+										from: 0,
+										highlight: {
+											fields: {
+												'paragraphs.par_raw_text_t': {
+													fragment_size: 270,
+													number_of_fragments: 1,
+													type: 'plain',
+												},
+												'paragraphs.par_raw_text_t.gc_english': {
+													fragment_size: 270,
+													number_of_fragments: 1,
+													type: 'plain',
+												},
+											},
+											fragmenter: 'span',
+										},
+										size: 100,
+										stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
+									},
+									path: 'paragraphs',
+									query: {
+										bool: {
+											should: [
+												{
+													query_string: {
+														query: 'artificial intelligence',
+														default_field: 'paragraphs.par_raw_text_t.gc_english',
+														default_operator: 'and',
+														fuzzy_max_expansions: 100,
+														fuzziness: 'AUTO',
+														analyzer: 'gc_english',
+														boost: 0.05,
+													},
+												},
+											],
+										},
+									},
+									score_mode: 'sum',
+								},
+							},
+							{
+								dis_max: {
+									boost: 150,
+									queries: [
+										{
+											wildcard: {
+												'display_title_s.search': {
+													case_insensitive: true,
+													value: '*artificial intelligence*',
+												},
+											},
+										},
+										{
+											fuzzy: {
+												'display_title_s.search': {
+													fuzziness: 'AUTO',
+													transpositions: false,
+													value: 'artificial intelligence',
+												},
+											},
+										},
+										{ match_phrase: { 'display_title_s.search': 'artificial intelligence' } },
+										{
+											wildcard: {
+												'filename.search': {
+													case_insensitive: true,
+													value: '*artificial intelligence*',
+												},
+											},
+										},
+										{ wildcard: { doc_num: { value: '*artificial intelligence*' } } },
+										{ term: { doc_num: { value: 'artificial intelligence' } } },
+									],
+								},
+							},
+							{
+								dis_max: {
+									boost: 5,
+									queries: [
+										{
+											wildcard: {
+												'top_entities_t.search': { value: '*artificial intelligence*' },
+											},
+										},
+										{ wildcard: { keyw_5: { value: '*artificial intelligence*' } } },
+									],
+								},
+							},
+							{
+								wildcard: {
+									'display_source_s.search': { boost: 10, value: '*artificial intelligence*' },
+								},
+							},
+							{
+								query_string: {
+									analyzer: 'gc_english',
+									boost: 10,
+									fields: ['display_title_s.search'],
+									query: '*artificial* AND *intelligence*',
+									type: 'best_fields',
+								},
+							},
+						],
+					},
+				},
+				size: 20,
+				sort: [{ _score: { order: 'desc' } }, { _id: 'desc' }],
 				stored_fields: [
 					'filename',
 					'title',
@@ -1322,172 +1457,9 @@ describe('SearchUtility', function () {
 					'topics_s',
 					'top_entities_t',
 				],
-				from: 0,
-				size: 20,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'display_doc_type_s',
-							size: 10000,
-						},
-					},
-					doc_org_aggs: {
-						terms: {
-							field: 'display_org_s',
-							size: 10000,
-						},
-					},
-				},
 				track_total_hits: true,
-				query: {
-					bool: {
-						must: [],
-						should: [
-							{
-								nested: {
-									path: 'paragraphs',
-									inner_hits: {
-										_source: false,
-										stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
-										from: 0,
-										size: 100,
-										highlight: {
-											fields: {
-												'paragraphs.par_raw_text_t': {
-													fragment_size: 270,
-													number_of_fragments: 1,
-													type: 'plain',
-												},
-												'paragraphs.par_raw_text_t.gc_english': {
-													fragment_size: 270,
-													number_of_fragments: 1,
-													type: 'plain',
-												},
-											},
-											fragmenter: 'span',
-										},
-									},
-									query: {
-										bool: {
-											should: [
-												{
-													query_string: {
-														query: 'artificial intelligence',
-														default_field: 'paragraphs.par_raw_text_t.gc_english',
-														default_operator: 'and',
-														fuzzy_max_expansions: 100,
-														fuzziness: 'AUTO',
-														analyzer: 'gc_english',
-														boost: 0.5,
-													},
-												},
-											],
-										},
-									},
-									score_mode: 'sum',
-								},
-							},
-							{
-								wildcard: {
-									keyw_5: {
-										value: '*artificial intelligence*',
-										boost: 5,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'display_title_s.search': {
-										value: '*artificial intelligence*',
-										boost: 15,
-										case_insensitive: true,
-									},
-								},
-							},
-							{
-								fuzzy: {
-									'display_title_s.search': {
-										value: 'artificial intelligence',
-										fuzziness: 'AUTO',
-										transpositions: false,
-										boost: 15,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'filename.search': {
-										value: '*artificial intelligence*',
-										boost: 10,
-										case_insensitive: true,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'display_source_s.search': {
-										value: '*artificial intelligence*',
-										boost: 4,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'top_entities_t.search': {
-										value: '*artificial intelligence*',
-										boost: 5,
-									},
-								},
-							},
-							{
-								match_phrase: {
-									'display_title_s.search': 'artificial intelligence',
-								},
-							},
-							{
-								query_string: {
-									fields: ['display_title_s.search'],
-									query: '*artificial* AND *intelligence*',
-									type: 'best_fields',
-									boost: 10,
-									analyzer: 'gc_english',
-								},
-							},
-						],
-						minimum_should_match: 1,
-						filter: [
-							{
-								term: {
-									is_revoked_b: 'false',
-								},
-							},
-						],
-					},
-				},
-				highlight: {
-					require_field_match: false,
-					fields: {
-						'display_title_s.search': {},
-						keyw_5: {},
-						'filename.search': {},
-						'display_source_s.search': {},
-						top_entities_t: {},
-						topics_s: {},
-					},
-					fragment_size: 10,
-					fragmenter: 'simple',
-					type: 'unified',
-					boundary_scanner: 'word',
-				},
-				sort: [
-					{
-						_score: {
-							order: 'desc',
-						},
-					},
-					{ _id: 'desc' },
-				],
 			};
+
 			assert.deepStrictEqual(actual, expected);
 		});
 
