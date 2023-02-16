@@ -29,7 +29,7 @@ class SearchTestController {
 					average_position: 0,
 				};
 				for (const element of documents[source]) {
-					let term = { searchText: element.metaData[element.searchText] };
+					let term = { searchText: element.metaData[element.searchText], cloneName: 'gamechanger' };
 					req.body = term;
 					let data = await this.policySearchHandler.searchHelper(req, userId, false);
 					positionSum += this.resultsWrapper(data, source, term, sourceData, element);
