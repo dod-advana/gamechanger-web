@@ -476,7 +476,7 @@ const renderHideTabs = (props) => {
 		adminTopics,
 		// searchMajorPubs,
 		recDocs,
-		loadingrecDocs,
+		loadingrecDocs = true,
 		cloneData,
 		crawlerSources,
 		prevSearchText,
