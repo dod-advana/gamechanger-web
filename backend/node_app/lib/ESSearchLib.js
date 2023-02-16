@@ -25,7 +25,6 @@ class ESSearchLib {
 	}
 
 	async queryElasticsearch(clientName, index, queryBody, user) {
-		console.log('SCSE2C1 clientName', clientName);
 		try {
 			const query = {
 				index,
