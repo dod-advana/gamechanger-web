@@ -50,6 +50,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 	const [showUsersModal, setShowUsersModal] = useState(false);
 	const [showAdminsModal, setShowAdminsModal] = useState(false);
 	const [showTagsModal, setShowTagsModal] = useState(false);
+	const [adminAdded, setAdminAdded] = useState(false);
 	const emptyData = {
 		name: '',
 		description: '',
@@ -66,6 +67,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 	const closeModal = () => {
 		setShowModal(false);
 		setData(emptyData);
+		setAdminAdded(false);
 	};
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -260,11 +262,11 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 
 	//Automatically adds the user as the admin when they attempt to create a new portfolio
 	useEffect(() => {
-		if (showModal) {
+		if (!adminAdded) {
 			handleAddAdmin(user.id);
+			setAdminAdded(true);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [showModal, user]);
+	}, [user, handleAddAdmin, showModal, adminAdded]);
 
 	/**
 	 *
