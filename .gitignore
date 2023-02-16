@@ -1,4 +1,5 @@
 elasticsearch
+!backend/node_app/modules/policy/elasticsearch
 values.*.yaml
 /.idea/
 /.dev/
