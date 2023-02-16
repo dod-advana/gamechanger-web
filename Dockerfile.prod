@@ -73,7 +73,7 @@ ARG NPM_AUTH_TOKEN=""
 RUN cd "${APP_FRONTEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
     _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
-    echo "always-auth=true" && \
+    echo "always-auth=true" >> .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc \
     )) && \
@@ -102,7 +102,7 @@ ARG NPM_AUTH_TOKEN=""
 RUN cd "${APP_BACKEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
     _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
-    echo "always-auth=true" && \
+    echo "always-auth=true" >> .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc \
     )) && \
