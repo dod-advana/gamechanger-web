@@ -2164,6 +2164,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		uot_department_s: {
+			newName: 'departmentCode',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	esTopLevelFields: [
