@@ -87,7 +87,7 @@ const parseExcel = async (file, portfolio) => {
 				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer'] ?? ''}`;
 				reviewData.service_mp_add =
 					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
-						? `${item['Current Mission Partners (Academia, Industry, or Other)'] ?? ''}`
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
 						: null;
 				reviewData.primary_ptp = `${item['Planned Transition Partner'] ?? ''}`;
 				reviewData.budget_year = `${item['FY (BY1)'] ?? ''}`;
@@ -102,7 +102,7 @@ const parseExcel = async (file, portfolio) => {
 
 				// service review section
 				// check if service review section is not all empty
-				let combined =
+				let combinedRAI =
 					`${item['RAI Secondary Reviewer'] ?? ''}` +
 					`${item['RAI Tag Agree'] ?? ''}` +
 					`${item['RAI Tag'] ?? ''}` +
@@ -116,15 +116,18 @@ const parseExcel = async (file, portfolio) => {
 					`${item['POC Org'] ?? ''}` +
 					`${item['POC Phone Number'] ?? ''}` +
 					`${item['RAI Review Notes'] ?? ''}`;
-				if (combined.trim() !== '') {
+				if (combinedRAI.trim() !== '') {
 					reviewData.service_secondary_reviewer = `${item['RAI Secondary Reviewer'] ?? ''}`;
 					reviewData.service_agree_label = `${item['RAI Tag Agree'] ?? ''}`;
 					reviewData.service_class_label = `${item['RAI Tag'] ?? ''}`;
 					if (reviewData.service_agree_label === 'Yes') {
 						reviewData.service_class_label = reviewData.primary_class_label;
 					}
-					reviewData.service_ptp_agree_label = `${item['RAI Transition Partners Agree'] ?? ''}`;
-					reviewData.service_ptp = `${item['RAI Transition Partners'] ?? ''}`;
+					reviewData.service_ptp_agree_label = `${item['RAI Transition Partner Agree'] ?? ''}`;
+					reviewData.service_ptp = `${item['RAI Transition Partner'] ?? ''}`;
+					if (reviewData.service_ptp_agree_label === 'Yes') {
+						reviewData.service_ptp = reviewData.primary_ptp;
+					}
 					reviewData.service_mp_list = `${item['RAI Mission Partners'] ?? ''}`;
 					reviewData.service_poc_name = `${item['POC Name'] ?? ''}`;
 					reviewData.service_poc_title = `${item['POC Title'] ?? ''}`;
@@ -149,10 +152,13 @@ const parseExcel = async (file, portfolio) => {
 						reviewData.poc_phone_number === '' ||
 						reviewData.service_review_notes === ''
 					) {
+						console.log('partial review service');
+						console.log(reviewData);
 						reviewData.service_review_status = 'Partial Review';
 					}
 				}
 			} else {
+				// General Review
 				reviewData.primary_class_label = `${item['Label']}`;
 				reviewData.budget_year = `${item['FY']}`;
 				reviewData.budget_type = `${item['PL Type']}`;
