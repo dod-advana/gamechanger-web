@@ -485,6 +485,7 @@ const renderHideTabs = (props) => {
 		loading,
 		userData,
 		recentSearches,
+		recentSearchesLoaded,
 		trending,
 		lastOpened = [],
 		loadingLastOpened = true,
@@ -530,7 +531,22 @@ const renderHideTabs = (props) => {
 			{renderShowDidYouMean(didYouMean, loading, state, dispatch)}
 			<div style={{ margin: '0 70px 0 70px' }}>
 				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
-					{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					{recentSearchesLoaded &&
+						recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					{!recentSearchesLoaded && (
+						<div className="col-xs-12">
+							<LoadingIndicator
+								customColor={gcOrange}
+								inline={true}
+								containerStyle={{
+									height: '300px',
+									textAlign: 'center',
+									paddingTop: '75px',
+									paddingBottom: '75px',
+								}}
+							/>
+						</div>
+					)}
 				</GameChangerThumbnailRow>
 				<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
 					{lastOpened.length > 0 &&
