@@ -525,6 +525,14 @@ const renderHideTabs = (props) => {
 		adminTopics[idx].favorite = !!topicMatchesAdmin;
 	});
 
+	const introSearch = 'DIA';
+	const handleIntroSearchClick = () => {
+		setState(dispatch, {
+			searchText: introSearch,
+			runSearch: true,
+		});
+	};
+
 	return (
 		<div style={{ marginTop: '40px' }}>
 			{renderPrevSearchText(prevSearchText, resetSettingsSwitch, dispatch, searchHandler, state)}
@@ -532,7 +540,19 @@ const renderHideTabs = (props) => {
 			<div style={{ margin: '0 70px 0 70px' }}>
 				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
 					{recentSearchesLoaded &&
+						recentSearches.length > 0 &&
 						recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					{recentSearchesLoaded && recentSearches.length === 0 && (
+						<div className="col-xs-12" style={{ height: '140px' }}>
+							<Typography style={styles.containerText}>
+								It looks like this is your first time on GAMECHANGER! Try searching for
+								<span style={{ color: 'blue', cursor: 'pointer' }} onClick={handleIntroSearchClick}>
+									{' ' + introSearch}
+								</span>
+								.
+							</Typography>
+						</div>
+					)}
 					{!recentSearchesLoaded && (
 						<div className="col-xs-12">
 							<LoadingIndicator
