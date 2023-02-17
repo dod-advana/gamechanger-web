@@ -6,7 +6,7 @@ import GCButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
-import documents from './testDocumentsTESTING';
+import documents from './testDocuments';
 import LoadingBar from '../../common/LoadingBar';
 
 const gameChangerAPI = new GameChangerAPI();
