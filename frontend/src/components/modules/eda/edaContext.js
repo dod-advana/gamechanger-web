@@ -37,7 +37,7 @@ const initState = {
 		},
 		minObligatedAmount: '',
 		maxObligatedAmount: '',
-		contractsOrMods: 'both',
+		contractsOrMods: 'contracts',
 		majcoms: {
 			'air force': [],
 			army: [],
