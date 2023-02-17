@@ -94,7 +94,7 @@ const initState = {
 		},
 		fiscalYears: [],
 		allYearsSelected: true,
-		contractsOrMods: 'both',
+		contractsOrMods: 'contracts',
 		idvPIID: '',
 		allOrgsSelected: true,
 		specificOrgsSelected: false,
