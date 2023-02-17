@@ -525,7 +525,7 @@ const renderHideTabs = (props) => {
 		adminTopics[idx].favorite = !!topicMatchesAdmin;
 	});
 
-	const introSearch = 'DIA';
+	const introSearch = 'Defense Intelligence Agency';
 	const handleIntroSearchClick = () => {
 		setState(dispatch, {
 			searchText: introSearch,
