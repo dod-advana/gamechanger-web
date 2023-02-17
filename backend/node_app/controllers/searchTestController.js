@@ -1,4 +1,5 @@
 const policySearchHandler = require('../modules/policy/policySearchHandler');
+const SearchUtility = require('../utils/searchUtility');
 const constants = require('../config/constants');
 
 const opts = {
@@ -9,6 +10,7 @@ const opts = {
 class SearchTestController {
 	constructor() {
 		this.policySearchHandler = new policySearchHandler(opts);
+		this.searchUtility = new SearchUtility();
 
 		this.testSearch = this.testSearch.bind(this);
 		this.resultsWrapper = this.resultsWrapper.bind(this);
@@ -29,8 +31,18 @@ class SearchTestController {
 					average_position: 0,
 				};
 				for (const element of documents[source]) {
-					let term = { searchText: element.metaData[element.searchText], cloneName: 'gamechanger' };
+					let searchText = element.metaData[element.searchText]; //.replace(/[()]/g, '');
+					let term = { searchText: searchText, index: 'gamechanger', cloneName: 'gamechanger' };
 					req.body = term;
+					// let data = await this.searchUtility.documentSearch(
+					// 	req,
+					// 	req.body,
+					// 	{
+					// 		esClientName: 'gamechanger',
+					// 		esIndex: ['gamechanger', 'gamechanger_assist'],
+					// 	},
+					// 	userId
+					// );
 					let data = await this.policySearchHandler.searchHelper(req, userId, false);
 					positionSum += this.resultsWrapper(data, source, term, sourceData, element);
 				}
