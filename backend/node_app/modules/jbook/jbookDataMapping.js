@@ -820,7 +820,7 @@ module.exports = {
 		id_s: {
 			newName: 'id',
 			defaultValue: '',
-			processValue: (value) => value,
+			processValue: (value) => String(value),
 		},
 		doc_id_s: {
 			newName: 'docID',

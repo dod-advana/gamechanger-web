@@ -447,8 +447,6 @@ class JBookDataHandler extends DataHandler {
 				where: query,
 			});
 
-			console.log('WHAT IS REVIEWDATA from this findall', reviewData);
-
 			if (reviewData && reviewData.dataValues) {
 				// parse mission partners
 				if (reviewData.service_mp_list && typeof reviewData.service_mp_list === 'string') {
@@ -629,7 +627,7 @@ class JBookDataHandler extends DataHandler {
 
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
+			const { frontendReviewData, isSubmit, reviewType, portfolioName, id, departmentCode } = req.body;
 			const permissions = req.permissions;
 			let wasUpdated = false;
 
@@ -640,7 +638,7 @@ class JBookDataHandler extends DataHandler {
 			this.updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName);
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
-			const tmpId = reviewData.id;
+			const tmpId = Number(reviewData.id);
 			const query = {
 				id: tmpId,
 				portfolio_name: portfolioName,
@@ -651,11 +649,11 @@ class JBookDataHandler extends DataHandler {
 			// in review table, budget_line_item is also projectNum
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
-					reviewData.jbook_ref_id = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+					reviewData.jbook_ref_id = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${departmentCode}`;
 					break;
 				case 'rdoc':
 					reviewData.budget_line_item = reviewData.projectNum;
-					reviewData.jbook_ref_id = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+					reviewData.jbook_ref_id = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${departmentCode}`;
 					delete reviewData.projectNum;
 					break;
 				case 'om':
@@ -679,6 +677,8 @@ class JBookDataHandler extends DataHandler {
 						},
 						{
 							where: query,
+							returning: true,
+							plain: true,
 						}
 					)
 					.catch((err) => {
@@ -687,8 +687,7 @@ class JBookDataHandler extends DataHandler {
 					});
 
 				wasUpdated = result && result.length && result[0] === 1;
-				newOrUpdatedReview = { ...reviewData, budget_type: types[reviewData.budget_type] };
-				newOrUpdatedReview.id = tmpId;
+				newOrUpdatedReview = result[1].dataValues;
 			}
 
 			// Now update ES
@@ -1511,7 +1510,7 @@ class JBookDataHandler extends DataHandler {
 						primary_review_status: reviewData.primary_review_status,
 						review_status: reviewData.review_status,
 						jbook_ref_id: reviewData.jbook_ref_id,
-						// we need to add updatedAt
+						// we need to add updatedAt???
 					},
 					{
 						where: {
@@ -1523,7 +1522,6 @@ class JBookDataHandler extends DataHandler {
 				);
 				newOrUpdatedReview = newOrUpdatedReview[1].dataValues;
 			}
-			// const newerReview =
 			// newOrUpdatedReview is now either from update OR create
 			// if it was a dupe it would be returned by now
 			// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
@@ -1602,24 +1600,11 @@ class JBookDataHandler extends DataHandler {
 				console.log('ES NOT UPDATED for REVIEW');
 				res.failed.push(index + 2);
 				// update PG again with original values:
-				await this.rev.update(
-					{
-						primary_reviewer: result.data.primary_reviewer,
-						primary_class_label: result.data.primary_class_label,
-						service_reviewer: result.data.service_reviewer,
-						primary_ptp: result.data.primary_ptp,
-						service_mp_add: result.data.service_mp_add,
-						primary_review_notes: result.data.primary_review_notes,
-						latest_class_label: result.data.latest_class_label,
-						primary_review_status: result.data.primary_review_status,
-						review_status: result.data.review_status,
+				await this.rev.update(result[0].dataValues, {
+					where: {
+						id: Number(newOrUpdatedReview.id),
 					},
-					{
-						where: {
-							id: newOrUpdatedReview.id,
-						},
-					}
-				);
+				});
 			}
 			return res;
 		} catch (e) {
