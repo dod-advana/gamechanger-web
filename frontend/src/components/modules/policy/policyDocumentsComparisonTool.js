@@ -720,7 +720,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		if (!paragraphs.length) return;
 		setNoResults(false);
 		setFilterChange(false);
-		// setLeftPanelOpen(true);
 		setSelectedInput(paragraphs?.[0].id);
 		setItemsToCombine({});
 		setState(dispatch, { runDocumentComparisonSearch: true });
@@ -952,7 +951,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				</div>
 			</div>
 			{((returnedDocs.length <= 0 && !loading) || stepIndex === 2) && (
-				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
+				<div style={{ maxWidth: 'calc(100% - 20px)', flexBasis: 'calc(100% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
