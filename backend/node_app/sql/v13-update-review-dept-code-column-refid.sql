@@ -22,10 +22,10 @@ WHERE rd.budget_type='odoc' AND (lower(rd.agency) like CONCAT('%',lower(jd.uot_d
 
 --MIGRATION TO ADD DEPT CODE TO review TABLE
 
--- ALTER TABLE public.review ADD COLUMN IF NOT EXISTS dept_code TEXT;
+-- ALTER TABLE public.review ADD COLUMN IF NOT EXISTS department TEXT;
 
 UPDATE public.review rd
-SET dept_code = jd.uot_department
+SET jd.department = jd.uot_department
 FROM jbooklookup jd
 WHERE lower(rd.agency) like CONCAT('%',lower(jd.uot_department_desc),'%') OR lower(rd.agency) like CONCAT('%',lower(jd.uot_agency),'%') OR lower(rd.agency) like CONCAT('%',lower(jd.org_code),'%');
 
