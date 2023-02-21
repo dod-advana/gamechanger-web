@@ -422,7 +422,6 @@ class JBookDataHandler extends DataHandler {
 				appn_num: { [Op.iLike]: `${data.appropriationNumber}%` },
 				budget_activity: data.budgetActivityNumber,
 				agency: data.serviceAgency,
-				// ^ this needs to be data.org_jbook_desc_s
 			};
 
 			// in review table, budget_line_item is also projectNum
@@ -665,6 +664,7 @@ class JBookDataHandler extends DataHandler {
 			let newOrUpdatedReview;
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
+
 				const newReview = await this.rev.create(reviewData);
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
@@ -1482,12 +1482,14 @@ class JBookDataHandler extends DataHandler {
 					portfolio_name: reviewData.portfolio_name,
 				},
 			});
+			let foundReview;
 			let newOrUpdatedReview;
 			let created = false;
 			if (result.length === 0) {
 				// in the case that this review does not exist, we're writing a new one
 				if (reviewData.budget_type !== 'odoc') {
-					newOrUpdatedReview = await this.rev.create(reviewData);
+					const newReview = await this.rev.create(reviewData);
+					newOrUpdatedReview = newReview.dataValues;
 					created = true;
 				}
 			} else if (result.length > 1) {
@@ -1496,31 +1498,16 @@ class JBookDataHandler extends DataHandler {
 				return res;
 			} else {
 				// we have found exactly one review that matches
-				let item = result[0].dataValues;
+				foundReview = result[0].dataValues;
 
-				newOrUpdatedReview = await this.rev.update(
-					{
-						primary_reviewer: reviewData.primary_reviewer,
-						primary_class_label: reviewData.primary_class_label,
-						service_reviewer: reviewData.service_reviewer,
-						primary_ptp: reviewData.primary_ptp,
-						service_mp_add: reviewData.service_mp_add,
-						primary_review_notes: reviewData.primary_review_notes,
-						latest_class_label: reviewData.latest_class_label,
-						primary_review_status: reviewData.primary_review_status,
-						review_status: reviewData.review_status,
-						jbook_ref_id: reviewData.jbook_ref_id,
-						// we need to add updatedAt???
+				const updatedReview = await this.rev.update(reviewData, {
+					where: {
+						id: foundReview.id,
 					},
-					{
-						where: {
-							id: item.id,
-						},
-						returning: true,
-						plain: true,
-					}
-				);
-				newOrUpdatedReview = newOrUpdatedReview[1].dataValues;
+					returning: true,
+					plain: true,
+				});
+				newOrUpdatedReview = updatedReview[1].dataValues;
 			}
 			// newOrUpdatedReview is now either from update OR create
 			// if it was a dupe it would be returned by now
@@ -1600,9 +1587,9 @@ class JBookDataHandler extends DataHandler {
 				console.log('ES NOT UPDATED for REVIEW');
 				res.failed.push(index + 2);
 				// update PG again with original values:
-				await this.rev.update(result[0].dataValues, {
+				await this.rev.update(foundReview, {
 					where: {
-						id: Number(newOrUpdatedReview.id),
+						id: foundReview.id,
 					},
 				});
 			}
