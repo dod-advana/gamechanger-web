@@ -1514,7 +1514,6 @@ class JBookDataHandler extends DataHandler {
 			// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
 
 			// Now update ES
-
 			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
