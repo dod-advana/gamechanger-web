@@ -12,7 +12,6 @@ import {
 import { trackSearch } from '../../telemetry/Matomo';
 import {
 	// createTinyUrl,
-	// getSearchObjectFromString,
 	// getUserData,
 	setState,
 } from '../../../utils/sharedFunctions';
