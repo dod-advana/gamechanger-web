@@ -10,6 +10,7 @@ import {
 	PlannedTransitionPartnerKey,
 	PlannedTransitionPartnerValue,
 	CurrentMissionPartnersValue,
+	JustificationValue,
 	ReviewStatus,
 	ButtonFooter,
 } from './jbookJAICHelper';
@@ -106,6 +107,16 @@ const JBookJAICReviewForm = React.memo((props) => {
 						dropdownData={dropdownData}
 						setReviewData={setReviewData}
 						serviceAdditionalMissionPartners={reviewData.serviceAdditionalMissionPartners}
+						finished={finished}
+						primaryReviewNotes={reviewData.primaryReviewNotes}
+					/>
+				),
+			},
+			{
+				Key: 'Review Notes',
+				Value: (
+					<JustificationValue
+						setReviewData={setReviewData}
 						finished={finished}
 						primaryReviewNotes={reviewData.primaryReviewNotes}
 					/>
