@@ -81,6 +81,32 @@ const EDADocumentsComparisonTool = ({
 		setNeedsSort(true);
 	};
 
+	/**
+	 * This is necessary for documents that are dragged and dropped.
+	 * If their input is too big, we're chunking it down based on important sections found in most contracts.
+	 * 5000 chars is around the range for an acceptable search length in DCT.
+	 *
+	 * @param {*} paragraph
+	 * @returns a array of paragraphs with snippets from the important sections found in the imported contract
+	 */
+	const modifyParagraphs = (paragraph) => {
+		const importantSections = ['SUMMARY OF CHANGES', 'PURPOSE OF MODIFICATION', 'PERFORMANCE WORK STATEMENT'];
+		let newParagraphs = [];
+		importantSections.forEach((section, index) => {
+			if (paragraph.text.includes(section)) {
+				newParagraphs.push({
+					id: index,
+					text: paragraph.text.slice(paragraph.text.indexOf(section), paragraph.text.indexOf(section) + 1700),
+				});
+			}
+		});
+		if (!newParagraphs.length) {
+			newParagraphs.push({ id: 0, text: paragraph.text.slice(0, 5000) });
+		}
+
+		return newParagraphs;
+	};
+
 	useEffect(() => {
 		if (updateFilters) {
 			setUpdateFilters(false);
@@ -148,6 +174,10 @@ const EDADocumentsComparisonTool = ({
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
 			setCollapseKeys([]);
+
+			if (paragraphs.length === 1 && paragraphs[0].text.length > 5500) {
+				setParagraphs(modifyParagraphs(paragraphs[0]));
+			}
 
 			const filters = {
 				allOrgsSelected,
@@ -390,7 +420,7 @@ const EDADocumentsComparisonTool = ({
 		document.pageHits.forEach((page) => {
 			exportList.push(getExportDoc(page));
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
 	const exportAll = () => {
@@ -400,10 +430,10 @@ const EDADocumentsComparisonTool = ({
 				exportList.push(getExportDoc(page));
 			});
 		});
-		heandleExport(exportList, 'ExportSindleDocCSV');
+		handleExport(exportList, 'ExportSindleDocCSV');
 	};
 
-	const heandleExport = (exportList, type) => {
+	const handleExport = (exportList, type) => {
 		try {
 			trackEvent(
 				getTrackingNameForFactory(state.cloneData.clone_name),
