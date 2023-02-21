@@ -31,18 +31,15 @@ class SearchTestController {
 					average_position: 0,
 				};
 				for (const element of documents[source]) {
-					let searchText = element.metaData[element.searchText]; //.replace(/[()]/g, '');
-					let term = { searchText: searchText, index: 'gamechanger', cloneName: 'gamechanger' };
+					let OriginalSearch = element.searchText;
+					let searchText = element.metaData[OriginalSearch].replace(/[():]/g, (matched) => `\\${matched}`);
+					let term = {
+						searchText: searchText,
+						index: 'gamechanger',
+						cloneName: 'gamechanger',
+						OriginalSearch: element.metaData[OriginalSearch],
+					};
 					req.body = term;
-					// let data = await this.searchUtility.documentSearch(
-					// 	req,
-					// 	req.body,
-					// 	{
-					// 		esClientName: 'gamechanger',
-					// 		esIndex: ['gamechanger', 'gamechanger_assist'],
-					// 	},
-					// 	userId
-					// );
 					let data = await this.policySearchHandler.searchHelper(req, userId, false);
 					positionSum += this.resultsWrapper(data, source, term, sourceData, element);
 				}
@@ -59,13 +56,13 @@ class SearchTestController {
 
 	resultsWrapper(data, source, term, sourceData, element) {
 		let position = 0;
-
+		console.log(`Searching ${source}`);
 		sourceData.source = source;
 		sourceData.number_of_documents_tested++;
 		if (!data || data === '' || data.docs.length < 1) {
 			sourceData.number_of_documents_not_found++;
 		} else {
-			position = data.docs.findIndex((el) => el[element.searchText] === term.searchText);
+			position = data.docs.findIndex((el) => el[element.searchText] === term.OriginalSearch);
 			position = position >= 0 ? position + 1 : 0;
 			if (position === 0) {
 				sourceData.number_of_documents_not_found++;
@@ -74,7 +71,6 @@ class SearchTestController {
 			}
 		}
 
-		console.log(`Searching ${source}`);
 		return position;
 	}
 }
