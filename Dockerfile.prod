@@ -102,12 +102,11 @@ ARG NPM_AUTH_TOKEN=""
 RUN cd "${APP_BACKEND_DIR}" && \
     ([ -n "$NPM_AUTH_TOKEN" ] && ( \
     _registry_fqdn=$(echo -n ${NPM_REGISTRY} | sed -E 's/^https?:\/\///') && \
+    echo "legacy-peer-deps=true" >> .npmrc && \
     echo "always-auth=true" >> .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc \
     )) && \
-    yarn config set @dod-advana:registry ${NPM_REGISTRY} && \
-    # yarn config set registry "https://registry.yarnpkg.com" && \
     yarn install --production
 
 USER root
