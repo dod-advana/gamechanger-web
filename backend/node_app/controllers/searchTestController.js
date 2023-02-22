@@ -20,11 +20,11 @@ class SearchTestController {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		let documents = req.body;
 		let results = [];
-		const METADATASOURCE = ['title', 'display_title_s', 'doc_num', 'filename', 'title'];
+		const METADATASOURCE = ['title', 'display_title_s', 'doc_num', 'filename'];
 		try {
 			for (const source in documents) {
 				let positionSum = 0;
-				let metaDataSourceCounter = 0;
+				// let metaDataSourceCounter = 0;
 				let sourceData = {
 					source: 'source',
 					number_of_documents_tested: 0,
@@ -33,19 +33,23 @@ class SearchTestController {
 					average_position: 0,
 				};
 				for (const element of documents[source]) {
-					let searchMetaType = METADATASOURCE[metaDataSourceCounter];
-					metaDataSourceCounter++;
-					let searchText = element.metaData[searchMetaType].replace(/[():]/g, (matched) => `\\${matched}`);
-					let term = {
-						searchText: searchText,
-						index: 'gamechanger',
-						cloneName: 'gamechanger',
-						searchTestString: element.metaData[searchMetaType],
-						searchMetaType: searchMetaType,
-					};
-					req.body = term;
-					let data = await this.policySearchHandler.searchHelper(req, userId, false);
-					positionSum += this.resultsWrapper(data, source, term, sourceData);
+					for (const dataSource of METADATASOURCE) {
+						// metaDataSourceCounter++;
+						let searchText = element.metaData[dataSource];
+						if (searchText === 'N/A') continue;
+						searchText = element.metaData[dataSource].replace(/[():]/g, (matched) => `\\${matched}`);
+						let term = {
+							titleOfSearchTestDoc: element.metaData.title,
+							searchText: searchText,
+							index: 'gamechanger',
+							cloneName: 'gamechanger',
+							searchTestString: element.metaData[dataSource],
+							searchMetaType: dataSource,
+						};
+						req.body = term;
+						let data = await this.policySearchHandler.searchHelper(req, userId, false);
+						positionSum += this.resultsWrapper(data, source, term, sourceData);
+					}
 				}
 				sourceData.average_position = sourceData.number_of_documents_found
 					? positionSum / sourceData.number_of_documents_found
@@ -66,7 +70,7 @@ class SearchTestController {
 		if (!data || data === '' || data.docs.length < 1) {
 			sourceData.number_of_documents_not_found++;
 		} else {
-			position = data.docs.findIndex((el) => el[term.searchMetaType] === term.searchTestString);
+			position = data.docs.findIndex((el) => el.title === term.titleOfSearchTestDoc);
 			position = position >= 0 ? position + 1 : 0;
 			if (position === 0) {
 				sourceData.number_of_documents_not_found++;
