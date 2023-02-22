@@ -6,7 +6,7 @@ import GCButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
-import documents from './testDocuments';
+import documents from './testDocumentsTESTING';
 import LoadingBar from '../../common/LoadingBar';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -20,12 +20,37 @@ export default () => {
 
 	const [tableColumns, setTableColumns] = useState([]);
 	const [resultSelected, setResultSelected] = useState(false);
+	const [selectedTab, setSelectedTab] = useState('Sources');
 	const [selected, setSelected] = useState();
 	const [results, setResults] = useState();
+	const [metrics, setMetrics] = useState();
 	const [searchResults, setSearchResults] = useState([]);
+	const [docMetrics, setDocMetrics] = useState([]);
 	const [searching, setSearching] = useState(false);
 	const [gcVersion, setGcVersion] = useState();
 	const [testing, setTesting] = useState(false);
+
+	let selectedTabStyle = {
+		...styles.tabSelectedStyle,
+		borderBottom: 'none !important',
+		borderRadius: `5px 5px 0px 0px`,
+		position: ' relative',
+		listStyle: 'none',
+		padding: '2px 12px',
+		textAlign: 'center',
+		marginRight: '2px',
+		marginLeft: '2px',
+		height: 45,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: '174px',
+	};
+
+	let tabStyles = {
+		...styles.tabStyle,
+		width: '174px',
+	};
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
@@ -45,15 +70,21 @@ export default () => {
 		setGcVersion(e.target.value);
 	}
 
+	function handleTabClick(e) {
+		setSelectedTab(e.target.textContent);
+	}
+
 	const handleTests = useCallback(async () => {
 		let returnedData = await gameChangerAPI.testSearch(documents);
-		setSearchResults(returnedData.data);
+		setSearchResults(returnedData.data.results);
+		setDocMetrics(returnedData.data.docMetrics);
 	}, []);
 
 	useEffect(() => {
 		let tmpColumns = selected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
 		gameChangerAPI.getSearchTestResults().then(({ data }) => {
 			setResults(data);
+			setMetrics(data[0].source_results.docMetrics);
 		});
 
 		setTableColumns(tmpColumns);
@@ -70,12 +101,16 @@ export default () => {
 		gameChangerAPI.postSearchTestResults({
 			gc_version: gcVersion,
 			timestamp: Date.now(),
-			source_results: searchResults,
-			total_average: Math.floor(totalAvg / searchResults.length),
+			source_results: { searchResults: searchResults, docMetrics: docMetrics },
+			total_average: totalAvg / searchResults.length,
 			total_number_of_documents_not_found: totalDocsNotFound,
 		});
 		setSearching(false);
-	}, [gcVersion, searchResults]);
+	}, [docMetrics, gcVersion, searchResults]);
+
+	useEffect(() => {
+		console.log(metrics);
+	}, [metrics]);
 
 	return (
 		<>
@@ -128,31 +163,51 @@ export default () => {
 			</div>
 			<div onClick={useCallback(handleRowSelected, [])}>
 				<LoadingBar loading={searching} />
-				<ReactTable
-					data={
-						resultSelected
-							? results[
-									results.findIndex((el) => {
-										return el.test_id.toString() === selected;
-									})
-							  ].source_results
-							: results
-					}
-					columns={tableColumns}
-					style={{ margin: '0 80px 20px 80px', height: 600 }}
-					defaultPageSize={10}
-					filterable={true}
-					defaultFilterMethod={useCallback(
-						(filter, row) => String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase()),
-						[]
+				<div>
+					{resultSelected && (
+						<div>
+							<div style={{ ...styles.tabsList, marginLeft: '78px', marginRight: '78px' }}>
+								<div
+									onClick={handleTabClick}
+									style={selectedTab === 'Sources' ? selectedTabStyle : tabStyles}
+								>
+									Sources
+								</div>
+								<div
+									onClick={handleTabClick}
+									style={selectedTab === 'Documents' ? selectedTabStyle : tabStyles}
+								>
+									Documents
+								</div>
+							</div>
+						</div>
 					)}
-					defaultSorted={[
-						{
-							id: 'timestamp',
-							desc: false,
-						},
-					]}
-				/>
+					<ReactTable
+						data={
+							resultSelected
+								? results[
+										results.findIndex((el) => {
+											return el.test_id.toString() === selected;
+										})
+								  ].source_results.searchResults
+								: results
+						}
+						columns={tableColumns}
+						style={{ margin: '0 80px 20px 80px', height: 600 }}
+						defaultPageSize={10}
+						filterable={true}
+						defaultFilterMethod={useCallback(
+							(filter, row) => String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase()),
+							[]
+						)}
+						defaultSorted={[
+							{
+								id: 'timestamp',
+								desc: false,
+							},
+						]}
+					/>
+				</div>
 			</div>
 		</>
 	);

@@ -14,7 +14,7 @@ module.exports = {
 				allowNull: false,
 			},
 			total_average: {
-				type: Sequelize.INTEGER,
+				type: Sequelize.FLOAT,
 			},
 			total_number_of_documents_not_found: {
 				type: Sequelize.INTEGER,
