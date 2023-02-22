@@ -174,9 +174,9 @@ const EDADocumentsComparisonTool = ({
 		if (state.runDocumentComparisonSearch) {
 			setLoading(true);
 			setCollapseKeys([]);
-
+			let newParagraphs = paragraphs;
 			if (paragraphs.length === 1 && paragraphs[0].text.length > 5500) {
-				setParagraphs(modifyParagraphs(paragraphs[0]));
+				newParagraphs = modifyParagraphs(paragraphs[0]);
 			}
 
 			const filters = {
@@ -188,9 +188,8 @@ const EDADocumentsComparisonTool = ({
 				contractsOrMods,
 				idvPIID,
 			};
-
 			gameChangerAPI
-				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: paragraphs, filters })
+				.compareDocumentPOST({ cloneName: state.cloneData.clone_name, paragraphs: newParagraphs, filters })
 				.then((resp) => {
 					if (resp.data.docs.length <= 0) {
 						setNoResults(true);
@@ -212,11 +211,13 @@ const EDADocumentsComparisonTool = ({
 					}
 					setReturnedDocs(resp.data.docs);
 					setState(dispatch, { runDocumentComparisonSearch: false });
+					setParagraphs(newParagraphs);
 					setLoading(false);
 				})
 				.catch(() => {
 					setReturnedDocs([]);
 					setState(dispatch, { runDocumentComparisonSearch: false });
+					setParagraphs(newParagraphs);
 					setLoading(false);
 					console.log('server error');
 				});
@@ -1026,7 +1027,7 @@ const EDADocumentsComparisonTool = ({
 									handlePdfOnLoad(
 										'pdfViewer',
 										'viewerContainer',
-										compareDocument.filename,
+										compareDocument?.filename,
 										'PDF Viewer'
 									)
 								}
