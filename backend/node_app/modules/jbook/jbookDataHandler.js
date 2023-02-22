@@ -665,7 +665,7 @@ class JBookDataHandler extends DataHandler {
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
 
-				const newReview = await this.rev.create(reviewData);
+				const newReview = await this.rev.create({ ...reviewData, department: departmentCode });
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
 			} else {
@@ -673,6 +673,7 @@ class JBookDataHandler extends DataHandler {
 					.update(
 						{
 							...reviewData,
+							department: departmentCode,
 							budget_type: types[reviewData.budget_type],
 						},
 						{
@@ -1465,7 +1466,6 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async updateRow(index, reviewData, userId) {
-		console.log('what is in reviewData', reviewData);
 		try {
 			let res = {
 				created: [],

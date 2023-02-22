@@ -1216,6 +1216,11 @@ module.exports = {
 			defaultValue: '',
 			processValue: (value) => value,
 		},
+		department_s: {
+			newName: 'department',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
 	},
 
 	accomplishmentMapping: {
