@@ -858,66 +858,12 @@ class EDASearchUtility {
 					},
 				};
 				for (const psc of settings.psc) {
-					if (psc.code === 'Product') {
-						//nnumbers 1 - 9
-						for (let i = 1; i <= 9; i += 1) {
-							nestedQuery.nested.query.bool.should.push({
-								query_string: {
-									default_field: 'fpds_ng_n.psc_eda_ext',
-									default_operator: 'or',
-									query: `${i}*`,
-								},
-							});
-						}
-					} else if (psc.code === 'Research and Development') {
+					if (psc.hasChildren) {
 						nestedQuery.nested.query.bool.should.push({
 							query_string: {
-								default_field: 'fpds_ng_n.psc_eda_ext',
+								default_field: 'fpds_ng_n.psc_hierarchy_eda_ext',
 								default_operator: 'or',
-								query: 'A*',
-							},
-						});
-					} else if (psc.code === 'Service') {
-						const serviceLetters = [
-							'B',
-							'C',
-							'D',
-							'E',
-							'F',
-							'G',
-							'H',
-							'J',
-							'K',
-							'L',
-							'M',
-							'N',
-							'P',
-							'Q',
-							'R',
-							'S',
-							'T',
-							'U',
-							'V',
-							'W',
-							'X',
-							'Y',
-							'Z',
-						];
-						for (let letter of serviceLetters) {
-							nestedQuery.nested.query.bool.should.push({
-								query_string: {
-									default_field: 'fpds_ng_n.psc_eda_ext',
-									default_operator: 'or',
-									query: `${letter}*`,
-								},
-							});
-						}
-					} else if (psc.hasChildren) {
-						nestedQuery.nested.query.bool.should.push({
-							query_string: {
-								default_field: 'fpds_ng_n.psc_eda_ext',
-								default_operator: 'or',
-								query: `${psc.code}*`,
+								query: `${psc.code}`,
 							},
 						});
 					} else {
@@ -973,9 +919,9 @@ class EDASearchUtility {
 					if (naicsCode.hasChildren) {
 						nestedQuery.nested.query.bool.should.push({
 							query_string: {
-								default_field: 'fpds_ng_n.naics_code_eda_ext',
+								default_field: 'fpds_ng_n.naics_hierarchy_eda_ext',
 								default_operator: 'or',
-								query: `${naicsCode.code}*`,
+								query: `${naicsCode.code}`,
 							},
 						});
 					} else {
