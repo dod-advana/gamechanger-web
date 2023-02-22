@@ -1702,7 +1702,12 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async bulkUpload(req, userId) {
+		const { permissions } = req;
+		const isAdmin = permissions?.includes('JBOOK Admin') || false;
 		const { portfolio, file } = req.body;
+		if (portfolio?.name === 'AI Inventory' && !isAdmin) {
+			throw new Error('You do not have permission to update the AI Inventory');
+		}
 		let reviewArray = [];
 		if (path.extname(file.originalname) === '.xlsx' || path.extname(file.originalname) === '.xls') {
 			reviewArray = await this.parseExcel(file.path, portfolio, userId);
