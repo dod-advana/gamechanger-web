@@ -19,12 +19,12 @@ class SearchTestController {
 	async testSearch(req, res) {
 		let userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 		let documents = req.body;
+		let docMetrics = {};
 		let results = [];
 		const METADATASOURCE = ['title', 'display_title_s', 'doc_num', 'filename'];
 		try {
 			for (const source in documents) {
 				let positionSum = 0;
-				// let metaDataSourceCounter = 0;
 				let sourceData = {
 					source: 'source',
 					number_of_documents_tested: 0,
@@ -34,7 +34,6 @@ class SearchTestController {
 				};
 				for (const element of documents[source]) {
 					for (const dataSource of METADATASOURCE) {
-						// metaDataSourceCounter++;
 						let searchText = element.metaData[dataSource];
 						if (searchText === 'N/A') continue;
 						searchText = element.metaData[dataSource].replace(/[():]/g, (matched) => `\\${matched}`);
@@ -48,7 +47,7 @@ class SearchTestController {
 						};
 						req.body = term;
 						let data = await this.policySearchHandler.searchHelper(req, userId, false);
-						positionSum += this.resultsWrapper(data, source, term, sourceData);
+						positionSum += this.resultsWrapper(data, source, term, sourceData, docMetrics);
 					}
 				}
 				sourceData.average_position = sourceData.number_of_documents_found
@@ -56,13 +55,13 @@ class SearchTestController {
 					: 0;
 				results.push(sourceData);
 			}
-			res.send(results);
+			res.send({ results: results, docMetrics: docMetrics });
 		} catch (e) {
 			console.log(e);
 		}
 	}
 
-	resultsWrapper(data, source, term, sourceData) {
+	resultsWrapper(data, source, term, sourceData, docMetrics) {
 		let position = 0;
 		console.log(`Searching ${source}`);
 		sourceData.source = source;
@@ -78,7 +77,11 @@ class SearchTestController {
 				sourceData.number_of_documents_found++;
 			}
 		}
-
+		if (Array.isArray(docMetrics[term.titleOfSearchTestDoc])) {
+			docMetrics[term.titleOfSearchTestDoc].push({ [term.searchMetaType]: position });
+		} else {
+			docMetrics[term.titleOfSearchTestDoc] = [{ [term.searchMetaType]: position }];
+		}
 		return position;
 	}
 }

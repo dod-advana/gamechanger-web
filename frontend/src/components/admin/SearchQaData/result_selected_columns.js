@@ -5,7 +5,11 @@ const RESULT_SELECTED_COLUMNS = [
 	{
 		Header: 'Source',
 		accessor: 'source',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'no source'}</TableRow>,
+		Cell: (row) => (
+			<TableRow style={{ overflowX: 'scroll' }}>
+				{row.value && row.value !== null ? row.value : 'no source'}
+			</TableRow>
+		),
 	},
 	{
 		Header: 'Documents Tested',
