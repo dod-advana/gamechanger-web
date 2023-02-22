@@ -240,6 +240,9 @@ module.exports = (sequelize, DataTypes) => {
 			jbook_ref_id: {
 				type: DataTypes.TEXT,
 			},
+			department: {
+				type: DataTypes.TEXT,
+			},
 		},
 		{
 			freezeTableName: true,

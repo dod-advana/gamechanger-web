@@ -1465,6 +1465,7 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async updateRow(index, reviewData, userId) {
+		console.log('what is in reviewData', reviewData);
 		try {
 			let res = {
 				created: [],

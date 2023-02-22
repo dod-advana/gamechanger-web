@@ -593,6 +593,73 @@ class EdaSearchHandler extends SearchHandler {
 			return {};
 		}
 	}
+	async getSummaryData(req, userId) {
+		try {
+			const { body } = req;
+			const { picklistName = '', parentCode = '' } = body;
+			let esIndex = this.constants.EDA_ELASTIC_SEARCH_OPTS.filterPicklistIndex;
+			let esClientName = 'eda';
+
+			const filter_options_query = {
+				size: 100,
+				sort: [
+					{
+						code_s: {
+							order: 'asc',
+						},
+					},
+				],
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									picklist_name_s: picklistName === 'naicsCode' ? 'naics' : picklistName,
+								},
+							},
+							{
+								match: {
+									parentCode_s: parentCode,
+								},
+							},
+						],
+					},
+				},
+			};
+
+			const filter_options_results = await this.dataLibrary.queryElasticSearch(
+				esClientName,
+				esIndex,
+				filter_options_query,
+				userId
+			);
+
+			let cleanedResults = [];
+
+			filter_options_results.body.hits.hits.forEach((hit) => {
+				if (picklistName === 'naicsCode') {
+					cleanedResults.push({
+						code: hit._source.code_s,
+						name: hit._source.title_s,
+						hasChildren: hit._source.hasChildren_b === 'true',
+						parent: hit._source.parentCode_s,
+					});
+				} else if (picklistName === 'psc') {
+					cleanedResults.push({
+						code: hit._source.code_s,
+						name: hit._source.productName_s,
+						hasChildren: hit._source.hasChildren_b === 'true',
+						parent: hit._source.parentCode_s,
+					});
+				}
+			});
+
+			return cleanedResults;
+		} catch (e) {
+			this.logger.error(e.message, 'B5YNTJC');
+			return {};
+		}
+	}
 
 	async callFunctionHelper(req, userId) {
 		const { functionName } = req.body;
@@ -611,6 +678,8 @@ class EdaSearchHandler extends SearchHandler {
 						return await this.getPresearchData(req, userId);
 					case 'getHierarchicalFilterData':
 						return await this.getHierarchicalFilterData(req, userId);
+					case 'getSummaryData':
+						return await this.getSummaryData(req, userId);
 					default:
 						this.logger.error(
 							`There is no function called ${functionName} defined in the edaSearchHandler`,
