@@ -25,7 +25,7 @@ export default () => {
 	const [searchResults, setSearchResults] = useState([]);
 	const [searching, setSearching] = useState(false);
 	const [gcVersion, setGcVersion] = useState();
-	const [testing, setTesting] = useState(true);
+	const [testing, setTesting] = useState(false);
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
