@@ -1625,15 +1625,7 @@ class JBookDataHandler extends DataHandler {
 	}
 
 	async bulkUpload(req, userId) {
-		const { permissions } = req;
-		const isAdmin = permissions?.includes('JBOOK Admin') || false;
-		const {
-			reviewArray,
-			portfolio: { name },
-		} = req.body;
-		if (name === 'AI Inventory' && !isAdmin) {
-			throw new Error('You do not have permission to update the AI Inventory');
-		}
+		const { reviewArray } = req.body;
 
 		const startTime = performance.now();
 		let dupes = [];
