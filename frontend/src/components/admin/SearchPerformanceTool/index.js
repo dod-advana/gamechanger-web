@@ -14,7 +14,7 @@ const gameChangerAPI = new GameChangerAPI();
 
 /**
  *
- * @class SearchQaData
+ * @class SearchPerfomanceTool
  */
 export default () => {
 	//Data states
@@ -28,7 +28,7 @@ export default () => {
 	const [tableColumns, setTableColumns] = useState([]);
 	const [tableData, setTableData] = useState(results);
 	//Table selection states
-	const [selected, setSelected] = useState();
+	const [selectedTest, setSelectedTest] = useState();
 	const [selectedTab, setSelectedTab] = useState('Sources');
 	//Boolean states
 	const [searching, setSearching] = useState(false);
@@ -37,7 +37,6 @@ export default () => {
 
 	let selectedTabStyle = {
 		...styles.tabSelectedStyle,
-		borderBottom: 'none !important',
 		borderRadius: `5px 5px 0px 0px`,
 		position: ' relative',
 		listStyle: 'none',
@@ -59,7 +58,7 @@ export default () => {
 
 	function handleRowSelected(e) {
 		if (e.target.className.includes('test-id')) {
-			setSelected(e.target.textContent);
+			setSelectedTest(e.target.textContent);
 			setResultSelected(true);
 			setMetrics(
 				results[
@@ -73,7 +72,7 @@ export default () => {
 
 	function handleBackSelected() {
 		if (resultSelected) {
-			setSelected(null);
+			setSelectedTest(null);
 			setResultSelected(false);
 		}
 	}
@@ -111,26 +110,25 @@ export default () => {
 	//This useEffect is here to update the table on load as well as whenever a test completes
 	useEffect(() => {
 		let tmpColumns;
-		if (selected) {
-			if (selectedTab === 'Sources') {
-				tmpColumns = [...RESULT_SELECTED_COLUMNS];
-				setTableData(
-					results[
-						results.findIndex((el) => {
-							return el.test_id.toString() === selected;
-						})
-					].source_results.searchResults
-				);
-			} else {
-				tmpColumns = [...DOCUMENTS_TAB_SELECTED_COLUMNS];
-				setTableData(documentWrapper(metrics));
-			}
+		if (selectedTest && selectedTab === 'Sources') {
+			tmpColumns = [...RESULT_SELECTED_COLUMNS];
+			setTableData(
+				results[
+					results.findIndex((el) => {
+						return el.test_id.toString() === selectedTest;
+					})
+				].source_results.searchResults
+			);
+		} else if (selectedTest && selectedTab === 'Documents') {
+			tmpColumns = [...DOCUMENTS_TAB_SELECTED_COLUMNS];
+			setTableData(documentWrapper(metrics));
 		} else {
 			tmpColumns = [...DEFAULT_COLUMNS];
 			setTableData(results);
 		}
+
 		setTableColumns(tmpColumns);
-	}, [metrics, results, selected, selectedTab]);
+	}, [metrics, results, selectedTest, selectedTab]);
 
 	useEffect(() => {
 		gameChangerAPI.getSearchTestResults().then(({ data }) => {
