@@ -11,6 +11,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
+import { utils, writeFileXLSX } from 'xlsx';
 
 const gameChangerAPI = new GameChangerAPI();
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
@@ -49,6 +50,13 @@ export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 
 	const blob = new Blob(byteArrays, { type: contentType });
 	return blob;
+};
+
+const downloadXlsx = (data) => {
+	const ws = utils.json_to_sheet(data);
+	const wb = utils.book_new();
+	utils.book_append_sheet(wb, ws, 'Primary Review Worksheet');
+	writeFileXLSX(wb, 'jbook-excel-export-general.xlsx');
 };
 
 const useStyles = makeStyles(() => ({
@@ -190,12 +198,19 @@ const ExportResultsDialog = ({
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(
-				data,
-				selectedFormat === 'csv-reviews' ? 'csv' : selectedFormat,
-				classificationMarking,
-				cloneData
-			);
+
+			if (selectedFormat === 'xlsx') {
+				//blob -> json
+				const jsonData = JSON.parse(await data.text());
+				downloadXlsx(jsonData);
+			} else {
+				downloadFile(
+					data,
+					selectedFormat === 'csv-reviews' ? 'csv' : selectedFormat,
+					classificationMarking,
+					cloneData
+				);
+			}
 			getUserData();
 			if (
 				selectedFormat === 'pdf' &&
@@ -207,7 +222,7 @@ const ExportResultsDialog = ({
 			setErrorMsg('Successfully Generated Results!');
 		} catch (err) {
 			console.log(err);
-			setErrorMsg('Error Generating Results');
+			setErrorMsg('Error Generating Results (Timeout)');
 		} finally {
 			setLoading(false);
 		}
@@ -281,6 +296,7 @@ const ExportResultsDialog = ({
 				}}
 			>
 				<div style={styles.leftButtonGroup} data-cy="export-select">
+					{/* needs form? or box overwritten as form? https://github.com/mui/material-ui/blob/d4d8512ce3453711f3c661374579b0d2ed13f3e7/docs/data/material/getting-started/templates/sign-up/SignUp.js#L59 */}
 					<FormControl variant="outlined" style={{ width: '100%' }} i data-cy="export-select-form">
 						<InputLabel className={classes.labelFont}>File Format</InputLabel>
 						<Select
@@ -308,6 +324,9 @@ const ExportResultsDialog = ({
 									CSV (Detailed)
 								</MenuItem>
 							)}
+							<MenuItem style={styles.menuItem} value="xlsx" key="xlsx" data-cy={`export-option-xlsx`}>
+								XLSX
+							</MenuItem>
 						</Select>
 					</FormControl>
 				</div>
@@ -331,7 +350,15 @@ const ExportResultsDialog = ({
 				</div>
 			</div>
 			{errorMsg ? (
-				<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>{errorMsg}</div>
+				<div
+					style={
+						errorMsg[0] === 'S'
+							? { color: 'green', display: 'flex', justifyContent: 'center' }
+							: { color: 'red', display: 'flex', justifyContent: 'center' }
+					}
+				>
+					{errorMsg}
+				</div>
 			) : (
 				<LoadingBar color="primary" loading={loading} />
 			)}

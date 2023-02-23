@@ -1293,9 +1293,144 @@ describe('SearchUtility', function () {
 				typeFilterString: [],
 			});
 			const expected = {
-				_source: {
-					includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'],
+				_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'] },
+				aggregations: {
+					doc_org_aggs: { terms: { field: 'display_org_s', size: 10000 } },
+					doc_type_aggs: { terms: { field: 'display_doc_type_s', size: 10000 } },
 				},
+				from: 0,
+				highlight: {
+					boundary_scanner: 'word',
+					fields: {
+						'display_source_s.search': {},
+						'display_title_s.search': {},
+						'filename.search': {},
+						keyw_5: {},
+						top_entities_t: {},
+						topics_s: {},
+					},
+					fragment_size: 10,
+					fragmenter: 'simple',
+					require_field_match: false,
+					type: 'unified',
+				},
+				query: {
+					bool: {
+						filter: [{ term: { is_revoked_b: 'false' } }],
+						minimum_should_match: 1,
+						must: [],
+						should: [
+							{
+								nested: {
+									inner_hits: {
+										_source: false,
+										from: 0,
+										highlight: {
+											fields: {
+												'paragraphs.par_raw_text_t': {
+													fragment_size: 270,
+													number_of_fragments: 1,
+													type: 'plain',
+												},
+												'paragraphs.par_raw_text_t.gc_english': {
+													fragment_size: 270,
+													number_of_fragments: 1,
+													type: 'plain',
+												},
+											},
+											fragmenter: 'span',
+										},
+										size: 100,
+										stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
+									},
+									path: 'paragraphs',
+									query: {
+										bool: {
+											should: [
+												{
+													query_string: {
+														query: 'artificial intelligence',
+														default_field: 'paragraphs.par_raw_text_t.gc_english',
+														default_operator: 'and',
+														fuzzy_max_expansions: 100,
+														fuzziness: 'AUTO',
+														analyzer: 'gc_english',
+														boost: 0.05,
+													},
+												},
+											],
+										},
+									},
+									score_mode: 'sum',
+								},
+							},
+							{
+								dis_max: {
+									boost: 150,
+									queries: [
+										{
+											wildcard: {
+												'display_title_s.search': {
+													case_insensitive: true,
+													value: '*artificial intelligence*',
+												},
+											},
+										},
+										{
+											fuzzy: {
+												'display_title_s.search': {
+													fuzziness: 'AUTO',
+													transpositions: false,
+													value: 'artificial intelligence',
+												},
+											},
+										},
+										{ match_phrase: { 'display_title_s.search': 'artificial intelligence' } },
+										{
+											wildcard: {
+												'filename.search': {
+													case_insensitive: true,
+													value: '*artificial intelligence*',
+												},
+											},
+										},
+										{ wildcard: { doc_num: { value: '*artificial intelligence*' } } },
+										{ term: { doc_num: { value: 'artificial intelligence' } } },
+									],
+								},
+							},
+							{
+								dis_max: {
+									boost: 5,
+									queries: [
+										{
+											wildcard: {
+												'top_entities_t.search': { value: '*artificial intelligence*' },
+											},
+										},
+										{ wildcard: { keyw_5: { value: '*artificial intelligence*' } } },
+									],
+								},
+							},
+							{
+								wildcard: {
+									'display_source_s.search': { boost: 10, value: '*artificial intelligence*' },
+								},
+							},
+							{
+								query_string: {
+									analyzer: 'gc_english',
+									boost: 10,
+									fields: ['display_title_s.search'],
+									query: '*artificial* AND *intelligence*',
+									type: 'best_fields',
+								},
+							},
+						],
+					},
+				},
+				size: 20,
+				sort: [{ _score: { order: 'desc' } }, { _id: 'desc' }],
 				stored_fields: [
 					'filename',
 					'title',
@@ -1322,162 +1457,9 @@ describe('SearchUtility', function () {
 					'topics_s',
 					'top_entities_t',
 				],
-				from: 0,
-				size: 20,
-				aggregations: {
-					doc_type_aggs: {
-						terms: {
-							field: 'display_doc_type_s',
-							size: 10000,
-						},
-					},
-					doc_org_aggs: {
-						terms: {
-							field: 'display_org_s',
-							size: 10000,
-						},
-					},
-				},
 				track_total_hits: true,
-				query: {
-					bool: {
-						must: [],
-						should: [
-							{
-								nested: {
-									path: 'paragraphs',
-									inner_hits: {
-										_source: false,
-										stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
-										from: 0,
-										size: 100,
-										highlight: {
-											fields: {
-												'paragraphs.par_raw_text_t': {
-													fragment_size: 270,
-													number_of_fragments: 1,
-													type: 'plain',
-												},
-												'paragraphs.par_raw_text_t.gc_english': {
-													fragment_size: 270,
-													number_of_fragments: 1,
-													type: 'plain',
-												},
-											},
-											fragmenter: 'span',
-										},
-									},
-									query: {
-										bool: {
-											should: [
-												{
-													query_string: {
-														query: 'artificial intelligence',
-														default_field: 'paragraphs.par_raw_text_t.gc_english',
-														default_operator: 'and',
-														fuzzy_max_expansions: 100,
-														fuzziness: 'AUTO',
-														analyzer: 'gc_english',
-														boost: 0.5,
-													},
-												},
-											],
-										},
-									},
-									score_mode: 'sum',
-								},
-							},
-							{
-								wildcard: {
-									keyw_5: {
-										value: '*artificial intelligence*',
-										boost: 5,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'display_title_s.search': {
-										value: '*artificial intelligence*',
-										boost: 15,
-										case_insensitive: true,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'filename.search': {
-										value: '*artificial intelligence*',
-										boost: 10,
-										case_insensitive: true,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'display_source_s.search': {
-										value: '*artificial intelligence*',
-										boost: 4,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'top_entities_t.search': {
-										value: '*artificial intelligence*',
-										boost: 5,
-									},
-								},
-							},
-							{
-								match_phrase: {
-									'display_title_s.search': 'artificial intelligence',
-								},
-							},
-							{
-								query_string: {
-									fields: ['display_title_s.search'],
-									query: '*artificial* AND *intelligence*',
-									type: 'best_fields',
-									boost: 10,
-									analyzer: 'gc_english',
-								},
-							},
-						],
-						minimum_should_match: 1,
-						filter: [
-							{
-								term: {
-									is_revoked_b: 'false',
-								},
-							},
-						],
-					},
-				},
-				highlight: {
-					require_field_match: false,
-					fields: {
-						'display_title_s.search': {},
-						keyw_5: {},
-						'filename.search': {},
-						'display_source_s.search': {},
-						top_entities_t: {},
-						topics_s: {},
-					},
-					fragment_size: 10,
-					fragmenter: 'simple',
-					type: 'unified',
-					boundary_scanner: 'word',
-				},
-				sort: [
-					{
-						_score: {
-							order: 'desc',
-						},
-					},
-					{ _id: 'desc' },
-				],
 			};
+
 			assert.deepStrictEqual(actual, expected);
 		});
 
@@ -1912,686 +1894,6 @@ describe('SearchUtility', function () {
 			const expectedSearchTermsArray = [`"artificial intelligence"`, `a.i.`];
 			assert.equal(actualSolrSearchText, expectedSolrSearchText);
 			expect(actualSearchTermsArray).to.have.members(expectedSearchTermsArray);
-		});
-	});
-
-	describe('#getTitle', function () {
-		it('should return partial, lowercase matches on display_title field', async () => {
-			const tmpOpts = {
-				...opts,
-				constants: { env: { GAME_CHANGER_OPTS: { allow_daterange: false } } },
-				dataApi: {
-					queryElasticSearch() {
-						return Promise.resolve(documentSearchES);
-					},
-				},
-			};
-			let clientObj = { esClientName: 'gamechanger', esIndex: 'gamechanger' };
-			let userId = '';
-			const query = 'dodi 8110.01 mission partner';
-			const target = new SearchUtility(tmpOpts);
-			const result = await target.getTitle(query, clientObj, userId);
-			let titles = [];
-			result.body.hits.hits.forEach((r) => {
-				titles.push(r.fields.display_title_s[0]);
-			});
-			const actual = titles;
-			const expected = [
-				'SECNAVINST 5030.8C GENERAL GUIDANCE FOR THE CLASSIFICATION OF NAVAL VESSELS AND BATTLE FORCE SHIP COUNTING PROCEDURES',
-				'OPNAVINST 3501.363B REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR COASTAL RIVERINE FORCES',
-				'OPNAVINST 3111.17A STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY',
-				'CFETP 2A9X1X BomberSpecial (BS) Integrated CommunicationNavigationMission Systems',
-				'AJP 3.14 ALLIED JOINT DOCTRINE FOR FORCE PROTECTION',
-				'OPNAVINST 3111.17B STRATEGIC LAYDOWN AND DISPERSAL PLAN FOR THE OPERATING FORCES OF THE U.S. NAVY',
-				'CJCSI 1805.01B Enlisted Professional Military Education Policy',
-				'AFI 36-2670 TOTAL FORCE DEVELOPMENT',
-				'OPNAVINST 5100.19F NAVY SAFETY AND OCCUPATIONAL HEALTH PROGRAM MANUAL FOR FORCES AFLOAT',
-				"CJCS GDE 3401D CJCS Guide to the Chairman's Readiness System",
-				'ATP 99 URBAN TACTICS',
-				'DoDFMR V2ACH3 Volume 2A, Chapter 3 : "Operation and Maintenance Appropriations"',
-				'AFMAN 13-1BCCV3 OPERATING PROCEDURES-BATTLE CONTROL CENTER (BCC)',
-				'AFJQS 8U000 Air Force Job Qualification Standard (AFJQS) Unit Deployment Manager (UDM)',
-				'DAFI 10-401 OPERATIONS PLANNING AND EXECUTION',
-				'DoDM 4160.21 Defense Materiel Disposition: Instructions for Hazardous Property and Other Special Processing Materiel',
-				'CFETP 1C5X1C2 COMMAND AND CONTROL BATTLE MANAGEMENT OPERATONS',
-				'OPNAVINST 3501.93F REQUIRED OPERATIONAL CAPABILITIES AND PROJECTED OPERATIONAL ENVIRONMENT FOR NAVAL BEACH GROUPS AND THEIR ELEMENTS',
-				'CJCSI 3030.01 IMPLEMENTING JOINT FORCE DEVELOPMENT AND DESIGN',
-				'CJCSI 3115.01 Common Tactical Picture Reporting Requirements',
-			];
-			assert.deepStrictEqual(actual, expected);
-		});
-	});
-
-	describe('#reorderFirst', function () {
-		it('should reorder a result with matching display_title to the top of the results', () => {
-			const tmpOpts = {
-				...opts,
-				constants: { env: { GAME_CHANGER_OPTS: { allow_daterange: false } } },
-			};
-
-			const titleResults = {
-				body: {
-					took: 47,
-					timed_out: false,
-					_shards: { total: 3, successful: 3, skipped: 0, failed: 0 },
-					hits: {
-						total: { value: 1, relation: 'eq' },
-						max_score: 1,
-						hits: [
-							{
-								_index: 'gamechanger_20211014',
-								_type: '_doc',
-								_id: 'd1a90cddb9518223136472d48ab0677d5ec03b84674e2db1b7dd371d8c15526a',
-								_score: 1,
-								_source: {
-									display_title_s:
-										'DoDI 8110.01 Mission Partner Environment Information Sharing Capability Implementation for the DoD',
-									title: 'Mission Partner Environment Information Sharing Capability Implementation for the DoD',
-									filename: 'DoDI 8110.01.pdf',
-									id: 'DoDI 8110.01.pdf_0',
-									group_s: 'DoDI 8110.01.pdf_0',
-									doc_type: 'DoDI',
-									doc_num: '8110.01',
-									type: 'document',
-									init_date: 'NA',
-									change_date: 'NA',
-									entities: ['NA_1', 'NA_2'],
-									author: 'NA',
-									signature: 'NA',
-									subject: 'NA',
-									classification: 'NA',
-									par_count_i: 53,
-									page_count: 23,
-									keyw_5: [
-										'dod mpe',
-										'warfighting functions',
-										'mpe capabilities',
-										'trans-regional operations',
-										'supports development',
-										'supporting organizations',
-										'standardized guidance',
-										'sharing information',
-										'sharing agreements',
-										'security usd',
-									],
-								},
-							},
-						],
-					},
-				},
-			};
-			const results = {
-				body: {
-					took: 71,
-					timed_out: false,
-					_shards: { total: 3, successful: 3, skipped: 0, failed: 0 },
-					hits: {
-						total: { value: 3, relation: 'eq' },
-						max_score: 27.600607,
-						hits: [
-							{
-								_index: 'gamechanger_20211014',
-								_type: '_doc',
-								_id: 'efd82d2f2a725220eeba3575843d25437152a71712ec8a7ef319280c05cc394f',
-								_score: 27.600607,
-								_source: {
-									kw_doc_score_r: 0.00001,
-									topics_s: {
-										chess: 0.16856570971216633,
-										'information technology': 0.19194784166650866,
-										enterprise: 0.19992821436573413,
-										arcyber: 0.2412196706591791,
-										dodin: 0.43229646739497485,
-									},
-									orgs_rs: {},
-									pagerank_r: 0.00001,
-								},
-								fields: {
-									display_title_s: ['AR 25-1 ARMY INFORMATION TECHNOLOGY'],
-									display_org_s: ['Dept. of the Army'],
-									crawler_used_s: ['army_pubs'],
-									doc_num: ['25-1'],
-									summary_30: [
-										"network architecture and information-sharing policy, modernizing Army IT resource management processes, and ensuring Establish and manage the Army's information support plan review and approval process. Coordinate IT plans, programs, and requirements with appropriate information system security managers in accord- Internet service provider and network temporary exception to policy : Waives the requirement to use an Army Army organizations will coordinate with the supporting NEC or other service providers to determine requirements Army will use DOD Identity and Access Management data to populate and maintain strategic and tactical directories, Army Information Technology Service Management Policy",
-									],
-									is_revoked_b: [false],
-									doc_type: ['AR'],
-									title: ['ARMY INFORMATION TECHNOLOGY'],
-									type: ['document'],
-									source_page_url_s: [
-										'https://armypubs.army.mil/ProductMaps/PubForm/Details.aspx?PUB_ID=1004709',
-									],
-									keyw_5: [
-										'information technology',
-										'ar 25',
-										'life cycle',
-										'investment management',
-										'data center',
-										'army information',
-										'visual information',
-										'spectrum management',
-										'public affairs',
-										'product managers',
-									],
-									filename: ['AR 25-1.pdf'],
-									access_timestamp_dt: ['2021-07-27T22:27:00'],
-									download_url_s: [
-										'https://armypubs.army.mil/epubs/DR_pubs/DR_a/pdf/ARN18225_AR25-1_FINAL.epub',
-									],
-									id: ['AR 25-1.pdf_0'],
-									display_doc_type_s: ['Document'],
-									ref_list: [
-										'DoD 4160.21',
-										'DoD 5500.7',
-										'DoD 5015.02',
-										'DoD 5500.07',
-										'DoD 5400.07',
-										'DoDD 8000.01',
-										'DoDD 8115.01',
-										'DoDD 8115.02',
-										'DoDD 5144.02',
-										'DoDD 5105.83',
-										'DoDD 5000.01',
-										'DoDD 5535.09',
-										'DoDD 3020.26',
-										'DoDD 5230.09',
-										'DoDD 5400.11',
-										'DoDD 8100.02',
-										'DoDD 4630.05',
-										'DoDI 8115.02',
-										'DoDI 5000.02',
-										'DoDI 5000.75',
-										'DoDI 5000.74',
-										'DoDI 8110.01',
-										'DoDI 8320.07',
-										'DoDI 8330.01',
-										'DoDI 8530.01',
-										'DoDI 5230.24',
-										'DoDI 5000.76',
-										'DoDI 8100.04',
-										'DoDI 8320.02',
-										'DoDI 8320.03',
-										'DoDI 8510.01',
-										'DoDI 4000.19',
-										'DoDI 8410.01',
-										'DoDI 8550.01',
-										'DoDI 5230.29',
-										'DoDI 5040.02',
-										'DoDI 1015.12',
-										'DoDI 1015.15',
-										'DoDI 1035.01',
-										'DoDI 5400.16',
-										'DoDI 1000.15',
-										'DoDI 1015.10',
-										'DoDI 1015.15 E',
-										'DoDI 5040.07',
-										'DoDI 8310.01',
-										'DoDI 8440.01',
-										'DoDI 8500.01',
-										'DoDI 8551.1',
-										'DoDI 8560.01',
-										'DoDI 8582.01',
-										'DoDI 4630.8',
-										'DoDM 5200.01 Volume 1',
-										'DoDM 4160.21',
-										'DoDM 5200.01, Volume 1',
-										'DoDM 5200.02',
-										'DTM 08 - 037',
-										'Title 40',
-										'Title 32',
-										'Title 10',
-										'CJCSI 3170.01',
-										'CJCSI 5128.01',
-										'CJCSI 3170.01H',
-										'CJCSI 6212.01F',
-										'CJCSI 5123.01H',
-										'CJCSI 3170.01I',
-										'CJCSI 5128.02',
-										'CJCSI 6211.02D',
-										'CJCSI 6285.01D',
-										'CJCSI 6250.01',
-										'JP 6-0',
-										'DCID 6/3',
-										'EO 13526',
-										'EO 13514',
-										'EO 12845',
-										'EO 12999',
-										'EO 12958',
-										'EO 13103',
-										'EO 13589',
-										'EO 13693',
-										'AR 25 - 1',
-										'AR 25 - 2',
-										'AR 25-1',
-										'AR 25 - 30',
-										'AR 11 - 2',
-										'AR 15 - 1',
-										'AR 380 - 5',
-										'AR 530 - 1',
-										'AR 25 - 400 - 2',
-										'AR 5 - 1',
-										'AR 70 - 1',
-										'AR 71 - 9',
-										'AR 25 - 55',
-										'AR 25-30',
-										'AR 690 - 950',
-										'AR 350 - 1',
-										'AR 25 - 13',
-										'AR 5 - 12',
-										'AR 525 - 27',
-										'AR 25 - 6',
-										'AR 73 - 1',
-										'AR 215 - 4',
-										'AR 700 - 127',
-										'AR 71 - 32',
-										'AR 500 - 3',
-										'AR 25 - 22',
-										'AR 420 - 1',
-										'AR 429 - 1',
-										'AR 360 - 1',
-										'AR 335 - 15',
-										'AR 600 - 7',
-										'AR 710 - 2',
-										'AR 215 - 1',
-										'AR 5 - 11',
-										'AR 5 - 20',
-										'AR 5 - 22',
-										'AR 12 - 1',
-										'AR 25 - 50',
-										'AR 25 - 51',
-										'AR 25 - 58',
-										'AR 25 - 59',
-										'AR 27 - 26',
-										'AR 27 - 60',
-										'AR 34 - 1',
-										'AR 190 - 53',
-										'AR 195 - 2',
-										'AR 215 - 7',
-										'AR 380 - 10',
-										'AR 380 - 40',
-										'AR 380 - 53',
-										'AR 380 - 381',
-										'AR 550 - 1',
-										'AR 640 - 30',
-										'AR 700 - 131',
-										'AR 700 - 142',
-										'AR 735 - 5',
-										'AR 750 - 1',
-										'AGO 2017 - 01',
-										'AGO 2006 - 01',
-										'AGO 2017 - 07',
-										'PAM 25 - 1 - 1',
-										'PAM 25-403',
-										'PAM 25 - 403',
-										'PAM 25 - 91',
-										'PAM 25 - 1 - 2',
-										'PAM 25-1-1',
-										'PAM 25 - 2-14',
-										'PAM 25 - 2 - 14',
-										'PAM 420 - 11',
-										'PAM 710 - 2 - 1',
-										'PAM 25 - 40',
-										'PAM 70 - 3',
-										'PAM 700 - 142',
-										'ARMY 2009 - 03',
-										'ARMY 2013 - 02',
-										'ARMY 2013 - 26',
-										'ARMY 2016 - 18',
-										'DA 25 - 51',
-										'FM 6 - 02',
-										'CTA 50 - 909',
-									],
-									publication_date_dt: ['2019-07-15T00:00:00'],
-									source_fqdn_s: ['armypubs.army.mil'],
-									page_count: [122],
-								},
-								inner_hits: {
-									paragraphs: {
-										hits: {
-											total: { value: 1, relation: 'eq' },
-											max_score: 27.600607,
-											hits: [
-												{
-													_index: 'gamechanger_20211014',
-													_type: '_doc',
-													_id: 'efd82d2f2a725220eeba3575843d25437152a71712ec8a7ef319280c05cc394f',
-													_nested: { field: 'paragraphs', offset: 215 },
-													_score: 27.600607,
-													fields: {
-														'paragraphs.page_num_i': [78],
-														'paragraphs.par_raw_text_t': [
-															'DODI 1015.10 Military Morale , Welfare , and Recreation ( MWR ) Programs DODI 1015.12 Lodging Program Resource Management DODI 1015.15 Establishment , Management , and Control of Non appropriated Fund Instrumentalities and Financial Management of Supporting Resources DODI 1035.01 Telework Policy DODI 4000.19 Support Agreements DODI 5000.02 Operation of the Defense Acquisition System DODI 5000.74 Defense Acquisition of Services DODI 5000.75 Business Systems Requirements and Acquisition DODI 5000.76 Accountability and Management of Internal Use Software ( IUS ) DODI 5040.02 Visual Information ( VI ) DODI 5040.07 Visual Information ( VI ) Productions DODI 5230.24 Distribution Statements of Technical Document DODI 5230.29 Security and Policy Review of DOD Information for Public Release DODI 5400.16 DOD Privacy Impact Assessment ( PIA ) Guidance DODI 8100.04 DOD Unified Capabilities ( UC ) DODI 8110.01 Mission Partner Environment ( MPE ) Information Sharing Capability Implementation for the DOD DODI 8310.01 Information Technology Standards in the DOD DODI 8320.02 Sharing Data , Information , and Technology ( IT ) Services in the Department of Defense DODI 8320.03 Unique Identification ( UID ) Standards for Supporting the DOD Information Enterprise DODI 8320.07 Implementing the Sharing of Data , Information , and Information Technology ( IT ) Services in the Department of Defense DODI 8330.01 Interoperability of Information Technology ( IT ) , Including National Security Systems ( NSS ) DODI 8410.01 Internet Domain Name and Internet Protocol Address Space Use and Approval ',
-														],
-													},
-													highlight: {
-														'paragraphs.par_raw_text_t.gc_english': [
-															' Privacy Impact Assessment ( PIA ) Guidance <em>DODI</em> 8100.04 DOD Unified Capabilities ( UC ) <em>DODI</em> <em>8110.01</em> <em>Mission</em> <em>Partner</em> Environment ( MPE ) Information Sharing Capability Implementation for the DOD <em>DODI</em> 8310.01 Information Technology Standards in the DOD <em>DODI</em> 8320.02',
-														],
-													},
-												},
-											],
-										},
-									},
-								},
-							},
-							{
-								_index: 'gamechanger_20211014',
-								_type: '_doc',
-								_id: 'f23124d4eb0bd5cdf0fc274beec45eee8ec7037dd12af2ea0e48ec020a14b1dd',
-								_score: 20.232485,
-								_source: {
-									kw_doc_score_r: 0.00001,
-									topics_s: {
-										abcanz: 0.8469349618695373,
-										forums: 0.15898364568075746,
-										armies: 0.1738771895202615,
-										stanags: 0.19247560534495273,
-										standardization: 0.11554268373092857,
-									},
-									orgs_rs: {},
-									pagerank_r: 0.00001,
-								},
-								fields: {
-									display_title_s: ['AR 34-1 INTEROPERABILITY'],
-									display_org_s: ['Dept. of the Army'],
-									crawler_used_s: ['army_pubs'],
-									doc_num: ['34-1'],
-									summary_30: [
-										'The Armys policy is to develop interoperability to enhance readiness in support of United States national de- Provide NATO, MIP, ABCANZ Armies Program, and DOD MPE capability and support group leaders, project The fulfillment by a nation or Service of its obligation under the terms of a ratified NATO or ABCANZ standardization These include agreements with allies and potential coalition partners on such matters as the standardization of doctrine,',
-									],
-									is_revoked_b: [false],
-									doc_type: ['AR'],
-									title: ['INTEROPERABILITY'],
-									type: ['document'],
-									source_page_url_s: [
-										'https://armypubs.army.mil/ProductMaps/PubForm/Details.aspx?PUB_ID=1008050',
-									],
-									keyw_5: [
-										'interoperability forums',
-										'interoperability agreements',
-										'internal controls',
-										'ar 34',
-										'validation cio/',
-										'term interoperability',
-										'technology sharing',
-										'technical areas',
-										'team leaders',
-										'support interoperability',
-									],
-									filename: ['AR 34-1.pdf'],
-									access_timestamp_dt: ['2021-07-27T22:26:52'],
-									download_url_s: [
-										'https://armypubs.army.mil/epubs/DR_pubs/DR_a/pdf/ARN21781_AR34_1_EBOOK_FINAL.epub',
-									],
-									id: ['AR 34-1.pdf_0'],
-									display_doc_type_s: ['Document'],
-									ref_list: [
-										'DoD 7000.14',
-										'DoDD 5000.01',
-										'DoDD 5132.03',
-										'DoDD 5530.3',
-										'DoDD 5230.20',
-										'DoDI 2015.4',
-										'DoDI 4120.24',
-										'DoDI 8110.01',
-										'DoDI 8330.01',
-										'DoDM 4120.24',
-										'Title 10',
-										'CJCSI 2700.01G',
-										'CJCSI 5123.01H',
-										'CJCSI 5128.01',
-										'CJCSI 6290.01',
-										'AR 34 - 1',
-										'AR 34-1',
-										'AR 25 - 30',
-										'AR 70 - 1',
-										'AR 11 - 31',
-										'AR 11 - 33',
-										'AR 380 - 10',
-										'AR 550 - 51',
-										'AR 70 - 41',
-										'AR 5 - 22',
-										'AR 380 - 5',
-										'AR 360 - 1',
-										'AR 1 - 1',
-										'AR 11 - 2',
-										'AR 12 - 1',
-										'AR 15 - 1',
-										'AR 25 - 400 - 2',
-										'AR 350 - 1',
-										'AR 570 - 9',
-										'AR 614 - 10',
-										'AR 700 - 131',
-										'PAM 25 - 403',
-										'PAM 11 - 31',
-										'PAM 70 - 3',
-										'FM 3 - 22',
-									],
-									publication_date_dt: ['2020-04-09T00:00:00'],
-									source_fqdn_s: ['armypubs.army.mil'],
-									page_count: [37],
-								},
-								inner_hits: {
-									paragraphs: {
-										hits: {
-											total: { value: 1, relation: 'eq' },
-											max_score: 20.232485,
-											hits: [
-												{
-													_index: 'gamechanger_20211014',
-													_type: '_doc',
-													_id: 'f23124d4eb0bd5cdf0fc274beec45eee8ec7037dd12af2ea0e48ec020a14b1dd',
-													_nested: { field: 'paragraphs', offset: 66 },
-													_score: 20.232485,
-													fields: {
-														'paragraphs.page_num_i': [21],
-														'paragraphs.par_raw_text_t': [
-															'DODD 5230.20 Visits and Assignments of Foreign Nationals DODI 2015.4 Defense Research , Development , Test and Evaluation ( RDT&E ) Information Exchange Program ( IEP ) DODI 4120.24 Defense Standardization Program ( DSP ) DODI 8110.01 Mission Partner Environment ( MPE ) Information Sharing Capability Implementation for the Do D DODI 8330.01 Interoperability of Information Technology ( IT ) , Including National Security Systems ( NSS ) International Cooperation in Acquisition , Technology and Logistics ( IC in AT&L ) Handbook ( Available at https://www.acq.osd.mil/ic/links/ichandbook.pdf . ) JP 3 – 0 Joint Operations ( Available at https://www.jcs.mil/doctrine/joint doctrine pubs/3 – 0 operations series / . ) JP 3 – 16 Multinational Operations ( Available at https://www.jcs.mil/doctrine/joint doctrine pubs/3 – 0 operations series / . ) Military Committee Policy for Military Operational Standardization( Available from the Central U.S . Repository , U.S . NATO Document Repository , 3072 Army Pentagon , Washington , DC 20310 – 3072 . )NATO Action Sheet PO ( 2016 ) 0179 – AS1 ( Available at nso.nato.int . ) NATO Allied Medical Publications ( Available at http://nso.nato.int/nso / . ) NSDD NATO Standardization Documents Database( The NSDD replaces Allied Administrative Publication 4 , NATO Standardization Agreements and Related Publications , and is available on NATO Standardization Office , NSDD ( Available at http://nso.nato.int/nso . ) NSOP NATO Standardization Office Procedures Presidential Policy Directive–8 National Preparedness Presidential Policy Directive–17 Countering Improvised Explosive Devices Presidential Policy Directive–23 U.S . Security Sector Assistance Policy The Army Vision ( Available at https://www.army.mil/e2/downloads/rv7/vision/the army vision.pdf . ) TRADOC Pamphlet 525 – 3 – 1 The U.S . Army in Multi Domain Operations 2028 10 USC Armed Forces 22 USC 2778 – 2780 Arms Export Control Act 22 USC 2796d Loan of materials , supplies , and equipment for research and development purposes ',
-														],
-													},
-													highlight: {
-														'paragraphs.par_raw_text_t.gc_english': [
-															'DODD 5230.20 Visits and Assignments of Foreign Nationals <em>DODI</em> 2015.4 Defense Research , Development , Test and Evaluation ( RDT&E ) Information Exchange Program ( IEP ) <em>DODI</em> 4120.24 Defense Standardization Program ( DSP ) <em>DODI</em> <em>8110.01</em> <em>Mission</em> <em>Partner</em> Environment ( MPE',
-														],
-													},
-												},
-											],
-										},
-									},
-								},
-							},
-							{
-								_index: 'gamechanger_20211014',
-								_type: '_doc',
-								_id: 'd1a90cddb9518223136472d48ab0677d5ec03b84674e2db1b7dd371d8c15526a',
-								_score: 10,
-								_source: {
-									kw_doc_score_r: 0.00001,
-									topics_s: {
-										uscybercom: 0.1545856199762491,
-										dodis: 0.21759227234478004,
-										sharing: 0.5318415637796077,
-										cybersecurity: 0.1807565173278742,
-										cssps: 0.176412634384188,
-									},
-									orgs_rs: {},
-									pagerank_r: 0.00001,
-								},
-								fields: {
-									display_title_s: [
-										'DoDI 8110.01 Mission Partner Environment Information Sharing Capability Implementation for the DoD',
-									],
-									display_org_s: ['Dept. of Defense'],
-									crawler_used_s: ['dod_issuances'],
-									doc_num: ['8110.01'],
-									summary_30: [
-										'Manage MPE information sharing capabilities in accordance with applicable DoD MPE information-sharing capabilities in support of joint and combined operations, leveraging Assists the DoD CIO in monitoring and evaluating MPE information sharing capabilities',
-									],
-									is_revoked_b: [false],
-									doc_type: ['DoDI'],
-									title: [
-										'Mission Partner Environment Information Sharing Capability Implementation for the DoD',
-									],
-									type: ['document'],
-									source_page_url_s: ['https://www.esd.whs.mil/Directives/issuances/dodi/'],
-									keyw_5: [
-										'dod mpe',
-										'warfighting functions',
-										'mpe capabilities',
-										'trans-regional operations',
-										'supports development',
-										'supporting organizations',
-										'standardized guidance',
-										'sharing information',
-										'sharing agreements',
-										'security usd',
-									],
-									filename: ['DoDI 8110.01.pdf'],
-									access_timestamp_dt: ['2021-08-28T13:30:54'],
-									download_url_s: [
-										'https://www.esd.whs.mil/Portals/54/Documents/DD/issuances/dodi/811001p.pdf?ver=98IOYlI0vyJIaQJfLQKkAg%3d%3d',
-									],
-									id: ['DoDI 8110.01.pdf_0'],
-									display_doc_type_s: ['Instruction'],
-									ref_list: [
-										'DoD 5400.11-R',
-										'DoDD 5144.02',
-										'DoDD 5240.01',
-										'DoDD 5230.11',
-										'DoDD 5101.22E',
-										'DoDD 3000.05',
-										'DoDD 8000.01',
-										'DoDD 5143.01',
-										'DoDD 5250.01',
-										'DoDD 5111.01',
-										'DoDD 5135.02',
-										'DoDD 5137.02',
-										'DoDD 5141.02',
-										'DoDD 3025.18',
-										'DoDD 5105.19',
-										'DoDI 8110.01',
-										'DoDI 8220.02',
-										'DoDI 5400.11',
-										'DoDI 5015.02',
-										'DoDI 8310.01',
-										'DoDI 8551.01',
-										'DoDI 8320.07',
-										'DoDI 8510.01',
-										'DoDI 5530.03',
-										'DoDI 2040.02',
-										'DoDI 8530.01',
-										'DoDI 8010.01',
-										'DoDI 5200.01',
-										'DoDI 5200.48',
-										'DoDI 8330.01',
-										'DoDI 8500.01',
-										'DoDM 5200.01',
-										'DoDM 5240.01',
-										'DoDM 5200.01 Volume 1',
-										'DoDM 5200.01 Volume 2',
-										'DoDM 5200.01 Volume 3',
-										'Title 5',
-										'Title 10',
-										'ICD 501',
-										'CJCSI 5128.02',
-										'CJCSI 5123.01H',
-										'CJCSI 6290.01',
-										'EO 12333',
-										'EO 13526',
-										'EO 13556',
-										'OMBM M-19-21',
-									],
-									publication_date_dt: ['2021-06-30T00:00:00'],
-									source_fqdn_s: ['www.esd.whs.mil'],
-									page_count: [23],
-								},
-								highlight: {
-									'display_title_s.search': [
-										'<em>DoDI 8110.01 Mission Partner Environment Information Sharing Capability Implementation for the DoD</em>',
-									],
-								},
-								inner_hits: {
-									paragraphs: {
-										hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-									},
-								},
-							},
-						],
-					},
-					aggregations: {
-						doc_type_aggs: {
-							doc_count_error_upper_bound: 0,
-							sum_other_doc_count: 0,
-							buckets: [
-								{ key: 'Document', doc_count: 2 },
-								{ key: 'Instruction', doc_count: 1 },
-							],
-						},
-						doc_org_aggs: {
-							doc_count_error_upper_bound: 0,
-							sum_other_doc_count: 0,
-							buckets: [
-								{ key: 'Dept. of the Army', doc_count: 2 },
-								{ key: 'Dept. of Defense', doc_count: 1 },
-							],
-						},
-					},
-				},
-				statusCode: 200,
-				headers: {
-					date: 'Fri, 12 Nov 2021 21:16:09 GMT',
-					'content-type': 'application/json; charset=UTF-8',
-					'content-length': '14870',
-					connection: 'keep-alive',
-					'access-control-allow-origin': '*',
-				},
-				meta: {
-					context: null,
-					request: {
-						params: {
-							method: 'POST',
-							path: '/gamechanger/_search',
-							body: '{"_source":{"includes":["pagerank_r","kw_doc_score_r","orgs_rs","topics_s"]},"stored_fields":["filename","title","page_count","doc_type","doc_num","ref_list","id","summary_30","keyw_5","p_text","type","p_page","display_title_s","display_org_s","display_doc_type_s","is_revoked_b","access_timestamp_dt","publication_date_dt","crawler_used_s","download_url_s","source_page_url_s","source_fqdn_s"],"from":0,"size":18,"aggregations":{"doc_type_aggs":{"terms":{"field":"display_doc_type_s","size":10000}},"doc_org_aggs":{"terms":{"field":"display_org_s","size":10000}}},"track_total_hits":true,"query":{"bool":{"must":[],"should":[{"nested":{"path":"paragraphs","inner_hits":{"_source":false,"stored_fields":["paragraphs.page_num_i","paragraphs.par_raw_text_t"],"from":0,"size":5,"highlight":{"fields":{"paragraphs.par_raw_text_t":{"fragment_size":270,"number_of_fragments":1,"type":"plain"},"paragraphs.par_raw_text_t.gc_english":{"fragment_size":270,"number_of_fragments":1,"type":"plain"}},"fragmenter":"span"}},"query":{"bool":{"should":[{"query_string":{"query":"dodi 8110.01 mission partner","default_field":"paragraphs.par_raw_text_t.gc_english","default_operator":"and","fuzzy_max_expansions":100,"fuzziness":"AUTO","analyzer":"gc_english"}}]}}}},{"wildcard":{"keyw_5":{"value":"*dodi 8110.01 mission partner*"}}},{"wildcard":{"display_title_s.search":{"value":"*dodi 8110.01 mission partner*","boost":10}}},{"multi_match":{"query":"dodi 8110.01 mission partner","fields":["display_title_s.search"],"operator":"AND","type":"phrase","boost":10}},{"match":{"filename.search":"dodi 8110.01 mission partner.pdf"}}],"minimum_should_match":1,"filter":[{"term":{"is_revoked_b":"false"}}]}},"highlight":{"require_field_match":false,"fields":{"display_title_s.search":{},"keyw_5":{},"id":{}},"fragment_size":10,"fragmenter":"simple","type":"unified","boundary_scanner":"word"},"sort":[{"_score":{"order":"desc"}}]}',
-							querystring: '',
-							headers: {
-								'user-agent': 'elasticsearch-js/7.13.0 (linux 5.10.47-linuxkit-x64; Node.js v14.18.1)',
-								'x-elastic-client-meta': 'es=7.13.0,js=14.18.1,t=7.13.0,hc=14.18.1',
-								'content-type': 'application/json',
-								'content-length': '1909',
-							},
-							timeout: 60000,
-						},
-						options: {},
-						id: 3,
-					},
-					name: 'elasticsearch-js',
-					connection: {
-						url: 'https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/',
-						id: 'https://vpc-gamechanger-iquxkyq2dobz4antllp35g2vby.us-east-1.es.amazonaws.com/',
-						headers: {},
-						deadCount: 0,
-						resurrectTimeout: 0,
-						_openRequests: 0,
-						status: 'alive',
-						roles: { master: true, data: true, ingest: true, ml: false },
-					},
-					attempts: 0,
-					aborted: false,
-				},
-			};
-			const target = new SearchUtility(tmpOpts);
-			const reordered = target.reorderFirst(results, titleResults);
-			let titles = [];
-			reordered.body.hits.hits.forEach((r) => {
-				titles.push(r.fields.display_title_s[0]);
-			});
-			const actual = titles;
-			const expected = [
-				'DoDI 8110.01 Mission Partner Environment Information Sharing Capability Implementation for the DoD',
-				'AR 25-1 ARMY INFORMATION TECHNOLOGY',
-				'AR 34-1 INTEROPERABILITY',
-			];
-			assert.deepStrictEqual(actual, expected);
 		});
 	});
 

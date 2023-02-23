@@ -19,9 +19,6 @@ const DataHandler = require('../base/dataHandler');
 const SearchUtility = require('../../utils/searchUtility');
 const JBookSearchUtility = require('./jbookSearchUtility');
 const { DataLibrary } = require('../../lib/dataLibrary');
-const XLSX = require('xlsx');
-const fs = require('fs');
-const path = require('path');
 
 const { performance } = require('perf_hooks');
 
@@ -1464,80 +1461,6 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async parseExcel(filePath, portfolio, userId) {
-		// create helper function that parses excel file and outputs an array
-		try {
-			const workbook = XLSX.readFile(filePath);
-			const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
-
-			const reviewArray = [];
-			sheet1.forEach((item) => {
-				const reviewData = {
-					primary_reviewer: `${item['Primary Reviewer']}`,
-					primary_class_label: `${item['AI Analysis']}`,
-					service_reviewer: `${item['Service/DoD Component Reviewer']}`,
-					primary_ptp: `${item['Planned Transition Partner']}`,
-					service_mp_add:
-						item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
-							? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
-							: null,
-					primary_review_notes: `${item['Primary Reviewer Notes']}`,
-					budget_year: `${item['FY (BY1)']}`,
-					budget_type: `${item['Doc Type']}`,
-					agency_service: `${item['Service / Agency']}`,
-					// agency_office: item[],
-					appn_num: `${item['APPN Symbol']}`,
-					budget_activity: `${item['BA']}`,
-					program_element: `${item['PE / BLI']}`,
-					budget_line_item:
-						item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
-				};
-
-				if (reviewData.budget_type === 'pdoc') {
-					reviewData.budget_line_item = reviewData.program_element;
-					reviewData.program_element = null;
-				}
-
-				if (reviewData.agency_service === 'Department of Defense (DOD)') {
-					reviewData.agency = reviewData.agency_office;
-				} else {
-					reviewData.agency = reviewData.agency_service;
-				}
-
-				if (reviewData.budget_activity.length !== 2) {
-					reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
-				}
-
-				if (reviewData.appn_num.length !== 4) {
-					reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
-				}
-				let refString = '';
-				if (reviewData.budget_type === 'pdoc') {
-					refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-				} else if (reviewData.budget_type === 'rdoc') {
-					refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
-				}
-
-				reviewData.jbook_ref_id = refString;
-				delete reviewData.agency_office;
-				delete reviewData.agency_service;
-
-				reviewData.portfolio_name = portfolio.name;
-				reviewData.latest_class_label = reviewData.primary_class_label;
-				reviewData.primary_review_status = 'Finished Review';
-				reviewData.review_status = 'Partial Review (Service)';
-
-				reviewArray.push(reviewData);
-			});
-
-			return reviewArray;
-		} catch (e) {
-			const { message } = e;
-			this.logger.error(message, 'NG7AONS', userId);
-			return [];
-		}
-	}
-
 	async updateRow(index, reviewData, userId) {
 		try {
 			let res = {
@@ -1704,13 +1627,12 @@ class JBookDataHandler extends DataHandler {
 	async bulkUpload(req, userId) {
 		const { permissions } = req;
 		const isAdmin = permissions?.includes('JBOOK Admin') || false;
-		const { portfolio, file } = req.body;
-		if (portfolio?.name === 'AI Inventory' && !isAdmin) {
+		const {
+			reviewArray,
+			portfolio: { name },
+		} = req.body;
+		if (name === 'AI Inventory' && !isAdmin) {
 			throw new Error('You do not have permission to update the AI Inventory');
-		}
-		let reviewArray = [];
-		if (path.extname(file.originalname) === '.xlsx' || path.extname(file.originalname) === '.xls') {
-			reviewArray = await this.parseExcel(file.path, portfolio, userId);
 		}
 
 		const startTime = performance.now();
@@ -1725,17 +1647,6 @@ class JBookDataHandler extends DataHandler {
 				written += 1;
 			}
 		}
-		if (file.path.startsWith('public/data/uploads')) {
-			fs.unlink(file.path, function (err) {
-				if (err) {
-					console.error(err);
-					console.log('File not found');
-				} else {
-					console.log('File Delete Successfuly');
-				}
-			});
-		}
-
 		const endTime = performance.now();
 		return {
 			written,

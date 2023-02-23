@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import FormData from 'form-data';
+import * as XLSX from 'xlsx';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
 import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
@@ -11,6 +11,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
+import xlsxSample from '../../../../resources/jbook-excel-sample.xlsx';
+import aiInvSample from '../../../../resources/jbook-ai-inv-sample.xlsx';
+import { ReactComponent as ExcelSvg } from '../../../../images/icon/excel_iconcolor.svg';
+import { SvgIcon } from '@mui/material';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -56,6 +60,103 @@ const Pill = styled.button`
 		color: #e9691d;
 	}
 `;
+
+const parseExcel = async (file, portfolio) => {
+	// create helper function that parses excel file and outputs an array
+	try {
+		const reviewArray = [];
+
+		const data = await file.arrayBuffer();
+		const workbook = XLSX.read(data);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+
+		sheet1.forEach((item) => {
+			// general review fields
+			const reviewData = {
+				primary_reviewer: `${item['Primary Reviewer']}`,
+				primary_review_notes: `${item['Primary Reviewer Notes']}`,
+				agency_service: `${item['Service / Agency']}`,
+				// agency_office: item[],
+				program_element: `${item['PE / BLI']}`,
+				budget_line_item:
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+			};
+
+			if (portfolio.name === 'AI Inventory') {
+				reviewData.primary_class_label = `${item['AI Analysis']}`;
+				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer']}`;
+				reviewData.service_mp_add =
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null;
+				reviewData.primary_ptp = `${item['Planned Transition Partner']}`;
+				reviewData.budget_year = `${item['FY (BY1)']}`;
+				reviewData.budget_type = `${item['Doc Type']}`;
+				reviewData.appn_num = `${item['APPN Symbol']}`;
+				reviewData.budget_activity = `${item['BA']}`;
+				reviewData.portfolio_name = 'AI Inventory';
+			} else {
+				reviewData.primary_class_label = `${item['Label']}`;
+				reviewData.budget_year = `${item['FY']}`;
+				reviewData.budget_type = `${item['PL Type']}`;
+				reviewData.appn_num = `${item['APPN Number']}`;
+				reviewData.budget_activity = `${item['BA Number']}`;
+				reviewData.portfolio_name = `${item['Portfolio Name']}`;
+			}
+
+			if (reviewData.budget_type === 'pdoc') {
+				reviewData.budget_line_item = reviewData.program_element;
+				reviewData.program_element = null;
+			}
+
+			if (reviewData.agency_service === 'Department of Defense (DOD)') {
+				reviewData.agency = reviewData.agency_office;
+			} else {
+				reviewData.agency = reviewData.agency_service;
+			}
+
+			if (reviewData.budget_activity.length !== 2) {
+				reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
+			}
+
+			if (reviewData.appn_num.length !== 4) {
+				reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
+			}
+			let refString = '';
+			if (reviewData.budget_type === 'pdoc') {
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budget_type === 'rdoc') {
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			}
+
+			reviewData.jbook_ref_id = refString;
+			delete reviewData.agency_office;
+			delete reviewData.agency_service;
+
+			reviewData.latest_class_label = reviewData.primary_class_label;
+			reviewData.primary_review_status = 'Finished Review';
+			reviewData.review_status = 'Partial Review (Service)';
+
+			reviewArray.push(reviewData);
+		});
+
+		return reviewArray;
+	} catch (e) {
+		const { message } = e;
+		console.log(message);
+		return [];
+	}
+};
+
+const getExample = (name) => {
+	switch (name) {
+		case 'AI Inventory':
+			return aiInvSample;
+		default:
+			return xlsxSample;
+	}
+};
+
 /**
  *
  * @class PortfolioBuilder
@@ -283,7 +384,7 @@ const PortfolioBuilder = (props) => {
 										}}
 										style={{ minWidth: 'unset' }}
 									>
-										Bulk Upload
+										AI Inventory Bulk Upload
 									</GCButton>
 								)}
 							</div>
@@ -345,17 +446,44 @@ const PortfolioBuilder = (props) => {
 	}, []);
 
 	const uploadCallback = useCallback(async () => {
-		const form = new FormData();
-		form.append('file', selectedFile, selectedFile.name);
-		form.append('functionName', 'bulkUpload');
-		form.append('cloneName', 'jbook');
-		form.append('options', JSON.stringify({ portfolio: modalData }));
+		let reviewArray = await parseExcel(selectedFile, modalData);
+		const reviewsChunked = [];
 		setLoading(true);
-		const uploadResponse = await gameChangerAPI.callUploadFunction(form, {
-			headers: form.getHeaders ? form.getHeaders() : { 'Content-Type': 'multipart/form-data' },
+		// I know this reviewLimit works in dev, but not sure in prod...
+		const reviewLimit = 85;
+		for (let i = 0; i < reviewArray.length; i += reviewLimit) {
+			const reviewChunk = reviewArray.slice(i, i + reviewLimit);
+			reviewsChunked.push(reviewChunk);
+		}
+		Promise.all(
+			reviewsChunked.map(async (reviewChunk, index) => {
+				const uploadResponse = await gameChangerAPI.callDataFunction({
+					functionName: 'bulkUpload',
+					cloneName: 'jbook',
+					options: {
+						portfolio: modalData,
+						reviewArray: reviewChunk,
+					},
+				});
+				return Promise.resolve({ ...uploadResponse.data, index });
+			})
+		).then((results) => {
+			const combinedResults = { written: 0, dupes: [], failedRows: [], time: 0 };
+			results.forEach(({ written, dupes, failedRows, time, index }) => {
+				combinedResults.written = combinedResults.written + written;
+				combinedResults.dupes = [
+					...combinedResults.dupes,
+					...dupes.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.failedRows = [
+					...combinedResults.failedRows,
+					...failedRows.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.time = combinedResults.time + time;
+			});
+			setResults(combinedResults);
+			setLoading(false);
 		});
-		setResults(uploadResponse.data);
-		setLoading(false);
 	}, [selectedFile, modalData]);
 
 	return (
@@ -401,8 +529,20 @@ const PortfolioBuilder = (props) => {
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton onClick={showPublicCallback} style={{ minWidth: 'unset' }}>
+								<GCButton
+									onClick={showPublicCallback}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
 									Public Portfolio Request
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData({ name: 'General', tags: [], user_ids: [], admins: [] });
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
 								</GCButton>
 							</div>
 						)}
@@ -565,6 +705,10 @@ const PortfolioBuilder = (props) => {
 							)}
 						</DialogContent>
 						<DialogActions>
+							<GCButton href={getExample(modalData.name)} download style={{ margin: '10px' }}>
+								<SvgIcon component={ExcelSvg} inheritViewBox />
+								&nbsp;Download Sample
+							</GCButton>
 							<GCButton
 								id={'editReviewerClose'}
 								onClick={closeUploadModal}
