@@ -15,7 +15,7 @@ const RESULT_SELECTED_COLUMNS = [
 		Header: 'Title',
 		accessor: 'title',
 		Cell: (row) => (
-			<TableRow style={{ width: 'fit-content' }}>
+			<TableRow style={{ textAlign: 'center' }}>
 				{row.value && row.value !== null ? row.value : 'Not Found'}
 			</TableRow>
 		),
@@ -23,17 +23,29 @@ const RESULT_SELECTED_COLUMNS = [
 	{
 		Header: 'Doc Number',
 		accessor: 'doc_num',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Not Found'}</TableRow>,
+		Cell: (row) => (
+			<TableRow style={{ textAlign: 'center' }}>
+				{row.value && row.value !== null ? row.value : 'Not Found'}
+			</TableRow>
+		),
 	},
 	{
 		Header: 'Filename',
 		accessor: 'filename',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Not Found'}</TableRow>,
+		Cell: (row) => (
+			<TableRow style={{ textAlign: 'center' }}>
+				{row.value && row.value !== null ? row.value : 'Not Found'}
+			</TableRow>
+		),
 	},
 	{
 		Header: 'Display Title S',
 		accessor: 'display_title_s',
-		Cell: (row) => <TableRow>{row.value && row.value !== null ? row.value : 'Not Found'}</TableRow>,
+		Cell: (row) => (
+			<TableRow style={{ textAlign: 'center' }}>
+				{row.value && row.value !== null ? row.value : 'Not Found'}
+			</TableRow>
+		),
 	},
 ];
 

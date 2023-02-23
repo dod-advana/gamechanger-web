@@ -86,6 +86,7 @@ export default () => {
 		setSelectedTab(e.target.textContent);
 	}
 
+	//This creates an object from the document metrics that can easily be read by the table
 	function documentWrapper(docs) {
 		let wrappedDocuments = [];
 		for (const doc in docs) {
@@ -107,6 +108,7 @@ export default () => {
 		setDocMetrics(returnedData.data.docMetrics);
 	}, []);
 
+	//This useEffect is here to update the table on load as well as whenever a test completes
 	useEffect(() => {
 		let tmpColumns;
 		if (selected) {
@@ -137,6 +139,7 @@ export default () => {
 		});
 	}, [searching]);
 
+	//This useEffect submits a post whenever a search is complete
 	useEffect(() => {
 		if (searchResults.length < 1) return;
 		let totalAvg = 0;

@@ -78,7 +78,7 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 				<HoverNavItem
 					centered
 					onClick={() => {
-						setPageToView(PAGES.SearchQaData);
+						setPageToView(PAGES.SearchPerformanceTool);
 						return false;
 					}}
 					toolTheme={toolTheme}
@@ -236,7 +236,7 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 			<Tooltip title="Test" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {
-						setPageToView(PAGES.SearchQaData);
+						setPageToView(PAGES.SearchPerformanceTool);
 						return false;
 					}}
 					toolTheme={toolTheme}

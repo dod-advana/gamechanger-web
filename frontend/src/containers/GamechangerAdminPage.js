@@ -10,7 +10,7 @@ import SlideOutMenuContent from '@dod-advana/advana-side-nav/dist/SlideOutMenuCo
 import { GCCheckbox, styles, TableRow, toolTheme } from '../components/admin/util/GCAdminStyles';
 import LoadableVisibility from 'react-loadable-visibility/react-loadable';
 import { gcOrange } from '../components/common/gc-colors';
-import SearchQaData from '../components/admin/SearchQaData';
+import SearchPerformanceTool from '../components/admin/SearchPerformanceTool';
 
 const NotificationsManagement = LoadableVisibility({
 	loader: () => import('../components/notifications/NotificationsManagement'),
@@ -112,7 +112,7 @@ const PAGES = {
 	apiKeys: 'API Keys',
 	homepageEditor: 'Homepage Editor',
 	responsibilityUpdates: 'Responsibility Updates',
-	SearchQaData: 'Search QA Data',
+	SearchPerformanceTool: 'Search Performance Tool',
 };
 
 const userListTableAdditions = [
@@ -186,8 +186,8 @@ const GamechangerAdminPage = (props) => {
 				return <HomepageEditor />;
 			case PAGES.responsibilityUpdates:
 				return <ResponsibilityUpdates />;
-			case PAGES.SearchQaData:
-				return <SearchQaData />;
+			case PAGES.SearchPerformanceTool:
+				return <SearchPerformanceTool />;
 			default:
 				return <GeneralAdminButtons />;
 		}
