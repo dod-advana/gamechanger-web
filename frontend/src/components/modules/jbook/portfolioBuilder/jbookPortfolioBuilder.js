@@ -150,12 +150,10 @@ const parseExcel = async (file, portfolio) => {
 };
 
 const getExample = (name) => {
-	switch (name) {
-		case 'AI Inventory':
-			return aiInvSample;
-		default:
-			return xlsxSample;
+	if (name === 'AI Inventory') {
+		return aiInvSample;
 	}
+	return xlsxSample;
 };
 
 /**
