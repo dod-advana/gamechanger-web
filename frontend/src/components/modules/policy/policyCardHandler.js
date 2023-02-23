@@ -344,8 +344,8 @@ const StyledListViewFrontCardContent = styled.div`
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
-	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -359,17 +359,16 @@ const StyledFrontCardContent = styled.div`
 	.hits-container {
 		display: grid;
 		grid-template-columns: 100px auto auto;
-		height: 100%;
+		height: calc(100% - 24px);
 
 		.page-hits {
 			min-width: 100px;
-			height: fit-content;
-			max-height: 150px;
 			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 			position: relative;
 			z-index: 1;
+			height: 100%;
 
 			.page-hit {
 				display: flex;
@@ -380,6 +379,7 @@ const StyledFrontCardContent = styled.div`
 				border-top: 1px solid rgb(189, 189, 189);
 				cursor: pointer;
 				color: #386f94;
+				border-bottom: 1px solid rgb(189, 189, 189);
 
 				span {
 					font-size: ${CARD_FONT_SIZE}px;
@@ -393,8 +393,13 @@ const StyledFrontCardContent = styled.div`
 		}
 
 		> .expanded-metadata {
-			overflow-wrap: anywhere;
 			grid-column: 2 / 4;
+			height: 100%;
+			overflow: auto;
+
+			.searchdemo-blockquote {
+				height: 100%;
+			}
 		}
 	}
 `;
@@ -778,7 +783,16 @@ const getPublicationDate = (publication_date_dt) => {
 	}
 };
 
-const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+const CardHeaderHandler = ({
+	item,
+	state,
+	checkboxComponent,
+	favoriteComponent,
+	graphView,
+	intelligentSearch,
+	idx,
+	page,
+}) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
 	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
@@ -792,9 +806,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 	const typeTextColor = getTypeTextColor(cardType);
 
 	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
-
 	const publicationDate = getPublicationDate(item.publication_date_dt);
-
 	return (
 		<StyledFrontCardHeader
 			listView={state.listView}
@@ -814,8 +826,9 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 											item.filename,
 											state.cloneData.clone_name,
 											state.searchText,
-											0,
-											item.download_url_s
+											item.download_url_s,
+											idx,
+											page.pageNumber
 										)
 								: () => undefined
 						}
@@ -1149,8 +1162,9 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1262,8 +1276,9 @@ const renderListView = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1346,9 +1361,9 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, docume
 						item.filename,
 						state.cloneData.clone_name,
 						state.searchText,
-						page.pageNumber,
 						item.download_url_s,
-						documentIdx
+						documentIdx,
+						page.pageNumber
 					);
 				}}
 			>
@@ -1516,7 +1531,7 @@ const cardHandler = {
 									href={'#'}
 									onClick={(e) => {
 										e.preventDefault();
-										clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+										clickFn(filename, cloneName, searchText, item.download_url_s, idx);
 									}}
 								>
 									Open
