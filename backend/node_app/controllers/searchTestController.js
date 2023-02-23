@@ -77,11 +77,12 @@ class SearchTestController {
 				sourceData.number_of_documents_found++;
 			}
 		}
-		if (Array.isArray(docMetrics[term.titleOfSearchTestDoc])) {
-			docMetrics[term.titleOfSearchTestDoc].push({ [term.searchMetaType]: position });
+		if (docMetrics[term.titleOfSearchTestDoc]) {
+			docMetrics[term.titleOfSearchTestDoc][term.searchMetaType] = position;
 		} else {
-			docMetrics[term.titleOfSearchTestDoc] = [{ [term.searchMetaType]: position }];
+			docMetrics[term.titleOfSearchTestDoc] = { [term.searchMetaType]: position };
 		}
+
 		return position;
 	}
 }

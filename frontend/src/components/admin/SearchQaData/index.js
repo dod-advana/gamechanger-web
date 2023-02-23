@@ -6,7 +6,8 @@ import GCButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
-import documents from './testDocumentsTESTING';
+import DOCUMENTS_TAB_SELECTED_COLUMNS from './documents_tab_selected_columns';
+import documents from './testDocuments';
 import LoadingBar from '../../common/LoadingBar';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -16,18 +17,22 @@ const gameChangerAPI = new GameChangerAPI();
  * @class SearchQaData
  */
 export default () => {
-	// Component Properties
-
-	const [tableColumns, setTableColumns] = useState([]);
-	const [resultSelected, setResultSelected] = useState(false);
-	const [selectedTab, setSelectedTab] = useState('Sources');
-	const [selected, setSelected] = useState();
+	//Data states
 	const [results, setResults] = useState();
 	const [metrics, setMetrics] = useState();
+	const [gcVersion, setGcVersion] = useState();
+	//Search States | used for posting to database
 	const [searchResults, setSearchResults] = useState([]);
 	const [docMetrics, setDocMetrics] = useState([]);
+	//Table states
+	const [tableColumns, setTableColumns] = useState([]);
+	const [tableData, setTableData] = useState(results);
+	//Table selection states
+	const [selected, setSelected] = useState();
+	const [selectedTab, setSelectedTab] = useState('Sources');
+	//Boolean states
 	const [searching, setSearching] = useState(false);
-	const [gcVersion, setGcVersion] = useState();
+	const [resultSelected, setResultSelected] = useState(false);
 	const [testing, setTesting] = useState(false);
 
 	let selectedTabStyle = {
@@ -56,6 +61,13 @@ export default () => {
 		if (e.target.className.includes('test-id')) {
 			setSelected(e.target.textContent);
 			setResultSelected(true);
+			setMetrics(
+				results[
+					results.findIndex((el) => {
+						return el.test_id.toString() === e.target.textContent;
+					})
+				].source_results.docMetrics
+			);
 		}
 	}
 
@@ -74,6 +86,21 @@ export default () => {
 		setSelectedTab(e.target.textContent);
 	}
 
+	function documentWrapper(docs) {
+		let wrappedDocuments = [];
+		for (const doc in docs) {
+			let document = {
+				document: doc,
+				title: docs[doc].title,
+				doc_num: docs[doc].doc_num,
+				filename: docs[doc].filename,
+				display_title_s: docs[doc].display_title_s,
+			};
+			wrappedDocuments.push(document);
+		}
+		return wrappedDocuments;
+	}
+
 	const handleTests = useCallback(async () => {
 		let returnedData = await gameChangerAPI.testSearch(documents);
 		setSearchResults(returnedData.data.results);
@@ -81,14 +108,34 @@ export default () => {
 	}, []);
 
 	useEffect(() => {
-		let tmpColumns = selected ? [...RESULT_SELECTED_COLUMNS] : [...DEFAULT_COLUMNS];
-		gameChangerAPI.getSearchTestResults().then(({ data }) => {
-			setResults(data);
-			setMetrics(data[0].source_results.docMetrics);
-		});
-
+		let tmpColumns;
+		if (selected) {
+			if (selectedTab === 'Sources') {
+				tmpColumns = [...RESULT_SELECTED_COLUMNS];
+				setTableData(
+					results[
+						results.findIndex((el) => {
+							return el.test_id.toString() === selected;
+						})
+					].source_results.searchResults
+				);
+			} else {
+				tmpColumns = [...DOCUMENTS_TAB_SELECTED_COLUMNS];
+				setTableData(documentWrapper(metrics));
+			}
+		} else {
+			tmpColumns = [...DEFAULT_COLUMNS];
+			setTableData(results);
+		}
 		setTableColumns(tmpColumns);
-	}, [resultSelected, searching, selected]);
+	}, [metrics, results, selected, selectedTab]);
+
+	useEffect(() => {
+		gameChangerAPI.getSearchTestResults().then(({ data }) => {
+			if (!data.length) return;
+			setResults(data);
+		});
+	}, [searching]);
 
 	useEffect(() => {
 		if (searchResults.length < 1) return;
@@ -107,10 +154,6 @@ export default () => {
 		});
 		setSearching(false);
 	}, [docMetrics, gcVersion, searchResults]);
-
-	useEffect(() => {
-		console.log(metrics);
-	}, [metrics]);
 
 	return (
 		<>
@@ -161,7 +204,7 @@ export default () => {
 					)}
 				</div>
 			</div>
-			<div onClick={useCallback(handleRowSelected, [])}>
+			<div onClick={useCallback(handleRowSelected, [results])}>
 				<LoadingBar loading={searching} />
 				<div>
 					{resultSelected && (
@@ -183,15 +226,7 @@ export default () => {
 						</div>
 					)}
 					<ReactTable
-						data={
-							resultSelected
-								? results[
-										results.findIndex((el) => {
-											return el.test_id.toString() === selected;
-										})
-								  ].source_results.searchResults
-								: results
-						}
+						data={tableData}
 						columns={tableColumns}
 						style={{ margin: '0 80px 20px 80px', height: 600 }}
 						defaultPageSize={10}
