@@ -105,7 +105,7 @@ RUN cd "${APP_BACKEND_DIR}" && \
     echo "always-auth=true" >> .npmrc && \
     echo "@${NPM_PROFILE}:registry=${NPM_REGISTRY}" >> .npmrc && \
     echo "//${_registry_fqdn}/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc && \
-    echo "legacy-peer-deps=true" > .npmrc \
+    echo "legacy-peer-deps=true" >> .npmrc \
     )) && \
     yarn install --production
 
