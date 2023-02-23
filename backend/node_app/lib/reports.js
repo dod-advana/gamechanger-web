@@ -256,6 +256,25 @@ class Reports {
 		}
 	}
 
+	prepareXlsxJson(data) {
+		// NOTE: not sure if all the Nullish Coalescing Operators(??) are necessary, does database guarentee no undefined values?
+		const jsonData = data.map((doc) => ({
+			'Primary Reviewer': doc.primary_reviewer_s ?? '',
+			Label: doc.primary_class_label_s ?? '',
+			'Primary Reviewer Notes': doc.primaryReviewNotes ?? '',
+			FY: doc.budgetYear ?? '',
+			'PL Type': doc.budgetType ?? '',
+			'Service / Agency': doc.serviceAgency ?? '',
+			'Agency / Office': doc.org_jbook_desc_s ?? '',
+			'APPN Number': doc.appropriationNumber ?? '',
+			'BA Number': doc.budgetActivityNumber ?? '',
+			'PE / BLI': doc.programElement ?? doc.budgetLineItem_s ?? '',
+			'Project # (RDT&E Only)': doc.projectNum ?? '',
+			'Portfolio Name': doc.portfolio_name_s ?? '',
+		}));
+		return jsonData;
+	}
+
 	createPdfBuffer(data, userId, settings, callback = () => {}) {
 		try {
 			const fonts = {
@@ -308,7 +327,7 @@ class Reports {
 			};
 
 			const printer = new this.pdfMake(fonts);
-			const docDefinition = await this.constructProfilePagePDF(data);
+			const docDefinition = await this.constructProfilePagePDF(data, userId);
 			const doc = printer.createPdfKitDocument(docDefinition);
 
 			let chunks = [];
@@ -778,7 +797,13 @@ class Reports {
 			// RDOC Content
 			const rdocContent = [];
 
-			for (const docData of fullData) {
+			// We need to filter out duplicated reviews that came as
+			// a result of data propagation from 2022-2023
+			const docIds = fullData.map((docData) => String(docData.id));
+			const filteredFullData = fullData.filter(
+				(docData, index) => !docIds.includes(String(docData.id), index + 1)
+			);
+			for (const docData of filteredFullData) {
 				switch (docData.budgetType) {
 					case 'pdoc':
 						procToc[1].table.body.push(
@@ -945,7 +970,7 @@ class Reports {
 
 			areas3.forEach((area3) => {
 				areas2.forEach((area2) => {
-					if (JCAData[docData.pocJointCapabilityArea][area2].includes(area3)) {
+					if (JCAData[docData.pocJointCapabilityArea][area2]?.includes(area3)) {
 						areasCombined[area2].push(area3);
 					}
 				});

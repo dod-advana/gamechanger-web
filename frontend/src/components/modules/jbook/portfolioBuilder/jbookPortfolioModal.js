@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
 	Dialog,
 	DialogActions,
@@ -50,6 +50,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 	const [showUsersModal, setShowUsersModal] = useState(false);
 	const [showAdminsModal, setShowAdminsModal] = useState(false);
 	const [showTagsModal, setShowTagsModal] = useState(false);
+	const [adminAdded, setAdminAdded] = useState(false);
 	const emptyData = {
 		name: '',
 		description: '',
@@ -66,13 +67,15 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 	const closeModal = () => {
 		setShowModal(false);
 		setData(emptyData);
+		setAdminAdded(false);
 	};
 
-	const handleDataChange = (val, key) => {
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const handleDataChange = useCallback((val, key) => {
 		const newData = { ...data };
 		newData[key] = val;
 		setData(newData);
-	};
+	});
 
 	// add user to portfolio data user_ids
 	const handleAddUser = (id) => {
@@ -93,22 +96,25 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 		}
 	};
 
-	const handleAddAdmin = (id) => {
-		try {
-			if (!isNaN(id)) {
-				let newList = [...data.admins];
-				let idIndex = newList.indexOf(id);
-				if (idIndex !== -1) {
-					newList.splice(idIndex, 1);
-				} else {
-					newList.push(id);
+	const handleAddAdmin = useCallback(
+		(id) => {
+			try {
+				if (!isNaN(id)) {
+					let newList = [...data.admins];
+					let idIndex = newList.indexOf(id);
+					if (idIndex !== -1) {
+						newList.splice(idIndex, 1);
+					} else {
+						newList.push(id);
+					}
+					handleDataChange(newList, 'admins');
 				}
-				handleDataChange(newList, 'admins');
+			} catch (e) {
+				console.log(e);
 			}
-		} catch (e) {
-			console.log(e);
-		}
-	};
+		},
+		[data.admins, handleDataChange]
+	);
 
 	// add tag to portfolio data tags
 	const handleAddTag = (tag, add) => {
@@ -253,6 +259,14 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 			setData(modalData);
 		}
 	}, [modalData]);
+
+	//Automatically adds the user as the admin when they attempt to create a new portfolio
+	useEffect(() => {
+		if (!adminAdded) {
+			handleAddAdmin(user.id);
+			setAdminAdded(true);
+		}
+	}, [user, handleAddAdmin, showModal, adminAdded]);
 
 	/**
 	 *
