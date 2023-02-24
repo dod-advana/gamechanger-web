@@ -55,8 +55,9 @@ class TextSuggestionController {
 					const originalText = req.body.searchText;
 					req.body.searchText = corrected;
 					// If the auto-corrected text doesn't return any results, don't suggest it to the user.
-					const correctedResults = this.searchUtility.documentSearch(null, req.body, clientObj, userId);
-					if (Object.keys(correctedResults).length === 0) {
+					const correctedResults = await this.searchUtility.documentSearch(null, req.body, clientObj, userId);
+
+					if (!correctedResults.totalCount) {
 						req.body.searchText = originalText;
 						corrected = '';
 					}
