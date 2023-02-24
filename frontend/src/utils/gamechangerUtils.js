@@ -481,6 +481,7 @@ export const orgColorMap = {
 	'Financial Mgmt. Reg': '#636363',
 	Legislation: '#ffbf00',
 	USSTRATCOM: '#00308f', // air force blue
+	'United States Army Training and Doctrine Command': '#4b5320', // army green
 };
 
 const linkColorMap = {
