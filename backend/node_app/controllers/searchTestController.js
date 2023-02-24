@@ -39,6 +39,7 @@ class SearchTestController {
 						searchText = element.metaData[dataSource].replace(/[():]/g, (matched) => `\\${matched}`);
 						let term = {
 							titleOfSearchTestDoc: element.metaData.title,
+							idOfSearchTestDoc: element.metaData.id,
 							searchText: searchText,
 							index: 'gamechanger',
 							cloneName: 'gamechanger',
@@ -69,7 +70,7 @@ class SearchTestController {
 		if (!data || data === '' || data.docs.length < 1) {
 			sourceData.number_of_documents_not_found++;
 		} else {
-			position = data.docs.findIndex((el) => el.title === term.titleOfSearchTestDoc);
+			position = data.docs.findIndex((el) => el.id === term.idOfSearchTestDoc);
 			position = position >= 0 ? position + 1 : 0;
 			if (position === 0) {
 				sourceData.number_of_documents_not_found++;
