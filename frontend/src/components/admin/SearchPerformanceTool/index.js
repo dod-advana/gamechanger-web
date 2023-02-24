@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import GameChangerAPI from '../../api/gameChanger-service-api';
+import { exportToCsv } from '../../../utils/gamechangerUtils';
 import GCButton from '../../common/GCButton';
 import { styles } from '../util/GCAdminStyles';
 import DEFAULT_COLUMNS from './default_columns';
 import RESULT_SELECTED_COLUMNS from './result_selected_columns';
 import DOCUMENTS_TAB_SELECTED_COLUMNS from './documents_tab_selected_columns';
-import documents from './testDocuments';
+import documents from './documents';
 import LoadingBar from '../../common/LoadingBar';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -33,7 +34,7 @@ export default () => {
 	//Boolean states
 	const [searching, setSearching] = useState(false);
 	const [resultSelected, setResultSelected] = useState(false);
-	const [testing, setTesting] = useState(false);
+	const [testing, setTesting] = useState(true);
 
 	let selectedTabStyle = {
 		...styles.tabSelectedStyle,
@@ -83,6 +84,10 @@ export default () => {
 
 	function handleTabClick(e) {
 		setSelectedTab(e.target.textContent);
+	}
+
+	function handleExportClick() {
+		exportToCsv(`TestID ${selectedTest} ${selectedTab}`, tableData, true);
 	}
 
 	//This creates an object from the document metrics that can easily be read by the table
@@ -223,6 +228,9 @@ export default () => {
 								>
 									Documents
 								</div>
+								<GCButton style={{ marginBottom: '3px', height: '40px' }} onClick={handleExportClick}>
+									Export
+								</GCButton>
 							</div>
 						</div>
 					)}
