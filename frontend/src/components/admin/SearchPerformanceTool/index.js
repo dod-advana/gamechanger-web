@@ -34,7 +34,6 @@ export default () => {
 	//Boolean states
 	const [searching, setSearching] = useState(false);
 	const [resultSelected, setResultSelected] = useState(false);
-	const [testing, setTesting] = useState(true);
 
 	let selectedTabStyle = {
 		...styles.tabSelectedStyle,
@@ -198,16 +197,6 @@ export default () => {
 					>
 						Run Test
 					</GCButton>
-					{testing && (
-						<GCButton
-							onClick={useCallback(() => {
-								gameChangerAPI.resetSearchTestResults();
-							}, [])}
-							style={{ minWidth: 'unset' }}
-						>
-							RESET TABLE
-						</GCButton>
-					)}
 				</div>
 			</div>
 			<div onClick={useCallback(handleRowSelected, [results])}>
