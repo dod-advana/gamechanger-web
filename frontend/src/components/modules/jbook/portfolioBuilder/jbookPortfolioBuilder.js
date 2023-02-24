@@ -371,22 +371,20 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
-					{portfolio.name === 'AI Inventory' && (
+					{portfolio.name === 'AI Inventory' && isAdmin && (
 						<>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
-								{isAdmin && (
-									<GCButton
-										key="bulkUpload"
-										onClick={() => {
-											setShowUploadModal(true);
-											setModalData(portfolio);
-										}}
-										style={{ minWidth: 'unset' }}
-									>
-										AI Inventory Bulk Upload
-									</GCButton>
-								)}
+								<GCButton
+									key="bulkUpload"
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									AI Inventory Bulk Upload
+								</GCButton>
 							</div>
 						</>
 					)}
