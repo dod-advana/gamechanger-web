@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import propTypes from 'prop-types';
 import { trackEvent } from '../../telemetry/Matomo';
 import { setState, handleSaveFavoriteDocument } from '../../../utils/sharedFunctions';
@@ -388,8 +388,12 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+	// tutorialLogicSwitch is set to true when going back from post-search tutorial to pre-search tutorial
+	// It indicates that we need to blank out returnedDocs and viewableDocs.
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
 	const [loading, setLoading] = useState(false);
+
+	const policyDCTMounted = useRef(false);
 
 	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
@@ -434,23 +438,49 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setLoading(resultsLoading || filterCountsLoading || updateFilters);
 	}, [resultsLoading, filterCountsLoading, updateFilters]);
 
-	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
+	useEffect(() => {
+		if (policyDCTMounted.current) {
+			if (!tutorialLogicSwitch) {
+				setShowTutorial(true);
+			}
+		} else {
+			policyDCTMounted.current = true;
+		}
+	}, [tutorialLogicSwitch]);
+
+	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
 		if (stepIndex === 0 && showTutorial === true)
 			setParagraphText(
 				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
 			);
-		if (stepIndex === 2 && tutorialLogicSwitch) {
+		if (stepIndex === 1 && tutorialLogicSwitch) {
 			setReturnedDocs([]);
 			setViewableDocs([]);
 			setTutorialLogicSwitch(false);
+			setShowTutorial(false);
 		}
-		if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
-		if (stepIndex === 3 && viewableDocs.length) {
-			setShowTutorial(true);
+		// not sure why this one is necessary, just copied over from commented code below
+		if (stepIndex === 2 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
+		if (stepIndex === 2 && !viewableDocs.length) {
+			setShowTutorial(false);
 			setTutorialLogicSwitch(true);
 		}
-	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
+		if (stepIndex === 2 && viewableDocs.length) {
+			setShowTutorial(true);
+		}
+
+		// if (stepIndex === 2 && tutorialLogicSwitch) {
+		// 	setReturnedDocs([]);
+		// 	setViewableDocs([]);
+		// 	setTutorialLogicSwitch(false);
+		// }
+		// if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
+		// if (stepIndex === 3 && viewableDocs.length) {
+		// 	setShowTutorial(true);
+		// 	setTutorialLogicSwitch(true);
+		// }
+	}, [loading, stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
 	// updateFilters is set alongside certain calls to setReturnedDocs().
@@ -922,7 +952,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					flexBasis: 'calc(16.666667% + 20px)',
 				}}
 			>
-				<div className="dct-tutorial-step-2" style={{ marginRight: 20 }}>
+				<div className={viewableDocs.length ? 'dct-tutorial-step-3' : undefined} style={{ marginRight: 20 }}>
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
@@ -950,7 +980,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					)}
 				</div>
 			</div>
-			{((returnedDocs.length <= 0 && !loading) || stepIndex === 2) && (
+			{((returnedDocs.length <= 0 && !loading) ||
+				stepIndex === 1) /*not sure why stepIndex check is necessary*/ && (
 				<div style={{ maxWidth: 'calc(100% - 20px)', flexBasis: 'calc(100% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
@@ -1010,7 +1041,9 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 										id="compare-button"
 										disabled={inputError}
 										onClick={handleCompare}
-										className="dct-tutorial-step-3"
+										className={
+											stepIndex !== 1 || !tutorialLogicSwitch ? 'dct-tutorial-step-2' : undefined
+										}
 									>
 										Submit
 									</GCButton>
