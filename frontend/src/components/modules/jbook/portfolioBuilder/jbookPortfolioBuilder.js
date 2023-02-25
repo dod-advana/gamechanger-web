@@ -232,6 +232,8 @@ const PortfolioBuilder = (props) => {
 		}
 	}, [init, setInit, setUser, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
 
+	// is user admin?
+	const isAdmin = user?.extra_fields?.jbook?.is_admin || false;
 	// helper function for listportfolio
 	const getName = (id) => {
 		if (userMap[id]) {
@@ -369,11 +371,12 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
-					{portfolio.name === 'AI Inventory' && (
+					{portfolio.name === 'AI Inventory' && isAdmin && (
 						<>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
 								<GCButton
+									key="bulkUpload"
 									onClick={() => {
 										setShowUploadModal(true);
 										setModalData(portfolio);
