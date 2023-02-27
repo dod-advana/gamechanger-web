@@ -62,6 +62,7 @@ const initState = {
 
 	// Homepage
 	recentSearches: [],
+	recentSearchesLoaded: false,
 	crawlerSources: [],
 	adminTopics: [],
 	adminMajorPubs: [],
