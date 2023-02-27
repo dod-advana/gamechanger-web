@@ -268,10 +268,15 @@ const handleLastOpened = async (last_opened_docs, state, dispatch, cancelToken, 
 	let cleanedDocs = [];
 	let filteredPubs = [];
 
-	for (let doc of last_opened_docs) {
-		cleanedDocs.push(doc.document.split(' - ')[1].split('.pdf')[0]);
-		cleanedDocs = [...new Set(cleanedDocs)];
+	// Extract filenames out of last_opened_docs, e.g.:
+	// 'Title 5 - Appendix' from 'PDFViewer - Title 5 - Appendix.pdf - gamechanger'
+	for (let { document } of last_opened_docs) {
+		let cleanedDoc = document.substring(document.indexOf('-') + 1, document.lastIndexOf('-')).trim();
+		cleanedDoc = cleanedDoc.substring(0, cleanedDoc.lastIndexOf('.'));
+		cleanedDocs.push(cleanedDoc);
 	}
+	cleanedDocs = [...new Set(cleanedDocs)];
+
 	try {
 		filteredPubs = createFilteredPubs(cleanedDocs);
 
