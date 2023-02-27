@@ -646,6 +646,7 @@ class SearchUtility {
 				: 'paragraphs.par_raw_text_t.gc_english';
 			const analyzer = this.isVerbatim(searchText) ? 'standard' : 'gc_english';
 			const plainQuery = this.isVerbatim(searchText) ? parsedQuery.replace(/["']/g, '') : parsedQuery;
+			const plainQueryTrimmed = plainQuery.trim();
 			let mainKeywords = this.remove_stopwords(plainQuery)
 				.replace(/["']/gi, '')
 				.replace(/ OR | AND /gi, ' ')
@@ -715,7 +716,7 @@ class SearchUtility {
 														fuzzy_max_expansions: 100,
 														fuzziness: 'AUTO',
 														analyzer,
-														boost: 0.5,
+														boost: 0.05,
 													},
 												},
 											],
@@ -725,60 +726,83 @@ class SearchUtility {
 								},
 							},
 							{
-								wildcard: {
-									keyw_5: {
-										value: `*${plainQuery}*`,
-										boost: 5,
-									},
+								dis_max: {
+									queries: [
+										{
+											wildcard: {
+												'display_title_s.search': {
+													value: `*${plainQueryTrimmed}*`,
+													case_insensitive: true,
+												},
+											},
+										},
+										{
+											fuzzy: {
+												'display_title_s.search': {
+													value: `${plainQueryTrimmed}`,
+													fuzziness: 'AUTO',
+													transpositions: false,
+												},
+											},
+										},
+										{
+											match_phrase: {
+												'display_title_s.search': plainQueryTrimmed,
+											},
+										},
+										{
+											wildcard: {
+												'filename.search': {
+													value: `*${plainQueryTrimmed}*`,
+													case_insensitive: true,
+												},
+											},
+										},
+										{
+											wildcard: {
+												doc_num: {
+													value: `*${plainQueryTrimmed}*`,
+												},
+											},
+										},
+										{
+											term: {
+												doc_num: {
+													value: plainQueryTrimmed,
+												},
+											},
+										},
+									],
+									boost: 150,
 								},
 							},
 							{
-								wildcard: {
-									'display_title_s.search': {
-										value: `*${plainQuery}*`,
-										boost: 15,
-										case_insensitive: true,
-									},
-								},
-							},
-							{
-								fuzzy: {
-									'display_title_s.search': {
-										value: `${plainQuery.trim()}`,
-										fuzziness: 'AUTO', // https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#fuzziness
-										transpositions: false, // do not allow edits to include transpositions of adjacent characters (e.g., ba -> ab)
-										boost: 15,
-									},
-								},
-							},
-							{
-								wildcard: {
-									'filename.search': {
-										value: `*${plainQuery}*`,
-										boost: 10,
-										case_insensitive: true,
-									},
+								dis_max: {
+									queries: [
+										{
+											wildcard: {
+												'top_entities_t.search': {
+													value: `*${plainQueryTrimmed}*`,
+												},
+											},
+										},
+										{
+											wildcard: {
+												keyw_5: {
+													value: `*${plainQueryTrimmed}*`,
+												},
+											},
+										},
+									],
+									boost: 5,
 								},
 							},
 							{
 								wildcard: {
 									'display_source_s.search': {
-										value: `*${plainQuery}*`,
-										boost: 4,
+										value: `*${plainQueryTrimmed}*`,
+										boost: 10,
 									},
-								},
-							},
-							{
-								wildcard: {
-									'top_entities_t.search': {
-										value: `*${plainQuery}*`,
-										boost: 5,
-									},
-								},
-							},
-							{
-								match_phrase: {
-									'display_title_s.search': plainQuery,
 								},
 							},
 						],

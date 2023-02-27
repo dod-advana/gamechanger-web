@@ -199,6 +199,8 @@ const cardHandler = {
 															item.filename,
 															state.cloneData.clone_name,
 															state.searchText,
+															null,
+															null,
 															page.pageNumber
 														);
 													}}
@@ -277,6 +279,8 @@ const cardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
+														null,
+														null,
 														page.pageNumber
 													);
 												}}
@@ -361,6 +365,8 @@ const cardHandler = {
 														item.filename,
 														state.cloneData.clone_name,
 														state.searchText,
+														null,
+														null,
 														page.pageNumber
 													);
 												}}
@@ -436,7 +442,7 @@ const cardHandler = {
 							href={'#'}
 							onClick={(e) => {
 								e.preventDefault();
-								clickFn(filename, cloneName, searchText, 0);
+								clickFn(filename, cloneName, searchText, null);
 							}}
 						>
 							Open
