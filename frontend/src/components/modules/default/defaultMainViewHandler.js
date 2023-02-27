@@ -123,6 +123,9 @@ export const handlePageLoad = async (props) => {
 	try {
 		gameChangerAPI.recentSearchesPOST(state.cloneData.clone_name).then(({ data }) => {
 			setState(dispatch, { recentSearches: data });
+			if (state.cloneData.clone_name === 'gamechanger') {
+				setState(dispatch, { recentSearchesLoaded: true });
+			}
 		});
 	} catch (e) {
 		// Do nothing
