@@ -70,39 +70,42 @@ const parseExcel = async (file, portfolio) => {
 		const workbook = XLSX.read(data);
 		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
 
-		sheet1.forEach((item) => {
+		sheet1.forEach((row) => {
+			let item = {};
+			Object.keys(row).forEach((key) => {
+				item[key] = row[key] ? `${row[key]}` : null;
+			});
 			// general review fields
 			// everything is ?? '' because otherwise it becomes the text "undefined"
 			const reviewData = {
-				primary_reviewer: `${item['Primary Reviewer'] ?? ''}`,
-				primary_review_notes: `${item['Primary Reviewer Notes'] ?? ''}`,
-				agency_service: `${item['Service / Agency'] ?? ''}`,
-				program_element: `${item['PE / BLI'] ?? ''}`,
-				budget_line_item:
-					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)'] ?? ''}` : null,
+				primary_reviewer: item['Primary Reviewer'],
+				primary_review_notes: item['Primary Reviewer Notes'],
+				agency_service: item['Service / Agency'],
+				program_element: item['PE / BLI'],
+				budget_line_item: item['Project # (RDT&E Only)'] !== undefined ? item['Project # (RDT&E Only)'] : null,
 			};
 
 			if (portfolio.name === 'AI Inventory') {
-				reviewData.primary_class_label = `${item['AI Analysis'] ?? ''}`;
-				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer'] ?? ''}`;
+				reviewData.primary_class_label = item['AI Analysis'];
+				reviewData.service_reviewer = item['Service/DoD Component Reviewer'];
 				reviewData.service_mp_add =
 					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
 						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
 						: null;
-				reviewData.primary_ptp = `${item['Planned Transition Partner'] ?? ''}`;
-				reviewData.budget_year = `${item['FY (BY1)'] ?? ''}`;
-				reviewData.budget_type = `${item['Doc Type'] ?? ''}`;
-				reviewData.appn_num = `${item['APPN Symbol'] ?? ''}`;
-				reviewData.budget_activity = `${item['BA'] ?? ''}`;
+				reviewData.primary_ptp = item['Planned Transition Partner'];
+				reviewData.budget_year = item['FY (BY1)'];
+				reviewData.budget_type = item['Doc Type'];
+				reviewData.appn_num = item['APPN Symbol'];
+				reviewData.budget_activity = item['BA'];
 				reviewData.portfolio_name = 'AI Inventory';
 
 				if (
-					reviewData.primary_reviewer === '' ||
-					reviewData.primary_class_label === '' ||
-					reviewData.service_reviewer === '' ||
-					reviewData.primary_ptp === '' ||
-					reviewData.service_mp_add === '' ||
-					reviewData.primary_review_notes === ''
+					reviewData.primary_reviewer === null ||
+					reviewData.primary_class_label === null ||
+					reviewData.service_reviewer === null ||
+					reviewData.primary_ptp === null ||
+					reviewData.service_mp_add === null ||
+					reviewData.primary_review_notes === null
 				) {
 					// partial review
 					reviewData.primary_review_status = 'Partial Review';
@@ -128,38 +131,40 @@ const parseExcel = async (file, portfolio) => {
 					`${item['POC Phone Number'] ?? ''}` +
 					`${item['RAI Review Notes'] ?? ''}`;
 				if (combinedRAI.trim() !== '') {
-					reviewData.service_secondary_reviewer = `${item['RAI Secondary Reviewer'] ?? ''}`;
-					reviewData.service_agree_label = `${item['RAI Tag Agree'] ?? ''}`;
-					reviewData.service_class_label = `${item['RAI Tag'] ?? ''}`;
+					reviewData.service_secondary_reviewer = item['RAI Secondary Reviewer']
+						? `${item['RAI Secondary Reviewer']}`
+						: null;
+					reviewData.service_agree_label = item['RAI Tag Agree'];
+					reviewData.service_class_label = item['RAI Tag'];
 					if (reviewData.service_agree_label === 'Yes') {
 						reviewData.service_class_label = reviewData.primary_class_label;
 					}
-					reviewData.service_ptp_agree_label = `${item['RAI Transition Partner Agree'] ?? ''}`;
-					reviewData.service_ptp = `${item['RAI Transition Partner'] ?? ''}`;
+					reviewData.service_ptp_agree_label = item['RAI Transition Partner Agree'];
+					reviewData.service_ptp = item['RAI Transition Partner'];
 					if (reviewData.service_ptp_agree_label === 'Yes') {
 						reviewData.service_ptp = reviewData.primary_ptp;
 					}
-					reviewData.service_mp_list = `${item['RAI Mission Partners'] ?? ''}`;
-					reviewData.service_poc_name = `${item['POC Name'] ?? ''}`;
-					reviewData.service_poc_title = `${item['POC Title'] ?? ''}`;
-					reviewData.service_poc_email = `${item['POC Email'] ?? ''}`;
-					reviewData.service_poc_org = `${item['POC Org'] ?? ''}`;
-					reviewData.poc_phone_number = `${item['POC Phone Number'] ?? ''}`;
-					reviewData.service_review_notes = `${item['RAI Review Notes'] ?? ''}`;
+					reviewData.service_mp_list = item['RAI Mission Partners'];
+					reviewData.service_poc_name = item['POC Name'];
+					reviewData.service_poc_title = item['POC Title'];
+					reviewData.service_poc_email = item['POC Email'];
+					reviewData.service_poc_org = item['POC Org'];
+					reviewData.poc_phone_number = item['POC Phone Number'];
+					reviewData.service_review_notes = item['RAI Review Notes'];
 
 					if (
-						reviewData.service_secondary_reviewer === '' ||
-						reviewData.service_agree_label === '' ||
-						reviewData.service_class_label === '' ||
-						reviewData.service_ptp_agree_label === '' ||
-						reviewData.service_ptp === '' ||
-						reviewData.service_mp_list === '' ||
-						reviewData.service_poc_name === '' ||
-						reviewData.service_poc_title === '' ||
-						reviewData.service_poc_email === '' ||
-						reviewData.service_poc_org === '' ||
-						reviewData.poc_phone_number === '' ||
-						reviewData.service_review_notes === ''
+						reviewData.service_secondary_reviewer === null ||
+						reviewData.service_agree_label === null ||
+						reviewData.service_class_label === null ||
+						reviewData.service_ptp_agree_label === null ||
+						reviewData.service_ptp === null ||
+						reviewData.service_mp_list === null ||
+						reviewData.service_poc_name === null ||
+						reviewData.service_poc_title === null ||
+						reviewData.service_poc_email === null ||
+						reviewData.service_poc_org === null ||
+						reviewData.poc_phone_number === null ||
+						reviewData.service_review_notes === null
 					) {
 						// partial service review
 						reviewData.service_review_status = 'Partial Review';
