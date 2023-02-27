@@ -388,6 +388,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+	const [showTutorial2, setShowTutorial2] = useState(false);
 	// tutorialLogicSwitch is set to true when going back from post-search tutorial to pre-search tutorial
 	// It indicates that we need to blank out returnedDocs and viewableDocs.
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
@@ -439,14 +440,32 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	}, [resultsLoading, filterCountsLoading, updateFilters]);
 
 	useEffect(() => {
-		if (policyDCTMounted.current) {
-			if (!tutorialLogicSwitch) {
-				setShowTutorial(true);
-			}
-		} else {
-			policyDCTMounted.current = true;
-		}
+		console.log('showTutorial: ', showTutorial);
+	}, [showTutorial]);
+	useEffect(() => {
+		console.log('tutorialLogicSwitch: ', tutorialLogicSwitch);
 	}, [tutorialLogicSwitch]);
+	useEffect(() => {
+		console.log('stepIndex: ', stepIndex);
+	}, [stepIndex]);
+
+	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
+	// useEffect(() => {
+	// 	if (stepIndex === 0 && showTutorial === true)
+	// 		setParagraphText(
+	// 			'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
+	// 		);
+	// 	if (stepIndex === 2 && tutorialLogicSwitch) {
+	// 		setReturnedDocs([]);
+	// 		setViewableDocs([]);
+	// 		setTutorialLogicSwitch(false);
+	// 	}
+	// 	if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
+	// 	if (stepIndex === 3 && viewableDocs.length) {
+	// 		setShowTutorial(true);
+	// 		setTutorialLogicSwitch(true);
+	// 	}
+	// }, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
@@ -455,10 +474,11 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
 			);
 		if (stepIndex === 1 && tutorialLogicSwitch) {
+			window.scrollTo(0, 0);
 			setReturnedDocs([]);
 			setViewableDocs([]);
 			setTutorialLogicSwitch(false);
-			setShowTutorial(false);
+			console.log('this logic here');
 		}
 		// not sure why this one is necessary, just copied over from commented code below
 		if (stepIndex === 2 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
@@ -1041,9 +1061,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 										id="compare-button"
 										disabled={inputError}
 										onClick={handleCompare}
-										className={
-											stepIndex !== 1 || !tutorialLogicSwitch ? 'dct-tutorial-step-2' : undefined
-										}
+										className={'dct-tutorial-step-2'}
 									>
 										Submit
 									</GCButton>
