@@ -10,6 +10,7 @@ import GCTooltip from '../../common/GCToolTip';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
 import Typography from '@material-ui/core/Typography';
+import { removeChildrenFromListDF, applyFunctionBF } from './edaUtils';
 
 // Internet Explorer 6-11
 const IS_IE = /*@cc_on!@*/ !!document.documentMode;
@@ -79,16 +80,38 @@ const EDAViewHeaderHandler = (props) => {
 		}
 	}, [dispatch]);
 
+	const handleNaicsPscChange = (newSearchSettings, type, option) => {
+		const nodeToDeselect = _.find(
+			newSearchSettings[type],
+			(node) => node.code === option || `${node.code}*` === option
+		);
+		if (nodeToDeselect && nodeToDeselect.hasChildren) {
+			let newSelectedNodes = newSearchSettings[type];
+			applyFunctionBF(nodeToDeselect, (node) => {
+				newSelectedNodes = newSelectedNodes.filter((e) => e.code !== node.code && `${e.code}*` !== node.code);
+			});
+			newSearchSettings[type] = newSelectedNodes;
+		} else if (nodeToDeselect) {
+			newSearchSettings[type] = newSearchSettings[type].filter(
+				(e) => e.code !== option && `${e.code}*` !== option
+			);
+		}
+	};
+
 	const handleFilterChange = (option, type) => {
 		const newSearchSettings = structuredClone(state.edaSearchSettings);
 
 		if (isArray(newSearchSettings[type])) {
-			const index = newSearchSettings[type].indexOf(option);
-
-			if (index !== -1) {
-				newSearchSettings[type].splice(index, 1);
+			let index;
+			if (type === 'naicsCode' || type === 'psc') {
+				handleNaicsPscChange(newSearchSettings, type, option);
 			} else {
-				newSearchSettings[type].push(option);
+				index = newSearchSettings[type].indexOf(option);
+				if (index !== -1) {
+					newSearchSettings[type].splice(index, 1);
+				} else {
+					newSearchSettings[type].push(option);
+				}
 			}
 		} else if (typeof newSearchSettings[type] === 'string') {
 			if (type === 'contractsOrMods') {
@@ -207,11 +230,38 @@ const EDAViewHeaderHandler = (props) => {
 		}
 	};
 
-	const processFilters = (settings) => {
+	const processFiltersMinimizeHierarchies = (settings, type) => {
 		const processedFilters = [];
+		const minimizedSettings = [...settings[type]];
+		// tidy up parent/child stuff
+		const rootOptions = minimizedSettings.filter((e) => !e.parent);
+		if (rootOptions.length > 0) {
+			rootOptions.forEach((root) => {
+				removeChildrenFromListDF(root, minimizedSettings);
+			});
+		}
+		minimizedSettings
+			.filter((e) => e.parent)
+			.sort((a, b) => a.code < b.code)
+			.forEach((node) => removeChildrenFromListDF(node, minimizedSettings));
+
+		minimizedSettings.forEach((option) => {
+			if (option.hasChildren) {
+				processedFilters.push({ type, optionName: `${option.code}*` });
+			} else {
+				processedFilters.push({ type, optionName: option.code });
+			}
+		});
+		return processedFilters;
+	};
+
+	const processFilters = (settings) => {
+		let processedFilters = [];
 		Object.keys(settings).forEach((type) => {
 			if (type in filterNameMap) {
-				if (isArray(settings[type]) && settings[type].length > 0) {
+				if (type === 'naicsCode' || type === 'psc') {
+					processedFilters = processedFilters.concat(processFiltersMinimizeHierarchies(settings, type));
+				} else if (isArray(settings[type]) && settings[type].length > 0) {
 					settings[type].forEach((option) => {
 						processedFilters.push({ type, optionName: option });
 					});

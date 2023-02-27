@@ -25,4 +25,4 @@ if (($VOLUMES)); then
   docker system prune --volumes -f
 fi
 docker-compose $COMPOSE_FILES_ARGS build
-docker-compose $COMPOSE_FILES_ARGS up
+COMPOSE_HTTP_TIMEOUT=200 docker-compose $COMPOSE_FILES_ARGS up

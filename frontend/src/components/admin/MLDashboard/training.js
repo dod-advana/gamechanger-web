@@ -171,6 +171,7 @@ const sendUserAggData = async (startDate, endDate) => {
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			limit: null,
 		};
 		const userData = await gameChangerAPI.getUserAggregations(params);
 		const searchData = await gameChangerAPI.getSearchPdfMapping(params);

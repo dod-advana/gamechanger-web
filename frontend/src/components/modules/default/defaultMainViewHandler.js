@@ -4,12 +4,7 @@ import { styles } from '../../mainView/commonStyles';
 import { renderHideTabs, getAboutUs, getUserProfilePage } from '../../mainView/commonFunctions';
 import ViewHeader from '../../mainView/ViewHeader';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	getNonMainPageOuterContainer,
-	getSearchObjectFromString,
-	getUserData,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { getNonMainPageOuterContainer, getUserData, setState } from '../../../utils/sharedFunctions';
 import Permissions from '@dod-advana/advana-platform-ui/dist/utilities/permissions';
 import { Card } from '../../cards/GCCard';
 import GameChangerSearchMatrix from '../../searchMetrics/GCSearchMatrix';
@@ -128,6 +123,9 @@ export const handlePageLoad = async (props) => {
 	try {
 		gameChangerAPI.recentSearchesPOST(state.cloneData.clone_name).then(({ data }) => {
 			setState(dispatch, { recentSearches: data });
+			if (state.cloneData.clone_name === 'gamechanger') {
+				setState(dispatch, { recentSearchesLoaded: true });
+			}
 		});
 	} catch (e) {
 		// Do nothing
@@ -204,9 +202,10 @@ export const getMainView = (props) => {
 		<>
 			{exportDialogVisible && (
 				<ExportResultsDialog
+					state={state}
 					open={exportDialogVisible}
 					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
-					searchObject={getSearchObjectFromString(prevSearchText)}
+					searchObject={{ search: prevSearchText }}
 					setCurrentTime={setCurrentTime}
 					selectedDocuments={selectedDocuments}
 					isSelectedDocs={isSelectedDocs}

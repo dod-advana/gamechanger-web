@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import * as XLSX from 'xlsx';
 import { styles, useStyles } from '../../../admin/util/GCAdminStyles';
 import GCButton from '../../../common/GCButton';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
-
+import { CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@material-ui/core';
+import DragAndDrop from '../../../common/DragAndDrop';
 import styled from 'styled-components';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
-
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
+import xlsxSample from '../../../../resources/jbook-excel-sample.xlsx';
+import aiInvSample from '../../../../resources/jbook-ai-inv-sample.xlsx';
+import { ReactComponent as ExcelSvg } from '../../../../images/icon/excel_iconcolor.svg';
+import { SvgIcon } from '@mui/material';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -56,6 +60,103 @@ const Pill = styled.button`
 		color: #e9691d;
 	}
 `;
+
+const parseExcel = async (file, portfolio) => {
+	// create helper function that parses excel file and outputs an array
+	try {
+		const reviewArray = [];
+
+		const data = await file.arrayBuffer();
+		const workbook = XLSX.read(data);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+
+		sheet1.forEach((item) => {
+			// general review fields
+			const reviewData = {
+				primary_reviewer: `${item['Primary Reviewer']}`,
+				primary_review_notes: `${item['Primary Reviewer Notes']}`,
+				agency_service: `${item['Service / Agency']}`,
+				// agency_office: item[],
+				program_element: `${item['PE / BLI']}`,
+				budget_line_item:
+					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
+			};
+
+			if (portfolio.name === 'AI Inventory') {
+				reviewData.primary_class_label = `${item['AI Analysis']}`;
+				reviewData.service_reviewer = `${item['Service/DoD Component Reviewer']}`;
+				reviewData.service_mp_add =
+					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
+						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
+						: null;
+				reviewData.primary_ptp = `${item['Planned Transition Partner']}`;
+				reviewData.budget_year = `${item['FY (BY1)']}`;
+				reviewData.budget_type = `${item['Doc Type']}`;
+				reviewData.appn_num = `${item['APPN Symbol']}`;
+				reviewData.budget_activity = `${item['BA']}`;
+				reviewData.portfolio_name = 'AI Inventory';
+			} else {
+				reviewData.primary_class_label = `${item['Label']}`;
+				reviewData.budget_year = `${item['FY']}`;
+				reviewData.budget_type = `${item['PL Type']}`;
+				reviewData.appn_num = `${item['APPN Number']}`;
+				reviewData.budget_activity = `${item['BA Number']}`;
+				reviewData.portfolio_name = `${item['Portfolio Name']}`;
+			}
+
+			if (reviewData.budget_type === 'pdoc') {
+				reviewData.budget_line_item = reviewData.program_element;
+				reviewData.program_element = null;
+			}
+
+			if (reviewData.agency_service === 'Department of Defense (DOD)') {
+				reviewData.agency = reviewData.agency_office;
+			} else {
+				reviewData.agency = reviewData.agency_service;
+			}
+
+			if (reviewData.budget_activity.length !== 2) {
+				reviewData.budget_activity = reviewData.budget_activity.padStart(2, '0');
+			}
+
+			if (reviewData.appn_num.length !== 4) {
+				reviewData.appn_num = reviewData.appn_num.padStart(4, '0');
+			}
+			let refString = '';
+			if (reviewData.budget_type === 'pdoc') {
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			} else if (reviewData.budget_type === 'rdoc') {
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+			}
+
+			reviewData.jbook_ref_id = refString;
+			delete reviewData.agency_office;
+			delete reviewData.agency_service;
+
+			reviewData.latest_class_label = reviewData.primary_class_label;
+			reviewData.primary_review_status = 'Finished Review';
+			reviewData.review_status = 'Partial Review (Service)';
+
+			reviewArray.push(reviewData);
+		});
+
+		return reviewArray;
+	} catch (e) {
+		const { message } = e;
+		console.log(message);
+		return [];
+	}
+};
+
+const getExample = (name) => {
+	switch (name) {
+		case 'AI Inventory':
+			return aiInvSample;
+		default:
+			return xlsxSample;
+	}
+};
+
 /**
  *
  * @class PortfolioBuilder
@@ -67,7 +168,13 @@ const PortfolioBuilder = (props) => {
 
 	const [showModal, setShowModal] = useState(false);
 	const [showPublicModal, setShowPublicModal] = useState(false);
+	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [deleteModal, setDeleteModal] = useState(false);
+
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [results, setResults] = useState(null);
+
 	const [deleteID, setDeleteID] = useState(-1);
 	const [modalData, setModalData] = useState({});
 	const [userList, setUserList] = useState([]);
@@ -97,8 +204,6 @@ const PortfolioBuilder = (props) => {
 					},
 				})
 				.then((data) => {
-					console.log(data);
-
 					const alphaSort = (a, b) => {
 						const nameA = a.name.toUpperCase(); // ignore upper and lowercase
 						const nameB = b.name.toUpperCase(); // ignore upper and lowercase
@@ -157,7 +262,7 @@ const PortfolioBuilder = (props) => {
 		if (tags.length > 0) {
 			portfolioTags = tags.map((tag, index) => {
 				return (
-					<Pill>
+					<Pill key={tag}>
 						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
 					</Pill>
 				);
@@ -264,12 +369,117 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
+					{portfolio.name === 'AI Inventory' && (
+						<>
+							<hr />
+							<div style={{ marginTop: '20px' }}>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData(portfolio);
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									AI Inventory Bulk Upload
+								</GCButton>
+							</div>
+						</>
+					)}
 				</div>
 			);
 		});
 
 		return portfolios;
 	};
+
+	const onDrop = useCallback(
+		(acceptedFiles) => {
+			if (acceptedFiles.length === 1) {
+				const [file] = acceptedFiles;
+				setSelectedFile(file);
+			}
+		},
+		[setSelectedFile]
+	);
+
+	const showModalCallback = useCallback(() => {
+		setShowModal(true);
+	}, []);
+
+	const closeModalCallback = useCallback(() => {
+		setShowModal(false);
+		setInit(false);
+	}, []);
+
+	const showPublicCallback = useCallback(() => {
+		setShowPublicModal(true);
+	}, []);
+
+	const closePublicCallback = useCallback(() => {
+		setShowPublicModal(false);
+	}, []);
+
+	const closeDeleteCallback = useCallback(() => {
+		setDeleteModal(false);
+	}, []);
+
+	const deleteCallback = useCallback(async () => {
+		await gameChangerAPI.callDataFunction({
+			functionName: 'deletePortfolio',
+			cloneName: 'jbook',
+			options: { id: deleteID },
+		});
+		setInit(false);
+		setDeleteModal(false);
+	}, [deleteID]);
+
+	const closeUploadModal = useCallback(() => {
+		setShowUploadModal(false);
+		setSelectedFile(null);
+		setResults(null);
+		setLoading(false);
+	}, []);
+
+	const uploadCallback = useCallback(async () => {
+		let reviewArray = await parseExcel(selectedFile, modalData);
+		const reviewsChunked = [];
+		setLoading(true);
+		// I know this reviewLimit works in dev, but not sure in prod...
+		const reviewLimit = 85;
+		for (let i = 0; i < reviewArray.length; i += reviewLimit) {
+			const reviewChunk = reviewArray.slice(i, i + reviewLimit);
+			reviewsChunked.push(reviewChunk);
+		}
+		Promise.all(
+			reviewsChunked.map(async (reviewChunk, index) => {
+				const uploadResponse = await gameChangerAPI.callDataFunction({
+					functionName: 'bulkUpload',
+					cloneName: 'jbook',
+					options: {
+						portfolio: modalData,
+						reviewArray: reviewChunk,
+					},
+				});
+				return Promise.resolve({ ...uploadResponse.data, index });
+			})
+		).then((results) => {
+			const combinedResults = { written: 0, dupes: [], failedRows: [], time: 0 };
+			results.forEach(({ written, dupes, failedRows, time, index }) => {
+				combinedResults.written = combinedResults.written + written;
+				combinedResults.dupes = [
+					...combinedResults.dupes,
+					...dupes.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.failedRows = [
+					...combinedResults.failedRows,
+					...failedRows.map((rowNum) => rowNum + index * reviewLimit),
+				];
+				combinedResults.time = combinedResults.time + time;
+			});
+			setResults(combinedResults);
+			setLoading(false);
+		});
+	}, [selectedFile, modalData]);
 
 	return (
 		<>
@@ -309,20 +519,25 @@ const PortfolioBuilder = (props) => {
 						{user && (
 							<div style={{ display: 'flex', flexDirection: 'column' }}>
 								<GCButton
-									onClick={() => {
-										setShowModal(true);
-									}}
+									onClick={showModalCallback}
 									style={{ minWidth: 'unset', marginBottom: '10px' }}
 								>
 									Create a New Portfolio
 								</GCButton>
 								<GCButton
+									onClick={showPublicCallback}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
+									Public Portfolio Request
+								</GCButton>
+								<GCButton
 									onClick={() => {
-										setShowPublicModal(true);
+										setShowUploadModal(true);
+										setModalData({ name: 'General', tags: [], user_ids: [], admins: [] });
 									}}
 									style={{ minWidth: 'unset' }}
 								>
-									Public Portfolio Request
+									Bulk Upload
 								</GCButton>
 							</div>
 						)}
@@ -345,10 +560,7 @@ const PortfolioBuilder = (props) => {
 				<>
 					<JbookPortfolioModal
 						showModal={showModal}
-						setShowModal={() => {
-							setShowModal(false);
-							setInit(false);
-						}}
+						setShowModal={closeModalCallback}
 						modalData={modalData}
 						userList={userList}
 						userMap={userMap}
@@ -356,9 +568,7 @@ const PortfolioBuilder = (props) => {
 					/>
 					<JbookPublicRequestModal
 						showModal={showPublicModal}
-						setShowModal={() => {
-							setShowPublicModal(false);
-						}}
+						setShowModal={closePublicCallback}
 						userMap={userMap}
 						user={user}
 						privatePortfolios={privatePortfolios.map((item) => item.name)}
@@ -391,9 +601,7 @@ const PortfolioBuilder = (props) => {
 									backgroundColor: styles.backgroundGreyLight,
 									borderRadius: 0,
 								}}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 							>
 								<CloseIcon style={{ fontSize: 30 }} />
 							</IconButton>
@@ -406,28 +614,111 @@ const PortfolioBuilder = (props) => {
 						<DialogActions>
 							<GCButton
 								id={'editReviewerClose'}
-								onClick={() => {
-									setDeleteModal(false);
-								}}
+								onClick={closeDeleteCallback}
 								style={{ margin: '10px' }}
 								buttonColor={'#8091A5'}
 							>
 								Cancel
 							</GCButton>
-							<GCButton
-								id={'editReviewerSubmit'}
-								onClick={async () => {
-									await gameChangerAPI.callDataFunction({
-										functionName: 'deletePortfolio',
-										cloneName: 'jbook',
-										options: { id: deleteID },
-									});
-									setInit(false);
-									setDeleteModal(false);
+							<GCButton id={'editReviewerSubmit'} onClick={deleteCallback} style={{ margin: '10px' }}>
+								Delete
+							</GCButton>
+						</DialogActions>
+					</Dialog>
+					<Dialog
+						open={showUploadModal}
+						scroll={'paper'}
+						maxWidth="sm"
+						disableEscapeKeyDown
+						disableBackdropClick
+						classes={{
+							paperWidthSm: classes.dialogSm,
+						}}
+					>
+						<DialogTitle>
+							<div style={{ display: 'flex', width: '100%' }}>
+								<Typography variant="h3" display="inline" style={{ fontWeight: 700 }}>
+									Bulk upload
+								</Typography>
+							</div>
+							<IconButton
+								aria-label="close"
+								style={{
+									position: 'absolute',
+									right: '0px',
+									top: '0px',
+									height: 60,
+									width: 60,
+									color: 'black',
+									backgroundColor: styles.backgroundGreyLight,
+									borderRadius: 0,
 								}}
+								onClick={closeUploadModal}
+							>
+								<CloseIcon style={{ fontSize: 30 }} />
+							</IconButton>
+						</DialogTitle>
+						<DialogContent>
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Upload Excel Document
+							</Typography>
+
+							{results === null && (
+								<DragAndDrop
+									text="Drag and drop a file here, or click to select a file (.xlsx files only)"
+									acceptedFileTypes={[
+										'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+										'application/vnd.ms-excel',
+									]}
+									handleFileDrop={onDrop}
+								/>
+							)}
+
+							<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>
+								Selected File: {selectedFile !== null ? selectedFile.name : 'None Selected'}
+								{loading && ' Loading...'}
+								{loading && <CircularProgress size={'20px'} />}
+							</Typography>
+
+							{results !== null && (
+								<>
+									<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Results</Typography>
+									<ul>
+										<li>Rows Written: {results.written}</li>
+										<li>
+											Row numbers with multiple reviews found:{' '}
+											{results.dupes.length === 0 ? 'None' : JSON.stringify(results.dupes)}
+										</li>
+										<li>
+											Failed Row Numbers:{' '}
+											{results.failedRows.length === 0
+												? 'None'
+												: JSON.stringify(results.failedRows)}
+										</li>
+									</ul>
+								</>
+							)}
+						</DialogContent>
+						<DialogActions>
+							<GCButton href={getExample(modalData.name)} download style={{ margin: '10px' }}>
+								<SvgIcon component={ExcelSvg} inheritViewBox />
+								&nbsp;Download Sample
+							</GCButton>
+							<GCButton
+								id={'editReviewerClose'}
+								onClick={closeUploadModal}
+								style={{ margin: '10px' }}
+								buttonColor={'#8091A5'}
+							>
+								{results === null ? 'Cancel' : 'Close'}
+							</GCButton>
+							<GCButton
+								id={'uploadSubmit'}
+								onClick={uploadCallback}
+								disabled={selectedFile === null || results !== null}
 								style={{ margin: '10px' }}
 							>
-								Delete
+								Upload
 							</GCButton>
 						</DialogActions>
 					</Dialog>
