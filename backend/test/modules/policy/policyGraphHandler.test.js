@@ -156,7 +156,7 @@ describe('PolicyGraphHandler', function () {
 										properties: {
 											kw_doc_score_r: { low: 0, high: 0 },
 											display_org_s: 'Dept. of the Air Force',
-											display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+											display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 											signature: 'NA',
 											subject: 'NA',
 											change_date: 'NA',
@@ -237,7 +237,7 @@ describe('PolicyGraphHandler', function () {
 													kw_doc_score_r: { low: 0, high: 0 },
 													display_org_s: 'Dept. of the Air Force',
 													display_title_s:
-														'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+														'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 													signature: 'NA',
 													subject: 'NA',
 													change_date: 'NA',
@@ -364,7 +364,7 @@ describe('PolicyGraphHandler', function () {
 										properties: {
 											kw_doc_score_r: { low: 0, high: 0 },
 											display_org_s: 'Dept. of the Air Force',
-											display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+											display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 											signature: 'NA',
 											subject: 'NA',
 											change_date: 'NA',
@@ -445,7 +445,7 @@ describe('PolicyGraphHandler', function () {
 													kw_doc_score_r: { low: 0, high: 0 },
 													display_org_s: 'Dept. of the Air Force',
 													display_title_s:
-														'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+														'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 													signature: 'NA',
 													subject: 'NA',
 													change_date: 'NA',
@@ -778,7 +778,7 @@ describe('PolicyGraphHandler', function () {
 								crawler_used_s: 'air_force_pubs',
 								display_doc_type_s: 'Document',
 								display_org_s: 'Dept. of the Air Force',
-								display_title_s: 'AFMAN 11-246V7 AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
+								display_title_s: 'AFMAN 11-246V7: AIRCRAFT DEMONSTRATIONS (SAILPLANES)',
 								doc_id: 'AFMAN 11-246V7.pdf_0',
 								doc_num: '11-246V7',
 								doc_type: 'AFMAN',
@@ -918,7 +918,7 @@ describe('PolicyGraphHandler', function () {
 									labels: ['Document'],
 									properties: {
 										kw_doc_score_r: 0.00001,
-										display_title_s: 'AASSEP 4 TYRE VALVE COUPLINGS',
+										display_title_s: 'AASSEP 4: TYRE VALVE COUPLINGS',
 										display_org_s: 'NATO',
 										signature: 'NA',
 										subject: 'NA',
@@ -1064,7 +1064,7 @@ describe('PolicyGraphHandler', function () {
 							crawler_used_s: 'nato_stanag',
 							display_doc_type_s: 'Document',
 							display_org_s: 'NATO',
-							display_title_s: 'AASSEP 4 TYRE VALVE COUPLINGS',
+							display_title_s: 'AASSEP 4: TYRE VALVE COUPLINGS',
 							doc_id: 'AASSEP 4.pdf_0',
 							doc_num: '4',
 							doc_type: 'AASSEP',
@@ -2880,7 +2880,7 @@ describe('PolicyGraphHandler', function () {
 									pagerank_r: 0.00001,
 								},
 								fields: {
-									display_title_s: ['DoDI 5000.02T Operation of the Defense Acquisition System'],
+									display_title_s: ['DoDI 5000.02T: Operation of the Defense Acquisition System'],
 									display_org_s: ['Dept. of Defense'],
 									crawler_used_s: ['dod_issuances'],
 									doc_num: ['5000.02T'],
@@ -3026,174 +3026,25 @@ describe('PolicyGraphHandler', function () {
 			try {
 				const actual = await target.callFunctionHelper(req, 'test');
 				const expected = {
-					query: {
-						_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'] },
-						stored_fields: [
-							'filename',
-							'title',
-							'page_count',
-							'doc_type',
-							'doc_num',
-							'ref_list',
-							'id',
-							'summary_30',
-							'keyw_5',
-							'p_text',
-							'type',
-							'p_page',
-							'display_title_s',
-							'display_org_s',
-							'display_doc_type_s',
-							'is_revoked_b',
-							'access_timestamp_dt',
-							'publication_date_dt',
-							'crawler_used_s',
-							'download_url_s',
-							'source_page_url_s',
-							'source_fqdn_s',
-							'topics_s',
-							'top_entities_t',
-						],
-						from: 0,
-						size: 20,
-						aggregations: {
-							doc_type_aggs: { terms: { field: 'display_doc_type_s', size: 10000 } },
-							doc_org_aggs: { terms: { field: 'display_org_s', size: 10000 } },
-						},
-						track_total_hits: true,
-						query: {
-							bool: {
-								must: [],
-								should: [
-									{
-										nested: {
-											path: 'paragraphs',
-											inner_hits: {
-												_source: false,
-												stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
-												from: 0,
-												size: 100,
-												highlight: {
-													fields: {
-														'paragraphs.par_raw_text_t': {
-															fragment_size: 270,
-															number_of_fragments: 1,
-															type: 'plain',
-														},
-														'paragraphs.par_raw_text_t.gc_english': {
-															fragment_size: 270,
-															number_of_fragments: 1,
-															type: 'plain',
-														},
-													},
-													fragmenter: 'span',
-												},
-											},
-											query: {
-												bool: {
-													should: [
-														{
-															query_string: {
-																query: 'artificial intelligence',
-																default_field: 'paragraphs.par_raw_text_t.gc_english',
-																default_operator: 'and',
-																fuzzy_max_expansions: 100,
-																fuzziness: 'AUTO',
-																analyzer: 'gc_english',
-																boost: 0.5,
-															},
-														},
-													],
-												},
-											},
-											score_mode: 'sum',
-										},
-									},
-									{ wildcard: { keyw_5: { value: '*artificial intelligence*', boost: 5 } } },
-									{
-										wildcard: {
-											'display_title_s.search': {
-												value: '*artificial intelligence*',
-												boost: 15,
-												case_insensitive: true,
-											},
-										},
-									},
-									{
-										wildcard: {
-											'filename.search': {
-												value: '*artificial intelligence*',
-												boost: 10,
-												case_insensitive: true,
-											},
-										},
-									},
-									{
-										wildcard: {
-											'display_source_s.search': { value: '*artificial intelligence*', boost: 4 },
-										},
-									},
-									{
-										wildcard: {
-											'top_entities_t.search': { value: '*artificial intelligence*', boost: 5 },
-										},
-									},
-									{ match_phrase: { 'display_title_s.search': 'artificial intelligence' } },
-									{
-										query_string: {
-											fields: ['display_title_s.search'],
-											query: '*artificial* AND *intelligence*',
-											type: 'best_fields',
-											boost: 10,
-											analyzer: 'gc_english',
-										},
-									},
-								],
-								minimum_should_match: 1,
-								filter: [{ term: { is_revoked_b: 'false' } }, { terms: { id: ['Test'] } }],
-							},
-						},
-						highlight: {
-							require_field_match: false,
-							fields: {
-								'display_title_s.search': {},
-								keyw_5: {},
-								'filename.search': {},
-								'display_source_s.search': {},
-								top_entities_t: {},
-								topics_s: {},
-							},
-							fragment_size: 10,
-							fragmenter: 'simple',
-							type: 'unified',
-							boundary_scanner: 'word',
-						},
-						sort: [{ _score: { order: 'desc' } }, { _id: 'desc' }],
-					},
-					totalCount: 1,
+					doc_orgs: [],
+					doc_types: [],
 					docs: [
 						{
-							display_title_s: 'DoDI 5000.02T Operation of the Defense Acquisition System',
-							display_org_s: 'Dept. of Defense',
-							crawler_used_s: 'dod_issuances',
-							doc_num: '5000.02T',
-							summary_30: '',
-							top_entities_t: [
-								'DoD',
-								'Program',
-								'DoD Instruction',
-								'HSI',
-								'the Defense Acquisition System',
-							],
-							topics_s: ['acquisition', 'enclosure', 'instruction', 'cybersecurity', 'change enclosure'],
-							doc_type: 'DoDI',
-							title: 'Operation of the Defense Acquisition System',
-							type: 'document',
-							keyw_5: 'dodi 02t, formal coordination, information technology, formal coordinatio, acquisition programs, usd pubs@osd, training plans, systems engineering, qualification criteria, national intelligence',
-							filename: 'DoDI 5000.02T CH 10.pdf',
 							access_timestamp_dt: '2021-07-13T23:23:37',
-							id: 'DoDI 5000.02T CH 10.pdf_0',
+							crawler_used_s: 'dod_issuances',
+							current_as_of: 'TEST',
 							display_doc_type_s: 'Instruction',
+							display_org_s: 'Dept. of Defense',
+							display_title_s: 'DoDI 5000.02T: Operation of the Defense Acquisition System',
+							doc_num: '5000.02T',
+							doc_type: 'DoDI',
+							esIndex: 'gamechanger',
+							filename: 'DoDI 5000.02T CH 10.pdf',
+							id: 'DoDI 5000.02T CH 10.pdf_0',
+							keyw_5: 'dodi 02t, formal coordination, information technology, formal coordinatio, acquisition programs, usd pubs@osd, training plans, systems engineering, qualification criteria, national intelligence',
+							pageHits: [],
+							page_count: 27,
+							publication_date_dt: '2015-01-07T00:00:00',
 							ref_list: [
 								'DoD 5000.04-M',
 								'DoD 5015.02-STD',
@@ -3260,17 +3111,198 @@ describe('PolicyGraphHandler', function () {
 								'OMBM M-04-16',
 								'OMBM M-05-25',
 							],
-							publication_date_dt: '2015-01-07T00:00:00',
-							page_count: 27,
-							pageHits: [],
-							esIndex: 'gamechanger',
-							current_as_of: 'TEST',
+							summary_30: '',
+							title: 'Operation of the Defense Acquisition System',
+							top_entities_t: [
+								'DoD',
+								'Program',
+								'DoD Instruction',
+								'HSI',
+								'the Defense Acquisition System',
+							],
+							topics_s: ['acquisition', 'enclosure', 'instruction', 'cybersecurity', 'change enclosure'],
+							type: 'document',
 						},
 					],
-					doc_types: [],
-					doc_orgs: [],
-					searchTerms: ['artificial', 'intelligence'],
 					expansionDict: null,
+					query: {
+						_source: { includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'topics_s'] },
+						aggregations: {
+							doc_org_aggs: { terms: { field: 'display_org_s', size: 10000 } },
+							doc_type_aggs: { terms: { field: 'display_doc_type_s', size: 10000 } },
+						},
+						from: 0,
+						highlight: {
+							boundary_scanner: 'word',
+							fields: {
+								'display_source_s.search': {},
+								'display_title_s.search': {},
+								'filename.search': {},
+								keyw_5: {},
+								top_entities_t: {},
+								topics_s: {},
+							},
+							fragment_size: 10,
+							fragmenter: 'simple',
+							require_field_match: false,
+							type: 'unified',
+						},
+						query: {
+							bool: {
+								filter: [{ term: { is_revoked_b: 'false' } }, { terms: { id: ['Test'] } }],
+								minimum_should_match: 1,
+								must: [],
+								should: [
+									{
+										nested: {
+											inner_hits: {
+												_source: false,
+												from: 0,
+												highlight: {
+													fields: {
+														'paragraphs.par_raw_text_t': {
+															fragment_size: 270,
+															number_of_fragments: 1,
+															type: 'plain',
+														},
+														'paragraphs.par_raw_text_t.gc_english': {
+															fragment_size: 270,
+															number_of_fragments: 1,
+															type: 'plain',
+														},
+													},
+													fragmenter: 'span',
+												},
+												size: 100,
+												stored_fields: ['paragraphs.page_num_i', 'paragraphs.par_raw_text_t'],
+											},
+											path: 'paragraphs',
+											query: {
+												bool: {
+													should: [
+														{
+															query_string: {
+																query: 'artificial intelligence',
+																default_field: 'paragraphs.par_raw_text_t.gc_english',
+																default_operator: 'and',
+																fuzzy_max_expansions: 100,
+																fuzziness: 'AUTO',
+																analyzer: 'gc_english',
+																boost: 0.05,
+															},
+														},
+													],
+												},
+											},
+											score_mode: 'sum',
+										},
+									},
+									{
+										dis_max: {
+											boost: 150,
+											queries: [
+												{
+													wildcard: {
+														'display_title_s.search': {
+															value: '*artificial intelligence*',
+															case_insensitive: true,
+														},
+													},
+												},
+												{
+													fuzzy: {
+														'display_title_s.search': {
+															value: 'artificial intelligence',
+															fuzziness: 'AUTO',
+															transpositions: false,
+														},
+													},
+												},
+												{
+													match_phrase: {
+														'display_title_s.search': 'artificial intelligence',
+													},
+												},
+												{
+													wildcard: {
+														'filename.search': {
+															value: '*artificial intelligence*',
+															case_insensitive: true,
+														},
+													},
+												},
+												{ wildcard: { doc_num: { value: '*artificial intelligence*' } } },
+												{ term: { doc_num: { value: 'artificial intelligence' } } },
+											],
+										},
+									},
+									{
+										dis_max: {
+											boost: 5,
+											queries: [
+												{
+													wildcard: {
+														'top_entities_t.search': {
+															value: '*artificial intelligence*',
+														},
+													},
+												},
+												{ wildcard: { keyw_5: { value: '*artificial intelligence*' } } },
+											],
+										},
+									},
+									{
+										wildcard: {
+											'display_source_s.search': {
+												boost: 10,
+												value: '*artificial intelligence*',
+											},
+										},
+									},
+									{
+										query_string: {
+											analyzer: 'gc_english',
+											boost: 10,
+											fields: ['display_title_s.search'],
+											query: '*artificial* AND *intelligence*',
+											type: 'best_fields',
+										},
+									},
+								],
+							},
+						},
+						size: 20,
+						sort: [{ _score: { order: 'desc' } }, { _id: 'desc' }],
+						stored_fields: [
+							'filename',
+							'title',
+							'page_count',
+							'doc_type',
+							'doc_num',
+							'ref_list',
+							'id',
+							'summary_30',
+							'keyw_5',
+							'p_text',
+							'type',
+							'p_page',
+							'display_title_s',
+							'display_org_s',
+							'display_doc_type_s',
+							'is_revoked_b',
+							'access_timestamp_dt',
+							'publication_date_dt',
+							'crawler_used_s',
+							'download_url_s',
+							'source_page_url_s',
+							'source_fqdn_s',
+							'topics_s',
+							'top_entities_t',
+						],
+						track_total_hits: true,
+					},
+					searchTerms: ['artificial', 'intelligence'],
+					totalCount: 1,
 				};
 
 				assert.deepStrictEqual(actual, expected);

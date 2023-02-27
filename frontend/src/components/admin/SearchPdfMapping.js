@@ -521,6 +521,7 @@ export default () => {
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
 			cloneName: cloneName.split('-')[1],
 			cloneID: cloneName.split('-')[0],
+			limit: 100,
 		};
 		gameChangerAPI.getSearchPdfMapping(params).then((data) => {
 			setMappingData(data.data.data);

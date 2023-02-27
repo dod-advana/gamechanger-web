@@ -486,28 +486,33 @@ const getItemPageHits = (item) => {
 };
 
 const consolidateItemPageHits = (item) => {
-	const consolidateHits = [];
 	const desiredOrder = [
+		'Budget Act. Title',
+		'Budget Sub Act. Title',
 		'Project Description',
 		'Justification',
 		'Summary Remarks',
 		'Schedule Details',
+		'Metrics',
 		'Project Notes',
 		'Acquisition Strat.',
+		'Milestones',
 		'Accomplishments',
 		'Contracts',
 	];
-
+	let consolidateHits = [];
 	for (const { title, snippet } of item.pageHits) {
-		if (title === 'Appropriation Title' || title === 'PE Title') {
-			continue;
-		}
 		if (title === consolidateHits[consolidateHits.length - 1]?.title) {
 			consolidateHits[consolidateHits.length - 1].occurrences += 1;
 			consolidateHits[consolidateHits.length - 1].snippet += `<br>- ${snippet} `;
 		} else {
 			consolidateHits.push({ title, snippet, occurrences: 1 });
 		}
+	}
+	if (consolidateHits.length > 1) {
+		consolidateHits = consolidateHits.filter(
+			(hit) => hit.title !== 'Appropriation Title' && hit.title !== 'PE Title' && hit.title !== 'BLI'
+		);
 	}
 	const consolidateMod = consolidateHits.map(({ occurrences, snippet, title }) => {
 		if (occurrences > 1) {
@@ -872,11 +877,11 @@ const cardHandler = {
 					.filter((review) => {
 						return (
 							review.portfolio_name_s === state.selectedPortfolio &&
-							Object.keys(review).some((key) => key.includes('class_label_s'))
+							Object.keys(review).some((key) => key.includes('latest_class_label_s'))
 						);
 					})
 					.forEach((rev) => {
-						const existingTags = Object.keys(rev).filter((key) => key.includes('class_label_s'));
+						const existingTags = Object.keys(rev).filter((key) => key.includes('latest_class_label_s'));
 						for (const tag of existingTags) {
 							review.push(rev[tag]);
 						}

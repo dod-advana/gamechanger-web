@@ -344,8 +344,8 @@ const StyledListViewFrontCardContent = styled.div`
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
-	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -359,17 +359,16 @@ const StyledFrontCardContent = styled.div`
 	.hits-container {
 		display: grid;
 		grid-template-columns: 100px auto auto;
-		height: 100%;
+		height: calc(100% - 24px);
 
 		.page-hits {
 			min-width: 100px;
-			height: fit-content;
-			max-height: 150px;
 			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 			position: relative;
 			z-index: 1;
+			height: 100%;
 
 			.page-hit {
 				display: flex;
@@ -380,6 +379,7 @@ const StyledFrontCardContent = styled.div`
 				border-top: 1px solid rgb(189, 189, 189);
 				cursor: pointer;
 				color: #386f94;
+				border-bottom: 1px solid rgb(189, 189, 189);
 
 				span {
 					font-size: ${CARD_FONT_SIZE}px;
@@ -393,8 +393,13 @@ const StyledFrontCardContent = styled.div`
 		}
 
 		> .expanded-metadata {
-			overflow-wrap: anywhere;
 			grid-column: 2 / 4;
+			height: 100%;
+			overflow: auto;
+
+			.searchdemo-blockquote {
+				height: 100%;
+			}
 		}
 	}
 `;
@@ -778,9 +783,18 @@ const getPublicationDate = (publication_date_dt) => {
 	}
 };
 
-const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, graphView, intelligentSearch }) => {
+const CardHeaderHandler = ({
+	item,
+	state,
+	checkboxComponent,
+	favoriteComponent,
+	graphView,
+	intelligentSearch,
+	idx,
+	page,
+}) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
-	const displayTitle = getDisplayTitle(item, state.currentViewName);
+	const displayTitle = getDisplayTitle(item);
 	const isRevoked = item.is_revoked_b;
 
 	const docListView = state.listView && !graphView;
@@ -792,9 +806,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 	const typeTextColor = getTypeTextColor(cardType);
 
 	let { docTypeColor, docOrgColor } = getDocTypeStyles(displayType, displayOrg);
-
 	const publicationDate = getPublicationDate(item.publication_date_dt);
-
 	return (
 		<StyledFrontCardHeader
 			listView={state.listView}
@@ -814,8 +826,9 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 											item.filename,
 											state.cloneData.clone_name,
 											state.searchText,
-											0,
-											item.download_url_s
+											item.download_url_s,
+											idx,
+											page.pageNumber
 										)
 								: () => undefined
 						}
@@ -852,11 +865,7 @@ const CardHeaderHandler = ({ item, state, checkboxComponent, favoriteComponent, 
 						<div className={'selected-favorite'}>
 							<div style={{ display: 'flex' }}>
 								{docListView && isRevoked && <RevokedTag>Canceled</RevokedTag>}
-								{checkboxComponent(
-									item.filename,
-									`${item.doc_type} ${item.doc_num}: ${item.title}`,
-									item.id
-								)}
+								{checkboxComponent(item.filename, displayTitle, item.id)}
 								{favoriteComponent()}
 							</div>
 						</div>
@@ -1062,10 +1071,7 @@ const getCardExtrasHandler = (props) => {
 	);
 };
 
-const getDisplayTitle = (item, currentViewName) => {
-	if (currentViewName === 'Card') {
-		return item.display_title_s ? `${item.doc_type} ${item.doc_num}: ${item.title}` : item.title;
-	}
+const getDisplayTitle = (item) => {
 	return item.display_title_s || item.title;
 };
 
@@ -1156,8 +1162,9 @@ const renderListViewPageHitsWithoutIntelligentSearch = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1269,8 +1276,9 @@ const renderListView = (
 												item.filename,
 												cloneName,
 												searchText,
-												page.pageNumber,
-												item.download_url_s
+												item.download_url_s,
+												idx,
+												page.pageNumber
 											);
 										}}
 									>
@@ -1353,9 +1361,9 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, docume
 						item.filename,
 						state.cloneData.clone_name,
 						state.searchText,
-						page.pageNumber,
 						item.download_url_s,
-						documentIdx
+						documentIdx,
+						page.pageNumber
 					);
 				}}
 			>
@@ -1375,8 +1383,8 @@ const renderPageHit = (page, key, hoveredHit, setHoveredHit, item, state, docume
 
 const cardHandler = {
 	document: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -1523,7 +1531,7 @@ const cardHandler = {
 									href={'#'}
 									onClick={(e) => {
 										e.preventDefault();
-										clickFn(filename, cloneName, searchText, 0, item.download_url_s);
+										clickFn(filename, cloneName, searchText, item.download_url_s, idx);
 									}}
 								>
 									Open
@@ -1614,8 +1622,8 @@ const cardHandler = {
 	},
 
 	publication: {
-		getDisplayTitle: (item, currentViewName) => {
-			return getDisplayTitle(item, currentViewName);
+		getDisplayTitle: (item) => {
+			return getDisplayTitle(item);
 		},
 		getCardHeader: (props) => {
 			return CardHeaderHandler(props);
@@ -2183,13 +2191,12 @@ const cardHandler = {
 };
 
 const PolicyCardHandler = (props) => {
-	const { state, setFilename, setDisplayTitle, item, cardType } = props;
-	const { currentViewName } = state;
+	const { setFilename, setDisplayTitle, item, cardType } = props;
 
 	useEffect(() => {
 		setFilename(cardHandler[cardType].getFilename(item));
-		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item, currentViewName));
-	}, [cardType, item, setDisplayTitle, setFilename, currentViewName]);
+		setDisplayTitle(cardHandler[cardType].getDisplayTitle(item));
+	}, [cardType, item, setDisplayTitle, setFilename]);
 
 	return <>{getDefaultComponent(props, cardHandler)}</>;
 };

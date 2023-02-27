@@ -8,8 +8,9 @@ import {
 	RECENT_SEARCH_LIMIT,
 	RESULTS_PER_PAGE,
 } from '../../../utils/gamechangerUtils';
+import { removeChildrenFromListDF } from './edaUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -234,6 +235,44 @@ const parseContractDataURL = (contractDataURL, newSearchSettings) => {
 	newSearchSettings.contractData = contractData;
 };
 
+// minimize the naicsCode and psc selections for search
+// ie, if a parent is selected only send the parent not its redundant kids
+const minimizeNaicsPscFilterSelections = (naicsCode, psc, minimizedEdaSearchSettings) => {
+	if (naicsCode && naicsCode.length > 0) {
+		// tidy up parent/child stuff
+		const rootOptions = naicsCode.filter((e) => !e.parent);
+		if (rootOptions.length > 0) {
+			rootOptions.forEach((root) => {
+				removeChildrenFromListDF(root, naicsCode);
+			});
+		}
+		naicsCode
+			.filter((e) => e.parent)
+			.sort((a, b) => a.code < b.code)
+			.forEach((node) => removeChildrenFromListDF(node, naicsCode));
+
+		minimizedEdaSearchSettings.naicsCode = naicsCode.map((e) => {
+			return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+		});
+	}
+	if (psc && psc.length > 0) {
+		// tidy up parent/child stuff
+		const rootOptions = psc.filter((e) => !e.parent);
+		if (rootOptions.length > 0) {
+			rootOptions.forEach((root) => {
+				removeChildrenFromListDF(root, psc);
+			});
+		}
+		psc.filter((e) => e.parent)
+			.sort((a, b) => a.code < b.code)
+			.forEach((node) => removeChildrenFromListDF(node, psc));
+
+		minimizedEdaSearchSettings.psc = psc.map((e) => {
+			return { name: e.name, code: e.code, parent: e.parent, hasChildren: e.hasChildren };
+		});
+	}
+};
+
 const EdaSearchHandler = {
 	setSearchURL(state) {
 		const { searchText, resultsPage, cloneData } = state;
@@ -303,16 +342,22 @@ const EdaSearchHandler = {
 			});
 
 			const newFilterData = {
-				fiscalYear: resp.data.fpds_date_signed_dt.reverse(),
-				issueOfficeName: resp.data.fpds_contracting_office_name,
-				issueOfficeDoDAAC: resp.data.fpds_contracting_office_code,
-				vendorName: resp.data.fpds_vendor_name,
-				fundingOfficeDoDAAC: resp.data.fpds_funding_office_code,
-				fundingAgencyName: resp.data.fpds_funding_agency_name,
-				psc: resp.data.fpds_psc,
-				naics: resp.data.fpds_naics_code,
-				duns: resp.data.fpds_duns,
-				modNumber: resp.data.fpds_modification_number,
+				fiscalYear: resp.data.filters.fpds_date_signed_dt.reverse(),
+				issueOfficeName: resp.data.filters.fpds_contracting_office_name,
+				issueOfficeDoDAAC: resp.data.filters.fpds_contracting_office_code,
+				vendorName: resp.data.filters.fpds_vendor_name,
+				fundingOfficeDoDAAC: resp.data.filters.fpds_funding_office_code,
+				fundingAgencyName: resp.data.filters.fpds_funding_agency_name,
+				psc: resp.data.filters.fpds_psc,
+				psc_hierarchy: resp.data.hierarchical_filters.psc.map((e) => {
+					return { ...e, children: [] };
+				}),
+				naics: resp.data.filters.fpds_naics_code,
+				naicsCode_hierarchy: resp.data.hierarchical_filters.naics.map((e) => {
+					return { ...e, children: [] };
+				}),
+				duns: resp.data.filters.fpds_duns,
+				modNumber: resp.data.filters.fpds_modification_number,
 			};
 
 			setState(dispatch, { filterDataFetched: true, edaFilterData: newFilterData });
@@ -343,23 +388,27 @@ const EdaSearchHandler = {
 			const charsPadding = listView ? 750 : 90;
 			const tiny_url = await createTinyUrl(cloneData);
 			const t0 = new Date().getTime();
-			const searchObject = getSearchObjectFromString(searchText);
 
 			let searchResults = [];
 
 			// regular search
 			let resp = {};
+			let minimizedEdaSearchSettings = { ...edaSearchSettings };
+			const naicsCode = [...minimizedEdaSearchSettings.naicsCode];
+			const psc = [...minimizedEdaSearchSettings.psc];
+			minimizeNaicsPscFilterSelections(naicsCode, psc, minimizedEdaSearchSettings);
+
 			try {
 				resp = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
+					searchText,
 					offset,
 					options: {
 						charsPadding,
 						showTutorial,
 						tiny_url,
 						combinedSearch,
-						edaSearchSettings,
+						edaSearchSettings: minimizedEdaSearchSettings,
 					},
 				});
 

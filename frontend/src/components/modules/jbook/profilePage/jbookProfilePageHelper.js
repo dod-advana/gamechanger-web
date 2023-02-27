@@ -297,6 +297,7 @@ const aggregateProjectDescriptions = (projectData) => {
 		// both or rdoc
 		appropriationTitle: { title: 'Appropriation Title' },
 		budgetActivityTitle: { title: 'Budget Activity Title' },
+		budgetSubActivityTitle: { title: 'Budget Sub Activity Title' },
 		programElementTitle: { title: 'Program Element Title' },
 		projectMissionDescription: {
 			title: projectData.budgetType === 'rdoc' ? 'Program Mission Description' : 'Description',
@@ -571,6 +572,10 @@ const getMetadataTableData = (
 			Hidden: budgetType === 'O&M',
 		},
 		{
+			Key: projectData.budgetLineItem ? 'Budget Line Item' : 'Program Element',
+			Value: projectData.budgetLineItem ? projectData.budgetLineItem : projectData.programElement,
+		},
+		{
 			Key: 'Project Number',
 			Value: projectData.projectNum,
 			Hidden: budgetType !== 'RDT&E',
@@ -592,7 +597,7 @@ const getMetadataTableData = (
 			Value: retrieveProjectField(projectData.budgetCycle),
 		},
 		{
-			Key: 'Appropriation',
+			Key: 'Main Account',
 			Value: retrieveProjectField(projectData.appropriationNumber),
 		},
 		{

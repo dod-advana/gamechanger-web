@@ -192,9 +192,7 @@ const DocResults = ({ docsLoading, data, collapseKeys, setCollapseKeys, renderHi
 				data.map((item, key) => {
 					const collapsed = collapseKeys?.[key.toString()] ?? true;
 					const displayTitle =
-						item.title === 'NA'
-							? `${item.doc_type} ${item.doc_num}`
-							: `${item.doc_type} ${item.doc_num} - ${item.title}`;
+						item.title === 'NA' ? `${item.doc_type} ${item.doc_num}` : item.display_title_s;
 
 					if (item.type === 'document') {
 						const pageHits = item.pageHits.filter((hit) => hit.pageNumber);
@@ -457,7 +455,6 @@ export default function PolicyDocumentExplorer({
 				let blockquoteClass = 'searchdemo-blockquote-sm';
 
 				let modifiedSnippet = modifySnippet(page.snippet.split(' '));
-
 				if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 				return (
 					<div key={key + pageKey} style={{ position: 'relative' }}>

@@ -11,6 +11,7 @@ import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory } from '../../utils/gamechangerUtils';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
+import { utils, writeFileXLSX } from 'xlsx';
 
 const gameChangerAPI = new GameChangerAPI();
 export const autoDownloadFile = ({ data, filename = 'results', extension = 'txt' }) => {
@@ -51,6 +52,13 @@ export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 	return blob;
 };
 
+const downloadXlsx = (data) => {
+	const ws = utils.json_to_sheet(data);
+	const wb = utils.book_new();
+	utils.book_append_sheet(wb, ws, 'Primary Review Worksheet');
+	writeFileXLSX(wb, 'jbook-excel-export-general.xlsx');
+};
+
 const useStyles = makeStyles(() => ({
 	labelFont: {
 		fontSize: 16,
@@ -79,8 +87,9 @@ const styles = {
 };
 
 export const downloadFile = async (data, format, classificationMarking, cloneData) => {
-	trackEvent(getTrackingNameForFactory(cloneData?.clone_name), 'ExportResults', `onDownloadFile${format}`);
-	let filename = 'GAMECHANGER-Results-' + moment().format('YYYY-MM-DD_HH-mm-ss');
+	const cloneName = cloneData?.clone_name ?? 'gamechanger';
+	trackEvent(getTrackingNameForFactory(cloneName), 'ExportResults', `onDownloadFile${format}`);
+	let filename = `${cloneName.toUpperCase()}-Results-` + moment().format('YYYY-MM-DD_HH-mm-ss');
 	if (classificationMarking === 'CUI') {
 		filename += '-CUI';
 	}
@@ -119,11 +128,15 @@ const ExportResultsDialog = ({
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
 	const isEda = cloneData.clone_name === 'eda';
+	const isJbookReviewer =
+		state.userData?.extra_fields?.jbook.is_admin ||
+		state.userData?.extra_fields?.jbook.is_poc_reviewer ||
+		state.userData?.extra_fields?.jbook.is_primary_reviewer ||
+		state.userData?.extra_fields?.jbook.is_service_reviewer;
 	const [selectedFormat, setSelectedFormat] = useState(isEda ? 'csv' : 'pdf');
 	const [classificationMarking, setClassificationMarking] = useState('');
 	const index = cloneData.clone_name;
 	const classes = useStyles();
-
 	const classificationMarkingOptions = ['None', 'CUI'];
 
 	const handleChange = ({ target: { value } }) => {
@@ -161,7 +174,6 @@ const ExportResultsDialog = ({
 			const tiny_url_send = `https://gamechanger.advana.data.mil/#/gamechanger?tiny=${res.data.tinyURL}`;
 			const cleanSearchSettings =
 				searchHandler !== undefined ? searchHandler.processSearchSettings(state, dispatch) : {};
-
 			const exportInput = {
 				cloneName: cloneData.clone_name,
 				format: selectedFormat,
@@ -172,8 +184,8 @@ const ExportResultsDialog = ({
 					index,
 					classificationMarking: classificationMarking === 'None' ? '' : classificationMarking,
 					cloneData,
-					orgFilter: orgFilter,
-					orgFilterString: orgFilterString,
+					orgFilter,
+					orgFilterString,
 					typeFilter,
 					typeFilterString,
 					selectedDocuments: isSelectedDocs ? Array.from(selectedDocuments.keys()) : [],
@@ -186,7 +198,19 @@ const ExportResultsDialog = ({
 				},
 			};
 			const { data } = await gameChangerAPI.modularExport(exportInput);
-			downloadFile(data, selectedFormat, classificationMarking, cloneData);
+
+			if (selectedFormat === 'xlsx') {
+				//blob -> json
+				const jsonData = JSON.parse(await data.text());
+				downloadXlsx(jsonData);
+			} else {
+				downloadFile(
+					data,
+					selectedFormat === 'csv-reviews' ? 'csv' : selectedFormat,
+					classificationMarking,
+					cloneData
+				);
+			}
 			getUserData();
 			if (
 				selectedFormat === 'pdf' &&
@@ -195,9 +219,10 @@ const ExportResultsDialog = ({
 			) {
 				sendNonstandardClassificationAlert(exportInput);
 			}
+			setErrorMsg('Successfully Generated Results!');
 		} catch (err) {
 			console.log(err);
-			setErrorMsg('Error Downloading Results');
+			setErrorMsg('Error Generating Results (Timeout)');
 		} finally {
 			setLoading(false);
 		}
@@ -271,6 +296,7 @@ const ExportResultsDialog = ({
 				}}
 			>
 				<div style={styles.leftButtonGroup} data-cy="export-select">
+					{/* needs form? or box overwritten as form? https://github.com/mui/material-ui/blob/d4d8512ce3453711f3c661374579b0d2ed13f3e7/docs/data/material/getting-started/templates/sign-up/SignUp.js#L59 */}
 					<FormControl variant="outlined" style={{ width: '100%' }} i data-cy="export-select-form">
 						<InputLabel className={classes.labelFont}>File Format</InputLabel>
 						<Select
@@ -286,7 +312,20 @@ const ExportResultsDialog = ({
 								</MenuItem>
 							)}
 							<MenuItem style={styles.menuItem} value="csv" key="csv" data-cy={`export-option-csv`}>
-								CSV
+								{cloneData.clone_name === 'jbook' ? 'CSV (Summary)' : 'CSV'}
+							</MenuItem>
+							{cloneData.clone_name === 'jbook' && isJbookReviewer && (
+								<MenuItem
+									style={styles.menuItem}
+									value="csv-reviews"
+									key="csv-reviews"
+									data-cy={`export-option-csv-reviews`}
+								>
+									CSV (Detailed)
+								</MenuItem>
+							)}
+							<MenuItem style={styles.menuItem} value="xlsx" key="xlsx" data-cy={`export-option-xlsx`}>
+								XLSX
 							</MenuItem>
 						</Select>
 					</FormControl>
@@ -311,7 +350,15 @@ const ExportResultsDialog = ({
 				</div>
 			</div>
 			{errorMsg ? (
-				<div style={{ color: 'red', display: 'flex', justifyContent: 'center' }}>{errorMsg}</div>
+				<div
+					style={
+						errorMsg[0] === 'S'
+							? { color: 'green', display: 'flex', justifyContent: 'center' }
+							: { color: 'red', display: 'flex', justifyContent: 'center' }
+					}
+				>
+					{errorMsg}
+				</div>
 			) : (
 				<LoadingBar color="primary" loading={loading} />
 			)}
