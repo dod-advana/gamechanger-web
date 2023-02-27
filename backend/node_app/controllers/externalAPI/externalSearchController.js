@@ -126,8 +126,7 @@ class ExternalSearchController {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
 			const esQuery = {
-				_source: false,
-				stored_fields: [
+				_source: [
 					'filename',
 					'title',
 					'page_count',
