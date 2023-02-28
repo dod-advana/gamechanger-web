@@ -125,6 +125,7 @@ router.post('/admin/deleteLocalModel', transformer.deleteLocalModel);
 router.post('/admin/deleteLocalModelTrain', transformer.deleteLocalModelTrain);
 router.post('/admin/stopProcess', transformer.stopProcess);
 router.post('/admin/sendUserAggregations', transformer.sendUserAggregations);
+router.post('/admin/sendUserAggregationsTrain', transformer.sendUserAggregationsTrain);
 router.post('/admin/clearCache', transformer.clearCache);
 
 router.post('/getNotifications', notification.getNotifications);

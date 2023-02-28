@@ -6,6 +6,10 @@ import { CloudDownload } from '@material-ui/icons';
 import Modal from 'react-modal';
 import Autocomplete from '@mui/material/Autocomplete';
 import GCButton from '../../common/GCButton';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import moment from 'moment';
+import styled from 'styled-components';
 
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
@@ -17,6 +21,28 @@ const status = ['ok', 'warning', 'error', 'loading'];
 
 const gameChangerAPI = new GameChangerAPI();
 
+const DatePickerWrapper = styled.div`
+	margin-right: 10px;
+	display: flex;
+	flex-direction: column;
+	> label {
+		text-align: left;
+		margin-bottom: 2px;
+		color: #3f4a56;
+		font-size: 15px;
+		font-family: Noto Sans;
+	}
+	> .react-datepicker-wrapper {
+		> .react-datepicker__input-container {
+			> input {
+				width: 225px;
+				border: 0;
+				outline: 0;
+				border-bottom: 1px solid black;
+			}
+		}
+	}
+`;
 const apiColumns = [
 	{
 		Header: 'Response',
@@ -164,6 +190,33 @@ const getModelsList = async (setDownloadedModelsList, setModelTable, props) => {
 };
 
 /**
+ * Get user aggregations data and sends that to the ml-api
+ * @method sendUserAggData
+ */
+const sendUserAggData = async (startDate, endDate) => {
+	try {
+		const params = {
+			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
+			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			limit: null,
+		};
+		const userData = await gameChangerAPI.getUserAggregations(params);
+		const searchData = await gameChangerAPI.getSearchPdfMapping(params);
+		const mlParams = {
+			searchData: searchData.data.data,
+			userData: userData.data.users,
+		};
+		gameChangerAPI.sendUserAggregations(mlParams);
+	} catch (e) {
+		console.error(e);
+	}
+};
+
+const handleDateChange = (date, setFunction) => {
+	setFunction(date);
+};
+
+/**
  * @method triggerReloadModels
  */
 const triggerReloadModels = async (
@@ -257,6 +310,8 @@ export default (props) => {
 	const [APIData, setAPIData] = useState({});
 	const [s3List, setS3List] = useState([]);
 	const [modelTable, setModelTable] = useState([]);
+	const [startDate, setStartDate] = useState(moment().subtract(6, 'months').set({ hour: 0, minute: 0 })._d);
+	const [endDate, setEndDate] = useState(moment()._d);
 
 	const [currentSimModel, setCurrentSim] = useState('');
 	const [currentEncoder, setCurrentEncoder] = useState('');
@@ -946,6 +1001,45 @@ export default (props) => {
 								</Select>
 							</div>
 						</div>
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Send User Data to ML-API</b>
+						<DatePickerWrapper>
+							<label>Start Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={startDate || ''}
+								onChange={(date) => handleDateChange(date, setStartDate)}
+								dateFormat="yyyy-MM-dd HH:mm"
+							/>
+						</DatePickerWrapper>
+						<DatePickerWrapper>
+							<label>End Date</label>
+							<DatePicker
+								showTimeSelect
+								selected={endDate || ''}
+								onChange={(date) => handleDateChange(date, setEndDate)}
+								dateFormat="yyyy-MM-dd HH:mm"
+							/>
+						</DatePickerWrapper>
+						<GCButton
+							onClick={() => {
+								sendUserAggData(startDate, endDate);
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Send Data
+						</GCButton>
 					</div>
 				</BorderDiv>
 				<BorderDiv className="half">
