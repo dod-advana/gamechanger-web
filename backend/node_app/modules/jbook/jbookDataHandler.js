@@ -1546,11 +1546,11 @@ class JBookDataHandler extends DataHandler {
 				userId
 			);
 
-			const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+			const { docs } = await this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			if (docs.length === 0) {
 				if (created) {
-					await newOrUpdatedReview.destroy();
+					await this.rev.destroy({ where: { id: newOrUpdatedReview.id } });
 				}
 				res.failed.push(index + 2);
 				return res;
