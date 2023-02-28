@@ -112,7 +112,7 @@ describe('JBookDataHandler', function () {
 				'P40-15_Justification':
 					'This program, Other Production Charges P-40A Category Uncategorized Item Bomber Armament Tester (BAT), is a new start.\n\nThe major efforts supported in FY 2022 include funding for Electronic Attack pods, towed decoys and associated test equipment; B-2, F-15E and F-22 Depot Core Activation; RQ-4, and Aerial Targets.',
 				serviceAgency: 'Air Force (AF)',
-				uot_department_s: '57',
+				departmentCode: '57',
 				uot_agency_s: 'N/A',
 				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
@@ -150,7 +150,7 @@ describe('JBookDataHandler', function () {
 					},
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
-						id: 233170,
+						id: '233170',
 						budgetLineItem: '000073',
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: 'Not AI',
@@ -227,7 +227,7 @@ describe('JBookDataHandler', function () {
 				'P40-15_Justification':
 					'This program, Other Production Charges P-40A Category Uncategorized Item Bomber Armament Tester (BAT), is a new start.\n\nThe major efforts supported in FY 2022 include funding for Electronic Attack pods, towed decoys and associated test equipment; B-2, F-15E and F-22 Depot Core Activation; RQ-4, and Aerial Targets.',
 				serviceAgency: 'Air Force (AF)',
-				uot_department_s: '57',
+				departmentCode: '57',
 				uot_agency_s: 'N/A',
 				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
@@ -259,7 +259,7 @@ describe('JBookDataHandler', function () {
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
-						id: 233170,
+						id: '233170',
 						budgetLineItem: '000073',
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: 'Not AI',
@@ -341,7 +341,7 @@ describe('JBookDataHandler', function () {
 				'P40-15_Justification':
 					'This program, Other Production Charges P-40A Category Uncategorized Item Bomber Armament Tester (BAT), is a new start.\n\nThe major efforts supported in FY 2022 include funding for Electronic Attack pods, towed decoys and associated test equipment; B-2, F-15E and F-22 Depot Core Activation; RQ-4, and Aerial Targets.',
 				serviceAgency: 'Air Force (AF)',
-				uot_department_s: '57',
+				departmentCode: '57',
 				uot_agency_s: 'N/A',
 				budgetSubActivityTitle: 'Other Production Charges',
 				org_jbook_desc_s: 'Air Force (AF)',
@@ -373,7 +373,7 @@ describe('JBookDataHandler', function () {
 				reviews: {
 					'AI Inventory': {
 						portfolioName: 'AI Inventory',
-						id: 233170,
+						id: '233170',
 						budgetLineItem: '000073',
 						serviceAgreeLabel: 'Yes',
 						primaryClassLabel: 'Not AI',
