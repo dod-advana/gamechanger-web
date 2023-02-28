@@ -1448,7 +1448,7 @@ class EDASearchUtility {
 		});
 
 		return {
-			track_total_hits: true,
+			track_total_hits: 10000,
 			size: 10,
 			_source: {
 				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'file_location_eda_ext'],
