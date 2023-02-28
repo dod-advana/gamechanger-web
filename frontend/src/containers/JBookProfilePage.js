@@ -84,6 +84,7 @@ const JBookProfilePage = () => {
 	const [programElement, setProgramElement] = useState('');
 	const [projectNum, setProjectNum] = useState('');
 	const [budgetYear, setBudgetYear] = useState('');
+	const [departmentCode, setDepartmentCode] = useState('');
 	const [docID, setDocID] = useState('');
 	const [appropriationNumber, setAppropriationNumber] = useState('');
 
@@ -196,6 +197,7 @@ const JBookProfilePage = () => {
 			setProjectNum(newProjectData.projectNum || '');
 			setAppropriationNumber(newProjectData.appropriationNumber || '');
 			setDocID(newProjectData.id || '');
+			setDepartmentCode(newProjectData.departmentCode || '');
 
 			let tempMapping = setContractData(newProjectData);
 
@@ -1041,6 +1043,7 @@ const JBookProfilePage = () => {
 					reviewType,
 					portfolioName: selectedPortfolio,
 					id: docID,
+					departmentCode,
 				},
 			});
 

@@ -78,6 +78,7 @@ const parseExcel = async (file, portfolio) => {
 				agency_service: `${item['Service / Agency']}`,
 				// agency_office: item[],
 				program_element: `${item['PE / BLI']}`,
+				department: `${item['Department']}`,
 				budget_line_item:
 					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
 			};
@@ -124,9 +125,9 @@ const parseExcel = async (file, portfolio) => {
 			}
 			let refString = '';
 			if (reviewData.budget_type === 'pdoc') {
-				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.department}`;
 			} else if (reviewData.budget_type === 'rdoc') {
-				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.department}`;
 			}
 
 			reviewData.jbook_ref_id = refString;
@@ -149,12 +150,10 @@ const parseExcel = async (file, portfolio) => {
 };
 
 const getExample = (name) => {
-	switch (name) {
-		case 'AI Inventory':
-			return aiInvSample;
-		default:
-			return xlsxSample;
+	if (name === 'AI Inventory') {
+		return aiInvSample;
 	}
+	return xlsxSample;
 };
 
 /**
