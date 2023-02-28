@@ -101,6 +101,7 @@ const endpoints = {
 	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
 	getUserDashboard: '/api/gamechanger/admin/getUserDashboard',
 	sendUserAggregations: '/api/gamechanger/admin/sendUserAggregations',
+	sendUserAggregationsTrain: '/api/gamechanger/admin/sendUserAggregationsTrain',
 	getDocumentProperties: '/api/gamechanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gamechanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gamechanger/clearFavoriteSearchUpdate',
@@ -858,7 +859,10 @@ export default class GameChangerAPI {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });
 	};
-
+	sendUserAggregationsTrain = async (body) => {
+		const url = endpoints.sendUserAggregationsTrain;
+		return axiosPOST(this.axios, url, { params: body });
+	};
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
 		return axiosPOST(this.axios, url, body);
