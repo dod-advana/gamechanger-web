@@ -915,6 +915,18 @@ export default () => {
 											</CardContent>
 										</Card>
 									</Grid>
+									<Grid item xs={4}></Grid>
+									<Grid item xs={2}>
+										<GCPrimaryButton
+											onClick={() => {
+												trackEvent('GAMECHANGER', 'ExportUserData', 'onClick');
+												exportData('UserData');
+											}}
+											style={{ minWidth: 'unset' }}
+										>
+											Export User Data
+										</GCPrimaryButton>
+									</Grid>
 									<Grid item xs={2}>
 										<Card>
 											<CardContent>
@@ -929,23 +941,23 @@ export default () => {
 										<Card>
 											<CardContent>
 												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
-													Inactive Users
+													New Inactive Users
 												</p>
-												{cardData.inactive_users}
+												{cardData.new_inactive_users}
 											</CardContent>
 										</Card>
 									</Grid>
 									<Grid item xs={2}>
-										<GCPrimaryButton
-											onClick={() => {
-												trackEvent('GAMECHANGER', 'ExportUserData', 'onClick');
-												exportData('UserData');
-											}}
-											style={{ minWidth: 'unset' }}
-										>
-											Export User Data
-										</GCPrimaryButton>
+										<Card>
+											<CardContent>
+												<p style={{ ...styles.sectionHeader, marginLeft: 0, marginTop: 10 }}>
+													Total Inactive Users
+												</p>
+												{cardData.total_inactive_users}
+											</CardContent>
+										</Card>
 									</Grid>
+									<Grid item xs={6}></Grid>
 									<Grid item xs={12} lg={6}>
 										<div
 											style={{
