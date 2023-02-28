@@ -105,6 +105,8 @@ export default () => {
 		return wrappedDocuments;
 	}
 
+	//gameChangerAPI.resetSearchTestResults();
+
 	const handleTests = useCallback(async () => {
 		let returnedData = await gameChangerAPI.testSearch(documents);
 		setSearchResults(returnedData.data.results);
