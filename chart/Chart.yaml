@@ -8,7 +8,7 @@ appVersion: "1.31.0.20230130"
 
 dependencies:
   - name: advana-library
-    version: 1.0.2
+    version: 1.0.6
     # repository: https://gitlab.advana.boozallencsn.com/platform/charts/advana-library
     repository: oci://092912502985.dkr.ecr.us-east-1.amazonaws.com/platform/charts
     tags:
