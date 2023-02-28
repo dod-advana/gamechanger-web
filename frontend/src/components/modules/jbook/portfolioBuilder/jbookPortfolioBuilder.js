@@ -68,7 +68,7 @@ const parseExcel = async (file, portfolio) => {
 
 		const data = await file.arrayBuffer();
 		const workbook = XLSX.read(data);
-		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet'], { defval: null });
 
 		sheet1.forEach((row) => {
 			let item = {};

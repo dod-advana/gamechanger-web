@@ -1499,41 +1499,13 @@ class JBookDataHandler extends DataHandler {
 				return res;
 			} else {
 				foundReview = result[0].dataValues; // we have found exactly one review that matches
-				const updatedReview = await this.rev.update(
-					{
-						primary_reviewer: reviewData.primary_reviewer ?? null,
-						primary_class_label: reviewData.primary_class_label ?? null,
-						service_reviewer: reviewData.service_reviewer ?? null,
-						primary_ptp: reviewData.primary_ptp ?? null,
-						service_mp_add: reviewData.service_mp_add ?? null,
-						primary_review_notes: reviewData.primary_review_notes ?? null,
-						latest_class_label: reviewData.latest_class_label ?? null,
-						primary_review_status: reviewData.primary_review_status ?? null,
-
-						service_secondary_reviewer: reviewData.service_secondary_reviewer ?? null,
-						service_agree_label: reviewData.service_agree_label ?? null,
-						service_class_label: reviewData.service_class_label ?? null,
-						service_ptp_agree_label: reviewData.service_ptp_agree_label ?? null,
-						service_ptp: reviewData.service_ptp ?? null,
-						service_mp_list: reviewData.service_mp_list ?? null,
-						service_poc_name: reviewData.service_poc_name ?? null,
-						service_poc_title: reviewData.service_poc_title ?? null,
-						service_poc_email: reviewData.service_poc_email ?? null,
-						service_poc_org: reviewData.service_poc_org ?? null,
-						poc_phone_number: reviewData.poc_phone_number ?? null,
-						service_review_notes: reviewData.service_review_notes ?? null,
-
-						service_review_status: reviewData.service_review_status ?? null,
-						review_status: reviewData.review_status ?? null,
+				const updatedReview = await this.rev.update(reviewData, {
+					where: {
+						id: foundReview.id,
 					},
-					{
-						where: {
-							id: foundReview.id,
-						},
-						returning: true,
-						plain: true,
-					}
-				);
+					returning: true,
+					plain: true,
+				});
 				newOrUpdatedReview = updatedReview[1].dataValues;
 			}
 			// newOrUpdatedReview is now either from update OR create
@@ -1613,39 +1585,11 @@ class JBookDataHandler extends DataHandler {
 				console.log('ES NOT UPDATED for REVIEW');
 				res.failed.push(index + 2);
 				// update PG again with original values:
-				await this.rev.update(
-					{
-						primary_reviewer: result.data.primary_reviewer ?? null,
-						primary_class_label: result.data.primary_class_label ?? null,
-						service_reviewer: result.data.service_reviewer ?? null,
-						primary_ptp: result.data.primary_ptp ?? null,
-						service_mp_add: result.data.service_mp_add ?? null,
-						primary_review_notes: result.data.primary_review_notes ?? null,
-						latest_class_label: result.data.latest_class_label ?? null,
-						primary_review_status: result.data.primary_review_status ?? null,
-
-						service_secondary_reviewer: result.data.service_secondary_reviewer ?? null,
-						service_agree_label: result.data.service_agree_label ?? null,
-						service_class_label: result.data.service_class_label ?? null,
-						service_ptp_agree_label: result.data.service_ptp_agree_label ?? null,
-						service_ptp: result.data.service_ptp ?? null,
-						service_mp_list: result.data.service_mp_list ?? null,
-						service_poc_name: result.data.service_poc_name ?? null,
-						service_poc_title: result.data.service_poc_title ?? null,
-						service_poc_email: result.data.service_poc_email ?? null,
-						service_poc_org: result.data.service_poc_org ?? null,
-						poc_phone_number: result.data.poc_phone_number ?? null,
-						service_review_notes: result.data.service_review_notes ?? null,
-
-						service_review_status: reviewData.service_review_status ?? null,
-						review_status: result.data.review_status ?? null,
+				await this.rev.update(foundReview, {
+					where: {
+						id: foundReview.id,
 					},
-					{
-						where: {
-							id: newOrUpdatedReview.id,
-						},
-					}
-				);
+				});
 			}
 			return res;
 		} catch (e) {
