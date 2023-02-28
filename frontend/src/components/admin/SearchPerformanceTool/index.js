@@ -157,8 +157,10 @@ export default () => {
 			total_average: totalAvg / searchResults.length,
 			total_number_of_documents_not_found: totalDocsNotFound,
 		});
+		setSearchResults([]);
 		setSearching(false);
-	}, [docMetrics, gcVersion, searchResults]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [gcVersion, docMetrics]);
 
 	return (
 		<>
