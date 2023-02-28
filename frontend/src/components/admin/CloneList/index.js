@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import _ from 'underscore';
 
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import GCButton from '../../common/GCButton';
@@ -19,7 +18,7 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 
 	const data = await gameChangerAPI.getCloneData();
 
-	_.forEach(data.data, (result) => {
+	data.data.forEach((result) => {
 		tableData.push(result);
 	});
 	// Set the main clone table
@@ -61,10 +60,6 @@ const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	setCloneTableMetaData({ stringFields, booleanFields, jsonFields });
 };
 
-/**
- *
- * @class CloneList
- */
 export default () => {
 	// Component Properties
 	const [gcCloneTableData, setGCCloneTableData] = useState([]);
@@ -80,7 +75,7 @@ export default () => {
 	// Component Methods
 	const openCloneModal = (num = -99) => {
 		if (num >= 0) {
-			const filteredClones = _.filter(gcCloneTableData, (clone) => {
+			const filteredClones = gcCloneTableData.filter((clone) => {
 				return clone.id === num;
 			});
 			const tmpCloneToEdit = { ...filteredClones[0] };
@@ -175,7 +170,7 @@ export default () => {
 						rightActive={row.value}
 						onClick={() => {
 							if (!row.row._original.can_edit) return;
-							const filteredClones = _.filter(gcCloneTableData, (clone) => {
+							const filteredClones = gcCloneTableData.filter((clone) => {
 								return clone.id === row.row.id;
 							});
 
