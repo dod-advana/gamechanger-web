@@ -81,6 +81,7 @@ const dctTutorialSteps = [
 		content: 'Click “submit” to find documents in the GAMECHANGER repository with similarity to your text inputs.',
 		clickButton: true,
 		buttonID: 'compare-button',
+		placement: 'top',
 	},
 	{
 		...tutorialObject,

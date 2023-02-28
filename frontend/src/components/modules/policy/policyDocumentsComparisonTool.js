@@ -388,13 +388,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
-	const [showTutorial2, setShowTutorial2] = useState(false);
 	// tutorialLogicSwitch is set to true when going back from post-search tutorial to pre-search tutorial
 	// It indicates that we need to blank out returnedDocs and viewableDocs.
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
 	const [loading, setLoading] = useState(false);
-
-	const policyDCTMounted = useRef(false);
 
 	const trackingCategory = getTrackingNameForFactory(state.cloneData.clone_name);
 
@@ -440,32 +437,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	}, [resultsLoading, filterCountsLoading, updateFilters]);
 
 	useEffect(() => {
-		console.log('showTutorial: ', showTutorial);
-	}, [showTutorial]);
-	useEffect(() => {
-		console.log('tutorialLogicSwitch: ', tutorialLogicSwitch);
-	}, [tutorialLogicSwitch]);
-	useEffect(() => {
-		console.log('stepIndex: ', stepIndex);
-	}, [stepIndex]);
-
-	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
-	// useEffect(() => {
-	// 	if (stepIndex === 0 && showTutorial === true)
-	// 		setParagraphText(
-	// 			'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
-	// 		);
-	// 	if (stepIndex === 2 && tutorialLogicSwitch) {
-	// 		setReturnedDocs([]);
-	// 		setViewableDocs([]);
-	// 		setTutorialLogicSwitch(false);
-	// 	}
-	// 	if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
-	// 	if (stepIndex === 3 && viewableDocs.length) {
-	// 		setShowTutorial(true);
-	// 		setTutorialLogicSwitch(true);
-	// 	}
-	// }, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
+		if (!viewableDocs.length) window.scrollTo(0, 0);
+	}, [viewableDocs]);
 
 	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
@@ -474,11 +447,9 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
 			);
 		if (stepIndex === 1 && tutorialLogicSwitch) {
-			window.scrollTo(0, 0);
 			setReturnedDocs([]);
 			setViewableDocs([]);
 			setTutorialLogicSwitch(false);
-			console.log('this logic here');
 		}
 		// not sure why this one is necessary, just copied over from commented code below
 		if (stepIndex === 2 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
@@ -486,20 +457,9 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			setShowTutorial(false);
 			setTutorialLogicSwitch(true);
 		}
-		if (stepIndex === 2 && viewableDocs.length) {
+		if (stepIndex === 2 && !loading && viewableDocs.length) {
 			setShowTutorial(true);
 		}
-
-		// if (stepIndex === 2 && tutorialLogicSwitch) {
-		// 	setReturnedDocs([]);
-		// 	setViewableDocs([]);
-		// 	setTutorialLogicSwitch(false);
-		// }
-		// if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
-		// if (stepIndex === 3 && viewableDocs.length) {
-		// 	setShowTutorial(true);
-		// 	setTutorialLogicSwitch(true);
-		// }
 	}, [loading, stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
@@ -724,8 +684,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	}, [paragraphText, handleSetParagraphs]);
 
 	useEffect(() => {
-		setLeftPanelOpen(returnedDocs.length > 0);
-	}, [returnedDocs]);
+		setLeftPanelOpen(!loading && viewableDocs.length);
+	}, [loading, viewableDocs]);
 
 	const removeParagraph = (id) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
@@ -972,7 +932,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					flexBasis: 'calc(16.666667% + 20px)',
 				}}
 			>
-				<div className={viewableDocs.length ? 'dct-tutorial-step-3' : undefined} style={{ marginRight: 20 }}>
+				<div
+					className={!loading && viewableDocs.length ? 'dct-tutorial-step-3' : undefined}
+					style={{ marginRight: 20 }}
+				>
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
