@@ -6,16 +6,14 @@ const RESULT_SELECTED_COLUMNS = [
 		Header: 'Document',
 		accessor: 'document',
 		Cell: (row) => (
-			<TableRow style={{ overflowX: 'scroll', overflowY: 'hidden' }}>
-				{row.value && row.value !== null ? row.value : 'no doc'}
-			</TableRow>
+			<TableRow style={{ overflowX: 'auto' }}>{row.value && row.value !== null ? row.value : 'no doc'}</TableRow>
 		),
 	},
 	{
 		Header: 'Title',
 		accessor: 'title',
 		Cell: (row) => (
-			<TableRow style={{ textAlign: 'center', overflowY: 'hidden' }}>
+			<TableRow style={{ textAlign: 'center' }}>
 				{row.value && row.value !== null ? row.value : 'Not Found'}
 			</TableRow>
 		),
@@ -24,7 +22,7 @@ const RESULT_SELECTED_COLUMNS = [
 		Header: 'Doc Number',
 		accessor: 'doc_num',
 		Cell: (row) => (
-			<TableRow style={{ textAlign: 'center', overflowY: 'hidden' }}>
+			<TableRow style={{ textAlign: 'center' }}>
 				{row.value && row.value !== null ? row.value : 'Not Found'}
 			</TableRow>
 		),
@@ -33,7 +31,7 @@ const RESULT_SELECTED_COLUMNS = [
 		Header: 'Filename',
 		accessor: 'filename',
 		Cell: (row) => (
-			<TableRow style={{ textAlign: 'center', overflowY: 'hidden' }}>
+			<TableRow style={{ textAlign: 'center' }}>
 				{row.value && row.value !== null ? row.value : 'Not Found'}
 			</TableRow>
 		),
@@ -42,7 +40,7 @@ const RESULT_SELECTED_COLUMNS = [
 		Header: 'Display Title S',
 		accessor: 'display_title_s',
 		Cell: (row) => (
-			<TableRow style={{ textAlign: 'center', overflowY: 'hidden' }}>
+			<TableRow style={{ textAlign: 'center' }}>
 				{row.value && row.value !== null ? row.value : 'Not Found'}
 			</TableRow>
 		),
