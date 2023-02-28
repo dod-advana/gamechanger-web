@@ -185,12 +185,12 @@ const parseExcel = async (file, portfolio) => {
 				}
 			} else {
 				// General Review
-				reviewData.primary_class_label = `${item['Label']}`;
-				reviewData.budget_year = `${item['FY']}`;
-				reviewData.budget_type = `${item['PL Type']}`;
-				reviewData.appn_num = `${item['APPN Number']}`;
-				reviewData.budget_activity = `${item['BA Number']}`;
-				reviewData.portfolio_name = `${item['Portfolio Name']}`;
+				reviewData.primary_class_label = item['Label'];
+				reviewData.budget_year = item['FY'];
+				reviewData.budget_type = item['PL Type'];
+				reviewData.appn_num = item['APPN Number'];
+				reviewData.budget_activity = item['BA Number'];
+				reviewData.portfolio_name = item['Portfolio Name'];
 			}
 
 			if (reviewData.budget_type === 'pdoc') {

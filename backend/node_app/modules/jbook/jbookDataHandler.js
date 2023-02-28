@@ -1498,9 +1498,8 @@ class JBookDataHandler extends DataHandler {
 				res.dupes.push(index + 2);
 				return res;
 			} else {
-				// we have found exactly one review that matches
-				let item = result[0].dataValues;
-				newOrUpdatedReview = await this.rev.update(
+				foundReview = result[0].dataValues; // we have found exactly one review that matches
+				const updatedReview = await this.rev.update(
 					{
 						primary_reviewer: reviewData.primary_reviewer ?? null,
 						primary_class_label: reviewData.primary_class_label ?? null,
@@ -1527,9 +1526,14 @@ class JBookDataHandler extends DataHandler {
 						service_review_status: reviewData.service_review_status ?? null,
 						review_status: reviewData.review_status ?? null,
 					},
-					returning: true,
-					plain: true,
-				});
+					{
+						where: {
+							id: foundReview.id,
+						},
+						returning: true,
+						plain: true,
+					}
+				);
 				newOrUpdatedReview = updatedReview[1].dataValues;
 			}
 			// newOrUpdatedReview is now either from update OR create
@@ -1636,7 +1640,12 @@ class JBookDataHandler extends DataHandler {
 						service_review_status: reviewData.service_review_status ?? null,
 						review_status: result.data.review_status ?? null,
 					},
-				});
+					{
+						where: {
+							id: newOrUpdatedReview.id,
+						},
+					}
+				);
 			}
 			return res;
 		} catch (e) {
