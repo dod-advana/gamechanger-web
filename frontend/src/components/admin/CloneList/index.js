@@ -13,6 +13,103 @@ const gameChangerAPI = new GameChangerAPI();
 
 const CLONE_MUST_BE_FILLED_KEYS = ['clone_name', 'url', 'display_name', 'available_at'];
 
+const getColumns = (
+	gcCloneTableData,
+	storeCloneData,
+	openCloneModal,
+	deleteCloneData,
+	setGCCloneTableData,
+	setCloneTableMetaData
+) => [
+	{
+		Header: 'Name',
+		accessor: 'display_name',
+		Cell: (row) => <TableRow>{row.value}</TableRow>,
+	},
+	{
+		Header: 'Url',
+		accessor: 'url',
+		Cell: (row) => (
+			<TableRow>
+				<a href={`#/${row.value}`}>{`#/${row.value}`}</a>
+			</TableRow>
+		),
+	},
+	{
+		Header: 'Live',
+		accessor: 'is_live',
+		width: 200,
+		Cell: (row) => (
+			<TableRow>
+				<UOTToggleSwitch
+					leftLabel={'Off'}
+					rightLabel={'Live'}
+					rightActive={row.value}
+					onClick={() => {
+						if (!row.row._original.can_edit) return;
+						const filteredClones = gcCloneTableData.filter((clone) => {
+							return clone.id === row.row.id;
+						});
+
+						const cloneEdit = { ...filteredClones[0] };
+
+						cloneEdit.is_live = !row.value;
+						trackEvent('GAMECHANGER_Admin', 'ToggleCloneIsLive', cloneEdit.name, cloneEdit.is_live ? 1 : 0);
+						storeCloneData(cloneEdit);
+					}}
+					customColor={'#E9691D'}
+				/>
+			</TableRow>
+		),
+	},
+	{
+		Header: ' ',
+		accessor: 'id',
+		width: 150,
+		Cell: (row) => (
+			<TableRow>
+				{row.row._original.can_edit && (
+					<GCButton
+						onClick={() => {
+							trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
+							openCloneModal(row.value);
+						}}
+						style={{ minWidth: 'unset' }}
+					>
+						Edit
+					</GCButton>
+				)}
+			</TableRow>
+		),
+	},
+	{
+		Header: ' ',
+		accessor: 'id',
+		width: 150,
+		Cell: (row) => (
+			<TableRow>
+				{row.row._original.can_edit && (
+					<GCButton
+						onClick={() => {
+							trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
+							deleteCloneData(row.value).then(() => {
+								getCloneData(setGCCloneTableData, setCloneTableMetaData);
+							});
+						}}
+						style={{
+							minWidth: 'unset',
+							backgroundColor: 'red',
+							borderColor: 'red',
+						}}
+					>
+						Delete
+					</GCButton>
+				)}
+			</TableRow>
+		),
+	},
+];
+
 const getCloneData = async (setGCCloneTableData, setCloneTableMetaData) => {
 	const tableData = [];
 
@@ -143,100 +240,6 @@ export default () => {
 	};
 
 	// The table columns
-	const columns = [
-		{
-			Header: 'Name',
-			accessor: 'display_name',
-			Cell: (row) => <TableRow>{row.value}</TableRow>,
-		},
-		{
-			Header: 'Url',
-			accessor: 'url',
-			Cell: (row) => (
-				<TableRow>
-					<a href={`#/${row.value}`}>{`#/${row.value}`}</a>
-				</TableRow>
-			),
-		},
-		{
-			Header: 'Live',
-			accessor: 'is_live',
-			width: 200,
-			Cell: (row) => (
-				<TableRow>
-					<UOTToggleSwitch
-						leftLabel={'Off'}
-						rightLabel={'Live'}
-						rightActive={row.value}
-						onClick={() => {
-							if (!row.row._original.can_edit) return;
-							const filteredClones = gcCloneTableData.filter((clone) => {
-								return clone.id === row.row.id;
-							});
-
-							const cloneEdit = { ...filteredClones[0] };
-
-							cloneEdit.is_live = !row.value;
-							trackEvent(
-								'GAMECHANGER_Admin',
-								'ToggleCloneIsLive',
-								cloneEdit.name,
-								cloneEdit.is_live ? 1 : 0
-							);
-							storeCloneData(cloneEdit);
-						}}
-						customColor={'#E9691D'}
-					/>
-				</TableRow>
-			),
-		},
-		{
-			Header: ' ',
-			accessor: 'id',
-			width: 150,
-			Cell: (row) => (
-				<TableRow>
-					{row.row._original.can_edit && (
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'EditClone', 'onClick', row.value);
-								openCloneModal(row.value);
-							}}
-							style={{ minWidth: 'unset' }}
-						>
-							Edit
-						</GCButton>
-					)}
-				</TableRow>
-			),
-		},
-		{
-			Header: ' ',
-			accessor: 'id',
-			width: 150,
-			Cell: (row) => (
-				<TableRow>
-					{row.row._original.can_edit && (
-						<GCButton
-							onClick={() => {
-								trackEvent('GAMECHANGER_Admin', 'DeleteClone', 'onClick', row.value);
-								deleteCloneData(row.value).then(() => {
-									getCloneData(setGCCloneTableData, setCloneTableMetaData);
-								});
-							}}
-							style={{
-								minWidth: 'unset',
-								backgroundColor: 'red',
-								borderColor: 'red',
-							}}
-						>
-							Delete
-						</GCButton>
-					)}
-				</TableRow>
-			),
-		},
-	];
 
 	return (
 		<>
@@ -262,7 +265,14 @@ export default () => {
 
 				<ReactTable
 					data={gcCloneTableData}
-					columns={columns}
+					columns={getColumns(
+						gcCloneTableData,
+						storeCloneData,
+						openCloneModal,
+						deleteCloneData,
+						setGCCloneTableData,
+						setCloneTableMetaData
+					)}
 					style={{ margin: '0 80px 20px 80px', height: 700 }}
 					pageSize={10}
 				/>
