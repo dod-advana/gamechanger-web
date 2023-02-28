@@ -256,21 +256,36 @@ class Reports {
 		}
 	}
 
-	prepareXlsxJson(data) {
+	prepareXlsxJson(data, portfolio) {
 		// NOTE: not sure if all the Nullish Coalescing Operators(??) are necessary, does database guarentee no undefined values?
+		const isAiInventory = portfolio === 'AI Inventory';
 		const jsonData = data.map((doc) => ({
 			'Primary Reviewer': doc.primary_reviewer_s ?? '',
-			Label: doc.primary_class_label_s ?? '',
+			...(isAiInventory
+				? {
+						'AI Analysis': doc.primary_class_label_s ?? '',
+						'Service/DoD Component Reviewer': doc.service_reviewer_s ?? '',
+						'Planned Transition Partner': doc.primaryPlannedTransitionPartner ?? '',
+				  }
+				: { Label: doc.primary_class_label_s ?? '' }),
 			'Primary Reviewer Notes': doc.primaryReviewNotes ?? '',
-			FY: doc.budgetYear ?? '',
-			'PL Type': doc.budgetType ?? '',
+			...(isAiInventory
+				? { 'FY (BY1)': doc.budgetYear ?? '', 'Doc Type': doc.budgetType ?? '' }
+				: { FY: doc.budgetYear ?? '', 'PL Type': doc.budgetType ?? '' }),
 			'Service / Agency': doc.serviceAgency ?? '',
-			'Agency / Office': doc.org_jbook_desc_s ?? '',
-			'APPN Number': doc.appropriationNumber ?? '',
-			'BA Number': doc.budgetActivityNumber ?? '',
+			Department: doc.departmentCode ?? '',
+			...(isAiInventory
+				? { 'APPN Symbol': doc.appropriationNumber ?? '', BA: doc.budgetActivityNumber ?? '' }
+				: { 'APPN Number': doc.appropriationNumber ?? '', 'BA Number': doc.budgetActivityNumber ?? '' }),
 			'PE / BLI': doc.programElement ?? doc.budgetLineItem_s ?? '',
 			'Project # (RDT&E Only)': doc.projectNum ?? '',
-			'Portfolio Name': doc.portfolio_name_s ?? '',
+			'Total Funding': doc.totalCost ?? '',
+			'BY1 Funding': doc.by1Request ?? '',
+			'BY2 Funding': doc.proj_fund_by2_d ?? doc.p4082_toa_by2_d ?? '',
+			'BY3 Funding': doc.proj_fund_by3_d ?? doc.p4083_toa_by3_d ?? '',
+			'BY4 Funding': doc.proj_fund_by4_d ?? doc.p4084_toa_by4_d ?? '',
+			'BY5 Funding': doc.proj_fund_by5_d ?? doc.p4085_toa_by5_d ?? '',
+			...(isAiInventory ? { 'Has Keywords': doc.hasKeywords ? 'Yes' : 'No' } : { 'Portfolio Name': '' }),
 		}));
 		return jsonData;
 	}
