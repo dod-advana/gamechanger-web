@@ -18,12 +18,7 @@ import {
 	getTypeQuery,
 } from '../../../utils/gamechangerUtils';
 import { trackEvent } from '../../telemetry/Matomo';
-import {
-	getNonMainPageOuterContainer,
-	getSearchObjectFromString,
-	getUserData,
-	setState,
-} from '../../../utils/sharedFunctions';
+import { getNonMainPageOuterContainer, getUserData, setState } from '../../../utils/sharedFunctions';
 import './jbook.css';
 import JBookWelcome from '../../aboutUs/JBookWelcomeModal';
 import FeedbackModal from './jbookFeedbackModal';
@@ -192,7 +187,7 @@ const getMainView = (props) => {
 					searchHandler={searchHandler}
 					open={exportDialogVisible}
 					handleClose={() => setState(dispatch, { exportDialogVisible: false })}
-					searchObject={getSearchObjectFromString(prevSearchText)}
+					searchObject={{ search: prevSearchText }}
 					setCurrentTime={setCurrentTime}
 					selectedDocuments={selectedDocuments}
 					isSelectedDocs={isSelectedDocs}

@@ -2,6 +2,7 @@ const LOGGER = require('@dod-advana/advana-logger');
 const { DataLibrary } = require('../lib/dataLibrary');
 const constantsFile = require('../config/constants');
 const SearchUtility = require('../utils/searchUtility');
+const { PolicyPreSearchSuggestionQuery } = require('../modules/policy/elasticsearch/queries');
 
 class TextSuggestionController {
 	constructor(opts = {}) {
@@ -35,6 +36,8 @@ class TextSuggestionController {
 				  ];
 			const suggestionsFlag = req.body.suggestions ? req.body.suggestions : false;
 			const esClientName = req.body.esClientName ? req.body.esClientName : 'gamechanger';
+			const isPolicy = req.body?.cloneName === 'policy';
+
 			let corrected;
 			let presearchTitle;
 			let presearchHistory;
@@ -78,7 +81,7 @@ class TextSuggestionController {
 						}
 					} else {
 						try {
-							presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits);
+							presearchTitle = this.getPreTitleCorrected(data_presearch.responses[0].hits.hits, isPolicy);
 						} catch (err) {
 							const { message } = err;
 							this.logger.error(message, 'JBVZKTF', userId);
@@ -92,8 +95,7 @@ class TextSuggestionController {
 							const { message } = err;
 							this.logger.error(message, 'JBVZKTG', userId);
 						}
-						// for future use
-						// let predictions = [];
+
 						try {
 							presearchEntity = this.getPreEntityCorrected(data_presearch.responses[2].hits.hits);
 						} catch (err) {
@@ -131,6 +133,8 @@ class TextSuggestionController {
 			let esQueryArray;
 			if (esClientName === 'eda') {
 				esQueryArray = this.searchUtility.getESpresearchMultiQueryEDA(body);
+			} else if (body?.cloneName === 'policy') {
+				esQueryArray = PolicyPreSearchSuggestionQuery.createMultiQuery({ ...body, documentsIndex: index });
 			} else {
 				esQueryArray = this.searchUtility.getESpresearchMultiQuery(body, index);
 			}
@@ -148,6 +152,7 @@ class TextSuggestionController {
 			throw message;
 		}
 	}
+
 	getPreHistoryCorrected(suggesterArray) {
 		const presearch = [];
 		// amount of users need to be more than 1 (max shown = 3 for efficiency)
@@ -180,12 +185,16 @@ class TextSuggestionController {
 		return unique;
 	}
 
-	getPreTitleCorrected(suggesterArray) {
-		const presearch = [];
-		suggesterArray.forEach((suggestion) => {
-			presearch.push(suggestion['_source']['display_title_s']);
-		});
-		return presearch;
+	getPreTitleCorrected(suggesterArray, isPolicy = false) {
+		if (isPolicy) {
+			return PolicyPreSearchSuggestionQuery.extractTitles(suggesterArray);
+		} else {
+			const presearch = [];
+			suggesterArray.forEach((suggestion) => {
+				presearch.push(suggestion['_source']['display_title_s']);
+			});
+			return presearch;
+		}
 	}
 
 	getPreEntityCorrected(suggesterArray) {
