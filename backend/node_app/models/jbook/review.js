@@ -233,7 +233,6 @@ module.exports = (sequelize, DataTypes) => {
 			service_secondary_reviewer_email: {
 				type: DataTypes.TEXT,
 			},
-
 			latest_class_label: {
 				type: DataTypes.TEXT,
 			},

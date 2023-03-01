@@ -1498,9 +1498,7 @@ class JBookDataHandler extends DataHandler {
 				res.dupes.push(index + 2);
 				return res;
 			} else {
-				// we have found exactly one review that matches
-				foundReview = result[0].dataValues;
-
+				foundReview = result[0].dataValues; // we have found exactly one review that matches
 				const updatedReview = await this.rev.update(reviewData, {
 					where: {
 						id: foundReview.id,
