@@ -1109,6 +1109,12 @@ describe('AppStatsController', function () {
 					}
 				],
 				[
+					{
+						total_users: 100,
+						active_user: 10
+					}
+				],
+				[
 					{ count: 3311, date: '2021-01' },
 					{ count: 4202, date: '2021-02' },
 					{ count: 1511, date: '2021-03' },
@@ -1128,7 +1134,8 @@ describe('AppStatsController', function () {
 					unique_searches: 5,
 					total_searches: 20,
 					new_users: 2,
-					inactive_users: 1
+					new_inactive_users: 1,
+					total_inactive_users: 90
 				},
 				searchBar : [
 					{ count: 3311, date: '2021-01' },

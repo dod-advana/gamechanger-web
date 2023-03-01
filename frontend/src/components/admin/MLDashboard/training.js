@@ -3,6 +3,8 @@ import { Tooltip, Typography, Input, IconButton, Checkbox } from '@material-ui/c
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 import Modal from 'react-modal';
 import styled from 'styled-components';
 import moment from 'moment';
@@ -171,6 +173,7 @@ const sendUserAggData = async (startDate, endDate) => {
 		const params = {
 			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
 			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
+			limit: null,
 		};
 		const userData = await gameChangerAPI.getUserAggregations(params);
 		const searchData = await gameChangerAPI.getSearchPdfMapping(params);
@@ -178,7 +181,7 @@ const sendUserAggData = async (startDate, endDate) => {
 			searchData: searchData.data.data,
 			userData: userData.data.users,
 		};
-		gameChangerAPI.sendUserAggregations(mlParams);
+		gameChangerAPI.sendUserAggregationsTrain(mlParams);
 	} catch (e) {
 		console.error(e);
 	}
@@ -463,7 +466,7 @@ const getConnectionStatus = (props) => {
 export default (props) => {
 	// Set state variables
 	const [APITrainData, setAPITrainData] = useState({});
-	const [startDate, setStartDate] = useState(moment().subtract(3, 'd').set({ hour: 0, minute: 0 })._d);
+	const [startDate, setStartDate] = useState(moment().subtract(6, 'months').set({ hour: 0, minute: 0 })._d);
 	const [endDate, setEndDate] = useState(moment()._d);
 	const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
 	const [s3List, setS3List] = useState([]);

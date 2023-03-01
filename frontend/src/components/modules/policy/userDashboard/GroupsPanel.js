@@ -10,13 +10,7 @@ import { getOrgToOrgQuery, getTypeQuery } from '../../../../utils/gamechangerUti
 import ExportResultsDialog from '../../../export/ExportResultsDialog';
 import GCGroupCard from '../../../cards/GCGroupCard';
 import GCButton from '../../../common/GCButton';
-import {
-	handleGenerateGroup,
-	getSearchObjectFromString,
-	setCurrentTime,
-	getUserData,
-	setState,
-} from '../../../../utils/sharedFunctions';
+import { handleGenerateGroup, setCurrentTime, getUserData, setState } from '../../../../utils/sharedFunctions';
 import GCCloseButton from '../../../common/GCCloseButton';
 
 const StyledPlaceHolder = styled.div`
@@ -389,7 +383,7 @@ export default function GroupsPanel(props) {
 									prevSearchText: '',
 								})
 							}
-							searchObject={getSearchObjectFromString(state.prevSearchText ? state.prevSearchText : '')}
+							searchObject={{ search: state.prevSearchText ? state.prevSearchText : '' }}
 							setCurrentTime={setCurrentTime}
 							selectedDocuments={state.selectedDocuments}
 							isSelectedDocs={true}
