@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import propTypes from 'prop-types';
 import { trackEvent } from '../../telemetry/Matomo';
 import { setState, handleSaveFavoriteDocument } from '../../../utils/sharedFunctions';
@@ -435,10 +435,6 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	useEffect(() => {
 		setLoading(resultsLoading || filterCountsLoading || updateFilters);
 	}, [resultsLoading, filterCountsLoading, updateFilters]);
-
-	useEffect(() => {
-		if (!viewableDocs.length) window.scrollTo(0, 0);
-	}, [viewableDocs]);
 
 	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
@@ -927,7 +923,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			<div
 				style={{
 					marginTop: 20,
-					display: leftPanelOpen ? 'block' : 'none',
+					display: leftPanelOpen && stepIndex !== 1 ? 'block' : 'none',
 					maxWidth: 'calc(16.666667% + 20px)',
 					flexBasis: 'calc(16.666667% + 20px)',
 				}}
@@ -963,8 +959,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					)}
 				</div>
 			</div>
-			{((returnedDocs.length <= 0 && !loading) ||
-				stepIndex === 1) /*not sure why stepIndex check is necessary*/ && (
+			{((returnedDocs.length <= 0 && !loading) || stepIndex === 1) && (
 				<div style={{ maxWidth: 'calc(100% - 20px)', flexBasis: 'calc(100% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
@@ -1046,7 +1041,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					</div>
 				</div>
 			)}
-			{!loading && returnedDocs.length > 0 && (
+			{!loading && returnedDocs.length > 0 && stepIndex !== 1 && (
 				<>
 					<div
 						style={{
