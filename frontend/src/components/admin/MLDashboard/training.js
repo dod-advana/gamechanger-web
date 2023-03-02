@@ -873,14 +873,14 @@ export default (props) => {
 										<div className="code-container" style={{ padding: '15px', color: 'black' }}>
 											Files
 											<ul>
-												{row.original.files.map((d) => (
-													<li key={d}>{d}</li>
+												{row.original.files.map((d, indexAsKey) => (
+													<li key={indexAsKey}>{d}</li>
 												))}
 											</ul>
 											Directories
 											<ul>
-												{row.original.subdirectories.map((d) => (
-													<li key={d}>{d}</li>
+												{row.original.subdirectories.map((d, indexAsKey) => (
+													<li key={indexAsKey}>{d}</li>
 												))}
 											</ul>
 										</div>

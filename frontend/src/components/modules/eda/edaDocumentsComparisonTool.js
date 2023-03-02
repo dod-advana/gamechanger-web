@@ -533,13 +533,13 @@ const EDADocumentsComparisonTool = ({
 		if (doc.paragraphs) {
 			return doc.paragraphs
 				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph) => {
+				.map((paragraph, indexAsKey) => {
 					let blockquoteClass = 'searchdemo-blockquote-sm';
 					const pOpen = selectedParagraph?.id === paragraph.id;
 					const isHighlighted = pOpen && docOpen;
 					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 					return (
-						<div key={paragraph.id} style={{ position: 'relative' }}>
+						<div key={indexAsKey} style={{ position: 'relative' }}>
 							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
 							<div
 								className={blockquoteClass}
@@ -667,13 +667,13 @@ const EDADocumentsComparisonTool = ({
 		if (doc.pageHits) {
 			return doc.pageHits
 				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph) => {
+				.map((paragraph, indexAsKey) => {
 					let blockquoteClass = 'searchdemo-blockquote-sm';
 					const pOpen = selectedParagraph?.id === paragraph.id;
 					const isHighlighted = pOpen && docOpen;
 					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 					return (
-						<div key={paragraph.id} style={{ position: 'relative' }}>
+						<div key={indexAsKey} style={{ position: 'relative' }}>
 							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
 							<div
 								className={blockquoteClass}
@@ -1060,9 +1060,9 @@ const EDADocumentsComparisonTool = ({
 							<Typography variant="body1" style={{ marginBottom: 10 }}>
 								Paragraph Input
 							</Typography>
-							{paragraphs.map((paragraph) => (
+							{paragraphs.map((paragraph, indexAsKey) => (
 								<div
-									key={paragraph.id}
+									key={indexAsKey}
 									style={{
 										border: paragraph.id === selectedInput ? 'none' : `2px solid #B6C6D8`,
 										boxShadow: paragraph.id === selectedInput ? '0px 3px 6px #00000029' : 'none',
@@ -1149,11 +1149,11 @@ const EDADocumentsComparisonTool = ({
 									<div className={'text'}>No results for paragraph found</div>
 								</div>
 							)}
-							{viewableDocs.map((doc) => {
+							{viewableDocs.map((doc, indexAsKey) => {
 								const docOpen = collapseKeys[doc.filename] ?? false;
 								const displayTitle = doc.title;
 								return (
-									<div key={doc.id}>
+									<div key={indexAsKey}>
 										<div
 											className="searchdemo-modal-result-header"
 											style={{ marginTop: 0 }}

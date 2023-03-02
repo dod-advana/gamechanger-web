@@ -161,7 +161,7 @@ const JBookFAQ = () => {
 	}, [selectedCategory, onScroll]);
 
 	return [
-		<div style={{ width: 900 }}>
+		<div key={'block1'} style={{ width: 900 }}>
 			<Typography style={{ fontFamily: 'Montserrat', fontSize: 38, fontWeight: 'bold', marginBottom: 20 }}>
 				Your Questions Answered
 			</Typography>
@@ -177,12 +177,13 @@ const JBookFAQ = () => {
 				We’ll continuously update this page with new insights and information. So check back often.
 			</Typography>
 		</div>,
-		<div style={{ display: 'flex' }}>
+		<div key={'block2'} style={{ display: 'flex' }}>
 			<StyledCategories>
 				{categoryOrder.map((cat, i) => {
 					const category = cat.toLowerCase();
 					return (
 						<StyledListItem
+							key={category}
 							id={category}
 							selected={selectedCategory}
 							onClick={() => {
@@ -200,14 +201,19 @@ const JBookFAQ = () => {
 				{categoryOrder.map((cat, i) => {
 					const category = cat.toLowerCase();
 					return (
-						<div style={{ marginBottom: 30 }}>
+						<div key={'block6'} style={{ marginBottom: 30 }}>
 							<div id="spacer" ref={categoryRefs.current[i]} style={{ height: 30 }} />
-							<Typography variant="h5" style={{ marginBottom: 15 }}>
+							<Typography key={category} variant="h5" style={{ marginBottom: 15 }}>
 								{cat}
 							</Typography>
 							{FAQdata[category] ? (
 								FAQdata[category].map((obj) => (
-									<GCAccordion expanded={false} header={obj.question} contentAlign="left">
+									<GCAccordion
+										key={obj.question}
+										expanded={false}
+										header={obj.question}
+										contentAlign="left"
+									>
 										<div
 											dangerouslySetInnerHTML={{
 												__html: sanitizeHtml(obj.answer),
@@ -216,7 +222,9 @@ const JBookFAQ = () => {
 									</GCAccordion>
 								))
 							) : (
-								<Typography variant="body">None for now, please check back later.</Typography>
+								<Typography key={cat} variant="body">
+									None for now, please check back later.
+								</Typography>
 							)}
 						</div>
 					);

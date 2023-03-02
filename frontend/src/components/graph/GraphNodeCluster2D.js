@@ -554,10 +554,10 @@ export default function GraphNodeCluster2D(props) {
 						{!runningQuery &&
 							Object.keys(legendData)
 								.sort()
-								.map((key) => {
+								.map((key, indexAsKey) => {
 									return (
 										<GCTooltip
-											key={key}
+											key={indexAsKey}
 											title={`${legendData[key].count} node${
 												legendData[key].count > 1 ? 's' : ''
 											} associated`}
@@ -565,7 +565,7 @@ export default function GraphNodeCluster2D(props) {
 											enterDelay={30}
 										>
 											<StyledLegendClickable
-												key={legendData[key].name}
+												key={indexAsKey + '1'}
 												onClick={(event) => handleLegendNodeClick(key, event.target)}
 												typesSelected={nodeLabelSelected ? [nodeLabelSelected] : []}
 												type={key}
@@ -596,13 +596,10 @@ export default function GraphNodeCluster2D(props) {
 				return (
 					<>
 						{!runningQuery &&
-							Object.keys(edgeLabelPatterns).map((label) => {
+							Object.keys(edgeLabelPatterns).map((label, indexAsKey) => {
 								if (edgeLabels[label] > 0) {
 									return (
-										<div
-											style={styles.legendRow}
-											key={`${edgeLabelPatterns[label].label}-legend-item`}
-										>
+										<div style={styles.legendRow} key={indexAsKey}>
 											<EdgeLegendItem
 												edgePattern={edgeLabelPatterns[label].pattern}
 												height={10}
@@ -768,11 +765,11 @@ export default function GraphNodeCluster2D(props) {
 
 	const renderFilterTabs = (filterTab2dArray, activeFilterTab) => {
 		return filterTab2dArray.map((row) => (
-			<div style={legendStyles.tabsContainer}>
-				{row.map((tab) => (
-					<GCTooltip title={tab} enterDelay={30}>
+			<div key={row[0]} style={legendStyles.tabsContainer}>
+				{row.map((tab, indexAsKey) => (
+					<GCTooltip key={indexAsKey} title={tab} enterDelay={30}>
 						<Typography
-							key={tab}
+							key={indexAsKey + '1'}
 							style={
 								activeFilterTab === tab
 									? { ...legendStyles.tab, ...legendStyles.activeTab }
@@ -790,10 +787,11 @@ export default function GraphNodeCluster2D(props) {
 	};
 
 	const renderNodesList = (nodesInGroup) => {
-		return nodesInGroup.map((node) => {
+		return nodesInGroup.map((node, indexAsKey) => {
 			let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
 			return (
 				<GCTooltip
+					key={indexAsKey}
 					title={isTopicOrEntityNode || node.label === 'UKN_Document' ? '' : node.display_title_s}
 					arrow
 					style={{ zIndex: 99999 }}

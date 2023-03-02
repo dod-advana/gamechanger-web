@@ -993,7 +993,7 @@ const cardHandler = {
 					Value: (
 						<div>
 							{projectData.keywords && projectData.keywords.length > 0
-								? projectData.keywords.map((keyword) => <p>{keyword}</p>)
+								? projectData.keywords.map((keyword, indexAsKey) => <p key={indexAsKey}>{keyword}</p>)
 								: 'None'}
 						</div>
 					),

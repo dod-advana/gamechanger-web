@@ -150,7 +150,7 @@ const recRecentlyViewedOnClick = (cloneData, dispatch, pub) => {
 		: setState(dispatch, { searchText: pub.name, runSearch: true });
 };
 
-const renderRecentSearches = (search, state, dispatch) => {
+const renderRecentSearches = (search, state, dispatch, indexAsKey) => {
 	const {
 		searchText,
 		orgFilterString,
@@ -169,6 +169,7 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 	return (
 		<RecentSearchContainer
+			key={indexAsKey}
 			onClick={() => {
 				const orgFilters = { ...state.searchSettings.orgFilter };
 				if (orgFilterString.length > 1) {
@@ -400,9 +401,9 @@ const handlePageLoad = async (props) => {
 	handleLastOpened(pdf_opened, state, dispatch, cancelToken, gameChangerAPI);
 };
 
-const recRecentlyViewedMap = (cloneData, dispatch, pub) => {
+const recRecentlyViewedMap = (cloneData, dispatch, pub, indexAsKey) => {
 	return (
-		<div className="topPublication">
+		<div key={indexAsKey} className="topPublication">
 			{pub.imgSrc !== 'error' ? (
 				<img className="image" src={pub.imgSrc} alt="thumbnail" title={pub.name} />
 			) : (
@@ -541,7 +542,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
 					{recentSearchesLoaded &&
 						recentSearches.length > 0 &&
-						recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+						recentSearches.map((search, indexAsKey) =>
+							renderRecentSearches(search, state, dispatch, indexAsKey)
+						)}
 					{recentSearchesLoaded && recentSearches.length === 0 && (
 						<div className="col-xs-12" style={{ height: '140px' }}>
 							<Typography style={styles.containerText}>
@@ -571,7 +574,7 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
 					{lastOpened.length > 0 &&
 						lastOpened[0].imgSrc &&
-						lastOpened.map((pub) => recRecentlyViewedMap(cloneData, dispatch, pub))}
+						lastOpened.map((pub, indexAsKey) => recRecentlyViewedMap(cloneData, dispatch, pub, indexAsKey))}
 					{loadingLastOpened && lastOpened.length === 0 && (
 						<div className="col-xs-12">
 							<LoadingIndicator
@@ -595,7 +598,7 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={recDocs} title="Recommended For You" width="215px">
 					{recDocs.length > 0 &&
 						recDocs[0].imgSrc &&
-						recDocs.map((pub) => recRecentlyViewedMap(cloneData, dispatch, pub))}
+						recDocs.map((pub, indexAsKey) => recRecentlyViewedMap(cloneData, dispatch, pub, indexAsKey))}
 					{loadingrecDocs && recDocs.length === 0 && (
 						<div className="col-xs-12">
 							<LoadingIndicator
@@ -621,8 +624,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 					{crawlerSources.length > 0 &&
 						crawlerSources[0].imgSrc &&
-						crawlerSources.map((source) => (
+						crawlerSources.map((source, indexAsKey) => (
 							<SourceContainer
+								key={indexAsKey}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneData.clone_name),

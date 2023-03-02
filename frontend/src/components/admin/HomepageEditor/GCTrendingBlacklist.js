@@ -112,9 +112,9 @@ export default () => {
 					<div style={{ width: '44%' }}>Added By</div>
 					<div style={{ width: '9%', marginLeft: '1px' }}>Delete</div>
 				</ListItem>
-				{blacklist.map(({ search_text, added_by }) => {
+				{blacklist.map(({ search_text, added_by }, indexAsKey) => {
 					return (
-						<ListItem key={search_text}>
+						<ListItem key={indexAsKey}>
 							<div style={{ width: '50%' }}>{search_text}</div>
 							<div style={{ width: '40%' }}>{added_by}</div>
 							<DeleteButton style={{ width: '10%' }} onClick={() => handleDelete(search_text)}>

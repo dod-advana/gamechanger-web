@@ -596,8 +596,8 @@ const GCDataStatusTracker = (props) => {
 									return 1;
 								else return 0;
 							})
-							.map((crawler) => (
-								<MenuItem value={crawler} key={crawler}>
+							.map((crawler, indexAsKey) => (
+								<MenuItem value={crawler} key={indexAsKey}>
 									{crawlerInfoMap[crawler].displayName}
 								</MenuItem>
 							))}
