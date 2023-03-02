@@ -106,9 +106,12 @@ const ClassificationScoreCard = (props) => {
 				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
 					{`${portfolioName} Label`}
 				</Typography>
-				{scores.map((score) => {
+				{scores.map((score, indexAsKey) => {
 					return (
-						<div style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}>
+						<div
+							key={indexAsKey}
+							style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}
+						>
 							<Typography
 								variant="h5"
 								style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
@@ -225,9 +228,9 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions
 								.filter((pd) => pd.value !== 'N/A' && pd.value !== 'Not applicable for this item.')
-								.map((pd) => {
+								.map((pd, indexAsKey) => {
 									return (
-										<>
+										<div key={indexAsKey}>
 											<Typography
 												key={pd.title}
 												variant="h3"
@@ -247,7 +250,7 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 													}),
 												}}
 											/>
-										</>
+										</div>
 									);
 								})}
 						</Typography>
@@ -261,9 +264,10 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 const Accomplishments = ({ accomplishments }) => {
 	return (
 		<StyledTableContainer>
-			{accomplishments.map((accomp) => {
+			{accomplishments.map((accomp, indexAsKey) => {
 				return (
 					<SimpleTable
+						key={indexAsKey}
 						tableClass={'magellan-table'}
 						zoom={1}
 						rows={accomp.data}

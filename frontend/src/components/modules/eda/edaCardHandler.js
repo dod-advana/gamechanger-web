@@ -247,12 +247,12 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 	}
 	if (contractMods.length > 0) {
 		listItems.push(
-			<>
+			<div key={'headers'}>
 				<ListItem>
 					<ListItemText style={{ textAlign: 'end' }} secondary={'(S) Signature Date | (E) Effective Date'} />
 				</ListItem>
 				<Divider light={true} />
-			</>
+			</div>
 		);
 	}
 
@@ -272,7 +272,7 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 		}
 
 		listItems.push(
-			<>
+			<div key={modNumber}>
 				<ListItem>
 					{item.modification_eda_ext === modNumber && (
 						<ListItemIcon style={{ minWidth: '54px' }}>
@@ -290,7 +290,7 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 					/>
 				</ListItem>
 				<Divider light={true} />
-			</>
+			</div>
 		);
 	}
 
@@ -566,13 +566,13 @@ const cardHandler = {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row) => {
+									{rows.map((row, indexAsKey2) => {
 										return (
-											<TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-												{tableColumns.map((column) => {
+											<TableRow hover role="checkbox" tabIndex={-1} key={indexAsKey2 + 'row'}>
+												{tableColumns.map((column, indexAsKey) => {
 													const value = row[column.id];
 													return (
-														<TableCell key={column.id} align={column.align}>
+														<TableCell key={indexAsKey} align={column.align}>
 															{column.format && typeof value === 'number'
 																? column.format(value)
 																: value}

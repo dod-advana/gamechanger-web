@@ -1385,10 +1385,10 @@ function PolicyGraphView(props) {
 					)}
 					{Object.keys(legendData)
 						.sort((x, y) => (x === 'All Documents' ? -1 : y === 'All Documents' ? 1 : 0))
-						.map((key) => {
+						.map((key, indexAsKey) => {
 							return (
 								<GCTooltip
-									key={key}
+									key={indexAsKey}
 									title={`${docOrgNumbers[key]} node${docOrgNumbers[key] > 1 ? 's' : ''} associated`}
 									arrow
 									enterDelay={30}

@@ -147,7 +147,7 @@ const GCAboutUs = (props) => {
 
 	const renderAboutGC = () => {
 		return [
-			<div style={{ margin: '0 0px 30px 100px', display: 'flex' }}>
+			<div key={'block'} style={{ margin: '0 0px 30px 100px', display: 'flex' }}>
 				<div
 					style={{
 						display: 'flex',
@@ -192,7 +192,7 @@ const GCAboutUs = (props) => {
 					src={GCLogo}
 				></img>
 			</div>,
-			<div style={{ backgroundColor: '#ECF1F7' }}>
+			<div key={'block2'} style={{ backgroundColor: '#ECF1F7' }}>
 				<div style={{ margin: '0 350px 0 100px', paddingBottom: '30px' }}>
 					<div style={{ padding: '30px 0 30px 0' }}>
 						<Typography variant="h5" display="inline">
@@ -261,7 +261,7 @@ const GCAboutUs = (props) => {
 					</div>
 				</div>
 			</div>,
-			<div style={{ backgroundColor: '#0000000A' }}>
+			<div key={'block3'} style={{ backgroundColor: '#0000000A' }}>
 				<div
 					style={{
 						display: 'flex',
@@ -320,7 +320,7 @@ const GCAboutUs = (props) => {
 
 	const renderFAQ = () => {
 		return [
-			<div style={{ margin: '0 0 30px 100px' }}>
+			<div key={'block4'} style={{ margin: '0 0 30px 100px' }}>
 				<Typography variant="h2">
 					Your Questions Answered
 					<br />
@@ -330,12 +330,13 @@ const GCAboutUs = (props) => {
 					page with new insights and information, so check back often.
 				</Typography>
 			</div>,
-			<div id="faq-section" style={{ margin: '30px 0 30px 100px', display: 'flex' }}>
+			<div key={'block5'} id="faq-section" style={{ margin: '30px 0 30px 100px', display: 'flex' }}>
 				<StyledCategories>
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();
 						return (
 							<StyledListItem
+								key={i}
 								id={category}
 								selected={selectedCategory}
 								onClick={() => {
@@ -353,14 +354,19 @@ const GCAboutUs = (props) => {
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();
 						return (
-							<div style={{ marginBottom: 30 }}>
+							<div key={'block6'} style={{ marginBottom: 30 }}>
 								<div id="spacer" ref={categoryRefs.current[i]} style={{ height: 30 }} />
-								<Typography variant="h5" style={{ marginBottom: 15 }}>
+								<Typography key={category} variant="h5" style={{ marginBottom: 15 }}>
 									{cat}
 								</Typography>
 								{FAQdata[category] ? (
 									FAQdata[category].map((obj) => (
-										<GCAccordion expanded={false} header={obj.question} contentAlign="left">
+										<GCAccordion
+											key={obj.question}
+											expanded={false}
+											header={obj.question}
+											contentAlign="left"
+										>
 											<div
 												dangerouslySetInnerHTML={{
 													__html: sanitizeHtml(obj.answer),
@@ -369,7 +375,9 @@ const GCAboutUs = (props) => {
 										</GCAccordion>
 									))
 								) : (
-									<Typography variant="body">None for now, please check back later.</Typography>
+									<Typography key={cat} variant="body">
+										None for now, please check back later.
+									</Typography>
 								)}
 							</div>
 						);

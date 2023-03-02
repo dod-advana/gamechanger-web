@@ -313,8 +313,8 @@ const sourceInteractionsColumns = [
 		width: 300,
 		Cell: (row) => (
 			<TableRow>
-				{Object.entries(row.value).map(([userId, count]) => (
-					<li className="source-interaction-bullet">
+				{Object.entries(row.value).map(([userId, count], indexAsKey) => (
+					<li key={indexAsKey} className="source-interaction-bullet">
 						{userId} : {count}
 					</li>
 				))}
@@ -327,8 +327,8 @@ const sourceInteractionsColumns = [
 		width: 450,
 		Cell: (row) => (
 			<TableRow>
-				{Object.entries(row.value).map(([action, count]) => (
-					<li className="source-interaction-bullet">
+				{Object.entries(row.value).map(([action, count], indexAsKey) => (
+					<li key={indexAsKey} className="source-interaction-bullet">
 						{action} : {count}
 					</li>
 				))}
@@ -341,8 +341,8 @@ const sourceInteractionsColumns = [
 		width: 400,
 		Cell: (row) => (
 			<TableRow>
-				{Object.entries(row.value).map(([filename, count]) => (
-					<li className="source-interaction-bullet">
+				{Object.entries(row.value).map(([filename, count], indexAsKey) => (
+					<li key={indexAsKey} className="source-interaction-bullet">
 						{filename} : {count}
 					</li>
 				))}
@@ -363,8 +363,8 @@ const subComponent = (row) => {
 				<Grid item xs={4}>
 					<p>Opened:</p>
 					<ol>
-						{row.original.opened.map((o) => (
-							<li>
+						{row.original.opened.map((o, indexAsKey) => (
+							<li key={indexAsKey}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -380,8 +380,8 @@ const subComponent = (row) => {
 				<Grid item xs={3}>
 					<p>Exported:</p>
 					<ol>
-						{row.original.ExportDocument.map((e) => (
-							<li>
+						{row.original.ExportDocument.map((e, indexAsKey) => (
+							<li key={indexAsKey}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -397,8 +397,8 @@ const subComponent = (row) => {
 				<Grid item xs={4}>
 					<p>Favorited:</p>
 					<ol>
-						{row.original.Favorite.map((f) => (
-							<li>
+						{row.original.Favorite.map((f, indexAsKey) => (
+							<li key={indexAsKey}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -773,12 +773,12 @@ export default () => {
 								margin: '10px',
 							}}
 						>
-							{cloneList.map((clone) => {
+							{cloneList.map((clone, indexAsKey) => {
 								return (
 									<MenuItem
 										style={{ fontSize: 'small', display: 'flex' }}
 										value={`${clone.category_id}-${clone.name}`}
-										key={clone.name}
+										key={indexAsKey}
 									>
 										{clone.name}
 									</MenuItem>

@@ -193,9 +193,10 @@ const DropdownRadioButton = ({
 			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
 				<div style={{ display: 'flex', flexDirection: 'column' }}>
 					{radioButton !== 'Other' ? (
-						Object.keys(data).map((name) => {
+						Object.keys(data).map((name, ind) => {
 							return (
 								<DomainCheckbox
+									key={ind}
 									name={name}
 									secondary={data[name]}
 									reviewData={reviewData}
@@ -1178,9 +1179,10 @@ const AIDomainValue = React.memo((props) => {
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				<div style={{ display: 'flex', flexDirection: 'row' }}>
 					<div style={{ width: '100%', margin: '15px 0px' }}>
-						{radioButtonData.map((data) => {
+						{radioButtonData.map((data, ind) => {
 							return (
 								<DropdownRadioButton
+									key={ind}
 									reviewData={reviewData}
 									reviewDataProp={'domainTask'}
 									setReviewData={setReviewData}

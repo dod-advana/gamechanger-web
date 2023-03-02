@@ -251,10 +251,10 @@ const GCFooter = (props) => {
 						Select clones to access
 					</Typography>
 					<FormGroup style={{ margin: '0px 10px', width: '100%', flexDirection: 'row' }}>
-						{cloneMeta.map((clone) => {
+						{cloneMeta.map((clone, indexAsKey) => {
 							return (
 								<FormControlLabel
-									key={clone.id}
+									key={indexAsKey}
 									name={clone.clone_name}
 									value={clone}
 									control={
@@ -303,7 +303,7 @@ const GCFooter = (props) => {
 	const getExtraLinks = () => {
 		const extraLinks = [];
 		if (cloneName === 'gamechanger') {
-			extraLinks.push(<FAQLinkButton />);
+			extraLinks.push(<FAQLinkButton key={extraLinks.length} />);
 		}
 		extraLinks.push(
 			<LinkButton key="disclaimer" onClick={() => setTrackingModalOpen(true)}>

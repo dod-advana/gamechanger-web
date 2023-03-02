@@ -98,7 +98,7 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 		return op.map((option, index) => {
 			return (
 				<FormControlLabel
-					key={`${option} ${index}`}
+					key={`${index}`}
 					value={`${option}`}
 					classes={{
 						root: classes.rootLabel,
@@ -107,6 +107,7 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 					data-cy={`filter-option-${option}`}
 					control={
 						<Checkbox
+							key={`${index} 1`}
 							classes={{
 								root: classes.rootButton,
 								checked: classes.checkedButton,
@@ -160,14 +161,14 @@ const JBookMultiSelectFilter = ({ state, dispatch, classes, filter, options }) =
 				showClear={showClear}
 				isChecked={isChecked}
 			>
-				{docs.map((doctype) => {
+				{docs.map((doctype, indexAsKey) => {
 					return (
-						<>
+						<div key={indexAsKey}>
 							<Typography style={{ width: '100%', display: 'inline-flex', fontSize: '20' }}>
 								{map[doctype]}
 							</Typography>
 							{renderAppropriationNumberOptions(options[doctype], doctype)}
-						</>
+						</div>
 					);
 				})}
 			</MultiSelectFilter>

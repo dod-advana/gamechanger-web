@@ -158,10 +158,7 @@ export default function GCResponsibilityResults({
 															if (isHighlighted)
 																blockquoteClass += ' searchdemo-blockquote-sm-active';
 															return (
-																<div
-																	key={key + respKey}
-																	style={{ position: 'relative' }}
-																>
+																<div key={respKey} style={{ position: 'relative' }}>
 																	<div
 																		className="searchdemo-quote-link"
 																		onClick={(e) => {

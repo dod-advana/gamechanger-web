@@ -148,9 +148,9 @@ export default ({
 					<Typography variant="h4" style={styles.modalHeaders}>
 						Input Fields
 					</Typography>
-					{cloneTableMetaData.stringFields.map((field) => (
+					{cloneTableMetaData.stringFields.map((field, indexAsKey) => (
 						<TextField
-							key={field.key}
+							key={indexAsKey}
 							label={getCloneModalTextDisplayName(field)}
 							value={editCloneData[field.key]}
 							onChange={(event) => handleTextChange(event, field.key)}
@@ -165,9 +165,9 @@ export default ({
 					<Typography variant="h4" style={styles.modalHeaders}>
 						Boolean Fields
 					</Typography>
-					{cloneTableMetaData.booleanFields.map((field) => (
+					{cloneTableMetaData.booleanFields.map((field, indexAsKey) => (
 						<FormControlLabel
-							key={field.key}
+							key={indexAsKey}
 							control={
 								<GCCheckbox
 									checked={editCloneData[field.key]}
@@ -236,15 +236,17 @@ export default ({
 				</Typography>
 				<div>
 					{editCloneData.permissions &&
-						editCloneData.permissions.map((permission) => (
-							<div style={{ marginBottom: 10 }}>
+						editCloneData.permissions.map((permission, indexAsKey) => (
+							<div key={indexAsKey} style={{ marginBottom: 10 }}>
 								<Input
+									key={permission}
 									id={`${permission}-input`}
 									className={classes.inputBox}
 									value={permission}
 									disabled={true}
 								/>
 								<GCButton
+									key={permission + 'button'}
 									id={`${permission}-delete`}
 									onClick={() => deletePermissions(permission)}
 									style={{
@@ -308,6 +310,7 @@ export default ({
 									const tr = index === tabList.length - 1 ? '5px' : '0';
 									return (
 										<Tab
+											key={index}
 											style={{
 												...styles.tabStyle,
 												...(tabIndex === index ? styles.tabSelectedStyle : {}),

@@ -246,7 +246,7 @@ const PortfolioBuilder = (props) => {
 		for (let user of users) {
 			if (getName(user) !== '') {
 				portfolioUsers.push(
-					<Pill>
+					<Pill key={user.toString() + '1'}>
 						<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
 					</Pill>
 				);
@@ -262,7 +262,7 @@ const PortfolioBuilder = (props) => {
 		if (tags.length > 0) {
 			portfolioTags = tags.map((tag, index) => {
 				return (
-					<Pill key={tag}>
+					<Pill key={index}>
 						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
 					</Pill>
 				);
@@ -273,12 +273,12 @@ const PortfolioBuilder = (props) => {
 	};
 
 	const listPortfolios = (pList) => {
-		let portfolios = pList.map((portfolio) => {
+		let portfolios = pList.map((portfolio, indexAsKey) => {
 			const portfolioAdmins = [];
 			for (let user of portfolio.admins) {
 				if (getName(user) !== '') {
 					portfolioAdmins.push(
-						<Pill>
+						<Pill key={user}>
 							<div style={{ marginRight: '5px', marginLeft: '5px' }}>{getName(user)}</div>
 						</Pill>
 					);
@@ -296,14 +296,14 @@ const PortfolioBuilder = (props) => {
 			}
 
 			return (
-				<div style={portfolioStyles.portfolio} key={portfolio.id}>
+				<div style={portfolioStyles.portfolio} key={indexAsKey}>
 					<div style={portfolioStyles.portfolioHeader}>
 						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
 							{portfolio.name}
 						</Typography>
 						<div>
 							{editIcon && (
-								<>
+								<div>
 									<IconButton
 										aria-label="close"
 										style={{
@@ -335,7 +335,7 @@ const PortfolioBuilder = (props) => {
 									>
 										<CancelIcon style={{ fontSize: 30 }} />
 									</IconButton>
-								</>
+								</div>
 							)}
 						</div>
 					</div>
@@ -370,7 +370,7 @@ const PortfolioBuilder = (props) => {
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
 					{portfolio.name === 'AI Inventory' && (
-						<>
+						<div>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
 								<GCButton
@@ -383,7 +383,7 @@ const PortfolioBuilder = (props) => {
 									AI Inventory Bulk Upload
 								</GCButton>
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 			);
@@ -482,7 +482,7 @@ const PortfolioBuilder = (props) => {
 	}, [selectedFile, modalData]);
 
 	return (
-		<>
+		<div>
 			<div
 				style={{
 					width: '100%',
@@ -557,7 +557,7 @@ const PortfolioBuilder = (props) => {
 				</div>
 			</div>
 			{user && (
-				<>
+				<div>
 					<JbookPortfolioModal
 						showModal={showModal}
 						setShowModal={closeModalCallback}
@@ -681,7 +681,7 @@ const PortfolioBuilder = (props) => {
 							</Typography>
 
 							{results !== null && (
-								<>
+								<div>
 									<Typography style={{ fontFamily: 'Montserrat', fontSize: 16 }}>Results</Typography>
 									<ul>
 										<li>Rows Written: {results.written}</li>
@@ -696,7 +696,7 @@ const PortfolioBuilder = (props) => {
 												: JSON.stringify(results.failedRows)}
 										</li>
 									</ul>
-								</>
+								</div>
 							)}
 						</DialogContent>
 						<DialogActions>
@@ -722,9 +722,9 @@ const PortfolioBuilder = (props) => {
 							</GCButton>
 						</DialogActions>
 					</Dialog>
-				</>
+				</div>
 			)}
-		</>
+		</div>
 	);
 };
 

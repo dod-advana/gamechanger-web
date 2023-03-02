@@ -177,6 +177,7 @@ const DocumentResult = ({
 				{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
 					return (
 						<EntityResult
+							key={entKey}
 							setCollapseKeys={setCollapseKeys}
 							collapseKeys={collapseKeys}
 							doc={doc}

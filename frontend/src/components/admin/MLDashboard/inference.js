@@ -883,9 +883,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.sentence).map((name) => {
+									{Object.keys(downloadedModelsList.sentence).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);
@@ -905,9 +909,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.qexp).map((name) => {
+									{Object.keys(downloadedModelsList.qexp).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);
@@ -926,9 +934,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
+									{Object.keys(downloadedModelsList.jbook_qexp).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);
@@ -947,9 +959,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.topic_models).map((name) => {
+									{Object.keys(downloadedModelsList.topic_models).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);
@@ -968,9 +984,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.transformers).map((name) => {
+									{Object.keys(downloadedModelsList.transformers).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);
@@ -991,9 +1011,13 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.sentence).map((name) => {
+									{Object.keys(downloadedModelsList.sentence).map((name, indexAsKey) => {
 										return (
-											<MenuItem style={{ fontSize: 'small', display: 'flex' }} value={name}>
+											<MenuItem
+												key={indexAsKey}
+												style={{ fontSize: 'small', display: 'flex' }}
+												value={name}
+											>
 												{name}
 											</MenuItem>
 										);

@@ -91,7 +91,7 @@ const TabView = (props) => {
 						<StyledTab
 							active={tabName === tmpTabName.name ? 'true' : 'false'}
 							title={tmpTabName.name}
-							key={tmpTabName.name}
+							key={idx}
 							first={idx === 0 ? 'true' : 'false'}
 							last={idx === tabNames.length - 1 ? 'true' : 'false'}
 							primary_color={toolStyle.primaryColor}
