@@ -259,15 +259,16 @@ class Reports {
 	prepareXlsxJson(data, portfolio) {
 		// NOTE: not sure if all the Nullish Coalescing Operators(??) are necessary, does database guarentee no undefined values?
 		const isAiInventory = portfolio === 'AI Inventory';
+		console.log(data);
 		const jsonData = data.map((doc) => ({
-			'Primary Reviewer': doc.primary_reviewer_s ?? '',
+			'Primary Reviewer': doc.primaryReviewer ?? '',
 			...(isAiInventory
 				? {
-						'AI Analysis': doc.primary_class_label_s ?? '',
-						'Service/DoD Component Reviewer': doc.service_reviewer_s ?? '',
+						'AI Analysis': doc.latestClassLabel ?? '',
+						'Service/DoD Component Reviewer': doc.serviceReviewer ?? '',
 						'Planned Transition Partner': doc.primaryPlannedTransitionPartner ?? '',
 				  }
-				: { Label: doc.primary_class_label_s ?? '' }),
+				: { Label: doc.latestClassLabel ?? '' }),
 			'Primary Reviewer Notes': doc.primaryReviewNotes ?? '',
 			...(isAiInventory
 				? { 'FY (BY1)': doc.budgetYear ?? '', 'Doc Type': doc.budgetType ?? '' }
@@ -285,7 +286,9 @@ class Reports {
 			'BY3 Funding': doc.proj_fund_by3_d ?? doc.p4083_toa_by3_d ?? '',
 			'BY4 Funding': doc.proj_fund_by4_d ?? doc.p4084_toa_by4_d ?? '',
 			'BY5 Funding': doc.proj_fund_by5_d ?? doc.p4085_toa_by5_d ?? '',
-			...(isAiInventory ? { 'Has Keywords': doc.hasKeywords ? 'Yes' : 'No' } : { 'Portfolio Name': '' }),
+			...(isAiInventory
+				? { 'Has Keywords': doc.hasKeywords ? 'Yes' : 'No' }
+				: { 'Portfolio Name': doc.portfolioName }),
 		}));
 		return jsonData;
 	}
