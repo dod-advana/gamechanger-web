@@ -81,7 +81,10 @@ export default ({
 					}
 
 					userDivs.push(
-						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+						<div
+							key={searchFilterText}
+							style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+						>
 							<Typography variant="h5" display="inline" style={{ fontWeight: 700 }}>
 								{user.first_name}, {user.last_name}
 							</Typography>
