@@ -163,9 +163,10 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 	const formattedSourceFilter = orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ');
 	const formattedTypeFilter = typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ');
-	const formattedPublicationDate = publicationDateAllTime
-		? 'All'
-		: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
+	const formattedPublicationDate =
+		publicationDateAllTime || publicationDateFilter[0] == null || publicationDateFilter[0] == null
+			? 'All'
+			: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
 
 	return (
 		<RecentSearchContainer
@@ -476,7 +477,7 @@ const renderHideTabs = (props) => {
 		adminTopics,
 		// searchMajorPubs,
 		recDocs,
-		loadingrecDocs,
+		loadingrecDocs = true,
 		cloneData,
 		crawlerSources,
 		prevSearchText,
@@ -485,6 +486,7 @@ const renderHideTabs = (props) => {
 		loading,
 		userData,
 		recentSearches,
+		recentSearchesLoaded,
 		trending,
 		lastOpened = [],
 		loadingLastOpened = true,
@@ -524,13 +526,48 @@ const renderHideTabs = (props) => {
 		adminTopics[idx].favorite = !!topicMatchesAdmin;
 	});
 
+	const introSearch = 'Defense Intelligence Agency';
+	const handleIntroSearchClick = () => {
+		setState(dispatch, {
+			searchText: introSearch,
+			runSearch: true,
+		});
+	};
+
 	return (
 		<div style={{ marginTop: '40px' }}>
 			{renderPrevSearchText(prevSearchText, resetSettingsSwitch, dispatch, searchHandler, state)}
 			{renderShowDidYouMean(didYouMean, loading, state, dispatch)}
 			<div style={{ margin: '0 70px 0 70px' }}>
 				<GameChangerThumbnailRow links={recentSearches} title="Recent Searches" width="300px">
-					{recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					{recentSearchesLoaded &&
+						recentSearches.length > 0 &&
+						recentSearches.map((search) => renderRecentSearches(search, state, dispatch))}
+					{recentSearchesLoaded && recentSearches.length === 0 && (
+						<div className="col-xs-12" style={{ height: '140px' }}>
+							<Typography style={styles.containerText}>
+								It looks like this is your first time on GAMECHANGER! Try searching for
+								<span style={{ color: 'blue', cursor: 'pointer' }} onClick={handleIntroSearchClick}>
+									{' ' + introSearch}
+								</span>
+								.
+							</Typography>
+						</div>
+					)}
+					{!recentSearchesLoaded && (
+						<div className="col-xs-12">
+							<LoadingIndicator
+								customColor={gcOrange}
+								inline={true}
+								containerStyle={{
+									height: '300px',
+									textAlign: 'center',
+									paddingTop: '75px',
+									paddingBottom: '75px',
+								}}
+							/>
+						</div>
+					)}
 				</GameChangerThumbnailRow>
 				<GameChangerThumbnailRow links={lastOpened} title="Recently Viewed" width="215px">
 					{lastOpened.length > 0 &&

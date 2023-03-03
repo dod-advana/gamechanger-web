@@ -30,7 +30,6 @@ class ESSearchLib {
 				index,
 				body: queryBody,
 			};
-
 			return this._clients[clientName].search(query);
 		} catch (e) {
 			this.logger.error(e.message, 'SCSE2C1', user);

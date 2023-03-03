@@ -41,6 +41,7 @@ class TransformerController {
 			createModelLTR: this.mlApi.createModelLTR,
 			stopProcess: this.mlApi.stopProcess,
 			sendUserAggregations: this.mlApi.sendUserAggregations,
+			sendUserAggregationsTrain: this.mlApi.sendUserAggregationsTrain,
 			clearCache: this.mlApi.clearCache,
 		};
 
@@ -61,6 +62,7 @@ class TransformerController {
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		this.getCache = this.getData.bind(this, 'getCache');
+
 		// Post methods
 		this.setTransformerModel = this.postData.bind(this, 'setTransformerModel');
 		this.reloadModels = this.postData.bind(this, 'reloadModels');
@@ -72,6 +74,7 @@ class TransformerController {
 		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
 		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
+		this.sendUserAggregationsTrain = this.postData.bind(this, 'sendUserAggregationsTrain');
 		this.clearCache = this.postData.bind(this, 'clearCache');
 	}
 	/**

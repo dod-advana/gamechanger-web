@@ -263,8 +263,8 @@ class SearchUtility {
 		const searchTextLower = searchText.toLowerCase();
 
 		let cleanSearch = searchTextLower.replace(/[\{}]/g, '');
-		// escape forward slashes so they don't break ES query
-		cleanSearch = cleanSearch.replace(/[/]/g, '\\/');
+		// escape forward slashes and colons so they don't break ES query
+		cleanSearch = cleanSearch.replace(/[/]/g, '\\/').replace(/:/g, '\\:');
 		// finds quoted phrases separated by and/or and allows nested quotes of another kind eg "there's an apostrophe"
 		const rawSequences = this.findQuoted(cleanSearch);
 
