@@ -1333,7 +1333,7 @@ const EDASearchMatrixHandler = (props) => {
 
 					<GCAccordion
 						contentPadding={15}
-						expanded={edaSearchSettings.contractsOrMods !== 'both'}
+						expanded={edaSearchSettings.contractsOrMods !== 'contracts'}
 						header={'CONTRACTS OR MODS'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}
