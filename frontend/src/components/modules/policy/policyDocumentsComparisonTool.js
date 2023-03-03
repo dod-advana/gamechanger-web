@@ -438,10 +438,13 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 
 	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
-		if (stepIndex === 0 && showTutorial === true)
+		if (stepIndex === 0 && showTutorial === true) {
+			resetAdvancedSettings(dispatch);
 			setParagraphText(
 				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
 			);
+		}
+
 		if (stepIndex === 1 && tutorialLogicSwitch) {
 			setReturnedDocs([]);
 			setViewableDocs([]);
@@ -456,7 +459,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		if (stepIndex === 2 && !loading && viewableDocs.length) {
 			setShowTutorial(true);
 		}
-	}, [loading, stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
+	}, [resetAdvancedSettings, dispatch, loading, stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
 	// updateFilters is set alongside certain calls to setReturnedDocs().
