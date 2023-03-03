@@ -52,11 +52,11 @@ export const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
 	return blob;
 };
 
-const downloadXlsx = (data) => {
+const downloadXlsx = (data, portfolio) => {
 	const ws = utils.json_to_sheet(data);
 	const wb = utils.book_new();
 	utils.book_append_sheet(wb, ws, 'Primary Review Worksheet');
-	writeFileXLSX(wb, 'jbook-excel-export-general.xlsx');
+	writeFileXLSX(wb, `Jbook-Excel-Export-${portfolio}.xlsx`);
 };
 
 const useStyles = makeStyles(() => ({
@@ -202,7 +202,7 @@ const ExportResultsDialog = ({
 			if (selectedFormat === 'xlsx') {
 				//blob -> json
 				const jsonData = JSON.parse(await data.text());
-				downloadXlsx(jsonData);
+				downloadXlsx(jsonData, state.selectedPortfolio ?? 'General');
 			} else {
 				downloadFile(
 					data,
@@ -324,9 +324,16 @@ const ExportResultsDialog = ({
 									CSV (Detailed)
 								</MenuItem>
 							)}
-							<MenuItem style={styles.menuItem} value="xlsx" key="xlsx" data-cy={`export-option-xlsx`}>
-								XLSX
-							</MenuItem>
+							{cloneData.clone_name === 'jbook' && isJbookReviewer && (
+								<MenuItem
+									style={styles.menuItem}
+									value="xlsx"
+									key="xlsx"
+									data-cy={`export-option-xlsx`}
+								>
+									XLSX
+								</MenuItem>
+							)}
 						</Select>
 					</FormControl>
 				</div>
