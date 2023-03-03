@@ -99,6 +99,7 @@ const parseExcel = async (file, portfolio) => {
 				reviewData.appn_num = item['APPN Symbol'];
 				reviewData.budget_activity = item['BA'];
 				reviewData.portfolio_name = 'AI Inventory';
+				reviewData.latest_class_label = reviewData.primary_class_label;
 
 				if (
 					reviewData.primary_reviewer === null ||
@@ -152,7 +153,7 @@ const parseExcel = async (file, portfolio) => {
 					reviewData.service_poc_org = item['POC Org'];
 					reviewData.poc_phone_number = item['POC Phone Number'];
 					reviewData.service_review_notes = item['RAI Review Notes'];
-
+					reviewData.latest_class_label = reviewData.service_class_label;
 					if (
 						reviewData.service_secondary_reviewer === null ||
 						reviewData.service_agree_label === null ||
@@ -186,6 +187,7 @@ const parseExcel = async (file, portfolio) => {
 			} else {
 				// General Review
 				reviewData.primary_class_label = item['Label'];
+				reviewData.latest_class_label = item['Label'];
 				reviewData.budget_year = item['FY'];
 				reviewData.budget_type = item['PL Type'];
 				reviewData.appn_num = item['APPN Number'];
