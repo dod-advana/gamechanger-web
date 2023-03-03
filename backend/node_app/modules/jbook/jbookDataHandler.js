@@ -1465,13 +1465,24 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async updateRow(index, reviewData, userId) {
+	async updateRow(index, reviewData, portfolioTags, userId) {
 		try {
 			let res = {
 				created: [],
 				dupes: [],
 				failed: [],
 			};
+			//verify tag exists in portfolio
+			if (
+				portfolioTags[reviewData.portfolio_name] === undefined ||
+				!portfolioTags[reviewData.portfolio_name].has(reviewData.primary_class_label) ||
+				(reviewData.service_class_label !== undefined &&
+					!portfolioTags[reviewData.service_class_label].has(reviewData.service_class_label))
+			) {
+				res.failed.push(index + 2);
+				return res;
+			}
+
 			// search PG reviews for row
 			const result = await this.rev.findAll({
 				where: {
@@ -1604,15 +1615,27 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getPortfolioTags() {
+		const portfolios = await this.portfolio.findAll({
+			where: { deleted: false },
+		});
+		let portfolioTags = {};
+		for (let portfolio of portfolios) {
+			portfolioTags[portfolio.dataValues.name] = new Set(portfolio.dataValues.tags);
+		}
+		return portfolioTags;
+	}
+
 	async bulkUpload(req, userId) {
 		const { reviewArray } = req.body;
 
 		const startTime = performance.now();
+		const portfolioTags = await this.getPortfolioTags();
 		let dupes = [];
 		let failed = [];
 		let written = 0;
 		for (let [index, reviewData] of reviewArray.entries()) {
-			const rowResults = await this.updateRow(index, reviewData, userId);
+			const rowResults = await this.updateRow(index, reviewData, portfolioTags, userId);
 			dupes.push(...rowResults.dupes);
 			failed.push(...rowResults.failed);
 			if (rowResults.dupes.length === 0 && rowResults.failed.length === 0) {
