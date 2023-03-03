@@ -22,7 +22,7 @@ const initState = {
 		clone_to_sipr: false,
 		show_tutorial: true,
 		show_graph: true,
-		show_crowd_source: true,
+		show_crowd_source: false,
 		show_feedback: true,
 		config: { esIndex: 'gamechanger' },
 	},
@@ -62,6 +62,7 @@ const initState = {
 
 	// Homepage
 	recentSearches: [],
+	recentSearchesLoaded: false,
 	crawlerSources: [],
 	adminTopics: [],
 	adminMajorPubs: [],

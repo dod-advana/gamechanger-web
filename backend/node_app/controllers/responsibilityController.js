@@ -323,7 +323,8 @@ class ResponsibilityController {
 		try {
 			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
 
-			const { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
+			let { offset = 0, order = [], where = [], docView, DOCS_PER_PAGE = 10, page, limit } = req.query;
+			order = order.map((item) => JSON.parse(item));
 			order.push(['documentTitle', 'ASC']);
 			const tmpWhere = this.parseResponsibilityFilters(where, docView);
 			const newOffsets = [];
