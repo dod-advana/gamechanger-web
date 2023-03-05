@@ -808,21 +808,28 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			<Grid item xs={12}>
 				<div style={{ display: 'flex' }}>
 					{/* different */}
-					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Document Comparison Tool enables users to compare submitted text (in the field below) with
-						existing text in the GAMECHANGER repository. After submitting a sentence, paragraph, or string
-						of paragraphs into the open text field, the tool will search for and yield the top existing
-						policy documents available within GAMECHANGER that share the most semantically similar text.
+					<div style={{ fontWeight: 'bold', fontFamily: 'Noto Sans' }}>
+						<div style={{ alignItems: 'center', marginBottom: '10px', display: 'flex' }}>
+							The Document Comparison Tool enables users to compare submitted text (in the field below)
+							with existing text in the GAMECHANGER repository. After submitting a sentence, paragraph, or
+							string of paragraphs into the open text field, the tool will search for and yield the top
+							existing policy documents available within GAMECHANGER that share the most semantically
+							similar text.
+						</div>
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: '10px' }}>For a step-by-step tutorial, click here:</div>
+							<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+								<HelpOutlineIcon
+									style={{ cursor: 'pointer', marginRight: 20, alignSelf: 'center' }}
+									onClick={() => {
+										reset();
+										setShowTutorial(true);
+									}}
+								/>
+							</GCTooltip>
+						</div>
 					</div>
-					<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon
-							style={{ cursor: 'pointer', marginRight: 20, alignSelf: 'center' }}
-							onClick={() => {
-								reset();
-								setShowTutorial(true);
-							}}
-						/>
-					</GCTooltip>
+
 					{!loading && returnedDocs.length > 0 && (
 						<div style={{ display: 'flex', alignSelf: 'center' }}>
 							<FormControl
