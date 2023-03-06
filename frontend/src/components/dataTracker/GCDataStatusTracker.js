@@ -356,9 +356,6 @@ const GCDataStatusTracker = (props) => {
 				tabIndex: 'crawler',
 				option: 'status',
 			});
-			docs = docs.filter((doc) => {
-				return date_difference(Date.parse(doc.datetime)) < 60;
-			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 			setNumPages(pageCount);
 			setCrawlerTableData(docs);
