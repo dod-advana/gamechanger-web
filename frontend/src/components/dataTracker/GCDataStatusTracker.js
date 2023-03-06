@@ -350,12 +350,15 @@ const GCDataStatusTracker = (props) => {
 	const handleFetchCrawlerData = async ({ page, sorted, filtered }) => {
 		try {
 			setLoading(true);
-			const { totalCount, docs = [] } = await getData({
+			let { totalCount, docs = [] } = await getData({
 				offset: page * PAGE_SIZE,
 				sorted,
 				filtered,
 				tabIndex: 'crawler',
 				option: 'status',
+			});
+			docs = docs.filter((doc) => {
+				return date_difference(Date.parse(doc.datetime)) < 60;
 			});
 			const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 			setNumPages(pageCount);
