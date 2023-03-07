@@ -244,15 +244,21 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		<div>
 			<div className="row" style={{ margin: 0, padding: 0, justifyContent: 'flex-end' }}>
 				<div style={{ display: 'flex', alignItems: 'center', margin: '10px 0 20px 0' }}>
-					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Responsibility Explorer enables users to identify the responsibilities that have been
-						assigned to various entities across an expansive corpus of DoD strategy, guidance, and policy
-						documents. Filter capabilities allow users to explore extracted portions of responsibility text
-						in specific documents, by organization/role/entity, and/or by responsibility area.
+					<div style={{ fontWeight: 'bold', fontFamily: 'Noto Sans' }}>
+						<div style={{ alignItems: 'center', marginBottom: '10px', display: 'flex' }}>
+							The Responsibility Explorer enables users to identify the responsibilities that have been
+							assigned to various entities across an expansive corpus of DoD strategy, guidance, and
+							policy documents. Filter capabilities allow users to explore extracted portions of
+							responsibility text in specific documents, by organization/role/entity, and/or by
+							responsibility area.
+						</div>
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: '10px' }}>For a step-by-step tutorial, click here:</div>
+							<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+								<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
+							</GCToolTip>
+						</div>
 					</div>
-					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
-					</GCToolTip>
 					<span
 						style={{
 							margin: '0px 10px',
