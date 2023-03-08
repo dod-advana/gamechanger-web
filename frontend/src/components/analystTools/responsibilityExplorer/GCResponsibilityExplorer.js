@@ -74,6 +74,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+	const duringViewChange = stepIndex === 6 && reView === 'Document';
 
 	const trackingCategory = getTrackingNameForFactory(state?.cloneData?.clone_name);
 
@@ -81,7 +82,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		if (stepIndex === 5) {
 			setReView('Document');
 		}
-		if (stepIndex === 6) {
+		if (stepIndex === 6 && reView === 'Document') {
 			setReView('Chart');
 		}
 		if (stepIndex === 1 || stepIndex === 2) {
@@ -94,7 +95,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				[`${firstDoc}${docResponsibilityData[firstDoc]?.entities?.[0]?.entityText}`]: true,
 			});
 		}
-	}, [docResponsibilityData, stepIndex]);
+	}, [docResponsibilityData, stepIndex, reView]);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -361,16 +362,18 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					showTutorial={showTutorial}
 				/>
 			)}
-			<TutorialOverlay
-				tutorialJoyrideSteps={reTutorialSteps}
-				setShowTutorial={setShowTutorial}
-				showTutorial={showTutorial}
-				buttonColor={gcOrange}
-				resetPage={resetPage}
-				stepIndex={stepIndex}
-				setStepIndex={setStepIndex}
-				showSkipButton={false}
-			/>
+			{!duringViewChange && (
+				<TutorialOverlay
+					tutorialJoyrideSteps={reTutorialSteps}
+					setShowTutorial={setShowTutorial}
+					showTutorial={showTutorial}
+					buttonColor={gcOrange}
+					resetPage={resetPage}
+					stepIndex={stepIndex}
+					setStepIndex={setStepIndex}
+					showSkipButton={false}
+				/>
+			)}
 		</div>
 	);
 }
