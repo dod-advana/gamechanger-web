@@ -828,7 +828,7 @@ const CardHeaderHandler = ({
 											state.searchText,
 											item.download_url_s,
 											idx,
-											page.pageNumber
+											page?.pageNumber ?? 0
 										)
 								: () => undefined
 						}
