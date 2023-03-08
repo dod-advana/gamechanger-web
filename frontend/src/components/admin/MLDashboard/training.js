@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Tooltip, Typography, Input, IconButton, Checkbox } from '@material-ui/core';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 
 import Modal from 'react-modal';
-import styled from 'styled-components';
-import moment from 'moment';
 import { CloudDownload } from '@material-ui/icons';
 
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
@@ -25,29 +21,6 @@ const gameChangerAPI = new GameChangerAPI();
 const S3_CORPUS_PATH = 'bronze/gamechanger/json';
 const DEFAULT_MODEL_NAME = 'msmarco-distilbert-base-v2';
 const DEFAULT_VERSION = 'v4';
-
-const DatePickerWrapper = styled.div`
-	margin-right: 10px;
-	display: flex;
-	flex-direction: column;
-	> label {
-		text-align: left;
-		margin-bottom: 2px;
-		color: #3f4a56;
-		font-size: 15px;
-		font-family: Noto Sans;
-	}
-	> .react-datepicker-wrapper {
-		> .react-datepicker__input-container {
-			> input {
-				width: 225px;
-				border: 0;
-				outline: 0;
-				border-bottom: 1px solid black;
-			}
-		}
-	}
-`;
 
 const apiColumns = [
 	{
@@ -135,10 +108,6 @@ const getAllProcessData = (props) => {
 	return processList;
 };
 
-const handleDateChange = (date, setFunction) => {
-	setFunction(date);
-};
-
 /**
  * @method triggerDownloadCorpus
  */
@@ -168,20 +137,9 @@ const getLocalData = async (setDataTable) => {
  * Get user aggregations data and sends that to the ml-api
  * @method sendUserAggData
  */
-const sendUserAggData = async (startDate, endDate) => {
+const sendUserAggData = async () => {
 	try {
-		const params = {
-			startDate: moment(startDate).utc().format('YYYY-MM-DD HH:mm'),
-			endDate: moment(endDate).utc().format('YYYY-MM-DD HH:mm'),
-			limit: null,
-		};
-		const userData = await gameChangerAPI.getUserAggregations(params);
-		const searchData = await gameChangerAPI.getSearchPdfMapping(params);
-		const mlParams = {
-			searchData: searchData.data.data,
-			userData: userData.data.users,
-		};
-		gameChangerAPI.sendUserAggregationsTrain(mlParams);
+		gameChangerAPI.sendUserAggregationsTrain();
 	} catch (e) {
 		console.error(e);
 	}
@@ -466,8 +424,6 @@ const getConnectionStatus = (props) => {
 export default (props) => {
 	// Set state variables
 	const [APITrainData, setAPITrainData] = useState({});
-	const [startDate, setStartDate] = useState(moment().subtract(6, 'months').set({ hour: 0, minute: 0 })._d);
-	const [endDate, setEndDate] = useState(moment()._d);
 	const [corpus, setCorpus] = useState(S3_CORPUS_PATH);
 	const [s3List, setS3List] = useState([]);
 	const [s3DataList, setS3DataList] = useState([]);
@@ -934,27 +890,9 @@ export default (props) => {
 						}}
 					>
 						<b>Send User Data to ML-API</b>
-						<DatePickerWrapper>
-							<label>Start Date</label>
-							<DatePicker
-								showTimeSelect
-								selected={startDate || ''}
-								onChange={(date) => handleDateChange(date, setStartDate)}
-								dateFormat="yyyy-MM-dd HH:mm"
-							/>
-						</DatePickerWrapper>
-						<DatePickerWrapper>
-							<label>End Date</label>
-							<DatePicker
-								showTimeSelect
-								selected={endDate || ''}
-								onChange={(date) => handleDateChange(date, setEndDate)}
-								dateFormat="yyyy-MM-dd HH:mm"
-							/>
-						</DatePickerWrapper>
 						<GCButton
 							onClick={() => {
-								sendUserAggData(startDate, endDate);
+								sendUserAggData();
 							}}
 							style={{ float: 'right', minWidth: 'unset' }}
 						>

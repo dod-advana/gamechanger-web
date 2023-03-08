@@ -239,7 +239,6 @@ class AppStatsController {
 	 */
 	async queryPdfOpend(startDate, endDate, limit, connection) {
 		return new Promise((resolve) => {
-			const self = this;
 			connection.query(
 				`
 				select 
@@ -268,7 +267,7 @@ class AppStatsController {
 						this.logger.error(error, 'BAP9ZIP1');
 						throw error;
 					}
-					resolve(self.cleanFilePath(results));
+					resolve(this.cleanFilePath(results));
 				}
 			);
 		});
@@ -356,7 +355,7 @@ class AppStatsController {
 						this.logger.error(error, 'BAP9ZIP2');
 						throw error;
 					}
-					resolve(results);
+					resolve(this.cleanSearch(results));
 				}
 			);
 		});
@@ -644,6 +643,20 @@ class AppStatsController {
 		}
 		return searchPdfMapping;
 	}
+
+	/**
+	 * Looks for a property called value and replaces the
+	 * unknown symbols
+	 * @param {Object[]} results  where each result has result['value']
+	 * @returns
+	 */
+	cleanSearch(results) {
+		for (let result of results) {
+			result['value'] = result['value'].replace(/&#039;|&quot;/g, "'");
+		}
+		return results;
+	}
+
 	/**
 	 * Looks for a property called document and replaces the
 	 * file path with the file name
@@ -659,7 +672,6 @@ class AppStatsController {
 		}
 		return results;
 	}
-
 	/**
 	 * This method is called to get a list of clones and there ids to pass into a select
 	 * It first makes the connection with matomo then populates the data for the results into an excel file.
