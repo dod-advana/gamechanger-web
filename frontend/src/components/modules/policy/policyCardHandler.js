@@ -791,7 +791,7 @@ const CardHeaderHandler = ({
 	graphView,
 	intelligentSearch,
 	idx,
-	page = 0,
+	page,
 }) => {
 	const [showDocIngestModal, setShowDocIngestModal] = useState(false);
 	const displayTitle = getDisplayTitle(item);
@@ -828,7 +828,7 @@ const CardHeaderHandler = ({
 											state.searchText,
 											item.download_url_s,
 											idx,
-											page
+											page?.pageNumber ?? 0
 										)
 								: () => undefined
 						}
