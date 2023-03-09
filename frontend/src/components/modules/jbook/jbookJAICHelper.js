@@ -211,14 +211,7 @@ const PlannedTransitionPartnerValue = React.memo((props) => {
 });
 
 const CurrentMissionPartnersValue = React.memo((props) => {
-	const { dropdownData, setReviewData, serviceAdditionalMissionPartners, finished, primaryReviewNotes } = props;
-
-	const [reviewerNotes, setReviewerNotes] = useState(primaryReviewNotes);
-
-	useEffect(() => {
-		setReviewerNotes(primaryReviewNotes);
-	}, [primaryReviewNotes]);
-
+	const { dropdownData, setReviewData, serviceAdditionalMissionPartners, finished } = props;
 	return (
 		<>
 			<Autocomplete
@@ -232,22 +225,6 @@ const CurrentMissionPartnersValue = React.memo((props) => {
 				value={serviceAdditionalMissionPartners ? { current_msn_part: serviceAdditionalMissionPartners } : null}
 				disabled={finished} //|| roleDisabled}
 				disableClearable
-			/>
-			<TextField
-				placeholder="Reviewer Notes"
-				variant="outlined"
-				value={reviewerNotes}
-				style={{ backgroundColor: 'white', width: '100%', margin: '15px 0 0 0' }}
-				onBlur={(event) => setReviewData('primaryReviewNotes', event.target.value)}
-				onChange={(event, value) => setReviewerNotes(value)}
-				inputProps={{
-					style: {
-						width: '100%',
-					},
-				}}
-				rows={10}
-				multiline
-				disabled={finished} //|| roleDisabled}
 			/>
 		</>
 	);

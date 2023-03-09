@@ -52,7 +52,6 @@ class PolicySearchHandler extends SearchHandler {
 			storeHistory,
 			getUserIdFromSAMLUserId(req)
 		);
-
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/"/g) || []).length;
 		if (doubleQuoteCount % 2 === 1) {
@@ -62,7 +61,9 @@ class PolicySearchHandler extends SearchHandler {
 
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts);
+		let searchResults = (await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts)) || {
+			docs: [],
+		};
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
