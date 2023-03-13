@@ -281,18 +281,22 @@ const ModularSearchBarHandler = (props) => {
 	};
 
 	const handleSubmit = (event) => {
-		if (event) {
+		if (searchText === '') {
 			event.preventDefault();
+		} else {
+			if (event) {
+				event.preventDefault();
+			}
+			setState(dispatch, {
+				searchText: searchText,
+				resultsPage: 1,
+				metricsCounted: false,
+				runSearch: true,
+			});
+			document.activeElement.blur();
+			setDropdownOpen(false);
+			trackEvent(trackingCategory, 'SearchButton', 'onClickOrEnter');
 		}
-		setState(dispatch, {
-			searchText: searchText,
-			resultsPage: 1,
-			metricsCounted: false,
-			runSearch: true,
-		});
-		document.activeElement.blur();
-		setDropdownOpen(false);
-		trackEvent(trackingCategory, 'SearchButton', 'onClickOrEnter');
 	};
 
 	useEffect(() => {

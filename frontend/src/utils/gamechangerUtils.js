@@ -53,7 +53,7 @@ export const SEARCH_TYPES = {
 const processRow = (row) => {
 	let finalVal = '';
 	for (let j = 0; j < row.length; j++) {
-		let innerValue = row[j] === null ? '' : row[j].toString();
+		let innerValue = row[j] === null || row[j] === undefined ? '' : row[j].toString();
 		if (row[j] instanceof Date) {
 			innerValue = row[j].toLocaleString();
 		}

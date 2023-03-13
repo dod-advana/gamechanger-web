@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { setState } from '../../../../utils/sharedFunctions';
 import { useStyles } from '../../default/defaultViewHeaderHandler.js';
+import _ from 'lodash';
 
 const JBookPortfolioSelector = ({
 	portfolios,
@@ -32,14 +33,17 @@ const JBookPortfolioSelector = ({
 				if (pageDisplayed === 'profile') {
 					getCommentThread(docID, name);
 				} else {
-					updatePortfolioSpecificFilters(name);
+					// get tag list
+					let selectedPortfolio = _.find(portfolios, (item) => item.name === name);
+					let tags = selectedPortfolio ? selectedPortfolio.tags : [];
+					updatePortfolioSpecificFilters(name, tags);
 				}
 			} catch (err) {
 				console.log('Error setting portfolio');
 				console.log(err);
 			}
 		},
-		[dispatch, projectData, pageDisplayed, getCommentThread, docID, updatePortfolioSpecificFilters]
+		[dispatch, projectData, pageDisplayed, getCommentThread, docID, portfolios, updatePortfolioSpecificFilters]
 	);
 
 	const renderPortfolioOptions = useCallback(() => {

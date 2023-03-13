@@ -27,6 +27,17 @@ const DEFAULT_VALUES = {
 	source_s3_bucket: '',
 	source_s3_prefix: '',
 	permissions: ['is_admin'],
+	can_edit: false,
+	clone_to_sipr: false,
+	document_view: false,
+	is_live: false,
+	needs_ingest: false,
+	permissions_required: false,
+	show_crowd_source: false,
+	show_feedback: false,
+	show_graph: false,
+	show_tutorial: false,
+	user_favorites: false,
 };
 
 const TabContainer = styled.div`
