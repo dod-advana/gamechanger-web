@@ -279,6 +279,7 @@ app.use(async function (req, res, next) {
 		'/api/gameChanger/mlApi/transformResults',
 		'/api/gameChanger/mlApi/recommender',
 		'/api/gameChanger/user/setupUserProfile',
+		'/api/gameChanger/searchPerformanceTestingTool',
 	];
 	if (routesAllowedWithoutToken.includes(req.path)) {
 		next();

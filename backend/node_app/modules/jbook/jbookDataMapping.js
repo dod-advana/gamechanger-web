@@ -820,7 +820,7 @@ module.exports = {
 		id_s: {
 			newName: 'id',
 			defaultValue: '',
-			processValue: (value) => value,
+			processValue: (value) => String(value),
 		},
 		doc_id_s: {
 			newName: 'docID',
@@ -1213,6 +1213,11 @@ module.exports = {
 		},
 		budget_activity_s: {
 			newName: 'budgetActivityNumber',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		department_s: {
+			newName: 'department',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
@@ -2161,6 +2166,11 @@ module.exports = {
 		},
 		r_2a_accomp_pp_n: {
 			newName: 'accomplishments',
+			defaultValue: '',
+			processValue: (value) => value,
+		},
+		uot_department_s: {
+			newName: 'departmentCode',
 			defaultValue: '',
 			processValue: (value) => value,
 		},
