@@ -449,7 +449,7 @@ const renderPortfolioTags = (tags) => {
 	try {
 		if (tags && tags.length) {
 			for (const tag of tags) {
-				tagElements.push(<StyledPill>{tag}</StyledPill>);
+				tagElements.push(<StyledPill key={tag.toString()}>{tag}</StyledPill>);
 			}
 		}
 	} catch (err) {
