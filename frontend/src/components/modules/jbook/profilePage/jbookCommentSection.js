@@ -336,7 +336,7 @@ const JBookCommentSection = ({
 				}
 			}
 
-			comments.push(<div ref={bottomRef} />);
+			comments.push(<div key="bottom" ref={bottomRef} />);
 
 			return comments;
 		} catch (err) {
