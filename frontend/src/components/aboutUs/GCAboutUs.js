@@ -354,7 +354,7 @@ const GCAboutUs = (props) => {
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();
 						return (
-							<div key={'block6'} style={{ marginBottom: 30 }}>
+							<div key={i} style={{ marginBottom: 30 }}>
 								<div id="spacer" ref={categoryRefs.current[i]} style={{ height: 30 }} />
 								<Typography key={category} variant="h5" style={{ marginBottom: 15 }}>
 									{cat}
