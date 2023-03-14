@@ -1476,8 +1476,8 @@ class JBookDataHandler extends DataHandler {
 			if (
 				portfolioTags[reviewData.portfolio_name] === undefined ||
 				!portfolioTags[reviewData.portfolio_name].has(reviewData.primary_class_label) ||
-				(reviewData.service_class_label !== undefined &&
-					!portfolioTags[reviewData.service_class_label].has(reviewData.service_class_label))
+				(reviewData.service_class_label &&
+					!portfolioTags[reviewData.portfolio_name].has(reviewData.service_class_label))
 			) {
 				res.failed.push(index + 2);
 				return res;
