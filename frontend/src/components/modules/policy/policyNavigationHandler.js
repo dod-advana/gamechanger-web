@@ -127,22 +127,24 @@ const generateClosedContentArea = (state, dispatch) => {
 					<ConstrainedIcon src={UserFeedbackIcon} />
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip data-cy="crowd-sourcing" title="Crowd Sourcing" placement="right" arrow>
-				<HoverNavItem
-					centered
-					onClick={() => {
-						setState(dispatch, { showAssistModal: true });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'CrowdSourcing'
-						);
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={CrowdSourcingAppIcon} />
-				</HoverNavItem>
-			</GCTooltip>
+			{state.cloneData?.show_crowd_source && (
+				<GCTooltip data-cy="crowd-sourcing" title="Crowd Sourcing" placement="right" arrow>
+					<HoverNavItem
+						centered
+						onClick={() => {
+							setState(dispatch, { showAssistModal: true });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'CrowdSourcing'
+							);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={CrowdSourcingAppIcon} />
+					</HoverNavItem>
+				</GCTooltip>
+			)}
 			<GCTooltip data-cy="data-status-tracker" title="Data Status Tracker" placement="right" arrow>
 				<HoverNavItem
 					centered
@@ -294,22 +296,24 @@ const generateOpenedContentArea = (state, dispatch) => {
 					<span style={{ marginLeft: '10px' }}>User Feedback</span>
 				</HoverNavItem>
 			</GCTooltip>
-			<GCTooltip title="Help us verify data" placement="right" arrow>
-				<HoverNavItem
-					onClick={() => {
-						setState(dispatch, { showAssistModal: true, closeSlideOutMenu: true });
-						trackEvent(
-							getTrackingNameForFactory(state.cloneData.clone_name),
-							'SidebarInteraction',
-							'CrowdSourcingSelected'
-						);
-					}}
-					toolTheme={toolTheme}
-				>
-					<ConstrainedIcon src={CrowdSourcingAppIcon} />
-					<span style={{ marginLeft: '10px' }}>Crowd Sourcing</span>
-				</HoverNavItem>
-			</GCTooltip>
+			{state.cloneData?.show_crowd_source && (
+				<GCTooltip title="Help us verify data" placement="right" arrow>
+					<HoverNavItem
+						onClick={() => {
+							setState(dispatch, { showAssistModal: true, closeSlideOutMenu: true });
+							trackEvent(
+								getTrackingNameForFactory(state.cloneData.clone_name),
+								'SidebarInteraction',
+								'CrowdSourcingSelected'
+							);
+						}}
+						toolTheme={toolTheme}
+					>
+						<ConstrainedIcon src={CrowdSourcingAppIcon} />
+						<span style={{ marginLeft: '10px' }}>Crowd Sourcing</span>
+					</HoverNavItem>
+				</GCTooltip>
+			)}
 			<GCTooltip title="Data Status Tracker" placement="right" arrow>
 				<HoverNavItem
 					onClick={() => {

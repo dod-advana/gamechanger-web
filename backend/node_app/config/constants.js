@@ -136,7 +136,7 @@ module.exports = Object.freeze({
 	},
 	EDA_ELASTIC_SEARCH_OPTS: {
 		protocol: process.env.EDA_OPENSEARCH_PROTOCOL || 'https',
-		host: process.env.EDA_OPENSEARCH_HOST || 'loclhost',
+		host: process.env.EDA_OPENSEARCH_HOST || 'localhost',
 		port: process.env.EDA_OPENSEARCH_PORT || '443',
 		user: process.env.EDA_OPENSEARCH_USER ? process.env.EDA_OPENSEARCH_USER : '',
 		password: process.env.EDA_OPENSEARCH_PASSWORD || 'password',

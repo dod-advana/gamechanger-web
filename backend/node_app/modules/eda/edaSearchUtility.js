@@ -1467,7 +1467,7 @@ class EDASearchUtility {
 	}
 
 	getESSimilarityQuery(pages, filters) {
-		let filterQueries = [];
+		let filterQueries = [{ match: { sow_pws_populated_b: 'true' } }];
 		filterQueries = filterQueries.concat(this.getEDASearchQuery(filters));
 
 		const pagesQuery = pages.map((page) => {
