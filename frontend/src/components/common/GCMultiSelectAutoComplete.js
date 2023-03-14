@@ -35,7 +35,7 @@ const MultiSelectAutocomplete = (props) => {
 				freeSolo
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						<Chip variant="outlined" key={index} label={option} {...getTagProps({ index })} />
+						<Chip variant="outlined" key={option.toString()} label={option} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (

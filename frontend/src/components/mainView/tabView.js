@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TabList, Tabs, Tab } from 'react-tabs';
 import { trackEvent } from '../telemetry/Matomo';
 import { getTrackingNameForFactory, PAGE_BORDER_RADIUS, useMountEffect } from '../../utils/gamechangerUtils';
-import { backgroundGreyDark, backgroundWhite } from '../../components/common/gc-colors';
-import { gcOrange } from '../../components/common/gc-colors';
+import { backgroundGreyDark, backgroundWhite, gcOrange } from '../../components/common/gc-colors';
 import styled from 'styled-components';
 import { Typography } from '@material-ui/core';
 import GCButton from '../common/GCButton';
@@ -91,7 +90,7 @@ const TabView = (props) => {
 						<StyledTab
 							active={tabName === tmpTabName.name ? 'true' : 'false'}
 							title={tmpTabName.name}
-							key={idx}
+							key={tmpTabName.name}
 							first={idx === 0 ? 'true' : 'false'}
 							last={idx === tabNames.length - 1 ? 'true' : 'false'}
 							primary_color={toolStyle.primaryColor}

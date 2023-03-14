@@ -48,10 +48,10 @@ export const RespExplAnnotationCard = ({
 	const [tag, setTag] = useState(tags[0]);
 	const [tagColorMap] = useState(colorMap);
 
-	const options = tags.map((tagText, indexAsKey) => (
+	const options = tags.map((tagText) => (
 		<CustomFormControlLabel
 			control={<StyledRadio />}
-			key={indexAsKey}
+			key={tagText}
 			value={tagText}
 			label={
 				<span

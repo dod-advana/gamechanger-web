@@ -106,10 +106,10 @@ const ClassificationScoreCard = (props) => {
 				<Typography variant="h3" style={{ margin: '10px 10px 15px 10px', fontWeight: 'bold' }}>
 					{`${portfolioName} Label`}
 				</Typography>
-				{scores.map((score, indexAsKey) => {
+				{scores.map((score) => {
 					return (
 						<div
-							key={indexAsKey}
+							key={score.name}
 							style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}
 						>
 							<Typography
@@ -228,9 +228,9 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 						<Typography variant="subtitle1" style={{ fontSize: '16px', margin: '10px 0' }}>
 							{projectDescriptions
 								.filter((pd) => pd.value !== 'N/A' && pd.value !== 'Not applicable for this item.')
-								.map((pd, indexAsKey) => {
+								.map((pd) => {
 									return (
-										<div key={indexAsKey}>
+										<div key={pd.title}>
 											<Typography
 												key={pd.title}
 												variant="h3"
@@ -264,10 +264,10 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 const Accomplishments = ({ accomplishments }) => {
 	return (
 		<StyledTableContainer>
-			{accomplishments.map((accomp, indexAsKey) => {
+			{accomplishments.map((accomp) => {
 				return (
 					<SimpleTable
-						key={indexAsKey}
+						key={accomp.title}
 						tableClass={'magellan-table'}
 						zoom={1}
 						rows={accomp.data}
@@ -468,7 +468,7 @@ const NavButtons = () => {
 	buttonNames.forEach((name, index) => {
 		navButtons.push(
 			<StyledNavButton
-				key={name + index}
+				key={name}
 				first={index === 0}
 				last={index === navButtons.length - 1}
 				selected={currentNav === name}

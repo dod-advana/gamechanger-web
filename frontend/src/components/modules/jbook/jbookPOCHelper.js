@@ -198,10 +198,10 @@ const DropdownRadioButton = ({
 			<StyledAccordionDiv padding={'12px'} style={{ textAlign: 'left' }}>
 				<div style={{ display: 'flex', flexDirection: 'column' }}>
 					{radioButton !== 'Other' ? (
-						Object.keys(data).map((name, ind) => {
+						Object.keys(data).map((name) => {
 							return (
 								<DomainCheckbox
-									key={ind}
+									key={name}
 									name={name}
 									secondary={data[name]}
 									reviewData={reviewData}
@@ -957,7 +957,7 @@ const MissionPartnersValue = React.memo((props) => {
 				freeSolo
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						<StyledChip key={index} variant={'default'} label={option} {...getTagProps({ index })} />
+						<StyledChip key={option} variant={'default'} label={option} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (
@@ -1186,10 +1186,10 @@ const AIDomainValue = React.memo((props) => {
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				<div style={{ display: 'flex', flexDirection: 'row' }}>
 					<div style={{ width: '100%', margin: '15px 0px' }}>
-						{radioButtonData.map((data, ind) => {
+						{radioButtonData.map((data) => {
 							return (
 								<DropdownRadioButton
-									key={ind}
+									key={data.toString()}
 									reviewData={reviewData}
 									reviewDataProp={'domainTask'}
 									setReviewData={setReviewData}

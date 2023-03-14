@@ -533,13 +533,13 @@ const EDADocumentsComparisonTool = ({
 		if (doc.paragraphs) {
 			return doc.paragraphs
 				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph, indexAsKey) => {
+				.map((paragraph) => {
 					let blockquoteClass = 'searchdemo-blockquote-sm';
 					const pOpen = selectedParagraph?.id === paragraph.id;
 					const isHighlighted = pOpen && docOpen;
 					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 					return (
-						<div key={indexAsKey} style={{ position: 'relative' }}>
+						<div key={paragraph.id} style={{ position: 'relative' }}>
 							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
 							<div
 								className={blockquoteClass}
@@ -667,13 +667,13 @@ const EDADocumentsComparisonTool = ({
 		if (doc.pageHits) {
 			return doc.pageHits
 				.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-				.map((paragraph, indexAsKey) => {
+				.map((paragraph) => {
 					let blockquoteClass = 'searchdemo-blockquote-sm';
 					const pOpen = selectedParagraph?.id === paragraph.id;
 					const isHighlighted = pOpen && docOpen;
 					if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 					return (
-						<div key={indexAsKey} style={{ position: 'relative' }}>
+						<div key={paragraph.id} style={{ position: 'relative' }}>
 							{isHighlighted && <span className="searchdemo-arrow-left-sm"></span>}
 							<div
 								className={blockquoteClass}
@@ -1062,7 +1062,7 @@ const EDADocumentsComparisonTool = ({
 							</Typography>
 							{paragraphs.map((paragraph, indexAsKey) => (
 								<div
-									key={indexAsKey}
+									key={paragraph.id}
 									style={{
 										border: paragraph.id === selectedInput ? 'none' : `2px solid #B6C6D8`,
 										boxShadow: paragraph.id === selectedInput ? '0px 3px 6px #00000029' : 'none',
@@ -1149,11 +1149,11 @@ const EDADocumentsComparisonTool = ({
 									<div className={'text'}>No results for paragraph found</div>
 								</div>
 							)}
-							{viewableDocs.map((doc, indexAsKey) => {
+							{viewableDocs.map((doc) => {
 								const docOpen = collapseKeys[doc.filename] ?? false;
 								const displayTitle = doc.title;
 								return (
-									<div key={indexAsKey}>
+									<div key={doc.title}>
 										<div
 											className="searchdemo-modal-result-header"
 											style={{ marginTop: 0 }}

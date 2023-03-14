@@ -460,7 +460,7 @@ const cardHandler = {
 										return (
 											<div
 												className={'page-hit'}
-												key={key}
+												key={page.pageNumber}
 												style={{
 													...(hoveredHit === key && {
 														backgroundColor: '#E9691D',
@@ -566,13 +566,14 @@ const cardHandler = {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row, indexAsKey2) => {
+									{rows.map((row) => {
+										console.log(row);
 										return (
-											<TableRow hover role="checkbox" tabIndex={-1} key={indexAsKey2 + 'row'}>
-												{tableColumns.map((column, indexAsKey) => {
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.eda}>
+												{tableColumns.map((column) => {
 													const value = row[column.id];
 													return (
-														<TableCell key={indexAsKey} align={column.align}>
+														<TableCell key={column.id} align={column.align}>
 															{column.format && typeof value === 'number'
 																? column.format(value)
 																: value}

@@ -251,10 +251,10 @@ const GCFooter = (props) => {
 						Select clones to access
 					</Typography>
 					<FormGroup style={{ margin: '0px 10px', width: '100%', flexDirection: 'row' }}>
-						{cloneMeta.map((clone, indexAsKey) => {
+						{cloneMeta.map((clone) => {
 							return (
 								<FormControlLabel
-									key={indexAsKey}
+									key={clone.clone_name}
 									name={clone.clone_name}
 									value={clone}
 									control={

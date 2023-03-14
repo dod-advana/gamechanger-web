@@ -554,10 +554,10 @@ export default function GraphNodeCluster2D(props) {
 						{!runningQuery &&
 							Object.keys(legendData)
 								.sort()
-								.map((key, indexAsKey) => {
+								.map((key) => {
 									return (
 										<GCTooltip
-											key={indexAsKey}
+											key={key.toString()}
 											title={`${legendData[key].count} node${
 												legendData[key].count > 1 ? 's' : ''
 											} associated`}
@@ -565,7 +565,6 @@ export default function GraphNodeCluster2D(props) {
 											enterDelay={30}
 										>
 											<StyledLegendClickable
-												key={indexAsKey + '1'}
 												onClick={(event) => handleLegendNodeClick(key, event.target)}
 												typesSelected={nodeLabelSelected ? [nodeLabelSelected] : []}
 												type={key}
@@ -596,10 +595,10 @@ export default function GraphNodeCluster2D(props) {
 				return (
 					<>
 						{!runningQuery &&
-							Object.keys(edgeLabelPatterns).map((label, indexAsKey) => {
+							Object.keys(edgeLabelPatterns).map((label) => {
 								if (edgeLabels[label] > 0) {
 									return (
-										<div style={styles.legendRow} key={indexAsKey}>
+										<div style={styles.legendRow} key={label}>
 											<EdgeLegendItem
 												edgePattern={edgeLabelPatterns[label].pattern}
 												height={10}
@@ -766,10 +765,9 @@ export default function GraphNodeCluster2D(props) {
 	const renderFilterTabs = (filterTab2dArray, activeFilterTab) => {
 		return filterTab2dArray.map((row) => (
 			<div key={row[0]} style={legendStyles.tabsContainer}>
-				{row.map((tab, indexAsKey) => (
-					<GCTooltip key={indexAsKey} title={tab} enterDelay={30}>
+				{row.map((tab) => (
+					<GCTooltip key={tab} title={tab} enterDelay={30}>
 						<Typography
-							key={indexAsKey + '1'}
 							style={
 								activeFilterTab === tab
 									? { ...legendStyles.tab, ...legendStyles.activeTab }
@@ -787,11 +785,11 @@ export default function GraphNodeCluster2D(props) {
 	};
 
 	const renderNodesList = (nodesInGroup) => {
-		return nodesInGroup.map((node, indexAsKey) => {
+		return nodesInGroup.map((node) => {
 			let isTopicOrEntityNode = node.label === 'Topic' || node.label === 'Entity';
 			return (
 				<GCTooltip
-					key={indexAsKey}
+					key={node.label}
 					title={isTopicOrEntityNode || node.label === 'UKN_Document' ? '' : node.display_title_s}
 					arrow
 					style={{ zIndex: 99999 }}

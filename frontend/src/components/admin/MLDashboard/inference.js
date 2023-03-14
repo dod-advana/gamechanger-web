@@ -883,10 +883,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.sentence).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.sentence).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>
@@ -909,10 +909,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.qexp).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.qexp).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>
@@ -934,10 +934,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.jbook_qexp).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.jbook_qexp).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>
@@ -959,10 +959,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.topic_models).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.topic_models).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>
@@ -984,10 +984,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.transformers).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.transformers).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>
@@ -1011,10 +1011,10 @@ export default (props) => {
 										margin: '10px',
 									}}
 								>
-									{Object.keys(downloadedModelsList.sentence).map((name, indexAsKey) => {
+									{Object.keys(downloadedModelsList.sentence).map((name) => {
 										return (
 											<MenuItem
-												key={indexAsKey}
+												key={name}
 												style={{ fontSize: 'small', display: 'flex' }}
 												value={name}
 											>

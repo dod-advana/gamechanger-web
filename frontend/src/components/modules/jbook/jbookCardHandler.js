@@ -627,7 +627,7 @@ const ExpandedHits = ({ item, hoveredHit, setHoveredHit, contextHtml }) => {
 						return (
 							<div
 								className={'page-hit'}
-								key={key}
+								key={page.title}
 								style={{
 									...(hoveredHit === key && {
 										backgroundColor: '#E9691D',
@@ -993,7 +993,7 @@ const cardHandler = {
 					Value: (
 						<div>
 							{projectData.keywords && projectData.keywords.length > 0
-								? projectData.keywords.map((keyword, indexAsKey) => <p key={indexAsKey}>{keyword}</p>)
+								? projectData.keywords.map((keyword) => <p key={keyword}>{keyword}</p>)
 								: 'None'}
 						</div>
 					),

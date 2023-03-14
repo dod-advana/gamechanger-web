@@ -19,7 +19,7 @@ const QueryExp = (props) => {
 				const clean_values = values.map((values) => values.replaceAll('"', ''));
 				const tempList = clean_values.map((clean_values, ind) => (
 					<Link
-						key={ind}
+						key={clean_values.toString()}
 						style={{ margin: '0px 6px', textDecoration: 'underline' }}
 						to={`jbook/checklist?q=${clean_values}`}
 					>

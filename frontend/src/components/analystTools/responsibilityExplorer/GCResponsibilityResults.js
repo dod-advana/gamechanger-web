@@ -72,7 +72,7 @@ export default function GCResponsibilityResults({
 					const docOpen = collapseKeys[doc] ? collapseKeys[doc] : false;
 					const displayTitle = doc;
 					return (
-						<div key={key}>
+						<div key={doc}>
 							<div
 								className="searchdemo-modal-result-header"
 								onClick={(e) => {
@@ -121,7 +121,7 @@ export default function GCResponsibilityResults({
 										? collapseKeys[doc + entityText]
 										: false;
 									return (
-										<div key={entKey}>
+										<div key={entityText}>
 											<div
 												className="searchdemo-modal-result-header"
 												onClick={(e) => {
@@ -149,7 +149,7 @@ export default function GCResponsibilityResults({
 											<UnmountClosed isOpened={entOpen && docOpen}>
 												<div>
 													{responsibilityData[doc].entities[entKey].responsibilities.map(
-														(responsibility, respKey) => {
+														(responsibility) => {
 															let isHighlighted =
 																selectedResponsibility.responsibilityText ===
 																responsibility.responsibilityText;
@@ -158,7 +158,10 @@ export default function GCResponsibilityResults({
 															if (isHighlighted)
 																blockquoteClass += ' searchdemo-blockquote-sm-active';
 															return (
-																<div key={respKey} style={{ position: 'relative' }}>
+																<div
+																	key={responsibility.responsibilityText}
+																	style={{ position: 'relative' }}
+																>
 																	<div
 																		className="searchdemo-quote-link"
 																		onClick={(e) => {

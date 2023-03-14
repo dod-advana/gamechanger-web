@@ -274,9 +274,9 @@ const DocumentResult = ({
 				{doc.paragraphs &&
 					doc.paragraphs
 						.filter((paragraph) => paragraph.paragraphIdBeingMatched === selectedInput)
-						.map((paragraph, ind) => (
+						.map((paragraph) => (
 							<DocumentParagraph
-								key={ind}
+								key={paragraph.id}
 								doc={doc}
 								docOpen={isOpen}
 								paragraph={paragraph}
@@ -1170,7 +1170,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 							)}
 							{viewableDocs.map((doc, i) => (
 								<DocumentResult
-									key={i}
+									key={doc.id}
 									doc={doc}
 									index={i}
 									selectedInput={selectedInput}

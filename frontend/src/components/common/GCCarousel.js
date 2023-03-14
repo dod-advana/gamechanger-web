@@ -75,7 +75,7 @@ const GCCarousel = ({ classes, includeOnlyList }) => {
 							backgroundColor: index === carouselIndex ? '#13A792' : '#B0BAC5',
 						}}
 						onClick={() => tinyTileClick(index)}
-						key={index}
+						key={option.toString()}
 					></div>
 				);
 			})}
