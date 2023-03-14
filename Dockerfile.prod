@@ -7,7 +7,7 @@ RUN yum install -y \
     git \
     make
 
-RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs cyrus-sasl-lib gzip zlib nss xz-libs systemd libksba python3-libxml2 libxml2
+RUN yum -y update libsolv libgcc libstdc++ cryptsetup-libs cyrus-sasl-lib gzip zlib nss xz-libs systemd libksba python3-libxml2 libxml2 libcurl curl
 
 COPY ./postgres/tmp/RPM-GPG-KEY-PGDG-11 \
     ./postgres/tmp/postgresql11-server.rpm \

@@ -11,7 +11,7 @@ import {
 	SEARCH_TYPES,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -84,7 +84,6 @@ const SimpleSearchHandler = {
 		const trimmed = searchText.trim();
 		if (_.isEmpty(trimmed)) return;
 
-		const searchObject = getSearchObjectFromString(searchText);
 		const recentSearches = localStorage.getItem(`recent${cloneData.clone_name}Searches`) || '[]';
 		const recentSearchesParsed = JSON.parse(recentSearches);
 
@@ -140,7 +139,7 @@ const SimpleSearchHandler = {
 
 			const resp = await gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
-				searchText: searchObject.search,
+				searchText,
 				offset,
 				options: {
 					transformResults,

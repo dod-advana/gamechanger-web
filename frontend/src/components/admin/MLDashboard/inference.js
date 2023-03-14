@@ -6,6 +6,7 @@ import { CloudDownload } from '@material-ui/icons';
 import Modal from 'react-modal';
 import Autocomplete from '@mui/material/Autocomplete';
 import GCButton from '../../common/GCButton';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import { TableRow, StatusCircle, BorderDiv } from './util/styledDivs';
 import { styles } from '../util/GCAdminStyles';
@@ -160,6 +161,18 @@ const getModelsList = async (setDownloadedModelsList, setModelTable, props) => {
 	} catch (e) {
 		props.updateLogs('Error querying models list: ' + e.toString(), 2);
 		throw e;
+	}
+};
+
+/**
+ * Get user aggregations data and sends that to the ml-api
+ * @method sendUserAggData
+ */
+const sendUserAggData = async () => {
+	try {
+		gameChangerAPI.sendUserAggregations();
+	} catch (e) {
+		console.error(e);
 	}
 };
 
@@ -946,6 +959,27 @@ export default (props) => {
 								</Select>
 							</div>
 						</div>
+					</div>
+					<div
+						style={{
+							width: '100%',
+							padding: '20px',
+							marginBottom: '10px',
+							border: '2px solid darkgray',
+							borderRadius: '6px',
+							display: 'inline-block',
+							justifyContent: 'space-between',
+						}}
+					>
+						<b>Send User Data to ML-API</b>
+						<GCButton
+							onClick={() => {
+								sendUserAggData();
+							}}
+							style={{ float: 'right', minWidth: 'unset' }}
+						>
+							Send Data
+						</GCButton>
 					</div>
 				</BorderDiv>
 				<BorderDiv className="half">

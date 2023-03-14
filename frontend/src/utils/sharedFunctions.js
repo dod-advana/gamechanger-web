@@ -204,38 +204,6 @@ export const getUserData = async (dispatch) => {
 		});
 };
 
-export const getSearchObjectFromString = (searchString = '') => {
-	//this search string in the input field on front end...
-	// tmp tag:foo tag:bar prop1:val1 prop2:val2
-	// ... would yield these request params
-	// {"text": "tmp", "tags": ["foo", "bar"], "properties": [{ "key": "prop1", "value": "val1" }, { "key": "prop2", "value": "val2" },] }
-	if (searchString.includes(':')) {
-		const stringParts = searchString.split(' ');
-		let search = '';
-		let properties = [];
-		let tags = [];
-		_.each(stringParts, (part) => {
-			if (part.includes(':')) {
-				const partSplits = part.split(':');
-				const key = partSplits[0];
-				const val = partSplits[1];
-				if (key === 'tag') {
-					tags.push(val);
-				} else {
-					properties.push({ key, value: val });
-				}
-			} else search += part + ' ';
-		});
-		return { search, properties, tags };
-	} else {
-		return {
-			search: searchString,
-			tags: undefined,
-			properties: undefined,
-		};
-	}
-};
-
 export const setCurrentTime = (dispatch) => {
 	let currentTime = new Date();
 	let currentMonth = currentTime.getMonth() + 1 < 10 ? `0${currentTime.getMonth() + 1}` : currentTime.getMonth() + 1;

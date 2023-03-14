@@ -11,6 +11,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import CancelIcon from '@mui/icons-material/Cancel';
 import JbookPortfolioModal from './jbookPortfolioModal';
 import JbookPublicRequestModal from './jbookPublicRequestModal';
+import xlsxSample from '../../../../resources/jbook-excel-sample.xlsx';
+import aiInvSample from '../../../../resources/jbook-ai-inv-sample.xlsx';
+import { ReactComponent as ExcelSvg } from '../../../../images/icon/excel_iconcolor.svg';
+import { SvgIcon } from '@mui/material';
 
 import GameChangerAPI from '../../../api/gameChanger-service-api';
 import GameChangerUserAPI from '../../../api/GamechangerUserManagement';
@@ -64,29 +68,132 @@ const parseExcel = async (file, portfolio) => {
 
 		const data = await file.arrayBuffer();
 		const workbook = XLSX.read(data);
-		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet']);
+		const sheet1 = XLSX.utils.sheet_to_json(workbook.Sheets['Primary Review Worksheet'], { defval: null });
 
-		sheet1.forEach((item) => {
+		sheet1.forEach((row) => {
+			let item = {};
+			Object.keys(row).forEach((key) => {
+				item[key] = row[key] ? `${row[key]}` : null;
+			});
+			// general review fields
+			// everything is ?? '' because otherwise it becomes the text "undefined"
 			const reviewData = {
-				primary_reviewer: `${item['Primary Reviewer']}`,
-				primary_class_label: `${item['AI Analysis']}`,
-				service_reviewer: `${item['Service/DoD Component Reviewer']}`,
-				primary_ptp: `${item['Planned Transition Partner']}`,
-				service_mp_add:
+				primary_reviewer: item['Primary Reviewer'],
+				primary_review_notes: item['Primary Reviewer Notes'],
+				agency_service: item['Service / Agency'],
+				program_element: item['PE / BLI'],
+				department: item['Department'],
+				budget_line_item: item['Project # (RDT&E Only)'] !== undefined ? item['Project # (RDT&E Only)'] : null,
+			};
+
+			if (portfolio.name === 'AI Inventory') {
+				reviewData.primary_class_label = item['AI Analysis'];
+				reviewData.service_reviewer = item['Service/DoD Component Reviewer'];
+				reviewData.service_mp_add =
 					item['Current Mission Partners (Academia, Industry, or Other)'] !== undefined
 						? `${item['Current Mission Partners (Academia, Industry, or Other)']}`
-						: null,
-				primary_review_notes: `${item['Primary Reviewer Notes']}`,
-				budget_year: `${item['FY (BY1)']}`,
-				budget_type: `${item['Doc Type']}`,
-				agency_service: `${item['Service / Agency']}`,
-				// agency_office: item[],
-				appn_num: `${item['APPN Symbol']}`,
-				budget_activity: `${item['BA']}`,
-				program_element: `${item['PE / BLI']}`,
-				budget_line_item:
-					item['Project # (RDT&E Only)'] !== undefined ? `${item['Project # (RDT&E Only)']}` : null,
-			};
+						: null;
+				reviewData.primary_ptp = item['Planned Transition Partner'];
+				reviewData.budget_year = item['FY (BY1)'];
+				reviewData.budget_type = item['Doc Type'];
+				reviewData.appn_num = item['APPN Symbol'];
+				reviewData.budget_activity = item['BA'];
+				reviewData.portfolio_name = 'AI Inventory';
+				reviewData.latest_class_label = reviewData.primary_class_label;
+
+				if (
+					reviewData.primary_reviewer === null ||
+					reviewData.primary_class_label === null ||
+					reviewData.service_reviewer === null ||
+					reviewData.primary_ptp === null ||
+					reviewData.service_mp_add === null ||
+					reviewData.primary_review_notes === null
+				) {
+					// partial review
+					reviewData.primary_review_status = 'Partial Review';
+					reviewData.review_status = 'Partial Review (Primary)';
+				} else {
+					reviewData.primary_review_status = 'Finished Review';
+					reviewData.review_status = 'Partial Review (Service)';
+				}
+				// service review section
+				// check if service review section is not all empty
+				let combinedRAI =
+					`${item['RAI Secondary Reviewer'] ?? ''}` +
+					`${item['RAI Tag Agree'] ?? ''}` +
+					`${item['RAI Tag'] ?? ''}` +
+					`${item['RAI Transition Partner Agree'] ?? ''}` +
+					`${item['RAI Transition Partner'] ?? ''}` +
+					`${item['RAI Mission Partners Agree'] ?? ''}` +
+					`${item['RAI Mission Partners'] ?? ''}` +
+					`${item['POC Name'] ?? ''}` +
+					`${item['POC Title'] ?? ''}` +
+					`${item['POC Email'] ?? ''}` +
+					`${item['POC Org'] ?? ''}` +
+					`${item['POC Phone Number'] ?? ''}` +
+					`${item['RAI Review Notes'] ?? ''}`;
+				if (combinedRAI.trim() !== '') {
+					reviewData.service_secondary_reviewer = item['RAI Secondary Reviewer']
+						? `${item['RAI Secondary Reviewer']}`
+						: null;
+					reviewData.service_agree_label = item['RAI Tag Agree'];
+					reviewData.service_class_label = item['RAI Tag'];
+					if (reviewData.service_agree_label === 'Yes') {
+						reviewData.service_class_label = reviewData.primary_class_label;
+					}
+					reviewData.service_ptp_agree_label = item['RAI Transition Partner Agree'];
+					reviewData.service_ptp = item['RAI Transition Partner'];
+					if (reviewData.service_ptp_agree_label === 'Yes') {
+						reviewData.service_ptp = reviewData.primary_ptp;
+					}
+					reviewData.service_mp_list = item['RAI Mission Partners'];
+					reviewData.service_poc_name = item['POC Name'];
+					reviewData.service_poc_title = item['POC Title'];
+					reviewData.service_poc_email = item['POC Email'];
+					reviewData.service_poc_org = item['POC Org'];
+					reviewData.poc_phone_number = item['POC Phone Number'];
+					reviewData.service_review_notes = item['RAI Review Notes'];
+					reviewData.latest_class_label = reviewData.service_class_label;
+					if (
+						reviewData.service_secondary_reviewer === null ||
+						reviewData.service_agree_label === null ||
+						reviewData.service_class_label === null ||
+						reviewData.service_ptp_agree_label === null ||
+						reviewData.service_ptp === null ||
+						reviewData.service_mp_list === null ||
+						reviewData.service_poc_name === null ||
+						reviewData.service_poc_title === null ||
+						reviewData.service_poc_email === null ||
+						reviewData.service_poc_org === null ||
+						reviewData.poc_phone_number === null ||
+						reviewData.service_review_notes === null
+					) {
+						// partial service review
+						reviewData.service_review_status = 'Partial Review';
+						if (reviewData.primary_review_status === 'Finished Review') {
+							reviewData.review_status = 'Partial Review (Service)';
+						}
+					} else {
+						// finished service review
+						if (reviewData.primary_review_status === 'Finished Review') {
+							reviewData.service_review_status = 'Finished Review';
+							reviewData.review_status = 'Partial Review (POC)';
+						} else {
+							reviewData.service_review_status = 'Partial Review';
+							reviewData.review_status = 'Partial Review (Service)';
+						}
+					}
+				}
+			} else {
+				// General Review
+				reviewData.primary_class_label = item['Label'];
+				reviewData.latest_class_label = item['Label'];
+				reviewData.budget_year = item['FY'];
+				reviewData.budget_type = item['PL Type'];
+				reviewData.appn_num = item['APPN Number'];
+				reviewData.budget_activity = item['BA Number'];
+				reviewData.portfolio_name = item['Portfolio Name'];
+			}
 
 			if (reviewData.budget_type === 'pdoc') {
 				reviewData.budget_line_item = reviewData.program_element;
@@ -108,19 +215,14 @@ const parseExcel = async (file, portfolio) => {
 			}
 			let refString = '';
 			if (reviewData.budget_type === 'pdoc') {
-				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+				refString = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.department}`;
 			} else if (reviewData.budget_type === 'rdoc') {
-				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.agency}`;
+				refString = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${reviewData.department}`;
 			}
 
 			reviewData.jbook_ref_id = refString;
 			delete reviewData.agency_office;
 			delete reviewData.agency_service;
-
-			reviewData.portfolio_name = portfolio.name;
-			reviewData.latest_class_label = reviewData.primary_class_label;
-			reviewData.primary_review_status = 'Finished Review';
-			reviewData.review_status = 'Partial Review (Service)';
 
 			reviewArray.push(reviewData);
 		});
@@ -131,6 +233,13 @@ const parseExcel = async (file, portfolio) => {
 		console.log(message);
 		return [];
 	}
+};
+
+const getExample = (name) => {
+	if (name === 'AI Inventory') {
+		return aiInvSample;
+	}
+	return xlsxSample;
 };
 
 /**
@@ -208,6 +317,8 @@ const PortfolioBuilder = (props) => {
 		}
 	}, [init, setInit, setUser, userList, setUserList, setPublicPortfolios, setPrivatePortfolios, userMap]);
 
+	// is user admin?
+	const isAdmin = user?.extra_fields?.jbook?.is_admin || false;
 	// helper function for listportfolio
 	const getName = (id) => {
 		if (userMap[id]) {
@@ -345,18 +456,19 @@ const PortfolioBuilder = (props) => {
 						</Typography>
 					</div>
 					<div style={portfolioStyles.pillbox}>{getTags(portfolio.tags)}</div>
-					{portfolio.name === 'AI Inventory' && (
+					{portfolio.name === 'AI Inventory' && isAdmin && (
 						<>
 							<hr />
 							<div style={{ marginTop: '20px' }}>
 								<GCButton
+									key="bulkUpload"
 									onClick={() => {
 										setShowUploadModal(true);
 										setModalData(portfolio);
 									}}
 									style={{ minWidth: 'unset' }}
 								>
-									Bulk Upload
+									AI Inventory Bulk Upload
 								</GCButton>
 							</div>
 						</>
@@ -500,8 +612,20 @@ const PortfolioBuilder = (props) => {
 								>
 									Create a New Portfolio
 								</GCButton>
-								<GCButton onClick={showPublicCallback} style={{ minWidth: 'unset' }}>
+								<GCButton
+									onClick={showPublicCallback}
+									style={{ minWidth: 'unset', marginBottom: '10px' }}
+								>
 									Public Portfolio Request
+								</GCButton>
+								<GCButton
+									onClick={() => {
+										setShowUploadModal(true);
+										setModalData({ name: 'General', tags: [], user_ids: [], admins: [] });
+									}}
+									style={{ minWidth: 'unset' }}
+								>
+									Bulk Upload
 								</GCButton>
 							</div>
 						)}
@@ -664,6 +788,10 @@ const PortfolioBuilder = (props) => {
 							)}
 						</DialogContent>
 						<DialogActions>
+							<GCButton href={getExample(modalData.name)} download style={{ margin: '10px' }}>
+								<SvgIcon component={ExcelSvg} inheritViewBox />
+								&nbsp;Download Sample
+							</GCButton>
 							<GCButton
 								id={'editReviewerClose'}
 								onClick={closeUploadModal}

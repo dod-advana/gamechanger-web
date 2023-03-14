@@ -1467,7 +1467,7 @@ class EDASearchUtility {
 	}
 
 	getESSimilarityQuery(pages, filters) {
-		let filterQueries = [];
+		let filterQueries = [{ match: { sow_pws_populated_b: 'true' } }];
 		filterQueries = filterQueries.concat(this.getEDASearchQuery(filters));
 
 		const pagesQuery = pages.map((page) => {
@@ -1502,7 +1502,7 @@ class EDASearchUtility {
 		});
 
 		return {
-			track_total_hits: true,
+			track_total_hits: 10000,
 			size: 10,
 			_source: {
 				includes: ['pagerank_r', 'kw_doc_score_r', 'orgs_rs', 'file_location_eda_ext'],

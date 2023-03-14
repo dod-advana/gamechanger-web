@@ -281,7 +281,7 @@ const JbookViewHeaderHandler = (props) => {
 		});
 	};
 
-	const updatePortfolioSpecificFilters = async (portfolio) => {
+	const updatePortfolioSpecificFilters = async (portfolio, tags) => {
 		const newSearchSettings = {
 			...state.jbookSearchSettings,
 
@@ -294,8 +294,8 @@ const JbookViewHeaderHandler = (props) => {
 			hasKeywordsSpecificSelected: false,
 			hasKeywordsAllSelected: true,
 
-			classLabelSpecificSelected: false,
-			classLabelAllSelected: true,
+			classLabelSpecificSelected: true,
+			classLabelAllSelected: false,
 
 			sourceTagSpecificSelected: false,
 			sourceTagAllSelected: true,
@@ -314,7 +314,7 @@ const JbookViewHeaderHandler = (props) => {
 			pocReviewer: state.defaultOptions.pocReviewer,
 			sourceTag: state.defaultOptions.sourceTag,
 			hasKeywords: state.defaultOptions.hasKeywords,
-			classLabel: state.defaultOptions.classLabel,
+			classLabel: tags,
 		};
 		const newDefaultOptions = _.cloneDeep(state.defaultOptions);
 
