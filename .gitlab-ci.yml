@@ -53,7 +53,7 @@ cache: &global_cache
     - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: node:14
+  image: ${IRONBANK_NODEJS}
   stage: "📡 prepare"
   cache:
     <<: *global_cache
@@ -96,7 +96,7 @@ semgrep-sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 unit-backend-test-job: # Job for the unit tests
-  image: node:14
+  image: ${IRONBANK_NODEJS}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -115,7 +115,7 @@ unit-backend-test-job: # Job for the unit tests
         path: backend/coverage/cobertura-coverage.xml
 
 lint-test-job: # lint-job
-  image: node:14
+  image: ${IRONBANK_NODEJS}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
