@@ -88,10 +88,10 @@ export const PowerUserAnnotationCard = ({
 		setTag(tags[0]);
 	}, [tags]);
 
-	const options = tags.map((tagText, indexAsKey) => (
+	const options = tags.map((tagText) => (
 		<CustomFormControlLabel
 			control={<StyledRadio />}
-			key={indexAsKey}
+			key={tagText}
 			value={tagText}
 			label={
 				<span

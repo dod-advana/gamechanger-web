@@ -625,9 +625,9 @@ const renderHideTabs = (props) => {
 				<GameChangerThumbnailRow links={crawlerSources} title="Sources" width="300px">
 					{crawlerSources.length > 0 &&
 						crawlerSources[0].imgSrc &&
-						crawlerSources.map((source, indexAsKey) => (
+						crawlerSources.map((source) => (
 							<SourceContainer
-								key={indexAsKey}
+								key={source.data_source_s}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneData.clone_name),

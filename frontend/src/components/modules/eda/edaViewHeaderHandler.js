@@ -320,10 +320,10 @@ const EDAViewHeaderHandler = (props) => {
 									className="MuiInputBase-root"
 									autoWidth
 								>
-									{categorySorting[activeCategoryTab].map((sort, indexAsKey) => {
+									{categorySorting[activeCategoryTab].map((sort) => {
 										return (
 											<MenuItem
-												key={`${indexAsKey}-key`}
+												key={sort}
 												value={sort}
 												style={{ display: 'flex', padding: '3px 6px' }}
 											>
@@ -406,19 +406,19 @@ const EDAViewHeaderHandler = (props) => {
 							classes={{ root: classes.selectRoot, icon: classes.selectIcon }}
 							autoWidth
 						>
-							{viewNames.map((view, indexAsKey) => {
+							{viewNames.map((view) => {
 								if (view.name === 'Card') {
 									return [
-										<MenuItem key={`Card-List ${indexAsKey}`} value={'List'}>
+										<MenuItem key={`Card-List ${view.name}`} value={'List'}>
 											List View
 										</MenuItem>,
-										<MenuItem key={`Card-Grid ${indexAsKey}`} value={'Grid'}>
+										<MenuItem key={`Card-Grid ${view.name}`} value={'Grid'}>
 											Grid View
 										</MenuItem>,
 									];
 								} else {
 									return (
-										<MenuItem key={`${indexAsKey}-key`} value={view.name}>
+										<MenuItem key={`${view.name}-key`} value={view.name}>
 											{view.title}
 										</MenuItem>
 									);

@@ -372,10 +372,10 @@ const JbookViewHeaderHandler = (props) => {
 							>
 								{categorySorting[activeCategoryTab]
 									.filter((sort) => !((!searchText || searchText === '') && sort === 'Relevance'))
-									.map((sort, ind) => {
+									.map((sort) => {
 										return (
 											<MenuItem
-												key={`${ind}-key`}
+												key={`${sort}-key`}
 												value={sort}
 												style={{ display: 'flex', padding: '3px 6px' }}
 											>

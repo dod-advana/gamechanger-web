@@ -347,9 +347,9 @@ const PortfolioBuilder = (props) => {
 	const getTags = (tags) => {
 		let portfolioTags = '(none)';
 		if (tags.length > 0) {
-			portfolioTags = tags.map((tag, index) => {
+			portfolioTags = tags.map((tag) => {
 				return (
-					<Pill key={index}>
+					<Pill key={tag}>
 						<div style={{ marginRight: '5px', marginLeft: '5px', height: '1.5em' }}>{tag}</div>
 					</Pill>
 				);
@@ -360,7 +360,7 @@ const PortfolioBuilder = (props) => {
 	};
 
 	const listPortfolios = (pList) => {
-		let portfolios = pList.map((portfolio, indexAsKey) => {
+		let portfolios = pList.map((portfolio) => {
 			const portfolioAdmins = [];
 			for (let user of portfolio.admins) {
 				if (getName(user) !== '') {
@@ -383,7 +383,7 @@ const PortfolioBuilder = (props) => {
 			}
 
 			return (
-				<div style={portfolioStyles.portfolio} key={indexAsKey}>
+				<div style={portfolioStyles.portfolio} key={portfolio.name}>
 					<div style={portfolioStyles.portfolioHeader}>
 						<Typography variant="h5" display="inline" style={{ fontWeight: 600 }}>
 							{portfolio.name}

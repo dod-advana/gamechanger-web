@@ -54,9 +54,13 @@ const JBookPortfolioSelector = ({
 		];
 
 		menuItems = menuItems.concat(
-			portfolios.map((portfolio, indexAsKey) => {
+			portfolios.map((portfolio) => {
 				return (
-					<MenuItem key={indexAsKey} value={portfolio.name} style={{ display: 'flex', padding: '3px 6px' }}>
+					<MenuItem
+						key={portfolio.name}
+						value={portfolio.name}
+						style={{ display: 'flex', padding: '3px 6px' }}
+					>
 						{portfolio.name}
 					</MenuItem>
 				);
