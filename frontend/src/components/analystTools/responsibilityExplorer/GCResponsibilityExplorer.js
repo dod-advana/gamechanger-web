@@ -15,6 +15,7 @@ import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechang
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import { reTutorialSteps } from '../tutotialSteps';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
+import { setState } from '../../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -113,6 +114,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	}, []);
 
 	const resetPage = () => {
+		setState(dispatch, { reExplorerLeftPanelOpen: true });
 		setStepIndex(0);
 		setReView('Document');
 		setFilters([]);
