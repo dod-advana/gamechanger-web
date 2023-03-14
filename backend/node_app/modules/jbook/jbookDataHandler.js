@@ -626,7 +626,7 @@ class JBookDataHandler extends DataHandler {
 
 	async storeBudgetReview(req, userId) {
 		try {
-			const { frontendReviewData, isSubmit, reviewType, portfolioName, id } = req.body;
+			const { frontendReviewData, isSubmit, reviewType, portfolioName, id, departmentCode } = req.body;
 			const permissions = req.permissions;
 			let wasUpdated = false;
 
@@ -637,7 +637,7 @@ class JBookDataHandler extends DataHandler {
 			this.updateReviewStatus(frontendReviewData, isSubmit, reviewType, portfolioName);
 
 			const reviewData = this.jbookSearchUtility.parseFields(frontendReviewData, true, 'review');
-			const tmpId = reviewData.id;
+			const tmpId = Number(reviewData.id);
 			const query = {
 				id: tmpId,
 				portfolio_name: portfolioName,
@@ -648,9 +648,11 @@ class JBookDataHandler extends DataHandler {
 			// in review table, budget_line_item is also projectNum
 			switch (types[reviewData.budget_type]) {
 				case 'pdoc':
+					reviewData.jbook_ref_id = `pdoc#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${departmentCode}`;
 					break;
 				case 'rdoc':
 					reviewData.budget_line_item = reviewData.projectNum;
+					reviewData.jbook_ref_id = `rdoc#${reviewData.program_element}#${reviewData.budget_line_item}#${reviewData.budget_year}#${reviewData.appn_num}#${reviewData.budget_activity}#${departmentCode}`;
 					delete reviewData.projectNum;
 					break;
 				case 'om':
@@ -663,7 +665,7 @@ class JBookDataHandler extends DataHandler {
 			if (!tmpId) {
 				reviewData.budget_type = types[reviewData.budget_type];
 
-				const newReview = await this.rev.create(reviewData);
+				const newReview = await this.rev.create({ ...reviewData, department: departmentCode });
 				wasUpdated = true;
 				newOrUpdatedReview = newReview.dataValues;
 			} else {
@@ -671,10 +673,13 @@ class JBookDataHandler extends DataHandler {
 					.update(
 						{
 							...reviewData,
+							department: departmentCode,
 							budget_type: types[reviewData.budget_type],
 						},
 						{
 							where: query,
+							returning: true,
+							plain: true,
 						}
 					)
 					.catch((err) => {
@@ -683,8 +688,7 @@ class JBookDataHandler extends DataHandler {
 					});
 
 				wasUpdated = result && result.length && result[0] === 1;
-				newOrUpdatedReview = { ...reviewData, budget_type: types[reviewData.budget_type] };
-				newOrUpdatedReview.id = tmpId;
+				newOrUpdatedReview = result[1].dataValues;
 			}
 
 			// Now update ES
@@ -1461,13 +1465,24 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
-	async updateRow(index, reviewData, userId) {
+	async updateRow(index, reviewData, portfolioTags, userId) {
 		try {
 			let res = {
 				created: [],
 				dupes: [],
 				failed: [],
 			};
+			//verify tag exists in portfolio
+			if (
+				portfolioTags[reviewData.portfolio_name] === undefined ||
+				!portfolioTags[reviewData.portfolio_name].has(reviewData.primary_class_label) ||
+				(reviewData.service_class_label &&
+					!portfolioTags[reviewData.portfolio_name].has(reviewData.service_class_label))
+			) {
+				res.failed.push(index + 2);
+				return res;
+			}
+
 			// search PG reviews for row
 			const result = await this.rev.findAll({
 				where: {
@@ -1479,12 +1494,14 @@ class JBookDataHandler extends DataHandler {
 					portfolio_name: reviewData.portfolio_name,
 				},
 			});
+			let foundReview;
 			let newOrUpdatedReview;
 			let created = false;
 			if (result.length === 0) {
 				// in the case that this review does not exist, we're writing a new one
 				if (reviewData.budget_type !== 'odoc') {
-					newOrUpdatedReview = await this.rev.create(reviewData);
+					const newReview = await this.rev.create(reviewData);
+					newOrUpdatedReview = newReview.dataValues;
 					created = true;
 				}
 			} else if (result.length > 1) {
@@ -1492,35 +1509,22 @@ class JBookDataHandler extends DataHandler {
 				res.dupes.push(index + 2);
 				return res;
 			} else {
-				// we have found exactly one review that matches
-				let item = result[0].dataValues;
-				reviewData.jbook_ref_id = item.jbook_ref_id;
-				newOrUpdatedReview = await this.rev.update(
-					{
-						primary_reviewer: reviewData.primary_reviewer,
-						primary_class_label: reviewData.primary_class_label,
-						service_reviewer: reviewData.service_reviewer,
-						primary_ptp: reviewData.primary_ptp,
-						service_mp_add: reviewData.service_mp_add,
-						primary_review_notes: reviewData.primary_review_notes,
-						latest_class_label: reviewData.latest_class_label,
-						primary_review_status: reviewData.primary_review_status,
-						review_status: reviewData.review_status,
+				foundReview = result[0].dataValues; // we have found exactly one review that matches
+				const updatedReview = await this.rev.update(reviewData, {
+					where: {
+						id: foundReview.id,
 					},
-					{
-						where: {
-							id: item.id,
-						},
-					}
-				);
+					returning: true,
+					plain: true,
+				});
+				newOrUpdatedReview = updatedReview[1].dataValues;
 			}
-
 			// newOrUpdatedReview is now either from update OR create
 			// if it was a dupe it would be returned by now
 			// we have yet to catch if there's no document match in ES (which would suggest that the row has an issue)
 
 			// Now update ES
-			let tmpPGToES = this.jbookSearchUtility.parseFields({ ...reviewData }, false, 'review');
+			let tmpPGToES = this.jbookSearchUtility.parseFields(newOrUpdatedReview, false, 'review');
 			tmpPGToES = this.jbookSearchUtility.parseFields(tmpPGToES, true, 'reviewES');
 
 			// Get ES Data
@@ -1551,11 +1555,11 @@ class JBookDataHandler extends DataHandler {
 				userId
 			);
 
-			const { docs } = this.jbookSearchUtility.cleanESResults(esResults, userId);
+			const { docs } = await this.jbookSearchUtility.cleanESResults(esResults, userId);
 
 			if (docs.length === 0) {
 				if (created) {
-					await newOrUpdatedReview.destroy();
+					await this.rev.destroy({ where: { id: newOrUpdatedReview.id } });
 				}
 				res.failed.push(index + 2);
 				return res;
@@ -1592,24 +1596,11 @@ class JBookDataHandler extends DataHandler {
 				console.log('ES NOT UPDATED for REVIEW');
 				res.failed.push(index + 2);
 				// update PG again with original values:
-				await this.rev.update(
-					{
-						primary_reviewer: result.data.primary_reviewer,
-						primary_class_label: result.data.primary_class_label,
-						service_reviewer: result.data.service_reviewer,
-						primary_ptp: result.data.primary_ptp,
-						service_mp_add: result.data.service_mp_add,
-						primary_review_notes: result.data.primary_review_notes,
-						latest_class_label: result.data.latest_class_label,
-						primary_review_status: result.data.primary_review_status,
-						review_status: result.data.review_status,
+				await this.rev.update(foundReview, {
+					where: {
+						id: foundReview.id,
 					},
-					{
-						where: {
-							id: newOrUpdatedReview.id,
-						},
-					}
-				);
+				});
 			}
 			return res;
 		} catch (e) {
@@ -1624,15 +1615,27 @@ class JBookDataHandler extends DataHandler {
 		}
 	}
 
+	async getPortfolioTags() {
+		const portfolios = await this.portfolio.findAll({
+			where: { deleted: false },
+		});
+		let portfolioTags = {};
+		for (let portfolio of portfolios) {
+			portfolioTags[portfolio.dataValues.name] = new Set(portfolio.dataValues.tags);
+		}
+		return portfolioTags;
+	}
+
 	async bulkUpload(req, userId) {
 		const { reviewArray } = req.body;
 
 		const startTime = performance.now();
+		const portfolioTags = await this.getPortfolioTags();
 		let dupes = [];
 		let failed = [];
 		let written = 0;
 		for (let [index, reviewData] of reviewArray.entries()) {
-			const rowResults = await this.updateRow(index, reviewData, userId);
+			const rowResults = await this.updateRow(index, reviewData, portfolioTags, userId);
 			dupes.push(...rowResults.dupes);
 			failed.push(...rowResults.failed);
 			if (rowResults.dupes.length === 0 && rowResults.failed.length === 0) {

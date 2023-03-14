@@ -344,8 +344,8 @@ const StyledListViewFrontCardContent = styled.div`
 
 const StyledFrontCardContent = styled.div`
 	font-family: 'Noto Sans';
-	overflow: auto;
 	font-size: ${CARD_FONT_SIZE}px;
+	height: 100%;
 
 	.current-as-of-div {
 		display: flex;
@@ -359,17 +359,16 @@ const StyledFrontCardContent = styled.div`
 	.hits-container {
 		display: grid;
 		grid-template-columns: 100px auto auto;
-		height: 100%;
+		height: calc(100% - 24px);
 
 		.page-hits {
 			min-width: 100px;
-			height: fit-content;
-			max-height: 150px;
 			overflow: auto;
 			border: 1px solid rgb(189, 189, 189);
 			border-top: 0px;
 			position: relative;
 			z-index: 1;
+			height: 100%;
 
 			.page-hit {
 				display: flex;
@@ -380,6 +379,7 @@ const StyledFrontCardContent = styled.div`
 				border-top: 1px solid rgb(189, 189, 189);
 				cursor: pointer;
 				color: #386f94;
+				border-bottom: 1px solid rgb(189, 189, 189);
 
 				span {
 					font-size: ${CARD_FONT_SIZE}px;
@@ -393,8 +393,13 @@ const StyledFrontCardContent = styled.div`
 		}
 
 		> .expanded-metadata {
-			overflow-wrap: anywhere;
 			grid-column: 2 / 4;
+			height: 100%;
+			overflow: auto;
+
+			.searchdemo-blockquote {
+				height: 100%;
+			}
 		}
 	}
 `;
@@ -823,7 +828,7 @@ const CardHeaderHandler = ({
 											state.searchText,
 											item.download_url_s,
 											idx,
-											page.pageNumber
+											page?.pageNumber ?? 0
 										)
 								: () => undefined
 						}

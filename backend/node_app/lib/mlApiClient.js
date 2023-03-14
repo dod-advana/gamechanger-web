@@ -24,6 +24,7 @@ const MLRoutes = {
 	getProcessStatus: `${mlBaseUrl}/getProcessStatus`,
 	getProcessStatusTrain: `${mlTrainBaseUrl}/getProcessStatus`,
 	getCache: `${mlBaseUrl}/getCache`,
+	sendUserAggregations: `${mlBaseUrl}/sendUserAggregations`,
 
 	expandTerms: `${mlBaseUrl}/expandTerms`,
 	questionAnswer: `${mlBaseUrl}/questionAnswer`,
@@ -38,7 +39,7 @@ const MLRoutes = {
 	createModelLTR: `${mlTrainBaseUrl}/LTR/createModel`,
 	recommender: `${mlBaseUrl}/recommender`,
 	stopProcess: `${mlBaseUrl}/stopProcess`,
-	sendUserAggregations: `${mlTrainBaseUrl}/sendUserAggregations`,
+	sendUserAggregationsTrain: `${mlTrainBaseUrl}/sendUserAggregations`,
 	clearCache: `${mlBaseUrl}/clearCache`,
 };
 /**
@@ -75,6 +76,8 @@ class MLApiClient {
 		this.initializeLTR = this.getData.bind(this, 'initializeLTR');
 		this.createModelLTR = this.getData.bind(this, 'createModelLTR');
 		this.getCache = this.getData.bind(this, 'getCache');
+		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
+
 		// Post methods
 		this.downloadCorpus = this.postData.bind(this, 'downloadCorpus');
 		this.trainModel = this.postData.bind(this, 'trainModel');
@@ -84,7 +87,7 @@ class MLApiClient {
 		this.deleteLocalModel = this.postData.bind(this, 'deleteLocalModel');
 		this.deleteLocalModelTrain = this.postData.bind(this, 'deleteLocalModelTrain');
 		this.stopProcess = this.postData.bind(this, 'stopProcess');
-		this.sendUserAggregations = this.postData.bind(this, 'sendUserAggregations');
+		this.sendUserAggregationsTrain = this.postData.bind(this, 'sendUserAggregationsTrain');
 		this.clearCache = this.postData.bind(this, 'clearCache');
 	}
 

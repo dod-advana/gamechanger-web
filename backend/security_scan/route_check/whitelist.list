@@ -92,4 +92,6 @@
 .*/api/gamechanger/getHomepageEditorData .*
 .*/api/gamechanger/analyticsTools/compareDocument .*
 .*/api/gamechanger/analyticsTools/getFilterCount .*
+.*/api/gamechanger/searchPerformanceTestingTool .*
+.*/api/gamechanger/searchTest .*
 

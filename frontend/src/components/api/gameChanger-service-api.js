@@ -101,6 +101,7 @@ const endpoints = {
 	getUserAggregations: '/api/gamechanger/admin/getUserAggregations',
 	getUserDashboard: '/api/gamechanger/admin/getUserDashboard',
 	sendUserAggregations: '/api/gamechanger/admin/sendUserAggregations',
+	sendUserAggregationsTrain: '/api/gamechanger/admin/sendUserAggregationsTrain',
 	getDocumentProperties: '/api/gamechanger/getDocumentProperties',
 	clearDashboardNotification: '/api/gamechanger/clearDashboardNotification',
 	clearFavoriteSearchUpdate: '/api/gamechanger/clearFavoriteSearchUpdate',
@@ -162,6 +163,8 @@ const endpoints = {
 	//getUserFavoriteHomeApps: '/api/um/profile/current-user',
 	getUserFavoriteHomeApps: '/api/gamechanger/user/profile/current-user',
 	cacheQlikApps: '/api/gamechanger/admin/cacheQlikApps',
+	searchPerformanceTest: '/api/gamechanger/searchPerformanceTestingTool',
+	searchTestController: '/api/gamechanger/searchTest',
 
 	exportHistoryDELETE: function (id) {
 		if (!id) {
@@ -858,7 +861,10 @@ export default class GameChangerAPI {
 		const url = endpoints.sendUserAggregations;
 		return axiosPOST(this.axios, url, { params: body });
 	};
-
+	sendUserAggregationsTrain = async (body) => {
+		const url = endpoints.sendUserAggregationsTrain;
+		return axiosPOST(this.axios, url, { params: body });
+	};
 	addInternalUser = async (body) => {
 		const url = endpoints.addInternalUser;
 		return axiosPOST(this.axios, url, body);
@@ -1249,5 +1255,25 @@ export default class GameChangerAPI {
 	cacheQlikApps = async () => {
 		const url = endpoints.cacheQlikApps;
 		return axiosGET(this.axios, url);
+	};
+
+	postSearchTestResults = async (data) => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosPOST(this.axios, url, data);
+	};
+
+	getSearchTestResults = async () => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosGET(this.axios, url);
+	};
+
+	resetSearchTestResults = async () => {
+		const url = endpoints.searchPerformanceTest;
+		return axiosDELETE(this.axios, url);
+	};
+
+	testSearch = async (data) => {
+		const url = endpoints.searchTestController;
+		return axiosPOST(this.axios, url, data);
 	};
 }

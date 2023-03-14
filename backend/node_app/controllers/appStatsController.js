@@ -10,8 +10,6 @@ const CRAWLER_INFO = require('../models').crawler_info;
 const { getUserIdFromSAMLUserId } = require('../utils/userUtility');
 const { sendCSVFile } = require('../utils/sendFileUtility');
 const sparkMD5Lib = require('spark-md5');
-const { Sequelize } = require('sequelize');
-const { QueryTypes } = require('sequelize');
 const { sortByValueDescending } = require('../utils/objectUtils');
 
 /**
@@ -241,7 +239,6 @@ class AppStatsController {
 	 */
 	async queryPdfOpend(startDate, endDate, limit, connection) {
 		return new Promise((resolve) => {
-			const self = this;
 			connection.query(
 				`
 				select 
@@ -270,7 +267,7 @@ class AppStatsController {
 						this.logger.error(error, 'BAP9ZIP1');
 						throw error;
 					}
-					resolve(self.cleanFilePath(results));
+					resolve(this.cleanFilePath(results));
 				}
 			);
 		});
@@ -340,7 +337,11 @@ class AppStatsController {
 				matomo_log_action b
 			where
 				a.idaction_name = b.idaction
-				and (search_cat = ? or search_cat = ?)
+				${
+					cloneName
+						? `and (search_cat = '${cloneName}_combined'  or search_cat = '${cloneName}')`
+						: 'and search_cat is not null'
+				}
 				and a.server_time > ?
 				and a.server_time <= ?
 			order by
@@ -348,13 +349,13 @@ class AppStatsController {
 				searchtime desc
 			
 			` + (limit ? `limit ${limit * 3};` : ';'),
-				[cloneName + '_combined', cloneName, startDate, endDate],
+				[startDate, endDate],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP2');
 						throw error;
 					}
-					resolve(results);
+					resolve(this.cleanSearch(results));
 				}
 			);
 		});
@@ -450,7 +451,7 @@ class AppStatsController {
 				WHERE llva.idaction_event_action = la.idaction
 					AND llva.idaction_name = la_names.idaction
 					AND (la.name LIKE 'Favorite' OR la.name LIKE 'CancelFavorite' OR la.name LIKE 'ExportDocument' OR la.name LIKE 'Highlight')
-					AND llva.idaction_event_category = ?
+					${cloneName ? `AND llva.idaction_event_category = ${cloneName}` : ''}
 					AND server_time >= ?
 					AND server_time <= ?
 				order by 
@@ -458,7 +459,7 @@ class AppStatsController {
 					idvisit
 				
 				` + (limit ? `limit ${limit};` : ';'),
-				[cloneName, startDate, endDate],
+				[startDate, endDate],
 				(error, results) => {
 					if (error) {
 						this.logger.error(error, 'BAP9ZIP5');
@@ -606,19 +607,23 @@ class AppStatsController {
 		const searchMap = this.mapSearchMappings(searches, documents, events, searchPdfMapping);
 		for (const [, value] of Object.entries(searchMap)) {
 			for (let search of value) {
-				if (search.visited === undefined) {
-					searchPdfMapping.push(search);
-				}
+				search.visited === undefined && searchPdfMapping.push(search);
 			}
 		}
 		// filename mapping to titles; pulled from ES
 		let filenames = searchPdfMapping.filter((item) => item.document !== undefined && item.document !== 'null');
 		filenames = filenames.map((item) => item.document);
-		const esQuery = this.searchUtility.getDocMetadataQuery('all', filenames);
+		const chunkSize = 9000;
 		const esClientName = 'gamechanger';
 		const esIndex = 'gamechanger';
-		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
-		esResults = esResults.body.hits.hits;
+		const esResults = [];
+		for (let i = 0; i < filenames.length; i += chunkSize) {
+			const chunk = filenames.slice(i, i + chunkSize);
+			let esQuery = this.searchUtility.getDocMetadataQuery('all', chunk);
+			let esChunk = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			esChunk = esChunk.body.hits.hits;
+			esResults.push(...esChunk);
+		}
 		const filenameMap = {};
 		for (const doc of esResults) {
 			const item = doc._source;
@@ -638,6 +643,20 @@ class AppStatsController {
 		}
 		return searchPdfMapping;
 	}
+
+	/**
+	 * Looks for a property called value and replaces the
+	 * unknown symbols
+	 * @param {Object[]} results  where each result has result['value']
+	 * @returns
+	 */
+	cleanSearch(results) {
+		for (let result of results) {
+			result['value'] = result['value'].replace(/&#039;|&quot;/g, "'");
+		}
+		return results;
+	}
+
 	/**
 	 * Looks for a property called document and replaces the
 	 * file path with the file name
@@ -647,13 +666,12 @@ class AppStatsController {
 	cleanFilePath(results) {
 		for (let result of results) {
 			let action = result['document'].replace(/^.*[\\\/]/, '').replace('PDFViewer - ', '');
-			const [filename, clone_name] = action.split(' - ');
-			result['document'] = filename;
-			result['clone_name'] = clone_name;
+			let idx = action.lastIndexOf('-');
+			result['document'] = action.substr(0, idx - 1);
+			result['clone_name'] = action.substr(idx + 1);
 		}
 		return results;
 	}
-
 	/**
 	 * This method is called to get a list of clones and there ids to pass into a select
 	 * It first makes the connection with matomo then populates the data for the results into an excel file.
@@ -798,7 +816,7 @@ class AppStatsController {
 				sendCSVFile(res, 'SourceInteractions', columns, data.data);
 			}
 		} catch (err) {
-			this.logger.error(err, '11MLULU');
+			this.logger.error(err, '51ML1NV');
 			res.status(500).send(err);
 		} finally {
 			connection.end();
@@ -813,9 +831,9 @@ class AppStatsController {
 	 */
 	async getSearchPdfMapping(req, res) {
 		const userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
-		const { startDate, endDate, cloneName, cloneID, offset = 0 } = req.query;
+		const { startDate, endDate, cloneName, cloneID, limit, offset = 0 } = req.query;
 
-		const opts = { startDate, endDate, cloneName, cloneID, offset, userId };
+		const opts = { startDate, endDate, cloneName, cloneID, limit, offset, userId };
 		let connection;
 		try {
 			connection = this.mysql.createConnection({
@@ -829,7 +847,7 @@ class AppStatsController {
 				daysBack: 3,
 				data: [],
 			};
-			results.data = await this.querySearchPdfMapping(opts, 100, connection);
+			results.data = await this.querySearchPdfMapping(opts, limit, connection);
 			res.status(200).send(results);
 		} catch (err) {
 			this.logger.error(err, '88ZHUHU');
@@ -1500,7 +1518,6 @@ class AppStatsController {
 				)
 				GROUP BY
 					DATE_FORMAT(visit_last_action_time, '%Y-%m')
-
 				`,
 				[cloneID],
 				(error, results) => {
@@ -1514,7 +1531,7 @@ class AppStatsController {
 		});
 	}
 	/**
-	 * This method gets graph data for users by month
+	 * This method gets newly inactive users
 	 * @returns an array of data from Matomo.
 	 */
 	async getInactiveUsers(startDate, endDate, cloneName, connection) {
@@ -1552,6 +1569,57 @@ class AppStatsController {
 			);
 		});
 	}
+
+	/**
+	 * This method gets active users
+	 * @returns an array of data from Matomo.
+	 */
+	async getActiveUsers(endDate, cloneName, connection) {
+		return new Promise((resolve) => {
+			connection.query(
+				`
+				SELECT
+					COUNT(t.user_id) as active_user,
+					(
+					select
+						count(distinct b.user_id) as unique_users
+					from
+						matomo_log_visit b
+					where 
+						b.idvisitor in (
+							select distinct idvisitor
+							from matomo_log_link_visit_action
+							where idaction_event_category=?
+						)
+					) as total_users
+				FROM (
+					select
+						user_id,
+						MAX(visit_last_action_time) as last_visit
+					from
+						matomo_log_visit b
+					where 
+						b.idvisitor in (
+							select distinct idvisitor
+							from matomo_log_link_visit_action
+							where idaction_event_category=?
+						)
+					GROUP BY user_id
+				) t
+				WHERE
+					t.last_visit >= DATE_SUB(STR_TO_DATE(?, '%Y-%m-%d %H:%i'), INTERVAL 6 WEEK)
+				`,
+				[cloneName, cloneName, endDate],
+				(error, results) => {
+					if (error) {
+						this.logger.error(error, '1FGM91B');
+						throw error;
+					}
+					resolve(results);
+				}
+			);
+		});
+	}
 	/**
 	 * This method is called by an endpoint to get the card and graph data
 	 * @param {*} req
@@ -1573,10 +1641,11 @@ class AppStatsController {
 			const userCardPromise = this.getCardUsersAggregationQuery(startDate, endDate, cloneID, connection);
 			const newUserPromise = this.getCardNewUsers(startDate, endDate, cloneID, connection);
 			const inactiveUserPromise = this.getInactiveUsers(startDate, endDate, cloneID, connection);
+			const activeUserPromise = this.getActiveUsers(endDate, cloneID, connection);
 			const searchBarPromise = this.getSearchGraphData(cloneName, connection);
 			const userBarPromise = this.getUserGraphData(cloneID, connection);
 
-			let cards, userCards, searchBar, userBar, newUser, inactiveUser;
+			let cards, userCards, searchBar, userBar, newUser, inactiveUser, activeUser;
 
 			await Promise.all([
 				cardPromise,
@@ -1585,6 +1654,7 @@ class AppStatsController {
 				userBarPromise,
 				newUserPromise,
 				inactiveUserPromise,
+				activeUserPromise,
 			]).then((data) => {
 				cards = data[0];
 				userCards = data[1];
@@ -1592,11 +1662,12 @@ class AppStatsController {
 				userBar = data[3];
 				newUser = data[4];
 				inactiveUser = data[5];
+				activeUser = data[6];
 			});
-
 			cards[0]['unique_users'] = userCards[0]['unique_users'];
 			cards[0]['new_users'] = newUser[0]['new_users'];
-			cards[0]['inactive_users'] = inactiveUser[0]['inactive_user'];
+			cards[0]['new_inactive_users'] = inactiveUser[0]['inactive_user'];
+			cards[0]['total_inactive_users'] = activeUser[0]['total_users'] - activeUser[0]['active_user'];
 
 			res.status(200).send({ cards: cards[0], userBar: userBar, searchBar: searchBar });
 		} catch (err) {
@@ -1699,9 +1770,8 @@ class AppStatsController {
 		const filenameMap = await this.getSourceMetadataForFilenames(filenames, userID);
 		events = events.map((item) => ({ ...item, ...filenameMap[item.filename] }));
 
-		// Query postgres for the total number of documents processed by each crawler.
-		const totalSourceCounts = await this.getSourceCounts();
-
+		// Query ElasticSearch for the total number of documents processed by each crawler.
+		const totalSourceCounts = await this.getSourceCounts(userID);
 		// Query Postgres for crawler source information.
 		const crawlerInfo = await this.getCrawlerInfo();
 
@@ -1852,40 +1922,29 @@ class AppStatsController {
 	}
 
 	/**
-	 * Query Postgres for the number of documents processed by each crawler.
+	 * Query ElasticSearch for the number of documents processed by each crawler.
 	 *
 	 * @returns - Object such that keys are (string) crawler
 	 * name and values are (integer) number of documents processed by the crawler.
 	 */
-	async getSourceCounts() {
-		let client;
-		let counts = {};
-		try {
-			const config = this.constants.POSTGRES_CONFIG.databases['gc-orchestration'];
-			client = new Sequelize(config.database, config.username, config.password, {
-				host: config.host,
-				port: config.port,
-				database: config.database,
-				dialect: config.dialect,
-			});
-			counts = await client.query(
-				`
-				SELECT
-					json_metadata ->> 'crawler_used' as crawler_used, COUNT(*)
-				FROM
-					gc_document_corpus_snapshot_vw
-				GROUP BY json_metadata ->> 'crawler_used'
-				`,
-				{ type: QueryTypes.SELECT, plain: false, raw: true }
-			);
-		} catch (err) {
-			this.logger.error(err);
-			throw err;
-		}
-
-		counts = counts.reduce((obj, item) => ((obj[item.crawler_used] = item.count), obj), {});
-
-		return counts;
+	async getSourceCounts(userID) {
+		const esQuery = {
+			size: 0,
+			aggs: {
+				source_count: {
+					terms: {
+						field: 'crawler_used_s',
+						size: 10000,
+					},
+				},
+			},
+		};
+		const esClientName = 'gamechanger';
+		const esIndex = 'gamechanger';
+		let esResults = await this.dataApi.queryElasticSearch(esClientName, esIndex, esQuery, userID);
+		esResults = esResults.body.aggregations.source_count.buckets;
+		esResults = esResults.reduce((obj, item) => ((obj[item.key] = item.doc_count), obj), {});
+		return esResults;
 	}
 
 	/**

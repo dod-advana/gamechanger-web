@@ -1,4 +1,5 @@
 const { ModularGameChangerController } = require('../modularGameChangerController');
+const { DataLibrary } = require('../../lib/dataLibrary');
 const { ORGFILTER, getOrgOptions, getOrgToDocQuery } = require('../../utils/routeUtility');
 const LOGGER = require('@dod-advana/advana-logger');
 
@@ -7,8 +8,13 @@ const LOGGER = require('@dod-advana/advana-logger');
  */
 class ExternalSearchController {
 	constructor(opts = {}) {
-		const { logger = LOGGER, search = new ModularGameChangerController(opts) } = opts;
+		const {
+			logger = LOGGER,
+			search = new ModularGameChangerController(opts),
+			dataLibrary = new DataLibrary(opts),
+		} = opts;
 		this.searchController = search;
+		this.dataLibrary = dataLibrary;
 		this.logger = logger;
 	}
 
@@ -91,6 +97,79 @@ class ExternalSearchController {
 		} catch (err) {
 			const { message } = err;
 			this.logger.error(message, 'DP7GSEH', userId);
+			return res.status(500).send();
+		}
+	}
+
+	/**
+	 * Gets metadata for all docs according to fields specified when building
+	 * this endpoint for Enterprise search.
+	 * We know we've hit end of results when hits.length is less than 10000,
+	 * though we've also surfaced total hits just in case.
+	 * @param {string} cloneName must line up with API key permissions
+	 * @param {string | undefined} searchAfterID single value from 'sort' array in
+	 *   last elem of 'hits' from prev search | undefined for first page of results
+	 * @returns {esHits}
+	 *
+	 * @typedef {Object} esHits
+	 * @property {Object} total holds total number of results
+	 * @property {Array<Hit>} hits holds results
+	 *
+	 * @typedef {Object} Hit
+	 * @property {Object} fields holds key-value pairs
+	 * @property {Array<string>} sort holds document ID; pass last ID to search_after
+	 *   of next call to getGCDocsMetadata to paginate
+	 */
+	async getGCDocsMetadata(req, res) {
+		let userId = 'API';
+		try {
+			userId = req.session?.user?.id || req.get('SSL_CLIENT_S_DN_CN');
+
+			const esQuery = {
+				_source: [
+					'filename',
+					'title',
+					'page_count',
+					'doc_type',
+					'doc_num',
+					'ref_list',
+					'keyw_5',
+					'type',
+					'display_title_s',
+					'display_org_s',
+					'display_source_s',
+					'is_revoked_b',
+					'publication_date_dt',
+					'download_url_s',
+					'source_fqdn_s',
+					'source_title_s',
+					'top_entities_t',
+				],
+				track_total_hits: true,
+				size: 10000,
+				query: {
+					match_all: {},
+				},
+				sort: [
+					{
+						_id: 'asc',
+					},
+				],
+			};
+
+			if (req.query?.searchAfterID) {
+				esQuery.search_after = [req.query.searchAfterID];
+			}
+
+			const esClientName = 'gamechanger';
+			const esIndex = 'gamechanger';
+			let esResults = await this.dataLibrary.queryElasticSearch(esClientName, esIndex, esQuery, userId);
+			esResults = esResults.body.hits;
+
+			return res.status(200).send(esResults);
+		} catch (err) {
+			const { message } = err;
+			this.logger.error(message, 'METAERR', userId);
 			return res.status(500).send();
 		}
 	}

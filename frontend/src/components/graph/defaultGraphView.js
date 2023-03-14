@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { getOrgToOrgQuery, getTypeQuery, numberWithCommas, SEARCH_TYPES } from '../../utils/gamechangerUtils';
-import { getSearchObjectFromString, setState } from '../../utils/sharedFunctions';
+import { setState } from '../../utils/sharedFunctions';
 import GameChangerAPI from '../api/gameChanger-service-api';
 import { MemoizedPolicyGraphView } from './policyGraphView';
 import ViewHeader from '../mainView/ViewHeader';
@@ -38,7 +38,6 @@ const getGraphData = async (
 		loadAll,
 	} = searchSettings;
 
-	const searchObject = getSearchObjectFromString(searchText);
 	const transformResults = searchType === SEARCH_TYPES.contextual;
 	const useGCCache = JSON.parse(localStorage.getItem('useGCCache'));
 	let modifiedOrgFilter = allOrgsSelected ? {} : orgFilter;
@@ -52,7 +51,7 @@ const getGraphData = async (
 
 		const graphResp = await gameChangerAPI.graphSearchPOST({
 			cloneName: cloneData.clone_name,
-			searchText: searchObject.search,
+			searchText,
 			options: {
 				orgFilterString,
 				typeFilterString,
