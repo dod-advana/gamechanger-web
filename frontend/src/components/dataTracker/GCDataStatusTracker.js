@@ -4,10 +4,9 @@ import styled from 'styled-components';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { Tabs, Tab, TabPanel, TabList } from 'react-tabs';
-import { Typography } from '@material-ui/core';
+import { Typography, MenuItem, Select } from '@material-ui/core';
 import TabStyles from '../common/TabStyles';
 import moment from 'moment';
-import { MenuItem, Select } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import { green, red } from '@material-ui/core/colors';
 import _ from 'lodash';
@@ -466,26 +465,17 @@ const GCDataStatusTracker = (props) => {
 	};
 
 	const crawl_download = (status) => {
-		if (
+		return !!(
 			status === 'Crawl and Download Complete' ||
 			status === 'Ingest In Progress' ||
 			status === 'Ingest Complete'
-		) {
-			return true;
-		}
-		return false;
+		);
 	};
 	const ingest_progress = (status) => {
-		if (status === 'Ingest In Progress' || status === 'Ingest Complete') {
-			return true;
-		}
-		return false;
+		return !!(status === 'Ingest In Progress' || status === 'Ingest Complete');
 	};
 	const ingest_complete = (status) => {
-		if (status === 'Ingest Complete') {
-			return true;
-		}
-		return false;
+		return status === 'Ingest Complete';
 	};
 	const date_difference = (date) => {
 		const diffTime = Math.abs(Date.now() - date);
