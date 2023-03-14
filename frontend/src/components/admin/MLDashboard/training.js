@@ -13,7 +13,7 @@ import GCButton from '../../common/GCButton';
 
 import Processes from './processes';
 
-import './index.scss';
+import './index.css';
 const status = ['ok', 'warning', 'error', 'loading'];
 
 const gameChangerAPI = new GameChangerAPI();

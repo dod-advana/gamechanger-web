@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:18.8.0
 RUN apt-get update && apt-get install -y vim && apt-get install -y postgresql
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app
