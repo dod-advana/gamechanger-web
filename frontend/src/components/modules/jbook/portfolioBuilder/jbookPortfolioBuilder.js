@@ -141,6 +141,9 @@ const parseExcel = async (file, portfolio) => {
 					if (reviewData.service_agree_label === 'Yes') {
 						reviewData.service_class_label = reviewData.primary_class_label;
 					}
+					if (reviewData.service_agree_label === 'No' && reviewData.service_class_label) {
+						reviewData.latest_class_label = reviewData.service_class_label;
+					}
 					reviewData.service_ptp_agree_label = item['RAI Transition Partner Agree'];
 					reviewData.service_ptp = item['RAI Transition Partner'];
 					if (reviewData.service_ptp_agree_label === 'Yes') {
@@ -153,7 +156,6 @@ const parseExcel = async (file, portfolio) => {
 					reviewData.service_poc_org = item['POC Org'];
 					reviewData.poc_phone_number = item['POC Phone Number'];
 					reviewData.service_review_notes = item['RAI Review Notes'];
-					reviewData.latest_class_label = reviewData.service_class_label;
 					if (
 						reviewData.service_secondary_reviewer === null ||
 						reviewData.service_agree_label === null ||
