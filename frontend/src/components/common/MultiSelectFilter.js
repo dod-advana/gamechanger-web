@@ -183,7 +183,7 @@ const MultiSelectFilter = ({
 			)}
 			<div ref={containerRef} style={styles.checkboxContainer}>
 				{children ||
-					visibleOptions.map((option) => {
+					visibleOptions.map((option, idx) => {
 						const checkboxText = getCheckboxText(option);
 						return (
 							<FormControlLabel
@@ -192,7 +192,7 @@ const MultiSelectFilter = ({
 									!betterData[option] &&
 									!state[searchSettingsName][filter][option]
 								}
-								key={option.toString()}
+								key={idx}
 								value={checkboxText}
 								classes={{
 									root: classes.rootLabel,

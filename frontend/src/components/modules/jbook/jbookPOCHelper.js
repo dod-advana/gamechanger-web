@@ -1189,7 +1189,7 @@ const AIDomainValue = React.memo((props) => {
 						{radioButtonData.map((data) => {
 							return (
 								<DropdownRadioButton
-									key={data.toString()}
+									key={data.toString}
 									reviewData={reviewData}
 									reviewDataProp={'domainTask'}
 									setReviewData={setReviewData}
