@@ -9,7 +9,7 @@ import {
 	SEARCH_TYPES,
 } from '../../../utils/gamechangerUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 import simpleSearchHandler from '../simple/simpleSearchHandler';
 
@@ -78,8 +78,6 @@ const AmhsSearchHandler = {
 		const trimmed = searchText.trim();
 		if (_.isEmpty(trimmed)) return;
 
-		const searchObject = getSearchObjectFromString(searchText);
-
 		this.getRecentSearches(searchText, cloneData);
 
 		const t0 = new Date().getTime();
@@ -126,7 +124,7 @@ const AmhsSearchHandler = {
 
 			const resp = await gameChangerAPI.modularSearch({
 				cloneName: cloneData.clone_name,
-				searchText: searchObject.search,
+				searchText,
 				offset,
 				options: {
 					transformResults,

@@ -56,7 +56,11 @@ cache: &global_cache
     - npm config set legacy-peer-deps true
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
+<<<<<<< HEAD
   image: ${IRONBANK_NODEJS18}
+=======
+  image: ${IRONBANK_NODEJS}
+>>>>>>> dev
   stage: "📡 prepare"
   cache:
     <<: *global_cache
@@ -99,7 +103,11 @@ semgrep-sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 unit-backend-test-job: # Job for the unit tests
+<<<<<<< HEAD
   image: ${IRONBANK_NODEJS18}
+=======
+  image: ${IRONBANK_NODEJS}
+>>>>>>> dev
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -118,7 +126,11 @@ unit-backend-test-job: # Job for the unit tests
         path: backend/coverage/cobertura-coverage.xml
 
 lint-test-job: # lint-job
+<<<<<<< HEAD
   image: ${IRONBANK_NODEJS18}
+=======
+  image: ${IRONBANK_NODEJS}
+>>>>>>> dev
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"

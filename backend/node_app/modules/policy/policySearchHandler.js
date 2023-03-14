@@ -1,6 +1,7 @@
 const SearchUtility = require('../../utils/searchUtility');
 const MLSearchUtility = require('../../utils/MLsearchUtility');
-
+const { PolicyPreSearchAggregationQuery } = require('./elasticsearch/queries');
+const { PolicyPreSearchAggregationResponse } = require('./elasticsearch/responses');
 const constantsFile = require('../../config/constants');
 const { MLApiClient } = require('../../lib/mlApiClient');
 const { DataTrackerController } = require('../../controllers/dataTrackerController');
@@ -51,7 +52,6 @@ class PolicySearchHandler extends SearchHandler {
 			storeHistory,
 			getUserIdFromSAMLUserId(req)
 		);
-
 		// cleaning incomplete double quote issue
 		const doubleQuoteCount = (searchText.match(/"/g) || []).length;
 		if (doubleQuoteCount % 2 === 1) {
@@ -61,7 +61,9 @@ class PolicySearchHandler extends SearchHandler {
 
 		let startTime = performance.now();
 		let expansionDict = await this.gatherExpansionTerms(req.body, userId);
-		let searchResults = await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts);
+		let searchResults = (await this.doSearch(req, expansionDict, clientObj, userId, reviseFilterCounts)) || {
+			docs: [],
+		};
 		let startTimeInt = performance.now();
 		let enrichedResults = await this.enrichSearchResults(req, searchResults, clientObj, userId);
 		let endTimeInt = performance.now();
@@ -807,23 +809,37 @@ class PolicySearchHandler extends SearchHandler {
 	}
 
 	async getPresearchData(userId) {
-		try {
-			let esIndex = this.constants.GAME_CHANGER_OPTS.index;
-			let esClientName = 'gamechanger';
-			const orgQuery = this.searchUtility.getOrgQuery(userId);
-			const typeQuery = this.searchUtility.getTypeQuery(userId);
+		let results = { orgs: [], types: [] };
+		const errorCode = 'RYZ919H';
+		const compositeBucketSize = 100;
+		const elasticsearchClientName = 'gamechanger';
 
-			const orgResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, orgQuery, userId);
-			const typeResults = this.dataLibrary.queryElasticSearch(esClientName, esIndex, typeQuery, userId);
-			const results = await Promise.all([orgResults, typeResults]);
-			const orgsCleaned = results[0].body.aggregations.display_org.buckets
-				.map((item) => (item.revoke_filter.buckets.query.doc_count !== 0 ? item.key.type : null))
-				.filter((item) => item !== null);
-			const typesCleaned = results[1].body.aggregations.display_type.buckets.map((item) => item.key.type);
-			return { orgs: orgsCleaned, types: typesCleaned };
-		} catch (e) {
-			this.logger.error(e.message, 'OICE7JS');
-			return { orgs: [], types: [] };
+		try {
+			const elasticsearchIndex = this.constants.GAME_CHANGER_OPTS.index;
+			const organizationQuery = PolicyPreSearchAggregationQuery.createOrganizationQuery(compositeBucketSize);
+			const documentTypeQuery = PolicyPreSearchAggregationQuery.createDocumentTypeQuery(compositeBucketSize);
+
+			const promises = [];
+			[organizationQuery, documentTypeQuery].forEach((query) => {
+				promises.push(
+					this.dataLibrary.queryElasticSearch(elasticsearchClientName, elasticsearchIndex, query, userId)
+				);
+			});
+
+			let [organizationResults, documentTypeResults] = await Promise.allSettled(promises);
+			const errorMessage = 'Failed to get presearch aggregations for ';
+			organizationResults.status === 'rejected' &&
+				this.logger.error(errorMessage + 'organizations. ' + organizationResults.reason, errorCode, userId);
+			documentTypeResults.status === 'rejected' &&
+				this.logger.error(errorMessage + 'document types. ' + documentTypeResults.reason, errorCode, userId);
+
+			results.orgs = PolicyPreSearchAggregationResponse.formatOrganizationResponse(organizationResults.value);
+			results.types = PolicyPreSearchAggregationResponse.formatDocumentTypeResponse(documentTypeResults.value);
+
+			return results;
+		} catch (error) {
+			this.logger.error(error.message, 'OICE7JS', userId);
+			return results;
 		}
 	}
 

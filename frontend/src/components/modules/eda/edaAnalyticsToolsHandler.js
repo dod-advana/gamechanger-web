@@ -519,7 +519,7 @@ const edaAnalyticsToolsHandler = {
 				<div style={{ width: '100%', marginBottom: 10 }}>
 					<GCAccordion
 						contentPadding={15}
-						expanded={analystToolsSearchSettings.contractsOrMods !== 'both'}
+						expanded={analystToolsSearchSettings.contractsOrMods !== 'contracts'}
 						header={'CONTRACTS OR MODS'}
 						headerBackground={'rgb(238,241,242)'}
 						headerTextColor={'black'}

@@ -274,7 +274,7 @@ const EDAViewHeaderHandler = (props) => {
 				) {
 					let optionString = contractDataToString(settings);
 					processedFilters.push({ type, optionName: optionString });
-				} else if (type === 'contractsOrMods' && settings.contractsOrMods !== 'both') {
+				} else if (type === 'contractsOrMods' && settings.contractsOrMods !== 'contracts') {
 					processedFilters.push({ type, optionName: settings[type] });
 				} else if (
 					!isArray(settings[type]) &&
