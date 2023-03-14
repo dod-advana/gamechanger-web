@@ -1046,10 +1046,15 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				</div>
 			)}
 			{loading && (
-				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
-					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
+				<div
+					style={{
+						flexBasis: 'calc(100%)',
+						display: 'flex',
+						justifyContent: 'center',
+						flexDirection: 'column',
+					}}
+				>
+					<LoadingIndicator customColor={gcOrange} />
 				</div>
 			)}
 			{!loading && returnedDocs.length > 0 && stepIndex !== 1 && (
