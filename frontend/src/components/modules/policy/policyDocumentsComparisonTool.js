@@ -386,9 +386,11 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 	const [needsSort, setNeedsSort] = useState(true);
 	const [sortOrder, setSortOrder] = useState('desc');
 	const [updateFilters, setUpdateFilters] = useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+	const [leftPanelOpen, setLeftPanelOpen] = useState(false);
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+	// tutorialLogicSwitch is set to true when going back from post-search tutorial to pre-search tutorial
+	// It indicates that we need to blank out returnedDocs and viewableDocs.
 	const [tutorialLogicSwitch, setTutorialLogicSwitch] = useState(false);
 	const [loading, setLoading] = useState(false);
 
@@ -435,23 +437,30 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setLoading(resultsLoading || filterCountsLoading || updateFilters);
 	}, [resultsLoading, filterCountsLoading, updateFilters]);
 
-	// useEffect for handling state changes and some other odd behavior during the tutorial the tutorial
+	// useEffect for handling state changes and some other odd behavior during the tutorial
 	useEffect(() => {
-		if (stepIndex === 0 && showTutorial === true)
+		if (stepIndex === 0 && showTutorial === true) {
+			resetAdvancedSettings(dispatch);
 			setParagraphText(
 				'Ensure the transfer of enterprise-wide MHRR information from the DoD to the National Archives and Records Administration.\nEstablish and implement procedures within their respective Components in accordance with this Instruction.'
 			);
-		if (stepIndex === 2 && tutorialLogicSwitch) {
+		}
+
+		if (stepIndex === 1 && tutorialLogicSwitch) {
 			setReturnedDocs([]);
 			setViewableDocs([]);
 			setTutorialLogicSwitch(false);
 		}
-		if (stepIndex === 3 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
-		if (stepIndex === 3 && viewableDocs.length) {
-			setShowTutorial(true);
+		// not sure why this one is necessary, just copied over from commented code below
+		if (stepIndex === 2 && showTutorial && !tutorialLogicSwitch) setShowTutorial(false);
+		if (stepIndex === 2 && !viewableDocs.length) {
+			setShowTutorial(false);
 			setTutorialLogicSwitch(true);
 		}
-	}, [stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
+		if (stepIndex === 2 && !loading && viewableDocs.length) {
+			setShowTutorial(true);
+		}
+	}, [resetAdvancedSettings, dispatch, loading, stepIndex, showTutorial, viewableDocs, tutorialLogicSwitch]);
 
 	// This useEffect updates filter counts based on the filter configuration in analystToolsSearchSettings.
 	// updateFilters is set alongside certain calls to setReturnedDocs().
@@ -674,6 +683,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		handleSetParagraphs();
 	}, [paragraphText, handleSetParagraphs]);
 
+	useEffect(() => {
+		setLeftPanelOpen(!loading && viewableDocs.length);
+	}, [loading, viewableDocs]);
+
 	const removeParagraph = (id) => {
 		const newParagraphs = paragraphs.filter((par) => par.id !== id);
 		if (id === selectedInput) {
@@ -754,9 +767,10 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setViewableDocs([]);
 		setNoResults(false);
 		setFilterChange(false);
-		setLeftPanelOpen(true);
+		setLeftPanelOpen(false);
 		setStepIndex(0);
 		setTutorialLogicSwitch(false);
+		resetAdvancedSettings(dispatch);
 	};
 
 	const handleCheck = (id) => {
@@ -796,21 +810,28 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			<Grid item xs={12}>
 				<div style={{ display: 'flex' }}>
 					{/* different */}
-					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Document Comparison Tool enables users to compare submitted text (in the field below) with
-						existing text in the GAMECHANGER repository. After submitting a sentence, paragraph, or string
-						of paragraphs into the open text field, the tool will search for and yield the top existing
-						policy documents available within GAMECHANGER that share the most semantically similar text.
+					<div style={{ fontWeight: 'bold', fontFamily: 'Noto Sans' }}>
+						<div style={{ alignItems: 'center', marginBottom: '10px', display: 'flex' }}>
+							The Document Comparison Tool enables users to compare submitted text (in the field below)
+							with existing text in the GAMECHANGER repository. After submitting a sentence, paragraph, or
+							string of paragraphs into the open text field, the tool will search for and yield the top
+							existing policy documents available within GAMECHANGER that share the most semantically
+							similar text.
+						</div>
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: '10px' }}>For a step-by-step tutorial, click here:</div>
+							<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+								<HelpOutlineIcon
+									style={{ cursor: 'pointer', marginRight: 20, alignSelf: 'center' }}
+									onClick={() => {
+										reset();
+										setShowTutorial(true);
+									}}
+								/>
+							</GCTooltip>
+						</div>
 					</div>
-					<GCTooltip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon
-							style={{ cursor: 'pointer', marginRight: 20, alignSelf: 'center' }}
-							onClick={() => {
-								reset();
-								setShowTutorial(true);
-							}}
-						/>
-					</GCTooltip>
+
 					{!loading && returnedDocs.length > 0 && (
 						<div style={{ display: 'flex', alignSelf: 'center' }}>
 							<FormControl
@@ -914,12 +935,15 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 			<div
 				style={{
 					marginTop: 20,
-					display: leftPanelOpen ? 'block' : 'none',
+					display: leftPanelOpen && stepIndex !== 1 ? 'block' : 'none',
 					maxWidth: 'calc(16.666667% + 20px)',
 					flexBasis: 'calc(16.666667% + 20px)',
 				}}
 			>
-				<div className="dct-tutorial-step-2" style={{ marginRight: 20 }}>
+				<div
+					className={!loading && viewableDocs.length ? 'dct-tutorial-step-3' : undefined}
+					style={{ marginRight: 20 }}
+				>
 					<GCAnalystToolsSideBar context={context} results={returnedDocs} />
 					<GCButton
 						isSecondaryBtn
@@ -947,8 +971,8 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 					)}
 				</div>
 			</div>
-			{((returnedDocs.length <= 0 && !loading) || stepIndex === 2) && (
-				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
+			{((returnedDocs.length <= 0 && !loading) || stepIndex === 1) && (
+				<div style={{ maxWidth: 'calc(100% - 20px)', flexBasis: 'calc(100% - 20px)' }}>
 					<DocumentInputContainer policy>
 						<Grid container className={'input-container-grid'} style={{ margin: 0 }}>
 							<Grid item xs={12}>
@@ -1007,7 +1031,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 										id="compare-button"
 										disabled={inputError}
 										onClick={handleCompare}
-										className="dct-tutorial-step-3"
+										className={'dct-tutorial-step-2'}
 									>
 										Submit
 									</GCButton>
@@ -1023,13 +1047,18 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 				</div>
 			)}
 			{loading && (
-				<div style={{ maxWidth: 'calc(83.333333% - 20px)', flexBasis: 'calc(83.333333% - 20px)' }}>
-					<div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
-						<LoadingIndicator customColor={gcOrange} />
-					</div>
+				<div
+					style={{
+						flexBasis: 'calc(100%)',
+						display: 'flex',
+						justifyContent: 'center',
+						flexDirection: 'column',
+					}}
+				>
+					<LoadingIndicator customColor={gcOrange} />
 				</div>
 			)}
-			{!loading && returnedDocs.length > 0 && (
+			{!loading && returnedDocs.length > 0 && stepIndex !== 1 && (
 				<>
 					<div
 						style={{

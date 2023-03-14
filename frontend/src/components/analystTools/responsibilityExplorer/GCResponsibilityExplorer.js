@@ -15,6 +15,7 @@ import { exportToCsv, getTrackingNameForFactory } from '../../../utils/gamechang
 import TutorialOverlay from '@dod-advana/advana-tutorial-overlay/dist/TutorialOverlay';
 import { reTutorialSteps } from '../tutotialSteps';
 import { useStyles } from '../../modules/default/defaultViewHeaderHandler.js';
+import { setState } from '../../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 
@@ -74,6 +75,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 
 	const [stepIndex, setStepIndex] = useState(0);
 	const [showTutorial, setShowTutorial] = useState(false);
+	const duringViewChange = stepIndex === 6 && reView === 'Document';
 
 	const trackingCategory = getTrackingNameForFactory(state?.cloneData?.clone_name);
 
@@ -81,7 +83,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		if (stepIndex === 5) {
 			setReView('Document');
 		}
-		if (stepIndex === 6) {
+		if (stepIndex === 6 && reView === 'Document') {
 			setReView('Chart');
 		}
 		if (stepIndex === 1 || stepIndex === 2) {
@@ -94,7 +96,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 				[`${firstDoc}${docResponsibilityData[firstDoc]?.entities?.[0]?.entityText}`]: true,
 			});
 		}
-	}, [docResponsibilityData, stepIndex]);
+	}, [docResponsibilityData, stepIndex, reView]);
 
 	useEffect(() => {
 		if (reloadResponsibilities) {
@@ -112,6 +114,7 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 	}, []);
 
 	const resetPage = () => {
+		setState(dispatch, { reExplorerLeftPanelOpen: true });
 		setStepIndex(0);
 		setReView('Document');
 		setFilters([]);
@@ -244,15 +247,21 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 		<div>
 			<div className="row" style={{ margin: 0, padding: 0, justifyContent: 'flex-end' }}>
 				<div style={{ display: 'flex', alignItems: 'center', margin: '10px 0 20px 0' }}>
-					<div style={{ fontWeight: 'bold', alignItems: 'center', fontFamily: 'Noto Sans' }}>
-						The Responsibility Explorer enables users to identify the responsibilities that have been
-						assigned to various entities across an expansive corpus of DoD strategy, guidance, and policy
-						documents. Filter capabilities allow users to explore extracted portions of responsibility text
-						in specific documents, by organization/role/entity, and/or by responsibility area.
+					<div style={{ fontWeight: 'bold', fontFamily: 'Noto Sans' }}>
+						<div style={{ alignItems: 'center', marginBottom: '10px', display: 'flex' }}>
+							The Responsibility Explorer enables users to identify the responsibilities that have been
+							assigned to various entities across an expansive corpus of DoD strategy, guidance, and
+							policy documents. Filter capabilities allow users to explore extracted portions of
+							responsibility text in specific documents, by organization/role/entity, and/or by
+							responsibility area.
+						</div>
+						<div style={{ display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: '10px' }}>For a step-by-step tutorial, click here:</div>
+							<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
+								<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
+							</GCToolTip>
+						</div>
 					</div>
-					<GCToolTip title="Start tutorial" placement="bottom" arrow enterDelay={500}>
-						<HelpOutlineIcon style={{ cursor: 'pointer' }} onClick={startTutorial} />
-					</GCToolTip>
 					<span
 						style={{
 							margin: '0px 10px',
@@ -355,16 +364,18 @@ export default function GCResponsibilityExplorer({ state, dispatch }) {
 					showTutorial={showTutorial}
 				/>
 			)}
-			<TutorialOverlay
-				tutorialJoyrideSteps={reTutorialSteps}
-				setShowTutorial={setShowTutorial}
-				showTutorial={showTutorial}
-				buttonColor={gcOrange}
-				resetPage={resetPage}
-				stepIndex={stepIndex}
-				setStepIndex={setStepIndex}
-				showSkipButton={false}
-			/>
+			{!duringViewChange && (
+				<TutorialOverlay
+					tutorialJoyrideSteps={reTutorialSteps}
+					setShowTutorial={setShowTutorial}
+					showTutorial={showTutorial}
+					buttonColor={gcOrange}
+					resetPage={resetPage}
+					stepIndex={stepIndex}
+					setStepIndex={setStepIndex}
+					showSkipButton={false}
+				/>
+			)}
 		</div>
 	);
 }

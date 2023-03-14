@@ -987,7 +987,7 @@ const renderMainDocs = (props) => {
 		renderCategoryOrAll = (
 			<>
 				{getSearchResults(docSearchResults, state, dispatch)}
-				{docsPagination && (
+				{docsPagination && docSearchResults.length < count && (
 					<div className="col-xs-12">
 						<LoadingIndicator
 							customColor={gcOrange}
