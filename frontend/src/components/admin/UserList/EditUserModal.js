@@ -197,14 +197,14 @@ const EditUserModal = React.memo(
 							permissionKey === cloneName
 						) {
 							return (
-								<>
+								<div key={permissionKey}>
 									<Typography variant="h4" style={styles.modalHeaders}>
 										{permissionKey.toUpperCase()}
 									</Typography>
 									<Grid container spacing={2} style={{ marginLeft: 8 }}>
 										{permissionsInfo[permissionKey].map((permission) => (
 											<FormControlLabel
-												key={`${permissionKey}|${permission}`}
+												key={permission}
 												control={
 													<GCCheckbox
 														checked={
@@ -226,18 +226,18 @@ const EditUserModal = React.memo(
 											/>
 										))}
 									</Grid>
-								</>
+								</div>
 							);
 						} else if (Permissions.permissionValidator(`Gamechanger Super Admin`, true)) {
 							return (
-								<>
+								<div key={permissionKey + '2'}>
 									<Typography variant="h4" style={styles.modalHeaders}>
 										{permissionKey.toUpperCase()}
 									</Typography>
 									<Grid container spacing={2} style={{ marginLeft: 8 }}>
 										{permissionsInfo[permissionKey].map((permission) => (
 											<FormControlLabel
-												key={`${permissionKey}|${permission}`}
+												key={permission}
 												control={
 													<GCCheckbox
 														checked={
@@ -259,7 +259,7 @@ const EditUserModal = React.memo(
 											/>
 										))}
 									</Grid>
-								</>
+								</div>
 							);
 						} else {
 							return null;
@@ -326,6 +326,7 @@ const EditUserModal = React.memo(
 											const tr = index === tabList.length - 1 ? '5px' : '0';
 											return (
 												<Tab
+													key={tab.title}
 													style={{
 														...styles.tabStyle,
 														...(tabIndex === index ? styles.tabSelectedStyle : {}),

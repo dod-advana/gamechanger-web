@@ -41,7 +41,7 @@ const FilterList = ({
 				let { type, optionName } = filter;
 				const typeText = filterNameMap[type] ? filterNameMap[type] + ': ' : type + ': ';
 				return (
-					<GCTooltip title={`${typeText}${optionName}`} placement="top" arrow>
+					<GCTooltip key={optionName} title={`${typeText}${optionName}`} placement="top" arrow>
 						<Button
 							data-cy={`${optionName}-top-filter`}
 							variant="outlined"

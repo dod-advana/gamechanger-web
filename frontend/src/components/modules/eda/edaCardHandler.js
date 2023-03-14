@@ -247,12 +247,12 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 	}
 	if (contractMods.length > 0) {
 		listItems.push(
-			<>
+			<div key={'headers'}>
 				<ListItem>
 					<ListItemText style={{ textAlign: 'end' }} secondary={'(S) Signature Date | (E) Effective Date'} />
 				</ListItem>
 				<Divider light={true} />
-			</>
+			</div>
 		);
 	}
 
@@ -272,7 +272,7 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 		}
 
 		listItems.push(
-			<>
+			<div key={modNumber}>
 				<ListItem>
 					{item.modification_eda_ext === modNumber && (
 						<ListItemIcon style={{ minWidth: '54px' }}>
@@ -290,7 +290,7 @@ const renderContractMods = ({ contractAwards = {}, item }) => {
 					/>
 				</ListItem>
 				<Divider light={true} />
-			</>
+			</div>
 		);
 	}
 
@@ -460,7 +460,7 @@ const cardHandler = {
 										return (
 											<div
 												className={'page-hit'}
-												key={key}
+												key={page.pageNumber}
 												style={{
 													...(hoveredHit === key && {
 														backgroundColor: '#E9691D',
@@ -568,7 +568,7 @@ const cardHandler = {
 								<TableBody>
 									{rows.map((row) => {
 										return (
-											<TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.name}>
 												{tableColumns.map((column) => {
 													const value = row[column.id];
 													return (

@@ -108,7 +108,10 @@ const ClassificationScoreCard = (props) => {
 				</Typography>
 				{scores.map((score) => {
 					return (
-						<div style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}>
+						<div
+							key={score.name}
+							style={{ backgroundColor: 'white', padding: '10px', margin: '10px 10px 15px 10px' }}
+						>
 							<Typography
 								variant="h5"
 								style={{ width: '100%', margin: '0 0 15px 0', fontWeight: 'bold' }}
@@ -227,7 +230,7 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 								.filter((pd) => pd.value !== 'N/A' && pd.value !== 'Not applicable for this item.')
 								.map((pd) => {
 									return (
-										<>
+										<div key={pd.title}>
 											<Typography
 												key={pd.title}
 												variant="h3"
@@ -247,7 +250,7 @@ const ProjectDescription = ({ profileLoading, projectData, programElement, proje
 													}),
 												}}
 											/>
-										</>
+										</div>
 									);
 								})}
 						</Typography>
@@ -264,6 +267,7 @@ const Accomplishments = ({ accomplishments }) => {
 			{accomplishments.map((accomp) => {
 				return (
 					<SimpleTable
+						key={accomp.title}
 						tableClass={'magellan-table'}
 						zoom={1}
 						rows={accomp.data}
@@ -464,7 +468,7 @@ const NavButtons = () => {
 	buttonNames.forEach((name, index) => {
 		navButtons.push(
 			<StyledNavButton
-				key={name + index}
+				key={name}
 				first={index === 0}
 				last={index === navButtons.length - 1}
 				selected={currentNav === name}
