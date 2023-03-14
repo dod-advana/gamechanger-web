@@ -1060,7 +1060,7 @@ const EDADocumentsComparisonTool = ({
 							<Typography variant="body1" style={{ marginBottom: 10 }}>
 								Paragraph Input
 							</Typography>
-							{paragraphs.map((paragraph) => (
+							{paragraphs.map((paragraph, indexAsKey) => (
 								<div
 									key={paragraph.id}
 									style={{
@@ -1153,7 +1153,7 @@ const EDADocumentsComparisonTool = ({
 								const docOpen = collapseKeys[doc.filename] ?? false;
 								const displayTitle = doc.title;
 								return (
-									<div key={doc.id}>
+									<div key={doc.title}>
 										<div
 											className="searchdemo-modal-result-header"
 											style={{ marginTop: 0 }}

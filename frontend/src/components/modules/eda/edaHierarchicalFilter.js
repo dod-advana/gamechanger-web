@@ -95,7 +95,7 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 		let expandedSection = <></>;
 		if (fetchingChildren) {
 			expandedSection = (
-				<div style={styles.expandedChildren}>
+				<div key={displayName} style={styles.expandedChildren}>
 					<LoadingIndicator
 						inline
 						containerStyle={{
@@ -109,11 +109,11 @@ const EdaHierarchicalFilter = ({ options, fetchChildren, onOptionClick, optionsS
 			);
 		} else if (childrenFetched) {
 			expandedSection = (
-				<div style={styles.expandedChildren}>
+				<div key={displayName} style={styles.expandedChildren}>
 					{root.children.map((child) => {
 						return (
 							<EdaHierarchicalFilter
-								key={child.code}
+								key={child.toString()}
 								options={[child]}
 								fetchChildren={fetchChildren}
 								onOptionClick={onOptionClick}

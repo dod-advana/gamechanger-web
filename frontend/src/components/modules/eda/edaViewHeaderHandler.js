@@ -323,7 +323,7 @@ const EDAViewHeaderHandler = (props) => {
 									{categorySorting[activeCategoryTab].map((sort) => {
 										return (
 											<MenuItem
-												key={`${sort}-key`}
+												key={sort}
 												value={sort}
 												style={{ display: 'flex', padding: '3px 6px' }}
 											>
@@ -409,10 +409,10 @@ const EDAViewHeaderHandler = (props) => {
 							{viewNames.map((view) => {
 								if (view.name === 'Card') {
 									return [
-										<MenuItem key={`Card-List`} value={'List'}>
+										<MenuItem key={`Card-List ${view.name}`} value={'List'}>
 											List View
 										</MenuItem>,
-										<MenuItem key={`Card-Grid`} value={'Grid'}>
+										<MenuItem key={`Card-Grid ${view.name}`} value={'Grid'}>
 											Grid View
 										</MenuItem>,
 									];

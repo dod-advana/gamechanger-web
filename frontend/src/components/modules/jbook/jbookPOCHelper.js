@@ -107,6 +107,7 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 	for (const option of radioButtonOptions) {
 		radioButtons.push(
 			<FormControlLabel
+				key={option.name}
 				name={option.name}
 				value={option.name}
 				control={
@@ -126,7 +127,11 @@ const renderRadioButtons = (reviewData, reviewDataProp, setReviewData, radioButt
 		);
 
 		if (option.example) {
-			examples.push(<div style={{ margin: '10px 0' }}>{option.example}</div>);
+			examples.push(
+				<div key={`style ${option.name}`} style={{ margin: '10px 0' }}>
+					{option.example}
+				</div>
+			);
 		}
 	}
 
@@ -196,6 +201,7 @@ const DropdownRadioButton = ({
 						Object.keys(data).map((name) => {
 							return (
 								<DomainCheckbox
+									key={name}
 									name={name}
 									secondary={data[name]}
 									reviewData={reviewData}
@@ -318,6 +324,7 @@ const JCAChecklist = (props) => {
 				if (tier3 !== 'Description') {
 					tier3List.push(
 						<JCACTier3CheckBox
+							key={tier3}
 							tier1={tier1}
 							tier2={tier2}
 							tier3={tier3}
@@ -332,6 +339,7 @@ const JCAChecklist = (props) => {
 			if (tier2 !== 'Description') {
 				tier2List.push(
 					<JCACTier2CheckBox
+						key={tier2}
 						tier1={tier1}
 						tier2={tier2}
 						tier3List={tier3List}
@@ -949,7 +957,7 @@ const MissionPartnersValue = React.memo((props) => {
 				freeSolo
 				renderTags={(value, getTagProps) =>
 					value.map((option, index) => (
-						<StyledChip variant={'default'} label={option} {...getTagProps({ index })} />
+						<StyledChip key={option} variant={'default'} label={option} {...getTagProps({ index })} />
 					))
 				}
 				renderInput={(params) => (
@@ -1181,6 +1189,7 @@ const AIDomainValue = React.memo((props) => {
 						{radioButtonData.map((data) => {
 							return (
 								<DropdownRadioButton
+									key={data.toString}
 									reviewData={reviewData}
 									reviewDataProp={'domainTask'}
 									setReviewData={setReviewData}

@@ -248,7 +248,7 @@ export default ({
 				<div>
 					{editCloneData.permissions &&
 						editCloneData.permissions.map((permission) => (
-							<div style={{ marginBottom: 10 }}>
+							<div key={permission} style={{ marginBottom: 10 }}>
 								<Input
 									id={`${permission}-input`}
 									className={classes.inputBox}
@@ -256,6 +256,7 @@ export default ({
 									disabled={true}
 								/>
 								<GCButton
+									key={permission + 'button'}
 									id={`${permission}-delete`}
 									onClick={() => deletePermissions(permission)}
 									style={{
@@ -319,6 +320,7 @@ export default ({
 									const tr = index === tabList.length - 1 ? '5px' : '0';
 									return (
 										<Tab
+											key={tab.title}
 											style={{
 												...styles.tabStyle,
 												...(tabIndex === index ? styles.tabSelectedStyle : {}),

@@ -123,7 +123,7 @@ const EntityResult = ({
 
 						if (isHighlighted) blockquoteClass += ' searchdemo-blockquote-sm-active';
 						return (
-							<div key={docKey + respKey} style={{ position: 'relative' }}>
+							<div key={entity} style={{ position: 'relative' }}>
 								<div
 									className="searchdemo-quote-link"
 									onClick={() => {
@@ -177,6 +177,7 @@ const DocumentResult = ({
 				{Object.keys(responsibilityData[doc]).map((entity, entKey) => {
 					return (
 						<EntityResult
+							key={entity + 'base'}
 							setCollapseKeys={setCollapseKeys}
 							collapseKeys={collapseKeys}
 							doc={doc}

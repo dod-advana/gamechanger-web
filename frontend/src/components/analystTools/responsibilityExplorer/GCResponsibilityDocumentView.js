@@ -11,6 +11,7 @@ import GCResponsiblityEditModal from './GCResponsiblityEditModal';
 import { styles as adminStyles } from '../../admin/util/GCAdminStyles';
 import GCResponsibilityResults from './GCResponsibilityResults';
 import ResponsibilityFilters from './ResponsibilityFilters';
+import { setState } from '../../../utils/sharedFunctions';
 
 const gameChangerAPI = new GameChangerAPI();
 const SIDEBAR_TOGGLE_WIDTH = 20;
@@ -77,6 +78,7 @@ const PanelArrowIcon = ({ leftFacing }) => {
 
 export default function GCResponsibilityDocumentView({
 	state,
+	dispatch,
 	responsibilityData = {},
 	loading,
 	setResultsPage,
@@ -96,10 +98,9 @@ export default function GCResponsibilityDocumentView({
 	setCollapseKeys,
 	showTutorial,
 }) {
-	const { cloneData } = state;
+	const { cloneData, reExplorerLeftPanelOpen } = state;
 
 	const [iframeLoading, setIframeLoading] = useState(false);
-	const [leftPanelOpen, setLeftPanelOpen] = useState(true);
 	const [rightPanelOpen, setRightPanelOpen] = useState(true);
 	const [pdfLoaded, setPdfLoaded] = useState(false);
 	const [isEditingResp, setIsEditingResp] = useState(false);
@@ -205,8 +206,8 @@ export default function GCResponsibilityDocumentView({
 	}
 
 	function handleLeftPanelToggle() {
-		trackLeftRightPanelToggle(trackingCategory, trackingAction, true, leftPanelOpen);
-		setLeftPanelOpen(!leftPanelOpen);
+		trackLeftRightPanelToggle(trackingCategory, trackingAction, true, reExplorerLeftPanelOpen);
+		setState(dispatch, { reExplorerLeftPanelOpen: !reExplorerLeftPanelOpen });
 	}
 
 	function handlePdfOnLoadStart() {
@@ -328,7 +329,7 @@ export default function GCResponsibilityDocumentView({
 	};
 
 	const getIframePanelSize = () => {
-		return 12 - (leftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
+		return 12 - (reExplorerLeftPanelOpen ? LEFT_PANEL_COL_WIDTH : 0) - (rightPanelOpen ? RIGHT_PANEL_COL_WIDTH : 0);
 	};
 
 	const handleIframeDisplay = () => {
@@ -348,7 +349,7 @@ export default function GCResponsibilityDocumentView({
 				id="re-document-col"
 				className={`col-xs-${LEFT_PANEL_COL_WIDTH}`}
 				style={{
-					display: leftPanelOpen ? 'block' : 'none',
+					display: reExplorerLeftPanelOpen ? 'block' : 'none',
 					paddingRight: 10,
 					paddingLeft: 0,
 					borderRight: '1px solid lightgrey',
@@ -391,9 +392,9 @@ export default function GCResponsibilityDocumentView({
 						style={{ ...leftBarExtraStyles, bottom: '0px' }}
 						onClick={() => handleLeftPanelToggle()}
 					>
-						<PanelArrowIcon leftFacing={leftPanelOpen} />
-						<span>{leftPanelOpen ? 'Hide' : 'Show'} Filters</span>
-						<PanelArrowIcon leftFacing={leftPanelOpen} />
+						<PanelArrowIcon leftFacing={reExplorerLeftPanelOpen} />
+						<span>{reExplorerLeftPanelOpen ? 'Hide' : 'Show'} Filters</span>
+						<PanelArrowIcon leftFacing={reExplorerLeftPanelOpen} />
 					</div>
 					<div
 						style={{

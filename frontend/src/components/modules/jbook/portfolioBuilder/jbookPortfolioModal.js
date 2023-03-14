@@ -149,7 +149,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 				let user = userMap[id];
 				if (user) {
 					selectedUsers.push(
-						<Pill style={{ margin: '0 5px 10px' }}>
+						<Pill key={user.last_name} style={{ margin: '0 5px 10px' }}>
 							{user.first_name} {user.last_name}
 							<IconButton
 								aria-label="close"
@@ -188,7 +188,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 				let user = userMap[id];
 				if (user) {
 					selectedUsers.push(
-						<Pill style={{ margin: '0 5px 10px' }}>
+						<Pill key={user.first_name} style={{ margin: '0 5px 10px' }}>
 							{user.first_name} {user.last_name}
 							<IconButton
 								aria-label="close"
@@ -225,7 +225,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 			let tags = data.tags;
 			for (const tag of tags) {
 				selectedTags.push(
-					<Pill style={{ margin: '0 5px 10px' }}>
+					<Pill key={tag.toString()} style={{ margin: '0 5px 10px' }}>
 						{tag}
 						<IconButton
 							aria-label="close"
@@ -275,7 +275,7 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 	 */
 
 	return (
-		<>
+		<div>
 			<JbookAddUsersModal
 				showModal={showUsersModal}
 				setShowModal={setShowUsersModal}
@@ -512,6 +512,6 @@ export default ({ showModal, setShowModal, modalData, userList, userMap, user })
 					</GCButton>
 				</DialogActions>
 			</Dialog>
-		</>
+		</div>
 	);
 };

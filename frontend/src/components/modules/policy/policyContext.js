@@ -225,6 +225,8 @@ const initState = {
 	compareFilename: null,
 	ignoredDocs: [],
 
+	reExplorerLeftPanelOpen: true,
+
 	// Presearch Filters
 	presearchSources: {},
 	presearchTypes: {},

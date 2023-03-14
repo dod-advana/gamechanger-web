@@ -724,7 +724,7 @@ function PolicyGraphView(props) {
 									31 * Math.sin(-0.5 * Math.PI - 2 * (1 / menuItems.length) * idx * Math.PI)
 								).toFixed(4) + '%';
 							return (
-								<GCTooltip title={item.tooltip} arrow enterDelay={30} key={`tooltip-${idx}`}>
+								<GCTooltip title={item.tooltip} arrow enterDelay={30} key={item.className}>
 									<div
 										className={'graph-contextItem'}
 										onClick={item.onClick}
@@ -1388,7 +1388,7 @@ function PolicyGraphView(props) {
 						.map((key) => {
 							return (
 								<GCTooltip
-									key={key}
+									key={key.toString()}
 									title={`${docOrgNumbers[key]} node${docOrgNumbers[key] > 1 ? 's' : ''} associated`}
 									arrow
 									enterDelay={30}

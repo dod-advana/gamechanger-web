@@ -314,7 +314,7 @@ const sourceInteractionsColumns = [
 		Cell: (row) => (
 			<TableRow>
 				{Object.entries(row.value).map(([userId, count]) => (
-					<li className="source-interaction-bullet">
+					<li key={userId} className="source-interaction-bullet">
 						{userId} : {count}
 					</li>
 				))}
@@ -328,7 +328,7 @@ const sourceInteractionsColumns = [
 		Cell: (row) => (
 			<TableRow>
 				{Object.entries(row.value).map(([action, count]) => (
-					<li className="source-interaction-bullet">
+					<li key={action} className="source-interaction-bullet">
 						{action} : {count}
 					</li>
 				))}
@@ -342,7 +342,7 @@ const sourceInteractionsColumns = [
 		Cell: (row) => (
 			<TableRow>
 				{Object.entries(row.value).map(([filename, count]) => (
-					<li className="source-interaction-bullet">
+					<li key={filename} className="source-interaction-bullet">
 						{filename} : {count}
 					</li>
 				))}
@@ -364,7 +364,7 @@ const subComponent = (row) => {
 					<p>Opened:</p>
 					<ol>
 						{row.original.opened.map((o) => (
-							<li>
+							<li key={o}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -381,7 +381,7 @@ const subComponent = (row) => {
 					<p>Exported:</p>
 					<ol>
 						{row.original.ExportDocument.map((e) => (
-							<li>
+							<li key={e}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -398,7 +398,7 @@ const subComponent = (row) => {
 					<p>Favorited:</p>
 					<ol>
 						{row.original.Favorite.map((f) => (
-							<li>
+							<li key={f}>
 								<a
 									target={'_blank'}
 									rel="noreferrer"
@@ -778,7 +778,7 @@ export default () => {
 									<MenuItem
 										style={{ fontSize: 'small', display: 'flex' }}
 										value={`${clone.category_id}-${clone.name}`}
-										key={clone.name}
+										key={clone}
 									>
 										{clone.name}
 									</MenuItem>

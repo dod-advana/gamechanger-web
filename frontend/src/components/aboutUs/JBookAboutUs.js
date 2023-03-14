@@ -197,7 +197,7 @@ const JBookAboutUs = (props) => {
 
 	const renderAboutGC = () => {
 		return [
-			<StyledSummaryFAQContainer>
+			<StyledSummaryFAQContainer key={'block1'}>
 				<Grid container className={'summarySection'}>
 					<Grid item xs={12} className={'summaryTextSectionContainer'}>
 						<Typography className={'summarySectionHeader'}>
@@ -205,7 +205,7 @@ const JBookAboutUs = (props) => {
 						</Typography>
 					</Grid>
 				</Grid>
-				<Grid container>
+				<Grid key={'block2'} container>
 					<Grid item xs={12}>
 						<Grid container className={'summaryTextSection'}>
 							<Grid item xs={8}>
@@ -289,7 +289,7 @@ const JBookAboutUs = (props) => {
 
 	const renderFAQ = () => {
 		return [
-			<div style={{ width: 900 }}>
+			<div key={'block3'} style={{ width: 900 }}>
 				<Typography style={{ fontFamily: 'Montserrat', fontSize: 38, fontWeight: 'bold', marginBottom: 20 }}>
 					Your Questions Answered
 				</Typography>
@@ -305,12 +305,13 @@ const JBookAboutUs = (props) => {
 					We’ll continuously update this page with new insights and information. So check back often.
 				</Typography>
 			</div>,
-			<div style={{ display: 'flex' }}>
+			<div key={'block4'} style={{ display: 'flex' }}>
 				<StyledCategories>
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();
 						return (
 							<StyledListItem
+								key={category}
 								id={category}
 								selected={selectedCategory}
 								onClick={() => {
@@ -328,14 +329,19 @@ const JBookAboutUs = (props) => {
 					{categoryOrder.map((cat, i) => {
 						const category = cat.toLowerCase();
 						return (
-							<div style={{ marginBottom: 30 }}>
+							<div key={'block5'} style={{ marginBottom: 30 }}>
 								<div id="spacer" ref={categoryRefs.current[i]} style={{ height: 30 }} />
-								<Typography variant="h5" style={{ marginBottom: 15 }}>
+								<Typography key={category} variant="h5" style={{ marginBottom: 15 }}>
 									{cat}
 								</Typography>
 								{FAQdata[category] ? (
 									FAQdata[category].map((obj) => (
-										<GCAccordion expanded={false} header={obj.question} contentAlign="left">
+										<GCAccordion
+											key={obj.question}
+											expanded={false}
+											header={obj.question}
+											contentAlign="left"
+										>
 											<div
 												dangerouslySetInnerHTML={{
 													__html: sanitizeHtml(obj.answer),
@@ -344,7 +350,9 @@ const JBookAboutUs = (props) => {
 										</GCAccordion>
 									))
 								) : (
-									<Typography variant="body">None for now, please check back later.</Typography>
+									<Typography key={cat} variant="body">
+										None for now, please check back later.
+									</Typography>
 								)}
 							</div>
 						);
