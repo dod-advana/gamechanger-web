@@ -567,9 +567,8 @@ const cardHandler = {
 								</TableHead>
 								<TableBody>
 									{rows.map((row) => {
-										console.log(row);
 										return (
-											<TableRow hover role="checkbox" tabIndex={-1} key={row.eda}>
+											<TableRow hover role="checkbox" tabIndex={-1} key={row.name}>
 												{tableColumns.map((column) => {
 													const value = row[column.id];
 													return (

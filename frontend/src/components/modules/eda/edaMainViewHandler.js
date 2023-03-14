@@ -114,7 +114,7 @@ const getExtraViewPanels = (props) => {
 
 const getSearchResults = (searchResultData, state, dispatch) => {
 	return _.map(searchResultData, (item, idx) => {
-		return <Card key={item.doc_num} item={item} idx={idx} state={state} dispatch={dispatch} />;
+		return <Card key={idx} item={item} idx={idx} state={state} dispatch={dispatch} />;
 	});
 };
 
