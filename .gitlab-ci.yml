@@ -34,6 +34,8 @@ variables:
   DEPLOY_TO_PERSONAL:
     description: "Optional: SKIP most validation steps and deploy to dev cluster at personal url for testing?"
     value: "false"
+  SONAR_SCAN_IMAGE: "092912502985.dkr.ecr.us-east-1.amazonaws.com/docker.io/sonarsource/sonar-scanner-cli:latest"
+  CYPRESS_IMAGE: "092912502985.dkr.ecr.us-east-1.amazonaws.com/docker.io/cypress/browsers:node18.6.0-chrome105-ff104"
 
 cache: &global_cache
   untracked: true
@@ -54,7 +56,7 @@ cache: &global_cache
     - npm config set legacy-peer-deps true
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: node:18
+  image: ${IRONBANK_NODEJS18}
   stage: "📡 prepare"
   cache:
     <<: *global_cache
@@ -97,7 +99,7 @@ semgrep-sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 unit-backend-test-job: # Job for the unit tests
-  image: node:18
+  image: ${IRONBANK_NODEJS18}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -116,7 +118,7 @@ unit-backend-test-job: # Job for the unit tests
         path: backend/coverage/cobertura-coverage.xml
 
 lint-test-job: # lint-job
-  image: node:18
+  image: ${IRONBANK_NODEJS18}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -131,7 +133,7 @@ lint-test-job: # lint-job
 sonar_scan-job: # Run code through sonar scanner
   stage: "🧪 security-test"
   image:
-    name: sonarsource/sonar-scanner-cli:latest
+    name: ${SONAR_SCAN_IMAGE}
     entrypoint: [""]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -273,7 +275,7 @@ trigger:
   #   project: "platform/promotion"
 
 integration-testing-cypress-job: # Start the integration testing
-  image: cypress/browsers:node18.6.0-chrome105-ff104
+  image: ${CYPRESS_IMAGE}
   stage: "🧪 integration-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
