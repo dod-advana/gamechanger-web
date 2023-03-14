@@ -26,7 +26,7 @@ variables:
     --set image.tag=${CI_COMMIT_SHA}-oci
     --set appVersion=${BUILD_VERSION}
   AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS: >-
-    --build-arg=BASE_IMAGE=${IRONBANK_NODEJS}
+    --build-arg=BASE_IMAGE=${IRONBANK_NODEJS18}
     --build-arg=NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}
     --build-arg=APP_UID=1001
     --build-arg=APP_GID=1001
@@ -51,11 +51,12 @@ cache: &global_cache
 
 .setup-github-npm:
   before_script: # Setups the npm vars
-    - npm set "@dod-advana:registry" "https://npm.pkg.github.com"
-    - npm set "//npm.pkg.github.com/:_authToken" "${NPM_AUTH_TOKEN}"
+    - npm config set "@dod-advana:registry"="https://npm.pkg.github.com"
+    - npm config set "//npm.pkg.github.com/:_authToken"="${NPM_AUTH_TOKEN}"
+    - npm config set legacy-peer-deps true
 
 prepare-node-modules-job: # Prepares the frontend node modules for the next jobs
-  image: ${IRONBANK_NODEJS}
+  image: ${IRONBANK_NODEJS18}
   stage: "📡 prepare"
   cache:
     <<: *global_cache
@@ -98,7 +99,7 @@ semgrep-sast:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 unit-backend-test-job: # Job for the unit tests
-  image: ${IRONBANK_NODEJS}
+  image: ${IRONBANK_NODEJS18}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -117,7 +118,7 @@ unit-backend-test-job: # Job for the unit tests
         path: backend/coverage/cobertura-coverage.xml
 
 lint-test-job: # lint-job
-  image: ${IRONBANK_NODEJS}
+  image: ${IRONBANK_NODEJS18}
   stage: "🧪 static-test"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
