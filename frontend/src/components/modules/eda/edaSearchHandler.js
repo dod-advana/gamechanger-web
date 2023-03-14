@@ -10,7 +10,7 @@ import {
 } from '../../../utils/gamechangerUtils';
 import { removeChildrenFromListDF } from './edaUtils';
 import { trackSearch } from '../../telemetry/Matomo';
-import { createTinyUrl, getSearchObjectFromString, getUserData, setState } from '../../../utils/sharedFunctions';
+import { createTinyUrl, getUserData, setState } from '../../../utils/sharedFunctions';
 import GameChangerAPI from '../../api/gameChanger-service-api';
 
 const gameChangerAPI = new GameChangerAPI();
@@ -388,7 +388,6 @@ const EdaSearchHandler = {
 			const charsPadding = listView ? 750 : 90;
 			const tiny_url = await createTinyUrl(cloneData);
 			const t0 = new Date().getTime();
-			const searchObject = getSearchObjectFromString(searchText);
 
 			let searchResults = [];
 
@@ -402,7 +401,7 @@ const EdaSearchHandler = {
 			try {
 				resp = await gameChangerAPI.modularSearch({
 					cloneName: cloneData.clone_name,
-					searchText: searchObject.search,
+					searchText,
 					offset,
 					options: {
 						charsPadding,
