@@ -627,7 +627,7 @@ const renderHideTabs = (props) => {
 						crawlerSources[0].imgSrc &&
 						crawlerSources.map((source) => (
 							<SourceContainer
-								key={source.data_source_s}
+								key={source.data_source_s + source.url_origin}
 								onClick={() => {
 									trackEvent(
 										getTrackingNameForFactory(cloneData.clone_name),
@@ -1138,7 +1138,7 @@ const getCardViewPanel = (props) => {
 
 	return (
 		<div key={'cardView'}>
-			<div key={'cardView'} style={{ marginTop: hideTabs ? 40 : 'auto' }}>
+			<div style={{ marginTop: hideTabs ? 40 : 'auto' }}>
 				<div>
 					<div id="game-changer-content-top" />
 					{renderResultView(props)}
