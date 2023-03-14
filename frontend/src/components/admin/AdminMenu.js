@@ -13,6 +13,7 @@ import AnalystToolsIcon from '../../images/icon/analyticswht.png';
 import DocumumentIcon from '../../images/icon/Document.png';
 import ReportIcon from '../../images/icon/slideout-menu/reports icon.png';
 import DashboardIcon from '../../images/icon/slideout-menu/dashboard icon.png';
+import TestIcon from '../../images/icon/TestIcon.png';
 import { HoverNavItem } from '../navigation/NavItems';
 import { toolTheme } from './util/GCAdminStyles';
 /**
@@ -71,6 +72,21 @@ const ClosedAdminMenu = ({ setPageToView, PAGES }) => {
 					<ConstrainedIcon src={CloneIcon} />
 				</HoverNavItem>
 			</Tooltip>
+
+			{/* TESTING......................................................... */}
+			<Tooltip title="Search Performance Tool" placement="right" arrow>
+				<HoverNavItem
+					centered
+					onClick={() => {
+						setPageToView(PAGES.SearchPerformanceTool);
+						return false;
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={TestIcon} />
+				</HoverNavItem>
+			</Tooltip>
+			{/* TESTING......................................................... */}
 
 			<Tooltip title="Service Notifications" placement="right" arrow>
 				<HoverNavItem centered onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
@@ -216,7 +232,20 @@ const OpenedAdminMenu = ({ setPageToView, PAGES }) => {
 					<span style={{ marginLeft: '10px' }}>Clone Gamechanger</span>
 				</HoverNavItem>
 			</Tooltip>
-
+			{/* TESTING......................................................... */}
+			<Tooltip title="Test" placement="right" arrow>
+				<HoverNavItem
+					onClick={() => {
+						setPageToView(PAGES.SearchPerformanceTool);
+						return false;
+					}}
+					toolTheme={toolTheme}
+				>
+					<ConstrainedIcon src={TestIcon} />
+					<span style={{ marginLeft: '10px' }}>Search Performance Tool</span>
+				</HoverNavItem>
+			</Tooltip>
+			{/* TESTING......................................................... */}
 			<Tooltip title="Show Notifications" placement="right" arrow>
 				<HoverNavItem onClick={() => setPageToView(PAGES.notifications)} toolTheme={toolTheme}>
 					<AddAlert style={{ fontSize: 30 }} />

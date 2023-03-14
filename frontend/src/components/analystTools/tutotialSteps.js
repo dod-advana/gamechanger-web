@@ -77,16 +77,16 @@ const dctTutorialSteps = [
 	{
 		...tutorialObject,
 		target: '.dct-tutorial-step-2',
-		title: 'Filter Results',
-		content: 'Apply filters to streamline results before or after submitting text.',
-	},
-	{
-		...tutorialObject,
-		target: '.dct-tutorial-step-3',
 		title: 'Submit',
 		content: 'Click “submit” to find documents in the GAMECHANGER repository with similarity to your text inputs.',
 		clickButton: true,
 		buttonID: 'compare-button',
+	},
+	{
+		...tutorialObject,
+		target: '.dct-tutorial-step-3',
+		title: 'Filter Results',
+		content: 'Apply filters to streamline results.',
 	},
 	{
 		...tutorialObject,

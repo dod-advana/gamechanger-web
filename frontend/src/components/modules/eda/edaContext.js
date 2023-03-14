@@ -37,7 +37,7 @@ const initState = {
 		},
 		minObligatedAmount: '',
 		maxObligatedAmount: '',
-		contractsOrMods: 'both',
+		contractsOrMods: 'contracts',
 		majcoms: {
 			'air force': [],
 			army: [],
@@ -94,7 +94,7 @@ const initState = {
 		},
 		fiscalYears: [],
 		allYearsSelected: true,
-		contractsOrMods: 'both',
+		contractsOrMods: 'contracts',
 		idvPIID: '',
 		allOrgsSelected: true,
 		specificOrgsSelected: false,

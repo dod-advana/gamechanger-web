@@ -163,9 +163,10 @@ const renderRecentSearches = (search, state, dispatch) => {
 
 	const formattedSourceFilter = orgFilterString.length === 0 ? 'All' : orgFilterString.join(', ');
 	const formattedTypeFilter = typeFilterString.length === 0 ? 'All' : typeFilterString.join(', ');
-	const formattedPublicationDate = publicationDateAllTime
-		? 'All'
-		: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
+	const formattedPublicationDate =
+		publicationDateAllTime || publicationDateFilter[0] == null || publicationDateFilter[0] == null
+			? 'All'
+			: publicationDateFilter.map((isoDate) => isoDate.substr(0, 10)).join(' - ');
 
 	return (
 		<RecentSearchContainer
@@ -982,7 +983,7 @@ const renderMainDocs = (props) => {
 		renderCategoryOrAll = (
 			<>
 				{getSearchResults(docSearchResults, state, dispatch)}
-				{docsPagination && (
+				{docsPagination && docSearchResults.length < count && (
 					<div className="col-xs-12">
 						<LoadingIndicator
 							customColor={gcOrange}
