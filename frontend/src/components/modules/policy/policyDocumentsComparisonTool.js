@@ -769,6 +769,7 @@ const PolicyDocumentsComparisonTool = ({ context, styles, DocumentInputContainer
 		setLeftPanelOpen(false);
 		setStepIndex(0);
 		setTutorialLogicSwitch(false);
+		resetAdvancedSettings(dispatch);
 	};
 
 	const handleCheck = (id) => {
