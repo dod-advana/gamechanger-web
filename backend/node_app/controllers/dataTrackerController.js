@@ -187,6 +187,8 @@ class DataTrackerController {
 	}
 
 	async getCrawlerMetaStatus(res, req, userId) {
+		//This will limit the crawlers sent back to only those that have been active within the last 60 days
+		const daysLimit = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
 		try {
 			const { limit = 10, offset = 0, order = [], where = {}, cloneName = 'gamechanger' } = req.body;
 			const permissions = req.permissions ? req.permissions : [];
@@ -201,8 +203,13 @@ class DataTrackerController {
 				.findAll({
 					attributes: ['crawler_name', 'status', 'datetime'],
 					where: {
-						crawler_name: {
-							[Op.ne]: 'dfars_subpart_regs',
+						[Op.and]: {
+							crawler_name: {
+								[Op.ne]: 'dfars_subpart_regs',
+							},
+							datetime: {
+								[Op.gt]: daysLimit,
+							},
 						},
 					},
 				})
