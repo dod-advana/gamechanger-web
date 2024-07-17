@@ -20,19 +20,30 @@ CREATE TABLE IF NOT EXISTS public.permissions (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.users (
+-- need to drop the table otherwise it has a user_id field instead of username. It also won't have an extra_fields
+DROP TABLE IF EXISTS public.users;
+CREATE TABLE public.users (
     id SERIAL,
-    username text NOT NULL,
-    displayname text NOT NULL,
+    user_id text NOT NULL,
     lastlogin timestamp with time zone,
     sandbox_id integer,
     disabled boolean DEFAULT false,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL,
-    session_id text,
+    cn text,
+    first_name text,
+    last_name text,
+    organization text,
     email text,
-    sub_agency text,
+    phone_number text,
+    sub_office text,
+    country text,
+    state text,
+    city text,
+    job_title text,
+    preferred_name text,
     extra_fields jsonb,
+    is_super_admin boolean,
     PRIMARY KEY (id)
 );
 

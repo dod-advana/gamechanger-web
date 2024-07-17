@@ -662,11 +662,13 @@ class UserController {
 		try {
 			let foundItem;
 			if (fromApp) {
-				foundItem = await this.user.findOne({ where: { id: userData.id }, raw: true });
+				foundItem = await this.user.findOne({ where: { user_id: userData.id }, raw: true });
 			} else {
+				console.log('having issues here');
+				console.log(JSON.stringify(userData));
 				user_id = getUserIdFromSAMLUserId(userData.id, false);
 				foundItem = await this.user.findOne({
-					where: { user_id },
+					where: { user_id: user_id },
 					raw: true,
 				});
 			}
